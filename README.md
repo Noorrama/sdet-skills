@@ -4,28 +4,10 @@ Claude Code skills marketplace for the AEP team.
 
 ## Install
 
-Our Claude Code deployment is enterprise-managed, so `claude plugin marketplace add`
-is locked down for end users — that's the same reason ponytail had to be installed
-by going through the CLI directly rather than self-service. Getting this marketplace
-in front of every engineer needs an admin, not a per-user step:
-
-**One-time, by whoever owns `managed-settings.json`** (see [admin-setup docs](https://code.claude.com/docs/en/admin-setup.md)):
-```json
-{
-  "extraKnownMarketplaces": {
-    "aep": {
-      "source": { "source": "url", "url": "https://source.golabs.io/aep/skills.git" }
-    }
-  }
-}
 ```
-(`strictKnownMarketplaces` needs an entry too if that's what's blocking self-service adds.)
-
-**Every engineer, after that's in place:**
-```
+claude plugin marketplace add https://source.golabs.io/aep/skills.git
 claude plugin install aep@aep
 ```
-No `marketplace add` needed — the marketplace is already pre-registered org-wide.
 
 ## Structure
 
