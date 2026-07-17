@@ -1,0 +1,14 @@
+{
+  "name": "aep",
+  "owner": {
+    "name": "AEP"
+  },
+  "description": "AEP team skills marketplace for Claude Code",
+  "plugins": [
+    {
+      "name": "aep",
+      "source": "./plugins/aep",
+      "description": "Core AEP engineering skills"
+    }
+  ]
+}
