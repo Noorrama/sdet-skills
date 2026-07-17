@@ -9,6 +9,11 @@
       "name": "aep",
       "source": "./plugins/aep",
       "description": "Core AEP engineering skills"
+    },
+    {
+      "name": "aep-mobile",
+      "source": "./plugins/aep-mobile",
+      "description": "Mobile QA skill set — agentic PDLC pipeline across the 5 GoTo apps"
     }
   ]
 }

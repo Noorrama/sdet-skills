@@ -1,0 +1,33 @@
+{
+  "app_id": "gopay-consumer",
+  "display_name": "GoPay Consumer",
+  "platforms": ["android", "ios"],
+  "deeplink_scheme": "gopay://",
+  "android_package": "com.gojek.gopay",
+  "ios_bundle_id": "com.gojek.gopay",
+  "repos": {
+    "gmt": "<TODO: GoPay Consumer GMT (Appium+TestNG) project path>",
+    "tapmind": "<TODO: GoPay Consumer TapMind NLP repo path>",
+    "shared_libs": ["<TODO: shared page-object/util lib if used>"]
+  },
+  "locator_keys": { "android": "resource-id", "ios": "accessibilityId" },
+  "naming_convention": {
+    "element_id_pattern": "<screen_id>.<element_role>",
+    "role_vocabulary": ["_btn", "_input", "_label", "_toggle", "_tab", "_list"],
+    "developer_locator_equals_role": false
+  },
+  "device_matrix": [
+    { "os": "android", "version": "13", "device": "Pixel 7" },
+    { "os": "android", "version": "11", "device": "Galaxy A52" },
+    { "os": "ios", "version": "17", "device": "iPhone 14" }
+  ],
+  "testbuddy": {
+    "agents": ["CustomerAgent", "PaymentAgent", "VoucherAgent"],
+    "segments": {
+      "kyc_verified": "<TODO: TestBuddy segment/tag>",
+      "kyc_unverified": "<TODO>",
+      "wallet_near_limit": "<TODO>"
+    }
+  },
+  "default_output": "NLP"
+}

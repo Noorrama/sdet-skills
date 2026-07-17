@@ -1,0 +1,28 @@
+{
+  "app_id": "gojek-driver | gofood-merchant | gopay-consumer | gopay-merchant",
+  "display_name": "<App display name>",
+  "platforms": ["android", "ios"],
+  "deeplink_scheme": "<scheme>://",
+  "android_package": "<com.package>",
+  "ios_bundle_id": "<com.bundle>",
+  "repos": {
+    "gmt": "<path to this app's GMT project>",
+    "tapmind": "<path to this app's TapMind NLP repo>",
+    "shared_libs": ["<shared lib(s), if this app uses the monorepo/shared model>"]
+  },
+  "locator_keys": { "android": "resource-id", "ios": "accessibilityId" },
+  "naming_convention": {
+    "element_id_pattern": "<screen_id>.<element_role>",
+    "role_vocabulary": ["_btn", "_input", "_label", "_toggle", "_tab", "_list"],
+    "developer_locator_equals_role": false
+  },
+  "device_matrix": [
+    { "os": "android", "version": "<v>", "device": "<device>" },
+    { "os": "ios", "version": "<v>", "device": "<device>" }
+  ],
+  "testbuddy": {
+    "agents": ["CustomerAgent", "DriverAgent", "GoPayMerchantAgent", "VoucherAgent", "BookingAgent", "PaymentAgent"],
+    "segments": { "<logical_state>": "<TestBuddy segment/tag name>" }
+  },
+  "default_output": "NLP"
+}

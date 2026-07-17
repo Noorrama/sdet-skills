@@ -1,0 +1,20 @@
+{
+  "app": "gojek-consumer",
+  "change_summary": "Add SAVE20 promo entry + validation to the GoFood cart-review/checkout screen",
+  "screens_touched": ["GOFOOD_CART_REVIEW"],
+  "view_models": ["CartReviewViewModel"],
+  "new_components": [{"name": "PromoInput", "purpose": "enter & validate promo at checkout"}],
+  "flag_keys": [{"key": "ff_promo_v2", "default": "off"}],
+  "test_hooks": [
+    {"hook_id": "HOOK-DL-CART", "type": "deeplink", "target": "GOFOOD_CART_REVIEW", "invoke": "gojek://food/cart/review"},
+    {"hook_id": "HOOK-FF", "type": "flag-override", "target": "ff_promo_v2", "invoke": "debug menu → set ff_promo_v2"},
+    {"hook_id": "HOOK-ADDR", "type": "state-injection", "target": "saved_address", "invoke": "seed saved address (skip UI)"}
+  ],
+  "observable_states": [
+    {"flow": "apply SAVE20", "success_signal": "discount_line visible + cart_total decreased", "failure_signal": "promo_error_label visible + cart_total unchanged"}
+  ],
+  "testability_gaps": [
+    "discounted fare not exposed as an observable field (only the total text) — add a testable discount value"
+  ],
+  "sequencing": ["validate promo before place-order"]
+}

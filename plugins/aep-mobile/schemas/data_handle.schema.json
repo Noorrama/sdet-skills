@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "test-data handle (Test-Data Provisioner output)",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["handle_id", "for_data_need", "entity", "provision_method", "refs"],
+    "properties": {
+      "handle_id": { "type": "string" },
+      "for_data_need": { "type": "string", "description": "the scenario data_needs id this satisfies" },
+      "entity": { "type": "string" },
+      "provision_method": { "type": "string", "enum": ["leased", "constructed", "synthetic", "override"] },
+      "source": { "type": "string", "enum": ["testbuddy", "gbt", "remote-config"], "description": "who provided it" },
+      "refs": { "type": "object", "description": "ids/handles the test uses (never raw values), e.g. {customer_id, promo_code_ref}" },
+      "credentials_ref": { "type": "string", "description": "vault pointer; never an inline secret" },
+      "ttl_seconds": { "type": "integer" },
+      "cleanup_token": { "type": "string", "description": "return-to-pool / delete after run" }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "plan_context (PRIMARY DRIVER)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["app", "change_summary", "screens_touched", "test_hooks"],
+  "properties": {
+    "app": { "type": "string" },
+    "change_summary": { "type": "string" },
+    "screens_touched": { "type": "array", "items": { "type": "string" }, "description": "screen_ids" },
+    "view_models": { "type": "array", "items": { "type": "string" } },
+    "new_components": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "name": { "type": "string" }, "purpose": { "type": "string" } } }
+    },
+    "flag_keys": {
+      "type": "array",
+      "items": { "type": "object",
+        "properties": { "key": { "type": "string" }, "default": { "type": "string" } } }
+    },
+    "test_hooks": {
+      "type": "array",
+      "description": "how QA reaches/sets up a screen without full UI walk",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["hook_id", "type", "invoke"],
+        "properties": {
+          "hook_id": { "type": "string" },
+          "type": { "type": "string", "enum": ["deeplink", "flag-override", "state-injection"] },
+          "target": { "type": "string", "description": "screen_id / element_id it reaches or sets" },
+          "invoke": { "type": "string", "description": "the deeplink URI / how to set the flag / how to inject state" }
+        }
+      }
+    },
+    "observable_states": {
+      "type": "array",
+      "items": { "type": "object",
+        "properties": { "flow": { "type": "string" }, "success_signal": { "type": "string" }, "failure_signal": { "type": "string" } } }
+    },
+    "testability_gaps": { "type": "array", "items": { "type": "string" } },
+    "sequencing": { "type": "array", "items": { "type": "string" } }
+  }
+}

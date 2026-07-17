@@ -1,0 +1,33 @@
+{
+  "app_id": "gofood-merchant",
+  "display_name": "GoFood Merchant (GoBiz)",
+  "platforms": ["android", "ios"],
+  "deeplink_scheme": "gobiz://",
+  "android_package": "com.gojek.gobiz",
+  "ios_bundle_id": "com.gojek.gobiz",
+  "repos": {
+    "gmt": "<TODO: GoFood Merchant GMT (Appium+TestNG) project path>",
+    "tapmind": "<TODO: GoFood Merchant TapMind NLP repo path>",
+    "shared_libs": ["<TODO: shared page-object/util lib if used>"]
+  },
+  "locator_keys": { "android": "resource-id", "ios": "accessibilityId" },
+  "naming_convention": {
+    "element_id_pattern": "<screen_id>.<element_role>",
+    "role_vocabulary": ["_btn", "_input", "_label", "_toggle", "_tab", "_list"],
+    "developer_locator_equals_role": false
+  },
+  "device_matrix": [
+    { "os": "android", "version": "13", "device": "Pixel 7" },
+    { "os": "android", "version": "11", "device": "Galaxy A52" },
+    { "os": "ios", "version": "17", "device": "iPhone 14" }
+  ],
+  "testbuddy": {
+    "agents": ["GoPayMerchantAgent", "BookingAgent", "CustomerAgent"],
+    "segments": {
+      "merchant_open_catalog": "<TODO: TestBuddy segment/tag>",
+      "merchant_closed": "<TODO>",
+      "merchant_pending_settlement": "<TODO>"
+    }
+  },
+  "default_output": "NLP"
+}

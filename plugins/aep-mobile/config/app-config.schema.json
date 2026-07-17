@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "per-app config (the one thing that varies across the 5 apps)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["app_id", "display_name", "platforms", "deeplink_scheme", "repos", "locator_keys", "naming_convention"],
+  "properties": {
+    "app_id": { "type": "string", "enum": ["gojek-consumer", "gojek-driver", "gofood-merchant", "gopay-consumer", "gopay-merchant"] },
+    "display_name": { "type": "string" },
+    "platforms": { "type": "array", "items": { "type": "string", "enum": ["android", "ios"] }, "minItems": 1 },
+    "deeplink_scheme": { "type": "string", "description": "e.g. gojek:// , gofood:// , gopay://" },
+    "android_package": { "type": "string" },
+    "ios_bundle_id": { "type": "string" },
+    "repos": {
+      "type": "object", "additionalProperties": false,
+      "required": ["gmt", "tapmind"],
+      "properties": {
+        "gmt": { "type": "string", "description": "coded (Appium+TestNG) repo/path" },
+        "tapmind": { "type": "string", "description": "NLP repo/path" },
+        "shared_libs": { "type": "array", "items": { "type": "string" }, "description": "shared page-object/util libs (mixed/monorepo case)" }
+      }
+    },
+    "locator_keys": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "android": { "type": "string", "default": "resource-id" },
+        "ios": { "type": "string", "default": "accessibilityId" }
+      }
+    },
+    "naming_convention": {
+      "type": "object", "additionalProperties": false,
+      "required": ["element_id_pattern"],
+      "properties": {
+        "element_id_pattern": { "type": "string", "default": "<screen_id>.<element_role>" },
+        "role_vocabulary": { "type": "array", "items": { "type": "string" }, "description": "e.g. _btn,_input,_label,_toggle,_tab" },
+        "developer_locator_equals_role": { "type": "boolean", "description": "true if resource-id/accessibilityId == element_role (enables 1:1 join)" }
+      }
+    },
+    "device_matrix": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "os": { "type": "string" }, "version": { "type": "string" }, "device": { "type": "string" } } }
+    },
+    "testbuddy": {
+      "type": "object",
+      "description": "maps logical data states → TestBuddy MCP agents/segments",
+      "properties": {
+        "agents": { "type": "array", "items": { "type": "string" } },
+        "segments": { "type": "object", "description": "logical state → TestBuddy segment/tag name" }
+      }
+    },
+    "default_output": { "type": "string", "enum": ["NLP", "GMT", "both", "per-scenario"], "default": "NLP" }
+  }
+}
