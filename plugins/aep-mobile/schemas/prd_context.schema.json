@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "prd_context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["app", "feature", "requirements", "business_rules", "needs_clarification"],
+  "properties": {
+    "app": { "type": "string", "description": "app_id from the per-app config" },
+    "feature": { "type": "string" },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "statement", "priority"],
+        "properties": {
+          "id": { "type": "string" },
+          "statement": { "type": "string" },
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "area": { "type": "string" },
+          "high_risk": { "type": "boolean" }
+        }
+      }
+    },
+    "business_rules": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "condition"],
+        "properties": {
+          "id": { "type": "string" },
+          "condition": { "type": "string" },
+          "boundaries": { "type": "array", "items": { "type": "string" } },
+          "error_message": { "type": "string" }
+        }
+      }
+    },
+    "personas": { "type": "array", "items": { "type": "string" } },
+    "payment_constraints": { "type": "array", "items": { "type": "string" } },
+    "feature_flags": {
+      "type": "array",
+      "items": { "type": "object",
+        "properties": { "key": { "type": "string" }, "states": { "type": "array", "items": { "type": "string" } } } }
+    },
+    "data_signals": {
+      "type": "array",
+      "description": "Precursor to per-scenario data_needs; the scenario generator refines these.",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["entity", "state"],
+        "properties": {
+          "entity": { "type": "string" },
+          "state": { "type": "string" },
+          "for_rule": { "type": "string" },
+          "sensitive": { "type": "boolean" }
+        }
+      }
+    },
+    "needs_clarification": { "type": "array", "items": { "type": "string" } }
+  }
+}

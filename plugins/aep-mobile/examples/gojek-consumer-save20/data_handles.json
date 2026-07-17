@@ -1,0 +1,23 @@
+[
+  {
+    "handle_id": "H-001", "for_data_need": "DN-1", "entity": "consumer",
+    "provision_method": "leased", "source": "testbuddy",
+    "refs": {"customer_id": "cust_ref_88231", "segment": "first_time_gofood", "payment": "gopay"},
+    "credentials_ref": "vault://testbuddy/gojek-consumer/cust_ref_88231/token",
+    "ttl_seconds": 1800, "cleanup_token": "release:cust_ref_88231"
+  },
+  {
+    "handle_id": "H-002", "for_data_need": "DN-2", "entity": "gopay_wallet",
+    "provision_method": "constructed", "source": "testbuddy",
+    "refs": {"customer_id": "cust_ref_88231", "balance_set_to": ">=order_total"},
+    "credentials_ref": "vault://testbuddy/gojek-consumer/cust_ref_88231/token",
+    "ttl_seconds": 1800, "cleanup_token": "reset-balance:cust_ref_88231"
+  },
+  {
+    "handle_id": "H-003", "for_data_need": "DN-3", "entity": "promo",
+    "provision_method": "constructed", "source": "testbuddy",
+    "refs": {"voucher_ref": "SAVE20_batch_4471", "status": "valid"},
+    "credentials_ref": "",
+    "ttl_seconds": 3600, "cleanup_token": "expire:SAVE20_batch_4471"
+  }
+]

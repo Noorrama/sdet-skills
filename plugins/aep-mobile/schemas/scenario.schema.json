@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SDET_PLAN scenario set (mobile)",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "requirement_ref", "title", "gherkin", "priority", "type", "app", "screen_id", "navigation", "automatable", "target_framework"],
+    "properties": {
+      "id": { "type": "string", "description": "e.g. SC-001" },
+      "requirement_ref": { "type": "string" },
+      "title": { "type": "string" },
+      "gherkin": { "type": "string", "description": "Given/When/Then — the goal, not the navigation" },
+      "priority": { "type": "string", "enum": ["P0", "P1", "P2"] },
+      "type": { "type": "string", "enum": ["happy", "edge", "negative", "contract", "nfr"] },
+      "app": { "type": "string", "description": "app_id" },
+      "target_platforms": { "type": "array", "items": { "type": "string", "enum": ["android", "ios"] }, "description": "which OS to run on; default both" },
+      "screen_id": { "type": "string", "description": "the goal screen" },
+      "navigation": {
+        "type": "object", "additionalProperties": false,
+        "required": ["method"],
+        "properties": {
+          "method": { "type": "string", "enum": ["deeplink", "flow"], "description": "prefer deeplink/hook; flow = UI walk fallback" },
+          "deeplink": { "type": "string" },
+          "hook_id": { "type": "string", "description": "PLAN test-hook used to reach/seed the screen" },
+          "path": { "type": "array", "items": { "type": "string" }, "description": "flow edges if method=flow" }
+        }
+      },
+      "data_needs": {
+        "type": "array",
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "required": ["id", "entity", "state", "provision"],
+          "properties": {
+            "id": { "type": "string" },
+            "entity": { "type": "string" },
+            "state": { "type": "object" },
+            "provision": { "type": "string", "enum": ["lease", "construct", "synthetic", "override"] },
+            "sensitive": { "type": "boolean" },
+            "testbuddy_hint": { "type": "string", "description": "which TestBuddy agent/tool provisions it" },
+            "source_ref": { "type": "string", "description": "PRD rule / signal it traces to" }
+          }
+        }
+      },
+      "automatable": { "type": "boolean" },
+      "target_framework": { "type": "string", "enum": ["NLP", "GMT"], "description": "NLP (TapMind) primary; GMT coded where needed" },
+      "source_ref": { "type": "string" },
+      "notes": { "type": "string" }
+    }
+  }
+}

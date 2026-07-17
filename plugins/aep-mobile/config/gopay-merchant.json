@@ -1,0 +1,33 @@
+{
+  "app_id": "gopay-merchant",
+  "display_name": "GoPay Merchant",
+  "platforms": ["android", "ios"],
+  "deeplink_scheme": "gopaymerchant://",
+  "android_package": "com.gojek.gopay.merchant",
+  "ios_bundle_id": "com.gojek.gopaymerchant",
+  "repos": {
+    "gmt": "<TODO: GoPay Merchant GMT (Appium+TestNG) project path>",
+    "tapmind": "<TODO: GoPay Merchant TapMind NLP repo path>",
+    "shared_libs": ["<TODO: shared page-object/util lib if used>"]
+  },
+  "locator_keys": { "android": "resource-id", "ios": "accessibilityId" },
+  "naming_convention": {
+    "element_id_pattern": "<screen_id>.<element_role>",
+    "role_vocabulary": ["_btn", "_input", "_label", "_toggle", "_tab", "_list"],
+    "developer_locator_equals_role": false
+  },
+  "device_matrix": [
+    { "os": "android", "version": "13", "device": "Pixel 7" },
+    { "os": "android", "version": "11", "device": "Galaxy A52" },
+    { "os": "ios", "version": "17", "device": "iPhone 14" }
+  ],
+  "testbuddy": {
+    "agents": ["GoPayMerchantAgent", "PaymentAgent", "CustomerAgent"],
+    "segments": {
+      "merchant_with_settlement_account": "<TODO: TestBuddy segment/tag>",
+      "merchant_pending_settlement": "<TODO>",
+      "merchant_qr_active": "<TODO>"
+    }
+  },
+  "default_output": "NLP"
+}

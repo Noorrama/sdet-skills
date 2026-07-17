@@ -1,0 +1,23 @@
+{
+  "app": "gojek-consumer",
+  "epic_ref": "GOFOOD-1234",
+  "merge_requests": ["!5678"],
+  "changed_screens": ["GOFOOD_CART_REVIEW"],
+  "elements": [
+    {"element_id": "GOFOOD_CART_REVIEW.promo_input", "android_locator": "com.gojek.app:id/promo_input", "ios_locator": "gofood.cart.promo_input"},
+    {"element_id": "GOFOOD_CART_REVIEW.apply_btn", "android_locator": "com.gojek.app:id/apply_promo_btn", "ios_locator": "gofood.cart.apply_promo_btn"},
+    {"element_id": "GOFOOD_CART_REVIEW.promo_error_label", "android_locator": "com.gojek.app:id/promo_error", "ios_locator": "gofood.cart.promo_error"},
+    {"element_id": "GOFOOD_CART_REVIEW.cart_total", "android_locator": "com.gojek.app:id/cart_total", "ios_locator": "gofood.cart.total"}
+  ],
+  "routes": ["gojek://food/cart/review"],
+  "api": [
+    {"endpoint": "POST /gofood/checkout/promo", "request": "{code, cart_total, user_id, payment_method}", "response": "{eligible, discount, total, reason}", "error_codes": ["NOT_FIRST_TIME", "NOT_GOPAY", "INSUFFICIENT_BALANCE", "EXPIRED"]}
+  ],
+  "flags": ["ff_promo_v2"],
+  "analytics": ["promo_applied", "promo_rejected"],
+  "app_api_version": "app 12.34 <-> promo-svc v3 (N-1: 12.33)",
+  "cr_risks": [
+    {"id": "CR-07", "area": "GOFOOD_CART_REVIEW.apply_btn", "category": "idempotency", "suggested_test": "double-tap apply must not double-apply", "severity": "High", "disposition": "becomes-scenario"},
+    {"id": "CR-08", "area": "promo apply", "category": "validation", "suggested_test": "trailing space in code bypasses regex", "severity": "Med", "disposition": "becomes-bug"}
+  ]
+}

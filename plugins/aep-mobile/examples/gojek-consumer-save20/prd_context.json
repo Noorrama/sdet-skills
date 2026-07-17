@@ -1,0 +1,28 @@
+{
+  "app": "gojek-consumer",
+  "feature": "SAVE20 promo at GoFood checkout",
+  "requirements": [
+    {"id": "REQ-1", "statement": "A first-time GoFood user paying via GoPay with sufficient balance can apply SAVE20 at checkout and receive the discount", "priority": "P0", "area": "gofood-checkout", "high_risk": true}
+  ],
+  "business_rules": [
+    {"id": "RULE-ELIG", "condition": "first_time_gofood_user AND payment == GoPay", "boundaries": ["first_time = true/false", "payment = GoPay/other"], "error_message": "<not specified>"},
+    {"id": "RULE-BAL", "condition": "GoPay balance sufficient for the order", "boundaries": ["balance = required-1 / required / required+1"], "error_message": "<not specified>"}
+  ],
+  "personas": ["first_time_gofood_user", "returning_gofood_user"],
+  "payment_constraints": ["GoPay only"],
+  "feature_flags": [],
+  "data_signals": [
+    {"entity": "consumer", "state": "first_time_gofood, payment=gopay", "for_rule": "RULE-ELIG", "sensitive": false},
+    {"entity": "consumer", "state": "returning_gofood", "for_rule": "RULE-ELIG", "sensitive": false},
+    {"entity": "consumer", "state": "payment=non-gopay", "for_rule": "RULE-ELIG", "sensitive": false},
+    {"entity": "gopay_wallet", "state": "balance at required-1 / required / required+1", "for_rule": "RULE-BAL", "sensitive": true},
+    {"entity": "promo", "state": "SAVE20 valid", "for_rule": "REQ-1", "sensitive": false}
+  ],
+  "needs_clarification": [
+    "SAVE20 discount value undefined — 20% or Rp20,000?",
+    "'insufficient' measured against order total or post-discount total?",
+    "'first-time GoFood user' = first GoFood order ever, or per-account?",
+    "Is SAVE20 single-use / does it expire?",
+    "Rejection/error copy not specified for not-first-time, non-GoPay, insufficient-balance"
+  ]
+}

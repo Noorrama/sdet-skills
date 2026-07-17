@@ -1,0 +1,65 @@
+[
+  {
+    "id": "SC-001", "requirement_ref": "REQ-1",
+    "title": "First-time + GoPay + sufficient balance → SAVE20 applies",
+    "gherkin": "Given a first-time GoFood user paying via GoPay with sufficient balance\nWhen they apply SAVE20 at cart review\nThen the discount is shown and the cart total decreases\nAnd the amount charged equals the discounted total",
+    "priority": "P0", "type": "happy", "app": "gojek-consumer",
+    "target_platforms": ["android", "ios"], "screen_id": "GOFOOD_CART_REVIEW",
+    "navigation": {"method": "deeplink", "deeplink": "gojek://food/cart/review", "hook_id": "HOOK-DL-CART"},
+    "data_needs": [
+      {"id": "DN-1", "entity": "consumer", "state": {"segment": "first_time_gofood", "payment": "gopay"}, "provision": "lease", "sensitive": false, "testbuddy_hint": "CustomerAgent.get_customer_segments", "source_ref": "PRD:RULE-ELIG"},
+      {"id": "DN-2", "entity": "gopay_wallet", "state": {"balance": ">= order_total"}, "provision": "construct", "sensitive": true, "testbuddy_hint": "CustomerAgent.recharge_customer_gopay", "source_ref": "PRD:RULE-BAL"},
+      {"id": "DN-3", "entity": "promo", "state": {"code": "SAVE20", "status": "valid"}, "provision": "construct", "sensitive": false, "testbuddy_hint": "VoucherAgent.get_voucher_by_service_type_and_country_code", "source_ref": "PRD:REQ-1"}
+    ],
+    "automatable": true, "target_framework": "NLP", "source_ref": "REQ-1", "notes": "P0 — affects charged amount."
+  },
+  {
+    "id": "SC-002", "requirement_ref": "REQ-1",
+    "title": "Insufficient GoPay balance → cannot apply, total unchanged",
+    "gherkin": "Given a first-time GoFood user via GoPay with balance below the required amount\nWhen they apply SAVE20\nThen a clear error is shown\nAnd the cart total is unchanged",
+    "priority": "P0", "type": "negative", "app": "gojek-consumer",
+    "target_platforms": ["android", "ios"], "screen_id": "GOFOOD_CART_REVIEW",
+    "navigation": {"method": "deeplink", "deeplink": "gojek://food/cart/review", "hook_id": "HOOK-DL-CART"},
+    "data_needs": [
+      {"id": "DN-1", "entity": "consumer", "state": {"segment": "first_time_gofood", "payment": "gopay"}, "provision": "lease", "sensitive": false, "testbuddy_hint": "CustomerAgent.get_customer_segments", "source_ref": "PRD:RULE-ELIG"},
+      {"id": "DN-2", "entity": "gopay_wallet", "state": {"balance": "required-1"}, "provision": "construct", "sensitive": true, "testbuddy_hint": "CustomerAgent.recharge_customer_gopay", "source_ref": "PRD:RULE-BAL"}
+    ],
+    "automatable": true, "target_framework": "NLP", "source_ref": "REQ-1", "notes": "Boundary triple (required-1/required/required+1) — generated because 'insufficient vs which amount' is unresolved."
+  },
+  {
+    "id": "SC-003", "requirement_ref": "REQ-1",
+    "title": "Returning (not first-time) user → cannot apply SAVE20",
+    "gherkin": "Given a returning GoFood user\nWhen they try to apply SAVE20\nThen it is rejected as not eligible",
+    "priority": "P1", "type": "negative", "app": "gojek-consumer",
+    "target_platforms": ["android", "ios"], "screen_id": "GOFOOD_CART_REVIEW",
+    "navigation": {"method": "deeplink", "deeplink": "gojek://food/cart/review", "hook_id": "HOOK-DL-CART"},
+    "data_needs": [
+      {"id": "DN-1", "entity": "consumer", "state": {"segment": "returning_gofood", "payment": "gopay"}, "provision": "lease", "sensitive": false, "testbuddy_hint": "CustomerAgent.get_customer_segments", "source_ref": "PRD:RULE-ELIG"}
+    ],
+    "automatable": true, "target_framework": "NLP", "source_ref": "REQ-1"
+  },
+  {
+    "id": "SC-004", "requirement_ref": "REQ-1",
+    "title": "Payment not GoPay → SAVE20 cannot be applied",
+    "gherkin": "Given a first-time GoFood user paying by card\nWhen they try to apply SAVE20\nThen it is rejected / the promo entry is unavailable",
+    "priority": "P1", "type": "negative", "app": "gojek-consumer",
+    "target_platforms": ["android", "ios"], "screen_id": "GOFOOD_CART_REVIEW",
+    "navigation": {"method": "deeplink", "deeplink": "gojek://food/cart/review", "hook_id": "HOOK-DL-CART"},
+    "data_needs": [
+      {"id": "DN-1", "entity": "consumer", "state": {"segment": "first_time_gofood", "payment": "card"}, "provision": "lease", "sensitive": false, "testbuddy_hint": "CustomerAgent.get_customer_data", "source_ref": "PRD:RULE-ELIG"}
+    ],
+    "automatable": true, "target_framework": "NLP", "source_ref": "REQ-1"
+  },
+  {
+    "id": "SC-005", "requirement_ref": "REQ-1",
+    "title": "Offline while applying SAVE20 → graceful error, no crash",
+    "gherkin": "Given the device has no network at cart review\nWhen the user applies SAVE20\nThen a graceful 'no connection' message shows\nAnd the app does not crash and the total is unchanged",
+    "priority": "P2", "type": "edge", "app": "gojek-consumer",
+    "target_platforms": ["android", "ios"], "screen_id": "GOFOOD_CART_REVIEW",
+    "navigation": {"method": "deeplink", "deeplink": "gojek://food/cart/review", "hook_id": "HOOK-DL-CART"},
+    "data_needs": [
+      {"id": "DN-1", "entity": "consumer", "state": {"segment": "first_time_gofood", "payment": "gopay"}, "provision": "lease", "sensitive": false, "testbuddy_hint": "CustomerAgent.get_customer_segments", "source_ref": "PRD:RULE-ELIG"}
+    ],
+    "automatable": true, "target_framework": "NLP", "source_ref": "REQ-1", "notes": "Mobile extra — poor-network path."
+  }
+]

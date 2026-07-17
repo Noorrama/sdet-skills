@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "design_context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["app", "screens"],
+  "properties": {
+    "app": { "type": "string" },
+    "screens": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["screen_id", "elements"],
+        "properties": {
+          "screen_id": { "type": "string", "description": "UPPER_SNAKE, from the Figma frame; app-prefixed if shared" },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["element_id", "element_role", "type"],
+              "properties": {
+                "element_id": { "type": "string", "description": "<screen_id>.<element_role>" },
+                "element_role": { "type": "string", "description": "functional name, not the visible label" },
+                "label": { "type": "string" },
+                "type": { "type": "string", "enum": ["button", "input", "label", "toggle", "tab", "list", "image", "other"] },
+                "states": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          },
+          "states": { "type": "array", "items": { "type": "string" }, "description": "screen-level: empty/loading/error/success/offline" }
+        }
+      }
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["name", "path"],
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "array", "items": { "type": "string" }, "description": "ordered screen_ids / edges" },
+          "guard": { "type": "string" }
+        }
+      }
+    },
+    "deep_links": { "type": "array", "items": { "type": "string" } },
+    "missing_ids": { "type": "array", "items": { "type": "string" }, "description": "elements without a stable id — testability feedback; not automatable until fixed" }
+  }
+}
