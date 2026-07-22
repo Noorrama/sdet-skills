@@ -7,9 +7,9 @@ description: Ingests pre-build contexts (plan, prd, design, rfc) to perform cros
 
 ## Purpose
 Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_context`, `rfc_context`) during implementation planning to generate 3 standardized pre-build deliverables:
-1. `sdet_plan.json` (Machine-readable master execution contract)
-2. `sdet_plan.md` (Human-readable RFC report)
-3. `sdet_plan.csv` (TMS bulk-import format)
+1. `<feature_key>.json` (Machine-readable master execution contract)
+2. `<feature_key>_analysis.md` (Human-readable Markdown QA analysis asset)
+3. `<feature_key>.csv` (TMS bulk-import format)
 
 ---
 
@@ -48,21 +48,21 @@ Expand scenarios across:
 
 ## Output File Specifications
 
-Generate the following 3 files in the current working directory:
+Generate the following 3 files in the current working directory, naming them dynamically using the `<feature_key>` defined in `feature_metadata`:
 
-### 1. `sdet_plan.json`
+### 1. `<feature_key>.json`
 Full machine-readable master payload conforming strictly to `schemas/sdet_plan.schema.json`. Must include `created_at` and `updated_at` ISO date-time timestamps.
 
-### 2. `sdet_plan.md`
-Markdown report formatted with the following sections:
-- Feature Metadata & Scope Summary
-- Risk Assessment
-- Scenario List Table (Priority, Execution Scope, Framework, Mode)
-- Cross-Stage Gap Analysis Table
-- Element Locator Handoff Mapping Table
-- Clickstream Telemetry Verification Table
+### 2. `<feature_key>_analysis.md` (QA Analysis Asset)
+A human-readable Markdown asset automatically generated for engineering leads detailing parsed requirements gaps, architectural risks, and testability bottlenecks during the pre-build review.
 
-### 3. `sdet_plan.csv`
+**Note: Do NOT include individual scenario/test cases here.** Instead, focus on high-level pre-build analysis:
+- **Open Questions & Clarifications:** Specific lists of unresolved questions and follow-ups for PMs and Devs.
+- **Cross-Stage Gaps:** Extracted mismatches between the inputs (PRD vs Figma, PRD vs RFC, RFC vs Implementation Plan).
+- **Architectural & Testability Risks:** Missing hooks, unstable element IDs, or fallback concerns.
+- **SDET Readiness & Testing Plan:** Actionable instructions on how the QA team should start testing, what environments/data setup to prepare, what dependencies to take, and execution guidelines.
+
+### 3. `<feature_key>.csv`
 Flattened CSV strictly matching squad project template headers:
 
 `Title`, `State`, `Priority`, `Type of Test Case`, `Automation Status`, `Preconditions`, `Steps`, `Expected Result`, `Execution Mode`, `Platform`, `Country v2`, `Android Automation Status v2`, `iOS Automation Status v2`, `TestType`, `DriverType`
@@ -90,3 +90,4 @@ Flattened CSV strictly matching squad project template headers:
 - **Strict Determinism**: Do not extrapolate, infer, or hallucinate missing requirements. Map inputs directly to schemas without adding unmentioned fields or assumptions.
 - **Contract Adherence**: Fail explicitly if mandatory input fields from upstream extractors (`plan_context`, `prd_context`, `design_context`, `rfc_context`) are missing.
 - **Format Precision**: Outputs must strictly conform to `sdet_plan.schema.json` and the 15-column squad CSV schema without altering column headers or ordering.
+- **Frontend Focus**: Test cases/scenarios must be generated *exclusively* for Frontend (FE) context (e.g., client-side UI, mobile views, offline transitions, local error copy, and client-side telemetry verifications). Do not generate backend-only validation or server-side test cases.
