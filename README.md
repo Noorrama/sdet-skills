@@ -17,9 +17,30 @@ Claude Code skills marketplace for the AEP team.
 4. **If they're not visible, restart the Claude desktop app** (quit and reopen).
    Once restarted, AEP skills should be visible under the Plugins section.
 
-To get later updates: `claude plugin marketplace update aep`, then
-`claude plugin update <plugin>@aep` (e.g. `aep-mobile@aep`), then restart the
-Claude desktop app the same way.
+## Updating
+
+Nothing updates automatically by default. When someone pushes a new skill
+version, everyone else has to pull it manually:
+
+```
+claude plugin marketplace update aep
+claude plugin update <plugin>@aep
+```
+(e.g. `claude plugin update aep-mobile@aep`)
+
+Then **restart Claude Code** (quit and reopen the terminal session, or the
+desktop app) — the version number updates immediately, but the actual skill
+content only loads on the next session start.
+
+Same two commands also work typed directly into the **desktop app's message
+box** (they're Claude Code commands, not shell-only) if you'd rather not open
+a terminal — then restart the desktop app the same way.
+
+**To stop doing this manually:** in the desktop app, go to **+ → Plugins →
+Manage plugins → Marketplaces tab**, find `aep`, and turn on auto-update.
+Claude Code will then check in the background shortly after each session
+starts and notify you when there's a new version, instead of you having to
+run the commands above.
 
 ## Structure
 
