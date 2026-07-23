@@ -187,11 +187,10 @@
           "accessibility_mapping_directives": {
             "type": "object",
             "properties": {
-              "android_attribute": { "type": "string" },
-              "ios_attribute": { "type": "string" },
-              "flutter_attribute": { "type": "string" }
+              "android_resource_id": { "type": "string" },
+              "ios_accessibility_identifier": { "type": "string" },
+              "flutter_key": { "type": "string" }
             },
-            "required": ["android_attribute", "ios_attribute", "flutter_attribute"],
             "additionalProperties": false
           }
         },

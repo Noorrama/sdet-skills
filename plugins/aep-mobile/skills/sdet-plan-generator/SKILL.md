@@ -15,7 +15,7 @@ Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_c
 
 ## Input Contracts
 
-- **`plan_context.json`** *(PRIMARY DRIVER)*: Change surface, test hooks (`method:deeplink`, `hook_id`), feature flags, observable states.
+- **`plan_context.json`**: Change surface, test hooks (`method:deeplink`, `hook_id`), feature flags, observable states.
 - **`prd_context.json`**: Business rules, boundary rules, expected UI copy, and `clickstream_events` (telemetry specs).
 - **`design_context.json`**: Screen definitions, UI elements with `screen_name:element_id_name` logical tokens, state variants, and flow matrix.
 - **`rfc_context.json`**: Feature flag mappings, API contracts, error codes, and N-1 fallback rules.
@@ -27,11 +27,14 @@ Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_c
 ## Execution Workflow
 
 ### 1. Ingest & Coverage Gates
-- Use `plan_context` as primary driver to define reachable test surface; supplement with PRD acceptance criteria.
+- Ingest and aggregate whatever context inputs are provided (`plan_context`, `prd_context`, `design_context`, `rfc_context`).
+- **Graceful Input Absence Handling:** If individual contexts (such as `plan_context.json` or `rfc_context.json`) are NOT provided, **do NOT fail execution.** Drive the generation with whatever inputs are given:
+  - If `plan_context.json` is absent, proceed with `prd_context.json` and `design_context.json` as the baseline. 
+  - Simply note the missing contexts clearly as an architectural observation or limitation inside the `<feature_key>_analysis.md` report (e.g., *"plan_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
 - **Hard Coverage Rules**:
   - Every P0 requirement $\rightarrow \ge 1$ scenario.
-  - Every `clickstream_events` entry $\rightarrow \ge 1$ verification step.
   - Every `boundary_rules` entry $\rightarrow \ge 1$ boundary scenario.
+  - **Clickstream Telemetry Rules:** Clickstream verification is **NOT** a mandatory hard gate for the generator. If `clickstream_events` are explicitly provided/told in the input contexts, then generate $\ge 1$ verification step per event. If they are NOT provided or explicitly mentioned, **do NOT fail validation and do NOT generate telemetry tests.** Instead, simply list it as an Open Question / Clarification inside `<feature_key>_analysis.md` (e.g., *"Are clickstream telemetry events required for this feature?"*).
 - Dedup against existing GMT/NLP tests retrieved from `config/<app>.json` repository paths.
 
 ### 2. Scenario Expansion
@@ -49,7 +52,7 @@ As the single integration point, the generator must actively compute the followi
 - **`prd_vs_figma_gaps`**: Cross-reference `prd_context.json` with `design_context.json`. Check `business_requirements[].context_screen` against Figma `screens[].screen_id`. Identify missing screens/frames, text copy mismatches, or personas with no design representation.
 - **`prd_vs_rfc_gaps`**: Cross-reference `prd_context.json` with `rfc_context.json`. Compare PRD `feature_flags` against the RFC `experimentation_matrix` (finding flag key typos, missing defaults, or status mismatches). Verify business rule conditions align with RFC error codes or API paths.
 - **`rfc_vs_impl_plan_gaps`**: Cross-reference `rfc_context.json` with the Implementation `plan_context.json`. Check if RFC architectural risks, local migrations, offline strategies, or required permissions are accounted for in the implementation's screens touched, view models, and components.
-- **`element_locator_handoff`**: Map `screen_name:element_id_name` logical tokens to cross-platform accessibility attributes (`resource-id`, `accessibilityIdentifier`, `Key / Semantics`).
+- **`element_locator_handoff`**: Map `screen_name:element_id_name` logical tokens to cross-platform accessibility attributes (`android_resource_id`, `ios_accessibility_identifier`, `flutter_key`). Only populate these fields if the matching locator values are provided by the upstream design/development context; do not use placeholders or "UNRESOLVED" strings.
 
 ---
 
@@ -72,24 +75,23 @@ A human-readable Markdown asset automatically generated for engineering leads de
 ### 3. `<feature_key>.csv`
 Flattened CSV strictly matching squad project template headers:
 
-`Title`, `State`, `Priority`, `Type of Test Case`, `Automation Status`, `Preconditions`, `Steps`, `Expected Result`, `Execution Mode`, `Platform`, `Country v2`, `Android Automation Status v2`, `iOS Automation Status v2`, `TestType`, `DriverType`
+`Title`, `State`, `Priority`, `Type of Test Case`, `Automation Status`, `Preconditions`, `Steps`, `Expected Result`, `Execution Mode`, `Platform`, `Country v2`, `Android Automation Status v2`, `iOS Automation Status v2`, `TestType`
 
 **Column Value Directives**:
 - `Title`: Concise scenario description.
 - `State`: `"Active"`
 - `Priority`: `"P0"`, `"P1"`, or `"P2"`
 - `Type of Test Case`: `"Regression"` or `"Sanity"`
-- `Automation Status`: `"Manual"` or `"Automated"`
+- `Automation Status`: By default, set to `"Manual"` (representing not-automated) for newly generated test cases. Set to `"Automated"` only if matched with an existing automated test case.
 - `Preconditions`: Multiline string with environment, locale, deep links, and active feature flags.
-- `Steps`: Numbered sequential steps inside double quotes with line breaks (`\n`). Must include telemetry emission checks.
-- `Expected Result`: Clear functional and telemetry assertions.
+- `Steps`: Numbered sequential steps inside double quotes with line breaks (`\n`). **Since this CSV is designed for human manual testers, never use technical automation IDs or logical component IDs (such as `WELCOME_PAGE.TAP_BUTTON_CTA`) inside the descriptions.** Instead, always write them as clear, user-friendly human actions using button text labels or natural element names (e.g. *"Tap on 'Daftar Program Affiliate'"* or *"Type in your referral code"*). Keep all technical automation variables and locators strictly isolated inside `<feature_key>.json`. Must include telemetry emission checks.
+- `Expected Result`: Clear functional and telemetry assertions described in user-friendly language.
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`
 - `Country v2`: `"Indonesia"`, `"Singapore"`, `"Vietnam"`, etc.
-- `Android Automation Status v2`: `"Automated"`, `"Manual"`, or `"N/A"`
-- `iOS Automation Status v2`: `"Automated"`, `"Manual"`, or `"N/A"`
+- `Android Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is iOS-only). Set to `"Automated"` only if matched with an existing automated Android case.
+- `iOS Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is Android-only). Set to `"Automated"` only if matched with an existing automated iOS case.
 - `TestType`: `"Story"`
-- `DriverType`: `"IDBike"`, `"IDCar"`, or `"N/A"`
 
 ---
 
@@ -119,6 +121,6 @@ The skill supports a two-way synchronization flow to allow human QA to review, r
 
 ## Guardrails
 - **Strict Determinism**: Do not extrapolate, infer, or hallucinate missing requirements. Map inputs directly to schemas without adding unmentioned fields or assumptions.
-- **Contract Adherence**: Fail explicitly if mandatory input fields from upstream extractors (`plan_context`, `prd_context`, `design_context`, `rfc_context`) are missing.
+- **Contract Adherence**: Fail explicitly if *all* context files are missing or if essential keys within provided contexts are missing. However, do NOT fail if individual files (like `plan_context.json` or `rfc_context.json`) are absent; instead, proceed with the inputs that are provided, noting the missing contexts in `<feature_key>_analysis.md`.
 - **Format Precision**: Outputs must strictly conform to `sdet_plan.schema.json` and the 15-column squad CSV schema without altering column headers or ordering.
 - **Frontend Focus**: Test cases/scenarios must be generated *exclusively* for Frontend (FE) context (e.g., client-side UI, mobile views, offline transitions, local error copy, and client-side telemetry verifications). Do not generate backend-only validation or server-side test cases.
