@@ -20,6 +20,8 @@ Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_c
 - **`design_context.json`**: Screen definitions, UI elements with `screen_name:element_id_name` logical tokens, state variants, and flow matrix.
 - **`rfc_context.json`**: Feature flag mappings, API contracts, error codes, and N-1 fallback rules.
 
+> **Pipeline Alignment & Architecture:** Upstream extractor skills (`prd-extractor`, `design-extractor`, `rfc-extractor`) run independently in isolated silos per stage and **do not communicate with each other**. The `sdet-plan-generator` is the first convergence point in the pipeline. It is responsible for cross-referencing these decoupled contexts to detect drift, mismatches, and gaps.
+
 ---
 
 ## Execution Workflow
@@ -35,13 +37,18 @@ Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_c
 ### 2. Scenario Expansion
 Expand scenarios across:
 - **Core**: Happy path, boundary, negative, and contract flows.
-- **Mobile Extras**: Offline/poor-network, permission prompts, feature flag toggles, deep-link navigation, and regional variants.
+- **Mobile Extras**: Generates mobile-specific scenarios (deep-link navigation, regional variants, feature flag toggles) and applies **Conditional Mobile-Native Interruption Rules** to ensure test suites remain highly focused and are only generated when technically valid:
+  - **Network Loss / API Timeout**: Inject a poor-network or server-timeout scenario *only* if `rfc_context.json` declares active `api_contract_changes` or `plan_context.json` specifies `observable_states` (API success/failure signals). Skip if the touchpoint screen is entirely static/local.
+  - **App Backgrounding & Process Death**: Inject a backgrounding/kill-and-restore state preservation scenario *only* if the screens in `design_context.json` contain interactive elements (inputs, forms, toggles) or view models are active in `plan_context.json`. Skip on purely static/read-only informational screens.
+  - **Local Storage & DB Migration**: Inject an N-1 upgrade and schema migration scenario *only* if `rfc_context.json` defines active `local_data_changes` (e.g. SQLite, Room, CoreData, or SharedPrefs modifications).
+  - **Runtime Permission Toggles**: Inject parallel Permission Granted vs Permission Denied scenarios *only* if `rfc_context.json` declares new or modified `permissions_required`.
 - **Navigation Priority**: Prefer test hooks (`method:deeplink` or `hook_id`) over full UI walks.
 
-### 3. Gap Analysis & Testability Feedback
-- **`prd_vs_figma_gaps`**: Missing screens, text copy mismatches, missing error/loading frames.
-- **`prd_vs_rfc_gaps`**: PRD business rules/flags missing technical RFC specs.
-- **`rfc_vs_impl_plan_gaps`**: Technical fallback/retry rules missing in task implementation scope.
+### 3. Gap Analysis & Alignment Engine
+As the single integration point, the generator must actively compute the following cross-stage gaps:
+- **`prd_vs_figma_gaps`**: Cross-reference `prd_context.json` with `design_context.json`. Check `business_requirements[].context_screen` against Figma `screens[].screen_id`. Identify missing screens/frames, text copy mismatches, or personas with no design representation.
+- **`prd_vs_rfc_gaps`**: Cross-reference `prd_context.json` with `rfc_context.json`. Compare PRD `feature_flags` against the RFC `experimentation_matrix` (finding flag key typos, missing defaults, or status mismatches). Verify business rule conditions align with RFC error codes or API paths.
+- **`rfc_vs_impl_plan_gaps`**: Cross-reference `rfc_context.json` with the Implementation `plan_context.json`. Check if RFC architectural risks, local migrations, offline strategies, or required permissions are accounted for in the implementation's screens touched, view models, and components.
 - **`element_locator_handoff`**: Map `screen_name:element_id_name` logical tokens to cross-platform accessibility attributes (`resource-id`, `accessibilityIdentifier`, `Key / Semantics`).
 
 ---
@@ -83,6 +90,30 @@ Flattened CSV strictly matching squad project template headers:
 - `iOS Automation Status v2`: `"Automated"`, `"Manual"`, or `"N/A"`
 - `TestType`: `"Story"`
 - `DriverType`: `"IDBike"`, `"IDCar"`, or `"N/A"`
+
+---
+
+## Bidirectional Sync Workflow
+
+The skill supports a two-way synchronization flow to allow human QA to review, refine, and add test cases manually in the CSV, and feed those corrections back to keep the master JSON in perfect alignment.
+
+### Dual Execution Modes
+
+1. **`GENERATE` Mode (Default):**
+   - **Trigger:** Upstream extractor contexts are provided as input.
+   - **Action:** Generates `<feature_key>.json`, `<feature_key>_analysis.md`, and `<feature_key>.csv` from scratch.
+
+2. **`SYNC` Mode (Reverse Sync):**
+   - **Trigger:** A modified `<feature_key>.csv` is uploaded/provided as input. The skill automatically reads the existing `<feature_key>.json` directly from the working directory.
+   - **Action:** Parses the modified CSV and merges all human edits back into `<feature_key>.json` strictly following these reconciliation rules:
+     - **Mapping Anchor:** Correlate rows in the CSV to scenario objects in `<feature_key>.json` using `Title` $\leftrightarrow$ `csv_title_association` as the primary key.
+     - **Synchronize Overridden Properties:** If the human QA modified fields in a correlated CSV row (e.g., changed `Automation Status` from "Manual" to "Automated", tweaked `Execution Mode` from "Manual" to "Automatable", altered priority, or edited steps), update those exact property values in `<feature_key>.json` to match the CSV.
+     - **Ingest New Manual Scenarios:** If a row exists in the CSV but has no matching `csv_title_association` in `<feature_key>.json`, it represents a new test case added by the QA. Create a new scenario object for it inside `<feature_key>.json` with:
+       - `is_legacy_regression: true`
+       - `automatable: false`
+       - All standard properties parsed from the CSV columns.
+     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>.json` (such as `mapped_user_flow`, `test_data_tags`, `clickstream_events`, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
+     - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>.json` to reflect the synchronization event.
 
 ---
 
