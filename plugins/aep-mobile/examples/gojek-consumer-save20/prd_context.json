@@ -1,28 +1,117 @@
 {
-  "app": "gojek-consumer",
-  "feature": "SAVE20 promo at GoFood checkout",
-  "requirements": [
-    {"id": "REQ-1", "statement": "A first-time GoFood user paying via GoPay with sufficient balance can apply SAVE20 at checkout and receive the discount", "priority": "P0", "area": "gofood-checkout", "high_risk": true}
+  "feature_key": "SG CPF Compliance - Supply & Earnings",
+  "module_namespace": ["Driver Earnings"],
+  "business_requirements": [
+    {
+      "req_id": "REQ-CPF-01",
+      "target_module": "Booking Flow",
+      "user_story": "As a driver, I see generic text stating that CPF/Medisave deductions are not part of the fare calculation on the Bid, OTW, and Summary screens.",
+      "context_screen": "Booking Flow (Bid / OTW / Summary)",
+      "target_personas": [
+        { "type": "driver", "prerequisites": ["SG driver"] }
+      ]
+    },
+    {
+      "req_id": "REQ-CPF-02",
+      "target_module": "Daily Earnings",
+      "user_story": "As a driver, I see an informative 'i' icon on the daily earnings page with a banner explaining the CPF/Medisave contribution.",
+      "context_screen": "Daily Earnings Page",
+      "target_personas": [
+        { "type": "driver", "prerequisites": ["SG driver"] }
+      ]
+    },
+    {
+      "req_id": "REQ-CPF-03",
+      "target_module": "Income Summary",
+      "user_story": "As a driver, my order history / income summary page shows the Medisave/CPF contribution.",
+      "context_screen": "Order History / Income Summary",
+      "target_personas": [
+        { "type": "driver", "prerequisites": ["SG driver with CPF/Medisave deductions applied"] }
+      ]
+    },
+    {
+      "req_id": "REQ-CPF-04",
+      "target_module": "Monthly Statement",
+      "user_story": "As a driver, my monthly statement shows the actual amount deducted, the original amount deducted, the refund, and the configurable Gojek contribution rate.",
+      "context_screen": "Monthly Statement",
+      "target_personas": [
+        { "type": "driver", "prerequisites": ["SG driver opted into CPF/Medisave"] }
+      ]
+    },
+    {
+      "req_id": "REQ-CPF-05",
+      "target_module": "Monthly Statement",
+      "user_story": "As a driver, I automatically receive my monthly statement each month.",
+      "context_screen": "Monthly Statement",
+      "target_personas": [
+        { "type": "driver", "prerequisites": ["SG driver opted into CPF/Medisave"] }
+      ]
+    },
+    {
+      "req_id": "REQ-CPF-06",
+      "target_module": "Annual Statement",
+      "user_story": "As a driver, my annual statement includes a CPF section and the company name.",
+      "context_screen": "Annual Statement",
+      "target_personas": [
+        { "type": "driver", "prerequisites": ["SG driver opted into CPF/Medisave"] }
+      ]
+    },
+    {
+      "req_id": "REQ-CPF-07",
+      "target_module": "CPF Wallet",
+      "user_story": "As a driver, my CPF wallet shows the transaction history for both credit and debit transactions.",
+      "context_screen": "CPF Wallet - Transaction History",
+      "target_personas": [
+        { "type": "driver", "prerequisites": ["SG driver with a CPF wallet"] }
+      ]
+    }
   ],
-  "business_rules": [
-    {"id": "RULE-ELIG", "condition": "first_time_gofood_user AND payment == GoPay", "boundaries": ["first_time = true/false", "payment = GoPay/other"], "error_message": "<not specified>"},
-    {"id": "RULE-BAL", "condition": "GoPay balance sufficient for the order", "boundaries": ["balance = required-1 / required / required+1"], "error_message": "<not specified>"}
+  "boundary_conditions": [
+    {
+      "req_id": "REQ-CPF-03",
+      "edge_case_description": "CPF deduction formula = Gross Earning * 40% (configurable) * deduction rate based on the bracket; applies to trip earnings, incentives, and tips.",
+      "proposed_default": "Test with the configurable 40% and bracket-based rate across trip earnings, incentives, and tips."
+    },
+    {
+      "req_id": "REQ-CPF-07",
+      "edge_case_description": "Cash transactions can drive the CPF wallet to a negative balance.",
+      "proposed_default": "Negative balance is accepted by the business for cash transactions; assert it is allowed."
+    },
+    {
+      "req_id": "REQ-CPF-04",
+      "edge_case_description": "Gojek contribution rate is configurable (currently 3.5%).",
+      "proposed_default": "Assert against the configured value (3.5% default), never a hardcoded amount."
+    },
+    {
+      "req_id": "REQ-CPF-03",
+      "edge_case_description": "Deduction start point differs for new vs existing drivers.",
+      "proposed_default": "New drivers: from the 1st order; existing drivers: 1st order after auto-deduction is enabled. Test both."
+    },
+    {
+      "req_id": "REQ-CPF-04",
+      "edge_case_description": "Monthly statement format is 'to be finalized'.",
+      "proposed_default": "Flag to Product; statement layout is TBD."
+    }
   ],
-  "personas": ["first_time_gofood_user", "returning_gofood_user"],
-  "payment_constraints": ["GoPay only"],
-  "feature_flags": [],
-  "data_signals": [
-    {"entity": "consumer", "state": "first_time_gofood, payment=gopay", "for_rule": "RULE-ELIG", "sensitive": false},
-    {"entity": "consumer", "state": "returning_gofood", "for_rule": "RULE-ELIG", "sensitive": false},
-    {"entity": "consumer", "state": "payment=non-gopay", "for_rule": "RULE-ELIG", "sensitive": false},
-    {"entity": "gopay_wallet", "state": "balance at required-1 / required / required+1", "for_rule": "RULE-BAL", "sensitive": true},
-    {"entity": "promo", "state": "SAVE20 valid", "for_rule": "REQ-1", "sensitive": false}
+  "applicable_countries": ["SG"],
+  "applicable_platforms": ["Android", "iOS", "Backend"],
+  "applicable_service_types": ["GoCar", "GoTaxi"],
+  "out_of_scope_module": [
+    "Driver opt-in integration (SG govt server / govt-id sync) [Backend]",
+    "Monthly SFTP opt-in sync job [Backend]",
+    "Driver segmentation & deduction service [Backend]",
+    "CPF deduction engine (wallet deduction processing) [Backend]",
+    "Auditing business portal (CSV export for finance) [Backend/Web + Ops]",
+    "Reconciliation portal (CSV upload + auto-refund) [Backend/Web + Ops]",
+    "Data support for business/ops [BI/Backend]",
+    "Manual finance audit columns (yellow-marked, handled outside the system)"
   ],
-  "needs_clarification": [
-    "SAVE20 discount value undefined — 20% or Rp20,000?",
-    "'insufficient' measured against order total or post-discount total?",
-    "'first-time GoFood user' = first GoFood order ever, or per-account?",
-    "Is SAVE20 single-use / does it expire?",
-    "Rejection/error copy not specified for not-first-time, non-GoPay, insufficient-balance"
+  "rollout_plan": {
+    "user_segment": "SG drivers opted into Medisave/CPF",
+    "timeline": "Dev complete 2nd week Sep; Pod QA by end Sep; E2E QA by 2nd week Oct; rollout from 3rd week Oct; hard deadline 1 Nov"
+  },
+  "feature_flags": [
+    "UI toggle to enable CPF/Medisave changes (Android)",
+    "UI toggle to enable CPF/Medisave changes (iOS)"
   ]
 }
