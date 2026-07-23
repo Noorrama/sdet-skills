@@ -3,34 +3,481 @@
   "title": "rfc_context",
   "type": "object",
   "additionalProperties": false,
-  "required": ["app", "scope"],
+  "required": ["app", "rfc_id", "rfc_title", "rfc_status", "extracted_at", "extractor_version", "scope"],
   "properties": {
-    "app": { "type": "string" },
-    "scope": { "type": "string" },
-    "risk_areas": { "type": "array", "items": { "type": "string" } },
-    "risk_register": {
+    "app": { "type": "string", "description": "app_id from the per-app config" },
+    "rfc_id": { "type": "string" },
+    "rfc_title": { "type": "string" },
+    "rfc_url": { "type": "string" },
+    "rfc_status": { "type": "string", "enum": ["Draft", "In Review", "Approved", "Published", "Abandoned"] },
+    "extracted_at": { "type": "string", "format": "date-time" },
+    "extractor_version": { "type": "string" },
+
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["affected_modules", "affected_screens", "target_platforms", "change_type"],
+      "properties": {
+        "affected_services": { "type": "array", "items": { "type": "string" } },
+        "affected_modules": { "type": "array", "items": { "type": "string" } },
+        "affected_screens": { "type": "array", "items": { "type": "string" } },
+        "target_platforms": { "type": "array", "items": { "type": "string", "enum": ["android", "ios", "flutter"] } },
+        "change_type": { "type": "string", "enum": ["NEW_FEATURE", "ENHANCEMENT", "REFACTOR", "BUG_FIX", "MIGRATION"] },
+        "platform_dimension": { "type": "string", "enum": ["FE", "BE", "FULL_STACK"] }
+      }
+    },
+
+    "experimentation_matrix": {
       "type": "array",
       "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["id", "area"],
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["flag_key", "variants", "default_variant"],
         "properties": {
-          "id": { "type": "string" },
-          "area": { "type": "string" },
-          "severity": { "type": "string" },
-          "likelihood": { "type": "string" },
-          "test_focus": { "type": "string" },
-          "p0": { "type": "boolean" }
+          "flag_key": { "type": "string" },
+          "variants": { "type": "array", "items": { "type": "string" } },
+          "default_variant": { "type": "string" },
+          "gated_module": { "type": "string" },
+          "gated_approach": { "type": "string" },
+          "kill_switch": { "type": "boolean" },
+          "rfc_section_ref": { "type": "string" }
         }
       }
     },
-    "feature_flags": {
+
+    "architectural_risks": {
       "type": "array",
-      "items": { "type": "object",
-        "properties": { "key": { "type": "string" }, "states": { "type": "array", "items": { "type": "string" } } } }
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk_id", "description", "severity"],
+        "properties": {
+          "risk_id": { "type": "string" },
+          "description": { "type": "string" },
+          "severity": { "type": "string", "enum": ["Critical", "High", "Medium", "Low", "Medium (inferred)", "High (inferred)", "Low (inferred)"] },
+          "affected_modules": { "type": "array", "items": { "type": "string" } },
+          "mitigation": { "type": "string" },
+          "testability_note": { "type": "string" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
     },
-    "cross_team_deps": { "type": "array", "items": { "type": "string" } },
-    "min_app_version": { "type": "string" },
-    "n1_compat": { "type": "string", "description": "backward-compat note for N-1 app version" },
-    "rollout": { "type": "string" }
+
+    "compatibility_mandates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "min_supported_app_version": { "type": ["string", "null"] },
+          "min_os_version": {
+            "type": "object",
+            "properties": {
+              "android": { "type": ["string", "null"] },
+              "ios": { "type": ["string", "null"] }
+            }
+          },
+          "degrade_strategy": { "type": "string" },
+          "affected_screens": { "type": "array", "items": { "type": "string" } },
+          "n_minus_1_behavior": { "type": "string" },
+          "upgrade_path": { "type": "string" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "rollout_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "environment_order": { "type": "array", "items": { "type": "string" } },
+        "percentage_ramp": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["percentage", "criteria"],
+            "properties": {
+              "percentage": { "type": "number", "minimum": 0, "maximum": 100 },
+              "criteria": { "type": "string" },
+              "duration": { "type": "string" }
+            }
+          }
+        },
+        "rollback_triggers": { "type": "array", "items": { "type": "string" } },
+        "rollback_strategy": { "type": "string" },
+        "kill_switch_flag": { "type": "string" },
+        "canary_metrics": { "type": "array", "items": { "type": "string" } },
+        "rfc_section_ref": { "type": "string" }
+      }
+    },
+
+    "api_contract_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["endpoint", "method", "change_type"],
+        "properties": {
+          "endpoint": { "type": "string" },
+          "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+          "change_type": { "type": "string", "enum": ["NEW", "MODIFIED", "DEPRECATED"] },
+          "request_shape": { "type": ["string", "null"] },
+          "response_shape": { "type": ["string", "null"] },
+          "new_error_codes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string" },
+                "message": { "type": "string" }
+              }
+            }
+          },
+          "breaking_change": { "type": "boolean" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "state_management_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["entity", "change_type"],
+        "properties": {
+          "entity": { "type": "string" },
+          "change_type": { "type": "string", "enum": ["NEW_ENTITY", "MODIFIED", "REMOVED"] },
+          "new_fields": { "type": "array", "items": { "type": "string" } },
+          "removed_fields": { "type": "array", "items": { "type": "string" } },
+          "state_transitions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["from", "to", "trigger"],
+              "properties": {
+                "from": { "type": "string" },
+                "to": { "type": "string" },
+                "trigger": { "type": "string" }
+              }
+            }
+          },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "navigation_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["change_type", "screen_id"],
+        "properties": {
+          "change_type": { "type": "string", "enum": ["NEW_SCREEN", "NEW_DEEP_LINK", "MODIFIED_FLOW", "REMOVED_SCREEN"] },
+          "screen_id": { "type": "string" },
+          "deep_link": { "type": ["string", "null"] },
+          "deep_link_params": { "type": "array", "items": { "type": "string" } },
+          "parent_flow": { "type": "string" },
+          "entry_points": { "type": "array", "items": { "type": "string" } },
+          "inferred_from_prose": { "type": "boolean" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "local_data_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["storage_type", "change_type", "entity_or_key"],
+        "properties": {
+          "storage_type": { "type": "string", "enum": ["ROOM", "CORE_DATA", "SHARED_PREFS", "USER_DEFAULTS", "CACHE", "PERSISTENCE", "SQLITE", "MMKV"] },
+          "change_type": { "type": "string", "enum": ["NEW_KEY", "SCHEMA_MIGRATION", "CACHE_INVALIDATION", "REMOVED"] },
+          "entity_or_key": { "type": "string" },
+          "migration_version": { "type": ["string", "null"] },
+          "migration_strategy": { "type": ["string", "null"], "enum": ["ADDITIVE", "DESTRUCTIVE", "FALLBACK_VALUE", null] },
+          "data_loss_risk": { "type": "boolean" },
+          "rollback_safe": { "type": "boolean" },
+          "inferred_from_prose": { "type": "boolean" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "platform_specific": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "android": {
+          "type": ["object", "null"],
+          "properties": {
+            "implementation_notes": { "type": "string" },
+            "min_sdk_version": { "type": ["integer", "null"] },
+            "uses_jetpack_compose": { "type": "boolean" },
+            "gradle_module": { "type": "string" },
+            "parity_with_ios": { "type": "string", "enum": ["FULL", "PARTIAL", "PLATFORM_ONLY"] }
+          }
+        },
+        "ios": {
+          "type": ["object", "null"],
+          "properties": {
+            "implementation_notes": { "type": "string" },
+            "min_ios_version": { "type": ["string", "null"] },
+            "uses_swiftui": { "type": "boolean" },
+            "framework_or_target": { "type": "string" },
+            "parity_with_android": { "type": "string", "enum": ["FULL", "PARTIAL", "PLATFORM_ONLY"] }
+          }
+        },
+        "flutter": {
+          "type": ["object", "null"],
+          "properties": {
+            "implementation_notes": { "type": "string" },
+            "min_flutter_version": { "type": ["string", "null"] },
+            "package_dependencies": { "type": "array", "items": { "type": "string" } },
+            "parity_notes": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "permissions_required": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["permission", "platform", "purpose"],
+        "properties": {
+          "permission": { "type": "string" },
+          "platform": { "type": "string", "enum": ["ANDROID", "IOS", "BOTH"] },
+          "purpose": { "type": "string" },
+          "is_new": { "type": "boolean" },
+          "deny_behavior": { "type": "string" },
+          "rationale_shown": { "type": "boolean" },
+          "inferred_from_prose": { "type": "boolean" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "offline_behavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "offline_capable": { "type": "boolean" },
+        "sync_strategy": { "type": "string", "enum": ["FAIL_FAST", "CACHE_FIRST", "QUEUE_AND_SYNC", "OFFLINE_FIRST"] },
+        "cached_data_ttl": { "type": "string" },
+        "offline_ui_state": { "type": "string" },
+        "reconnection_behavior": { "type": "string" },
+        "partial_sync_handling": { "type": "string" },
+        "inferred_from_prose": { "type": "boolean" },
+        "rfc_section_ref": { "type": "string" }
+      }
+    },
+
+    "accessibility_impacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["screen_id", "change_description"],
+        "properties": {
+          "screen_id": { "type": "string" },
+          "change_description": { "type": "string" },
+          "content_descriptions_required": { "type": "array", "items": { "type": "string" } },
+          "focus_order_defined": { "type": "boolean" },
+          "dynamic_content_announced": { "type": "boolean" },
+          "inferred_from_prose": { "type": "boolean" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "lifecycle_considerations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event", "affected_screen", "expected_behavior"],
+        "properties": {
+          "event": { "type": "string", "enum": ["PROCESS_DEATH", "CONFIG_CHANGE", "BACKGROUND_FOREGROUND", "APP_UNINSTALL_REINSTALL", "LOW_MEMORY", "SPLIT_SCREEN"] },
+          "affected_screen": { "type": "string" },
+          "expected_behavior": { "type": "string" },
+          "state_preservation": { "type": "string", "enum": ["FULL_RESTORE", "PARTIAL_RESTORE", "RESTART_FLOW", "NO_RESTORE"] },
+          "inferred_from_prose": { "type": "boolean" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "dependency_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["dependency_name", "change_type"],
+        "properties": {
+          "dependency_name": { "type": "string" },
+          "change_type": { "type": "string", "enum": ["NEW", "UPGRADED", "DOWNGRADED", "REMOVED", "EXISTING"] },
+          "old_version": { "type": ["string", "null"] },
+          "new_version": { "type": ["string", "null"] },
+          "breaking_changes": { "type": ["string", "null"] },
+          "initialization_changes": { "type": "boolean" },
+          "test_impact": { "type": "string" },
+          "inferred_from_prose": { "type": "boolean" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "notification_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "trigger"],
+        "properties": {
+          "type": { "type": "string", "enum": ["PUSH", "LOCAL", "IN_APP"] },
+          "channel_id": { "type": "string" },
+          "trigger": { "type": "string" },
+          "payload_shape": { "type": "string" },
+          "deep_link_on_tap": { "type": "string" },
+          "background_task": { "type": ["string", "null"] },
+          "inferred_from_prose": { "type": "boolean" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "cross_cutting_concerns": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "observability": {
+          "type": "object",
+          "properties": {
+            "new_metrics": { "type": "array", "items": { "type": "string" } },
+            "new_alerts": { "type": "array", "items": { "type": "string" } },
+            "clickstream_events": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "security": {
+          "type": "object",
+          "properties": {
+            "auth_changes": { "type": ["string", "null"] },
+            "data_sensitivity": { "type": "string" },
+            "encryption_changes": { "type": ["string", "null"] },
+            "certificate_pinning_changes": { "type": "boolean" }
+          }
+        },
+        "performance": {
+          "type": "object",
+          "properties": {
+            "latency_targets": { "type": ["string", "null"] },
+            "throughput_targets": { "type": ["string", "null"] },
+            "app_size_impact": { "type": "string" },
+            "memory_impact": { "type": "string" },
+            "battery_impact": { "type": "string" },
+            "startup_time_impact": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["question_id", "question", "status"],
+        "properties": {
+          "question_id": { "type": "string" },
+          "question": { "type": "string" },
+          "owner": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "RESOLVED", "DEFERRED"] },
+          "impact_on_testing": { "type": "string" },
+          "rfc_section_ref": { "type": "string" }
+        }
+      }
+    },
+
+    "prd_cross_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Cross-reference against prd_context.json when available. Populated by comparing RFC fields with PRD extractor output.",
+      "properties": {
+        "feature_flag_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prd_flag_key": { "type": ["string", "null"] },
+              "rfc_flag_key": { "type": ["string", "null"] },
+              "match": { "type": "boolean" }
+            }
+          }
+        },
+        "requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "drift_warnings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["field", "severity"],
+            "properties": {
+              "field": { "type": "string" },
+              "prd_value": { "type": "string" },
+              "rfc_value": { "type": "string" },
+              "severity": { "type": "string", "enum": ["High", "Medium", "Low"] }
+            }
+          }
+        }
+      }
+    },
+
+    "design_cross_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Cross-reference against design_context.json when available. Populated by comparing RFC screens/flows with Figma extractor output.",
+      "properties": {
+        "screen_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rfc_screen_id": { "type": "string" },
+              "design_screen_id": { "type": "string" },
+              "match": { "type": "boolean" }
+            }
+          }
+        },
+        "navigation_drift": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rfc_flow": { "type": "string" },
+              "design_flow": { "type": "string" },
+              "match": { "type": "boolean" }
+            }
+          }
+        },
+        "drift_warnings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["severity"],
+            "properties": {
+              "field": { "type": "string" },
+              "rfc_value": { "type": "string" },
+              "design_value": { "type": "string" },
+              "severity": { "type": "string", "enum": ["High", "Medium", "Low"] }
+            }
+          }
+        }
+      }
+    }
   }
 }
