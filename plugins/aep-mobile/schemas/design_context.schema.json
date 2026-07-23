@@ -1,49 +1,94 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "design_context",
   "type": "object",
-  "additionalProperties": false,
-  "required": ["app", "screens"],
   "properties": {
-    "app": { "type": "string" },
+    "visual_analysis_scratchpad": {
+      "type": "string",
+      "description": "Write a 2-3 sentence overview of what you visually detect in the image before compiling the technical fields. List screens found."
+    },
+    "project_context": {
+      "type": "object",
+      "properties": {
+        "overall_ambiguity_rating": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH"]
+        },
+        "blocking_issues": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["overall_ambiguity_rating", "blocking_issues"]
+    },
     "screens": {
       "type": "array",
       "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["screen_id", "elements"],
+        "type": "object",
         "properties": {
-          "screen_id": { "type": "string", "description": "UPPER_SNAKE, from the Figma frame; app-prefixed if shared" },
+          "screen_id": { 
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$",
+            "description": "Figma frame title forced into UPPER_SNAKE_CASE (e.g., LOGIN_SCREEN)"
+          },
+          "screen_name": { "type": "string" },
+          "purpose": { "type": "string" },
+          "screen_states": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
           "elements": {
             "type": "array",
             "items": {
-              "type": "object", "additionalProperties": false,
-              "required": ["element_id", "element_role", "type"],
+              "type": "object",
               "properties": {
-                "element_id": { "type": "string", "description": "<screen_id>.<element_role>" },
-                "element_role": { "type": "string", "description": "functional name, not the visible label" },
+                "element_id": { 
+                  "type": "string",
+                  "pattern": "^[A-Z0-9_]+\\.[A-Z0-9_]+(\\.[A-Z0-9_]+)?$",
+                  "description": "Syntax: <SCREEN_ID>.<ACTION>_<ELEMENT_TYPE>.<STATE> all in UPPER_SNAKE_CASE (e.g., LOGIN_SCREEN.TAP_BUTTON.DISABLED)"
+                },
+                "type": { "type": "string" },
                 "label": { "type": "string" },
-                "type": { "type": "string", "enum": ["button", "input", "label", "toggle", "tab", "list", "image", "other"] },
-                "states": { "type": "array", "items": { "type": "string" } }
-              }
+                "states_represented": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "interactions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "trigger": { "type": "string" },
+                      "action": { "type": "string" }
+                    },
+                    "required": ["trigger", "action"]
+                  }
+                },
+                "validations_and_edge_cases": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "required": ["element_id", "type", "label", "states_represented", "interactions", "validations_and_edge_cases"]
             }
           },
-          "states": { "type": "array", "items": { "type": "string" }, "description": "screen-level: empty/loading/error/success/offline" }
-        }
+          "screen_notes": { "type": "string" }
+        },
+        "required": ["screen_id", "screen_name", "purpose", "screen_states", "elements", "screen_notes"]
       }
     },
-    "flows": {
+    "ui_flow": {
       "type": "array",
       "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["name", "path"],
+        "type": "object",
         "properties": {
-          "name": { "type": "string" },
-          "path": { "type": "array", "items": { "type": "string" }, "description": "ordered screen_ids / edges" },
-          "guard": { "type": "string" }
-        }
+          "from_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+          "trigger_element_id": { "type": "string", "pattern": "^[A-Z0-9_]+\\.[A-Z0-9_]+(\\.[A-Z0-9_]+)?$" },
+          "to_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+          "condition": { "type": "string" }
+        },
+        "required": ["from_screen_id", "trigger_element_id", "to_screen_id", "condition"]
       }
-    },
-    "deep_links": { "type": "array", "items": { "type": "string" } },
-    "missing_ids": { "type": "array", "items": { "type": "string" }, "description": "elements without a stable id — testability feedback; not automatable until fixed" }
-  }
+    }
+  },
+  "required": ["visual_analysis_scratchpad", "project_context", "screens", "ui_flow"]
 }
