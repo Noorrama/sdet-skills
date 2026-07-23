@@ -93,6 +93,30 @@ Flattened CSV strictly matching squad project template headers:
 
 ---
 
+## Bidirectional Sync Workflow
+
+The skill supports a two-way synchronization flow to allow human QA to review, refine, and add test cases manually in the CSV, and feed those corrections back to keep the master JSON in perfect alignment.
+
+### Dual Execution Modes
+
+1. **`GENERATE` Mode (Default):**
+   - **Trigger:** Upstream extractor contexts are provided as input.
+   - **Action:** Generates `<feature_key>.json`, `<feature_key>_analysis.md`, and `<feature_key>.csv` from scratch.
+
+2. **`SYNC` Mode (Reverse Sync):**
+   - **Trigger:** A modified `<feature_key>.csv` is uploaded/provided as input. The skill automatically reads the existing `<feature_key>.json` directly from the working directory.
+   - **Action:** Parses the modified CSV and merges all human edits back into `<feature_key>.json` strictly following these reconciliation rules:
+     - **Mapping Anchor:** Correlate rows in the CSV to scenario objects in `<feature_key>.json` using `Title` $\leftrightarrow$ `csv_title_association` as the primary key.
+     - **Synchronize Overridden Properties:** If the human QA modified fields in a correlated CSV row (e.g., changed `Automation Status` from "Manual" to "Automated", tweaked `Execution Mode` from "Manual" to "Automatable", altered priority, or edited steps), update those exact property values in `<feature_key>.json` to match the CSV.
+     - **Ingest New Manual Scenarios:** If a row exists in the CSV but has no matching `csv_title_association` in `<feature_key>.json`, it represents a new test case added by the QA. Create a new scenario object for it inside `<feature_key>.json` with:
+       - `is_legacy_regression: true`
+       - `automatable: false`
+       - All standard properties parsed from the CSV columns.
+     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>.json` (such as `mapped_user_flow`, `test_data_tags`, `clickstream_events`, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
+     - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>.json` to reflect the synchronization event.
+
+---
+
 ## Guardrails
 - **Strict Determinism**: Do not extrapolate, infer, or hallucinate missing requirements. Map inputs directly to schemas without adding unmentioned fields or assumptions.
 - **Contract Adherence**: Fail explicitly if mandatory input fields from upstream extractors (`plan_context`, `prd_context`, `design_context`, `rfc_context`) are missing.
