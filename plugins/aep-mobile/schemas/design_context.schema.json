@@ -66,17 +66,9 @@
                 "validations_and_edge_cases": {
                   "type": "array",
                   "items": { "type": "string" }
-                },
-                "element_ambiguity": {
-                  "type": "object",
-                  "properties": {
-                    "rating": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
-                    "reason": { "type": "string" }
-                  },
-                  "required": ["rating", "reason"]
                 }
               },
-              "required": ["element_id", "type", "label", "states_represented", "interactions", "validations_and_edge_cases", "element_ambiguity"]
+              "required": ["element_id", "type", "label", "states_represented", "interactions", "validations_and_edge_cases"]
             }
           },
           "screen_notes": { "type": "string" }

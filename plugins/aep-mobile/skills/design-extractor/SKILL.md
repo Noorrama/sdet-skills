@@ -1,6 +1,6 @@
 ---
 name: mobile-design-extractor
-description: Extract the UI flow and element map from a mobile app's design (Figma + navigation + accessibility IDs) into design_context.json — screens, element IDs (logical), interactions, states, ui_flow, and a per-element/per-project ambiguity rating. Collapses loading/scroll/error/locale variants into screen-level states instead of fragmenting them into separate screens, and reports unresolved navigation or content as an ambiguity/blocking issue rather than inventing it. App-agnostic; the frontend-primary stage. Its element IDs are the logical half of the locator mapping.
+description: Extract the UI flow and element map from a mobile app's design (Figma + navigation + accessibility IDs) into design_context.json — screens, element IDs (logical), interactions, states, ui_flow, and project-level ambiguity tracking. Collapses loading/scroll/error/locale variants into screen-level states instead of fragmenting them into separate screens, and reports unresolved navigation or content in blocking_issues rather than inventing it. App-agnostic; the frontend-primary stage. Its element IDs are the logical half of the locator mapping.
 ---
 
 # Mobile Design Extractor (all 5 GoTo apps)
@@ -19,8 +19,10 @@ links, sticky-note annotations, and text layers — plus the navigation/deep-lin
 accessibility-ID / component spec.
 
 ## Model
-Fast tier — Haiku / Composer 2.5. Escalate to reasoning only when a frame's screen-vs-state grouping,
-or a connector's destination, is still ambiguous after applying the rules below.
+Fast tier — Haiku / Composer 2.5. Escalate to reasoning when:
+- A frame's screen-vs-state grouping is ambiguous after applying the rules below.
+- A connector's destination is unclear (e.g. target node ID is null or orphaned).
+- Extracting connectors from a very large or deeply nested Figma file (to ensure 100% coverage).
 
 ## Screen vs. state (CRITICAL GUARDRAIL)
 A screen is a unique navigational destination; a state is a visual variation of the same screen. Do
@@ -49,21 +51,29 @@ one `screen_id` and reference it from every caller's `ui_flow` entry — never d
    `Button`). `interactions` is `{trigger, action}` pairs, including where a tap navigates to another
    screen or opens a dialog. `validations_and_edge_cases` captures business rules stated or clearly
    implied by the design.
-3. **element_ambiguity** (per element) and **project_context** (per output) — `{rating: LOW/MEDIUM/HIGH,
-   reason}`. This is where ambiguity belongs, not silently resolved:
-   - A tappable element with no traced connector/prototype link to a destination.
-   - A frame/dialog with no captured copy, or copy that is truncated, contradictory, or a literal
+3. **project_context** (per output) — `{overall_ambiguity_rating: LOW/MEDIUM/HIGH, blocking_issues: []}`.
+   This is where project-level ambiguity and gaps belong, not resolved silently:
+   - Tappable elements with no traced connector/prototype link to a destination.
+   - Frames/dialogs with no captured copy, or copy that is truncated, contradictory, or a literal
      placeholder (e.g. `"PLACEHOLDER"`, `"TBD"`, `"[Placeholder Copy]"`).
-   - Two design iterations disagreeing on terminology/copy for what is otherwise the same screen (keep
-     one `screen_id`, list both variants under `screen_states`/`screen_notes`, and flag the conflict here
-     rather than picking one silently).
-   - Roll the worst per-element rating up into `project_context.overall_ambiguity_rating`, and put
-     project-wide gaps (e.g. a whole flow with no design coverage) into `project_context.blocking_issues`.
+   - Design iterations disagreeing on terminology/copy for what is otherwise the same screen (keep
+     one `screen_id`, list both variants under `screen_states`/`screen_notes`, and flag the conflict in
+     `blocking_issues` rather than silently picking one).
+   - Missing or incomplete connector traces, unreachable screens, design gaps in critical flows.
+   - Set `overall_ambiguity_rating` to the worst case across the design, and put all project-wide gaps
+     into `blocking_issues` array with a brief description of each.
 4. **ui_flow** — `{from_screen_id, trigger_element_id, to_screen_id, condition}` edges between screens
-   (state changes within one screen are *not* ui_flow entries — see guardrail). Prefer edges backed by an
-   explicit prototype/connector link; when a destination is only inferred (e.g. a menu label with no
-   traced connector), say so in `condition` (e.g. `"inferred from label, no connector traced"`) instead of
-   asserting it as fact. If a deep link is known for a screen, note it in that screen's `screen_notes`.
+   (state changes within one screen are *not* ui_flow entries — see guardrail). **CRITICAL: Capture ALL
+   prototype/connector lines visible in the Figma file** — traverse every frame, component, and nested
+   element to extract all `interactions` with a `NAVIGATE` action or `destinationId`. Include both:
+   - **Element-level interactions** (buttons, icons, tappable regions with ON_CLICK, ON_HOVER, etc.)
+   - **Frame-level interactions** (auto-transitions with AFTER_TIMEOUT, auto-play animations)
+   
+   Prefer edges backed by an explicit prototype/connector link in the condition field. When a destination
+   is only inferred (e.g. a menu label with no traced connector), say so in `condition` (e.g.
+   `"inferred from label, no connector traced"`) instead of asserting it as fact. If a deep link is known
+   for a screen, note it in that screen's `screen_notes`. Deduplicate flows that appear in multiple frame
+   variants (same from/to/trigger).
 5. **visual_analysis_scratchpad** — 2-3 sentences up front listing every distinct navigational screen
    found, before compiling the structured fields below it.
 
@@ -75,7 +85,10 @@ one `screen_id` and reference it from every caller's `ui_flow` entry — never d
 - Every P0 screen must have error/empty/loading states in `screen_states`, and every P0 navigation must
   appear in `ui_flow`.
 - Never invent a destination, a piece of copy, or a business rule the export doesn't state — every gap
-  becomes an `element_ambiguity`/`blocking_issues` entry instead of being filled in.
+  becomes a `blocking_issues` entry instead of being filled in.
+- **Extract all connector lines:** Traverse the full node tree to find every interaction with a destination.
+  This includes element-level taps/clicks and frame-level auto-transitions. Deduplicates flows across
+  frame variants (multiple Homescreen variants shouldn't produce multiple identical HOMESCREEN→SCREEN_X flows).
 
 ## Guardrails
 Output valid JSON only, conforming to `schemas/design_context.schema.json`. All `screen_id`,
@@ -83,4 +96,8 @@ Output valid JSON only, conforming to `schemas/design_context.schema.json`. All 
 regex patterns exactly — no lowercase, no stray punctuation.
 
 ## Validate
-`jsonschema.validate(output, schemas/design_context.schema.json)`
+- `jsonschema.validate(output, schemas/design_context.schema.json)` — confirms JSON structure & naming
+- **ui_flow completeness:** Count all visible prototype/connector lines in the Figma file and verify
+  `ui_flow` entries match (or flag missing ones in `blocking_issues` with "connector not traced" rationale).
+  Use Figma's inspector or connector layer to confirm all interactions are extracted.
+- All `element_id` and `screen_id` values must satisfy regex patterns exactly — no lowercase or special chars.
