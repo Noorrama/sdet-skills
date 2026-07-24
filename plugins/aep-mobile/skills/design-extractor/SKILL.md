@@ -14,15 +14,24 @@ Design is the frontend-primary stage. This skill produces the screen/element map
 — the schema doesn't require it, but the rest of the pipeline keys off it for multi-app runs.
 
 ## Reads
-Figma file/export for the affected screens — frames, component instances + variants, prototype/connector
-links, sticky-note annotations, and text layers — plus the navigation/deep-link map and the
-accessibility-ID / component spec.
+JSON representation of the Figma design (exported structure containing frames, component instances +
+variants, prototype/connector links, sticky-note annotations, text layers, navigation/deep-link map,
+and accessibility-ID / component spec). Input is read-only; no Figma API calls are made.
 
 ## Model
 Fast tier — Haiku / Composer 2.5. Escalate to reasoning when:
 - A frame's screen-vs-state grouping is ambiguous after applying the rules below.
 - A connector's destination is unclear (e.g. target node ID is null or orphaned).
 - Extracting connectors from a very large or deeply nested Figma file (to ensure 100% coverage).
+
+## Tool usage & permissions
+Minimize tools requiring user approval:
+- **Read from JSON representation only** — accept pre-exported Figma design data as JSON input; no
+  Figma API/MCP calls required. This eliminates Figma tool approval overhead.
+- **Output JSON directly to stdout/artifact** — return design_context.json as structured output that can
+  be piped or captured without requiring a Write tool.
+- **Avoid intermediate file operations** — process the input JSON in-memory and output the result once at
+  the end. This reduces approval prompts to zero (input is JSON provided inline or via Read).
 
 ## Screen vs. state (CRITICAL GUARDRAIL)
 A screen is a unique navigational destination; a state is a visual variation of the same screen. Do
@@ -50,7 +59,9 @@ one `screen_id` and reference it from every caller's `ui_flow` entry — never d
    ID per state. `type` and `label` are freeform (label = visible copy; type = e.g. `TextField`,
    `Button`). `interactions` is `{trigger, action}` pairs, including where a tap navigates to another
    screen or opens a dialog. `validations_and_edge_cases` captures business rules stated or clearly
-   implied by the design.
+   implied by the design. **Omit decorative/spacer elements:** Do not include elements with no `label`,
+   no `interactions`, no `states_represented`, and no semantic purpose (pure visual separators, spacers,
+   decorative backgrounds). Include all labeled, interactive, or state-bearing elements.
 3. **project_context** (per output) — `{overall_ambiguity_rating: LOW/MEDIUM/HIGH, blocking_issues: []}`.
    This is where project-level ambiguity and gaps belong, not resolved silently:
    - Tappable elements with no traced connector/prototype link to a destination.
@@ -89,6 +100,11 @@ one `screen_id` and reference it from every caller's `ui_flow` entry — never d
 - **Extract all connector lines:** Traverse the full node tree to find every interaction with a destination.
   This includes element-level taps/clicks and frame-level auto-transitions. Deduplicates flows across
   frame variants (multiple Homescreen variants shouldn't produce multiple identical HOMESCREEN→SCREEN_X flows).
+- **Omit elements with no informational value:** Exclude any element that meets ALL of these criteria:
+  has no `interactions` (no taps, clicks, or other triggers), no `states_represented` (static visual only),
+  no `label` or copy (decorative spacers, dividers, or purely visual separators), and no references from
+  other elements' `validations_and_edge_cases`. This minimizes output noise while keeping all functional
+  and labeled elements.
 
 ## Guardrails
 Output valid JSON only, conforming to `schemas/design_context.schema.json`. All `screen_id`,
