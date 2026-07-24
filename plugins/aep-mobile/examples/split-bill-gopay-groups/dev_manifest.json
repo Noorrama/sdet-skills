@@ -1,0 +1,229 @@
+{
+  "contract_version": "1.0.0",
+  "feature_key": "split_bill_gopay_groups",
+  "epic_ref": "split_bill_gopay_groups",
+  "app": "gopay-consumer",
+  "platforms": ["android", "ios"],
+  "framework": "native",
+  "jira_ids": ["SB-101", "SB-102", "SB-103"],
+  "merge_requests": ["!6011", "!6024", "!6039"],
+  "screens": [
+    {
+      "screen_id": "SELECT_MEMBER_PAGE",
+      "elements": [
+        {
+          "generated_logical_id": "SELECT_MEMBER_PAGE.select_group_btn",
+          "android_locator": "com.gojek.gopay:id/split_select_group_btn",
+          "ios_locator": "splitbill.select_member.select_group_btn",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!6011", "file": "splitbill/participant/SelectMemberScreen.kt", "line": 88 }
+        },
+        {
+          "generated_logical_id": "SELECT_MEMBER_PAGE.group_picker_list",
+          "android_locator": "com.gojek.gopay:id/split_group_picker_list",
+          "ios_locator": "splitbill.select_member.group_picker_list",
+          "role": "list",
+          "change_type": "added",
+          "provenance": { "mr": "!6011", "file": "splitbill/participant/GroupPickerBottomSheet.kt", "line": 40 }
+        },
+        {
+          "generated_logical_id": "SELECT_MEMBER_PAGE.suggested_group_card",
+          "android_locator": "com.gojek.gopay:id/split_suggested_group_card",
+          "ios_locator": "splitbill.select_member.suggested_group_card",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!6024", "file": "splitbill/participant/GroupRecommendationCard.kt", "line": 22 }
+        },
+        {
+          "generated_logical_id": "SELECT_MEMBER_PAGE.invite_toggle",
+          "android_locator": "com.gojek.gopay:id/split_invite_to_group_toggle",
+          "ios_locator": "splitbill.select_member.invite_toggle",
+          "role": "toggle",
+          "change_type": "added",
+          "provenance": { "mr": "!6024", "file": "splitbill/participant/NonMemberInviteRow.kt", "line": 55 }
+        },
+        {
+          "generated_logical_id": "SELECT_MEMBER_PAGE.clear_group_btn",
+          "android_locator": "com.gojek.gopay:id/split_clear_group_btn",
+          "ios_locator": "splitbill.select_member.clear_group_btn",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!6011", "file": "splitbill/participant/SelectMemberScreen.kt", "line": 132 }
+        },
+        {
+          "generated_logical_id": "SELECT_MEMBER_PAGE.group_search_input",
+          "android_locator": "com.gojek.gopay:id/split_group_search_input",
+          "ios_locator": "splitbill.select_member.group_search_input",
+          "role": "input",
+          "change_type": "added",
+          "provenance": { "mr": "!6024", "file": "splitbill/participant/GroupPickerBottomSheet.kt", "line": 61 }
+        },
+        {
+          "generated_logical_id": "SELECT_MEMBER_PAGE.group_info_loader",
+          "android_locator": "com.gojek.gopay:id/split_group_info_loader",
+          "ios_locator": "splitbill.select_member.group_info_loader",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!6039", "file": "splitbill/participant/SelectMemberScreen.kt", "line": 176 }
+        },
+        {
+          "generated_logical_id": "SELECT_MEMBER_PAGE.recommendation_error_banner",
+          "android_locator": "com.gojek.gopay:id/split_recommendation_error_banner",
+          "ios_locator": "splitbill.select_member.recommendation_error_banner",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!6039", "file": "splitbill/participant/GroupRecommendationCard.kt", "line": 90 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "feature_split_bill_groups", "state": "on" }],
+      "apis_touched": [
+        { "endpoint": "GET /gopay/splitbill/groups/recommendations", "method": "GET", "response": "{groups[], ranked_by}", "error_codes": ["TIMEOUT", "SERVICE_UNAVAILABLE"] },
+        { "endpoint": "POST /gopay/groups/{groupId}/invite", "method": "POST", "response": "{invite_status}", "error_codes": ["INVITE_FAILED"] }
+      ]
+    },
+    {
+      "screen_id": "CREATE_SPLIT_BILL_PAGE",
+      "elements": [
+        {
+          "generated_logical_id": "CREATE_SPLIT_BILL_PAGE.group_creation_info_banner",
+          "android_locator": "com.gojek.gopay:id/split_group_creation_info_banner",
+          "ios_locator": "splitbill.create.group_creation_info_banner",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!6011", "file": "splitbill/create/CreateSplitBillScreen.kt", "line": 210 }
+        },
+        {
+          "generated_logical_id": "CREATE_SPLIT_BILL_PAGE.create_split_btn",
+          "android_locator": "com.gojek.gopay:id/split_create_btn",
+          "ios_locator": "splitbill.create.create_split_btn",
+          "role": "button",
+          "change_type": "modified",
+          "provenance": { "mr": "!6011", "file": "splitbill/create/CreateSplitBillScreen.kt", "line": 245 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "feature_split_bill_groups", "state": "on" }],
+      "apis_touched": [
+        { "endpoint": "POST /gopay/splitbill/create", "method": "POST", "response": "{split_id, group_id?, created_group}", "error_codes": [] }
+      ]
+    },
+    {
+      "screen_id": "GROUP_CHAT",
+      "elements": [
+        {
+          "generated_logical_id": "GROUP_CHAT.start_split_btn",
+          "android_locator": "com.gojek.gopay:id/group_start_split_btn",
+          "ios_locator": "groupchat.start_split_btn",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!6024", "file": "groups/chat/GroupChatActionSheet.kt", "line": 70 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "feature_split_bill_groups", "state": "on" }],
+      "apis_touched": []
+    },
+    {
+      "screen_id": "IN_GROUP_SPLIT_ACTIVITY_WIDGET",
+      "elements": [
+        {
+          "generated_logical_id": "IN_GROUP_SPLIT_ACTIVITY_WIDGET.amount_to_pay_label",
+          "android_locator": "com.gojek.gopay:id/split_widget_amount_to_pay",
+          "ios_locator": "groups.split_widget.amount_to_pay_label",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!6039", "file": "groups/activity/SplitActivityWidget.kt", "line": 44 }
+        },
+        {
+          "generated_logical_id": "IN_GROUP_SPLIT_ACTIVITY_WIDGET.pay_your_part_cta",
+          "android_locator": "com.gojek.gopay:id/split_widget_pay_your_part_cta",
+          "ios_locator": "groups.split_widget.pay_your_part_cta",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!6039", "file": "groups/activity/SplitActivityWidget.kt", "line": 58 }
+        },
+        {
+          "generated_logical_id": "IN_GROUP_SPLIT_ACTIVITY_WIDGET.lent_total_label",
+          "android_locator": "com.gojek.gopay:id/split_widget_lent_total",
+          "ios_locator": "groups.split_widget.lent_total_label",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!6039", "file": "groups/activity/SplitActivityWidget.kt", "line": 74 }
+        },
+        {
+          "generated_logical_id": "IN_GROUP_SPLIT_ACTIVITY_WIDGET.recovered_total_label",
+          "android_locator": "com.gojek.gopay:id/split_widget_recovered_total",
+          "ios_locator": "groups.split_widget.recovered_total_label",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!6039", "file": "groups/activity/SplitActivityWidget.kt", "line": 82 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "feature_split_bill_groups", "state": "on" }],
+      "apis_touched": [
+        { "endpoint": "GET /gopay/splitbill/{splitId}/activity", "method": "GET", "response": "{amount_to_pay, lent_total, recovered_total, pending_total}", "error_codes": [] }
+      ]
+    },
+    {
+      "screen_id": "SPLIT_BILL_DETAILS",
+      "elements": [
+        {
+          "generated_logical_id": "SPLIT_BILL_DETAILS.create_group_from_split_btn",
+          "android_locator": "com.gojek.gopay:id/split_details_create_group_btn",
+          "ios_locator": "splitbill.details.create_group_from_split_btn",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!6024", "file": "splitbill/details/SplitBillDetailsScreen.kt", "line": 160 }
+        },
+        {
+          "generated_logical_id": "SPLIT_BILL_DETAILS.group_details_section",
+          "android_locator": "com.gojek.gopay:id/split_details_group_section",
+          "ios_locator": "splitbill.details.group_details_section",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!6011", "file": "splitbill/details/SplitBillDetailsScreen.kt", "line": 118 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "feature_split_bill_groups", "state": "on" }],
+      "apis_touched": [
+        { "endpoint": "POST /gopay/groups/create", "method": "POST", "response": "{group_id, pending_invitees}", "error_codes": ["GROUP_CREATE_FAILED"] }
+      ]
+    },
+    {
+      "screen_id": "SPLIT_BILL_HISTORY",
+      "elements": [
+        {
+          "generated_logical_id": "SPLIT_BILL_HISTORY.group_icon_indicator",
+          "android_locator": "com.gojek.gopay:id/split_history_group_icon",
+          "ios_locator": "splitbill.history.group_icon_indicator",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!6011", "file": "splitbill/history/SplitBillHistoryItem.kt", "line": 33 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "feature_split_bill_groups", "state": "on" }],
+      "apis_touched": []
+    },
+    {
+      "screen_id": "MANAGE_PARTICIPATION_BOTTOMSHEET",
+      "elements": [
+        {
+          "generated_logical_id": "MANAGE_PARTICIPATION_BOTTOMSHEET.member_list",
+          "android_locator": "com.gojek.gopay:id/manage_participation_member_list",
+          "ios_locator": "groups.manage_participation.member_list",
+          "role": "list",
+          "change_type": "added",
+          "provenance": { "mr": "!6024", "file": "groups/participation/ManageParticipationBottomSheet.kt", "line": 27 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "feature_split_bill_groups", "state": "on" }],
+      "apis_touched": []
+    }
+  ]
+}
