@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "id_compliance (the stable-ID gate; CI blocks on this)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["app", "epic_ref", "status"],
+  "properties": {
+    "contract_version": { "type": "string" },
+    "app": { "type": "string" },
+    "epic_ref": { "type": "string" },
+    "platform": { "type": "string", "description": "android | ios | cross-platform" },
+    "framework": { "type": "string", "description": "native | flutter" },
+    "status": { "type": "string", "enum": ["PASS", "FAIL"] },
+    "missing_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "shopping-list logical IDs the dev did not bind in code"
+    },
+    "renamed_ids": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "expected": { "type": "string" },
+          "found": { "type": "string" }
+        }
+      }
+    },
+    "missing_deeplinks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "declared target_entry_deeplinks not implemented in code"
+    },
+    "gap_filled_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "elements the dev bound that the design/plan shopping-list missed (informational)"
+    },
+    "reject_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["MISSING_STABLE_ID", "RENAMED_ID", "MISSING_DEEPLINK", "UNDOCUMENTED_RESPONSE_SHAPE", "UNRESOLVED_CHANGES_REQUESTED"]
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "dev_manifest (the dev agent's structured declaration of what it built)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["app", "epic_ref", "screens"],
+  "description": "Preferred input to code-change-extractor. The dev/coding agent emits this so QA does not parse raw source. One manifest per repo in the multi-repo (Android + iOS) case; may carry both platform locators per element when a single codebase (or this demo) ships both.",
+  "properties": {
+    "contract_version": { "type": "string" },
+    "feature_key": { "type": "string" },
+    "epic_ref": { "type": "string" },
+    "app": { "type": "string" },
+    "platforms": { "type": "array", "items": { "type": "string" } },
+    "framework": { "type": "string", "description": "native | flutter" },
+    "jira_ids": { "type": "array", "items": { "type": "string" }, "description": "tasks this build delivered (feeds partial-readiness)" },
+    "merge_requests": { "type": "array", "items": { "type": "string" } },
+    "screens": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["screen_id", "elements"],
+        "properties": {
+          "screen_id": { "type": "string" },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["generated_logical_id"],
+              "properties": {
+                "generated_logical_id": { "type": "string" },
+                "android_locator": { "type": "string" },
+                "ios_locator": { "type": "string" },
+                "flutter_locator": { "type": "string" },
+                "role": { "type": "string" },
+                "change_type": { "type": "string", "enum": ["added", "modified", "removed"] },
+                "provenance": {
+                  "type": "object", "additionalProperties": false,
+                  "properties": {
+                    "mr": { "type": "string" },
+                    "file": { "type": "string" },
+                    "line": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "deep_links_added": { "type": "array", "items": { "type": "string" } },
+          "flags_used": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "properties": { "name": { "type": "string" }, "state": { "type": "string" } }
+            }
+          },
+          "apis_touched": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "endpoint": { "type": "string" },
+                "method": { "type": "string" },
+                "response": { "type": "string" },
+                "error_codes": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
