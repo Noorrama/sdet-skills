@@ -1,0 +1,59 @@
+{
+  "app": "gopay-consumer",
+  "epic_ref": "split_bill_gopay_groups",
+  "status": "PASS",
+  "expected_shopping_list_size": 0,
+  "found_elements_count": 21,
+  "missing_ids": [],
+  "renamed_ids": [],
+  "missing_deeplinks": [],
+  "reject_codes": [],
+  "note": "sdet_plan.json's element_locator_handoff was empty (design_context.json was not available when the plan was generated), so there was no expected logical-ID list to gate against. PASS reflects 'nothing required was missed,' not 'full design coverage was verified' — all 21 elements below were captured from dev_manifest.json as change_type:added/modified beyond the (empty) shopping list. Re-run this gate once design_context.json exists and sdet_plan.json is regenerated with a real element_locator_handoff.",
+  "elements_built_beyond_plan": [
+    "SELECT_MEMBER_PAGE.select_group_btn",
+    "SELECT_MEMBER_PAGE.group_picker_list",
+    "SELECT_MEMBER_PAGE.suggested_group_card",
+    "SELECT_MEMBER_PAGE.invite_toggle",
+    "SELECT_MEMBER_PAGE.clear_group_btn",
+    "SELECT_MEMBER_PAGE.group_search_input",
+    "SELECT_MEMBER_PAGE.group_info_loader",
+    "SELECT_MEMBER_PAGE.recommendation_error_banner",
+    "CREATE_SPLIT_BILL_PAGE.group_creation_info_banner",
+    "CREATE_SPLIT_BILL_PAGE.create_split_btn",
+    "GROUP_CHAT.start_split_btn",
+    "IN_GROUP_SPLIT_ACTIVITY_WIDGET.amount_to_pay_label",
+    "IN_GROUP_SPLIT_ACTIVITY_WIDGET.pay_your_part_cta",
+    "IN_GROUP_SPLIT_ACTIVITY_WIDGET.lent_total_label",
+    "IN_GROUP_SPLIT_ACTIVITY_WIDGET.recovered_total_label",
+    "SPLIT_BILL_DETAILS.create_group_from_split_btn",
+    "SPLIT_BILL_DETAILS.group_details_section",
+    "SPLIT_BILL_HISTORY.group_icon_indicator",
+    "MANAGE_PARTICIPATION_BOTTOMSHEET.member_list"
+  ],
+  "flag_gate": {
+    "status": "PASS",
+    "expected_flags": ["feature_split_bill_groups"],
+    "found_flags": ["feature_split_bill_groups"],
+    "note": "Matches the RFC/Litmus key across all 7 changed screens; resolves the PRD-vs-RFC key-name drift in favor of this key."
+  },
+  "deeplink_gate": {
+    "status": "PASS",
+    "expected_deeplinks": [],
+    "found_deeplinks": [],
+    "note": "No deep link was expected for Select Member Page (per sdet_plan.testability_feedback) and none was added."
+  },
+  "locator_gaps_for_followup": [
+    {
+      "area": "SELECT_MEMBER_PAGE",
+      "gap": "No distinct locator/state declared for a disabled (>25-member) group entry within group_picker_list.",
+      "reject_code": "NONE (not a formal gate failure - no expected ID existed for this in the empty shopping list)",
+      "impact": "Blocks element-level assertion for SB-G10 threshold scenarios (24/25/26 members)."
+    },
+    {
+      "area": "SELECT_MEMBER_PAGE",
+      "gap": "No locator declared for the 'can't select 2 groups' toast.",
+      "reject_code": "NONE (not a formal gate failure - no expected ID existed for this in the empty shopping list)",
+      "impact": "Blocks stable-ID assertion for the second-group-blocked toast scenario (R6)."
+    }
+  ]
+}
