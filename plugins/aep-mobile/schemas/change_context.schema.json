@@ -1,27 +1,87 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "change_context (post-build; from the MR)",
+  "title": "change_context (post-build; from the MR / dev_manifest)",
   "type": "object",
   "additionalProperties": false,
   "required": ["app", "epic_ref", "changed_screens", "elements"],
   "properties": {
+    "contract_version": { "type": "string" },
+    "generated_at": { "type": "string" },
     "app": { "type": "string" },
-    "epic_ref": { "type": "string", "description": "JIRA/EPIC key linking the MR(s)" },
+    "epic_ref": { "type": "string", "description": "JIRA/EPIC (feature) key linking the MR(s)" },
+    "platform": { "type": "string", "description": "android | ios | cross-platform" },
+    "framework": { "type": "string", "description": "native | flutter" },
+
     "merge_requests": { "type": "array", "items": { "type": "string" }, "description": "MR iids unioned for this EPIC" },
+    "processed_mrs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": { "mr": { "type": "string" }, "sha": { "type": "string" } }
+      }
+    },
+    "pdg": { "type": "string" },
+    "test_repo": { "type": "string" },
+    "module_path": { "type": "string" },
+    "scoped_to_modules": { "type": "array", "items": { "type": "string" } },
+    "ready_jira_ids": { "type": "array", "items": { "type": "string" } },
+
     "changed_screens": { "type": "array", "items": { "type": "string" } },
+    "screens": {
+      "type": "array",
+      "description": "per-screen navigation + observability (screen_id derivable from element_id prefixes)",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["screen_id"],
+        "properties": {
+          "screen_id": { "type": "string" },
+          "deep_links": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "properties": {
+                "uri": { "type": "string" },
+                "preconditions": { "type": "array", "items": { "type": "string" } },
+                "auth_required": { "type": "boolean" }
+              }
+            }
+          },
+          "observable_state": { "type": "array", "items": { "type": "string" } },
+          "nav_macro_fallback": { "type": "string" }
+        }
+      }
+    },
+
     "elements": {
       "type": "array",
-      "description": "logical element_id → real per-platform locators (both platforms)",
+      "description": "logical element_id → real per-platform locators + interaction metadata",
       "items": {
         "type": "object", "additionalProperties": false,
         "required": ["element_id"],
         "properties": {
           "element_id": { "type": "string" },
+          "screen_id": { "type": "string" },
           "android_locator": { "type": "string", "description": "resource-id" },
-          "ios_locator": { "type": "string", "description": "accessibilityId" }
+          "ios_locator": { "type": "string", "description": "accessibilityId" },
+          "flutter_locator": { "type": "string", "description": "Key / Semantics identifier (Flutter apps)" },
+          "locator_fallback": { "type": "string", "description": "semantic/text fallback when no stable id" },
+          "role": { "type": "string", "description": "button | input | label | toggle | tab | list" },
+          "interaction": { "type": "string", "description": "tap | type | swipe | view" },
+          "states": { "type": "array", "items": { "type": "string" } },
+          "change_type": { "type": "string", "enum": ["added", "modified", "removed"] },
+          "triggers_api": { "type": "string" },
+          "provenance": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "mr": { "type": "string" },
+              "file": { "type": "string" },
+              "line": { "type": "integer" }
+            }
+          }
         }
       }
     },
+
     "routes": { "type": "array", "items": { "type": "string" }, "description": "new/changed deeplinks or routes" },
     "api": {
       "type": "array",
@@ -31,13 +91,31 @@
           "endpoint": { "type": "string" },
           "request": { "type": "string" },
           "response": { "type": "string" },
-          "error_codes": { "type": "array", "items": { "type": "string" } }
+          "error_codes": { "type": "array", "items": { "type": "string" } },
+          "state_injection": { "type": "string" }
         }
       }
     },
-    "flags": { "type": "array", "items": { "type": "string" } },
+    "flags": { "type": "array", "items": { "type": "string" }, "description": "flag names touched" },
+    "feature_flags": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "state_at_merge": { "type": "string" }
+        }
+      }
+    },
     "analytics": { "type": "array", "items": { "type": "string" } },
     "app_api_version": { "type": "string", "description": "app <-> service version, incl. N-1" },
+    "review_summary": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "approval_state": { "type": "string" },
+        "review_iterations": { "type": "integer" }
+      }
+    },
     "cr_risks": {
       "type": "array",
       "items": {
@@ -50,6 +128,14 @@
           "severity": { "type": "string" },
           "disposition": { "type": "string", "enum": ["becomes-scenario", "becomes-bug", "acknowledged"] }
         }
+      }
+    },
+    "id_compliance": {
+      "type": "object", "additionalProperties": false,
+      "description": "inline pointer to the id_compliance.json gate result",
+      "properties": {
+        "status": { "type": "string", "enum": ["PASS", "FAIL"] },
+        "ref": { "type": "string" }
       }
     }
   }
