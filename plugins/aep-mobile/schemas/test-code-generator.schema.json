@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "automation_manifest (test-code-generator output; the traceable ledger of generated tests)",
+  "title": "test-code-generator output (the traceable ledger of generated tests)",
   "type": "object",
   "additionalProperties": false,
   "required": ["feature_key", "target", "tests"],

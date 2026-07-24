@@ -1,6 +1,6 @@
 ---
 name: mobile-test-code-generator
-description: The Code-Generation-phase QA output. From the approved SDET_PLAN + post-build change_context, generates mobile automation — TapMind NLP steps (primary) and GMT (Appium+TestNG Java) coded tests (where needed) — for both Android & iOS, wired to test data, and emits automation_manifest.json (the traceable ledger with BrowserStack IDs, validation, and deferred scenarios). App-agnostic; grounds on the GMT coded repo. In Phase B this becomes the self-healing Frontend Test-Code-Gen agent.
+description: The Code-Generation-phase QA output. From the approved SDET_PLAN + post-build change_context, generates mobile automation — TapMind NLP steps (primary) and GMT (Appium+TestNG Java) coded tests (where needed) — for both Android & iOS, wired to test data, and emits test-code-generator.json (the traceable ledger with BrowserStack IDs, validation, and deferred scenarios). App-agnostic; grounds on the GMT coded repo. In Phase B this becomes the self-healing Frontend Test-Code-Gen agent.
 ---
 
 # Mobile Test-Code Generator (all 5 GoTo apps)
@@ -10,7 +10,7 @@ SDET_PLAN once the build exists. Default output is **TapMind NLP** (per config);
 produced where NLP can't express the case.
 
 **Two things per scenario acted on:** (1) the runnable test file, and (2) an entry in
-`automation_manifest.json` (the ledger of what was generated).
+`test-code-generator.json` (the ledger of what was generated).
 
 ## Config
 `config/<app>.json` → `default_output` (NLP), `repos.gmt`/`tapmind`/`shared_libs`, `locator_keys`,
@@ -61,7 +61,7 @@ Do **not** emit a broken test. Add the scenario to `deferred[]` with a reason wh
 
 ## Produces
 1. **The test file** — TapMind NLP (`.java` with `runStep`/`assertStep`) or GMT coded, at `artifact_ref`.
-2. **`automation_manifest.json`** (→ `schemas/automation_manifest.schema.json`) — one entry per scenario
+2. **`test-code-generator.json`** (→ `schemas/test-code-generator.schema.json`) — one entry per scenario
    acted on: `op`, `target`, `class_name`/`test_method`, `artifact_ref`, `traceability`, `setup`,
    `given_strategy`, `nl_steps`, `assertions_from`, `analytics_assertions`, `locators_used`,
    `data_binding`, `flags_required`, `waits`, `teardown`, `validation` — plus `deferred[]` and a
@@ -81,4 +81,4 @@ retried into green**; assertions are never weakened. A test that can't be safely
 ## Guardrails
 - Never hard-code credentials/tokens/PII — resolve from vault/TestBuddy; mask in logs.
 - Non-deterministic values (fare/ETA/surge) use matchers/tolerances, not exact equality.
-- Output the manifest as valid JSON conforming to `schemas/automation_manifest.schema.json`.
+- Output the manifest as valid JSON conforming to `schemas/test-code-generator.schema.json`.
