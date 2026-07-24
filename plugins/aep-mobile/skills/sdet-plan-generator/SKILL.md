@@ -7,9 +7,9 @@ description: Ingests pre-build contexts (plan, prd, design, rfc) to perform cros
 
 ## Purpose
 Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_context`, `rfc_context`) during implementation planning to generate 3 standardized pre-build deliverables:
-1. `<feature_key>.json` (Machine-readable master execution contract)
+1. `<feature_key>_SDET_plan.json` (Machine-readable master execution contract)
 2. `<feature_key>_analysis.md` (Human-readable Markdown QA analysis asset)
-3. `<feature_key>.csv` (TMS bulk-import format)
+3. `<feature_key>_test_cases.csv` (TMS bulk-import format)
 
 ---
 
@@ -60,7 +60,7 @@ As the single integration point, the generator must actively compute the followi
 
 Generate the following 3 files in the current working directory, naming them dynamically using the `<feature_key>` defined in `feature_metadata`:
 
-### 1. `<feature_key>.json`
+### 1. `<feature_key>_SDET_plan.json`
 Full machine-readable master payload conforming strictly to `schemas/sdet_plan.schema.json`. Must include `created_at` and `updated_at` ISO date-time timestamps.
 
 ### 2. `<feature_key>_analysis.md` (QA Analysis Asset)
@@ -72,7 +72,7 @@ A human-readable Markdown asset automatically generated for engineering leads de
 - **Architectural & Testability Risks:** Missing hooks, unstable element IDs, or fallback concerns.
 - **SDET Readiness & Testing Plan:** Actionable instructions on how the QA team should start testing, what environments/data setup to prepare, what dependencies to take, and execution guidelines.
 
-### 3. `<feature_key>.csv`
+### 3. `<feature_key>_test_cases.csv`
 Flattened CSV strictly matching squad project template headers:
 
 `Title`, `State`, `Priority`, `Type of Test Case`, `Automation Status`, `Preconditions`, `Steps`, `Expected Result`, `Execution Mode`, `Platform`, `Country v2`, `Android Automation Status v2`, `iOS Automation Status v2`, `TestType`
@@ -83,8 +83,8 @@ Flattened CSV strictly matching squad project template headers:
 - `Priority`: `"P0"`, `"P1"`, or `"P2"`
 - `Type of Test Case`: `"Regression"` or `"Sanity"`
 - `Automation Status`: By default, set to `"Manual"` (representing not-automated) for newly generated test cases. Set to `"Automated"` only if matched with an existing automated test case.
-- `Preconditions`: Multiline string with environment, locale, deep links, and active feature flags.
-- `Steps`: Numbered sequential steps inside double quotes with line breaks (`\n`). **Since this CSV is designed for human manual testers, never use technical automation IDs or logical component IDs (such as `WELCOME_PAGE.TAP_BUTTON_CTA`) inside the descriptions.** Instead, always write them as clear, user-friendly human actions using button text labels or natural element names (e.g. *"Tap on 'Daftar Program Affiliate'"* or *"Type in your referral code"*). Keep all technical automation variables and locators strictly isolated inside `<feature_key>.json`. Must include telemetry emission checks.
+- `Preconditions`: Multiline string with environment, locale, deep links, and active feature flags, **using a new line break (`\n`) after each statement/line.**
+- `Steps`: Numbered sequential steps inside double quotes with line breaks (`\n`). **Since this CSV is designed for human manual testers, never use technical automation IDs or logical component IDs (such as `WELCOME_PAGE.TAP_BUTTON_CTA`) inside the descriptions.** Instead, always write them as clear, user-friendly human actions using button text labels or natural element names (e.g. *"Tap on 'Daftar Program Affiliate'"* or *"Type in your referral code"*). Keep all technical automation variables and locators strictly isolated inside `<feature_key>_SDET_plan.json`. Must include telemetry emission checks.
 - `Expected Result`: Clear functional and telemetry assertions described in user-friendly language.
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`
@@ -103,19 +103,19 @@ The skill supports a two-way synchronization flow to allow human QA to review, r
 
 1. **`GENERATE` Mode (Default):**
    - **Trigger:** Upstream extractor contexts are provided as input.
-   - **Action:** Generates `<feature_key>.json`, `<feature_key>_analysis.md`, and `<feature_key>.csv` from scratch.
+   - **Action:** Generates `<feature_key>_SDET_plan.json`, `<feature_key>_analysis.md`, and `<feature_key>_test_cases.csv` from scratch.
 
 2. **`SYNC` Mode (Reverse Sync):**
-   - **Trigger:** A modified `<feature_key>.csv` is uploaded/provided as input. The skill automatically reads the existing `<feature_key>.json` directly from the working directory.
-   - **Action:** Parses the modified CSV and merges all human edits back into `<feature_key>.json` strictly following these reconciliation rules:
-     - **Mapping Anchor:** Correlate rows in the CSV to scenario objects in `<feature_key>.json` using `Title` $\leftrightarrow$ `csv_title_association` as the primary key.
-     - **Synchronize Overridden Properties:** If the human QA modified fields in a correlated CSV row (e.g., changed `Automation Status` from "Manual" to "Automated", tweaked `Execution Mode` from "Manual" to "Automatable", altered priority, or edited steps), update those exact property values in `<feature_key>.json` to match the CSV.
-     - **Ingest New Manual Scenarios:** If a row exists in the CSV but has no matching `csv_title_association` in `<feature_key>.json`, it represents a new test case added by the QA. Create a new scenario object for it inside `<feature_key>.json` with:
+   - **Trigger:** A modified `<feature_key>_test_cases.csv` is uploaded/provided as input. The skill automatically reads the existing `<feature_key>_SDET_plan.json` directly from the working directory.
+   - **Action:** Parses the modified CSV and merges all human edits back into `<feature_key>_SDET_plan.json` strictly following these reconciliation rules:
+     - **Mapping Anchor:** Correlate rows in the CSV to scenario objects in `<feature_key>_SDET_plan.json` using `Title` $\leftrightarrow$ `csv_title_association` as the primary key.
+     - **Synchronize Overridden Properties:** If the human QA modified fields in a correlated CSV row (e.g., changed `Automation Status` from "Manual" to "Automated", tweaked `Execution Mode` from "Manual" to "Automatable", altered priority, or edited steps), update those exact property values in `<feature_key>_SDET_plan.json` to match the CSV.
+     - **Ingest New Manual Scenarios:** If a row exists in the CSV but has no matching `csv_title_association` in `<feature_key>_SDET_plan.json`, it represents a new test case added by the QA. Create a new scenario object for it inside `<feature_key>_SDET_plan.json` with:
        - `is_legacy_regression: true`
        - `automatable: false`
        - All standard properties parsed from the CSV columns.
-     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>.json` (such as `mapped_user_flow`, `test_data_tags`, `clickstream_events`, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
-     - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>.json` to reflect the synchronization event.
+     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `mapped_user_flow`, `test_data_tags`, `clickstream_events`, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
+     - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>_SDET_plan.json` to reflect the synchronization event.
 
 ---
 
