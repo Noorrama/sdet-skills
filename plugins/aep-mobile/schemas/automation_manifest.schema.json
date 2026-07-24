@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "automation_manifest (test-code-generator output; the traceable ledger of generated tests)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feature_key", "target", "tests"],
+  "properties": {
+    "contract_version": { "type": "string" },
+    "feature_key": { "type": "string" },
+    "app": { "type": "string" },
+    "platform": { "type": "string" },
+    "framework": { "type": "string", "description": "native | flutter" },
+    "target": { "type": "string", "enum": ["tapmind-nlp", "gmt-java"] },
+    "test_repo": { "type": "string" },
+    "module_path": { "type": "string" },
+    "package": { "type": "string" },
+    "base_class": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "source_refs": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "sdet_plan_ref": { "type": "string" },
+        "change_context_ref": { "type": "string" }
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["scenario_id", "op", "artifact_ref", "assertions_from"],
+        "properties": {
+          "scenario_id": { "type": "string" },
+          "title": { "type": "string" },
+          "op": { "type": "string", "enum": ["CREATE", "UPDATE", "SKIP"] },
+          "priority": { "type": "string" },
+          "class_name": { "type": "string" },
+          "test_method": { "type": "string" },
+          "artifact_ref": { "type": "string", "description": "path to the actual .java NLP/coded test file" },
+          "screens_covered": { "type": "array", "items": { "type": "string" } },
+          "traceability": {
+            "type": "object", "additionalProperties": false,
+            "description": "ID chain so results post back to BrowserStack",
+            "properties": {
+              "requirement_id": { "type": "string" },
+              "story_id": { "type": "string" },
+              "jira_task_ids": { "type": "array", "items": { "type": "string" } },
+              "browserstack_suite_id": { "type": "string" },
+              "browserstack_test_case_id": { "type": ["string", "null"] },
+              "test_info_annotation": { "type": "string" }
+            }
+          },
+          "setup": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "mock_location": {
+                "type": "object", "additionalProperties": false,
+                "properties": { "lat": { "type": "number" }, "lng": { "type": "number" } }
+              },
+              "backdoor_login": { "type": "string" }
+            }
+          },
+          "given_strategy": { "type": "string", "description": "deep_link | api_injection_then_deeplink | nav_macro" },
+          "deep_link": { "type": "string" },
+          "nav_macro_fallback": { "type": "string" },
+          "nl_steps": { "type": "array", "items": { "type": "string" }, "description": "runStep(...)/assertStep(...) lines (TapMind NLP)" },
+          "assertions_from": { "type": "string", "description": "always sdet_plan:<scenario_id> — assertions never come from the diff" },
+          "analytics_assertions": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "properties": {
+                "event_name": { "type": "string" },
+                "required_attributes": { "type": "object", "additionalProperties": { "type": "string" } }
+              }
+            }
+          },
+          "locators_used": { "type": "array", "items": { "type": "string" } },
+          "data_binding": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+              "data_need_id": { "type": "string" },
+              "status": { "type": "string", "enum": ["RESOLVED", "UNMAPPED", "STATIC", "NOT_REQUIRED"] },
+              "provider": { "type": "string" },
+              "fixture_ref": { "type": "string" },
+              "provision_via": { "type": "string" }
+            }
+          },
+          "flags_required": { "type": "array", "items": { "type": "string" } },
+          "waits": { "type": "string", "description": "dynamic (static sleeps banned)" },
+          "teardown": { "type": "boolean" },
+          "validation": {
+            "type": "object", "additionalProperties": false,
+            "description": "validated-by-construction: emitted only steps that ran on a real device",
+            "properties": {
+              "mode": { "type": "string", "enum": ["validated_on_device", "generated"] },
+              "result": { "type": "string", "enum": ["PASS", "FAIL", "NEEDS_REVIEW"] },
+              "device": { "type": "string" },
+              "steps_validated": { "type": "integer" },
+              "steps_repaired": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+    "deferred": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "scenario_id": { "type": "string" },
+          "reason": { "type": "string", "description": "PARTIAL_READINESS | UNMAPPED_DATA_NEED | NO_LOCATOR | NO_NAV_ROUTE" },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "created": { "type": "integer" },
+        "updated": { "type": "integer" },
+        "skipped_legacy": { "type": "integer" },
+        "deferred": { "type": "integer" },
+        "unmapped_data_need": { "type": "integer" },
+        "validated_on_device": { "type": "integer" },
+        "needs_review": { "type": "integer" }
+      }
+    }
+  }
+}
