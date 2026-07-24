@@ -14,9 +14,14 @@ Design is the frontend-primary stage. This skill produces the screen/element map
 — the schema doesn't require it, but the rest of the pipeline keys off it for multi-app runs.
 
 ## Reads
-JSON representation of the Figma design (exported structure containing frames, component instances +
-variants, prototype/connector links, sticky-note annotations, text layers, navigation/deep-link map,
-and accessibility-ID / component spec). Input is read-only; no Figma API calls are made.
+JSON representation of the Figma design export (`.json` file) containing:
+- Frames (navigational screens)
+- Component instances and variants
+- Prototype/connector links (ALL connector lines must be extracted)
+- Text layers and accessibility IDs
+- Element interactions and state definitions
+
+Input is read-only; no Figma API calls made.
 
 ## Model
 Fast tier — Haiku / Composer 2.5. Escalate to reasoning when:
@@ -50,61 +55,44 @@ multiple callers (e.g. a shared error dialog, native date/month picker, share sh
 one `screen_id` and reference it from every caller's `ui_flow` entry — never duplicate it per caller.
 
 ## Extract (→ schemas/design_context.schema.json)
-1. **screens** — `screen_id` (`^[A-Z0-9_]+$`, UPPER_SNAKE derived from the Figma frame title with any
-   state/variant qualifier stripped first; app-prefixed if shared), `screen_name`, `purpose`,
-   `screen_states` (empty/loading/error/success/offline — see guardrail above), `screen_notes`.
-2. **elements** (per screen) — `element_id` matching `^[A-Z0-9_]+\.[A-Z0-9_]+(\.[A-Z0-9_]+)?$`, i.e.
-   `<SCREEN_ID>.<ACTION>_<ELEMENT_TYPE>.<STATE>` — the trailing `.<STATE>` segment is optional; omit it
-   when the element has several states, and list them all in `states_represented` instead of minting one
-   ID per state. `type` and `label` are freeform (label = visible copy; type = e.g. `TextField`,
-   `Button`). `interactions` is `{trigger, action}` pairs, including where a tap navigates to another
-   screen or opens a dialog. `validations_and_edge_cases` captures business rules stated or clearly
-   implied by the design. **Omit decorative/spacer elements:** Do not include elements with no `label`,
-   no `interactions`, no `states_represented`, and no semantic purpose (pure visual separators, spacers,
-   decorative backgrounds). Include all labeled, interactive, or state-bearing elements.
-3. **project_context** (per output) — `{overall_ambiguity_rating: LOW/MEDIUM/HIGH, blocking_issues: []}`.
-   This is where project-level ambiguity and gaps belong, not resolved silently:
-   - Tappable elements with no traced connector/prototype link to a destination.
-   - Frames/dialogs with no captured copy, or copy that is truncated, contradictory, or a literal
-     placeholder (e.g. `"PLACEHOLDER"`, `"TBD"`, `"[Placeholder Copy]"`).
-   - Design iterations disagreeing on terminology/copy for what is otherwise the same screen (keep
-     one `screen_id`, list both variants under `screen_states`/`screen_notes`, and flag the conflict in
-     `blocking_issues` rather than silently picking one).
-   - Missing or incomplete connector traces, unreachable screens, design gaps in critical flows.
-   - Set `overall_ambiguity_rating` to the worst case across the design, and put all project-wide gaps
-     into `blocking_issues` array with a brief description of each.
-4. **ui_flow** — `{from_screen_id, trigger_element_id, to_screen_id, condition}` edges between screens
-   (state changes within one screen are *not* ui_flow entries — see guardrail). **CRITICAL: Capture ALL
-   prototype/connector lines visible in the Figma file** — traverse every frame, component, and nested
-   element to extract all `interactions` with a `NAVIGATE` action or `destinationId`. Include both:
-   - **Element-level interactions** (buttons, icons, tappable regions with ON_CLICK, ON_HOVER, etc.)
-   - **Frame-level interactions** (auto-transitions with AFTER_TIMEOUT, auto-play animations)
+
+**CRITICAL: Extract ALL connector lines first, then filter elements by relevance to ui_flow.**
+
+1. **ui_flow** (extract FIRST) — `{from_screen_id, trigger_element_id, to_screen_id, condition}` edges.
+   - Traverse entire JSON tree to find ALL prototype/connector links (both element-level and frame-level).
+   - Record the source element ID, destination screen, and explicit connector condition.
+   - This becomes the ground truth for which elements matter.
+
+2. **screens** — `screen_id` (`^[A-Z0-9_]+$`, UPPER_SNAKE from frame title, state/variant qualifiers
+   stripped), `screen_name`, `purpose`, `screen_states` (empty/loading/error/success/offline), `screen_notes`.
+   Include only screens that appear in ui_flow (as from_screen_id or to_screen_id).
+
+3. **elements** (per screen, FILTERED) — `element_id` matching `^[A-Z0-9_]+\.[A-Z0-9_]+(\.[A-Z0-9_]+)?$`.
+   **Include ONLY elements that:**
+   - Appear as `trigger_element_id` in ui_flow, OR
+   - Have explicit interactions/states defined in the design (multi-state buttons, form fields with
+     validation states), OR
+   - Are labeled text/content with semantic purpose.
    
-   Prefer edges backed by an explicit prototype/connector link in the condition field. When a destination
-   is only inferred (e.g. a menu label with no traced connector), say so in `condition` (e.g.
-   `"inferred from label, no connector traced"`) instead of asserting it as fact. If a deep link is known
-   for a screen, note it in that screen's `screen_notes`. Deduplicate flows that appear in multiple frame
-   variants (same from/to/trigger).
-5. **visual_analysis_scratchpad** — 2-3 sentences up front listing every distinct navigational screen
-   found, before compiling the structured fields below it.
+   **Omit:** decorative elements (vectors, spacers, dividers), icons without interactions, nested groups
+   with no functional purpose. Keep output concise — only functional, navigational, and state-bearing elements.
+
+4. **project_context** — `{overall_ambiguity_rating: LOW/MEDIUM/HIGH, blocking_issues: []}`.
+   - Missing connector traces (tappable elements with no traced destination).
+   - Unreachable screens (appear in design but not in any ui_flow edge).
+   - Incomplete or contradictory design annotations.
 
 ## Rules
-- No locators here — labels/types/states/interactions/flow only. Physical locators come from code
-  (code-change-extractor).
-- `label` is the visible, locale-dependent copy; don't fold it into `element_id` — the ID stays a stable
-  functional token (`ENTER_PROMO_CODE_FIELD`, not the placeholder text).
-- Every P0 screen must have error/empty/loading states in `screen_states`, and every P0 navigation must
-  appear in `ui_flow`.
-- Never invent a destination, a piece of copy, or a business rule the export doesn't state — every gap
-  becomes a `blocking_issues` entry instead of being filled in.
-- **Extract all connector lines:** Traverse the full node tree to find every interaction with a destination.
-  This includes element-level taps/clicks and frame-level auto-transitions. Deduplicates flows across
-  frame variants (multiple Homescreen variants shouldn't produce multiple identical HOMESCREEN→SCREEN_X flows).
-- **Omit elements with no informational value:** Exclude any element that meets ALL of these criteria:
-  has no `interactions` (no taps, clicks, or other triggers), no `states_represented` (static visual only),
-  no `label` or copy (decorative spacers, dividers, or purely visual separators), and no references from
-  other elements' `validations_and_edge_cases`. This minimizes output noise while keeping all functional
-  and labeled elements.
+- No locators — labels, types, states, interactions, flow only. Locators come from code-change-extractor.
+- `label` = visible copy; `element_id` = stable functional token (UPPER_SNAKE, not text content).
+- **Extract all connector lines first** — before filtering elements. Traverse full tree for every
+  prototype/connector link (element-level ON_CLICK and frame-level AFTER_TIMEOUT transitions).
+- **Filter elements by ui_flow relevance** — only include elements that trigger navigation (appear in
+  ui_flow as `trigger_element_id`), or define interaction/state behaviors. Omit decorative elements.
+- **Deduplicate ui_flow** — same from/to/trigger across frame variants = one ui_flow entry.
+- **Never invent** — every gap (missing connector, unreachable screen, placeholder text) becomes a
+  `blocking_issues` entry, not a filled assumption.
+- Output design_context.json concisely — only functional elements that matter for test automation.
 
 ## Guardrails
 Output valid JSON only, conforming to `schemas/design_context.schema.json`. All `screen_id`,
@@ -112,8 +100,12 @@ Output valid JSON only, conforming to `schemas/design_context.schema.json`. All 
 regex patterns exactly — no lowercase, no stray punctuation.
 
 ## Validate
-- `jsonschema.validate(output, schemas/design_context.schema.json)` — confirms JSON structure & naming
-- **ui_flow completeness:** Count all visible prototype/connector lines in the Figma file and verify
-  `ui_flow` entries match (or flag missing ones in `blocking_issues` with "connector not traced" rationale).
-  Use Figma's inspector or connector layer to confirm all interactions are extracted.
-- All `element_id` and `screen_id` values must satisfy regex patterns exactly — no lowercase or special chars.
+- `jsonschema.validate(output, schemas/design_context.schema.json)` — confirms JSON structure & naming.
+- **Connector completeness:** Count all visible prototype/connector lines in JSON and verify each appears
+  in `ui_flow` (or flag missing ones in `blocking_issues`). Zero false positives/negatives.
+- **Element filtering:** Every element in `elements` either (a) appears in `ui_flow` as trigger, or (b)
+  has explicit interactions/states. No decorative/unused elements.
+- **ID patterns:** All `screen_id` and `element_id` values match regex exactly — `^[A-Z0-9_]+$` and
+  `^[A-Z0-9_]+\.[A-Z0-9_]+(\.[A-Z0-9_]+)?$` respectively. No lowercase, no stray punctuation.
+- **Conciseness:** Output size is minimal; only functional elements included. Verify by comparing element
+  count to connector count — should be roughly proportional.
