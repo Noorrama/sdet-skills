@@ -17,7 +17,7 @@ produced where NLP can't express the case.
 `platforms`, `deeplink_scheme`.
 
 ## Reads
-- `sdet_plan.json` — the approved scenarios (keep each scenario `scenario_id`). **Source of assertions.**
+- **The SDET plan** — the approved scenarios (keep each scenario `scenario_id`). **Source of assertions.** *Filename:* match **`*sdet_plan.json`** — emitted feature-suffixed as `<feature_key>_sdet_plan.json` (e.g. `split_bill_gopay_groups_sdet_plan.json`); resolve by suffix (or by `feature_metadata.feature_key`), never a hardcoded `sdet_plan.json`.
 - `change_context.json` — **real per-platform locators** (android + ios), API shapes, routes, flags (post-build). **How to interact only.**
 - `design_context.json` — screens/flows for navigation (when present).
 - **Grounding = the GMT coded repo** (page objects, base classes, existing tests) via retrieval — where the real navigation & element knowledge lives; the TapMind repo alone is too thin to ground on.
