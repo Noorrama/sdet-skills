@@ -1,6 +1,6 @@
 ---
 name: mobile-rfc-extractor
-description: Extract comprehensive technical context from a mobile RFC into rfc_context.json — scope, experimentation flags, architectural risks, compatibility mandates, rollout plan, API contracts, state management, navigation/deep links, local data changes, platform-specific details, permissions, offline behavior, accessibility impacts, lifecycle considerations, dependency changes, notification changes, cross-cutting concerns, open questions, and cross-references against PRD and design docs. App-agnostic; optional (only when an RFC exists). Tells the SDET_PLAN where to concentrate depth, which flags/N-1 versions to parameterise, and what mobile-specific edge cases to cover.
+description: Extract comprehensive technical context from a mobile RFC into rfc_context.json — scope, experimentation flags, architectural risks, compatibility mandates, rollout plan, API contracts, state management, navigation/deep links, local data changes, platform-specific details, permissions, offline behavior, accessibility impacts, lifecycle considerations, dependency changes, notification changes, cross-cutting concerns, and open questions. App-agnostic; optional (only when an RFC exists). Tells the SDET_PLAN where to concentrate depth, which flags/N-1 versions to parameterise, and what mobile-specific edge cases to cover.
 ---
 
 # Mobile RFC Extractor (all 5 GoTo apps)
@@ -11,9 +11,7 @@ Distils the RFC into the risk/scope/technical signals that shape test prioritisa
 `config/<app>.json` → set `rfc_context.app = app_id`.
 
 ## Reads
-- RFC document (Lark/Confluence/PDF) — **primary input**
-- PRD document or `prd_context.json` — for `prd_cross_refs` (optional, populates drift warnings)
-- Design document (Figma) or `design_context.json` — for `design_cross_refs` (optional, populates drift warnings)
+RFC document (Lark/Confluence/PDF) — **single input**. This skill reads only the RFC. Cross-references against PRD and design are handled downstream by the `sdet-plan-generator`, which ingests all extractor outputs and performs gap analysis.
 
 ## Model
 Fast tier — Haiku / Composer 2.5. Escalate to reasoning only if the RFC is long/ambiguous or contains complex architectural trade-off analysis.
@@ -43,7 +41,7 @@ Fast tier — Haiku / Composer 2.5. Escalate to reasoning only if the RFC is lon
 
 7. **state_management_changes** — `entity`, `change_type`, `new_fields`, `removed_fields`, `state_transitions` (from/to/trigger). Extract from flow diagrams and state machine descriptions.
 
-### Mobile-Specific Sections (Rule 8 — `inferred_from_prose`)
+### Mobile-Specific Sections (Rule 7 — `inferred_from_prose`)
 
 These sections may or may not have dedicated RFC sections. When the information is extracted from a **dedicated section** (e.g., "Navigation", "Deep Links"), set `inferred_from_prose: false`. When **inferred from prose** in other sections (e.g., flow descriptions, open questions, PRD requirements), set `inferred_from_prose: true`.
 
@@ -65,15 +63,13 @@ These sections may or may not have dedicated RFC sections. When the information 
 
 16. **notification_changes** — `type` (PUSH/LOCAL/IN_APP), `channel_id`, `trigger`, `payload_shape`, `deep_link_on_tap`, `background_task`.
 
-### Cross-Cutting & References
+### Cross-Cutting
 
 17. **cross_cutting_concerns** — `observability` (new_metrics, new_alerts, clickstream_events), `security` (auth_changes, data_sensitivity, certificate_pinning_changes), `performance` (latency_targets, app_size_impact, memory_impact, battery_impact, startup_time_impact).
 
 18. **open_questions** — `question_id`, `question`, `owner`, `status` (OPEN/RESOLVED/DEFERRED), `impact_on_testing`. Extract from "Open Questions" sections. Also capture questions embedded in italic/bold answers within the RFC.
 
-19. **prd_cross_refs** — When PRD is available: `feature_flag_refs` (compare PRD flags vs RFC flags, set `match: true/false`), `requirement_refs`, `drift_warnings` (field-level mismatches with severity).
-
-20. **design_cross_refs** — When Figma/design is available: `screen_refs` (compare RFC screens vs design screens), `navigation_drift`, `drift_warnings`.
+> **Note:** `prd_cross_refs` and `design_cross_refs` are **not populated by this skill**. These fields exist in the schema for the `sdet-plan-generator` to populate during its cross-stage gap analysis, where it compares `rfc_context.json` against `prd_context.json` and `design_context.json`. This skill should omit these fields from its output.
 
 ---
 
@@ -97,12 +93,8 @@ When open questions have inline answers (typically in bold/italic), extract both
 ### Rule 6: Contract/data structure extraction
 When the RFC includes JSON contracts or data schemas (e.g., Litmus payloads, API responses), use these to inform `state_management_changes` fields and `api_contract_changes` shapes.
 
-### Rule 7: Cross-reference generation
-- **prd_cross_refs**: Compare feature flags, requirement IDs, and data approaches between RFC and PRD. Flag mismatches as `drift_warnings` with severity.
-- **design_cross_refs**: Compare screen IDs and navigation flows between RFC and Figma. Flag mismatches as `drift_warnings`.
-
-### Rule 8: `inferred_from_prose` marker
-For mobile-specific sections (8–16), set `inferred_from_prose: false` when extracted from a dedicated RFC section, and `true` when the information is synthesized from prose in other sections. This tells downstream consumers the confidence level of the extraction.
+### Rule 7: `inferred_from_prose` marker
+For mobile-specific sections (8–16), set `inferred_from_prose: false` when extracted from a dedicated RFC section, and `true` when the information is synthesized from prose in other sections (e.g., flow descriptions, open questions). This tells downstream consumers the confidence level of the extraction.
 
 ---
 
@@ -119,7 +111,7 @@ For mobile-specific sections (8–16), set `inferred_from_prose: false` when ext
 - `inferred_from_prose` must be set correctly — never omit this field on mobile-specific sections.
 - Empty arrays `[]` are valid when the RFC explicitly has no items for a section (e.g., no API changes). Do not omit the key.
 - Output valid JSON only, conforming to `schemas/rfc_context.schema.json`.
-- When PRD or design docs are not available, set `prd_cross_refs` and `design_cross_refs` to objects with empty arrays.
+- Do not populate `prd_cross_refs` or `design_cross_refs` — these are filled downstream by `sdet-plan-generator`.
 
 ## Validate
 ```
