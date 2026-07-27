@@ -66,11 +66,37 @@ Full machine-readable master payload conforming strictly to `schemas/sdet_plan.s
 ### 2. `<feature_key>_analysis.md` (QA Analysis Asset)
 A human-readable Markdown asset automatically generated for engineering leads detailing parsed requirements gaps, architectural risks, and testability bottlenecks during the pre-build review.
 
-**Note: Do NOT include individual scenario/test cases here.** Instead, focus on high-level pre-build analysis:
-- **Open Questions & Clarifications:** Specific lists of unresolved questions and follow-ups for PMs and Devs.
-- **Cross-Stage Gaps:** Extracted mismatches between the inputs (PRD vs Figma, PRD vs RFC, RFC vs Implementation Plan).
-- **Architectural & Testability Risks:** Missing hooks, unstable element IDs, or fallback concerns.
-- **SDET Readiness & Testing Plan:** Actionable instructions on how the QA team should start testing, what environments/data setup to prepare, what dependencies to take, and execution guidelines.
+**Note: Do NOT include individual scenario/test cases here.** Instead, you must match the exact structural layout, depth, and tone of the gold-standard **`birthday_feature_analysis best.md`** blueprint:
+
+#### **Required Document Sections & Formatting**:
+
+1. **Meta Header:**
+   - Include clear, bold rows: **Feature Key**, **App**, **RFC (ID, Title, Status)**, **Analysis Date**, **SDET Plan File**, **Test Cases File**.
+
+2. **Section 1: Missing Input Context:**
+   - If any input context (like `plan_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).
+
+3. **Section 2: Cross-Stage Gap Analysis:**
+   - **PRD vs Figma Gaps Table:** Must contain columns: `Req` (Requirement ID), `Severity` (`CRITICAL_BLOCKER` or `WARNING`), and `Gap` (highly detailed, context-aware analysis of broken prototype links, un-designed flows, dynamic text copy verification requirements).
+   - **PRD vs RFC Gaps Table:** Must contain columns: `Req` and `Gap` (outlining architectural drift, scoped platform changes like Flutter single-build vs separate builds, feature flag mismatches, and specific environment IDs).
+   - **RFC vs Implementation Plan Gaps:** List exact technical elements that require verification (e.g., specific cache invalidation strategies, database migrations with keys, lifecycle state preservation, and required Android/iOS permissions).
+
+4. **Section 3: Architectural & Testability Risks Table:**
+   - Columns: `Risk ID`, `Severity` (`Critical`, `High`, `Medium`, `Low`), `Description`, and `Testing Implication` (detailing specific manual/automated testing approaches to mitigate the risk). Focus on caching, state sync, stale name values, etc.
+
+5. **Section 4: Open Questions & Clarifications:**
+   - Must be categorized explicitly by current blocker status and owner:
+     - **Blocked — Awaiting PM / Design Input Table** (Columns: `ID`, `Question`, `Test Impact`)
+     - **Blocked — Awaiting Dev / RFC Author Input Table** (Columns: `ID`, `Question`, `Test Impact`)
+     - **Resolved — Unblocked for Testing Table** (Columns: `ID`, `Resolution`, `Test Action`)
+     - **Additional Clarifications Needed (for PM)** (Detailed bullet points covering telemetry payload schemas, copy approvals, sound packages, third-party libraries).
+
+6. **Section 5: SDET Readiness & Testing Plan:**
+   - **Environment Requirements Table:** (Columns: `Item`, `Specification`) detailing App, target release environment configs, kill switch flags, and local/time zones.
+   - **Test Data Requirements Table:** (Columns: `Tag`, `Description`) mapping exact user segments, verification states, device permissions, and system configurations (e.g., `gallery_permission_denied`, `no_card_selected`).
+   - **Device Matrix:** Reference targets from the configuration (e.g., `Pixel 7`, `iPhone 14`).
+   - **Dependencies Before Test Execution:** Bullet points of absolute prerequisites (finalized copy, manifest declarations, design updates).
+   - **Execution Guidelines:** Highly technical, actionable testing recipes detailing manual and automated procedures (e.g., using `adb shell am kill` for process death, configuring proxy tools like Charles Proxy or mitmproxy for network interception, and real physical device instructions).
 
 ### 3. `<feature_key>_test_cases.csv`
 Flattened CSV strictly matching squad project template headers:
