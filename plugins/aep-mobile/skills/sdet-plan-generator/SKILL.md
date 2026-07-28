@@ -50,9 +50,12 @@ Flow:
   - If `plan_context.json` is absent, proceed with `prd_context.json` and `design_context.json` as the baseline.
   - Simply note the missing contexts clearly as an architectural observation or limitation inside the `<feature_key>_analysis.md` report (e.g., *"plan_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
   - A missing context also means its Category Catalog triggers simply cannot fire (no failure) — those categories fall through to the extras tiers.
-- **Hard Coverage Rules**:
-  - Every P0 requirement $\rightarrow \ge 1$ scenario.
-  - Every `boundary_rules` entry $\rightarrow \ge 1$ boundary scenario.
+- **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and emit at least the required scenario(s) before doing anything else. Model-independence depends on this being a mechanical loop:
+  - **For each** `prd.business_requirements[i]` → emit ≥1 scenario whose `requirement_ref` = that `req_id`. (A P0 requirement always keeps ≥1.)
+  - **For each** `prd.boundary_conditions[i]` → emit ≥1 boundary scenario referencing that entry. Do NOT fold a boundary rule into an unrelated happy-path scenario as a substitute — it needs its own row. (This is the rule most often missed: e.g. a screenshot/privacy-mask boundary and a "shown once per customer" ordering boundary are distinct entries, each needing its own scenario.)
+  - **For each** `rfc.lifecycle_considerations[i]` (if the lifecycle category is selected) → emit ≥1 scenario for that `event`.
+  - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario.
+  - Every scenario MUST carry a `requirement_ref` (the `req_id` / boundary index / event it satisfies) so Step 4 can audit coverage mechanically.
   - **Clickstream Telemetry Rules:** Clickstream verification is **NOT** a mandatory hard gate for the generator. If `clickstream_events` are explicitly provided/told in the input contexts, then generate $\ge 1$ verification step per event. If they are NOT provided or explicitly mentioned, **do NOT fail validation and do NOT generate telemetry tests.** Instead, simply list it as an Open Question / Clarification inside `<feature_key>_analysis.md` (e.g., *"Are clickstream telemetry events required for this feature?"*).
 - Dedup against existing GMT/NLP tests retrieved from `config/<app>.json` repository paths.
 
@@ -74,6 +77,34 @@ As the single integration point, the generator must actively compute the followi
 - **`rfc_vs_impl_plan_gaps`**: Cross-reference `rfc_context.json` with the Implementation `plan_context.json`. Check if RFC architectural risks, local migrations, offline strategies, or required permissions are accounted for in the implementation's screens touched, view models, and components.
 - **`element_locator_handoff`**: Map `screen_name:element_id_name` logical tokens to cross-platform accessibility attributes (`android_resource_id`, `ios_accessibility_identifier`, `flutter_key`). Only populate these fields if the matching locator values are provided by the upstream design/development context; do not use placeholders or "UNRESOLVED" strings.
 
+### 4. Coverage Self-Audit Gate (MANDATORY — run before writing any output file)
+
+This gate is what makes coverage model-independent: it does not rely on the model "remembering" to be thorough — it mechanically re-checks the generated scenario set against the inputs and forces a fix before output. Run it every time, in both interactive and headless modes.
+
+**4a. Build the required-coverage checklist** directly from the inputs (this is a deterministic list, not a judgment):
+- every `prd.business_requirements[].req_id`
+- every `prd.boundary_conditions[]` entry (by index + `req_id` + `edge_case_description`)
+- every `rfc.lifecycle_considerations[].event` (if lifecycle selected)
+- every flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if flag category selected)
+- every event in `prd.clickstream_events[]` / `rfc…observability.clickstream_events[]` **only if** such a structured array is non-empty (per the Telemetry Rules — never invent this list)
+
+**4b. Match generated scenarios to the checklist** using each scenario's `requirement_ref`. Produce a coverage map: `checklist_item → [scenario titles covering it]`.
+
+**4c. If any checklist item has zero covering scenarios → the plan is INCOMPLETE.** Do not write the output files yet. Generate the missing scenario(s), then re-run 4b. Repeat until every item is covered. A boundary rule "covered" only by being mentioned inside an unrelated scenario does NOT count — it needs a scenario whose `requirement_ref` names it.
+
+**4d. Emit the audit result** into the SDET plan as a `coverage_audit` object and echo it as a table in `<feature_key>_analysis.md`:
+```
+"coverage_audit": {
+  "required": { "business_requirements": [...], "boundary_conditions": [...], "lifecycle_events": [...], "feature_flags": [...], "clickstream_events": [...] },
+  "covered": { "<checklist_item>": ["<scenario title>", ...], ... },
+  "gaps_closed_in_this_pass": ["<item that was missing and got a new scenario>", ...],
+  "still_blocked": [ { "item": "...", "reason": "expected behavior undefined (e.g. OQ-open)" } ]
+}
+```
+An item may legitimately remain uncovered ONLY if its expected behavior is undefined in every input (e.g. an OPEN open-question). In that case it goes in `still_blocked` with the reason — it is never silently dropped.
+
+**Determinism note:** two different models running this gate on the same inputs must arrive at the same `required` checklist and the same set of items in `covered` vs `still_blocked`. Scenario *wording* may differ between models; scenario *coverage* must not.
+
 ---
 
 ## Output File Specifications
@@ -89,7 +120,9 @@ Must also include the `coverage_categories` object produced by Step 0:
 - `optional_extras_selected[]` — categories the QA ticked.
 - `user_removed[]` — `{ category, reason }` for any AUTO category the QA explicitly overrode out of scope.
 
-Generate scenarios ONLY for `auto_selected ∪ optional_extras_selected`, and tag each scenario with `coverage_category` + `source`.
+It must also include the `coverage_audit` object produced by Step 4 (the mechanical coverage proof).
+
+Generate scenarios ONLY for `auto_selected ∪ optional_extras_selected`, and tag each scenario with `coverage_category` + `source`. Every scenario also carries a `requirement_ref` linking it to the checklist item it satisfies.
 
 ### 2. `<feature_key>_analysis.md` (QA Analysis Asset)
 A human-readable Markdown asset automatically generated for engineering leads detailing parsed requirements gaps, architectural risks, and testability bottlenecks during the pre-build review.
@@ -104,6 +137,7 @@ A human-readable Markdown asset automatically generated for engineering leads de
 2. **Section 0: Selected Test Coverage Categories:**
    - A table mirroring `coverage_categories` with columns: `Category`, `Tier` (`Auto` / `Extra — feature-adjacent` / `Extra — fe_baseline`), `Selected?`, and `Why` (the field that fired, or why it was offered as an extra).
    - Note explicitly which extras were QA-added and that `fe_baseline` scenarios are hygiene, not spec-backed.
+   - Immediately after the category table, render the **Coverage Audit table** from `coverage_audit`: one row per required checklist item (`Item`, `Type`, `Covered By` (scenario titles), `Status` = Covered / Blocked-with-reason). This is the reviewer-facing proof that every requirement and boundary rule has a scenario.
 
 3. **Section 1: Missing Input Context:**
    - If any input context (like `plan_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).
@@ -143,15 +177,17 @@ Flattened CSV strictly matching squad project template headers:
 - `Priority`: `"P0"`, `"P1"`, or `"P2"`
 - `Type of Test Case`: `"Regression"` or `"Sanity"`
 - `Automation Status`: By default, set to `"Manual"` (representing not-automated) for newly generated test cases. Set to `"Automated"` only if matched with an existing automated test case.
-- `Preconditions`: Multiline string with environment, locale, deep links, and active feature flags, **using a new line break (`\n`) after each statement/line.**
+- `Preconditions`: Multiline string with environment, locale, deep links, and active feature flags, **using a new line break (`\n`) after each statement/line.** Any feature-flag name written here MUST be copied verbatim from `rfc.experimentation_matrix[].flag_key` / `prd.feature_flags[]` — never paraphrase or append suffixes (e.g. do not turn `birthday_feature_litmus` into `birthday_feature_litmus_content`).
 - `Steps`: Numbered sequential actions inside double quotes with line breaks (`\n`). **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g., `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`, `3. Tap "Lanjut"`). Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`). Must include telemetry emission checks.
 - `Expected Result`: Numbered sequential assertions matching the numbered steps in the `Steps` column 1-to-1, inside double quotes with line breaks (`\n`) after each statement. **Write assertions using clean, declarative NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`, `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes in user-friendly, non-technical language.
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`
-- `Country v2`: `"Indonesia"`, `"Singapore"`, `"Vietnam"`, etc.
+- `Country v2`: MUST be derived from `prd.applicable_countries` (map ISO code → name, e.g. `ID`→`"Indonesia"`, `SG`→`"Singapore"`, `VN`→`"Vietnam"`). Never pick a country the inputs do not list. If `applicable_countries` has one entry, every row uses that country.
 - `Android Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is iOS-only). Set to `"Automated"` only if matched with an existing automated Android case.
 - `iOS Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is Android-only). Set to `"Automated"` only if matched with an existing automated iOS case.
-- `TestType`: `"Story"`
+- `TestType`: always the literal `"Story"` for every row. Do NOT substitute `"FCT"`, `"Non-FCT"`, or any other value.
+
+> **Enum validation (run as part of the Step 4 gate):** before writing the CSV, verify every row's `State` / `Priority` / `Type of Test Case` / `Execution Mode` / `Platform` / `TestType` / `Country v2` holds only a value allowed above; reject and fix any other value.
 
 ---
 
@@ -175,7 +211,8 @@ The skill supports a two-way synchronization flow to allow human QA to review, r
        - `automatable: false`
        - `source: "qa_added"`
        - All standard properties parsed from the CSV columns.
-     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `mapped_user_flow`, `test_data_tags`, `clickstream_events`, `coverage_category`, `source`, the top-level `coverage_categories` block, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
+     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `mapped_user_flow`, `test_data_tags`, `clickstream_events`, `coverage_category`, `source`, `requirement_ref`, the top-level `coverage_categories` / `coverage_audit` blocks, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
+     - **Re-run the Step 4 Coverage Self-Audit** after merging and refresh the `coverage_audit` block, so QA-added/removed rows keep the coverage proof accurate.
      - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>_SDET_plan.json` to reflect the synchronization event.
 
 ---
@@ -227,7 +264,9 @@ The auto/extra partition is computed **solely** from the presence/values of sche
 
 ## Guardrails
 - **Strict Determinism**: Do not extrapolate, infer, or hallucinate missing requirements. Map inputs directly to schemas without adding unmentioned fields or assumptions.
+- **No Fabricated Values (provenance rule)**: Every concrete identifier in the output — feature-flag keys, Litmus/experiment release IDs, deep-link URIs, clickstream event names, API paths, error codes, permission names — MUST be traceable to a specific input field. If a value is not present in any provided context, write `TBD — not in context` (or omit the field / use `null` where the schema allows) and record it as an Open Question in `<feature_key>_analysis.md`. Never invent a plausible-looking value (e.g. a UUID release ID or an event name like `birthday_animation_viewed`) to fill a gap. Clickstream event names in particular come ONLY from a non-empty `clickstream_events` array; if that array is empty, do not name events (per the Telemetry Rules).
 - **Category Gate**: AUTO-SELECTED categories (signal-derived) are the mandatory baseline and are always covered; only OPTIONAL EXTRAS are QA-discretionary. Generate for `auto_selected ∪ optional_extras_selected`. The P0 and boundary Hard Coverage Rules override the gate and are always covered.
+- **Coverage Audit is blocking**: The Step 4 Coverage Self-Audit Gate MUST pass (every checklist item either `covered` or in `still_blocked` with a reason) before any output file is written. Coverage is a mechanical property of the inputs, not a model judgment — two different models must produce the same `required` checklist and the same covered/blocked partition, even if scenario wording differs.
 - **Baseline Determinism**: `fe_baseline` scenarios are curated hygiene, NOT input-derived requirements — stamp `source: "fe_baseline"` and note in `analysis.md` that expected behavior needs PM/dev confirmation. Never present them as spec-backed requirements.
 - **Contract Adherence**: Fail explicitly if *all* context files are missing or if essential keys within provided contexts are missing. However, do NOT fail if individual files (like `plan_context.json` or `rfc_context.json`) are absent; instead, proceed with the inputs that are provided, noting the missing contexts in `<feature_key>_analysis.md`.
 - **Format Precision**: Outputs must strictly conform to `sdet_plan.schema.json` and the 15-column squad CSV schema without altering column headers or ordering.
