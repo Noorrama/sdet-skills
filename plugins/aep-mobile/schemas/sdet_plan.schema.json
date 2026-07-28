@@ -25,6 +25,80 @@
       "items": { "type": "string", "enum": ["QA", "Prod"] },
       "minItems": 1
     },
+    "coverage_categories": {
+      "type": "object",
+      "description": "Output of the Test-Category Selection Gate (Step 0). auto_selected is the mandatory signal-derived baseline; optional_extras are QA-discretionary.",
+      "properties": {
+        "auto_selected": {
+          "type": "array",
+          "description": "Categories whose detection signal fired in the supplied contexts. Always generated.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": { "type": "string" },
+              "reason": { "type": "string", "description": "The exact input field that fired, e.g. rfc.lifecycle_considerations[0].event = PROCESS_DEATH" }
+            },
+            "required": ["category", "reason"],
+            "additionalProperties": false
+          }
+        },
+        "optional_extras_available": {
+          "type": "object",
+          "properties": {
+            "feature_adjacent": {
+              "type": "array",
+              "description": "Categories whose trigger field exists in the schema but was empty/absent for this feature.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "category": { "type": "string" },
+                  "rationale": { "type": "string" }
+                },
+                "required": ["category", "rationale"],
+                "additionalProperties": false
+              }
+            },
+            "fe_baseline": {
+              "type": "array",
+              "description": "Universal FE-mobile hygiene categories not derivable from the docs, gated by an applicability predicate.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "group": { "type": "string" },
+                  "category": { "type": "string" },
+                  "rationale": { "type": "string" },
+                  "applicability": { "type": "string" },
+                  "source": { "type": "string", "enum": ["fe_baseline"] }
+                },
+                "required": ["group", "category", "rationale"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["feature_adjacent", "fe_baseline"],
+          "additionalProperties": false
+        },
+        "optional_extras_selected": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "user_removed": {
+          "type": "array",
+          "description": "AUTO categories the QA explicitly overrode out of scope, with reason.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": { "type": "string" },
+              "reason": { "type": "string" }
+            },
+            "required": ["category", "reason"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["auto_selected", "optional_extras_available"],
+      "additionalProperties": false
+    },
     "scenario_list": {
       "type": "array",
       "items": {
@@ -33,20 +107,29 @@
           "csv_title_association": { "type": "string" },
           "requirement_ref": { "type": "string" },
           "priority_tier": { "type": "string", "enum": ["P0", "P1", "P2"] },
-          "execution_scope": { 
-            "type": "string", 
-            "enum": ["FRONTEND_ONLY", "BACKEND_ONLY", "END_TO_END"] 
+          "execution_scope": {
+            "type": "string",
+            "enum": ["FRONTEND_ONLY", "BACKEND_ONLY", "END_TO_END"]
           },
           "is_legacy_regression": { "type": "boolean" },
           "automatable": { "type": "boolean" },
-          "target_execution_framework": { 
-            "type": "string", 
-            "enum": ["TAPMIND_NLP", "GMT_JAVA"] 
+          "target_execution_framework": {
+            "type": "string",
+            "enum": ["TAPMIND_NLP", "GMT_JAVA"]
           },
           "test_case_type": { "type": "string" },
           "automation_status": { "type": "string" },
-          "steps": { 
-            "type": "array", 
+          "coverage_category": {
+            "type": "string",
+            "description": "Which Category Catalog category this scenario belongs to (e.g. boundary, interruption_network, session_auth)."
+          },
+          "source": {
+            "type": "string",
+            "enum": ["input_derived", "feature_adjacent", "fe_baseline", "qa_added"],
+            "description": "Provenance of the scenario. fe_baseline/qa_added are curated hygiene, NOT input-derived requirements."
+          },
+          "steps": {
+            "type": "array",
             "items": { "type": "string" },
             "description": "Supports automated execution steps and manual/legacy regression test steps."
           },
@@ -195,9 +278,9 @@
           }
         },
         "required": [
-          "screen_id", 
-          "element_role", 
-          "generated_logical_id", 
+          "screen_id",
+          "element_role",
+          "generated_logical_id",
           "accessibility_mapping_directives"
         ],
         "additionalProperties": false
