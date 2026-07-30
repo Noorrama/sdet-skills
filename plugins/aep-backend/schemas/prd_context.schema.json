@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "prd_context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feature_name", "user_stories"],
+  "properties": {
+    "feature_name": { "type": "string" },
+    "prd_version": { "type": ["string", "null"] },
+    "user_stories": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "persona", "goal", "benefit", "acceptance_criteria"],
+        "properties": {
+          "id": { "type": "string" },
+          "persona": { "type": "string" },
+          "goal": { "type": "string" },
+          "benefit": { "type": "string" },
+          "acceptance_criteria": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["id", "description", "type"],
+              "properties": {
+                "id": { "type": "string" },
+                "description": { "type": "string" },
+                "type": { "type": "string", "enum": ["functional", "non_functional"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "risk_areas": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "flow": { "type": "string" },
+          "reason": { "type": "string" },
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2"] }
+        }
+      }
+    },
+    "business_error_scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "trigger": { "type": "string" },
+          "user_facing_message": { "type": "string" },
+          "story_ref": { "type": "string" }
+        }
+      }
+    },
+    "sla": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "p99_latency_ms": { "type": ["number", "null"] },
+        "throughput_rps": { "type": ["number", "null"] },
+        "uptime_percent": { "type": ["number", "null"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "out_of_scope": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "rfc_context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feature_name", "validation_sequence"],
+  "properties": {
+    "feature_name": { "type": "string" },
+    "rfc_version": { "type": ["string", "null"] },
+    "validation_sequence": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["step", "name", "what_is_validated", "why"],
+        "properties": {
+          "step": { "type": "integer" },
+          "name": { "type": "string" },
+          "what_is_validated": { "type": "string" },
+          "why": { "type": "string" },
+          "failure_error_code": { "type": "string" },
+          "failure_http_status": { "type": "integer" },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "api_contracts": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "endpoint": { "type": "string" },
+          "method": { "type": "string" },
+          "design_level": { "type": "boolean" },
+          "auth": { "type": "string" },
+          "request_schema": { "type": "object" },
+          "response_schema": { "type": "object" },
+          "error_codes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["name", "steps"],
+        "properties": {
+          "name": { "type": "string" },
+          "trigger": { "type": "string" },
+          "steps": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "error_scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "condition": { "type": "string" },
+          "error_code": { "type": "string" },
+          "http_status": { "type": "integer" },
+          "validation_step_ref": { "type": "integer" }
+        }
+      }
+    },
+    "edge_cases": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "type": { "type": "string", "enum": ["boundary", "race_condition", "timeout", "concurrent"] }
+        }
+      }
+    },
+    "cross_service_dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "service": { "type": "string" },
+          "call_order": { "type": "integer" },
+          "failure_behaviour": { "type": "string" }
+        }
+      }
+    },
+    "feature_flags": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "flag": { "type": "string" },
+          "on_behaviour": { "type": "string" },
+          "off_behaviour": { "type": "string" }
+        }
+      }
+    },
+    "timeouts": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "context": { "type": "string" },
+          "value_ms": { "type": "integer" },
+          "retry_count": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
