@@ -121,6 +121,8 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 3. Claude Desktop reads `marketplace.json` and lists available plugins
 4. Click **Install** next to `aep-backend`
 5. All 12 skills are immediately available
+![alt text](<Screenshot 2026-07-30 at 11.51.25 AM.png>)
+
 
 ### Claude Code (CLI)
 ```bash
@@ -186,3 +188,4 @@ Share the updated PRD/RFC/Tasks with Claude
 
 Each `skills/<name>/SKILL.md` is a loadable skill (folder name = skill id).
 Schemas are referenced from `schemas/`.
+
