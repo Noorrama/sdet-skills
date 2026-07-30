@@ -113,7 +113,76 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 3. The **naming convention** for test classes and methods (`should[Outcome]When[Condition]`).
 4. TDP / TestBuddy fixture provisioning API contract.
 
-## Installing a skill
+## Installing the plugin
+
+### Claude Desktop (GUI)
+1. Open **Settings → Capabilities → Plugins**
+2. Click **Add plugin source** and paste the skills repo Git URL
+3. Claude Desktop reads `marketplace.json` and lists available plugins
+4. Click **Install** next to `aep-backend`
+5. All 12 skills are immediately available
+
+### Claude Code (CLI)
+```bash
+claude plugins install https://gitlab.com/<org>/skills --plugin aep-backend
+```
+
+### Using the skills
+
+Skills auto-trigger based on their description. You can also invoke them explicitly:
+```
+/backend-prd-extractor
+/backend-rfc-extractor
+/backend-tasks-extractor
+/backend-regression-extractor
+/backend-sdet-plan-generator
+/backend-automation-plan-generator
+/backend-test-data-generator
+/backend-test-code-generator
+/backend-test-code-validator
+/backend-dedup-generator
+/backend-code-change-extractor
+/backend-doc-delta-extractor
+```
+
+Or naturally in conversation:
+> *"Extract the RFC context from this RFC doc"* → triggers `backend-rfc-extractor`
+> *"Generate the SDET plan for this feature"* → triggers `backend-sdet-plan-generator`
+> *"The PRD was updated, re-trigger the plan"* → triggers `backend-doc-delta-extractor`
+
+### Running the pipeline end to end
+
+```
+1. Share PRD + RFC + TASKS.md with Claude
+   → prd-extractor, rfc-extractor, tasks-extractor, regression-extractor run
+
+2. sdet-plan-generator (Pass 1) produces:
+   → <feature>_sdet_plan.json + qa_analysis.md + testcases.csv
+
+3. SDET + PM review the plan in Claude
+   → approve → BrowserStack upload
+   → gaps found → regenerate → re-review
+
+4. Post-build: share GitLab diff
+   → code-change-extractor + sdet-plan-generator Pass 2 → delta review
+
+5. Approved → automation-plan-generator → SDET reviews automation plan
+
+6. Parallel:
+   → test-data-generator (TDP fixtures)
+   → dedup-generator + test-code-generator (GBT Java)
+
+7. test-code-validator → SDET reviews code → raises MR
+```
+
+### If an upstream doc changes mid-sprint
+```
+Share the updated PRD/RFC/Tasks with Claude
+→ doc-delta-extractor extracts what changed
+→ SDET + PM confirm scope (human feedback gate)
+→ sdet-plan-generator re-triggered with delta only
+→ review delta scenarios → re-upload to BrowserStack
+```
+
 Each `skills/<name>/SKILL.md` is a loadable skill (folder name = skill id).
-Point your skills directory at `skills/`, or install per Settings → Capabilities.
 Schemas are referenced from `schemas/`.
