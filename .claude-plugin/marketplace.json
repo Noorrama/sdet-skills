@@ -14,6 +14,11 @@
       "name": "aep-mobile",
       "source": "./plugins/aep-mobile",
       "description": "Mobile QA skill set — agentic PDLC pipeline across the 5 GoTo apps"
+    },
+    {
+      "name": "aep-backend",
+      "source": "./plugins/aep-backend",
+      "description": "Backend QA skill set — agentic PDLC pipeline for GoTo backend services"
     }
   ]
 }

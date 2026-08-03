@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "validation_report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["overall_status", "files_checked", "results"],
+  "properties": {
+    "validation_date": { "type": "string" },
+    "overall_status": { "type": "string", "enum": ["PASS", "FAIL", "WARN"] },
+    "files_checked": { "type": "integer" },
+    "files_passed": { "type": "integer" },
+    "files_with_warnings": { "type": "integer" },
+    "files_with_errors": { "type": "integer" },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["file", "status", "checks"],
+        "properties": {
+          "file": { "type": "string" },
+          "status": { "type": "string", "enum": ["PASS", "FAIL", "WARN"] },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["check", "status"],
+              "properties": {
+                "check": { "type": "string" },
+                "status": { "type": "string", "enum": ["PASS", "FAIL", "WARN"] },
+                "detail": { "type": ["string", "null"] }
+              }
+            }
+          },
+          "missing_methods": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "coverage_check": { "type": "object" }
+  }
+}

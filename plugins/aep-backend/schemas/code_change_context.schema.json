@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "code_change_context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["epic_id", "mr_ids", "extraction_date"],
+  "properties": {
+    "epic_id": { "type": "string" },
+    "mr_ids": { "type": "array", "items": { "type": "string" } },
+    "extraction_date": { "type": "string" },
+    "new_endpoints": { "type": "array", "items": { "type": "object" } },
+    "changed_endpoints": { "type": "array", "items": { "type": "object" } },
+    "validation_rules": { "type": "array", "items": { "type": "object" } },
+    "error_mappings": { "type": "array", "items": { "type": "object" } },
+    "db_changes": { "type": "array", "items": { "type": "object" } },
+    "new_enums": { "type": "array", "items": { "type": "object" } },
+    "dependency_changes": { "type": "array", "items": { "type": "object" } },
+    "auth_changes": { "type": "array", "items": { "type": "object" } },
+    "feature_flags": { "type": "array", "items": { "type": "object" } },
+    "proto_changes": { "type": "array", "items": { "type": "object" } }
+  }
+}

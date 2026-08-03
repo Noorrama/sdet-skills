@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "automation_plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feature_name", "plan_version", "test_classes", "fixtures_summary"],
+  "properties": {
+    "feature_name": { "type": "string" },
+    "plan_version": { "type": "string" },
+    "test_classes": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["class_name", "package", "test_layer", "methods"],
+        "properties": {
+          "class_name": { "type": "string" },
+          "package": { "type": "string" },
+          "test_layer": { "type": "string", "enum": ["component", "integration", "e2e"] },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["method_name", "scenario_id", "fixture_id", "required_state"],
+              "properties": {
+                "method_name": { "type": "string" },
+                "scenario_id": { "type": "string" },
+                "is_dedup": { "type": "boolean" },
+                "dedup_reason": { "type": "string" },
+                "curl_reference": { "type": "string" },
+                "fixture_id": { "type": "string" },
+                "required_state": { "type": "string" },
+                "mock_setup": { "type": "array", "items": { "type": "object" } },
+                "tags": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "fixtures_summary": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["fixture_id", "description", "required_state"],
+        "properties": {
+          "fixture_id": { "type": "string" },
+          "description": { "type": "string" },
+          "used_by_scenarios": { "type": "array", "items": { "type": "string" } },
+          "required_state": { "type": "string" }
+        }
+      }
+    },
+    "dedup_report": { "type": "object" }
+  }
+}
