@@ -71,7 +71,7 @@ valuable thing this skill produces.
 
 Output valid JSON only, conforming to `${CLAUDE_PLUGIN_ROOT}/schemas/plan_context.schema.json`.
 
-## Validate — hard gate
+## Validate — report, never block
 ```
 python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('plan_context.json')),

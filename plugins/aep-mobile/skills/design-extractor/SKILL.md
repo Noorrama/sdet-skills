@@ -19,15 +19,58 @@ resolved becomes an `extraction_gaps` entry and the run continues — a partial,
 labelled output is always better than no output. What is forbidden is inventing a value to
 fill the hole.
 
-1. **App id.** One of `gojek-consumer`, `gojek-driver`, `gofood-merchant`, `gopay-consumer`,
-   `gopay-merchant`. Not resolvable → leave `app` absent, add a `BLOCKING` gap on `app`.
-2. **Config** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Unreadable → add a `DEGRADED` gap on
+1. **App set — how many apps does this export cover?** Never assume one. Scan the frame tree
+   before extracting and collect every app in scope from: top-level Figma pages or frame-group
+   names per app, a frame-name prefix (`[GoPay] …` / `Gojek — …`), the file/export name, or the
+   user naming them. Map each to an app id: `gojek-consumer`, `gojek-driver`,
+   `gofood-merchant`, `gopay-consumer`, `gopay-merchant`.
+   - **One app** → one output file, as before.
+   - **Two or more** → one output file per app (see *Output files*). Common when one Figma file
+     holds a shared component's screens for every host app.
+   - **Separate exports already supplied per app** → nothing to split; run once per file.
+   - **None resolvable** → emit a single file, leave `app` absent, add a `BLOCKING` gap on `app`.
+     Do **not** guess from visual style; a dark-themed frame is not proof of an app.
+   Report the decision in your reply before extracting: *"2 apps detected — gopay-consumer
+   (pages 'GoPay Transfer', 'GoPay Tagihan'), gojek-consumer (page 'Gojek Tagihan'). Writing 2
+   context files."*
+2. **Config, per app in the set** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Unreadable → add a `DEGRADED` gap on
    `ENVIRONMENT` with reason *"cannot read ${CLAUDE_PLUGIN_ROOT}/config/<app>.json — plugin install
    may be incomplete"* and action *"run `claude plugin update aep-mobile@aep`, restart Claude,
    re-run"*. Set `extraction_status: DEGRADED`. Continue. **`naming_convention.element_id_pattern` and `role_vocabulary` come from this file only.** If it is unreadable, do NOT improvise a convention — emit IDs verbatim from the Figma accessibility IDs, and raise a `DEGRADED` gap warning that IDs are unverified against the app convention and may not join to real locators at code-gen.
+   In a multi-app split this is the whole point of splitting: **each file's `element_id`s must
+   follow its own app's pattern and `role_vocabulary`.** IDs generated under the wrong app's
+   convention silently fail to join to real locators at code-gen, which surfaces much later as a
+   broken test rather than a bad extraction.
 3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`. Unreadable → `DEGRADED` gap on `ENVIRONMENT`, same install action.
    Fall back to the field list in this document **only** in that case, and say so in the gap.
 4. **Input.** Figma JSON attached and parses. No frames → emit with `INCOMPLETE` and a `BLOCKING` gap saying the export looks empty. That is a bad export, not a design with zero screens.
+
+## Output files — one per app in scope
+| Apps in scope | Files written |
+| :--- | :--- |
+| 1 | `design_context.json` |
+| 2+ | `design_context.<app_id>.json` for each — e.g. `design_context.gopay-consumer.json`, `design_context.gojek-consumer.json` |
+
+Each file is a complete, independently valid `design_context`. Set `app` on the output object —
+the schema doesn't require it, but `sdet-plan-generator` keys off it to match contexts for a run,
+so omitting it in a split defeats the purpose.
+
+**What goes in each file:**
+- Only that app's screens, elements and `ui_flow` edges. A Gojek frame never appears in the
+  GoPay file, and no `ui_flow` edge may cross between apps — the two host apps have no shared
+  navigation, so a cross-app edge is a mis-attributed frame. Raise it in `blocking_issues`
+  rather than emitting the edge.
+- `project_context.blocking_issues` scoped to that app's frames, so each QA sees only their own
+  design gaps.
+
+**A screen reused by every app** (a shared SDK component rendered identically in both) gets the
+**same `screen_id` in every file** — that shared id is what lets the QA reviewing both plans see
+it as one component, not two. Its `element_id`s still follow each file's own app convention, so
+the same logical screen can legitimately carry different element ids per file.
+
+**Never split on visual style alone.** GoPay Tagihan renders dark and Gojek Tagihan renders
+light, but theme is a `screen_states` variant, not an app boundary. Split only on structural
+evidence — page names, frame-group names, an explicit prefix.
 
 ## Reporting gaps — required on every run
 Every output carries both fields (see the schema):
@@ -136,10 +179,16 @@ regex patterns exactly — no lowercase, no stray punctuation.
 you cannot classify as screen-vs-state — becomes a `blocking_issues` entry. Never a filled
 assumption, never an element ID guessed from a layer name when the accessibility ID is absent.
 
-## Validate — hard gate
+**Never merge two apps into one file.** If the export covers several apps, write several files —
+do not pick the app with the most frames and drop the rest, and never generate one app's
+`element_id`s under another app's `element_id_pattern`.
+
+## Validate — report, never block
+Run once **per output file** — every file in a multi-app split is validated separately, and the
+ID-pattern checks below are re-run per file against **that file's own** app convention.
 ```
 python3 -c "import json,jsonschema; jsonschema.validate(
-  json.load(open('design_context.json')),
+  json.load(open('<each design_context file>')),
   json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json')))"
 ```
 - Passes → `extraction_status: OK` (when `extraction_gaps` is empty).

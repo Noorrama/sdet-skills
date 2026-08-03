@@ -45,9 +45,28 @@ what was not covered.
    of them into this plan's `extraction_gaps[]`, prefixing `field` with the source
    (`prd_context.business_requirements[3].target_module`). Upstream gaps do not disappear
    because a downstream skill ran successfully.
-5. **App agreement.** Every supplied context's `app` must match. A mismatch means contexts from
-   different features or apps are mixed in one folder — pick nothing, use the majority value,
-   and raise a `BLOCKING` gap naming the conflicting files and values.
+5. **Resolve the app before picking files.** Extractors write per-app files when a source
+   document covers more than one app: `prd_context.<app_id>.json`, `rfc_context.<app_id>.json`,
+   `design_context.<app_id>.json` (a single-app run writes the plain `prd_context.json` /
+   `rfc_context.json` / `design_context.json`). The forms can be mixed — a PRD may cover two
+   apps while the design was exported per app already, so match each stage independently.
+   - Plain files only → use them.
+   - Per-app files present → **generate a plan for one app per run.** Ask the QA which app if
+     they did not say, then load only that app's files. Never merge two apps' contexts into one
+     plan: `deeplink_scheme`, locators and repos differ per app, so a merged plan is wrong for
+     both.
+   - Both forms present for the same stage → prefer the per-app file and raise an `INFO` gap
+     naming the plain file you ignored.
+   Stamp the chosen `app` into `feature_metadata`, and suffix `feature_key` per app
+   (`insurance_sdk_gopay`) so two runs' deliverables don't collide on import.
+6. **App agreement.** Every context loaded for the run must carry the same `app`. A mismatch
+   means files for different apps were mixed — pick nothing, use the majority value, and raise a
+   `BLOCKING` gap naming the conflicting files and values.
+7. **Shared requirements across apps.** When a source document covered several apps, items that
+   apply to all of them carry the **same id in every file** (`req_id`, `risk_id`, `flag_key`,
+   `endpoint`). Generate scenarios for them normally — they are in scope for this app too — and
+   list those ids under a *Shared across apps* note in `<feature_key>_analysis.md`, so the QA
+   reviewing both plans knows which scenarios are duplicates rather than distinct coverage.
 
 ## Anti-hallucination rules
 - **Every scenario traces to a real field in a real input context.** No scenario may rest on a
