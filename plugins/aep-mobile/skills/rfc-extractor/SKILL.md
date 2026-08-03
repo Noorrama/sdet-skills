@@ -7,8 +7,78 @@ description: Extract comprehensive technical context from a mobile RFC into rfc_
 
 Distils the RFC into the risk/scope/technical signals that shape test prioritisation and mobile-specific scenario generation. Skipped when an EPIC has no RFC.
 
-## Config
-`config/<app>.json` → set `rfc_context.app = app_id`.
+## Preflight — resolve, or record and continue
+**Never stop, never guess.** Work through these before extracting. Anything that cannot be
+resolved becomes an `extraction_gaps` entry and the run continues — a partial, honestly
+labelled output is always better than no output. What is forbidden is inventing a value to
+fill the hole.
+
+1. **App set — how many apps does this RFC cover?** Never assume one. Read the whole document
+   first and collect every app in scope from: `scope.affected_modules` / per-app sections, the
+   `platform_specific` breakdown, the title, or the user naming them. Map each to an app id:
+   `gojek-consumer`, `gojek-driver`, `gofood-merchant`, `gopay-consumer`, `gopay-merchant`.
+   - **One app** → one output file, as before.
+   - **Two or more** → one output file per app (see *Output files*). Common for shared SDK,
+     platform-library, or backend-contract RFCs that land in several host apps.
+   - **None resolvable** → emit a single file with `app` absent and a `BLOCKING` gap on `app`.
+   Report the decision in your reply before extracting: *"2 apps detected — gopay-consumer,
+   gojek-consumer. Writing 2 context files."*
+2. **Config, per app in the set** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Each output file's
+   `app` comes from its own config's `app_id`; never copy one app's config onto another's file.
+   Unreadable → add a `DEGRADED` gap on `ENVIRONMENT` with reason *"cannot read
+   ${CLAUDE_PLUGIN_ROOT}/config/<app>.json — plugin install may be incomplete"* and action *"run
+   `claude plugin update aep-mobile@aep`, restart Claude, re-run"*. Set
+   `extraction_status: DEGRADED`. Continue; without it `app` stays absent with a `BLOCKING` gap.
+3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/rfc_context.schema.json`. Unreadable → `DEGRADED` gap on `ENVIRONMENT`, same install action.
+   Fall back to the field list in this document **only** in that case, and say so in the gap.
+4. **Input.** RFC attached and readable. Empty or unparsed → emit with `INCOMPLETE` and a `BLOCKING` gap. Do not emit empty sections as though the RFC declared them empty.
+
+## Output files — one per app in scope
+| Apps in scope | Files written |
+| :--- | :--- |
+| 1 | `rfc_context.json` |
+| 2+ | `rfc_context.<app_id>.json` for each — e.g. `rfc_context.gopay-consumer.json`, `rfc_context.gojek-consumer.json` |
+
+Each file is a complete, independently valid `rfc_context` with a **single** `app`. The schema is
+unchanged; nothing downstream needs to know a split happened. `rfc_id` / `rfc_title` /
+`rfc_status` are identical across the files — they describe one RFC.
+
+**What goes in each file:**
+- `scope`, `navigation_changes`, `platform_specific`, `permissions_required` and the other
+  surface-bound sections carry **only that app's** entries. A `gojek://` deep link never appears
+  in the GoPay file.
+- **Plus** the sections that are properties of the change itself, not of a host app — the shared
+  API contract, state-management changes, dependency changes, architectural risks, rollback
+  strategy. Both files need these; they are what the RFC is actually about.
+
+**Marking shared items:** give an item that applies to every app the **same id in every file**
+(`risk_id`, `flag_key`, `endpoint`). An id appearing in more than one file is shared by
+definition, which is all the QA needs to dedup across the two plans — and it costs no schema
+change.
+
+**Watch the per-app divergence points specifically:**
+- `experimentation_matrix` — the same `flag_key` often has different defaults or variants per
+  app. Record each app's own value.
+- `compatibility_mandates` — `min_supported_app_version` is per host app and is almost never the
+  same number. Never copy one app's version onto the other.
+- `navigation_changes[].deep_link` — scheme differs by app; take it from that app's config.
+
+## Reporting gaps — required on every run
+Every output carries both fields (see the schema):
+
+- `extraction_status` — `OK` only when `extraction_gaps` is empty. `INCOMPLETE` when a field
+  could not be resolved from the source. `DEGRADED` when config/schema/tooling was unavailable.
+- `extraction_gaps[]` — `{ field, reason, action, severity }`, severity one of `BLOCKING`
+  (schema-required field absent), `DEGRADED` (resolved without normal grounding), `INFO`
+  (optional content genuinely absent from the source doc).
+
+Rules:
+- A field you cannot resolve is **left absent** and recorded. Never filled with a placeholder,
+  a plausible default, or a value carried over from another feature.
+- `reason` cites the section actually checked (*"PRD §4.2 states the rule but names no
+  module"*), not a generic *"not found"*.
+- Silence is the failure mode being designed out here — an empty `extraction_gaps` on a
+  half-specified source document is a worse bug than a malformed field.
 
 ## Reads
 RFC document (Lark/Confluence/PDF) — **single input**. This skill reads only the RFC. Cross-references against PRD and design are handled downstream by the `sdet-plan-generator`, which ingests all extractor outputs and performs gap analysis.
@@ -107,18 +177,40 @@ For mobile-specific sections (8–16), set `inferred_from_prose: false` when ext
 - No solution approach clearly marked as selected/preferred when multiple are presented
 
 ## Guardrails
-- Do not infer risks not stated — unknowns go to `open_questions` with `impact_on_testing`.
+- **Never invent a value.** Do not infer risks not stated — unknowns go to `open_questions`
+  with `impact_on_testing`.
 - `inferred_from_prose` must be set correctly — never omit this field on mobile-specific sections.
 - Empty arrays `[]` are valid when the RFC explicitly has no items for a section (e.g., no API changes). Do not omit the key.
-- Output valid JSON only, conforming to `schemas/rfc_context.schema.json`.
+- Distinguish the two absences: **the RFC says there are none** → `[]`. **The RFC is silent and
+  you cannot tell** → `open_questions`, never `[]`. Emitting `[]` for something you simply
+  could not find is a fabricated "no changes here" claim.
+- Absent **required** content that cannot be read from the RFC → leave the field absent and add
+  a `BLOCKING` gap naming it and the RFC section you checked. Emit the file anyway.
 - Do not populate `prd_cross_refs` or `design_cross_refs` — these are filled downstream by `sdet-plan-generator`.
+- Output valid JSON only.
+- **Never merge two apps into one file.** An `rfc_context` carries exactly one `app`. If the RFC
+  covers several, write several files — do not pick the app with the most sections and drop the
+  rest, and do not concatenate their entries under one `app`.
 
-## Validate
+## Validate — report, never block
+Run once **per output file** — every file in a multi-app split is validated separately.
 ```
 python3 -c "import json,jsonschema; jsonschema.validate(
-  json.load(open('rfc_context.json')),
-  json.load(open('schemas/rfc_context.schema.json')))"
+  json.load(open('<each rfc_context file>')),
+  json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/rfc_context.schema.json')))"
 ```
+- Passes → `extraction_status: OK` (when `extraction_gaps` is empty).
+- Fails → **still write the file.** Convert every validator error into an `extraction_gaps`
+  entry (`field` = the validator's JSON path, `severity: BLOCKING`) and set
+  `extraction_status: INCOMPLETE`. Never patch a value in just to make validation pass.
+- Validator unavailable (`jsonschema` not installed) → write the file, add a `DEGRADED` gap on
+  `ENVIRONMENT`, **and say so in your reply to the user** — not only in the JSON, which they may
+  not open. Give them the command for their platform:
+  - macOS / Linux with a system Python: `pip3 install --break-system-packages jsonschema`
+    (plain `pip3 install` fails with an *externally-managed-environment* error under PEP 668)
+  - inside a virtualenv, or with `uv`: `pip install jsonschema` / `uv pip install jsonschema`
+  Never report an unvalidated output as valid — well-formed JSON is not schema conformance.
+  Do not attempt the install yourself; it is the user's environment to change.
 
 ## Downstream consumers
 - **sdet-plan-generator** — uses `experimentation_matrix` for flag toggle scenarios, `api_contract_changes` for contract tests, `local_data_changes` for migration scenarios, `permissions_required` for permission grant/deny scenarios, `lifecycle_considerations` for process death/config change scenarios, `architectural_risks` for risk-focused P0 tests.

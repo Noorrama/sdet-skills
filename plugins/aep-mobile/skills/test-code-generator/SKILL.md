@@ -13,7 +13,7 @@ produced where NLP can't express the case.
 `test-code-generator.json` (the ledger of what was generated).
 
 ## Config
-`config/<app>.json` → `default_output` (NLP), `repos.gmt`/`tapmind`/`shared_libs`, `locator_keys`,
+`${CLAUDE_PLUGIN_ROOT}/config/<app>.json` → `default_output` (NLP), `repos.gmt`/`tapmind`/`shared_libs`, `locator_keys`,
 `platforms`, `deeplink_scheme`.
 
 ## Reads
@@ -41,7 +41,7 @@ scenarios are **updated**, not regenerated (see Dedup). Route by `target_executi
 1. **Given:** resolve via the hierarchy above; record `given_strategy` + `deep_link`/`nav_macro_fallback`.
 2. **Setup:** emit `mock_location` + `backdoor_login` (TDP user) via the house-style helpers.
 3. **Elements:** resolve each `element_id` → real locator from `change_context` (android=resource-id, ios=accessibilityId, flutter=Key/Semantics). Never hard-code inline locators.
-4. **NLP (primary):** emit TapMind `runStep(...)` for interactions ending in `assertStep(...)`. Align grammar to the app's TapMind syntax (see examples/).
+4. **NLP (primary):** emit TapMind `runStep(...)` for interactions ending in `assertStep(...)`. Align grammar to the app's TapMind syntax (see `${CLAUDE_PLUGIN_ROOT}/examples/`).
 5. **GMT coded (where routed):** Appium+TestNG Java using the bound locators, real `Assert`, teardown.
 6. **Assertions:** derive the "Then" **strictly from `sdet_plan`** (`assertions_from: sdet_plan:<scenario_id>`) — never from the diff (Bias Guardrail). Turn the plan's `clickstream_events` into `analytics_assertions`.
 7. **Test data:** bind each need to the provisioner's handle (`data_binding`, never raw values).
@@ -61,7 +61,7 @@ Do **not** emit a broken test. Add the scenario to `deferred[]` with a reason wh
 
 ## Produces
 1. **The test file** — TapMind NLP (`.java` with `runStep`/`assertStep`) or GMT coded, at `artifact_ref`.
-2. **`test-code-generator.json`** (→ `schemas/test-code-generator.schema.json`) — one entry per scenario
+2. **`test-code-generator.json`** (→ `${CLAUDE_PLUGIN_ROOT}/schemas/test-code-generator.schema.json`) — one entry per scenario
    acted on: `op`, `target`, `class_name`/`test_method`, `artifact_ref`, `traceability`, `setup`,
    `given_strategy`, `nl_steps`, `assertions_from`, `analytics_assertions`, `locators_used`,
    `data_binding`, `flags_required`, `waits`, `teardown`, `validation` — plus `deferred[]` and a
@@ -81,4 +81,4 @@ retried into green**; assertions are never weakened. A test that can't be safely
 ## Guardrails
 - Never hard-code credentials/tokens/PII — resolve from vault/TestBuddy; mask in logs.
 - Non-deterministic values (fare/ETA/surge) use matchers/tolerances, not exact equality.
-- Output the manifest as valid JSON conforming to `schemas/test-code-generator.schema.json`.
+- Output the manifest as valid JSON conforming to `${CLAUDE_PLUGIN_ROOT}/schemas/test-code-generator.schema.json`.
