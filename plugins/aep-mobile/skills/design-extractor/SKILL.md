@@ -9,9 +9,42 @@ Design is the frontend-primary stage. This skill produces the screen/element map
 `element_id`s later join to real per-platform locators from the Code Diff (see code-change-extractor).
 
 ## Config
-`config/<app>.json` → `naming_convention.element_id_pattern` and `role_vocabulary` govern the
+`${CLAUDE_PLUGIN_ROOT}/config/<app>.json` → `naming_convention.element_id_pattern` and `role_vocabulary` govern the
 `<ACTION>_<ELEMENT_TYPE>` segment of each `element_id` (see Extract §1). Set `app` on the output object
 — the schema doesn't require it, but the rest of the pipeline keys off it for multi-app runs.
+
+## Preflight — resolve, or record and continue
+**Never stop, never guess.** Work through these before extracting. Anything that cannot be
+resolved becomes an `extraction_gaps` entry and the run continues — a partial, honestly
+labelled output is always better than no output. What is forbidden is inventing a value to
+fill the hole.
+
+1. **App id.** One of `gojek-consumer`, `gojek-driver`, `gofood-merchant`, `gopay-consumer`,
+   `gopay-merchant`. Not resolvable → leave `app` absent, add a `BLOCKING` gap on `app`.
+2. **Config** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Unreadable → add a `DEGRADED` gap on
+   `ENVIRONMENT` with reason *"cannot read ${CLAUDE_PLUGIN_ROOT}/config/<app>.json — plugin install
+   may be incomplete"* and action *"run `claude plugin update aep-mobile@aep`, restart Claude,
+   re-run"*. Set `extraction_status: DEGRADED`. Continue. **`naming_convention.element_id_pattern` and `role_vocabulary` come from this file only.** If it is unreadable, do NOT improvise a convention — emit IDs verbatim from the Figma accessibility IDs, and raise a `DEGRADED` gap warning that IDs are unverified against the app convention and may not join to real locators at code-gen.
+3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`. Unreadable → `DEGRADED` gap on `ENVIRONMENT`, same install action.
+   Fall back to the field list in this document **only** in that case, and say so in the gap.
+4. **Input.** Figma JSON attached and parses. No frames → emit with `INCOMPLETE` and a `BLOCKING` gap saying the export looks empty. That is a bad export, not a design with zero screens.
+
+## Reporting gaps — required on every run
+Every output carries both fields (see the schema):
+
+- `extraction_status` — `OK` only when `extraction_gaps` is empty. `INCOMPLETE` when a field
+  could not be resolved from the source. `DEGRADED` when config/schema/tooling was unavailable.
+- `extraction_gaps[]` — `{ field, reason, action, severity }`, severity one of `BLOCKING`
+  (schema-required field absent), `DEGRADED` (resolved without normal grounding), `INFO`
+  (optional content genuinely absent from the source doc).
+
+Rules:
+- A field you cannot resolve is **left absent** and recorded. Never filled with a placeholder,
+  a plausible default, or a value carried over from another feature.
+- `reason` cites the section actually checked (*"PRD §4.2 states the rule but names no
+  module"*), not a generic *"not found"*.
+- Silence is the failure mode being designed out here — an empty `extraction_gaps` on a
+  half-specified source document is a worse bug than a malformed field.
 
 ## Reads
 JSON representation of the Figma design export (`.json` file) containing:
@@ -54,7 +87,7 @@ title *and* distinct purpose/route), including a component that is reused as its
 multiple callers (e.g. a shared error dialog, native date/month picker, share sheet). Give each of those
 one `screen_id` and reference it from every caller's `ui_flow` entry — never duplicate it per caller.
 
-## Extract (→ schemas/design_context.schema.json)
+## Extract (→ `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`)
 
 **CRITICAL: Extract ALL connector lines first, then filter elements by relevance to ui_flow.**
 
@@ -95,12 +128,32 @@ one `screen_id` and reference it from every caller's `ui_flow` entry — never d
 - Output design_context.json concisely — only functional elements that matter for test automation.
 
 ## Guardrails
-Output valid JSON only, conforming to `schemas/design_context.schema.json`. All `screen_id`,
+Output valid JSON only, conforming to `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`. All `screen_id`,
 `trigger_element_id`/`element_id`, `from_screen_id`, and `to_screen_id` values must satisfy the schema's
 regex patterns exactly — no lowercase, no stray punctuation.
 
-## Validate
-- `jsonschema.validate(output, schemas/design_context.schema.json)` — confirms JSON structure & naming.
+**Never invent.** Every gap — missing connector, unreachable screen, placeholder text, a frame
+you cannot classify as screen-vs-state — becomes a `blocking_issues` entry. Never a filled
+assumption, never an element ID guessed from a layer name when the accessibility ID is absent.
+
+## Validate — hard gate
+```
+python3 -c "import json,jsonschema; jsonschema.validate(
+  json.load(open('design_context.json')),
+  json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json')))"
+```
+- Passes → `extraction_status: OK` (when `extraction_gaps` is empty).
+- Fails → **still write the file.** Convert every validator error into an `extraction_gaps`
+  entry (`field` = the validator's JSON path, `severity: BLOCKING`) and set
+  `extraction_status: INCOMPLETE`. Never patch a value in just to make validation pass.
+- Validator unavailable (`jsonschema` not installed) → write the file, add a `DEGRADED` gap on
+  `ENVIRONMENT`, **and say so in your reply to the user** — not only in the JSON, which they may
+  not open. Give them the command for their platform:
+  - macOS / Linux with a system Python: `pip3 install --break-system-packages jsonschema`
+    (plain `pip3 install` fails with an *externally-managed-environment* error under PEP 668)
+  - inside a virtualenv, or with `uv`: `pip install jsonschema` / `uv pip install jsonschema`
+  Never report an unvalidated output as valid — well-formed JSON is not schema conformance.
+  Do not attempt the install yourself; it is the user's environment to change.
 - **Connector completeness:** Count all visible prototype/connector lines in JSON and verify each appears
   in `ui_flow` (or flag missing ones in `blocking_issues`). Zero false positives/negatives.
 - **Element filtering:** Every element in `elements` either (a) appears in `ui_flow` as trigger, or (b)

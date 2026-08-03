@@ -24,6 +24,68 @@ Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_c
 
 ---
 
+## Preflight — resolve, or record and continue
+**Never stop, never guess.** Always produce the three deliverables. Never synthesise a missing
+context from the others, never reconstruct one from the source PRD/RFC/Figma, and never let a
+missing input pass unmentioned — generate what the available inputs support and say plainly
+what was not covered.
+
+1. **Schemas.** Read `${CLAUDE_PLUGIN_ROOT}/schemas/sdet_plan.schema.json` and
+   `${CLAUDE_PLUGIN_ROOT}/schemas/scenario.schema.json`. Unreadable → `DEGRADED` gap on
+   `ENVIRONMENT`, action *"run `claude plugin update aep-mobile@aep`, restart Claude, re-run"*.
+   Fall back to the field lists in this document **only** then, and say so in the gap.
+2. **Required contexts.** `prd_context.json` and `design_context.json`. Either missing → carry
+   on with what remains and add a `BLOCKING` gap: *"generated without <name> — requirement
+   coverage / screen coverage is unverified"*. Set `extraction_status: INCOMPLETE`.
+3. **Optional contexts.** `rfc_context.json` and `plan_context.json` may legitimately be
+   absent (no RFC, no impl plan) → `INFO` gap, that is a normal run. A file that exists but
+   **fails its schema** is different: use what parses, and raise a `BLOCKING` gap naming the
+   file and the validation error. Never silently downgrade malformed to absent.
+4. **Inherit upstream gaps.** Every input context carries its own `extraction_gaps[]`. Copy all
+   of them into this plan's `extraction_gaps[]`, prefixing `field` with the source
+   (`prd_context.business_requirements[3].target_module`). Upstream gaps do not disappear
+   because a downstream skill ran successfully.
+5. **App agreement.** Every supplied context's `app` must match. A mismatch means contexts from
+   different features or apps are mixed in one folder — pick nothing, use the majority value,
+   and raise a `BLOCKING` gap naming the conflicting files and values.
+
+## Anti-hallucination rules
+- **Every scenario traces to a real field in a real input context.** No scenario may rest on a
+  requirement, screen, element, flag or endpoint that is not present in a supplied context.
+- Never invent `element_id` or `screen_id` values. If a scenario needs an element the design
+  context does not carry, that is a `blocking_issues` entry, not a guessed token.
+- Never invent a deeplink or test hook. Absent hook → the scenario states the manual
+  navigation path and is flagged in testability feedback.
+- A cross-stage contradiction (PRD says one thing, design another) is reported as a gap. Do
+  **not** silently resolve it by preferring one source.
+- A required schema field that cannot be satisfied from the inputs is **left absent** with a
+  `BLOCKING` gap — never filled to make the output validate.
+
+## Gap reporting — required in all three deliverables
+The same gaps must appear everywhere the QA might look. Reporting them in the JSON alone does
+not count; nobody reads the JSON.
+
+**`<feature_key>_SDET_plan.json`** — `extraction_status` plus `extraction_gaps[]`
+(`{ field, reason, action, severity }`), including everything inherited from upstream.
+
+**`<feature_key>_analysis.md`** — open with a section titled `## ⚠️ Coverage Gaps & Inputs`
+**before** any scenario content. It contains:
+- A one-line verdict: *"Generated from PRD + Design. No RFC, no impl plan. Status: INCOMPLETE."*
+- An inputs table — each context, `Present / Absent / Malformed`, and its own status.
+- A gaps table — `Severity | Field | Reason | Action`, `BLOCKING` first.
+- A plain-language line naming what the plan therefore does **not** cover, e.g. *"No RFC was
+  supplied, so no feature-flag, N-1 compatibility or API-error scenarios were generated."*
+
+**`<feature_key>_test_cases.csv`** — when `extraction_status` is not `OK`, the first data row
+is a non-executable marker row: `id` = `GAP-NOTICE`, `title` = *"⚠️ Generated with N gaps (M
+blocking) — see analysis.md before importing"*, all other columns empty. It is a deliberate
+speed bump: this CSV gets bulk-imported into TMS without the analysis doc ever being opened.
+
+**Never report `extraction_status: OK` when any gap exists**, and never describe coverage as
+complete in the analysis doc while `BLOCKING` gaps are open.
+
+---
+
 ## Execution Workflow
 
 ### 0. Test-Category Selection Gate
@@ -46,10 +108,11 @@ Flow:
 
 ### 1. Ingest & Coverage Gates
 - Ingest and aggregate whatever context inputs are provided (`plan_context`, `prd_context`, `design_context`, `rfc_context`).
-- **Graceful Input Absence Handling:** If individual contexts (such as `plan_context.json` or `rfc_context.json`) are NOT provided, **do NOT fail execution.** Drive the generation with whatever inputs are given:
+- **Optional Input Absence Handling** (applies to `plan_context.json` and `rfc_context.json` only — `prd_context.json` and `design_context.json` are required, see Preflight step 2). If an *optional* context is not provided, **do NOT fail execution.** Drive the generation with whatever inputs are given:
   - If `plan_context.json` is absent, proceed with `prd_context.json` and `design_context.json` as the baseline.
-  - Simply note the missing contexts clearly as an architectural observation or limitation inside the `<feature_key>_analysis.md` report (e.g., *"plan_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
+  - State the missing contexts clearly as a limitation inside the `<feature_key>_analysis.md` report (e.g., *"plan_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
   - A missing context also means its Category Catalog triggers simply cannot fire (no failure) — those categories fall through to the extras tiers.
+  - **Absent is not the same as malformed.** A context file that exists but fails its schema gets a `BLOCKING` gap naming the file and the validation error (Preflight step 3) — never a silent fall-through to "treat as absent", which drops coverage the QA believes they have.
 - **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and emit at least the required scenario(s) before doing anything else. Model-independence depends on this being a mechanical loop:
   - **For each** `prd.business_requirements[i]` → emit ≥1 scenario whose `requirement_ref` = that `req_id`. (A P0 requirement always keeps ≥1.)
   - **For each** `prd.boundary_conditions[i]` → emit ≥1 boundary scenario referencing that entry. Do NOT fold a boundary rule into an unrelated happy-path scenario as a substitute — it needs its own row. (This is the rule most often missed: e.g. a screenshot/privacy-mask boundary and a "shown once per customer" ordering boundary are distinct entries, each needing its own scenario.)
@@ -57,7 +120,7 @@ Flow:
   - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario.
   - Every scenario MUST carry a `requirement_ref` (the `req_id` / boundary index / event it satisfies) so Step 4 can audit coverage mechanically.
   - **Clickstream Telemetry Rules:** Clickstream verification is **NOT** a mandatory hard gate for the generator. If `clickstream_events` are explicitly provided/told in the input contexts, then generate $\ge 1$ verification step per event. If they are NOT provided or explicitly mentioned, **do NOT fail validation and do NOT generate telemetry tests.** Instead, simply list it as an Open Question / Clarification inside `<feature_key>_analysis.md` (e.g., *"Are clickstream telemetry events required for this feature?"*).
-- Dedup against existing GMT/NLP tests retrieved from `config/<app>.json` repository paths.
+- Dedup against existing GMT/NLP tests retrieved from `${CLAUDE_PLUGIN_ROOT}/config/<app>.json` repository paths.
 
 ### 2. Scenario Expansion
 Expand scenarios across:
@@ -112,7 +175,7 @@ An item may legitimately remain uncovered ONLY if its expected behavior is undef
 Generate the following 3 files in the current working directory, naming them dynamically using the `<feature_key>` defined in `feature_metadata`:
 
 ### 1. `<feature_key>_SDET_plan.json`
-Full machine-readable master payload conforming strictly to `schemas/sdet_plan.schema.json`. Must include `created_at` and `updated_at` ISO date-time timestamps.
+Full machine-readable master payload conforming strictly to `${CLAUDE_PLUGIN_ROOT}/schemas/sdet_plan.schema.json`. Must include `created_at` and `updated_at` ISO date-time timestamps.
 
 Must also include the `coverage_categories` object produced by Step 0:
 - `auto_selected[]` — `{ category, reason }` where `reason` = the exact input field that fired (e.g. `"rfc.lifecycle_considerations[0].event = PROCESS_DEATH"`).
@@ -188,6 +251,32 @@ Flattened CSV strictly matching squad project template headers:
 - `TestType`: always the literal `"Story"` for every row. Do NOT substitute `"FCT"`, `"Non-FCT"`, or any other value.
 
 > **Enum validation (run as part of the Step 4 gate):** before writing the CSV, verify every row's `State` / `Priority` / `Type of Test Case` / `Execution Mode` / `Platform` / `TestType` / `Country v2` holds only a value allowed above; reject and fix any other value.
+
+---
+
+## Validate — report, never block
+```
+python3 -c "import json,jsonschema; jsonschema.validate(
+  json.load(open('<feature_key>_SDET_plan.json')),
+  json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/sdet_plan.schema.json')))"
+```
+- Passes and `extraction_gaps` is empty → `extraction_status: OK`.
+- Fails → **still write all three files.** Convert each validator error into an
+  `extraction_gaps` entry (`field` = the validator's JSON path, `severity: BLOCKING`), set
+  `extraction_status: INCOMPLETE`, and carry it into the analysis doc's gap table. Never patch
+  a value in just to make validation pass.
+- Validator unavailable (`jsonschema` not installed) → write the files, add a `DEGRADED` gap on
+  `ENVIRONMENT`, **and say so in your reply to the user** — not only in the JSON, which they may
+  not open. Give them the command for their platform:
+  - macOS / Linux with a system Python: `pip3 install --break-system-packages jsonschema`
+    (plain `pip3 install` fails with an *externally-managed-environment* error under PEP 668)
+  - inside a virtualenv, or with `uv`: `pip install jsonschema` / `uv pip install jsonschema`
+  Never report an unvalidated output as valid — well-formed JSON is not schema conformance.
+  Do not attempt the install yourself; it is the user's environment to change.
+
+Also validate each **input** context against its own schema during Preflight, with the same
+report-never-block rule — an upstream file that fails validation gets a `BLOCKING` gap naming
+the file and the error.
 
 ---
 

@@ -5,6 +5,22 @@
   "additionalProperties": false,
   "required": ["app", "change_summary", "screens_touched", "test_hooks"],
   "properties": {
+    "extraction_status": { "type": "string", "enum": ["OK", "INCOMPLETE", "DEGRADED"], "description": "OK = every field resolved from the inputs. INCOMPLETE = one or more fields could not be resolved and were left absent. DEGRADED = a config/schema/tool the skill depends on was unavailable. Never OK when extraction_gaps is non-empty." },
+    "extraction_gaps": {
+      "type": "array",
+      "description": "Everything the skill could NOT resolve, written instead of guessing a value. Empty array = clean extraction.",
+      "items": {
+        "type": "object",
+        "required": ["field", "reason", "severity"],
+        "additionalProperties": false,
+        "properties": {
+          "field": { "type": "string", "description": "JSON path of the unresolved field, e.g. business_requirements[3].target_module. Use 'ENVIRONMENT' for install/tool failures not tied to one field." },
+          "reason": { "type": "string", "description": "Why it could not be resolved, citing the source section checked." },
+          "action": { "type": "string", "description": "What a human must do to close the gap." },
+          "severity": { "type": "string", "enum": ["BLOCKING", "DEGRADED", "INFO"], "description": "BLOCKING = schema-required field absent. DEGRADED = resolved without normal grounding. INFO = optional content genuinely absent from the source." }
+        }
+      }
+    },
     "app": { "type": "string" },
     "change_summary": { "type": "string" },
     "screens_touched": { "type": "array", "items": { "type": "string" }, "description": "screen_ids" },
