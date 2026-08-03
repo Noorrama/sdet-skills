@@ -7,8 +7,38 @@ description: Extract comprehensive technical context from a mobile RFC into rfc_
 
 Distils the RFC into the risk/scope/technical signals that shape test prioritisation and mobile-specific scenario generation. Skipped when an EPIC has no RFC.
 
-## Config
-`config/<app>.json` → set `rfc_context.app = app_id`.
+## Preflight — resolve, or record and continue
+**Never stop, never guess.** Work through these before extracting. Anything that cannot be
+resolved becomes an `extraction_gaps` entry and the run continues — a partial, honestly
+labelled output is always better than no output. What is forbidden is inventing a value to
+fill the hole.
+
+1. **App id.** One of `gojek-consumer`, `gojek-driver`, `gofood-merchant`, `gopay-consumer`,
+   `gopay-merchant`. Not resolvable → leave `app` absent, add a `BLOCKING` gap on `app`.
+2. **Config** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Unreadable → add a `DEGRADED` gap on
+   `ENVIRONMENT` with reason *"cannot read ${CLAUDE_PLUGIN_ROOT}/config/<app>.json — plugin install
+   may be incomplete"* and action *"run `claude plugin update aep-mobile@aep`, restart Claude,
+   re-run"*. Set `extraction_status: DEGRADED`. Continue. `app_id` comes from this file; without it `app` stays absent with a `BLOCKING` gap.
+3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/rfc_context.schema.json`. Unreadable → `DEGRADED` gap on `ENVIRONMENT`, same install action.
+   Fall back to the field list in this document **only** in that case, and say so in the gap.
+4. **Input.** RFC attached and readable. Empty or unparsed → emit with `INCOMPLETE` and a `BLOCKING` gap. Do not emit empty sections as though the RFC declared them empty.
+
+## Reporting gaps — required on every run
+Every output carries both fields (see the schema):
+
+- `extraction_status` — `OK` only when `extraction_gaps` is empty. `INCOMPLETE` when a field
+  could not be resolved from the source. `DEGRADED` when config/schema/tooling was unavailable.
+- `extraction_gaps[]` — `{ field, reason, action, severity }`, severity one of `BLOCKING`
+  (schema-required field absent), `DEGRADED` (resolved without normal grounding), `INFO`
+  (optional content genuinely absent from the source doc).
+
+Rules:
+- A field you cannot resolve is **left absent** and recorded. Never filled with a placeholder,
+  a plausible default, or a value carried over from another feature.
+- `reason` cites the section actually checked (*"PRD §4.2 states the rule but names no
+  module"*), not a generic *"not found"*.
+- Silence is the failure mode being designed out here — an empty `extraction_gaps` on a
+  half-specified source document is a worse bug than a malformed field.
 
 ## Reads
 RFC document (Lark/Confluence/PDF) — **single input**. This skill reads only the RFC. Cross-references against PRD and design are handled downstream by the `sdet-plan-generator`, which ingests all extractor outputs and performs gap analysis.
@@ -107,18 +137,37 @@ For mobile-specific sections (8–16), set `inferred_from_prose: false` when ext
 - No solution approach clearly marked as selected/preferred when multiple are presented
 
 ## Guardrails
-- Do not infer risks not stated — unknowns go to `open_questions` with `impact_on_testing`.
+- **Never invent a value.** Do not infer risks not stated — unknowns go to `open_questions`
+  with `impact_on_testing`.
 - `inferred_from_prose` must be set correctly — never omit this field on mobile-specific sections.
 - Empty arrays `[]` are valid when the RFC explicitly has no items for a section (e.g., no API changes). Do not omit the key.
-- Output valid JSON only, conforming to `schemas/rfc_context.schema.json`.
+- Distinguish the two absences: **the RFC says there are none** → `[]`. **The RFC is silent and
+  you cannot tell** → `open_questions`, never `[]`. Emitting `[]` for something you simply
+  could not find is a fabricated "no changes here" claim.
+- Absent **required** content that cannot be read from the RFC → leave the field absent and add
+  a `BLOCKING` gap naming it and the RFC section you checked. Emit the file anyway.
 - Do not populate `prd_cross_refs` or `design_cross_refs` — these are filled downstream by `sdet-plan-generator`.
+- Output valid JSON only.
 
-## Validate
+## Validate — hard gate
 ```
 python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('rfc_context.json')),
-  json.load(open('schemas/rfc_context.schema.json')))"
+  json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/rfc_context.schema.json')))"
 ```
+- Passes → write the file.
+- Passes → `extraction_status: OK` (when `extraction_gaps` is empty).
+- Fails → **still write the file.** Convert every validator error into an `extraction_gaps`
+  entry (`field` = the validator's JSON path, `severity: BLOCKING`) and set
+  `extraction_status: INCOMPLETE`. Never patch a value in just to make validation pass.
+- Validator unavailable (`jsonschema` not installed) → write the file, add a `DEGRADED` gap on
+  `ENVIRONMENT`, **and say so in your reply to the user** — not only in the JSON, which they may
+  not open. Give them the command for their platform:
+  - macOS / Linux with a system Python: `pip3 install --break-system-packages jsonschema`
+    (plain `pip3 install` fails with an *externally-managed-environment* error under PEP 668)
+  - inside a virtualenv, or with `uv`: `pip install jsonschema` / `uv pip install jsonschema`
+  Never report an unvalidated output as valid — well-formed JSON is not schema conformance.
+  Do not attempt the install yourself; it is the user's environment to change.
 
 ## Downstream consumers
 - **sdet-plan-generator** — uses `experimentation_matrix` for flag toggle scenarios, `api_contract_changes` for contract tests, `local_data_changes` for migration scenarios, `permissions_required` for permission grant/deny scenarios, `lifecycle_considerations` for process death/config change scenarios, `architectural_risks` for risk-focused P0 tests.
