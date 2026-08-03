@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "sdet_plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feature_name", "plan_version", "generation_mode", "scenarios", "coverage_summary"],
+  "properties": {
+    "feature_name": { "type": "string" },
+    "plan_version": { "type": "string" },
+    "generation_mode": { "type": "string", "enum": ["pass1", "pass2", "retrigger"] },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["scenario_id", "name", "test_layer", "priority", "source"],
+        "properties": {
+          "scenario_id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "test_layer": { "type": "string", "enum": ["component", "integration", "e2e"] },
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "source": { "type": "string", "enum": ["RFC", "PRD", "CODE_DIFF", "RETRIGGER"] },
+          "source_ref": { "type": "string" },
+          "is_delta": { "type": "boolean" },
+          "is_legacy_regression": { "type": "boolean" },
+          "is_dedup": { "type": "boolean" },
+          "dedup_reason": { "type": "string" },
+          "step_descriptions": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["step", "action", "expected_result"],
+              "properties": {
+                "step": { "type": "integer" },
+                "action": { "type": "string" },
+                "curl_reference": { "type": "string" },
+                "expected_result": { "type": "string" }
+              }
+            }
+          },
+          "preconditions": { "type": "array", "items": { "type": "string" } },
+          "fixture_ids": { "type": "array", "items": { "type": "string" } },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "coverage_summary": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "total": { "type": "integer" },
+        "by_layer": { "type": "object" },
+        "by_priority": { "type": "object" },
+        "rfc_steps_covered": { "type": "integer" },
+        "rfc_steps_total": { "type": "integer" },
+        "rfc_gaps": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "dedup_report": { "type": "object" }
+  }
+}
