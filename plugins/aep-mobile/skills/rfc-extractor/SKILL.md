@@ -9,7 +9,7 @@ Distils the RFC into the risk/scope/technical signals that shape test prioritisa
 
 ## Preflight — resolve, or record and continue
 **Never stop, never guess.** Work through these before extracting. Anything that cannot be
-resolved becomes an `extraction_gaps` entry and the run continues — a partial, honestly
+resolved becomes an `extraction_notes` entry and the run continues — a partial, honestly
 labelled output is always better than no output. What is forbidden is inventing a value to
 fill the hole.
 
@@ -20,18 +20,18 @@ fill the hole.
    - **One app** → one output file, as before.
    - **Two or more** → one output file per app (see *Output files*). Common for shared SDK,
      platform-library, or backend-contract RFCs that land in several host apps.
-   - **None resolvable** → emit a single file with `app` absent and a `BLOCKING` gap on `app`.
+   - **None resolvable** → emit a single file with `app` absent and a `NEEDS_ANSWER` note on `app`.
    Report the decision in your reply before extracting: *"2 apps detected — gopay-consumer,
    gojek-consumer. Writing 2 context files."*
 2. **Config, per app in the set** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Each output file's
    `app` comes from its own config's `app_id`; never copy one app's config onto another's file.
-   Unreadable → add a `DEGRADED` gap on `ENVIRONMENT` with reason *"cannot read
+   Unreadable → add a `WORTH_CHECKING` note on `ENVIRONMENT` with reason *"cannot read
    ${CLAUDE_PLUGIN_ROOT}/config/<app>.json — plugin install may be incomplete"* and action *"run
    `claude plugin update aep-mobile@aep`, restart Claude, re-run"*. Set
-   `extraction_status: DEGRADED`. Continue; without it `app` stays absent with a `BLOCKING` gap.
-3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/rfc_context.schema.json`. Unreadable → `DEGRADED` gap on `ENVIRONMENT`, same install action.
-   Fall back to the field list in this document **only** in that case, and say so in the gap.
-4. **Input.** RFC attached and readable. Empty or unparsed → emit with `INCOMPLETE` and a `BLOCKING` gap. Do not emit empty sections as though the RFC declared them empty.
+   `extraction_status: LIMITED`. Continue; without it `app` stays absent with a `NEEDS_ANSWER` note.
+3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/rfc_context.schema.json`. Unreadable → `WORTH_CHECKING` note on `ENVIRONMENT`, same install action.
+   Fall back to the field list in this document **only** in that case, and say so in the note.
+4. **Input.** RFC attached and readable. Empty or unparsed → emit with `PARTIAL` and a `NEEDS_ANSWER` note. Do not emit empty sections as though the RFC declared them empty.
 
 ## Output files — one per app in scope
 | Apps in scope | Files written |
@@ -63,22 +63,59 @@ change.
   same number. Never copy one app's version onto the other.
 - `navigation_changes[].deep_link` — scheme differs by app; take it from that app's config.
 
-## Reporting gaps — required on every run
-Every output carries both fields (see the schema):
+## Notes on what the document didn't say — required on every run
+Every output carries two fields. They are a to-do list for the document's author, **not** a
+verdict on your work — a doc still being written will always produce some, and that is the
+normal, expected result.
 
-- `extraction_status` — `OK` only when `extraction_gaps` is empty. `INCOMPLETE` when a field
-  could not be resolved from the source. `DEGRADED` when config/schema/tooling was unavailable.
-- `extraction_gaps[]` — `{ field, reason, action, severity }`, severity one of `BLOCKING`
-  (schema-required field absent), `DEGRADED` (resolved without normal grounding), `INFO`
-  (optional content genuinely absent from the source doc).
+- `extraction_status`
+  - `COMPLETE` — everything the document specified was captured.
+  - `PARTIAL` — the document didn't specify some things; they're listed below. Normal for a
+    work-in-progress doc.
+  - `LIMITED` — a config file, schema or the validator wasn't available, so part of the run had
+    less grounding than usual.
+- `extraction_notes[]` — `{ field, reason, action, follow_up }`, where `follow_up` is:
+  - `NEEDS_ANSWER` — someone has to supply this before the tests can cover it.
+  - `WORTH_CHECKING` — a value was produced, but without its usual reference source. Confirm it.
+  - `FYI` — optional content the document simply doesn't have. No action needed.
 
 Rules:
-- A field you cannot resolve is **left absent** and recorded. Never filled with a placeholder,
-  a plausible default, or a value carried over from another feature.
-- `reason` cites the section actually checked (*"PRD §4.2 states the rule but names no
-  module"*), not a generic *"not found"*.
-- Silence is the failure mode being designed out here — an empty `extraction_gaps` on a
-  half-specified source document is a worse bug than a malformed field.
+- A field you cannot resolve is **left empty** and noted. Never filled with a placeholder, a
+  plausible default, or a value carried over from another feature.
+- `reason` says what you checked and what was there (*"PRD section 4.2 states the rule but names
+  no module"*), not a bare *"not found"*.
+- `action` is the concrete next step (*"confirm the target module with the PM"*), so the note can
+  be acted on without re-reading the doc.
+- Staying silent is the failure being designed out here. An empty `extraction_notes` on a
+  half-written document is a worse outcome than a field left empty and explained.
+## Matching the source document — normalise, don't invent
+Source docs are human-written. Labels and values vary; the schema does not. Reading a value that
+**is** in the document and expressing it in the schema's vocabulary is normalisation, and it is
+required. Supplying a value the document does not contain is invention, and it is forbidden.
+Do not confuse the two — refusing to normalise is not caution, it is a false open-point report.
+
+**Field labels — match by meaning, not by key name.** Schema keys are output names, never strings
+to search for. A row labelled `Status`, `RFC Status`, `Current Status` or `State` all populate
+`rfc_status`. `Owner` / `Author` / `DRI` all populate the owner field. Look for the concept.
+
+**Enum values — match case-insensitively, emit the canonical spelling.** Compare the document's
+value to the schema's allowed values ignoring:
+- letter case — `DRAFT`, `draft`, `Draft` all → `"Draft"`
+- surrounding whitespace, and any trailing punctuation or checkbox glyph (`☑ DRAFT` → `"Draft"`)
+- separator style — `state injection`, `state_injection`, `State-Injection` → `"state-injection"`
+
+Emit the schema's exact spelling, never the document's. This applies to **every** enum in the
+schema, not just the ones named here.
+
+**Synonyms — allowed when unambiguous, recorded when used.** `In Progress` → `"In Review"` is a
+fair mapping; make it, and add an `FYI` note noting the source value so the mapping is auditable.
+A pure case or whitespace fix needs no note — it is not a judgement call.
+
+**When nothing matches, say what you found.** If no allowed value fits even case-insensitively,
+leave the field absent and make the note specific: *"RFC header reads `PRD WALKTHROUGH`; not a
+legal `rfc_status` value (allowed: Draft, In Review, Approved, Published, Abandoned)"*. Never
+report it as *"not found"* — the field was found, its value could not be expressed, and those
+send the reader to different places. Never pick the nearest-looking value to dodge the note.
 
 ## Reads
 RFC document (Lark/Confluence/PDF) — **single input**. This skill reads only the RFC. Cross-references against PRD and design are handled downstream by the `sdet-plan-generator`, which ingests all extractor outputs and performs gap analysis.
@@ -185,7 +222,7 @@ For mobile-specific sections (8–16), set `inferred_from_prose: false` when ext
   you cannot tell** → `open_questions`, never `[]`. Emitting `[]` for something you simply
   could not find is a fabricated "no changes here" claim.
 - Absent **required** content that cannot be read from the RFC → leave the field absent and add
-  a `BLOCKING` gap naming it and the RFC section you checked. Emit the file anyway.
+  a `NEEDS_ANSWER` note naming it and the RFC section you checked. Emit the file anyway.
 - Do not populate `prd_cross_refs` or `design_cross_refs` — these are filled downstream by `sdet-plan-generator`.
 - Output valid JSON only.
 - **Never merge two apps into one file.** An `rfc_context` carries exactly one `app`. If the RFC
@@ -199,11 +236,11 @@ python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('<each rfc_context file>')),
   json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/rfc_context.schema.json')))"
 ```
-- Passes → `extraction_status: OK` (when `extraction_gaps` is empty).
-- Fails → **still write the file.** Convert every validator error into an `extraction_gaps`
-  entry (`field` = the validator's JSON path, `severity: BLOCKING`) and set
-  `extraction_status: INCOMPLETE`. Never patch a value in just to make validation pass.
-- Validator unavailable (`jsonschema` not installed) → write the file, add a `DEGRADED` gap on
+- Passes → `extraction_status: COMPLETE` (when `extraction_notes` is empty).
+- Fails → **still write the file.** Convert every validator error into an `extraction_notes`
+  entry (`field` = the validator's JSON path, `follow_up: NEEDS_ANSWER`) and set
+  `extraction_status: PARTIAL`. Never patch a value in just to make validation pass.
+- Validator unavailable (`jsonschema` not installed) → write the file, add a `WORTH_CHECKING` note on
   `ENVIRONMENT`, **and say so in your reply to the user** — not only in the JSON, which they may
   not open. Give them the command for their platform:
   - macOS / Linux with a system Python: `pip3 install --break-system-packages jsonschema`

@@ -31,19 +31,19 @@ missing input pass unmentioned — generate what the available inputs support an
 what was not covered.
 
 1. **Schemas.** Read `${CLAUDE_PLUGIN_ROOT}/schemas/sdet_plan.schema.json` and
-   `${CLAUDE_PLUGIN_ROOT}/schemas/scenario.schema.json`. Unreadable → `DEGRADED` gap on
+   `${CLAUDE_PLUGIN_ROOT}/schemas/scenario.schema.json`. Unreadable → `WORTH_CHECKING` note on
    `ENVIRONMENT`, action *"run `claude plugin update aep-mobile@aep`, restart Claude, re-run"*.
-   Fall back to the field lists in this document **only** then, and say so in the gap.
+   Fall back to the field lists in this document **only** then, and say so in the note.
 2. **Required contexts.** `prd_context.json` and `design_context.json`. Either missing → carry
-   on with what remains and add a `BLOCKING` gap: *"generated without <name> — requirement
-   coverage / screen coverage is unverified"*. Set `extraction_status: INCOMPLETE`.
+   on with what remains and add a `NEEDS_ANSWER` note: *"generated without <name> — requirement
+   coverage / screen coverage is unverified"*. Set `extraction_status: PARTIAL`.
 3. **Optional contexts.** `rfc_context.json` and `plan_context.json` may legitimately be
-   absent (no RFC, no impl plan) → `INFO` gap, that is a normal run. A file that exists but
-   **fails its schema** is different: use what parses, and raise a `BLOCKING` gap naming the
+   absent (no RFC, no impl plan) → `FYI` note, that is a normal run, not a problem. A file that exists but
+   **fails its schema** is different: use what parses, and raise a `NEEDS_ANSWER` note naming the
    file and the validation error. Never silently downgrade malformed to absent.
-4. **Inherit upstream gaps.** Every input context carries its own `extraction_gaps[]`. Copy all
-   of them into this plan's `extraction_gaps[]`, prefixing `field` with the source
-   (`prd_context.business_requirements[3].target_module`). Upstream gaps do not disappear
+4. **Inherit upstream notes.** Every input context carries its own `extraction_notes[]`. Copy all
+   of them into this plan's `extraction_notes[]`, prefixing `field` with the source
+   (`prd_context.business_requirements[3].target_module`). Upstream notes do not disappear
    because a downstream skill ran successfully.
 5. **Resolve the app before picking files.** Extractors write per-app files when a source
    document covers more than one app: `prd_context.<app_id>.json`, `rfc_context.<app_id>.json`,
@@ -55,13 +55,13 @@ what was not covered.
      they did not say, then load only that app's files. Never merge two apps' contexts into one
      plan: `deeplink_scheme`, locators and repos differ per app, so a merged plan is wrong for
      both.
-   - Both forms present for the same stage → prefer the per-app file and raise an `INFO` gap
+   - Both forms present for the same stage → prefer the per-app file and raise an `FYI` note
      naming the plain file you ignored.
    Stamp the chosen `app` into `feature_metadata`, and suffix `feature_key` per app
    (`insurance_sdk_gopay`) so two runs' deliverables don't collide on import.
 6. **App agreement.** Every context loaded for the run must carry the same `app`. A mismatch
    means files for different apps were mixed — pick nothing, use the majority value, and raise a
-   `BLOCKING` gap naming the conflicting files and values.
+   `NEEDS_ANSWER` note naming the conflicting files and values.
 7. **Shared requirements across apps.** When a source document covered several apps, items that
    apply to all of them carry the **same id in every file** (`req_id`, `risk_id`, `flag_key`,
    `endpoint`). Generate scenarios for them normally — they are in scope for this app too — and
@@ -78,32 +78,68 @@ what was not covered.
 - A cross-stage contradiction (PRD says one thing, design another) is reported as a gap. Do
   **not** silently resolve it by preferring one source.
 - A required schema field that cannot be satisfied from the inputs is **left absent** with a
-  `BLOCKING` gap — never filled to make the output validate.
+  `NEEDS_ANSWER` note — never filled to make the output validate.
 
-## Gap reporting — required in all three deliverables
-The same gaps must appear everywhere the QA might look. Reporting them in the JSON alone does
-not count; nobody reads the JSON.
+## Open points — reported in all three deliverables
+The same notes must appear everywhere the QA might look; putting them only in the JSON does not
+count, because nobody opens the JSON.
 
-**`<feature_key>_SDET_plan.json`** — `extraction_status` plus `extraction_gaps[]`
-(`{ field, reason, action, severity }`), including everything inherited from upstream.
+Frame them as **what the source documents left open**, not as problems with the plan. Most
+features are planned from work-in-progress docs, so a list of open points is the expected
+result — say so, rather than letting it read as a failed run.
 
-**`<feature_key>_analysis.md`** — open with a section titled `## ⚠️ Coverage Gaps & Inputs`
-**before** any scenario content. It contains:
-- A one-line verdict: *"Generated from PRD + Design. No RFC, no impl plan. Status: INCOMPLETE."*
-- An inputs table — each context, `Present / Absent / Malformed`, and its own status.
-- A gaps table — `Severity | Field | Reason | Action`, `BLOCKING` first.
+**`<feature_key>_SDET_plan.json`** — `extraction_status` plus `extraction_notes[]`
+(`{ field, reason, action, follow_up }`), including everything inherited from upstream.
+
+**`<feature_key>_analysis.md`** — open with a section titled `## Inputs & Open Points` **before**
+any scenario content. It contains:
+- A one-line summary in plain words: *"Generated from the PRD and design. No RFC or impl plan
+  was supplied. 4 open points below — 1 needs an answer before the tests can cover it."*
+- An inputs table — each context, `Present / Not supplied / Could not be read`, and its status.
+- A table of open points — `Follow-up | Field | What we found | Next step`, `NEEDS_ANSWER` first.
+- A one-line legend directly under it so the labels explain themselves:
+  *"NEEDS_ANSWER — someone has to supply this. WORTH_CHECKING — produced, but confirm it.
+  FYI — the document doesn't cover this; no action needed."*
 - A plain-language line naming what the plan therefore does **not** cover, e.g. *"No RFC was
   supplied, so no feature-flag, N-1 compatibility or API-error scenarios were generated."*
 
-**`<feature_key>_test_cases.csv`** — when `extraction_status` is not `OK`, the first data row
-is a non-executable marker row: `id` = `GAP-NOTICE`, `title` = *"⚠️ Generated with N gaps (M
-blocking) — see analysis.md before importing"*, all other columns empty. It is a deliberate
-speed bump: this CSV gets bulk-imported into TMS without the analysis doc ever being opened.
+**`<feature_key>_test_cases.csv`** — when `extraction_status` is not `COMPLETE`, the first data
+row is a non-executable marker row: `id` = `REVIEW-FIRST`, `title` = *"N open points (M need an
+answer) — see analysis.md before importing"*, all other columns empty. It is a deliberate speed
+bump: this CSV gets bulk-imported into TMS without the analysis doc ever being opened.
 
-**Never report `extraction_status: OK` when any gap exists**, and never describe coverage as
-complete in the analysis doc while `BLOCKING` gaps are open.
+**Never report `extraction_status: COMPLETE` when any note is open**, and never describe coverage
+as complete while `NEEDS_ANSWER` items remain.
 
 ---
+
+## Matching the source document — normalise, don't invent
+Source docs are human-written. Labels and values vary; the schema does not. Reading a value that
+**is** in the document and expressing it in the schema's vocabulary is normalisation, and it is
+required. Supplying a value the document does not contain is invention, and it is forbidden.
+Do not confuse the two — refusing to normalise is not caution, it is a false open-point report.
+
+**Field labels — match by meaning, not by key name.** Schema keys are output names, never strings
+to search for. Look for the concept, whatever the doc calls it.
+
+**Enum values — match case-insensitively, emit the canonical spelling.** Compare the document's
+value to the schema's allowed values ignoring:
+- letter case — `DRAFT`, `draft`, `Draft` all → `"Draft"`
+- surrounding whitespace, and any trailing punctuation or checkbox glyph (`☑ DRAFT` → `"Draft"`)
+- separator style — `state injection`, `state_injection`, `State-Injection` → `"state-injection"`
+
+Emit the schema's exact spelling, never the document's. This applies to **every** enum in the
+schema, not just the ones named here.
+
+**Synonyms — allowed when unambiguous, recorded when used.** `In Progress` → `"In Review"` is a
+fair mapping; make it, and add an `FYI` note noting the source value so the mapping is auditable.
+A pure case or whitespace fix needs no note — it is not a judgement call.
+
+**When nothing matches, say what you found.** If no allowed value fits even case-insensitively,
+leave the field absent and make the note specific — quote the document's value and list the legal
+ones: *"header reads `PRD WALKTHROUGH`; not a legal value (allowed: …)"*. Never report it as
+*"not found"* — the field was found, its value could not be expressed, and those send the reader
+to different places. Never pick the nearest-looking value to dodge the note.
 
 ## Execution Workflow
 
@@ -131,7 +167,7 @@ Flow:
   - If `plan_context.json` is absent, proceed with `prd_context.json` and `design_context.json` as the baseline.
   - State the missing contexts clearly as a limitation inside the `<feature_key>_analysis.md` report (e.g., *"plan_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
   - A missing context also means its Category Catalog triggers simply cannot fire (no failure) — those categories fall through to the extras tiers.
-  - **Absent is not the same as malformed.** A context file that exists but fails its schema gets a `BLOCKING` gap naming the file and the validation error (Preflight step 3) — never a silent fall-through to "treat as absent", which drops coverage the QA believes they have.
+  - **Absent is not the same as malformed.** A context file that exists but fails its schema gets a `NEEDS_ANSWER` note naming the file and the validation error (Preflight step 3) — never a silent fall-through to "treat as absent", which drops coverage the QA believes they have.
 - **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and emit at least the required scenario(s) before doing anything else. Model-independence depends on this being a mechanical loop:
   - **For each** `prd.business_requirements[i]` → emit ≥1 scenario whose `requirement_ref` = that `req_id`. (A P0 requirement always keeps ≥1.)
   - **For each** `prd.boundary_conditions[i]` → emit ≥1 boundary scenario referencing that entry. Do NOT fold a boundary rule into an unrelated happy-path scenario as a substitute — it needs its own row. (This is the rule most often missed: e.g. a screenshot/privacy-mask boundary and a "shown once per customer" ordering boundary are distinct entries, each needing its own scenario.)
@@ -279,12 +315,12 @@ python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('<feature_key>_SDET_plan.json')),
   json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/sdet_plan.schema.json')))"
 ```
-- Passes and `extraction_gaps` is empty → `extraction_status: OK`.
+- Passes and `extraction_notes` is empty → `extraction_status: COMPLETE`.
 - Fails → **still write all three files.** Convert each validator error into an
-  `extraction_gaps` entry (`field` = the validator's JSON path, `severity: BLOCKING`), set
-  `extraction_status: INCOMPLETE`, and carry it into the analysis doc's gap table. Never patch
+  `extraction_notes` entry (`field` = the validator's JSON path, `follow_up: NEEDS_ANSWER`), set
+  `extraction_status: PARTIAL`, and carry it into the analysis doc's gap table. Never patch
   a value in just to make validation pass.
-- Validator unavailable (`jsonschema` not installed) → write the files, add a `DEGRADED` gap on
+- Validator unavailable (`jsonschema` not installed) → write the files, add a `WORTH_CHECKING` note on
   `ENVIRONMENT`, **and say so in your reply to the user** — not only in the JSON, which they may
   not open. Give them the command for their platform:
   - macOS / Linux with a system Python: `pip3 install --break-system-packages jsonschema`
@@ -294,7 +330,7 @@ python3 -c "import json,jsonschema; jsonschema.validate(
   Do not attempt the install yourself; it is the user's environment to change.
 
 Also validate each **input** context against its own schema during Preflight, with the same
-report-never-block rule — an upstream file that fails validation gets a `BLOCKING` gap naming
+report-never-block rule — an upstream file that fails validation gets a `NEEDS_ANSWER` note naming
 the file and the error.
 
 ---
