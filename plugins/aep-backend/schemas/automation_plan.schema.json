@@ -20,16 +20,19 @@
             "type": "array",
             "items": {
               "type": "object", "additionalProperties": false,
-              "required": ["method_name", "scenario_id", "fixture_id", "required_state"],
+              "required": ["method_name", "scenario_id", "fixture_ids"],
               "properties": {
                 "method_name": { "type": "string" },
                 "scenario_id": { "type": "string" },
                 "is_dedup": { "type": "boolean" },
                 "dedup_reason": { "type": "string" },
                 "curl_reference": { "type": "string" },
-                "fixture_id": { "type": "string" },
-                "required_state": { "type": "string" },
-                "mock_setup": { "type": "array", "items": { "type": "object" } },
+                "fixture_ids": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1,
+                  "description": "One or more fixture IDs required by this test method. Each ID resolves to an entry in fixtures_summary."
+                },
                 "tags": { "type": "array", "items": { "type": "string" } }
               }
             }
@@ -46,7 +49,28 @@
           "fixture_id": { "type": "string" },
           "description": { "type": "string" },
           "used_by_scenarios": { "type": "array", "items": { "type": "string" } },
-          "required_state": { "type": "string" }
+          "required_state": {
+            "type": "object",
+            "description": "What the test data service must provision. entity + category drive service dispatch; config passes parameters.",
+            "required": ["entity", "category"],
+            "properties": {
+              "entity":   { "type": "string", "description": "Domain the test data service owns: CUSTOMER | DRIVER | BOOKING | MERCHANT | PAYMENT_INSTRUMENT | DB_INFRA" },
+              "category": { "type": "string", "description": "Exact category name from the test data service catalog, e.g. CUSTOMER_WITH_GOPAY, DRIVER_4W_ONLINE. Maps to testDataCategory.testDataCategoryName." },
+              "count":    { "type": "integer", "minimum": 1, "description": "Number of entities to provision. Maps to testDataCategory.count in the test-data-service request. Omit for DB_INFRA." },
+              "config":   { "type": "object", "additionalProperties": true, "description": "Extra parameters for this category, e.g. wallet_balance_idr, service_area_id. Merged into testDataCategory body." }
+            },
+            "additionalProperties": false
+          },
+          "response_fields_used": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Canonical field names the test code will call .get() on from the test data service response. Must match the service's documented response schema for this entity+category. Code generator uses this list to emit typed field lookups. Example: [\"customerId\", \"bearerToken\", \"walletId\"]"
+          },
+          "output": {
+            "type": ["object", "null"],
+            "description": "Populated by test-data-generator after provisioning. null until TDG runs. Contains the provisioned entity details; code generator reads runtime values from here.",
+            "default": null
+          }
         }
       }
     },
