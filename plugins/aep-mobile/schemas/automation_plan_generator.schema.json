@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "automation_plan_generator",
+  "description": "Handoff contract emitted by sdet-plan-generator (EMIT_AUTOMATION_PLAN mode) for the downstream Test-Data-Generation stage defined in the Backend QA Test-Data Generation RFC. Mirrors that RFC's automation-plan-generator INPUT shape (pre-enrichment — the test-data stage later adds test_data_output). The RFC owns the canonical contract, so this schema is intentionally permissive (additionalProperties allowed) and pins only the fields the emission must always carry.",
+  "type": "object",
+  "required": ["epic_id", "automation_scenarios"],
+  "additionalProperties": true,
+  "properties": {
+    "epic_id": { "type": "string", "description": "From feature_metadata (the EPIC/Jira id if present, else the feature_key)." },
+    "generated_from": { "type": "string", "description": "Source SDET plan filename this was emitted from, e.g. 'birthday_reward_SDET_plan.json'. Provenance for re-generation." },
+    "emit_notes": {
+      "type": "array",
+      "description": "Open points from the emission itself — most commonly a backend field the mobile SDET plan could not supply. Same spirit as extraction_notes: never fabricated, always surfaced.",
+      "items": {
+        "type": "object",
+        "required": ["scenario_id", "field", "reason", "follow_up"],
+        "additionalProperties": false,
+        "properties": {
+          "scenario_id": { "type": "string" },
+          "field": { "type": "string" },
+          "reason": { "type": "string" },
+          "follow_up": { "type": "string", "enum": ["NEEDS_ANSWER", "WORTH_CHECKING", "FYI"] }
+        }
+      }
+    },
+    "automation_scenarios": {
+      "type": "array",
+      "description": "Only scenarios whose (post-sync) Execution Mode is Automatable. Manual scenarios stay in the SDET plan and are excluded here.",
+      "items": {
+        "type": "object",
+        "required": ["scenario_id", "requirement_ref", "description", "target_framework", "test_data", "environments"],
+        "additionalProperties": true,
+        "properties": {
+          "scenario_id": { "type": "string", "description": "Stable id (e.g. SC-001), assigned in scenario order. Reused on re-generation so downstream references stay valid." },
+          "requirement_ref": { "type": "string" },
+          "description": { "type": "string", "description": "From the scenario's csv_title_association / title." },
+          "is_legacy_regression": { "type": "boolean" },
+          "is_dedup": { "type": "boolean" },
+          "target_framework": { "type": "string", "description": "The scenario's target_execution_framework, verbatim (e.g. TAPMIND_NLP, GMT_JAVA). Backend consumers may map to their own value." },
+          "execution_scope": { "type": "string", "enum": ["FRONTEND_ONLY", "BACKEND_ONLY", "END_TO_END"] },
+          "service_name": { "type": "string", "description": "Backend-only. Present only when the SDET plan actually carries it; omitted (with an emit_note) otherwise. Never fabricated." },
+          "module": { "type": "string" },
+          "package": { "type": "string", "description": "Backend-only. See service_name." },
+          "test_class": { "type": "string", "description": "Backend-only. See service_name." },
+          "assertion_class": { "type": "string", "description": "Backend-only. See service_name." },
+          "endpoint": { "type": "string", "description": "Backend-only. See service_name." },
+          "curl_reference": { "type": "string", "description": "Backend-only. See service_name." },
+          "test_data": {
+            "type": "array",
+            "description": "The identification INPUT for the test-data stage. Carried directly from the SDET scenario's test_data[] — fixture_id, description, and required_state. The test-data stage appends test_data_output; do not add it here.",
+            "items": {
+              "type": "object",
+              "required": ["fixture_id", "description"],
+              "additionalProperties": true,
+              "properties": {
+                "fixture_id": { "type": "string" },
+                "description": { "type": "string" },
+                "required_state": { "type": "object", "description": "Static entity attributes, verbatim from the SDET fixture. Carried as-is — never re-derived here." },
+                "entity": { "type": "string" },
+                "dynamic_conditions": { "type": "array", "items": { "type": "object" }, "description": "Carried through from the SDET fixture — temporal/relational/selection needs that are not static attributes." },
+                "count": { "type": "integer" }
+              }
+            }
+          },
+          "environments": { "type": "array", "items": { "type": "string" } },
+          "execution_hints": { "type": "object" },
+          "jira_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}
