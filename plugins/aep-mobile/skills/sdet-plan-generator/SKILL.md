@@ -159,7 +159,7 @@ Flow:
 3. **Headless / non-interactive fallback:** if no user is available to answer (e.g. CI), skip the prompt and proceed with the **AUTO** set only — never block generation.
 4. **Generate scenarios for `auto_selected ∪ optional_extras_selected`.** Stamp each scenario with `coverage_category` and a `source` (`input_derived` for AUTO/feature_adjacent, `fe_baseline`, or `qa_added`). Record the whole decision in `coverage_categories` (see Output spec) and echo it in `<feature_key>_analysis.md`.
 
-**Scope rule:** generate scenarios **only** for selected categories — EXCEPT the Hard Coverage Rules below, which always apply (every P0 requirement and every `boundary_rules` entry keeps ≥1 scenario regardless of selection).
+**Scope rule:** generate scenarios **only** for selected categories — EXCEPT the Hard Coverage Rules below, which always apply (every P0 requirement and every `boundary_conditions` entry keeps ≥1 scenario regardless of selection).
 
 ### 1. Ingest & Coverage Gates
 - Ingest and aggregate whatever context inputs are provided (`plan_context`, `prd_context`, `design_context`, `rfc_context`).
@@ -227,7 +227,7 @@ An item may legitimately remain uncovered ONLY if its expected behavior is undef
 
 ## Output File Specifications
 
-Generate the following 3 files in the current working directory, naming them dynamically using the `<feature_key>` defined in `feature_metadata`:
+Generate the following files in the current working directory, naming them dynamically using the `<feature_key>` defined in `feature_metadata`. The first three are always produced in `GENERATE`/`SYNC` mode; the fourth (`automation_plan_generator.json`) is produced on CSV feedback, per the *Automation-Plan-Generator emission* section:
 
 ### 1. `<feature_key>_SDET_plan.json`
 Full machine-readable master payload conforming strictly to `${CLAUDE_PLUGIN_ROOT}/schemas/sdet_plan.schema.json`. Must include `created_at` and `updated_at` ISO date-time timestamps.
@@ -366,19 +366,23 @@ Also validate each **input** context against its own schema during Preflight, wi
 report-never-block rule — an upstream file that fails validation gets a `NEEDS_ANSWER` note naming
 the file and the error.
 
+In `SYNC` mode, validate the emitted `<feature_key>_automation_plan_generator.json` against
+`${CLAUDE_PLUGIN_ROOT}/schemas/automation_plan_generator.schema.json` the same way — write it even
+on failure, record the validator error, and never report an unvalidated handoff as valid.
+
 ---
 
 ## Bidirectional Sync Workflow
 
 The skill supports a two-way synchronization flow to allow human QA to review, refine, and add test cases manually in the CSV, and feed those corrections back to keep the master JSON in perfect alignment.
 
-### Dual Execution Modes
+### Execution Modes
 
 1. **`GENERATE` Mode (Default):**
    - **Trigger:** Upstream extractor contexts are provided as input.
    - **Action:** Generates `<feature_key>_SDET_plan.json`, `<feature_key>_analysis.md`, and `<feature_key>_test_cases.csv` from scratch.
 
-2. **`SYNC` Mode (Reverse Sync):**
+2. **`SYNC` Mode (Reverse Sync + automation-plan emission):**
    - **Trigger:** A modified `<feature_key>_test_cases.csv` is uploaded/provided as input. The skill automatically reads the existing `<feature_key>_SDET_plan.json` directly from the working directory.
    - **Action:** Parses the modified CSV and merges all human edits back into `<feature_key>_SDET_plan.json` strictly following these reconciliation rules:
      - **Mapping Anchor:** Correlate rows in the CSV to scenario objects in `<feature_key>_SDET_plan.json` using `Title` $\leftrightarrow$ `csv_title_association` as the primary key.
@@ -391,6 +395,46 @@ The skill supports a two-way synchronization flow to allow human QA to review, r
      - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `mapped_user_flow`, `test_data`, `unmapped_extractor_data`, `clickstream_events`, `coverage_category`, `source`, `requirement_ref`, the top-level `coverage_categories` / `coverage_audit` blocks, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
      - **Re-run the Step 4 Coverage Self-Audit** after merging and refresh the `coverage_audit` block, so QA-added/removed rows keep the coverage proof accurate.
      - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>_SDET_plan.json` to reflect the synchronization event.
+   - **Then emit the automation plan.** After the merge, run the *Automation-Plan-Generator emission* below — the CSV feedback is precisely the trigger to (re)produce `<feature_key>_automation_plan_generator.json` for the downstream Test-Data-Generation stage.
+
+---
+
+## Automation-Plan-Generator emission (Test-Data-Generation handoff)
+When the QA feeds the edited CSV back, the point of the round-trip is to produce the handoff the
+Backend QA Test-Data-Generation RFC consumes. Emit `<feature_key>_automation_plan_generator.json`
+conforming to `${CLAUDE_PLUGIN_ROOT}/schemas/automation_plan_generator.schema.json`.
+
+**Build from the synced JSON, never from the raw CSV.** The CSV has no test-data column, so the
+fixtures only exist in `<feature_key>_SDET_plan.json`. Order of operations: SYNC the CSV into the
+JSON first (above), then emit from that merged JSON. The JSON is the single source of truth; the
+CSV only carried the QA's column edits.
+
+**Filter.** Include a scenario **only if its post-sync `execution_mode` is `Automatable`.** Manual
+scenarios stay in the SDET plan and are omitted from the automation plan. (For a purely backend
+consumer you may additionally scope to `execution_scope` ∈ {`BACKEND_ONLY`, `END_TO_END`}; state
+it if you do.)
+
+**Field mapping** (SDET scenario → automation_scenario):
+- `scenario_id` — assign `SC-001`, `SC-002`… in scenario order; **reuse the same id on
+  re-generation** so downstream references stay valid.
+- `requirement_ref` → `requirement_ref`; `csv_title_association` → `description`;
+  `is_legacy_regression` → `is_legacy_regression`; `target_execution_framework` →
+  `target_framework` (verbatim); `execution_scope` → `execution_scope`;
+  `preconditions_metadata.target_environment` → `environments`.
+- **`test_data` is carried straight across** — copy each fixture's `fixture_id`, `description`,
+  `required_state` (and `entity`/`dynamic_conditions`/`count` if present) **verbatim**. Do NOT
+  re-derive `required_state` here; it was already assembled at generation time. Emit the
+  identification INPUT only — never add `test_data_output`, that is the test-data stage's job.
+- `epic_id` — the EPIC/Jira id from `feature_metadata` if present, else `feature_key`.
+
+**Backend-only fields** (`service_name`, `package`, `test_class`, `assertion_class`, `endpoint`,
+`curl_reference`) — a mobile SDET plan does not carry these. **Never fabricate them.** Emit them
+only when the plan actually has the value. When a `BACKEND_ONLY`/`END_TO_END` scenario needs one
+that is absent, omit the field and add an `emit_notes` entry (`follow_up: NEEDS_ANSWER`) naming
+the scenario and field. For `FRONTEND_ONLY` scenarios they are simply not applicable — no note.
+
+**Validate** the emitted file against its schema with the same report-never-block rule as every
+other output: on failure, still write it, record the validator error, and say so.
 
 ---
 
