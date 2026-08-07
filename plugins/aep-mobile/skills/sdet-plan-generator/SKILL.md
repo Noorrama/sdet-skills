@@ -242,6 +242,39 @@ It must also include the `coverage_audit` object produced by Step 4 (the mechani
 
 Generate scenarios ONLY for `auto_selected ∪ optional_extras_selected`, and tag each scenario with `coverage_category` + `source`. Every scenario also carries a `requirement_ref` linking it to the checklist item it satisfies.
 
+#### Lossless carry-over — never drop extractor data
+The SDET plan is a **superset** of its inputs, not a lossy summary. Every field the extractors
+produced must survive into the plan.
+- Map each extractor field to its proper schema home first (a PRD business rule → a scenario, a
+  persona → `test_data`, an RFC flag → coverage + `test_data`, etc.).
+- **Anything you cannot place in a defined field goes into the top-level `unmapped_extractor_data`
+  object, verbatim**, keyed by source (`prd` / `rfc` / `design` / `plan`). Do not summarise,
+  truncate, or paraphrase it — copy it as received.
+- `unmapped_extractor_data` is `{}` only when genuinely everything mapped cleanly. If you find
+  yourself about to discard an extractor field because "there's no field for it", that field
+  belongs in `unmapped_extractor_data` instead. Dropping it is never the answer.
+- This is a safety net, not a dumping ground: prefer the real field. The bucket exists so that a
+  schema gap can never silently lose information the QA supplied.
+
+#### `test_data` — structured, sourced from PRD + RFC (replaces `test_data_tags`)
+Each scenario carries a `test_data` array (was `test_data_tags`). One entry per fixture, built
+from the structured upstream fields — **not** flattened to tag strings:
+- `required_state` is assembled from `prd_context.target_personas[].prerequisites` and
+  `boundary_conditions`, expressed as structured predicates
+  (`"KYCed GoPay user"` + prereq `"confirmed Date of Birth"` → `{ "kyc_status": "VERIFIED",
+  "gopay_active": true, "date_of_birth": "CONFIRMED" }`). Restate the source in schema vocabulary;
+  never invent an attribute the source doesn't state.
+- `type_signals` carries the short labels that used to be `test_data_tags`
+  (`["kyc_verified_user","birthday_d_day"]`). They summarise; `required_state` is the source of
+  truth. Keep both.
+- **Conditions that are not static entity attributes** — a birthday-on-D-day, an N-th
+  transaction, any clock- or relationship-dependent need — go in `dynamic_conditions` with the
+  right `kind` (`TEMPORAL` / `RELATIONAL` / `SELECTION`), **not** in `required_state`. Forcing
+  `birthday_d_day` into `required_state` produces a predicate no test-data category can match.
+- `fixture_id` is stable and reused across scenarios needing the same entity+state, so downstream
+  can dedup. `source_refs` traces every fixture back to the PRD/RFC field it came from.
+- Absent test-data need → `test_data: []`. Never fabricate a fixture to fill the array.
+
 ### 2. `<feature_key>_analysis.md` (QA Analysis Asset)
 A human-readable Markdown asset automatically generated for engineering leads detailing parsed requirements gaps, architectural risks, and testability bottlenecks during the pre-build review.
 
@@ -355,7 +388,7 @@ The skill supports a two-way synchronization flow to allow human QA to review, r
        - `automatable: false`
        - `source: "qa_added"`
        - All standard properties parsed from the CSV columns.
-     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `mapped_user_flow`, `test_data_tags`, `clickstream_events`, `coverage_category`, `source`, `requirement_ref`, the top-level `coverage_categories` / `coverage_audit` blocks, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
+     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `mapped_user_flow`, `test_data`, `unmapped_extractor_data`, `clickstream_events`, `coverage_category`, `source`, `requirement_ref`, the top-level `coverage_categories` / `coverage_audit` blocks, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
      - **Re-run the Step 4 Coverage Self-Audit** after merging and refresh the `coverage_audit` block, so QA-added/removed rows keep the coverage proof accurate.
      - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>_SDET_plan.json` to reflect the synchronization event.
 
