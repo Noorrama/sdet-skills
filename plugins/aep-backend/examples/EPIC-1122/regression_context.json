@@ -1,0 +1,98 @@
+{
+  "feature_name": "Save Payment-Method API (EPIC-1122)",
+  "module": "wallet-service",
+  "extraction_date": "2026-08-06",
+  "covered_requirement_refs": ["REQ-001", "REQ-002", "REQ-003", "REQ-004"],
+  "uncovered_requirement_refs": ["REQ-005", "NFR-001", "NFR-003"],
+  "existing_tests": [
+    {
+      "test_id": "GBT-PAY-001",
+      "framework": "GBT_JAVA",
+      "type": "automated",
+      "class_name": "PaymentControllerTest",
+      "method_name": "saveCardHappyPath",
+      "file_path": "wallet-service/src/test/java/com/gojek/wallet/PaymentControllerTest.java",
+      "api_endpoint": "POST /payment/v1/cards",
+      "requirement_ref": "REQ-001",
+      "what_it_tests": "Valid card save returns HTTP 200 and a non-null token",
+      "is_legacy_regression": true,
+      "is_flaky": false,
+      "notes": "Controller-layer unit test; does not test full vault integration stack"
+    },
+    {
+      "test_id": "GBT-PAY-002",
+      "framework": "GBT_JAVA",
+      "type": "automated",
+      "class_name": "CardValidationServiceTest",
+      "method_name": "rejectExpiredCard",
+      "file_path": "wallet-service/src/test/java/com/gojek/wallet/service/CardValidationServiceTest.java",
+      "api_endpoint": "POST /payment/v1/cards",
+      "requirement_ref": "REQ-004",
+      "what_it_tests": "Card with expiryYear < currentYear is rejected with INVALID_EXPIRY",
+      "is_legacy_regression": true,
+      "is_flaky": false,
+      "notes": "Service-layer unit test; good coverage for this scenario"
+    },
+    {
+      "test_id": "GBT-PAY-003",
+      "framework": "GBT_JAVA",
+      "type": "automated",
+      "class_name": "CardValidationServiceTest",
+      "method_name": "rejectExpiredCardSameYear",
+      "file_path": "wallet-service/src/test/java/com/gojek/wallet/service/CardValidationServiceTest.java",
+      "api_endpoint": "POST /payment/v1/cards",
+      "requirement_ref": "REQ-004",
+      "what_it_tests": "Card with expiryYear == currentYear AND expiryMonth < currentMonth is rejected with INVALID_EXPIRY",
+      "is_legacy_regression": true,
+      "is_flaky": false,
+      "notes": "Service-layer unit test; does not verify HTTP response envelope"
+    },
+    {
+      "test_id": "GBT-PAY-004",
+      "framework": "GBT_JAVA",
+      "type": "automated",
+      "class_name": "CardRepositoryTest",
+      "method_name": "uniqueConstraintBlocksDuplicate",
+      "file_path": "wallet-service/src/test/java/com/gojek/wallet/repository/CardRepositoryTest.java",
+      "api_endpoint": "POST /payment/v1/cards (DB layer)",
+      "requirement_ref": "REQ-003",
+      "what_it_tests": "Inserting the same (customer_id, fingerprint) twice raises DataIntegrityViolationException",
+      "is_legacy_regression": true,
+      "is_flaky": false,
+      "notes": "Repository integration test; does not verify HTTP 409 response at API level"
+    },
+    {
+      "test_id": "BS-PAY-011",
+      "framework": "BROWSERSTACK",
+      "type": "manual",
+      "class_name": null,
+      "method_name": null,
+      "file_path": null,
+      "api_endpoint": "POST /payment/v1/cards",
+      "requirement_ref": "REQ-003",
+      "what_it_tests": "Save card — duplicate card rejected (HTTP 409 DUPLICATE_CARD)",
+      "is_legacy_regression": true,
+      "is_flaky": false,
+      "notes": "Manual test only; no automated integration test exists at HTTP level for this scenario"
+    },
+    {
+      "test_id": "BS-PAY-012",
+      "framework": "BROWSERSTACK",
+      "type": "manual",
+      "class_name": null,
+      "method_name": null,
+      "file_path": null,
+      "api_endpoint": "POST /payment/v1/cards",
+      "requirement_ref": "REQ-002",
+      "what_it_tests": "Save card — missing cardNumber returns 400 MISSING_FIELD",
+      "is_legacy_regression": true,
+      "is_flaky": false,
+      "notes": "Manual test only; needs automation. Only covers missing cardNumber, not other required fields"
+    }
+  ],
+  "coverage_gaps": [
+    {"requirement_ref": "REQ-005", "description": "No raw card data in logs — not tested at any level"},
+    {"requirement_ref": "NFR-001", "description": "p95 latency ≤ 300ms — no performance test exists"},
+    {"requirement_ref": "NFR-003", "description": "Vault service unavailability → 503 graceful — not tested"}
+  ]
+}
