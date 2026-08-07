@@ -5,19 +5,19 @@
   "additionalProperties": false,
   "required": ["app", "rfc_id", "rfc_title", "rfc_status", "extracted_at", "extractor_version", "scope"],
   "properties": {
-    "extraction_status": { "type": "string", "enum": ["OK", "INCOMPLETE", "DEGRADED"], "description": "OK = every field resolved from the inputs. INCOMPLETE = one or more fields could not be resolved and were left absent. DEGRADED = a config/schema/tool the skill depends on was unavailable. Never OK when extraction_gaps is non-empty." },
-    "extraction_gaps": {
+    "extraction_status": { "type": "string", "enum": ["COMPLETE", "PARTIAL", "LIMITED"], "description": "How much of the source document was captured. COMPLETE = everything the document specified was captured. PARTIAL = the document did not specify some things, so they were left empty and listed in extraction_notes; this is the normal result for a work-in-progress doc and is not an error. LIMITED = a config file, schema or the validator was unavailable, so part of the run had less grounding than usual — see extraction_notes. Not COMPLETE whenever extraction_notes is non-empty." },
+    "extraction_notes": {
       "type": "array",
-      "description": "Everything the skill could NOT resolve, written instead of guessing a value. Empty array = clean extraction.",
+      "description": "Things the source document did not say, recorded instead of guessing a value. An empty array means nothing was left open. A non-empty array is normal and expected on a work-in-progress document — it is a to-do list for the author, not a list of errors.",
       "items": {
         "type": "object",
-        "required": ["field", "reason", "severity"],
+        "required": ["field", "reason", "follow_up"],
         "additionalProperties": false,
         "properties": {
-          "field": { "type": "string", "description": "JSON path of the unresolved field, e.g. business_requirements[3].target_module. Use 'ENVIRONMENT' for install/tool failures not tied to one field." },
-          "reason": { "type": "string", "description": "Why it could not be resolved, citing the source section checked." },
-          "action": { "type": "string", "description": "What a human must do to close the gap." },
-          "severity": { "type": "string", "enum": ["BLOCKING", "DEGRADED", "INFO"], "description": "BLOCKING = schema-required field absent. DEGRADED = resolved without normal grounding. INFO = optional content genuinely absent from the source." }
+          "field": { "type": "string", "description": "JSON path of the field left empty, e.g. business_requirements[3].target_module. Use 'ENVIRONMENT' for tool or install issues not tied to one field." },
+          "reason": { "type": "string", "description": "What was checked and what was found there, e.g. 'PRD section 4.2 states the rule but names no module'." },
+          "action": { "type": "string", "description": "The concrete next step, e.g. 'confirm the target module with the PM'." },
+          "follow_up": { "type": "string", "enum": ["NEEDS_ANSWER", "WORTH_CHECKING", "FYI"], "description": "How much attention this needs. NEEDS_ANSWER = someone has to supply this before the tests can cover it. WORTH_CHECKING = a value was produced, but without its usual reference source, so confirm it. FYI = optional content the document simply does not have; no action needed." }
         }
       }
     },
