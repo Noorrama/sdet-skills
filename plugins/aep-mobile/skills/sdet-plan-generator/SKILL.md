@@ -45,6 +45,16 @@ what was not covered.
    of them into this plan's `extraction_notes[]`, prefixing `field` with the source
    (`prd_context.business_requirements[3].target_module`). Upstream notes do not disappear
    because a downstream skill ran successfully.
+   - **Also inherit `design_context.project_context.blocking_issues[]`.** Each blocker becomes (a)
+     an `extraction_notes` entry with `follow_up: NEEDS_ANSWER` (a design blocker blocks test
+     authoring), and (b) a row in `<feature_key>_analysis.md` **Section 4 → Blocked — Awaiting PM /
+     Design Input**. A design blocker also forbids inventing the screen/element it names — it routes
+     to `blocking_issues`, consistent with the anti-hallucination rule.
+   - **Read `design_context.project_context.overall_ambiguity_rating`** as a confidence signal, never
+     a gate — scenarios still generate. `HIGH` → add a `NEEDS_ANSWER` note ("design ambiguity HIGH —
+     screen/element-derived scenarios need design confirmation before automation") and set
+     `extraction_status: PARTIAL`. `MEDIUM` → a `WORTH_CHECKING` note. `LOW` → nothing. Surface the
+     rating on a row in analysis.md Section 5 (SDET Readiness).
 5. **Resolve the app before picking files.** Extractors write per-app files when a source
    document covers more than one app: `prd_context.<app_id>.json`, `rfc_context.<app_id>.json`,
    `design_context.<app_id>.json` (a single-app run writes the plain `prd_context.json` /
@@ -170,9 +180,9 @@ Flow:
   - **Absent is not the same as malformed.** A context file that exists but fails its schema gets a `NEEDS_ANSWER` note naming the file and the validation error (Preflight step 3) — never a silent fall-through to "treat as absent", which drops coverage the QA believes they have.
 - **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and emit at least the required scenario(s) before doing anything else. Model-independence depends on this being a mechanical loop:
   - **For each** `prd.business_requirements[i]` → emit ≥1 scenario whose `requirement_ref` = that `req_id`. (A P0 requirement always keeps ≥1.)
-  - **For each** `prd.boundary_conditions[i]` → emit ≥1 boundary scenario referencing that entry. Do NOT fold a boundary rule into an unrelated happy-path scenario as a substitute — it needs its own row. (This is the rule most often missed: e.g. a screenshot/privacy-mask boundary and a "shown once per customer" ordering boundary are distinct entries, each needing its own scenario.)
+  - **For each** `prd.boundary_conditions[i]` → emit ≥1 boundary scenario referencing that entry. Do NOT fold a boundary rule into an unrelated happy-path scenario as a substitute — it needs its own row. (This is the rule most often missed: e.g. a screenshot/privacy-mask boundary and a "shown once per customer" ordering boundary are distinct entries, each needing its own scenario.) The scenario's setup/Steps come from `edge_case_description`; its **expected outcome is taken verbatim from `proposed_default`**. If `proposed_default` is empty, still emit the scenario (the edge case must be exercised) but leave its Expected Result as a `NEEDS_ANSWER` open point — never invent the default behaviour.
   - **For each** `rfc.lifecycle_considerations[i]` (if the lifecycle category is selected) → emit ≥1 scenario for that `event`.
-  - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario.
+  - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario. **Flag record precedence: RFC is authoritative.** When the same flag appears in both, take the RFC `experimentation_matrix[]` record (`flag_key` verbatim + `default_variant` + `variants` + `kill_switch`) as the source of truth; the PRD entry is name-only corroboration. A PRD-only flag (absent from RFC) still gets a toggle scenario from its name **and** a `prd_vs_rfc_gap` note ("flag in PRD, undocumented in RFC — no variants/default"). An RFC-only flag is fine.
   - Every scenario MUST carry a `requirement_ref` (the `req_id` / boundary index / event it satisfies) so Step 4 can audit coverage mechanically.
   - **Clickstream Telemetry Rules:** Clickstream verification is **NOT** a mandatory hard gate for the generator. If `clickstream_events` are explicitly provided/told in the input contexts, then generate $\ge 1$ verification step per event. If they are NOT provided or explicitly mentioned, **do NOT fail validation and do NOT generate telemetry tests.** Instead, simply list it as an Open Question / Clarification inside `<feature_key>_analysis.md` (e.g., *"Are clickstream telemetry events required for this feature?"*).
 - Dedup against existing GMT/NLP tests retrieved from `${CLAUDE_PLUGIN_ROOT}/config/<app>.json` repository paths.
@@ -328,11 +338,11 @@ Flattened CSV strictly matching squad project template headers:
 - `Priority`: `"P0"`, `"P1"`, or `"P2"`
 - `Type of Test Case`: `"Regression"` or `"Sanity"`
 - `Automation Status`: By default, set to `"Manual"` (representing not-automated) for newly generated test cases. Set to `"Automated"` only if matched with an existing automated test case.
-- `Preconditions`: Multiline string with environment, locale, deep links, and active feature flags, **using a new line break (`\n`) after each statement/line.** Any feature-flag name written here MUST be copied verbatim from `rfc.experimentation_matrix[].flag_key` / `prd.feature_flags[]` — never paraphrase or append suffixes (e.g. do not turn `birthday_feature_litmus` into `birthday_feature_litmus_content`).
+- `Preconditions`: Multiline string with environment, locale, deep links, and active feature flags, **using a new line break (`\n`) after each statement/line.** Any feature-flag name written here MUST be copied verbatim from `rfc.experimentation_matrix[].flag_key` / `prd.feature_flags[]` — never paraphrase or append suffixes (e.g. do not turn `birthday_feature_litmus` into `birthday_feature_litmus_content`). When a flag is in both, use the RFC record (`flag_key` + `default_variant`); PRD is name-only corroboration.
 - `Steps`: Numbered sequential actions inside double quotes with line breaks (`\n`). **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g., `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`, `3. Tap "Lanjut"`). Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`). Must include telemetry emission checks.
-- `Expected Result`: Numbered sequential assertions matching the numbered steps in the `Steps` column 1-to-1, inside double quotes with line breaks (`\n`) after each statement. **Write assertions using clean, declarative NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`, `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes in user-friendly, non-technical language.
+- `Expected Result`: Numbered sequential assertions matching the numbered steps in the `Steps` column 1-to-1, inside double quotes with line breaks (`\n`) after each statement. **Write assertions using clean, declarative NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`, `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes in user-friendly, non-technical language. **For boundary scenarios the assertion derives from `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker rather than a guessed outcome.**
 - `Execution Mode`: `"Automatable"` or `"Manual"`
-- `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`
+- `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`. **Resolution precedence: (1) `prd.applicable_platforms` (PRD is the scope authority), (2) else `rfc.scope.target_platforms`, (3) else infer from `design`.** One platform → `"Android"`/`"iOS"`; more than one → `"Cross-Platform"`. If PRD and RFC conflict, use PRD and raise it as a `prd_vs_rfc_gap` — never silently prefer one.
 - `Country v2`: MUST be derived from `prd.applicable_countries` (map ISO code → name, e.g. `ID`→`"Indonesia"`, `SG`→`"Singapore"`, `VN`→`"Vietnam"`). Never pick a country the inputs do not list. If `applicable_countries` has one entry, every row uses that country.
 - `Android Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is iOS-only). Set to `"Automated"` only if matched with an existing automated Android case.
 - `iOS Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is Android-only). Set to `"Automated"` only if matched with an existing automated iOS case.
@@ -457,7 +467,7 @@ The auto/extra partition is computed **solely** from the presence/values of sche
 | `deep_link_nav` | `plan` test hook `method:deeplink` **or** any `rfc.navigation_changes[].deep_link` non-null |
 | `telemetry_clickstream` | `prd.clickstream_events[]` **or** `rfc.cross_cutting_concerns.observability.clickstream_events[]` non-empty |
 | `localization_regional` | `prd.applicable_countries.length > 1` **or** multiple locales / localized copy in design |
-| `platform_variance` | `rfc.platform_specific.android`/`.ios` non-null **or** `target_platforms.length > 1` |
+| `platform_variance` | `prd.applicable_platforms.length > 1` **or** `rfc.platform_specific.android`/`.ios` non-null **or** `rfc.scope.target_platforms.length > 1` |
 | `theming_darkmode` | design theme-state variants **or** an `open_question` matching theme/dark-mode |
 | `accessibility` | `rfc.accessibility_impacts[]` non-empty |
 | `non_functional_perf` | `rfc.cross_cutting_concerns.performance` has any non-null target/impact |
