@@ -140,9 +140,9 @@ Fast tier — Haiku / Composer 2.5. Escalate to reasoning only if the RFC is lon
 
 3. **architectural_risks** — `risk_id`, `description`, `severity`, `affected_modules`, `mitigation`, `testability_note`. Extract from explicit "Risks" sections. Also extract from "Cons" listed under each solution approach — these are implicit risks. Always include a `testability_note` suggesting how QA can verify the risk/mitigation.
 
-4. **compatibility_mandates** — `min_supported_app_version`, `min_os_version`, `degrade_strategy`, `n_minus_1_behavior`, `upgrade_path`. Extract from backward compatibility sections.
+4. **compatibility_mandates** — `min_supported_app_version`, `target_platform`, `framework_type`, `min_os_version`, `degrade_strategy`, `n_minus_1_behavior`, `upgrade_path`. Extract from backward compatibility sections.
 
-5. **rollout_plan** — `environment_order`, `percentage_ramp` (array of percentage/criteria/duration), `rollback_triggers`, `rollback_strategy`, `kill_switch_flag`, `canary_metrics`.
+5. **rollout_plan** — `environment_order`, `percentage_ramp` (array of percentage/criteria/duration), `kill_switch_flag`, `canary_metrics`.
 
 6. **api_contract_changes** — `endpoint`, `method`, `change_type` (NEW/MODIFIED/DEPRECATED), `request_shape`, `response_shape`, `new_error_codes`, `breaking_change`. Empty array `[]` if the RFC explicitly has no API (e.g., Litmus-driven features).
 
@@ -154,11 +154,11 @@ These sections may or may not have dedicated RFC sections. When the information 
 
 8. **navigation_changes** — `change_type` (NEW_SCREEN/NEW_DEEP_LINK/MODIFIED_FLOW), `screen_id`, `deep_link`, `deep_link_params`, `parent_flow`, `entry_points`.
 
-9. **local_data_changes** — `storage_type` (ROOM/SHARED_PREFS/CACHE/PERSISTENCE/etc.), `change_type`, `entity_or_key`, `migration_version`, `migration_strategy`, `data_loss_risk`, `rollback_safe`.
+9. **local_data_changes** — `storage_type` (ROOM/SHARED_PREFS/CACHE/PERSISTENCE/etc.), `change_type`, `entity_or_key`, `migration_version`, `migration_strategy`.
 
 10. **platform_specific** — Per-platform (`android`, `ios`, `flutter`) implementation notes, SDK versions, modules/targets, parity status.
 
-11. **permissions_required** — `permission` (manifest string), `platform`, `purpose`, `is_new`, `deny_behavior`, `rationale_shown`.
+11. **permissions_required** — `permission` (manifest string), `purpose`, `deny_behavior`, `rationale_shown`.
 
 12. **offline_behavior** — `offline_capable`, `sync_strategy` (FAIL_FAST/CACHE_FIRST/QUEUE_AND_SYNC/OFFLINE_FIRST), `cached_data_ttl`, `offline_ui_state`, `reconnection_behavior`, `partial_sync_handling`.
 
@@ -209,7 +209,6 @@ For mobile-specific sections (8–16), set `inferred_from_prose: false` when ext
 - Impact/blast-radius absent (no scope section or no affected screens listed)
 - No backward compatibility statement (N-1 behavior undefined)
 - Risks unrated (no severity on any risk)
-- No rollback strategy defined
 - Feature flags mentioned but not documented with variants/defaults
 - No solution approach clearly marked as selected/preferred when multiple are presented
 
