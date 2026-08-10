@@ -136,15 +136,15 @@ Fast tier — Haiku / Composer 2.5. Escalate to reasoning only if the RFC is lon
 
 1. **scope** — `affected_services`, `affected_modules`, `affected_screens`, `target_platforms`, `change_type`, `platform_dimension`. Map from RFC's "Requirements" and "Solution" sections.
 
-2. **experimentation_matrix** — Each feature flag/experiment with `flag_key`, `variants`, `default_variant`, `gated_module`, `gated_approach`, `kill_switch`. Extract from dedicated Experimentation/Feature Flag sections. Include Litmus, Firebase, or custom flag systems.
+2. **experimentation_matrix** *(Optional)* — Each feature flag/experiment with `flag_key`, `variants`, `default_variant`, `gated_module`, `gated_approach`, `kill_switch`. Extract from dedicated Experimentation/Feature Flag sections. Include Litmus, Firebase, or custom flag systems. Omit if the RFC defines no feature flags or experiments.
 
 3. **architectural_risks** — `risk_id`, `description`, `severity`, `affected_modules`, `mitigation`, `testability_note`. Extract from explicit "Risks" sections. Also extract from "Cons" listed under each solution approach — these are implicit risks. Always include a `testability_note` suggesting how QA can verify the risk/mitigation.
 
 4. **compatibility_mandates** — `min_supported_app_version`, `target_platform`, `framework_type`, `min_os_version`, `degrade_strategy`, `n_minus_1_behavior`, `upgrade_path`. Extract from backward compatibility sections.
 
-5. **rollout_plan** — `environment_order`, `percentage_ramp` (array of percentage/criteria/duration), `kill_switch_flag`, `canary_metrics`.
+5. **rollout_plan** *(Optional)* — `environment_order`, `percentage_ramp` (array of percentage/criteria/duration), `kill_switch_flag`, `canary_metrics`. Omit if the RFC does not describe a rollout strategy.
 
-6. **api_contract_changes** — `endpoint`, `method`, `change_type` (NEW/MODIFIED/DEPRECATED), `request_shape`, `response_shape`, `new_error_codes`, `breaking_change`. Empty array `[]` if the RFC explicitly has no API (e.g., Litmus-driven features).
+6. **api_contract_changes** *(Optional)* — `endpoint`, `method`, `change_type` (NEW/MODIFIED/DEPRECATED), `request_shape`, `response_shape`, `new_error_codes`, `breaking_change`. Omit if the RFC has no API changes.
 
 7. **state_management_changes** — `entity`, `change_type`, `new_fields`, `removed_fields`, `state_transitions` (from/to/trigger). Extract from flow diagrams and state machine descriptions.
 
@@ -152,27 +152,27 @@ Fast tier — Haiku / Composer 2.5. Escalate to reasoning only if the RFC is lon
 
 These sections may or may not have dedicated RFC sections. When the information is extracted from a **dedicated section** (e.g., "Navigation", "Deep Links"), set `inferred_from_prose: false`. When **inferred from prose** in other sections (e.g., flow descriptions, open questions, PRD requirements), set `inferred_from_prose: true`.
 
-8. **navigation_changes** — `change_type` (NEW_SCREEN/NEW_DEEP_LINK/MODIFIED_FLOW), `screen_id`, `deep_link`, `deep_link_params`, `parent_flow`, `entry_points`.
+8. **navigation_changes** *(Optional)* — `change_type` (NEW_SCREEN/NEW_DEEP_LINK/MODIFIED_FLOW), `screen_id`, `deep_link`, `deep_link_params`, `parent_flow`, `entry_points`. Omit if no navigation or deep-link changes.
 
-9. **local_data_changes** — `storage_type` (ROOM/SHARED_PREFS/CACHE/PERSISTENCE/etc.), `change_type`, `entity_or_key`, `migration_version`, `migration_strategy`.
+9. **local_data_changes** *(Optional)* — `storage_type` (ROOM/SHARED_PREFS/CACHE/PERSISTENCE/etc.), `change_type`, `entity_or_key`, `migration_version`, `migration_strategy`. Omit if no local storage changes.
 
-10. **platform_specific** — Per-platform (`android`, `ios`, `flutter`) implementation notes, SDK versions, modules/targets, parity status.
+10. **platform_specific** *(Optional)* — Per-platform (`android`, `ios`, `flutter`) implementation notes, SDK versions, modules/targets, parity status. Omit if the RFC has no platform-specific implementation details.
 
-11. **permissions_required** — `permission` (manifest string), `purpose`, `deny_behavior`, `rationale_shown`.
+11. **permissions_required** *(Optional)* — `permission` (manifest string), `purpose`, `deny_behavior`, `rationale_shown`. Omit if no new permissions.
 
-12. **offline_behavior** — `offline_capable`, `sync_strategy` (FAIL_FAST/CACHE_FIRST/QUEUE_AND_SYNC/OFFLINE_FIRST), `cached_data_ttl`, `offline_ui_state`, `reconnection_behavior`, `partial_sync_handling`.
+12. **offline_behavior** *(Optional)* — `offline_capable`, `sync_strategy` (FAIL_FAST/CACHE_FIRST/QUEUE_AND_SYNC/OFFLINE_FIRST), `cached_data_ttl`, `offline_ui_state`, `reconnection_behavior`, `partial_sync_handling`. Omit if the RFC does not address offline or caching behaviour.
 
-13. **accessibility_impacts** — Per `screen_id`: `change_description`, `content_descriptions_required`, `focus_order_defined`, `dynamic_content_announced`.
+13. **accessibility_impacts** *(Optional)* — Per `screen_id`: `change_description`, `content_descriptions_required`, `focus_order_defined`, `dynamic_content_announced`. Omit if no accessibility-relevant changes.
 
-14. **lifecycle_considerations** — `event` (PROCESS_DEATH/CONFIG_CHANGE/BACKGROUND_FOREGROUND/APP_UNINSTALL_REINSTALL), `affected_screen`, `expected_behavior`, `state_preservation` (FULL_RESTORE/PARTIAL_RESTORE/RESTART_FLOW/NO_RESTORE).
+14. **lifecycle_considerations** *(Optional)* — `event` (PROCESS_DEATH/CONFIG_CHANGE/BACKGROUND_FOREGROUND/APP_UNINSTALL_REINSTALL), `affected_screen`, `expected_behavior`, `state_preservation` (FULL_RESTORE/PARTIAL_RESTORE/RESTART_FLOW/NO_RESTORE). Omit if no lifecycle-relevant changes.
 
-15. **dependency_changes** — `dependency_name`, `change_type` (NEW/UPGRADED/EXISTING/REMOVED), `old_version`, `new_version`, `breaking_changes`, `initialization_changes`, `test_impact`.
+15. **dependency_changes** *(Optional)* — `dependency_name`, `change_type` (NEW/UPGRADED/EXISTING/REMOVED), `old_version`, `new_version`, `breaking_changes`, `initialization_changes`, `test_impact`. Omit if no dependency changes.
 
-16. **notification_changes** — `type` (PUSH/LOCAL/IN_APP), `channel_id`, `trigger`, `payload_shape`, `deep_link_on_tap`, `background_task`.
+16. **notification_changes** *(Optional)* — `type` (PUSH/LOCAL/IN_APP), `channel_id`, `trigger`, `payload_shape`, `deep_link_on_tap`, `background_task`. Omit if no notification changes.
 
 ### Cross-Cutting
 
-17. **cross_cutting_concerns** — `observability` (new_metrics, new_alerts, clickstream_events), `security` (auth_changes, data_sensitivity, certificate_pinning_changes), `performance` (latency_targets, app_size_impact, memory_impact, battery_impact, startup_time_impact).
+17. **cross_cutting_concerns** *(Optional)* — `observability` (new_metrics, new_alerts, clickstream_events), `security` (auth_changes, data_sensitivity, certificate_pinning_changes), `performance` (latency_targets, app_size_impact, memory_impact, battery_impact, startup_time_impact). Omit if the RFC has no observability, security, or performance notes.
 
 18. **open_questions** — `question_id`, `question`, `owner`, `status` (OPEN/RESOLVED/DEFERRED), `impact_on_testing`. Extract from "Open Questions" sections. Also capture questions embedded in italic/bold answers within the RFC.
 
@@ -192,7 +192,7 @@ RFCs often present multiple approaches with one marked "Preferred" or "Selected"
 Every "Cons" bullet under a selected approach is a potential `architectural_risk`. Convert the con into a risk with appropriate severity and a testability note.
 
 ### Rule 4: Deprecated section handling
-Sections marked "Deprecated" in the RFC should be noted but not extracted into the primary output. If a deprecated section (e.g., "API Deprecated") means `api_contract_changes` is empty, set it to `[]` explicitly.
+Sections marked "Deprecated" in the RFC should be noted but not extracted into the primary output. If a deprecated section means an optional section has no content, omit the key entirely.
 
 ### Rule 5: Open question answers
 When open questions have inline answers (typically in bold/italic), extract both the question and the answer. Set status to `RESOLVED` if answered, `OPEN` if unanswered, `DEFERRED` if explicitly deferred.
@@ -216,10 +216,14 @@ For mobile-specific sections (8–16), set `inferred_from_prose: false` when ext
 - **Never invent a value.** Do not infer risks not stated — unknowns go to `open_questions`
   with `impact_on_testing`.
 - `inferred_from_prose` must be set correctly — never omit this field on mobile-specific sections.
-- Empty arrays `[]` are valid when the RFC explicitly has no items for a section (e.g., no API changes). Do not omit the key.
-- Distinguish the two absences: **the RFC says there are none** → `[]`. **The RFC is silent and
-  you cannot tell** → `open_questions`, never `[]`. Emitting `[]` for something you simply
-  could not find is a fabricated "no changes here" claim.
+- **Optional sections** (marked *(Optional)* above): omit the key entirely when the RFC is
+  silent or explicitly states there are none. No `extraction_notes` entry needed for omission.
+  Include them **only** when the RFC provides actual content for that section.
+- **Always-extracted sections** (`scope`, `architectural_risks`, `compatibility_mandates`,
+  `state_management_changes`, `open_questions`): include even when the RFC is silent — add an
+  `extraction_notes` entry if content is missing.
+- For always-extracted sections, distinguish the two absences: **the RFC says there are none** →
+  `[]`. **The RFC is silent** → `open_questions` entry, never `[]`.
 - Absent **required** content that cannot be read from the RFC → leave the field absent and add
   a `NEEDS_ANSWER` note naming it and the RFC section you checked. Emit the file anyway.
 - Do not populate `prd_cross_refs` or `design_cross_refs` — these are filled downstream by `sdet-plan-generator`.
