@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "test_data_manifest",
+  "description": "Output of test-data-identification. Each record is one test_data_output object — the same shape written into automation_plan.json fixtures_summary[].output.test_data_output[].",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["epic_id", "manifest_version", "records"],
+  "properties": {
+    "epic_id": { "type": "string" },
+    "manifest_version": { "type": "string", "description": "v1, v2, ... bumped on every re-identification run." },
+    "source_plan_version": { "type": "string", "description": "plan_version of the automation_plan.json this manifest was identified from." },
+    "identified_at": { "type": "string", "description": "ISO8601 timestamp of the identification run." },
+    "records": {
+      "type": "array",
+      "description": "One record per (scenario_id, fixture_id) that resolved to a Test Data Domain.",
+      "items": { "$ref": "#/definitions/test_data_output" }
+    },
+    "unidentified_fixtures": {
+      "type": "array",
+      "description": "Fixtures with no usable identification — no TDP category and no supported operation, or the domain itself could not be resolved. No test_data_output is written to the plan for these.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fixture_id", "reason"],
+        "properties": {
+          "fixture_id": { "type": "string" },
+          "scenario_ids": { "type": "array", "items": { "type": "string" } },
+          "test_data_domain": { "type": ["string", "null"] },
+          "reason": {
+            "type": "string",
+            "enum": ["NO_DOMAIN_MATCH", "NO_CATEGORY_MATCH", "UNSUPPORTED_OPERATION", "CATALOG_UNAVAILABLE"]
+          },
+          "missing_operations": {
+            "type": "array",
+            "description": "Operations the required_state needs that get_supported_operations does not expose. Actionable backlog for the TDP team.",
+            "items": { "type": "string" }
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "identification_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "total_fixtures": { "type": "integer", "minimum": 0 },
+        "tdp_supported": { "type": "integer", "minimum": 0 },
+        "tdp_hybrid_fallback": { "type": "integer", "minimum": 0 },
+        "tdp_operation_fallback": { "type": "integer", "minimum": 0 },
+        "tdp_complete_fallback": { "type": "integer", "minimum": 0 },
+        "unidentified": { "type": "integer", "minimum": 0 },
+        "skipped_db_infra": { "type": "integer", "minimum": 0 },
+        "needs_human_review": {
+          "type": "array",
+          "description": "fixture_ids with match_confidence low, or with an unsupported operation — SDET reviews before test-data-provision runs.",
+          "items": { "type": "string" }
+        },
+        "domains_seen": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "definitions": {
+    "test_data_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenario_id", "fixture_id", "test_data_domain", "test_data_type_signals", "test_data_status", "test_data_details"],
+      "properties": {
+        "scenario_id": { "type": "string", "description": "Same scenario_id as in the automation_plan.json method that uses this fixture." },
+        "fixture_id": { "type": "string", "description": "Same fixture_id as in automation_plan.json fixtures_summary[]." },
+        "test_data_domain": {
+          "type": "string",
+          "description": "Test Data Domain resolved from fixture details + references/test_data_domains.md. Open vocabulary owned by the TDP team, e.g. CUSTOMER, DRIVER, MERCHANT, PAYMENT_INSTRUMENT, VOUCHER, WALLET_BALANCE, BOOKING, LOCATION."
+        },
+        "test_data_type_signals": {
+          "type": "array",
+          "description": "Atomic state signals lifted from the fixture description + required_state. One signal per concept, e.g. [\"Bike\", \"4w\", \"SDF\", \"Polygon\", \"non jabo\"].",
+          "items": { "type": "string" }
+        },
+        "test_data_status": {
+          "type": "string",
+          "enum": ["TDP_SUPPORTED", "TDP_HYBRID_FALLBACK", "TDP_OPERATION_FALLBACK", "TDP_COMPLETE_FALLBACK"]
+        },
+        "test_data_details": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tdp_test_data_category", "count"],
+          "properties": {
+            "tdp_test_data_category": {
+              "type": ["string", "null"],
+              "description": "Exact category name returned by get_supported_categories. null when no category matches (TDP_OPERATION_FALLBACK). Never invented."
+            },
+            "test_data_operations": {
+              "type": ["array", "null"],
+              "description": "Ordered operation sequence that closes the gap between the category and required_state. null when the category alone satisfies the fixture. [] when the gap needs an operation TDP/TestBuddy does not support (TDP_COMPLETE_FALLBACK) — the missing names go to unidentified_fixtures[].missing_operations.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["operation", "operationSupported"],
+                "properties": {
+                  "operation": { "type": "string", "description": "Exact operation name from get_supported_operations." },
+                  "operationSupported": { "type": "boolean" },
+                  "operationInput": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Inputs the operation needs, drawn from required_state / config / a preceding operation's output. Never fabricated IDs, never real PII, card numbers or tokens."
+                  }
+                }
+              }
+            },
+            "count": { "type": "integer", "minimum": 1, "description": "Number of entities to fetch/create. From required_state.count, default 1." }
+          }
+        },
+        "test_buddy_prompt": {
+          "type": ["string", "null"],
+          "description": "Prompt TestBuddy can execute to produce this data. Generated via the generate_testBuddy_prompt MCP tool. null for TDP_COMPLETE_FALLBACK."
+        },
+        "match_confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "Confidence of the domain + category semantic match. low routes the fixture to human review before provisioning."
+        },
+        "actual_test_data": {
+          "type": ["array", "null"],
+          "description": "Reserved for test-data-provision — null at identification time. Provisioning appends { test_data_type, test_data_identifier } entries.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "test_data_type": { "type": "string" },
+              "test_data_identifier": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
