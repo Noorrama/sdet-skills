@@ -2,6 +2,37 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
+    "app": {
+      "type": "string",
+      "enum": ["gojek-consumer", "gojek-driver", "gofood-merchant", "gopay-consumer", "gopay-merchant"],
+      "description": "App this context belongs to. Not required (a design may cover an app the extractor could not resolve), but sdet-plan-generator keys off it to match contexts for a run, so omitting it in a multi-app split defeats the split."
+    },
+    "design_source": {
+      "type": "object",
+      "description": "Provenance of the Figma export this context was extracted from — copied verbatim from the Export Design Raw JSON plugin envelope. Lets a reviewer tell a full-page export from a partial selection export without re-opening Figma.",
+      "additionalProperties": false,
+      "properties": {
+        "file_name": { "type": "string", "description": "envelope file.name" },
+        "page_name": { "type": "string", "description": "envelope file.page" },
+        "scope": { "type": "string", "enum": ["page", "selection"], "description": "envelope scope. 'selection' means flows leaving the selected layers are not in the export, so ui_flow coverage cannot be verified." },
+        "exported_at": { "type": "string", "description": "envelope exportedAt (ISO-8601)" },
+        "max_depth": { "type": "integer", "description": "envelope export.maxDepth" },
+        "node_count": { "type": "integer", "description": "envelope export.nodeCount" },
+        "truncated_count": { "type": "integer", "description": "envelope export.truncatedCount. Non-zero means the depth cap dropped children — elements below those layers were never exported." },
+        "truncated_nodes": {
+          "type": "array",
+          "description": "envelope export.truncatedNodes (up to 20 samples) — the layers worth flattening before the next export.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "type": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
     "extraction_status": { "type": "string", "enum": ["COMPLETE", "PARTIAL", "LIMITED"], "description": "How much of the source document was captured. COMPLETE = everything the document specified was captured. PARTIAL = the document did not specify some things, so they were left empty and listed in extraction_notes; this is the normal result for a work-in-progress doc and is not an error. LIMITED = a config file, schema or the validator was unavailable, so part of the run had less grounding than usual — see extraction_notes. Not COMPLETE whenever extraction_notes is non-empty." },
     "extraction_notes": {
       "type": "array",
@@ -20,18 +51,36 @@
     },
     "visual_analysis_scratchpad": {
       "type": "string",
-      "description": "Write a 2-3 sentence overview of what you visually detect in the image before compiling the technical fields. List screens found."
+      "description": "Write a 2-3 sentence overview of what you detect in the export before compiling the technical fields. List screens found. Note: the export carries no geometry or styling, so this is a structural reading of names, variants and reactions — not a visual one."
     },
     "project_context": {
       "type": "object",
       "properties": {
         "overall_ambiguity_rating": {
           "type": "string",
-          "enum": ["LOW", "MEDIUM", "HIGH"]
+          "enum": ["LOW", "MEDIUM", "HIGH"],
+          "description": "HIGH = a screen or trigger element could not be resolved. MEDIUM = flows resolved, but through fallbacks/inference. LOW = every ui_flow edge is EXPLICIT and every layer name convention-compliant."
         },
         "blocking_issues": {
           "type": "array",
           "items": { "type": "string" }
+        },
+        "convention_compliance": {
+          "type": "object",
+          "description": "Tallies of how well the export follows the design team's five flow-authoring conventions. This is the feedback loop back to design — a high inferred/unresolved count means the next export needs fixing at source, not more guessing downstream.",
+          "additionalProperties": false,
+          "properties": {
+            "connectors_total": { "type": "integer", "description": "Every CONNECTOR node in the export. Must equal the sum of the buckets below plus note connectors plus connector-derived blockers." },
+            "connectors_resolved_to_screen": { "type": "integer", "description": "Standard #1 followed: the connector ends on a screen frame." },
+            "connectors_inferred_to_screen": { "type": "integer", "description": "Standard #1 not followed: the destination was an element, and the screen was inferred from its ancestors." },
+            "connectors_unresolvable": { "type": "integer", "description": "Floating endpoint, orphaned node id, or an intra-screen connector that is neither a flow nor a note." },
+            "note_connectors": { "type": "integer", "description": "Standard #5: TEXT-to-FRAME connectors whose text starts with Note or Context." },
+            "reactions_with_destination": { "type": "integer", "description": "Standard #2 followed: a tap-family reaction naming a destination." },
+            "reactions_without_destination": { "type": "integer", "description": "Standard #2 not followed: tap trigger with a null/absent destination. Each is also a blocking_issues entry." },
+            "unlabelled_branches": { "type": "integer", "description": "Standard #4 not followed: a trigger element with 2+ outgoing connectors and no connector labels to discriminate them." },
+            "non_descriptive_names": { "type": "integer", "description": "Standard #3 not followed: frames/layers named Frame 427, Group 12, Rectangle, Blue Button, etc." },
+            "unreachable_screens": { "type": "integer", "description": "Screen frames in no ui_flow edge and no flowStartingPoints entry." }
+          }
         }
       },
       "required": ["overall_ambiguity_rating", "blocking_issues"]
@@ -41,29 +90,65 @@
       "items": {
         "type": "object",
         "properties": {
-          "screen_id": { 
+          "screen_id": {
             "type": "string",
             "pattern": "^[A-Z0-9_]+$",
-            "description": "Figma frame title forced into UPPER_SNAKE_CASE (e.g., LOGIN_SCREEN)"
+            "description": "Figma frame name with any trailing state qualifier stripped, forced into UPPER_SNAKE_CASE (e.g. 'Approve Disbursement — Error' -> APPROVE_DISBURSEMENT)"
           },
-          "screen_name": { "type": "string" },
+          "screen_name": { "type": "string", "description": "The Figma frame name verbatim." },
+          "source_ref": { "type": "string", "description": "Figma node id of the screen frame (e.g. '2015:31162'), so a reviewer can jump straight to it." },
           "purpose": { "type": "string" },
+          "deep_link": {
+            "type": "string",
+            "description": "Deep link that opens this screen, taken from a prototype URL action matching the app config's deeplink_scheme, or stated in a Note/Context annotation. Absent when the design does not state one — never construct a plausible URI. sdet-plan-generator uses this both as the deep_link_nav category trigger and as a navigation shortcut in preference to a full UI walk."
+          },
+          "entry_point": { "type": "boolean", "description": "True when this frame is named in the page's flowStartingPoints[] — i.e. the designer marked it as a prototype flow entry." },
+          "flow_name": { "type": "string", "description": "Name of the prototype flow this screen starts, from flowStartingPoints[].name." },
           "screen_states": {
             "type": "array",
+            "description": "The designer's own wording for each state, kept verbatim (e.g. 'Promo Applying (loading)').",
             "items": { "type": "string" }
+          },
+          "state_kinds": {
+            "type": "array",
+            "description": "screen_states normalised to a fixed vocabulary. This is what makes downstream category selection deterministic — sdet-plan-generator fires negative_error / offline / theming_darkmode / localization_regional / permission triggers off these values rather than pattern-matching free text. Keep both fields: screen_states is the source of truth for wording, state_kinds for machine decisions.",
+            "items": {
+              "type": "string",
+              "enum": ["DEFAULT", "LOADING", "EMPTY", "ERROR", "SUCCESS", "OFFLINE", "DISABLED", "PERMISSION_DENIED", "DARK_THEME", "LIGHT_THEME", "LOCALE_VARIANT", "RTL", "OTHER"]
+            }
           },
           "elements": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "element_id": { 
+                "element_id": {
                   "type": "string",
-                  "pattern": "^[A-Z0-9_]+\\.[A-Z0-9_]+(\\.[A-Z0-9_]+)?$",
-                  "description": "Syntax: <SCREEN_ID>.<ACTION>_<ELEMENT_TYPE>.<STATE> all in UPPER_SNAKE_CASE (e.g., LOGIN_SCREEN.TAP_BUTTON.DISABLED)"
+                  "pattern": "^[A-Z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$",
+                  "description": "Built from the app config's naming_convention.element_id_pattern and role_vocabulary: <SCREEN_ID>.<purpose><role_suffix>, optionally .<state> (e.g. APPROVE_DISBURSEMENT.approve_btn, HISTORY_PAGE.affiliator_search_input). Screen id is UPPER_SNAKE; the role half is lower_snake, matching the config's role_vocabulary casing and the developer's locator names."
                 },
-                "type": { "type": "string" },
-                "label": { "type": "string" },
+                "source_ref": { "type": "string", "description": "Figma node id of this layer." },
+                "type": { "type": "string", "description": "Free-text type as read from the design (Figma node type plus the design's role token)." },
+                "role": {
+                  "type": "string",
+                  "enum": ["BUTTON", "INPUT", "LABEL", "TOGGLE", "TAB", "LIST", "IMAGE", "LINK", "DROPDOWN", "SLIDER", "CAROUSEL", "CONTAINER", "OTHER"],
+                  "description": "Normalised role, from the layer's role token (standard #3). Machine-readable companion to `type`: sdet-plan-generator uses it to decide whether a screen is interactive (INPUT/TOGGLE/DROPDOWN/SLIDER/CAROUSEL) for the interruption_lifecycle and a11y_baseline triggers, instead of pattern-matching free text."
+                },
+                "label": { "type": "string", "description": "Visible copy." },
+                "accessibility_id": {
+                  "type": "string",
+                  "description": "Accessibility / test id the designer wrote into a Dev Mode annotation, transcribed verbatim. This is the design half of the locator handoff: sdet-plan-generator's element_locator_handoff joins it to the real per-platform locator that code-change-extractor reports. Absent when the design does not state one — never derive it from the layer name."
+                },
+                "platform_hints": {
+                  "type": "object",
+                  "description": "Per-platform ids when the annotation states them separately. Populate only from what the annotation says; omit the whole object otherwise. Never a placeholder or an 'UNRESOLVED' string.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "android_resource_id": { "type": "string" },
+                    "ios_accessibility_identifier": { "type": "string" },
+                    "flutter_key": { "type": "string" }
+                  }
+                },
                 "states_represented": {
                   "type": "array",
                   "items": { "type": "string" }
@@ -73,7 +158,7 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "trigger": { "type": "string" },
+                      "trigger": { "type": "string", "description": "The reaction's trigger.type (ON_CLICK, ON_PRESS, AFTER_TIMEOUT, ...) or the designer's own wording." },
                       "action": { "type": "string" }
                     },
                     "required": ["trigger", "action"]
@@ -82,6 +167,16 @@
                 "validations_and_edge_cases": {
                   "type": "array",
                   "items": { "type": "string" }
+                },
+                "element_ambiguity": {
+                  "type": "object",
+                  "description": "Per-element confidence, when this element specifically is less certain than the screen overall.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "rating": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+                    "reason": { "type": "string" }
+                  },
+                  "required": ["rating", "reason"]
                 }
               },
               "required": ["element_id", "type", "label", "states_represented", "interactions", "validations_and_edge_cases"]
@@ -98,13 +193,29 @@
         "type": "object",
         "properties": {
           "from_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
-          "trigger_element_id": { "type": "string", "pattern": "^[A-Z0-9_]+\\.[A-Z0-9_]+(\\.[A-Z0-9_]+)?$" },
+          "trigger_element_id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$",
+            "description": "The element that triggers the transition. Absent for a frame-to-frame connector with no identifiable trigger element — omit it rather than inventing a token, and say so in blocking_issues."
+          },
           "to_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
-          "condition": { "type": "string" }
+          "condition": { "type": "string", "description": "The connector's label (standard #4), or the conditional block's condition. Empty string means unconditional." },
+          "navigation_kind": {
+            "type": "string",
+            "enum": ["NAVIGATE", "OVERLAY", "BACK", "CLOSE", "DEEP_LINK"],
+            "description": "What kind of transition this is. SWAP / CHANGE_TO / SCROLL_TO reactions are element state changes, not navigation, and never appear as ui_flow edges."
+          },
+          "edge_source": {
+            "type": "string",
+            "enum": ["CONNECTOR", "PROTOTYPE_REACTION", "CONNECTOR_INFERRED", "REACTION_INFERRED"],
+            "description": "Where the edge came from. The _INFERRED variants mean a design convention was not followed and the destination screen (or trigger element) was derived by walking ancestors — each has a matching WORTH_CHECKING extraction_note."
+          },
+          "confidence": { "type": "string", "enum": ["EXPLICIT", "INFERRED"] },
+          "source_ref": { "type": "string", "description": "Figma node id of the connector, or of the node carrying the reaction." }
         },
-        "required": ["from_screen_id", "trigger_element_id", "to_screen_id", "condition"]
+        "required": ["from_screen_id", "to_screen_id", "condition"]
       }
     }
   },
-  "required": ["visual_analysis_scratchpad", "project_context", "screens", "ui_flow"]
+  "required": ["extraction_status", "extraction_notes", "visual_analysis_scratchpad", "project_context", "screens", "ui_flow"]
 }

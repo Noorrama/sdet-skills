@@ -1,6 +1,6 @@
 ---
 name: mobile-design-extractor
-description: Extract the UI flow and element map from a mobile app's design (Figma + navigation + accessibility IDs) into design_context.json — screens, element IDs (logical), interactions, states, ui_flow, and project-level ambiguity tracking. Collapses loading/scroll/error/locale variants into screen-level states instead of fragmenting them into separate screens, and reports unresolved navigation or content in blocking_issues rather than inventing it. App-agnostic; the frontend-primary stage. Its element IDs are the logical half of the locator mapping.
+description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, element IDs (logical), interactions, states, ui_flow, deep links, and project-level ambiguity tracking. Input is a JSON export from the "Export Design Raw JSON" Figma plugin (connectors, prototype reactions, variants, Dev Mode annotations). Collapses loading/scroll/error/locale variants into screen-level states instead of fragmenting them into separate screens, applies the design team's five flow-authoring conventions with recorded fallbacks, and reports unresolved navigation or content in blocking_issues rather than inventing it. App-agnostic; the frontend-primary stage. Its element IDs are the logical half of the locator mapping.
 ---
 
 # Mobile Design Extractor (all 5 GoTo apps)
@@ -10,8 +10,8 @@ Design is the frontend-primary stage. This skill produces the screen/element map
 
 ## Config
 `${CLAUDE_PLUGIN_ROOT}/config/<app>.json` → `naming_convention.element_id_pattern` and `role_vocabulary` govern the
-`<ACTION>_<ELEMENT_TYPE>` segment of each `element_id` (see Extract §1). Set `app` on the output object
-— the schema doesn't require it, but the rest of the pipeline keys off it for multi-app runs.
+role segment of each `element_id` (see *Element IDs*). Set `app` on the output object — the schema
+doesn't require it, but the rest of the pipeline keys off it for multi-app runs.
 
 ## Preflight — resolve, or record and continue
 **Never stop, never guess.** Work through these before extracting. Anything that cannot be
@@ -20,9 +20,9 @@ labelled output is always better than no output. What is forbidden is inventing 
 fill the hole.
 
 1. **App set — how many apps does this export cover?** Never assume one. Scan the frame tree
-   before extracting and collect every app in scope from: top-level Figma pages or frame-group
-   names per app, a frame-name prefix (`[GoPay] …` / `Gojek — …`), the file/export name, or the
-   user naming them. Map each to an app id: `gojek-consumer`, `gojek-driver`,
+   before extracting and collect every app in scope from: `file.page` and `file.name` in the export
+   envelope, `SECTION` / top-level frame-group names, a frame-name prefix (`[GoPay] …` /
+   `Gojek — …`), or the user naming them. Map each to an app id: `gojek-consumer`, `gojek-driver`,
    `gofood-merchant`, `gopay-consumer`, `gopay-merchant`.
    - **One app** → one output file, as before.
    - **Two or more** → one output file per app (see *Output files*). Common when one Figma file
@@ -43,7 +43,20 @@ fill the hole.
    broken test rather than a bad extraction.
 3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`. Unreadable → `WORTH_CHECKING` note on `ENVIRONMENT`, same install action.
    Fall back to the field list in this document **only** in that case, and say so in the note.
-4. **Input.** Figma JSON attached and parses. No frames → emit with `PARTIAL` and a `NEEDS_ANSWER` note saying the export looks empty. That is a bad export, not a design with zero screens.
+4. **Input.** The Figma export JSON is attached and parses as the envelope in *Input contract* below.
+   - Not that shape (no `nodes[]`, no `export` block) → it is not an `Export Design Raw JSON` plugin
+     export. Extract what you can, set `extraction_status: LIMITED`, and add a `WORTH_CHECKING`
+     note on `ENVIRONMENT` naming the shape you actually got.
+   - `nodes[]` present but no screen frame (see *Screen frame*) → emit with `PARTIAL` and a
+     `NEEDS_ANSWER` note saying the export looks empty. That is a bad export, not a design with
+     zero screens.
+   - `scope: "selection"` → connectors and destination frames outside the selection are simply not
+     in the file. Add a `WORTH_CHECKING` note on `ENVIRONMENT`: *"export scope is `selection`;
+     flows leaving the selected layers cannot be seen — re-export with `Export page` for full
+     `ui_flow` coverage"*. Never report connector completeness as verified on a selection export.
+   - `export.truncatedCount > 0` → the depth cap dropped children. Add a `WORTH_CHECKING` note on
+     `ENVIRONMENT` listing `export.truncatedNodes[].name`. If any truncated node is (or contains) a
+     screen frame, that is a `blocking_issues` entry too — elements below it were never exported.
 
 ## Output files — one per app in scope
 | Apps in scope | Files written |
@@ -127,33 +140,321 @@ ones: *"header reads `PRD WALKTHROUGH`; not a legal value (allowed: …)"*. Neve
 to different places. Never pick the nearest-looking value to dodge the note.
 
 ## Reads
-JSON representation of the Figma design export (`.json` file) containing:
-- Frames (navigational screens)
-- Component instances and variants
-- Prototype/connector links (ALL connector lines must be extracted)
-- Text layers and accessibility IDs
-- Element interactions and state definitions
+One `.json` file produced by the **Export Design Raw JSON** Figma plugin (or by its REST-parity
+script `tools/figma_rest_export.py`, which emits a byte-identical payload). Input is read-only; no
+Figma API/MCP calls are made.
 
-Input is read-only; no Figma API calls made.
+---
+
+## Input contract — the Figma plugin export
+This is the **only** input shape this skill accepts. Everything in *Extract* is derived from these
+fields; there are no others. Read this before mapping anything.
+
+### Envelope
+```jsonc
+{
+  "exportedAt": "2026-08-11T04:12:07.331Z",  // ISO-8601, when the export ran
+  "scope": "page" | "selection",             // "page" = whole active page; "selection" = picked layers only
+  "file": { "name": "<Figma file name>", "page": "<Figma page name>" },
+  "export": {
+    "maxDepth": 15,                          // walk depth cap
+    "nodeCount": 1842,                       // nodes kept (after hidden/decorative pruning)
+    "truncatedCount": 3,                     // nodes whose children the cap dropped — 0 = nothing cut
+    "truncatedNodes": [ { "id": "12:34", "name": "Icon Grid", "type": "INSTANCE" } ]  // ≤20 samples
+  },
+  "nodes": [ /* Node */ ]                    // page scope: one PAGE node; selection scope: one per selected layer
+}
+```
+
+### Node
+Every key is **omitted when absent, null, `[]` or `{}`** — the plugin prunes empties, so *absence
+carries meaning*. No `reactions` key means the node has no prototype interaction. No `children`
+key means no kept children (all pruned, or the depth cap hit).
+
+```jsonc
+{
+  "id": "2015:31162",                 // always present — use for source_ref
+  "name": "History Page",             // layer name — the naming standards below parse this
+  "type": "PAGE"|"CANVAS"|"SECTION"|"FRAME"|"GROUP"|"COMPONENT"|"COMPONENT_SET"|"INSTANCE"
+        |"TEXT"|"CONNECTOR"|"STICKY"|"SHAPE_WITH_TEXT"|"RECTANGLE"|"VECTOR"|...,
+  "characters": "Approve",            // TEXT nodes only — the visible copy
+  "connectorStart": ConnectorEndpoint, // CONNECTOR only
+  "connectorEnd":   ConnectorEndpoint, // CONNECTOR only
+  "componentPropertyDefinitions": {    // COMPONENT_SET / COMPONENT — the declared state surface
+    "State": { "type": "VARIANT", "defaultValue": "Default", "variantOptions": ["Default","Error","Loading"] },
+    "Label#12:3": { "type": "TEXT", "defaultValue": "Approve" }
+  },
+  "componentProperties": {             // INSTANCE — the overridden values
+    "Label#12:3": { "type": "TEXT", "value": "Approve Disbursement" }
+  },
+  "variantProperties": { "State": "Error", "Type": "Primary" },  // INSTANCE of a variant, or COMPONENT inside a set
+  "reactions": [ Reaction ],           // prototype interactions
+  "annotations": [                     // Dev Mode annotations — where a11y / testIDs are usually written
+    { "label": "a11y id: approve_btn", "labelMarkdown": "...", "properties": [ { "type": "..." } ], "categoryId": "..." }
+  ],
+  "flowStartingPoints": [ { "nodeId": "12:3", "name": "Disbursement Flow" } ],  // PAGE node only
+  "text": { "characters": "if amount > 5jt" },  // sublayer — CONNECTOR / STICKY / SHAPE_WITH_TEXT / TABLE_CELL
+  "textBackground": { },                        // normally pruned away entirely
+  "children": [ Node ]
+}
+```
+
+**`ConnectorEndpoint`** — exactly one of two forms, and the difference decides whether a flow is
+resolvable at all:
+```jsonc
+{ "endpointNodeId": "2015:31170", "magnet": "AUTO"|"TOP"|"BOTTOM"|"LEFT"|"RIGHT"|"CENTER" }  // attached to a node
+{ "position": { "x": 1204, "y": 880 } }                                                       // floating — attached to nothing
+```
+A floating endpoint is a connector the designer never snapped to a layer. It is **never**
+resolvable — it goes to `blocking_issues`, never to a guessed nearest frame.
+
+**`Reaction`**:
+```jsonc
+{
+  "trigger": { "type": "ON_CLICK"|"ON_PRESS"|"ON_HOVER"|"ON_DRAG"|"AFTER_TIMEOUT"
+                     |"MOUSE_ENTER"|"MOUSE_LEAVE"|"MOUSE_UP"|"MOUSE_DOWN"
+                     |"ON_KEY_DOWN"|"ON_MEDIA_HIT"|"ON_MEDIA_END",
+               "timeout": 3000, "delay": 0 },
+  "actions": [
+    { "type": "NODE", "destinationId": "2015:31200"|null,
+      "navigation": "NAVIGATE"|"SWAP"|"OVERLAY"|"SCROLL_TO"|"CHANGE_TO",
+      "transition": { }, "preserveScrollPosition": false },
+    { "type": "BACK" },
+    { "type": "CLOSE" },
+    { "type": "URL", "url": "gopaymerchant://disbursement/history" },
+    { "type": "SET_VARIABLE", "variableId": "...", "variableValue": { } },
+    { "type": "CONDITIONAL", "conditionalBlocks": [ { "condition": { }, "actions": [ /* … */ ] } ] }
+  ],
+  "action": { }   // legacy single-action mirror; when both exist they say the same thing — read `actions`
+}
+```
+`destinationId: null` **survives the pruning** (only empty arrays/objects are dropped, not nulls).
+A tap whose `destinationId` is null, or a reaction with a `trigger` and no `actions` key at all, is
+exactly the "tap prototype with no destination" case standard #2 exists to prevent — flag it.
+
+### What the plugin already threw away — do not look for it
+| Dropped | Consequence for you |
+| :--- | :--- |
+| Hidden layers (`visible: false`), whole subtree | A designed-but-hidden state is invisible here. Never infer one. |
+| `VECTOR` nodes with no `reactions` and no `annotations` | Decorative icons are gone. A **tappable** icon survives (it carries `reactions`), so a vector in the file is signal, not noise. |
+| Geometry, styling, colour, fonts, sizes, positions | No visual reasoning is possible. Screen-vs-state must be decided from **names, variants and reactions only** — never from "it looks like a dialog". |
+| Children below `export.maxDepth` (15) | Reported in `export.truncatedCount` / `truncatedNodes`, never silent. |
+| Every empty `[]` / `{}` at any depth | Absence = "none", not "unknown". |
+
+### Screen frame — the one structural definition everything else keys off
+A **screen frame** is a node of type `FRAME`, `COMPONENT` or `INSTANCE` whose ancestor chain up to
+the export root contains only `PAGE` / `CANVAS` / `SECTION` / `GROUP` nodes. In other words: a
+top-level frame on the page, including one wrapped in a section or a group.
+
+A `FRAME` nested inside another `FRAME` is a **component of that screen**, never a screen — unless
+a connector or reaction targets it directly, which promotes it to a screen candidate to be judged
+under *Screen vs. state* below.
+
+---
+
+## Design conventions — how the design team writes flows
+The design team has standardised on the five conventions below. Each has a **read** (the compliant
+case), a **fallback** (the inference you may make when it was not followed — always within reason,
+always recorded), and a **flag** (when even the fallback is not defensible).
+
+Every fallback you take is an `extraction_notes` entry with `follow_up: WORTH_CHECKING`, and every
+flag is a `project_context.blocking_issues` entry. Tally both into
+`project_context.convention_compliance` so the design team gets one actionable list per export.
+
+### 1. Connectors point element → **screen**, not element → element
+- **Read.** `connectorStart.endpointNodeId` resolves to an element inside a screen frame;
+  `connectorEnd.endpointNodeId` resolves to a screen frame. → `from_screen_id` = the source's
+  nearest screen-frame ancestor, `trigger_element_id` = the source element, `to_screen_id` = the
+  destination frame. `edge_source: "CONNECTOR"`, `confidence: "EXPLICIT"`.
+- **Fallback.** The destination is an element *inside* a different screen frame → walk its
+  ancestors to the nearest screen frame and use that. `edge_source: "CONNECTOR_INFERRED"`,
+  `confidence: "INFERRED"`, plus a `WORTH_CHECKING` note naming the connector `id`.
+- **Fallback.** The source is the screen frame itself (frame → frame connector) → emit the edge
+  with **no** `trigger_element_id` if the source screen has no single obvious trigger; if it has
+  exactly one interactive element whose own reaction targets the same destination, use that one and
+  mark `INFERRED`. Never invent a trigger token to satisfy the schema.
+- **Flag.** Either endpoint is floating (`position`, no `endpointNodeId`); or the destination
+  resolves into the *same* screen frame as the source (an intra-screen connector is an annotation,
+  not a flow — check standard #5 first); or the destination node id is not present anywhere in the
+  export (orphaned, or cut by the depth cap).
+
+### 2. Tap prototypes always name their destination
+Read every `reactions[]` entry on every node.
+
+| Action | Meaning | Emit |
+| :--- | :--- | :--- |
+| `NODE` + `navigation: "NAVIGATE"` | real navigation | `ui_flow` edge, `navigation_kind: "NAVIGATE"` |
+| `NODE` + `"OVERLAY"` | dialog / bottom sheet | fold into the **source** screen's `screen_states` (see *Screen vs. state*), `navigation_kind: "OVERLAY"`; own `screen_id` only when ≥2 screens open it |
+| `NODE` + `"SWAP"` / `"CHANGE_TO"` | variant / state change | **not** a `ui_flow` edge — record on the element's `states_represented` |
+| `NODE` + `"SCROLL_TO"` | intra-screen scroll | **not** a `ui_flow` edge |
+| `BACK` | return to caller | edge with `navigation_kind: "BACK"` **only if** exactly one caller exists in `ui_flow`; otherwise flag |
+| `CLOSE` | dismiss overlay | closes the overlay state; no new screen |
+| `URL` | deep link or external | if the URL starts with the config's `deeplink_scheme`, set `screens[].deep_link` on the destination screen and emit `navigation_kind: "DEEP_LINK"`; otherwise record as external and flag |
+| `CONDITIONAL` | branch | one `ui_flow` edge per `conditionalBlocks[]` entry, `condition` from that block; if the block's condition does not serialise readably, flag |
+| `SET_VARIABLE` | prototype bookkeeping | ignore for flow; may inform `condition` |
+
+- **Fallback.** `AFTER_TIMEOUT` with a `NODE` destination is a real edge — `condition` = *"after
+  <timeout>ms"*. `ON_HOVER` / `MOUSE_ENTER` / `MOUSE_LEAVE` are desktop-only prototype
+  scaffolding on a mobile design; drop them and note once, not per node.
+- **Flag.** Tap-family trigger (`ON_CLICK` / `ON_PRESS` / `ON_DRAG`) with `destinationId: null`, or
+  with no `actions` at all → `blocking_issues`: *"tappable element `<name>` (`<id>`) has a
+  prototype trigger with no destination — standard #2"*. Never guess where it goes.
+
+### 3. Human-readable frame and layer names
+- **Screen frame name → `screen_name` verbatim.** `screen_id` = the name with any trailing state
+  qualifier stripped, then UPPER_SNAKE (non-alphanumerics → `_`, repeats collapsed, ends trimmed).
+  A state qualifier is the segment after the last ` — `, ` – `, ` - ` or `/`.
+  - `History Page` → `HISTORY_PAGE`
+  - `Confirm Disbursement Dialog` → `CONFIRM_DISBURSEMENT_DIALOG`
+  - `Approve Disbursement — Error` → `APPROVE_DISBURSEMENT`, and `"Error"` joins that screen's
+    `screen_states` (and `state_kinds: ["ERROR"]`)
+- **Interactive layer name → `element_id`.** The convention is `<Role>/<Variant> — <what it does>`
+  or `<Role> — <what it does>`; the role is the token before the first `/` or ` — `, the purpose is
+  the remainder.
+  - `Button/Brand — Approve` → role `Button`, purpose `Approve`
+  - `Field — Affiliator Search` → role `Field`, purpose `Affiliator Search`
+  Build the id from the app config's `naming_convention` — see *Element IDs* below.
+- **Fallback (role).** Role token missing or unrecognised → derive the role from the node's `type`
+  and `reactions` (`TEXT` with no reactions → `LABEL`; any node with a tap reaction → `BUTTON`;
+  a node with a `TEXT`-typed `componentProperties` entry and a tap reaction → `INPUT`). Record a
+  `WORTH_CHECKING` note.
+- **Fallback (purpose).** No purpose in the layer name → use the element's visible copy: the node's
+  own `characters`, or the `characters` of its single TEXT descendant, or a `componentProperties`
+  `TEXT` `value`. Record a `WORTH_CHECKING` note.
+- **Flag.** The name is a default or a visual-only description (`Frame 427`, `Group 12`,
+  `Rectangle`, `Component 3`, `Blue Button`, `Icon/24`) **and** no copy is available → the element
+  gets no id and goes to `blocking_issues`: *"element `<id>` has a non-descriptive name and no
+  visible copy — cannot produce a stable element_id (standard #3)"*. A screen frame in this state
+  is always a blocker, because every element id under it inherits the screen id.
+
+### 4. Branching conditions live on the connector label
+- **Read.** A connector's label is its text sublayer: `text.characters`. Copy it into the edge's
+  `condition` verbatim.
+- **Fallback.** No label and only **one** outgoing edge from that trigger element → `condition` =
+  `""` (unconditional). That is normal and needs no note.
+- **Flag.** No label and **two or more** outgoing edges from the same trigger element → the branch
+  is undecidable → `blocking_issues`: *"`<element>` has N unlabelled outgoing connectors — which
+  condition selects which destination is not stated (standard #4)"*. Emit every edge with an empty
+  `condition` so the flows are not lost; do not invent the discriminator.
+- A free-floating `TEXT` / `STICKY` node that reads like a condition but is attached to nothing is
+  **not** a condition — it is unattached commentary. Note it as `FYI`, do not bind it to an edge.
+
+### 5. Notes and context are TEXT nodes connected to a FRAME
+- **Read.** A `CONNECTOR` where one endpoint is a `TEXT` node whose `characters`, trimmed and
+  case-insensitive, starts with `Note` or `Context`, is **not** a flow. Append that text to the
+  other endpoint's `screen_notes` (or, if the other endpoint is an element, to that element's
+  `validations_and_edge_cases`). Classify these **before** running standard #1, so a note connector
+  is never counted as a missing flow.
+- **Fallback.** A `TEXT` / `STICKY` node starting with `Note` / `Context` that sits *inside* a
+  screen frame with no connector → attach it to that frame's `screen_notes` with an `FYI` note.
+- **Flag.** Same prefix, but the node sits outside every screen frame and has no connector → it
+  belongs to nothing → `blocking_issues`, quoting the first ~100 characters so the designer can
+  find it.
+
+### Convention compliance is reported, not enforced
+A non-compliant export still produces a full `design_context`. Falling back is the default
+behaviour; refusing to extract is not. What is forbidden is a silent fallback — every one is in
+`extraction_notes`, and the totals are in `project_context.convention_compliance`.
+
+---
+
+## Element IDs — built from the app config, never from memory
+`naming_convention.element_id_pattern` is `<screen_id>.<element_role>` and `role_vocabulary` lists
+the role suffixes (`_btn`, `_input`, `_label`, `_toggle`, `_tab`, `_list`). Take both **verbatim**,
+including their casing:
+
+```
+element_id = <SCREEN_ID> "." <purpose_lower_snake> <role_suffix>
+```
+`Button/Brand — Approve` on frame `Approve Disbursement` → `APPROVE_DISBURSEMENT.approve_btn`.
+`Field — Affiliator Search` on frame `History Page` → `HISTORY_PAGE.affiliator_search_input`.
+
+**Casing is mixed, and deliberately so:** the screen half is UPPER_SNAKE because it is the
+`screen_id`; the role half is lower_snake because that is how `role_vocabulary` writes it and how
+developers name the real locators it joins to. The schema's pattern enforces exactly this —
+`^[A-Z0-9_]+\.[a-z0-9_]+(\.[a-z0-9_]+)?$`. Do not "normalise" either half.
+
+Map the design role token to the config's vocabulary — never to a suffix the config does not list:
+
+| Layer role token | `role_vocabulary` entry → emitted suffix | `role` enum |
+| :--- | :--- | :--- |
+| Button, CTA, Action, FAB | `_btn` | `BUTTON` |
+| Field, Input, TextField, Search, Form | `_input` | `INPUT` |
+| Label, Text, Title, Caption, Error, Message | `_label` | `LABEL` |
+| Toggle, Switch, Checkbox, Radio | `_toggle` | `TOGGLE` |
+| Tab, Segment, Chip (navigational) | `_tab` | `TAB` |
+| List, Row, Card, Item, Cell, Carousel | `_list` | `LIST` |
+
+The suffix is emitted exactly as the config writes it. `role` is the separate normalised enum field
+and stays UPPER — the two are different things and do not have to match in case.
+
+A role that maps to none of these → use the closest listed suffix, set `role` to the honest enum
+value (or `OTHER`), and record a `WORTH_CHECKING` note naming the source token. Do **not** invent a
+seventh suffix — downstream locator joins are keyed on this vocabulary.
+
+A third `.state` segment (lower_snake, same rule) is only appended when the design genuinely ships
+that element as a separate variant (`variantProperties.State`) *and* a flow depends on the
+distinction.
+
+This is the form every downstream stage joins on:
+
+```
+design_context   GOFOOD_CART_REVIEW.promo_input      (logical — this skill)
+change_context   GOFOOD_CART_REVIEW.promo_input  ->  com.gojek.app:id/promo_input   (real locator — code diff)
+nlp_steps        enter "SAVE20" into "GOFOOD_CART_REVIEW.promo_input"                (test code)
+```
+
+The `element_id` is the join key across all three. Emit it once, here, in this form; every later
+stage copies it verbatim and never re-derives or re-cases it. An id that does not match the pattern
+does not silently fail — it fails at code-gen, months later, as a test that cannot find its element.
+
+---
+
+## Field derivation — Figma node → `design_context`
+| `design_context` field | Comes from |
+| :--- | :--- |
+| `app` | Preflight §1 — `file.name`, `file.page`, `SECTION` names, or a frame-name prefix |
+| `design_source` | `exportedAt`, `scope`, `file.*`, `export.*` — copied verbatim for provenance |
+| `screens[].screen_id` / `screen_name` | screen frame `name` (standard #3) |
+| `screens[].source_ref` | screen frame `id` |
+| `screens[].purpose` | frame name + the screen's own TEXT copy; never speculation |
+| `screens[].screen_states` | frame-name state qualifiers, `componentPropertyDefinitions.*.variantOptions`, `variantProperties` across sibling frames, and `OVERLAY` destinations folded in |
+| `screens[].state_kinds` | the canonical enum those states normalise to (`ERROR`, `LOADING`, `OFFLINE`, `DARK_THEME`, `LOCALE_VARIANT`, …) — this is what makes downstream category triggers deterministic |
+| `screens[].deep_link` | a `URL` action whose url starts with the config `deeplink_scheme`, or a `Note`/`Context` note that states one |
+| `screens[].entry_point` / `flow_name` | the PAGE node's `flowStartingPoints[]` — `nodeId` matches the screen frame |
+| `screens[].screen_notes` | note connectors and in-frame `Note` / `Context` text (standard #5) |
+| `elements[].element_id` / `role` | layer `name` + config `naming_convention` (*Element IDs*) |
+| `elements[].source_ref` | node `id` |
+| `elements[].type` | node `type` plus the design role token |
+| `elements[].label` | `characters`, or a `componentProperties` `TEXT` `value`, or the single TEXT descendant's `characters` |
+| `elements[].states_represented` | `variantProperties`, `componentPropertyDefinitions.*.variantOptions`, `SWAP`/`CHANGE_TO` reactions |
+| `elements[].interactions` | `reactions[]` — `trigger.type` → `trigger`, the action → `action` |
+| `elements[].accessibility_id` / `platform_hints` | `annotations[].label` when it reads as an id (`a11y id: x`, `testID: x`, `resource-id: x`, or a bare `^[a-z0-9_]+$` token). Prose annotations go to `validations_and_edge_cases` instead |
+| `elements[].validations_and_edge_cases` | prose `annotations[].label` / `labelMarkdown`, and note connectors landing on the element |
+| `ui_flow[]` | `CONNECTOR` nodes (standard #1) + `reactions[]` (standard #2), deduped |
+| `project_context.blocking_issues` | every **Flag** case above |
+| `project_context.convention_compliance` | the tallies from the five standards |
+
+---
 
 ## Model
 Fast tier — Haiku / Composer 2.5. Escalate to reasoning when:
-- A frame's screen-vs-state grouping is ambiguous after applying the rules below.
-- A connector's destination is unclear (e.g. target node ID is null or orphaned).
-- Extracting connectors from a very large or deeply nested Figma file (to ensure 100% coverage).
+- A frame's screen-vs-state grouping is ambiguous after applying all three mechanical signals below.
+- A connector endpoint is floating, orphaned, or lands mid-tree so a fallback has to be judged.
+- Layer names are largely non-compliant with standard #3, so roles and purposes must be inferred.
+- `export.nodeCount` is large or `truncatedCount > 0` — connector coverage has to be exhaustive.
 
 ## Tool usage & permissions
 Minimize tools requiring user approval:
 - **Read from JSON representation only** — accept pre-exported Figma design data as JSON input; no
   Figma API/MCP calls required. This eliminates Figma tool approval overhead.
-- **Output JSON directly to stdout/artifact** — return design_context.json as structured output that can
-  be piped or captured without requiring a Write tool.
-- **Avoid intermediate file operations** — process the input JSON in-memory and output the result once at
-  the end. This reduces approval prompts to zero (input is JSON provided inline or via Read).
+- **Avoid intermediate file operations** — process the input JSON in-memory and write the result once
+  at the end. One Write per output file (see *Output files*), nothing else.
 
 ## Screen vs. state (CRITICAL GUARDRAIL)
-A screen is a unique navigational destination; a state is a visual variation of the same screen. Do
-**not** create a new `screen_id` for:
+A screen is a unique navigational destination; a state is a visual variation of the same screen. The
+export carries no geometry, so this decision is made from **names, variants and reactions only** —
+never from how a frame looks. Do **not** create a new `screen_id` for:
 - Loading, scroll-position, or pagination variants of the same frame.
 - Form states (empty / typing / typed / error) of the same field or button.
 - Platform, locale ("as-is vs redesign", ID vs EN), or viewport-crop variants that share the same
@@ -162,49 +463,94 @@ A screen is a unique navigational destination; a state is a visual variation of 
   as a `screen_states` entry on that screen and document the open/close trigger under the opening
   element's `interactions` instead.
 
-Only start a new `screen_id` when the frame is a genuinely different destination (distinct Figma frame
-title *and* distinct purpose/route), including a component that is reused as its own destination from
+Three mechanical signals decide it, in this order:
+1. **Same base name after stripping the state qualifier** (standard #3) → one screen, the qualifiers
+   are `screen_states`. `Approve Disbursement`, `Approve Disbursement — Error`,
+   `Approve Disbursement — Loading` are **one** screen with three states.
+2. **`variantProperties` differ but the component set is the same** → states of one screen, not
+   screens. `componentPropertyDefinitions.*.variantOptions` on the set enumerates them for you.
+3. **`navigation: "OVERLAY"`** → a state of the screen that opens it, **unless** ≥2 distinct screens
+   have an `OVERLAY` reaction targeting the same frame — then it is a shared destination and gets its
+   own `screen_id`, referenced from every caller.
+
+Only start a new `screen_id` when the frame is a genuinely different destination (distinct base name
+*and* distinct purpose/route), including a component that is reused as its own destination from
 multiple callers (e.g. a shared error dialog, native date/month picker, share sheet). Give each of those
 one `screen_id` and reference it from every caller's `ui_flow` entry — never duplicate it per caller.
 
+A frame you cannot place under any of the three signals is **not** silently promoted to a screen:
+emit it as a screen, and record a `blocking_issues` entry saying the screen-vs-state call is unresolved.
+
 ## Extract (→ `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`)
 
-**CRITICAL: Extract ALL connector lines first, then filter elements by relevance to ui_flow.**
+Run these passes in order. Pass 0 exists because a note connector misread as a flow corrupts every
+later pass.
 
-1. **ui_flow** (extract FIRST) — `{from_screen_id, trigger_element_id, to_screen_id, condition}` edges.
-   - Traverse entire JSON tree to find ALL prototype/connector links (both element-level and frame-level).
-   - Record the source element ID, destination screen, and explicit connector condition.
-   - This becomes the ground truth for which elements matter.
+**0. Index the tree.** One traversal of `nodes[]`, building:
+   - `id → node`, and `id → nearest screen-frame ancestor` (see *Screen frame*).
+   - the list of every `CONNECTOR` node,
+   - the list of every node carrying `reactions`,
+   - the PAGE node's `flowStartingPoints[]`.
+   Then classify each `CONNECTOR` as **note** (standard #5) or **flow** (standard #1). Note
+   connectors are removed from the flow set before pass 1 and never counted as missing flows.
 
-2. **screens** — `screen_id` (`^[A-Z0-9_]+$`, UPPER_SNAKE from frame title, state/variant qualifiers
-   stripped), `screen_name`, `purpose`, `screen_states` (empty/loading/error/success/offline), `screen_notes`.
-   Include only screens that appear in ui_flow (as from_screen_id or to_screen_id).
+**1. ui_flow** — `{from_screen_id, trigger_element_id?, to_screen_id, condition, navigation_kind,
+   edge_source, confidence, source_ref}` edges, from the flow connectors (standard #1) **and** every
+   `reactions[]` entry (standard #2). This is the ground truth for which elements matter.
+   - Resolve every `endpointNodeId` / `destinationId` through the pass-0 index. An id that resolves
+     to nothing is orphaned or was cut by the depth cap → `blocking_issues`, not an edge.
+   - `SWAP` / `CHANGE_TO` / `SCROLL_TO` are **not** edges (they are element states) — record them so
+     the completeness audit knows they were seen and deliberately not emitted.
+   - **Deduplicate:** the same `from` / `to` / `trigger` / `condition` across frame variants is one
+     entry. A connector and a reaction expressing the *same* transition is also one entry — keep the
+     `EXPLICIT` one and prefer `edge_source: "CONNECTOR"`.
 
-3. **elements** (per screen, FILTERED) — `element_id` matching `^[A-Z0-9_]+\.[A-Z0-9_]+(\.[A-Z0-9_]+)?$`.
-   **Include ONLY elements that:**
-   - Appear as `trigger_element_id` in ui_flow, OR
-   - Have explicit interactions/states defined in the design (multi-state buttons, form fields with
-     validation states), OR
-   - Are labeled text/content with semantic purpose.
-   
-   **Omit:** decorative elements (vectors, spacers, dividers), icons without interactions, nested groups
-   with no functional purpose. Keep output concise — only functional, navigational, and state-bearing elements.
+**2. screens** — `screen_id`, `screen_name`, `purpose`, `screen_states`, `state_kinds`, `deep_link`,
+   `entry_point` / `flow_name`, `screen_notes`, `source_ref`.
+   Include every screen that appears in `ui_flow` (as `from_screen_id` or `to_screen_id`) **plus**
+   every `flowStartingPoints[]` entry point. A screen frame in neither is unreachable → still emit
+   it (it is real design) and add a `blocking_issues` entry saying nothing navigates to it.
+   Normalise each free-text state into `state_kinds` so downstream triggers are deterministic:
+   `DEFAULT`, `LOADING`, `EMPTY`, `ERROR`, `SUCCESS`, `OFFLINE`, `DISABLED`, `PERMISSION_DENIED`,
+   `DARK_THEME`, `LIGHT_THEME`, `LOCALE_VARIANT`, `RTL`, `OTHER`. Keep the designer's wording in
+   `screen_states`; `state_kinds` is the normalised companion, not a replacement.
 
-4. **project_context** — `{overall_ambiguity_rating: LOW/MEDIUM/HIGH, blocking_issues: []}`.
-   - Missing connector traces (tappable elements with no traced destination).
-   - Unreachable screens (appear in design but not in any ui_flow edge).
-   - Incomplete or contradictory design annotations.
+**3. elements** (per screen, FILTERED). **Include ONLY elements that:**
+   - Appear as `trigger_element_id` in `ui_flow`, OR
+   - Carry `reactions`, `variantProperties`, or a multi-option `componentPropertyDefinitions`, OR
+   - Carry `annotations` (a Dev Mode annotation is a deliberate note to engineering), OR
+   - Are labelled text/content with semantic purpose (visible copy a test would assert on).
+
+   **Omit:** spacers, dividers, wrapper groups with no functional purpose, and icons with no
+   `reactions` and no `annotations`. Decorative `VECTOR`s were already dropped by the plugin, so a
+   `VECTOR` still in the file is interactive or annotated — keep it. Keep output concise: functional,
+   navigational and state-bearing elements only.
+
+**4. project_context** — `{overall_ambiguity_rating, blocking_issues, convention_compliance}`.
+   `blocking_issues` collects every **Flag** case from the five standards, plus:
+   - Tappable elements with no traced destination (standard #2).
+   - Unreachable screens (in the design, in no `ui_flow` edge and no flow starting point).
+   - Contradictory annotations, or a frame whose screen-vs-state call is unresolved.
+   `overall_ambiguity_rating`: `HIGH` when any screen or trigger element could not be resolved;
+   `MEDIUM` when flows resolved but through fallbacks/inference; `LOW` when every edge is `EXPLICIT`
+   and every name compliant.
 
 ## Rules
-- No locators — labels, types, states, interactions, flow only. Locators come from code-change-extractor.
-- `label` = visible copy; `element_id` = stable functional token (UPPER_SNAKE, not text content).
-- **Extract all connector lines first** — before filtering elements. Traverse full tree for every
-  prototype/connector link (element-level ON_CLICK and frame-level AFTER_TIMEOUT transitions).
-- **Filter elements by ui_flow relevance** — only include elements that trigger navigation (appear in
-  ui_flow as `trigger_element_id`), or define interaction/state behaviors. Omit decorative elements.
-- **Deduplicate ui_flow** — same from/to/trigger across frame variants = one ui_flow entry.
+- No locators — labels, types, states, interactions, flow only. **Exception:** an accessibility id
+  the designer wrote into a Dev Mode `annotation` goes into `accessibility_id` / `platform_hints`
+  verbatim. That is transcription of a design artefact, not a locator you derived — real per-platform
+  locators still come from code-change-extractor, which reconciles against this.
+- `label` = visible copy; `element_id` = stable functional token (`<SCREEN_ID>.<element_role>`, not
+  text content). Casing is not a style choice — see *Element IDs*.
+- **Classify note connectors before flow connectors** — standard #5 runs before standard #1.
+- **Absence in the export means "none", not "unknown"** — the plugin prunes empty arrays and
+  objects. No `reactions` key = no prototype interaction, and that is a fact you may rely on. The one
+  thing absence does *not* tell you about is anything hidden, decorative, or below the depth cap.
+- **Never infer from appearance** — there is no geometry in this file. "It looks like a bottom
+  sheet" is not available to you and is not a valid reason for any decision.
 - **Never invent** — every gap (missing connector, unreachable screen, placeholder text) becomes a
   `blocking_issues` entry, not a filled assumption.
+- **Every fallback is recorded** — a `WORTH_CHECKING` note plus a tally in `convention_compliance`.
 - Output design_context.json concisely — only functional elements that matter for test automation.
 
 ## Guardrails
@@ -240,11 +586,25 @@ python3 -c "import json,jsonschema; jsonschema.validate(
   - inside a virtualenv, or with `uv`: `pip install jsonschema` / `uv pip install jsonschema`
   Never report an unvalidated output as valid — well-formed JSON is not schema conformance.
   Do not attempt the install yourself; it is the user's environment to change.
-- **Connector completeness:** Count all visible prototype/connector lines in JSON and verify each appears
-  in `ui_flow` (or flag missing ones in `blocking_issues`). Zero false positives/negatives.
-- **Element filtering:** Every element in `elements` either (a) appears in `ui_flow` as trigger, or (b)
-  has explicit interactions/states. No decorative/unused elements.
-- **ID patterns:** All `screen_id` and `element_id` values match regex exactly — `^[A-Z0-9_]+$` and
-  `^[A-Z0-9_]+\.[A-Z0-9_]+(\.[A-Z0-9_]+)?$` respectively. No lowercase, no stray punctuation.
-- **Conciseness:** Output size is minimal; only functional elements included. Verify by comparing element
-  count to connector count — should be roughly proportional.
+- **Connector completeness (mechanical, not from memory):** every `CONNECTOR` node in the export is
+  accounted for in exactly one bucket — a `ui_flow` edge, a note attached under standard #5, or a
+  `blocking_issues` entry. Same for every `reactions[]` entry: an edge, a recorded
+  `SWAP`/`CHANGE_TO`/`SCROLL_TO`/`CLOSE` state change, a dropped hover trigger, or a blocker.
+  `connectors_total` in `convention_compliance` must equal the sum of the buckets. A shortfall is a
+  bug in the extraction, not an acceptable rounding.
+- **Endpoint resolution:** every `endpointNodeId` and non-null `destinationId` either resolves to a
+  node present in the export, or produced a `blocking_issues` entry.
+- **Element filtering:** every element in `elements` satisfies at least one of the four inclusion
+  tests in Extract §3. No decorative/unused elements.
+- **ID patterns:** all `screen_id` and `element_id` values match regex exactly — `^[A-Z0-9_]+$` and
+  `^[A-Z0-9_]+\.[a-z0-9_]+(\.[a-z0-9_]+)?$` respectively — UPPER screen half, lower role half, no
+  stray punctuation. An id that is upper on both halves is as wrong as one that is lower on both. Every
+  `element_id` prefix is a `screen_id` that exists in `screens[]`, and every `from_screen_id` /
+  `to_screen_id` resolves to one too.
+- **Role vocabulary:** every emitted role suffix comes from the app config's `role_vocabulary`. A
+  suffix outside that list is a defect, not a judgement call.
+- **Fallback accounting:** every `INFERRED` edge, inferred role and inferred purpose has a matching
+  `WORTH_CHECKING` entry in `extraction_notes`. A fallback with no note is a silent guess.
+- **Truncation:** if `export.truncatedCount > 0`, the note exists and names the truncated layers.
+- **Conciseness:** output size is minimal; only functional elements included. Verify by comparing
+  element count to connector + reaction count — should be roughly proportional.
