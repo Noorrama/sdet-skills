@@ -1,68 +1,364 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "prd_context",
+  "description": "QA-first product intent extracted from a backend PRD. Test-design oriented: requirements (business + product), GIVEN/WHEN/THEN acceptance criteria with a verifiable flag, boundary values/conditions, undecided open_decisions with contingent approach_branches, comment_resolutions from the PRD's review thread, and a needs_clarification Definition-of-Ready gate. Feeds sdet-plan-generator (priority, risk weighting, boundary/negative scenarios, out-of-scope suppression, and which criteria are actually assertable).",
   "type": "object",
   "additionalProperties": false,
-  "required": ["feature_name", "user_stories"],
+  "required": ["title", "requirements", "acceptance_criteria", "needs_clarification"],
   "properties": {
-    "feature_name": { "type": "string" },
-    "prd_version": { "type": ["string", "null"] },
-    "user_stories": {
+    "id": {
+      "type": ["string", "null"],
+      "description": "Stable PRD identifier, e.g. PRD-SEE-ALL-FORCED-DISPLAY. Slugged from the title if the PRD states none."
+    },
+    "title": {
+      "type": "string",
+      "description": "The PRD / feature title, verbatim."
+    },
+    "priority": {
+      "type": ["string", "null"],
+      "description": "PRD-stated priority (P0/P1/P2 or the PRD's own label). null when the PRD states none — do not infer a document-level priority."
+    },
+    "readiness": {
+      "type": ["string", "null"],
+      "description": "PRD maturity, e.g. draft, in_review, approved. Verbatim from the PRD header/metadata."
+    },
+    "owner": {
+      "type": ["string", "null"],
+      "description": "Product owner / DRI stated in the PRD body. Comment authors are NOT the owner. null when unstated."
+    },
+    "team": {
       "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["id", "persona", "goal", "benefit", "acceptance_criteria"],
-        "properties": {
-          "id": { "type": "string" },
-          "persona": { "type": "string" },
-          "goal": { "type": "string" },
-          "benefit": { "type": "string" },
-          "acceptance_criteria": {
-            "type": "array",
-            "items": {
-              "type": "object", "additionalProperties": false,
-              "required": ["id", "description", "type"],
-              "properties": {
-                "id": { "type": "string" },
-                "description": { "type": "string" },
-                "type": { "type": "string", "enum": ["functional", "non_functional"] }
+      "description": "Owning squad(s) named in the PRD. Empty when unstated (involved_teams still records participants).",
+      "items": { "type": "string" }
+    },
+    "pdg": {
+      "type": "array",
+      "description": "Product Delivery Group(s), if resolvable from team mapping. Empty when unknown.",
+      "items": { "type": "string" }
+    },
+    "milestones": {
+      "type": "array",
+      "description": "Delivery milestones/dates stated in the PRD. Empty when unstated."
+    },
+    "source_document": {
+      "type": ["string", "null"],
+      "description": "Path or URL of the PRD the context was extracted from (alias of source_ref)."
+    },
+    "extracted_at": {
+      "type": ["string", "null"],
+      "description": "ISO-8601 timestamp of the extraction run."
+    },
+    "extractor_version": {
+      "type": ["string", "null"],
+      "description": "Version of the prd-extractor skill that produced this file."
+    },
+    "summary": {
+      "type": ["string", "null"],
+      "description": "One-paragraph plain-language statement of the feature intent."
+    },
+    "in_scope": {
+      "type": "array",
+      "description": "Explicit in-scope items from the PRD Scope section.",
+      "items": { "type": "string" }
+    },
+    "out_of_scope": {
+      "type": "array",
+      "description": "Explicit exclusions — as important as in-scope; the SDET plan uses this to SUPPRESS scenario generation. Record even when it conflicts with a later section (flag that conflict in needs_clarification / open_decisions).",
+      "items": { "type": "string" }
+    },
+    "user_flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The end-to-end request/render flow plus its failure states — the skeleton the SDET plan turns into happy-path and negative scenarios.",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["actor", "action"],
+            "properties": {
+              "step": { "type": ["integer", "null"] },
+              "actor": {
+                "type": "string",
+                "description": "The system/persona performing the step, e.g. user, Gateway, MLS, Frontend."
+              },
+              "action": {
+                "type": "string",
+                "description": "What happens at this step. Prefix branch-specific behaviour with the branch, e.g. '[Option B path] ...'."
               }
+            }
+          }
+        },
+        "failure_states": {
+          "type": "array",
+          "description": "Named failure/edge outcomes on this flow — each is a negative-scenario seed.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "outcome"],
+            "properties": {
+              "name": { "type": "string", "description": "The triggering condition, e.g. 'dish_list = 0', 'Missing flag'." },
+              "outcome": { "type": "string", "description": "Expected observable result, e.g. 'Do not show', 'use old logic'." }
             }
           }
         }
       }
     },
+    "personas": {
+      "type": "array",
+      "description": "Actors referenced by the feature, e.g. ['user'].",
+      "items": { "type": "string" }
+    },
+    "persona_prerequisites": {
+      "type": "array",
+      "description": "Preconditions a persona must satisfy to hit the flow (eligibility, state). Empty when unstated."
+    },
+    "applicable_countries": {
+      "type": "array",
+      "description": "Country/region gating, e.g. ['ID','SG']. Empty when the PRD states no country scope.",
+      "items": { "type": "string" }
+    },
+    "applicable_service_types": {
+      "type": "array",
+      "description": "Service verticals the feature applies to, e.g. ['Food'].",
+      "items": { "type": "string" }
+    },
+    "rollout_plan": {
+      "type": ["object", "null"],
+      "description": "Rollout / experiment ramp if the PRD states one (segment, %, phases). null when unstated even if A/B is 'in scope'."
+    },
+    "involved_teams": {
+      "type": "array",
+      "description": "Every team the flow touches and its role. Under an undecided approach, record each team's role per branch, e.g. '[Option A] ... [Option B] ...'.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["team", "role"],
+        "properties": {
+          "team": { "type": "string" },
+          "role": { "type": "string" }
+        }
+      }
+    },
+    "user_stories": {
+      "type": "array",
+      "description": "User stories. Every acceptance_criterion must trace to exactly one story via story_ref.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description"],
+        "properties": {
+          "id": { "type": "string", "description": "Story id from the PRD, else assigned US-001, US-002 ..." },
+          "description": {
+            "type": "string",
+            "description": "The story, ideally 'As a <persona> I want <goal> so that <benefit>.'"
+          },
+          "owner": { "type": ["string", "null"] },
+          "team": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "description": "Each requirement pairs the business intent with the concrete product behaviour to be tested. Under an undecided approach, prefix branch-only requirements with '[Option X only]' in the text and list them in approach_branches.branches[].requirement_refs.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "product_requirement"],
+        "properties": {
+          "id": { "type": "string", "description": "Requirement id, REQ-001 ..." },
+          "story_ref": { "type": ["string", "null"], "description": "user_stories[].id this requirement serves." },
+          "business_requirement": { "type": ["string", "null"], "description": "The 'why' — business outcome the requirement drives." },
+          "product_requirement": { "type": "string", "description": "The 'what' — concrete, testable behaviour/contract." },
+          "owner": { "type": ["string", "null"] },
+          "team": { "type": ["string", "null"], "description": "Owning team, e.g. Gateway, MLS." }
+        }
+      }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "description": "Testable criteria as GIVEN/WHEN/THEN. verifiable=false marks a criterion that CANNOT be asserted as written (ambiguous oracle, conflicting default, contingent on an unresolved open_decision) — the SDET plan must not build a passing assertion from it until it is resolved.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "condition", "verifiable"],
+        "properties": {
+          "id": { "type": "string", "description": "AC id, AC-001 ..." },
+          "requirement_ref": { "type": ["string", "null"], "description": "requirements[].id this criterion proves." },
+          "story_ref": { "type": ["string", "null"], "description": "user_stories[].id this criterion traces to." },
+          "condition": {
+            "type": "string",
+            "description": "GIVEN <state> WHEN <action> THEN <observable result>. Copy the PRD's operators verbatim (>=, >, <=)."
+          },
+          "verifiable": {
+            "type": "boolean",
+            "description": "true = a deterministic assertion can be written now. false = blocked; explain the blocker in needs_clarification and, if branch-gated, in approach_branches."
+          },
+          "owner": { "type": ["string", "null"] },
+          "team": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "boundary_values": {
+      "type": "array",
+      "description": "Named boundary/default values for equivalence-partition and boundary-value analysis. Copy verbatim; never derive.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "value"],
+        "properties": {
+          "name": { "type": "string" },
+          "value": {
+            "type": ["string", "number", "boolean"],
+            "description": "The threshold/default exactly as stated, e.g. 'dish_list > 9', false, 2."
+          },
+          "requirement_ref": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "boundary_conditions": {
+      "type": "array",
+      "description": "Edge cases with their expected default behaviour — direct negative/boundary scenario seeds. Include cases the PRD marks 'example only, not for treatment' with that note in proposed_default so the SDET plan does not assert them as treatments.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["edge_case_description", "proposed_default"],
+        "properties": {
+          "requirement_ref": { "type": ["string", "null"] },
+          "edge_case_description": { "type": "string" },
+          "proposed_default": { "type": "string", "description": "Expected outcome, e.g. 'Do not show', 'clamp to 2', 'example for understanding, not for treatment'." }
+        }
+      }
+    },
+    "error_codes": {
+      "type": "array",
+      "description": "Named business/user-facing error outcomes stated in the PRD. Technical HTTP/error codes belong to the RFC extractor. Empty is intentional when the PRD names none.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": ["string", "null"] },
+          "trigger": { "type": ["string", "null"] },
+          "user_facing_message": { "type": ["string", "null"] },
+          "story_ref": { "type": ["string", "null"] },
+          "expected_recovery": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "feature_flags": {
+      "type": "array",
+      "description": "Every flag/field name the PRD mentions for this feature — INCLUDING competing candidate names for the same flag (record all; the naming decision is an open_decision). Each is a flag_on/flag_off scenario pair.",
+      "items": { "type": "string" }
+    },
+    "non_functional_requirements": {
+      "type": "array",
+      "description": "Latency/throughput/uptime/security/localisation targets. Copy numbers verbatim; qualitative language ('fast') is not an NFR — flag it in needs_clarification.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": ["string", "null"] },
+          "requirement": { "type": ["string", "null"] },
+          "target": { "type": ["string", "number", "null"] },
+          "story_ref": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "open_decisions": {
+      "type": "array",
+      "description": "Unresolved decisions with a testing impact. blocking=true means the test oracle is undefined until it is resolved.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "decision", "blocking"],
+        "properties": {
+          "id": { "type": "string", "description": "OD-001 ..." },
+          "decision": { "type": "string", "description": "The undecided question, stated neutrally." },
+          "owner": { "type": ["string", "null"] },
+          "blocking": { "type": "boolean" }
+        }
+      }
+    },
+    "approach_branches": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "Present only when a blocking open_decision forks the design into mutually exclusive options (e.g. Option A vs Option B). While status=undecided, keep BOTH branches' requirement/AC refs so the SDET plan can hold parallel contingent paths. When the PRD locks one branch, set status=resolved, chosen_branch, and drop the other branch's refs.",
+      "properties": {
+        "decision_ref": { "type": ["string", "null"], "description": "open_decisions[].id that this fork resolves." },
+        "status": { "type": "string", "enum": ["undecided", "resolved"] },
+        "chosen_branch": { "type": ["string", "null"], "description": "branches[].id once locked; null while undecided." },
+        "rule": { "type": ["string", "null"], "description": "How downstream should treat the branches (emit parallel paths while undecided; collapse to chosen_branch once locked)." },
+        "shared_requirement_refs": { "type": "array", "items": { "type": "string" }, "description": "requirements[].id that hold under EITHER branch." },
+        "shared_acceptance_criteria_refs": { "type": "array", "items": { "type": "string" } },
+        "branches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label"],
+            "properties": {
+              "id": { "type": "string", "description": "e.g. 'Option A'." },
+              "label": { "type": "string", "description": "e.g. 'MLS-only Experiment'." },
+              "requirement_refs": { "type": "array", "items": { "type": "string" } },
+              "acceptance_criteria_refs": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "comment_resolutions": {
+      "type": "array",
+      "description": "Decisions/clarifications mined from the PRD's review comment thread. status tells the SDET plan how much to trust each: 'resolves' = authoritative; 'clarifies' = context, does not lock a decision; 'unanswered' = open, do not act on. Always keep the quote and what it affects.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "topic"],
+        "properties": {
+          "id": { "type": "string", "description": "CR-001 ..." },
+          "status": { "type": "string", "enum": ["resolves", "clarifies", "unanswered", "open", "superseded"] },
+          "topic": { "type": "string" },
+          "quote": { "type": ["string", "null"], "description": "Short verbatim quote from the thread (attribute the source; keep it brief)." },
+          "affects": { "type": "array", "items": { "type": "string" }, "description": "Refs to fields/requirements/ACs/open_decisions this comment bears on." },
+          "related_open_decision": { "type": ["string", "null"] },
+          "detail": { "type": ["string", "null"] }
+        }
+      }
+    },
     "risk_areas": {
       "type": "array",
+      "description": "Flows flagged high-value/high-risk. Infer severity from language: money, compliance, irreversible, 'must not', 'guaranteed' → high.",
       "items": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk"],
         "properties": {
-          "flow": { "type": "string" },
-          "reason": { "type": "string" },
-          "priority": { "type": "string", "enum": ["P0", "P1", "P2"] }
+          "risk": { "type": "string" },
+          "severity": { "type": ["string", "null"], "description": "e.g. low, medium, high, critical. null when the PRD gives no signal." },
+          "mitigation": { "type": ["string", "null"] }
         }
       }
     },
-    "business_error_scenarios": {
+    "needs_clarification": {
       "type": "array",
+      "description": "Definition-of-Ready gate. Every gap, ambiguity, conflict, and non-verifiable criterion the extractor hit. blocking=true entries must be resolved before the SDET plan can build a deterministic oracle for the affected area. NEVER guess a value to avoid listing it here.",
       "items": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "reason", "blocking"],
         "properties": {
-          "trigger": { "type": "string" },
-          "user_facing_message": { "type": "string" },
-          "story_ref": { "type": "string" }
+          "field": { "type": "string", "description": "The field/section/AC that is unclear, e.g. 'boundary_values[min_dish_count default]'." },
+          "reason": {
+            "type": "string",
+            "enum": ["missing_from_source", "ambiguous", "non_verifiable", "conflicting", "contradictory", "non_extractable"],
+            "description": "Why it is not ready. 'conflicting'/'contradictory' = the PRD states two incompatible values; 'non_verifiable' = no deterministic oracle."
+          },
+          "detail": { "type": ["string", "null"], "description": "What is missing/conflicting and the testing impact. Reference the conflicting sections." },
+          "blocking": { "type": "boolean" }
         }
       }
     },
-    "sla": {
-      "type": "object", "additionalProperties": false,
-      "properties": {
-        "p99_latency_ms": { "type": ["number", "null"] },
-        "throughput_rps": { "type": ["number", "null"] },
-        "uptime_percent": { "type": ["number", "null"] },
-        "notes": { "type": "string" }
-      }
-    },
-    "out_of_scope": { "type": "array", "items": { "type": "string" } }
+    "source_ref": {
+      "type": ["string", "null"],
+      "description": "Path or URL of the source PRD."
+    }
   }
 }
