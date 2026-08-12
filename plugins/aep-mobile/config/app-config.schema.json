@@ -27,6 +27,31 @@
         "ios": { "type": "string", "default": "accessibilityId" }
       }
     },
+    "design_components": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "OPTIONAL. Names of Figma components the design team uses to declare intent on a flow board. Omit this block entirely unless an app genuinely diverges — design-extractor applies the defaults below when it is absent, and an app config that does not mention design_components is the expected, normal case. Purely a hint either way: the classifier decides board nodes from geometry, text and connector degree, so an absent block, an absent key or an empty list is never a gap and never a note. A trailing * is a prefix wildcard; matching is case-insensitive. Present but empty ([]) means the same as absent: fall back to the default.",
+      "properties": {
+        "annotation": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["Notes", "Note", "Annotation", "Comment", "tooltip*"],
+          "description": "DEFAULT: [\"Notes\", \"Note\", \"Annotation\", \"Comment\", \"tooltip*\"] — used whenever this key is absent or empty. Components that carry notes/context. The note's own copy is usually in a child TEXT, so detection matches the component node, not the text."
+        },
+        "decision": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "DEFAULT: [] — no such component exists today and the classifier does not need one; it identifies a branch from size, a trailing '?' and connector degree. Populate only if design introduces a dedicated component, which would then take priority over the inference."
+        },
+        "lane": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "DEFAULT: [] — same rationale as decision; a lane banner is identified by being small, text-only and a sibling of screens."
+        }
+      }
+    },
     "naming_convention": {
       "type": "object", "additionalProperties": false,
       "required": ["element_id_pattern"],

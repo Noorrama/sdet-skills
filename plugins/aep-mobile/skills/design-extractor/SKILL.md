@@ -36,7 +36,7 @@ fill the hole.
 2. **Config, per app in the set** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Unreadable → add a `WORTH_CHECKING` note on
    `ENVIRONMENT` with reason *"cannot read ${CLAUDE_PLUGIN_ROOT}/config/<app>.json — plugin install
    may be incomplete"* and action *"run `claude plugin update aep-mobile@aep`, restart Claude,
-   re-run"*. Set `extraction_status: LIMITED`. Continue. **`naming_convention.element_id_pattern` and `role_vocabulary` come from this file only.** If it is unreadable, do NOT improvise a convention — emit IDs verbatim from the Figma accessibility IDs, and raise a `WORTH_CHECKING` note warning that IDs are unverified against the app convention and may not join to real locators at code-gen.
+   re-run"*. Set `extraction_status: LIMITED`. Continue. **`naming_convention.element_id_pattern` and `role_vocabulary` come from this file only.** If it is unreadable, do NOT improvise a convention — derive IDs from the layer names per standard #3, and raise a `WORTH_CHECKING` note warning that IDs are unverified against the app convention and may not join to real locators at code-gen.
    In a multi-app split this is the whole point of splitting: **each file's `element_id`s must
    follow its own app's pattern and `role_vocabulary`.** IDs generated under the wrong app's
    convention silently fail to join to real locators at code-gen, which surfaces much later as a
@@ -47,7 +47,7 @@ fill the hole.
    - Not that shape (no `nodes[]`, no `export` block) → it is not an `Export Design Raw JSON` plugin
      export. Extract what you can, set `extraction_status: LIMITED`, and add a `WORTH_CHECKING`
      note on `ENVIRONMENT` naming the shape you actually got.
-   - `nodes[]` present but no screen frame (see *Screen frame*) → emit with `PARTIAL` and a
+   - `nodes[]` present but nothing classifies as `SCREEN` (see *Board node classification*) → emit with `PARTIAL` and a
      `NEEDS_ANSWER` note saying the export looks empty. That is a bad export, not a design with
      zero screens.
    - `scope: "selection"` → connectors and destination frames outside the selection are simply not
@@ -180,6 +180,11 @@ key means no kept children (all pruned, or the depth cap hit).
   "characters": "Approve",            // TEXT nodes only — the visible copy
   "connectorStart": ConnectorEndpoint, // CONNECTOR only
   "connectorEnd":   ConnectorEndpoint, // CONNECTOR only
+  "connectorLineType": "ELBOWED"|"STRAIGHT",                    // CONNECTOR only
+  "connectorStartStrokeCap": "NONE"|"ARROW_LINES"|"ARROW_EQUILATERAL"|"TRIANGLE_FILLED"|...,
+  "connectorEndStrokeCap":   "NONE"|"ARROW_LINES"|...,          // no arrowhead => a tether, not a flow
+  "x": 1204, "y": 880, "width": 390, "height": 844,  // FRAME/INSTANCE/COMPONENT/COMPONENT_SET/SECTION/GROUP/TEXT only,
+                                                     // integers, PARENT-RELATIVE
   "componentPropertyDefinitions": {    // COMPONENT_SET / COMPONENT — the declared state surface
     "State": { "type": "VARIANT", "defaultValue": "Default", "variantOptions": ["Default","Error","Loading"] },
     "Label#12:3": { "type": "TEXT", "defaultValue": "Approve" }
@@ -198,6 +203,30 @@ key means no kept children (all pruned, or the depth cap hit).
   "children": [ Node ]
 }
 ```
+
+### Optional enrichment — capture when present, never require, never flag
+Two things are **nice to have**, not part of the contract:
+
+| Field | Read from | When absent |
+| :--- | :--- | :--- |
+| `elements[].accessibility_id` / `platform_hints` | Dev Mode `annotations[]` | normal — most files have no annotations at all |
+| `screens[].deep_link` | a `URL` prototype action matching the config `deeplink_scheme`, or a `Note`/`Context` note stating one | normal — designers are not expected to document routing |
+
+For both:
+- **Never** emit an `extraction_notes` entry, a `blocking_issues` entry, or any other flag because
+  a node has no `annotations`, because no element has an `accessibility_id`, or because a screen
+  has no `deep_link`.
+- **Never** let their absence change `extraction_status` or `overall_ambiguity_rating`.
+- **Never** treat either as the required source for anything. Every mandatory field is derived from
+  names, reactions, variants and connectors — the things every Figma file has. These two only ever
+  *add*.
+- **Never** construct a plausible value to fill them. A guessed URI is worse than an absent one:
+  downstream will navigate straight to it and the test fails somewhere unrelated.
+
+Both have a real source later in the pipeline. Locators arrive post-build from
+code-change-extractor; deep links come from `plan_context` test hooks and `rfc_context`
+`navigation_changes`. An empty pre-build locator handoff, and a screen with no deep link, are the
+expected state — not gaps in the design.
 
 **`ConnectorEndpoint`** — exactly one of two forms, and the difference decides whether a flow is
 resolvable at all:
@@ -236,19 +265,71 @@ exactly the "tap prototype with no destination" case standard #2 exists to preve
 | Dropped | Consequence for you |
 | :--- | :--- |
 | Hidden layers (`visible: false`), whole subtree | A designed-but-hidden state is invisible here. Never infer one. |
-| `VECTOR` nodes with no `reactions` and no `annotations` | Decorative icons are gone. A **tappable** icon survives (it carries `reactions`), so a vector in the file is signal, not noise. |
-| Geometry, styling, colour, fonts, sizes, positions | No visual reasoning is possible. Screen-vs-state must be decided from **names, variants and reactions only** — never from "it looks like a dialog". |
+| Decorative leaf shapes with no `reactions` / `annotations` — `VECTOR`, `RECTANGLE`, `ELLIPSE`, `POLYGON`, `BOOLEAN_OPERATION`, `LINE`, `STAR` | Icons and backing shapes are gone. One that survives is **signal, not noise**: it is tappable, annotated, or a connector points at it. |
+| Styling, colour, fonts, effects | No aesthetic reasoning is possible, and none is needed. |
 | Children below `export.maxDepth` (15) | Reported in `export.truncatedCount` / `truncatedNodes`, never silent. |
 | Every empty `[]` / `{}` at any depth | Absence = "none", not "unknown". |
 
-### Screen frame — the one structural definition everything else keys off
-A **screen frame** is a node of type `FRAME`, `COMPONENT` or `INSTANCE` whose ancestor chain up to
-the export root contains only `PAGE` / `CANVAS` / `SECTION` / `GROUP` nodes. In other words: a
-top-level frame on the page, including one wrapped in a section or a group.
+**Kept, and load-bearing: `x` / `y` / `width` / `height`** on every layout-bearing type. This is the
+only thing that separates a screen from a caption box, a decision box or a note box — Figma draws
+all four as the same kind of frame. Sizes are integers and positions are **parent-relative**, which
+is sufficient because every comparison you make is between siblings (a banner against the screens
+beside it, screens against each other for reading order). Never compare `x`/`y` across different
+parents. This is *not* licence to reason about appearance: use size and position for classification
+and ordering only, never to infer that something "looks like a dialog".
 
-A `FRAME` nested inside another `FRAME` is a **component of that screen**, never a screen — unless
-a connector or reaction targets it directly, which promotes it to a screen candidate to be judged
-under *Screen vs. state* below.
+**A shape a connector points at is never pruned**, whatever its type — designers do anchor flow
+arrows to plain rectangles.
+
+### Board node classification — what everything else keys off
+A **board node** is a node of type `FRAME`, `COMPONENT` or `INSTANCE` whose ancestor chain up to the
+export root contains only `PAGE` / `CANVAS` / `SECTION` / `GROUP` nodes — a top-level object on the
+flow board, including one wrapped in a section or a group.
+
+**Not every board node is a screen.** A flow board also carries caption boxes, lane banners,
+decision boxes and note boxes, and Figma draws all of them as the same kind of frame under the same
+kind of section. Treating them all as screens is what produces phantom screens and dead connectors.
+Classify every board node into exactly one of these, in this order:
+
+| Class | Test |
+| :--- | :--- |
+| `NOTE` | Name matches an annotation-component name — default `Notes`, `Note`, `Annotation`, `Comment`, `tooltip*`, matched case-insensitively with `*` as a prefix wildcard — **or** its subtree holds a `TEXT` whose copy starts `Note` / `Context`. |
+| `DECISION` | Small (see *Size*), text-bearing, its text ends in `?`, **and** it has ≥2 outgoing connectors. All three conditions — a small question with one exit is a caption, not a branch. |
+| `CAPTION` / `LANE_BANNER` | Small, text-only, and a sibling of at least one node classified `SCREEN`. It labels the group it sits in. |
+| `SCREEN` | Device-sized (see *Size*). This is the only class that gets a `screen_id`. |
+| `UNKNOWN` | Everything else → `blocking_issues`, never silently promoted to `SCREEN`. |
+
+**Size — the primary test.** `width` / `height` are on every `FRAME` / `INSTANCE` / `COMPONENT` /
+`SECTION` / `GROUP` / `TEXT` in the export. A `SCREEN` is device-shaped: `width` roughly 320-500 and
+`height` roughly 550-1200. Anything well under that is a caption, decision or note box. These are
+guide values, not a spec — a tablet or an intentionally tall scroll frame is still a screen; judge
+the shape, and when a frame sits on the boundary, prefer `SCREEN` and note it.
+
+**Fallback when the export carries no geometry** (an older export, or a `truncatedNodes` casualty):
+use descendant count. On a measured board, screens hold 200-690 descendants and caption/decision/note
+boxes hold ≤ 6 — the split is wide and unambiguous. It is still a proxy: a genuinely minimal screen
+could fall under it. **Say which test you used** in `extraction_notes` whenever it was the fallback.
+
+**A `FRAME` nested inside a `SCREEN` is an element of that screen**, never a screen — unless a
+connector or reaction targets it directly, which promotes it to a board node to be classified here
+and then judged under *Screen vs. state*.
+
+**Component names come from the defaults; the app config only overrides them.** The names above are
+the built-in defaults, and **an app config that says nothing about `design_components` is the normal
+case** — apply the defaults, silently. Read
+`${CLAUDE_PLUGIN_ROOT}/config/<app>.json` → `design_components` only to *override* them:
+- Block absent, key absent, or list empty → use the default for that key. Never a note, never a
+  flag; absence is not a configuration gap.
+- List present and non-empty → it **replaces** the default for that key, so an app that names its
+  annotation component something else does not inherit names that would misfire.
+- `decision` and `lane` default to **empty**, which is deliberate: no such components exist, and the
+  classifier does not need them. If design ever introduces one, adding it to that app's config makes
+  it an extra first-priority trigger on the matching row — a config edit, not a skill change.
+
+> The `NOTE` row is the only one keyed on a name, and only because that component already exists on
+> these boards. It is a hint that happens to be there, **not** something the design must supply —
+> every other class is decided from geometry, text and connector degree, so the classifier works on
+> a board that follows no naming convention at all.
 
 ---
 
@@ -273,10 +354,47 @@ flag is a `project_context.blocking_issues` entry. Tally both into
   with **no** `trigger_element_id` if the source screen has no single obvious trigger; if it has
   exactly one interactive element whose own reaction targets the same destination, use that one and
   mark `INFERRED`. Never invent a trigger token to satisfy the schema.
+- **Fallback — destination is a `CAPTION` / `LANE_BANNER`.** The connector points at the *label* of
+  a group rather than at a screen. The destination is that group's **entry screen**: among the
+  `SCREEN` siblings sharing the banner's parent, the topmost-then-leftmost by `y`, then `x`. Emit
+  `edge_source: "CONNECTOR_INFERRED"`, `confidence: "INFERRED"`, and a `WORTH_CHECKING` note naming
+  the banner. No `SCREEN` sibling → do not guess an entry; flag it.
+  - **Order by `y`/`x` only — never by array order.** Children are stored in z-order, which has no
+    relationship to reading order; picking the first array element selects an arbitrary screen that
+    looks plausible and is silently wrong. Without geometry this fallback is **not available**:
+    flag the connector instead, and say the export predates geometry.
+  - **Self-loop guard.** If the resolved entry screen is the same screen the connector started
+    from, the resolution is wrong by construction — drop the edge and flag it. A lane you enter
+    from outside never resolves back to the caller.
+- **Fallback — destination is a `DECISION`.** See *Contraction* below.
 - **Flag.** Either endpoint is floating (`position`, no `endpointNodeId`); or the destination
   resolves into the *same* screen frame as the source (an intra-screen connector is an annotation,
   not a flow — check standard #5 first); or the destination node id is not present anywhere in the
   export (orphaned, or cut by the depth cap).
+
+#### Contraction — reaching a screen through a decision box
+A branch is drawn as *screen → decision box → (labelled connectors) → destinations*, so the
+condition sits one hop away from the screen it belongs to. Collapse that hop:
+
+1. Source is a `SCREEN`, destination is a `DECISION` → for **each** labelled connector leaving the
+   decision, emit one edge from the source screen, `condition` = that connector's label, resolving
+   its own destination by the rules above (including the lane-banner fallback).
+2. **Normalise the entry/exit seam.** A decision box is typically *entered* on its child `TEXT` and
+   *exited* from the parent `FRAME` — two different node ids, so the path looks broken. Lift a
+   `TEXT` endpoint **exactly one level** to its parent before matching. One level, never more.
+3. Mark every edge produced this way `edge_source: "CONNECTOR_CONTRACTED"`, and put the decision
+   box's node id in `source_ref` so a reviewer can see why the condition attached where it did.
+
+**Hard limits — these are not tuning knobs.** Contraction that chases hops through the tree
+manufactures flows that do not exist: on a real board an unbounded version (lift to any
+connector-bearing ancestor, up to 3 hops) produced **853 edges, 595 carrying fabricated
+conditions**, because lane and section containers act as hubs joining every path to every other. So:
+- **At most one hop.** A destination still not a `SCREEN` after one hop → `blocking_issues`.
+- **Fan-out ≤ 4.** A hop node with more than four outgoing connectors is a hub, not a decision —
+  abort and flag.
+- **Never hop through** a `SECTION`, `PAGE`, `GROUP` or any lane container.
+- If total edges ever approach the connector count multiplied by the average fan-out, contraction
+  has escaped its bounds — stop and flag rather than emit.
 
 ### 2. Tap prototypes always name their destination
 Read every `reactions[]` entry on every node.
@@ -289,7 +407,7 @@ Read every `reactions[]` entry on every node.
 | `NODE` + `"SCROLL_TO"` | intra-screen scroll | **not** a `ui_flow` edge |
 | `BACK` | return to caller | edge with `navigation_kind: "BACK"` **only if** exactly one caller exists in `ui_flow`; otherwise flag |
 | `CLOSE` | dismiss overlay | closes the overlay state; no new screen |
-| `URL` | deep link or external | if the URL starts with the config's `deeplink_scheme`, set `screens[].deep_link` on the destination screen and emit `navigation_kind: "DEEP_LINK"`; otherwise record as external and flag |
+| `URL` | deep link or external | if the URL starts with the config's `deeplink_scheme`, set `screens[].deep_link` on the destination screen and emit `navigation_kind: "DEEP_LINK"`; any other URL is an external link — record it on the element's `interactions` and move on. Neither case is ever a blocker |
 | `CONDITIONAL` | branch | one `ui_flow` edge per `conditionalBlocks[]` entry, `condition` from that block; if the block's condition does not serialise readably, flag |
 | `SET_VARIABLE` | prototype bookkeeping | ignore for flow; may inform `condition` |
 
@@ -339,17 +457,24 @@ Read every `reactions[]` entry on every node.
 - A free-floating `TEXT` / `STICKY` node that reads like a condition but is attached to nothing is
   **not** a condition — it is unattached commentary. Note it as `FYI`, do not bind it to an edge.
 
-### 5. Notes and context are TEXT nodes connected to a FRAME
-- **Read.** A `CONNECTOR` where one endpoint is a `TEXT` node whose `characters`, trimmed and
-  case-insensitive, starts with `Note` or `Context`, is **not** a flow. Append that text to the
-  other endpoint's `screen_notes` (or, if the other endpoint is an element, to that element's
+### 5. Notes and context are connected to what they describe
+- **Read.** A `CONNECTOR` is a **note connector** when either endpoint — or **any ancestor of
+  either endpoint** — is classified `NOTE`. It is not a flow. Append the note's text to the other
+  endpoint's `screen_notes` (or, if the other endpoint is an element, to that element's
   `validations_and_edge_cases`). Classify these **before** running standard #1, so a note connector
   is never counted as a missing flow.
-- **Fallback.** A `TEXT` / `STICKY` node starting with `Note` / `Context` that sits *inside* a
-  screen frame with no connector → attach it to that frame's `screen_notes` with an `FYI` note.
-- **Flag.** Same prefix, but the node sits outside every screen frame and has no connector → it
-  belongs to nothing → `blocking_issues`, quoting the first ~100 characters so the designer can
-  find it.
+  - **Match on the node, not on the copy.** A note is normally an `INSTANCE` of an annotation
+    component, and the word "Note" then lives in a *child* `TEXT` (`Notes / Annotation`) while the
+    body text says something else entirely. Testing the endpoint's own `characters` for a `Note` /
+    `Context` prefix therefore matches **nothing** on a real board — it is kept below only as an
+    additional trigger, never as the only one.
+  - The ancestor walk is what makes this work: a connector usually lands on a child *inside* the
+    note component, not on the component node itself.
+- **Fallback.** A `NOTE` node with no connector at all → attach it to the `SCREEN` that geometrically
+  contains it, else the nearest `SCREEN` by centre-point distance, with an `FYI` note recording that
+  the attachment was positional. Without geometry, fall back to the section it sits in and say so.
+- **Flag.** A `NOTE` node outside every screen, with no connector and no near neighbour → it belongs
+  to nothing → `blocking_issues`, quoting the first ~100 characters so the designer can find it.
 
 ### Convention compliance is reported, not enforced
 A non-compliant export still produces a full `design_context`. Falling back is the default
@@ -415,12 +540,12 @@ does not silently fail — it fails at code-gen, months later, as a test that ca
 | :--- | :--- |
 | `app` | Preflight §1 — `file.name`, `file.page`, `SECTION` names, or a frame-name prefix |
 | `design_source` | `exportedAt`, `scope`, `file.*`, `export.*` — copied verbatim for provenance |
-| `screens[].screen_id` / `screen_name` | screen frame `name` (standard #3) |
+| `screens[].screen_id` / `screen_name` | `SCREEN`-classified board node's `name` (standard #3) |
 | `screens[].source_ref` | screen frame `id` |
 | `screens[].purpose` | frame name + the screen's own TEXT copy; never speculation |
 | `screens[].screen_states` | frame-name state qualifiers, `componentPropertyDefinitions.*.variantOptions`, `variantProperties` across sibling frames, and `OVERLAY` destinations folded in |
 | `screens[].state_kinds` | the canonical enum those states normalise to (`ERROR`, `LOADING`, `OFFLINE`, `DARK_THEME`, `LOCALE_VARIANT`, …) — this is what makes downstream category triggers deterministic |
-| `screens[].deep_link` | a `URL` action whose url starts with the config `deeplink_scheme`, or a `Note`/`Context` note that states one |
+| `screens[].deep_link` | a `URL` action whose url starts with the config `deeplink_scheme`, or a `Note`/`Context` note that states one. Optional — see *Optional enrichment* |
 | `screens[].entry_point` / `flow_name` | the PAGE node's `flowStartingPoints[]` — `nodeId` matches the screen frame |
 | `screens[].screen_notes` | note connectors and in-frame `Note` / `Context` text (standard #5) |
 | `elements[].element_id` / `role` | layer `name` + config `naming_convention` (*Element IDs*) |
@@ -433,7 +558,7 @@ does not silently fail — it fails at code-gen, months later, as a test that ca
 | `elements[].validations_and_edge_cases` | prose `annotations[].label` / `labelMarkdown`, and note connectors landing on the element |
 | `ui_flow[]` | `CONNECTOR` nodes (standard #1) + `reactions[]` (standard #2), deduped |
 | `project_context.blocking_issues` | every **Flag** case above |
-| `project_context.convention_compliance` | the tallies from the five standards |
+| `project_context.convention_compliance` | the tallies from the five standards, plus the classifier counts (`decision_nodes`, `caption_endpoints`, `contracted_edges`, `lane_entry_inferred`) |
 
 ---
 
@@ -453,8 +578,8 @@ Minimize tools requiring user approval:
 
 ## Screen vs. state (CRITICAL GUARDRAIL)
 A screen is a unique navigational destination; a state is a visual variation of the same screen. The
-export carries no geometry, so this decision is made from **names, variants and reactions only** —
-never from how a frame looks. Do **not** create a new `screen_id` for:
+export carries size but no styling, so this decision is made from **names, variants, reactions and
+frame size** — never from how a frame *looks*. Do **not** create a new `screen_id` for:
 - Loading, scroll-position, or pagination variants of the same frame.
 - Form states (empty / typing / typed / error) of the same field or button.
 - Platform, locale ("as-is vs redesign", ID vs EN), or viewport-crop variants that share the same
@@ -487,12 +612,16 @@ Run these passes in order. Pass 0 exists because a note connector misread as a f
 later pass.
 
 **0. Index the tree.** One traversal of `nodes[]`, building:
-   - `id → node`, and `id → nearest screen-frame ancestor` (see *Screen frame*).
+   - `id → node`, `id → parent`, and `id → nearest `SCREEN` ancestor` (see *Board node
+     classification*). Classify every board node before anything else — the classes decide
+     everything downstream.
    - the list of every `CONNECTOR` node,
    - the list of every node carrying `reactions`,
    - the PAGE node's `flowStartingPoints[]`.
    Then classify each `CONNECTOR` as **note** (standard #5) or **flow** (standard #1). Note
    connectors are removed from the flow set before pass 1 and never counted as missing flows.
+   Run the note test by walking each endpoint's **ancestors** for a `NOTE` node — the connector
+   usually lands on a child inside the note component, not on the component itself.
 
 **1. ui_flow** — `{from_screen_id, trigger_element_id?, to_screen_id, condition, navigation_kind,
    edge_source, confidence, source_ref}` edges, from the flow connectors (standard #1) **and** every
@@ -530,24 +659,30 @@ later pass.
    `blocking_issues` collects every **Flag** case from the five standards, plus:
    - Tappable elements with no traced destination (standard #2).
    - Unreachable screens (in the design, in no `ui_flow` edge and no flow starting point).
-   - Contradictory annotations, or a frame whose screen-vs-state call is unresolved.
+   - A frame whose screen-vs-state call is unresolved.
+   Never a blocker, and never an `extraction_notes` entry either: an element with no Dev Mode
+   annotation, an export with no annotations at all, a screen with no `deep_link`, or an element
+   with no `accessibility_id`. See *Optional enrichment*.
    `overall_ambiguity_rating`: `HIGH` when any screen or trigger element could not be resolved;
    `MEDIUM` when flows resolved but through fallbacks/inference; `LOW` when every edge is `EXPLICIT`
    and every name compliant.
 
 ## Rules
-- No locators — labels, types, states, interactions, flow only. **Exception:** an accessibility id
-  the designer wrote into a Dev Mode `annotation` goes into `accessibility_id` / `platform_hints`
-  verbatim. That is transcription of a design artefact, not a locator you derived — real per-platform
-  locators still come from code-change-extractor, which reconciles against this.
+- No locators — labels, types, states, interactions, flow only. **Exception:** *if* the designer
+  happened to write an accessibility id into a Dev Mode `annotation`, transcribe it verbatim into
+  `accessibility_id` / `platform_hints`. That is transcription of a design artefact, not a locator
+  you derived — real per-platform locators still come from code-change-extractor. Annotations are
+  optional everywhere: their absence is the normal case and is never noted or flagged.
 - `label` = visible copy; `element_id` = stable functional token (`<SCREEN_ID>.<element_role>`, not
   text content). Casing is not a style choice — see *Element IDs*.
 - **Classify note connectors before flow connectors** — standard #5 runs before standard #1.
 - **Absence in the export means "none", not "unknown"** — the plugin prunes empty arrays and
   objects. No `reactions` key = no prototype interaction, and that is a fact you may rely on. The one
   thing absence does *not* tell you about is anything hidden, decorative, or below the depth cap.
-- **Never infer from appearance** — there is no geometry in this file. "It looks like a bottom
-  sheet" is not available to you and is not a valid reason for any decision.
+- **Never infer from appearance.** Geometry is in the file, but it answers exactly two questions:
+  *is this frame device-sized* (classification) and *which sibling comes first* (reading order).
+  "It looks like a bottom sheet", "it is styled like an error" and anything about colour, contrast
+  or shadow are not available to you and are not valid reasons for any decision.
 - **Never invent** — every gap (missing connector, unreachable screen, placeholder text) becomes a
   `blocking_issues` entry, not a filled assumption.
 - **Every fallback is recorded** — a `WORTH_CHECKING` note plus a tally in `convention_compliance`.
@@ -560,7 +695,8 @@ regex patterns exactly — no lowercase, no stray punctuation.
 
 **Never invent.** Every gap — missing connector, unreachable screen, placeholder text, a frame
 you cannot classify as screen-vs-state — becomes a `blocking_issues` entry. Never a filled
-assumption, never an element ID guessed from a layer name when the accessibility ID is absent.
+assumption. Element IDs come from layer names per standard #3 — that is the source, not a
+fallback for a missing accessibility ID.
 
 **Never merge two apps into one file.** If the export covers several apps, write several files —
 do not pick the app with the most frames and drop the rest, and never generate one app's

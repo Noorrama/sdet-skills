@@ -51,7 +51,7 @@
     },
     "visual_analysis_scratchpad": {
       "type": "string",
-      "description": "Write a 2-3 sentence overview of what you detect in the export before compiling the technical fields. List screens found. Note: the export carries no geometry or styling, so this is a structural reading of names, variants and reactions — not a visual one."
+      "description": "Write a 2-3 sentence overview of what you detect in the export before compiling the technical fields. List screens found. Note: the export carries frame size/position but no styling, so this is a structural reading of names, variants, reactions and frame size — not a visual one."
     },
     "project_context": {
       "type": "object",
@@ -79,7 +79,11 @@
             "reactions_without_destination": { "type": "integer", "description": "Standard #2 not followed: tap trigger with a null/absent destination. Each is also a blocking_issues entry." },
             "unlabelled_branches": { "type": "integer", "description": "Standard #4 not followed: a trigger element with 2+ outgoing connectors and no connector labels to discriminate them." },
             "non_descriptive_names": { "type": "integer", "description": "Standard #3 not followed: frames/layers named Frame 427, Group 12, Rectangle, Blue Button, etc." },
-            "unreachable_screens": { "type": "integer", "description": "Screen frames in no ui_flow edge and no flowStartingPoints entry." }
+            "unreachable_screens": { "type": "integer", "description": "Screen frames in no ui_flow edge and no flowStartingPoints entry." },
+            "decision_nodes": { "type": "integer", "description": "Board nodes classified DECISION — a small question box with 2+ outgoing connectors. Each one is a branch whose conditions were recovered by contraction." },
+            "caption_endpoints": { "type": "integer", "description": "Connectors landing on a CAPTION / LANE_BANNER rather than a screen (standard #1 not followed). The destination screen had to be inferred from the group the caption labels." },
+            "contracted_edges": { "type": "integer", "description": "Edges emitted via decision-box contraction (edge_source CONNECTOR_CONTRACTED). A number far above connectors_total means contraction escaped its one-hop / fan-out bounds and is manufacturing flows — investigate before trusting the output." },
+            "lane_entry_inferred": { "type": "integer", "description": "Edges whose destination is a lane's entry screen picked by reading order (topmost-then-leftmost sibling) rather than stated by the designer." }
           }
         }
       },
@@ -96,11 +100,21 @@
             "description": "Figma frame name with any trailing state qualifier stripped, forced into UPPER_SNAKE_CASE (e.g. 'Approve Disbursement — Error' -> APPROVE_DISBURSEMENT)"
           },
           "screen_name": { "type": "string", "description": "The Figma frame name verbatim." },
+          "node_class": {
+            "type": "string",
+            "enum": ["SCREEN", "DECISION", "CAPTION", "LANE_BANNER", "NOTE", "UNKNOWN"],
+            "description": "How the board-node classifier labelled this frame. Only SCREEN entries become screens; the others appear here solely when an unresolved classification was recorded for review. Optional — omit it when every frame classified cleanly as SCREEN."
+          },
+          "classified_by": {
+            "type": "string",
+            "enum": ["GEOMETRY", "DESCENDANT_COUNT", "COMPONENT_NAME"],
+            "description": "Which test decided the class. GEOMETRY is the normal case. DESCENDANT_COUNT means the export carried no width/height and the proxy was used — less reliable, and paired with an extraction_note."
+          },
           "source_ref": { "type": "string", "description": "Figma node id of the screen frame (e.g. '2015:31162'), so a reviewer can jump straight to it." },
           "purpose": { "type": "string" },
           "deep_link": {
             "type": "string",
-            "description": "Deep link that opens this screen, taken from a prototype URL action matching the app config's deeplink_scheme, or stated in a Note/Context annotation. Absent when the design does not state one — never construct a plausible URI. sdet-plan-generator uses this both as the deep_link_nav category trigger and as a navigation shortcut in preference to a full UI walk."
+            "description": "OPTIONAL bonus. Deep link that opens this screen, taken from a prototype URL action matching the app config's deeplink_scheme, or stated in a Note/Context text note (standard #5). Does not depend on Dev Mode. Most designs document no routing at all: absence is the NORMAL case, is never a gap, and must never produce an extraction_note, a blocking_issue, or any change to extraction_status — never construct a plausible URI to fill it. When present, sdet-plan-generator uses it as the deep_link_nav category trigger and as a navigation shortcut in preference to a full UI walk; when absent it simply falls back to the UI walk."
           },
           "entry_point": { "type": "boolean", "description": "True when this frame is named in the page's flowStartingPoints[] — i.e. the designer marked it as a prototype flow entry." },
           "flow_name": { "type": "string", "description": "Name of the prototype flow this screen starts, from flowStartingPoints[].name." },
@@ -137,11 +151,11 @@
                 "label": { "type": "string", "description": "Visible copy." },
                 "accessibility_id": {
                   "type": "string",
-                  "description": "Accessibility / test id the designer wrote into a Dev Mode annotation, transcribed verbatim. This is the design half of the locator handoff: sdet-plan-generator's element_locator_handoff joins it to the real per-platform locator that code-change-extractor reports. Absent when the design does not state one — never derive it from the layer name."
+                  "description": "OPTIONAL bonus. Accessibility / test id the designer happened to write into a Dev Mode annotation, transcribed verbatim. When present it seeds sdet-plan-generator's element_locator_handoff, which code-change-extractor later joins to the real per-platform locator. Most Figma files carry no annotations at all: absence is the NORMAL case, is never a gap, and must never produce an extraction_note, a blocking_issue, or any change to extraction_status. Never derive this from the layer name."
                 },
                 "platform_hints": {
                   "type": "object",
-                  "description": "Per-platform ids when the annotation states them separately. Populate only from what the annotation says; omit the whole object otherwise. Never a placeholder or an 'UNRESOLVED' string.",
+                  "description": "OPTIONAL bonus. Per-platform ids when a Dev Mode annotation states them separately. Populate only from what the annotation says; omit the whole object otherwise — an omitted object is the normal case and is never flagged. Never a placeholder or an 'UNRESOLVED' string.",
                   "additionalProperties": false,
                   "properties": {
                     "android_resource_id": { "type": "string" },
@@ -207,8 +221,8 @@
           },
           "edge_source": {
             "type": "string",
-            "enum": ["CONNECTOR", "PROTOTYPE_REACTION", "CONNECTOR_INFERRED", "REACTION_INFERRED"],
-            "description": "Where the edge came from. The _INFERRED variants mean a design convention was not followed and the destination screen (or trigger element) was derived by walking ancestors — each has a matching WORTH_CHECKING extraction_note."
+            "enum": ["CONNECTOR", "PROTOTYPE_REACTION", "CONNECTOR_INFERRED", "REACTION_INFERRED", "CONNECTOR_CONTRACTED"],
+            "description": "Where the edge came from. The _INFERRED variants mean a design convention was not followed and the destination screen (or trigger element) was derived by walking ancestors. CONNECTOR_CONTRACTED means the edge was produced by collapsing a decision box that sat between two screens, so the condition could be attached to the screen it belongs to; source_ref then holds the decision box's node id. Each non-plain variant has a matching WORTH_CHECKING extraction_note."
           },
           "confidence": { "type": "string", "enum": ["EXPLICIT", "INFERRED"] },
           "source_ref": { "type": "string", "description": "Figma node id of the connector, or of the node carrying the reaction." }
