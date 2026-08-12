@@ -19,6 +19,7 @@ Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_c
 - **`prd_context.json`**: Business rules, boundary rules, expected UI copy, and `clickstream_events` (telemetry specs).
 - **`design_context.json`**: Screen definitions, UI elements with `screen_name:element_id_name` logical tokens, state variants, and flow matrix.
 - **`rfc_context.json`**: Feature flag mappings, API contracts, error codes, and N-1 fallback rules.
+- **`regression_context.json`**: **Generator-internal, not a QA-supplied file.** Produced by invoking the `regression-extractor` skill from *within* this generator (Preflight step 8), before any scenario is created — never something the QA hands in alongside the other four contexts.
 
 > **Pipeline Alignment & Architecture:** Upstream extractor skills (`prd-extractor`, `design-extractor`, `rfc-extractor`) run independently in isolated silos per stage and **do not communicate with each other**. The `sdet-plan-generator` is the first convergence point in the pipeline. It is responsible for cross-referencing these decoupled contexts to detect drift, mismatches, and gaps.
 
@@ -77,6 +78,20 @@ what was not covered.
    `endpoint`). Generate scenarios for them normally — they are in scope for this app too — and
    list those ids under a *Shared across apps* note in `<feature_key>_analysis.md`, so the QA
    reviewing both plans knows which scenarios are duplicates rather than distinct coverage.
+8. **Invoke `regression-extractor` — before any scenario is created, not after.** Call it with
+   the resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
+   coverage) to get `regression_context.json`. This is an internal call, the same as any other
+   skill invocation in this pipeline — not something to wait on the QA for.
+   - **Absent is normal, not an error.** `extraction_status: LIMITED` with an `FYI` note (the two
+     merchant apps have no coverage in the automation repo at all; BrowserStack MCP can be
+     unreachable) means proceed with **zero** regression context — same as any other optional
+     input being absent. Never block generation on this.
+   - **A schema-invalid or unreadable `regression_context.json` is different** — treat it like
+     any other malformed input context (Preflight step 3): use nothing from it, raise a
+     `NEEDS_ANSWER` note naming the failure, never silently treat malformed as merely absent.
+   - Inherit its `extraction_notes[]` the same way as every other input context (step 4), so a
+     regression case with weak/unverified steps is visible in this plan's own open points, not
+     lost at the boundary.
 
 ## Anti-hallucination rules
 - **Every scenario traces to a real field in a real input context.** No scenario may rest on a
@@ -185,7 +200,12 @@ Flow:
   - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario. **Flag record precedence: RFC is authoritative.** When the same flag appears in both, take the RFC `experimentation_matrix[]` record (`flag_key` verbatim + `default_variant` + `variants` + `kill_switch`) as the source of truth; the PRD entry is name-only corroboration. A PRD-only flag (absent from RFC) still gets a toggle scenario from its name **and** a `prd_vs_rfc_gap` note ("flag in PRD, undocumented in RFC — no variants/default"). An RFC-only flag is fine.
   - Every scenario MUST carry a `requirement_ref` (the `req_id` / boundary index / event it satisfies) so Step 4 can audit coverage mechanically.
   - **Clickstream Telemetry Rules:** Clickstream verification is **NOT** a mandatory hard gate for the generator. If `clickstream_events` are explicitly provided/told in the input contexts, then generate $\ge 1$ verification step per event. If they are NOT provided or explicitly mentioned, **do NOT fail validation and do NOT generate telemetry tests.** Instead, simply list it as an Open Question / Clarification inside `<feature_key>_analysis.md` (e.g., *"Are clickstream telemetry events required for this feature?"*).
-- Dedup against existing GMT/NLP tests retrieved from `${CLAUDE_PLUGIN_ROOT}/config/<app>.json` repository paths.
+- **Regression dedup — using `regression_context.json` from Preflight step 8, before writing any scenario:**
+  - For each requirement/boundary/flag about to get a Hard-Coverage scenario, check `regression_context.json.regression_tests[]` for a case whose `title` or `steps` clearly cover the same behaviour.
+  - **Exact match (the existing case already covers this exact behaviour)** → do not create a new scenario. Still emit a row for it (QA needs to see it exists), with `is_legacy_regression: true` and `existing_case_ref` set to that case's `id` (e.g. `C2879733`) — never `is_legacy_regression: true` with no ref; that's a flag nobody can audit or trace back.
+  - **Partial overlap (related but not identical — e.g. the existing case covers the happy path, this requirement needs a boundary variant)** → still create the new scenario (the Hard Coverage Rule requires it), but set `existing_case_ref` to the related case anyway, so the analysis doc shows the relationship instead of two disconnected-looking rows.
+  - **No match** → proceed normally, no `existing_case_ref`.
+  - This never overrides a Hard Coverage Rule (Step 1 above) — every P0 requirement and boundary condition still gets ≥1 row in the plan even if a legacy case already covers it; the point of dedup is to avoid generating a *second, redundant automation target*, not to avoid *documenting* coverage.
 
 ### 2. Scenario Expansion
 Expand scenarios across:
@@ -299,6 +319,7 @@ A human-readable Markdown asset automatically generated for engineering leads de
    - A table mirroring `coverage_categories` with columns: `Category`, `Tier` (`Auto` / `Extra — feature-adjacent` / `Extra — fe_baseline`), `Selected?`, and `Why` (the field that fired, or why it was offered as an extra).
    - Note explicitly which extras were QA-added and that `fe_baseline` scenarios are hygiene, not spec-backed.
    - Immediately after the category table, render the **Coverage Audit table** from `coverage_audit`: one row per required checklist item (`Item`, `Type`, `Covered By` (scenario titles), `Status` = Covered / Blocked-with-reason). This is the reviewer-facing proof that every requirement and boundary rule has a scenario.
+   - Immediately after that, if any scenario in this plan carries `existing_case_ref`, render a **Regression Coverage table**: `Scenario` (title), `Existing Case` (the BrowserStack id), `Relationship` (`Duplicate — not re-created` / `Related — new variant still generated`). If `regression_context.json` itself was unavailable this run (Preflight step 8), say so in one line instead of an empty table — e.g. *"Regression check did not run this pass: <reason from the note>."*
 
 3. **Section 1: Missing Input Context:**
    - If any input context (like `plan_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).

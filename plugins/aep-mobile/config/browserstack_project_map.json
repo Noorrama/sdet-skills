@@ -1,0 +1,187 @@
+{
+  "_meta": {
+    "generated_by": "extract_project_map.py",
+    "generated_from_repo_sha": "a8c997d414a07560a1a9356c3528a6d364f27a45",
+    "generated_at": "2026-08-12T06:05:47.055322+00:00",
+    "constants_files_found": 16,
+    "literal_PR_ids_found_repo_wide": {
+      "PR-176": [
+        "transport/src/main/java/io/gojek/transport/reports/browserstack/TransportBrowserStackHelper.java"
+      ],
+      "PR-143": [
+        "driverapp/src/test/java/io/gojek/driverapptest/utils/UITestRailHelper.java"
+      ]
+    },
+    "note": "consumer_super_app + its folder ids are a LIVE-VERIFIED fact from the BrowserStack MCP, not derived from this static scan -- see CONSUMER_SUPER_APP docstring for how/when it was verified. Everything under separate_projects is derived purely from this scan and needs BrowserStack-side confirmation (no listProjects MCP tool exists to auto-verify)."
+  },
+  "consumer_super_app": {
+    "browserstack_project": "PR-176",
+    "browserstack_project_numeric": "2880292",
+    "testrail_project": "107",
+    "verified": "live, via BrowserStack MCP listFolders(PR-176) -- 36 top-level folders match the module namespaces below",
+    "folders": {
+      "gofood": {
+        "booking": 28796662,
+        "discovery": 28796102,
+        "expansion": 28796829,
+        "group_order": 30945403,
+        "free_meal": 28797551,
+        "food_fulfilment": 28797554
+      },
+      "transport": {
+        "partnership": 28796253,
+        "gocorp": 28796308,
+        "iron_bank_growth": 28796414,
+        "booking_experience": 28796341,
+        "journeys": 28796820,
+        "two_wheeler": 30304163,
+        "four_wheeler": 30304164,
+        "live_tracking": 28796541,
+        "location_places": 28797391
+      },
+      "logistics": {
+        "gosend": 28796556,
+        "gobox": 28796767,
+        "goshop": 28796803
+      },
+      "gomart": {
+        "gomart": 28797431
+      },
+      "customer-platforms": {
+        "voucher_discovery": 28796895,
+        "subscriptions": 28796907,
+        "home": 28797004,
+        "archived_pilot": 28796867
+      },
+      "icp": {
+        "identity": 28797331,
+        "comms_gojek_user": 28797135,
+        "comms_user_user": 28797181
+      },
+      "helpcenter": {
+        "helpcenter": 28797278,
+        "chatbot": 28797257
+      },
+      "gamification": {
+        "gamification": 28797510
+      },
+      "ads-promo-platform": {
+        "ads_and_promo": 28797521
+      }
+    }
+  },
+  "separate_projects": {
+    "driverapp": {
+      "browserstack_project": null,
+      "resolution": "PER-CASE at runtime via lumosClient.getProjectIdFromTestCaseId(testCaseId), see driverapp/src/test/java/io/gojek/driverapptest/utils/UITestRailHelper.java",
+      "static_fallback_pr_id": "PR-143",
+      "note": "No single project id applies to all driverapp cases -- resolve per case_number via Lumos; PR-143 is only the hardcoded fallback when that lookup fails. Confirmed by human review to also apply to driver-platforms and driver-platform-android (same TestRail project 122, same BrowserStack project ids).",
+      "testrail_ids": {},
+      "source_files": []
+    },
+    "driver-platforms": {
+      "browserstack_project": null,
+      "resolution": "PER-CASE at runtime via lumosClient.getProjectIdFromTestCaseId(testCaseId), see driverapp/src/test/java/io/gojek/driverapptest/utils/UITestRailHelper.java",
+      "static_fallback_pr_id": "PR-143",
+      "note": "No single project id applies to all driverapp cases -- resolve per case_number via Lumos; PR-143 is only the hardcoded fallback when that lookup fails. Confirmed by human review to also apply to driver-platforms and driver-platform-android (same TestRail project 122, same BrowserStack project ids).",
+      "testrail_ids": {
+        "DP_PROJECT_ID": "122",
+        "DP_SUITE_ID": "7642"
+      },
+      "source_files": [
+        "driver-platforms/src/main/java/io/gojek/driverplatforms/utils/testRail/DPTestRailConfig.java"
+      ]
+    },
+    "driver-platform-android": {
+      "browserstack_project": null,
+      "resolution": "PER-CASE at runtime via lumosClient.getProjectIdFromTestCaseId(testCaseId), see driverapp/src/test/java/io/gojek/driverapptest/utils/UITestRailHelper.java",
+      "static_fallback_pr_id": "PR-143",
+      "note": "No single project id applies to all driverapp cases -- resolve per case_number via Lumos; PR-143 is only the hardcoded fallback when that lookup fails. Confirmed by human review to also apply to driver-platforms and driver-platform-android (same TestRail project 122, same BrowserStack project ids).",
+      "testrail_ids": {
+        "DP_PROJECT_ID": "122",
+        "DP_SUITE_ID": "18240"
+      },
+      "source_files": [
+        "driver-platform-android/src/main/java/io/gojek/utils/DriverPlatformTestRailConfig.java"
+      ]
+    },
+    "campaign-manager": {
+      "browserstack_project": null,
+      "testrail_ids": {
+        "CM_PROJECT_ID": "186",
+        "CM_SUITE_ID": "14474"
+      },
+      "source_files": [
+        "campaign-manager/src/main/java/io/gojek/campaignmanager/constants/CMProjectDetails.java"
+      ]
+    },
+    "gopay": {
+      "browserstack_project": "PR-173",
+      "testrail_ids": {
+        "GO_PAY_PROJECT_ID": "138",
+        "PE_SUITE_ID": "9291",
+        "CX_SUITE_ID": "9179",
+        "US_SUITE_ID": "9189",
+        "MM_SUITE_ID": "9187"
+      },
+      "source_files": [
+        "gopay/src/main/java/constants/testrail/GoPayProjectDetails.java"
+      ],
+      "verified": "human-confirmed, seen live in BrowserStack"
+    },
+    "gopay-consumer": {
+      "browserstack_project": null,
+      "testrail_ids": {
+        "PX_MOBILE_PROJECT_ID": "139"
+      },
+      "source_files": [
+        "gopay-consumer/src/test/java/constants/ProjectConstants.java"
+      ]
+    },
+    "gopay_later": {
+      "browserstack_project": null,
+      "testrail_ids": {},
+      "source_files": [],
+      "note": "no PROJECT_ID/SUITE_ID constants found in this module -- join by tag/title only"
+    }
+  },
+  "app_id_to_modules": {
+    "gojek-consumer": {
+      "modules": [
+        "gofood",
+        "transport",
+        "logistics",
+        "gomart",
+        "customer-platforms",
+        "icp",
+        "helpcenter",
+        "gamification",
+        "ads-promo-platform",
+        "gopay"
+      ],
+      "note": "9 modules share BrowserStack project PR-176 (TestRail 107); 'gopay' is a 10th module for the same app binary (package com.gojek.app) filed under its own TestRail project 138 -- query it separately, it is not part of PR-176."
+    },
+    "gojek-driver": {
+      "modules": [
+        "driverapp",
+        "driver-platforms",
+        "driver-platform-android"
+      ],
+      "note": "All three share TestRail project 122 (confirmed via DP_PROJECT_ID / Cucumber Examples project id). driverapp is the primary Cucumber suite; the other two are older TestNG suites for the same app."
+    },
+    "gopay-consumer": {
+      "modules": [
+        "gopay-consumer"
+      ],
+      "note": "Standalone GoPay app, confirmed by exact android_package match (com.gojek.gopay). Its automation uses the gopaystaging:// scheme (iOS/staging-build convention), not the gopay:// scheme declared in gopay-consumer.json -- that config value may describe the production scheme, which the staging-build automation would not use directly; treat as a config/repo naming difference to confirm, not an error in either file."
+    },
+    "gofood-merchant": {
+      "modules": [],
+      "note": "NO_COVERAGE: no GoFood Merchant (GoBiz) app UI automation exists in gojek-mobile-tests. The only 'gobiz' references are consumer/driver-side test helpers calling GoBiz's backend API, not merchant-app tests. A regression check for this app cannot use this repo/BrowserStack project as a source."
+    },
+    "gopay-merchant": {
+      "modules": [],
+      "note": "NO_COVERAGE: zero occurrences of gopaymerchant/gopay-merchant/gopay.merchant anywhere in gojek-mobile-tests. A regression check for this app cannot use this repo/BrowserStack project as a source."
+    }
+  }
+}

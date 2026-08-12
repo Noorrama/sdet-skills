@@ -1,0 +1,693 @@
+{
+  "_meta": {
+    "generated_by": "extract_nav_index.py",
+    "generated_from_repo_sha": "a8c997d414a07560a1a9356c3528a6d364f27a45",
+    "generated_at": "2026-08-12T06:05:47.947419+00:00",
+    "module": "ads-promo-platform",
+    "case_ids_indexed": 27,
+    "warning": "deeplinks_literal / deeplinks_enum_ref / case ids are exact regex extractions. page_object_calls_heuristic and steps_gherkin are best-effort navigation aids, NOT a guaranteed-complete or verified-correct step list -- method bodies and Gherkin text are free-form, unlike the structured id/deeplink data."
+  },
+  "cases": {
+    "4666944": [
+      {
+        "module": "ads-promo-platform",
+        "title": "GoFood Text search ad view and click event validation",
+        "method": "createTestDataForSearchAds",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/textsearchads/TextSearchAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "defaultTextSearchAdsValue",
+          "restaurantId"
+        ],
+        "framework": "GMT_JAVA"
+      },
+      {
+        "module": "ads-promo-platform",
+        "title": "GoJek Text search ad view and click event validation",
+        "method": "verifyGoFoodTextSearchAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/textsearchads/TextSearchAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setInAppLocationAndroid",
+          "getDriver",
+          "selectLocationInLocationPicker",
+          "searchOnGoFoodPage",
+          "scrollDownToTextSearchAds",
+          "isTextSearchAdsServed",
+          "clickOnAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4666943": [
+      {
+        "module": "ads-promo-platform",
+        "title": "GoFood Text search ad view and click event validation",
+        "method": "createTestDataForSearchAds",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/textsearchads/TextSearchAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "defaultTextSearchAdsValue",
+          "restaurantId"
+        ],
+        "framework": "GMT_JAVA"
+      },
+      {
+        "module": "ads-promo-platform",
+        "title": "GoJek Text search ad view and click event validation",
+        "method": "verifyGoFoodTextSearchAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/textsearchads/TextSearchAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setInAppLocationAndroid",
+          "getDriver",
+          "selectLocationInLocationPicker",
+          "searchOnGoFoodPage",
+          "scrollDownToTextSearchAds",
+          "isTextSearchAdsServed",
+          "clickOnAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4666946": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyGoJekTextSearchAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/textsearchads/TextSearchAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setInAppLocationAndroid",
+          "getDriver",
+          "searchOnGoFoodPage",
+          "scrollDownToTextSearchAds",
+          "isTextSearchAdsServed",
+          "clickOnAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4666945": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyGoJekTextSearchAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/textsearchads/TextSearchAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setInAppLocationAndroid",
+          "getDriver",
+          "searchOnGoFoodPage",
+          "scrollDownToTextSearchAds",
+          "isTextSearchAdsServed",
+          "clickOnAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663775": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyGoFoodHomeInfiniteListAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/infinitelistads/InfiniteListAdsTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToInfiniteListAd",
+          "isInfiniteListAdPresent",
+          "clickOnInfiniteListAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      },
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoJek Home Shuffle Ad View And Click Event",
+        "method": "verifyGoFoodHomeShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      },
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyGoFoodHomeShufflePlusPlusAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShufflePlusPlusAdPresent",
+          "clickOnShufflePlusPlusAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663776": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyGoFoodHomeInfiniteListAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/infinitelistads/InfiniteListAdsTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToInfiniteListAd",
+          "isInfiniteListAdPresent",
+          "clickOnInfiniteListAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      },
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoJek Home Shuffle Ad View And Click Event",
+        "method": "verifyGoFoodHomeShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      },
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyGoFoodHomeShufflePlusPlusAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShufflePlusPlusAdPresent",
+          "clickOnShufflePlusPlusAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4690742": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyCompactAdsOnAOSPage",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/compactbannerads/CompactBannerAdsTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "createDeliveryOrder",
+          "parseInt",
+          "getDriver",
+          "getOrderNumber",
+          "ensureCompactBannerAdIsVisible",
+          "sleep",
+          "closeApp",
+          "relaunchApp",
+          "clickFirstCompactBannerAd",
+          "navigate",
+          "back"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4678994": [
+      {
+        "module": "ads-promo-platform",
+        "title": "Gojek Promo page banner ad view event validation",
+        "method": "verifyBannerAdsEventOnGoJekHomePage",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/bannerads/BannerAdsGojekTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "appState",
+          "relaunchApp",
+          "bannerAds",
+          "isDisplayed",
+          "clickBannerAds",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4679059": [
+      {
+        "module": "ads-promo-platform",
+        "title": "Gojek Search page banner ad view event validation",
+        "method": "verifyBannerAdsEventOnGoJekPromoPage",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/bannerads/BannerAdsGojekTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "clickPromosTab",
+          "bannerAds",
+          "isDisplayed",
+          "clickBannerAds",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4683191": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyBannerAdsEventOnGoJekSearchPage",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/bannerads/BannerAdsGojekTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "clickSearchTextBar",
+          "sleep",
+          "bannerAds",
+          "isDisplayed",
+          "clickBannerAds",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4523438": [
+      {
+        "module": "ads-promo-platform",
+        "title": "Promo page banner ad view event validation",
+        "method": "verifyBannerAdsEvent",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/bannerads/BannerAdsGoFoodTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "sleep",
+          "bannerAds",
+          "isDisplayed",
+          "scrollDownTo",
+          "clickBannerAds",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4523445": [
+      {
+        "module": "ads-promo-platform",
+        "title": "Promo page banner ad view event validation",
+        "method": "verifyBannerAdsEvent",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/bannerads/BannerAdsGoFoodTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "sleep",
+          "bannerAds",
+          "isDisplayed",
+          "scrollDownTo",
+          "clickBannerAds",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4523446": [
+      {
+        "module": "ads-promo-platform",
+        "title": "Promo page banner ad view event validation",
+        "method": "verifyBannerAdsEvent",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/bannerads/BannerAdsGoFoodTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "sleep",
+          "bannerAds",
+          "isDisplayed",
+          "scrollDownTo",
+          "clickBannerAds",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4678830": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyBannerAdsEventOnPromoPage",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/bannerads/BannerAdsGoFoodTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "sleep",
+          "getFoodHome",
+          "isPromoScreenDisplayed",
+          "bannerAdsOnPromoScreen",
+          "isDisplayed",
+          "clickBannerAds",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4647567": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyGoFoodCategoryAdsEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/categoryads/CategoryAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [
+          "GoFoodDeeplinks.bestSellers"
+        ],
+        "page_object_calls_heuristic": [
+          "getGoFoodCategoryListPage",
+          "getDriver",
+          "getFoodMerchantProfilePage",
+          "getFoodHome",
+          "openDeeplink",
+          "getLink",
+          "tapOnGridCard",
+          "closeToolTips",
+          "isMatchingPageTitleDisplayed",
+          "scrollDownToCategoryAds",
+          "isCategoryAdsServed",
+          "clickOnAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4666947": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyGoFoodCategoryAdsEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/categoryads/CategoryAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [
+          "GoFoodDeeplinks.bestSellers"
+        ],
+        "page_object_calls_heuristic": [
+          "getGoFoodCategoryListPage",
+          "getDriver",
+          "getFoodMerchantProfilePage",
+          "getFoodHome",
+          "openDeeplink",
+          "getLink",
+          "tapOnGridCard",
+          "closeToolTips",
+          "isMatchingPageTitleDisplayed",
+          "scrollDownToCategoryAds",
+          "isCategoryAdsServed",
+          "clickOnAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4668113": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyMastHeadAdsEvent",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/mastheadads/MastHeadAdsTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "clickMastHeadAds",
+          "isUserOnRestaurantPage",
+          "deleteCampaign"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4667656": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyMastHeadAdsEvent",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/mastheadads/MastHeadAdsTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "clickMastHeadAds",
+          "isUserOnRestaurantPage",
+          "deleteCampaign"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4667655": [
+      {
+        "module": "ads-promo-platform",
+        "title": null,
+        "method": "verifyMastHeadAdsEvent",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/mastheadads/MastHeadAdsTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "clickMastHeadAds",
+          "isUserOnRestaurantPage",
+          "deleteCampaign"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663778": [
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoFood Search Page ShuffleAd View And Click Event",
+        "method": "verifyGoJekHomeShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663781": [
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoFood Search Page ShuffleAd View And Click Event",
+        "method": "verifyGoJekHomeShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663780": [
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoFood Promo Page ShuffleAd View And Click Event",
+        "method": "verifyGoFoodSearchPageShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663783": [
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoFood Promo Page ShuffleAd View And Click Event",
+        "method": "verifyGoFoodSearchPageShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663777": [
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoFood History Page ShuffleAd View And Click Event",
+        "method": "verifyGoFoodPromoPageShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663784": [
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoFood History Page ShuffleAd View And Click Event",
+        "method": "verifyGoFoodPromoPageShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "setAttribute",
+          "loginToCustomerApp",
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663779": [
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoFood Home ShufflePlusPlusAd View And Click Event",
+        "method": "verifyGoFoodHistoryPageShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4663782": [
+      {
+        "module": "ads-promo-platform",
+        "title": "verify GoFood Home ShufflePlusPlusAd View And Click Event",
+        "method": "verifyGoFoodHistoryPageShuffleAdEvents",
+        "source_file": "ads-promo-platform/src/test/java/io/gojek/adtech/tests/shuffleads/ShuffleAdsEventTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "scrollDownToShuffleAds",
+          "isShuffleAdPresent",
+          "clickOnShuffleAd",
+          "isUserOnRestaurantPage"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ]
+  }
+}
