@@ -110,7 +110,11 @@ Identification decides, per fixture: Test Data Domain → real TDP category → 
 sequence closing the gap → `test_data_status` (`TDP_SUPPORTED` · `TDP_HYBRID_FALLBACK` ·
 `TDP_OPERATION_FALLBACK` · `TDP_COMPLETE_FALLBACK`) → the TestBuddy prompt. It never provisions and
 never invents a category or operation name — both come from the TestBuddy MCP catalog tools
-(`get_supported_categories`, `get_supported_operations`, `generate_testBuddy_prompt`). Domain
+(`TestDataAgent_get_supported_category`, `TestDataAgent_generate_testbuddy_prompt`; a
+`get_supported_operations` counterpart is not shipped yet, so operations fall back to the live
+`<Domain>Agent_*` tool inventory). The category matcher always returns its nearest match and never
+reports a no-match, so the skill validates every returned category against the fixture's own signals
+and rejects the uncorroborated ones instead of trusting them. Domain
 definitions live in `skills/test-data-identification/references/test_data_domains.md`; adding a
 domain is a file edit, not a skill change.
 

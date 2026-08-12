@@ -107,7 +107,12 @@
                 }
               }
             },
-            "count": { "type": "integer", "minimum": 1, "description": "Number of entities to fetch/create. From required_state.count, default 1." }
+            "count": { "type": "integer", "minimum": 1, "description": "Number of entities to fetch/create. From required_state.count, default 1." },
+            "tdp_request": {
+              "type": ["object", "null"],
+              "additionalProperties": true,
+              "description": "TDP_Request returned by TestDataAgent_get_supported_category for the resolved category, carried through verbatim. null when the category was rejected by the validation gate. Provisioning prefers this structured request over the prose test_buddy_prompt."
+            }
           }
         },
         "test_buddy_prompt": {
@@ -118,6 +123,10 @@
           "type": "string",
           "enum": ["high", "medium", "low"],
           "description": "Confidence of the domain + category semantic match. low routes the fixture to human review before provisioning."
+        },
+        "identification_notes": {
+          "type": "string",
+          "description": "Reviewer-facing free text. When the validation gate rejects the matcher's category, record what it proposed and the top candidates[] here, so a wrong match is visible rather than lost."
         },
         "actual_test_data": {
           "type": ["array", "null"],
