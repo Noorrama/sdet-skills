@@ -263,6 +263,16 @@ def connector_label(connector: dict) -> str:
     return ""
 
 
+def normalise_question(text: str | None) -> str:
+    """'Does user have GoPay+ ?' -> 'Does user have GoPay+?'.
+
+    Designers space-pad punctuation for layout; the condition string is read by
+    humans and pasted into test steps, so close the gap.
+    """
+    collapsed = re.sub(r"\s+", " ", (text or "").strip())
+    return re.sub(r"\s+([?!:;,.])", r"\1", collapsed)
+
+
 def split_name(name: str | None) -> tuple[str, str, str | None]:
     """'Confirm account / EN' -> ('CONFIRM_ACCOUNT', 'Confirm account', 'EN')."""
     raw = (name or "").strip()
@@ -307,6 +317,7 @@ class Extractor:
         } or dict(ROLE_SUFFIX)
         self.counts = Counter()
         self.blocking_issues: list[str] = []
+        self.by_trigger: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
 
         self.groups: dict[str, list[str]] = defaultdict(list)
         for node_id, cls in board.node_class.items():
@@ -379,6 +390,11 @@ class Extractor:
             if start and end:
                 anchor, _ = self.resolve(start)
                 outgoing[anchor or start].append((end, connector_label(conn), conn["id"]))
+            # Keyed by the RAW start node, not the resolved screen: interactions
+            # belong to the element the designer drew from. A trigger with two
+            # connectors gets two interactions — a single stub would drop one.
+            if start:
+                self.by_trigger[start].append((conn["id"], end))
 
         edges: list[dict] = []
         for conn in board.connectors:
@@ -462,7 +478,9 @@ class Extractor:
             )
             return
 
-        for exit_end, exit_label, _ in exits:
+        question = normalise_question((self.board.texts(decision_id, 1) or [""])[0])
+
+        for exit_end, exit_label, exit_conn_id in exits:
             target, target_kind = self.resolve(exit_end)
             if target_kind == "CAPTION":
                 entry = self.lane_entry(target)
@@ -472,14 +490,24 @@ class Extractor:
             elif target_kind != "SCREEN":
                 target = None
 
-            condition = " / ".join(x for x in (label, exit_label) if x)
+            # "<question> — <value>", with any label on the connector INTO the
+            # decision kept in front so no authored text is lost.
+            branch = f"{question} — {exit_label}" if question and exit_label else (question or exit_label)
+            condition = " / ".join(x for x in (label, branch) if x)
+
             if target and target != src:
                 self.counts["contracted_edges"] += 1
-                edges.append(
-                    self._edge(
-                        src, target, condition, "CONNECTOR_CONTRACTED", "INFERRED", decision_id
-                    )
+                edge = self._edge(
+                    src, target, condition, "CONNECTOR_CONTRACTED", "INFERRED", exit_conn_id
                 )
+                # The box is carried explicitly, so source_ref can stay what it
+                # is on every other edge: the connector this edge came from.
+                edge["decision_node_id"] = decision_id
+                if question:
+                    edge["decision_question"] = question
+                if exit_label:
+                    edge["decision_value"] = exit_label
+                edges.append(edge)
             else:
                 self.blocking_issues.append(
                     f"Branch {condition!r} out of decision box {decision_id} has no resolvable "
@@ -567,6 +595,71 @@ class Extractor:
             )
         return screens
 
+    def _interactions(self, trigger_id: str, owning_screen: str) -> list[dict]:
+        """One entry per outgoing connector, naming where it goes.
+
+        A note tether is an annotation, not behaviour, so it produces no
+        interaction — its text reaches the element through
+        validations_and_edge_cases instead.
+        """
+        board = self.board
+        out: list[dict] = []
+        for connector_id, end in self.by_trigger.get(trigger_id, []):
+            target, kind = self.resolve(end) if end else (None, None)
+            if kind == "NOTE":
+                continue
+
+            entry: dict[str, Any] = {"trigger": "onTap", "connector_id": connector_id}
+            if end:
+                entry["destination_node_id"] = end
+
+            if kind == "SCREEN":
+                entry["destination_screen_id"] = target
+                if target == owning_screen:
+                    # Lands on a different state frame of this same collapsed
+                    # screen. Real behaviour, but not navigation — ui_flow counts
+                    # it under connectors_intra_screen and emits no edge, so the
+                    # wording must not read as a transition between screens.
+                    state = board.nodes.get(end, {}).get("name") or end
+                    entry["action"] = (
+                        f"Changes state within {target} (to frame {state!r}) via "
+                        f"connector {connector_id} — same screen, no navigation."
+                    )
+                else:
+                    entry["action"] = f"Navigates to {target} via connector {connector_id}."
+            elif kind == "DECISION":
+                question = normalise_question((board.texts(target, 1) or [""])[0])
+                entry["action"] = (
+                    f"Enters decision {question!r} via connector {connector_id}."
+                    if question
+                    else f"Enters a decision box via connector {connector_id}."
+                )
+            elif kind == "CAPTION":
+                caption = (board.texts(target, 1) or ["(no text)"])[0][:60]
+                resolved = self.lane_entry(target)
+                screen = self.frame_to_screen.get(resolved) if resolved else None
+                # Same self-loop guard the flow layer applies. Without it an
+                # interaction advertises a destination that ui_flow refused, and
+                # the two halves of the file disagree.
+                if screen == owning_screen:
+                    screen = None
+                if screen:
+                    entry["destination_screen_id"] = screen
+                    entry["action"] = (
+                        f"Points at caption {caption!r} via connector {connector_id} — "
+                        f"destination screen {screen} inferred from the lane it fronts."
+                    )
+                else:
+                    entry["action"] = (
+                        f"Points at caption {caption!r} via connector {connector_id} — "
+                        f"fronts no distinct destination screen, unresolved."
+                    )
+            else:
+                entry["action"] = f"Connector {connector_id} has no resolvable destination."
+
+            out.append(entry)
+        return out
+
     def _elements(self, screen_id: str, trigger_ids: list[str]) -> list[dict]:
         board = self.board
         elements, used = [], set()
@@ -587,12 +680,7 @@ class Extractor:
                     "role": role,
                     "label": label,
                     "states_represented": [],
-                    "interactions": [
-                        {
-                            "trigger": "onTap",
-                            "action": "Navigates via a design connector — see ui_flow.",
-                        }
-                    ],
+                    "interactions": self._interactions(node_id, screen_id),
                     "validations_and_edge_cases": [],
                 }
             )
