@@ -2,14 +2,30 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
+    "extraction_status": { "type": "string", "enum": ["OK", "INCOMPLETE", "DEGRADED"], "description": "OK = every field resolved from the inputs. INCOMPLETE = one or more fields could not be resolved and were left absent. DEGRADED = a config/schema/tool the skill depends on was unavailable. Never OK when extraction_gaps is non-empty." },
+    "extraction_gaps": {
+      "type": "array",
+      "description": "Everything the skill could NOT resolve, written instead of guessing a value. Empty array = clean extraction.",
+      "items": {
+        "type": "object",
+        "required": ["field", "reason", "severity"],
+        "additionalProperties": false,
+        "properties": {
+          "field": { "type": "string", "description": "JSON path of the unresolved field, e.g. business_requirements[3].target_module. Use 'ENVIRONMENT' for install/tool failures not tied to one field." },
+          "reason": { "type": "string", "description": "Why it could not be resolved, citing the source section checked." },
+          "action": { "type": "string", "description": "What a human must do to close the gap." },
+          "severity": { "type": "string", "enum": ["BLOCKING", "DEGRADED", "INFO"], "description": "BLOCKING = schema-required field absent. DEGRADED = resolved without normal grounding. INFO = optional content genuinely absent from the source." }
+        }
+      }
+    },
     "app": {
       "type": "string",
       "enum": ["gojek-consumer", "gojek-driver", "gofood-merchant", "gopay-consumer", "gopay-merchant"],
-      "description": "App this context belongs to. Not required (a design may cover an app the extractor could not resolve), but sdet-plan-generator keys off it to match contexts for a run, so omitting it in a multi-app split defeats the split."
+      "description": "ADDITION. App this context belongs to. Optional, but sdet-plan-generator keys off it to match contexts for a run, so omitting it in a multi-app split defeats the split."
     },
     "design_source": {
       "type": "object",
-      "description": "Provenance of the Figma export this context was extracted from — copied verbatim from the Export Design Raw JSON plugin envelope. Lets a reviewer tell a full-page export from a partial selection export without re-opening Figma.",
+      "description": "ADDITION. Provenance of the Figma export, copied from the Export Design Raw JSON plugin envelope. Lets a reviewer tell a full-page export from a partial selection export, and tells them whether geometry was available, without re-opening Figma.",
       "additionalProperties": false,
       "properties": {
         "file_name": { "type": "string", "description": "envelope file.name" },
@@ -19,6 +35,7 @@
         "max_depth": { "type": "integer", "description": "envelope export.maxDepth" },
         "node_count": { "type": "integer", "description": "envelope export.nodeCount" },
         "truncated_count": { "type": "integer", "description": "envelope export.truncatedCount. Non-zero means the depth cap dropped children — elements below those layers were never exported." },
+        "has_geometry": { "type": "boolean", "description": "Whether the export carried x/y/width/height. False means board nodes were classified by the descendant-count proxy instead of by size, and lane-entry resolution was unavailable." },
         "truncated_nodes": {
           "type": "array",
           "description": "envelope export.truncatedNodes (up to 20 samples) — the layers worth flattening before the next export.",
@@ -33,33 +50,16 @@
         }
       }
     },
-    "extraction_status": { "type": "string", "enum": ["COMPLETE", "PARTIAL", "LIMITED"], "description": "How much of the source document was captured. COMPLETE = everything the document specified was captured. PARTIAL = the document did not specify some things, so they were left empty and listed in extraction_notes; this is the normal result for a work-in-progress doc and is not an error. LIMITED = a config file, schema or the validator was unavailable, so part of the run had less grounding than usual — see extraction_notes. Not COMPLETE whenever extraction_notes is non-empty." },
-    "extraction_notes": {
-      "type": "array",
-      "description": "Things the source document did not say, recorded instead of guessing a value. An empty array means nothing was left open. A non-empty array is normal and expected on a work-in-progress document — it is a to-do list for the author, not a list of errors.",
-      "items": {
-        "type": "object",
-        "required": ["field", "reason", "follow_up"],
-        "additionalProperties": false,
-        "properties": {
-          "field": { "type": "string", "description": "JSON path of the field left empty, e.g. business_requirements[3].target_module. Use 'ENVIRONMENT' for tool or install issues not tied to one field." },
-          "reason": { "type": "string", "description": "What was checked and what was found there, e.g. 'PRD section 4.2 states the rule but names no module'." },
-          "action": { "type": "string", "description": "The concrete next step, e.g. 'confirm the target module with the PM'." },
-          "follow_up": { "type": "string", "enum": ["NEEDS_ANSWER", "WORTH_CHECKING", "FYI"], "description": "How much attention this needs. NEEDS_ANSWER = someone has to supply this before the tests can cover it. WORTH_CHECKING = a value was produced, but without its usual reference source, so confirm it. FYI = optional content the document simply does not have; no action needed." }
-        }
-      }
-    },
     "visual_analysis_scratchpad": {
       "type": "string",
-      "description": "Write a 2-3 sentence overview of what you detect in the export before compiling the technical fields. List screens found. Note: the export carries frame size/position but no styling, so this is a structural reading of names, variants, reactions and frame size — not a visual one."
+      "description": "Write a 2-3 sentence overview of what you detect in the export before compiling the technical fields. List screens found. Note: the export carries frame size and position but no styling, so this is a structural reading of names, variants, reactions and frame size — not a visual one."
     },
     "project_context": {
       "type": "object",
       "properties": {
         "overall_ambiguity_rating": {
           "type": "string",
-          "enum": ["LOW", "MEDIUM", "HIGH"],
-          "description": "HIGH = a screen or trigger element could not be resolved. MEDIUM = flows resolved, but through fallbacks/inference. LOW = every ui_flow edge is EXPLICIT and every layer name convention-compliant."
+          "enum": ["LOW", "MEDIUM", "HIGH"]
         },
         "blocking_issues": {
           "type": "array",
@@ -67,23 +67,25 @@
         },
         "convention_compliance": {
           "type": "object",
-          "description": "Tallies of how well the export follows the design team's five flow-authoring conventions. This is the feedback loop back to design — a high inferred/unresolved count means the next export needs fixing at source, not more guessing downstream.",
+          "description": "ADDITION. Tallies of how well the export follows the design team's flow-authoring conventions — the feedback loop back to design. connectors_total must equal the sum of every bucket below; a shortfall means connectors were dropped silently, which is the failure this block exists to make impossible.",
           "additionalProperties": false,
           "properties": {
-            "connectors_total": { "type": "integer", "description": "Every CONNECTOR node in the export. Must equal the sum of the buckets below plus note connectors plus connector-derived blockers." },
-            "connectors_resolved_to_screen": { "type": "integer", "description": "Standard #1 followed: the connector ends on a screen frame." },
-            "connectors_inferred_to_screen": { "type": "integer", "description": "Standard #1 not followed: the destination was an element, and the screen was inferred from its ancestors." },
-            "connectors_unresolvable": { "type": "integer", "description": "Floating endpoint, orphaned node id, or an intra-screen connector that is neither a flow nor a note." },
-            "note_connectors": { "type": "integer", "description": "Standard #5: TEXT-to-FRAME connectors whose text starts with Note or Context." },
-            "reactions_with_destination": { "type": "integer", "description": "Standard #2 followed: a tap-family reaction naming a destination." },
-            "reactions_without_destination": { "type": "integer", "description": "Standard #2 not followed: tap trigger with a null/absent destination. Each is also a blocking_issues entry." },
-            "unlabelled_branches": { "type": "integer", "description": "Standard #4 not followed: a trigger element with 2+ outgoing connectors and no connector labels to discriminate them." },
-            "non_descriptive_names": { "type": "integer", "description": "Standard #3 not followed: frames/layers named Frame 427, Group 12, Rectangle, Blue Button, etc." },
-            "unreachable_screens": { "type": "integer", "description": "Screen frames in no ui_flow edge and no flowStartingPoints entry." },
-            "decision_nodes": { "type": "integer", "description": "Board nodes classified DECISION — a small question box with 2+ outgoing connectors. Each one is a branch whose conditions were recovered by contraction." },
-            "caption_endpoints": { "type": "integer", "description": "Connectors landing on a CAPTION / LANE_BANNER rather than a screen (standard #1 not followed). The destination screen had to be inferred from the group the caption labels." },
-            "contracted_edges": { "type": "integer", "description": "Edges emitted via decision-box contraction (edge_source CONNECTOR_CONTRACTED). A number far above connectors_total means contraction escaped its one-hop / fan-out bounds and is manufacturing flows — investigate before trusting the output." },
-            "lane_entry_inferred": { "type": "integer", "description": "Edges whose destination is a lane's entry screen picked by reading order (topmost-then-leftmost sibling) rather than stated by the designer." }
+            "connectors_total": { "type": "integer", "description": "Every CONNECTOR node in the export." },
+            "connectors_resolved_to_screen": { "type": "integer", "description": "Both endpoints resolved to screens (standard #1 followed)." },
+            "connectors_inferred_to_screen": { "type": "integer", "description": "Destination was an element or a lane caption; the screen was inferred." },
+            "connectors_unresolvable": { "type": "integer", "description": "Floating endpoint, orphaned node id, or a destination with no board-node ancestor. Each is also a blocking_issues entry." },
+            "connectors_intra_screen": { "type": "integer", "description": "Both endpoints inside the same screen (including two state-frames of one screen) — a state transition or annotation, not navigation." },
+            "connectors_to_decision": { "type": "integer", "description": "Connectors terminating on a DECISION box. Each is consumed by contraction, which emits one edge per labelled exit — so this is its own bucket, not part of connectors_resolved_to_screen." },
+            "note_connectors": { "type": "integer", "description": "Either endpoint (or an ancestor of it) is an annotation component or Note/Context text." },
+            "caption_endpoints": { "type": "integer", "description": "Connectors landing on a CAPTION / LANE_BANNER rather than a screen." },
+            "decision_nodes": { "type": "integer", "description": "Board nodes classified DECISION — a small question box with 2+ outgoing connectors." },
+            "contracted_edges": { "type": "integer", "description": "Edges emitted by collapsing a decision box (edge_source CONNECTOR_CONTRACTED). Far above connectors_total means contraction escaped its one-hop / fan-out bounds and is manufacturing flows." },
+            "lane_entry_inferred": { "type": "integer", "description": "Edges whose destination is a lane's entry screen picked by reading order rather than stated." },
+            "reactions_with_destination": { "type": "integer", "description": "Tap-family reactions naming a destination (standard #2 followed)." },
+            "reactions_without_destination": { "type": "integer", "description": "Tap trigger with a null/absent destination (standard #2 not followed)." },
+            "unlabelled_branches": { "type": "integer", "description": "A trigger element with 2+ outgoing connectors and no labels to discriminate them (standard #4 not followed)." },
+            "non_descriptive_names": { "type": "integer", "description": "Frames/layers named Frame 427, Group 12, Rectangle, etc (standard #3 not followed)." },
+            "unreachable_screens": { "type": "integer", "description": "Screens in no ui_flow edge and no flowStartingPoints entry." }
           }
         }
       },
@@ -97,35 +99,36 @@
           "screen_id": {
             "type": "string",
             "pattern": "^[A-Z0-9_]+$",
-            "description": "Figma frame name with any trailing state qualifier stripped, forced into UPPER_SNAKE_CASE (e.g. 'Approve Disbursement — Error' -> APPROVE_DISBURSEMENT)"
+            "description": "Figma frame title forced into UPPER_SNAKE_CASE (e.g., LOGIN_SCREEN). Any trailing state/locale qualifier is stripped and the BASE name kept — 'Confirm account / EN' is CONFIRM_ACCOUNT with 'EN' as a state, never EN."
           },
-          "screen_name": { "type": "string", "description": "The Figma frame name verbatim." },
+          "screen_name": { "type": "string" },
+          "source_ref": { "type": "string", "description": "ADDITION. Figma node id of the representative frame (e.g. '1997:31939'), so a reviewer can jump straight to it." },
+          "source_refs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "ADDITION. Every frame collapsed into this screen. A screen drawn as N sibling state-frames has N ids here, and a connector touching ANY of them resolves to this screen — resolving against source_ref alone silently drops the flows drawn from the other states."
+          },
           "node_class": {
             "type": "string",
             "enum": ["SCREEN", "DECISION", "CAPTION", "LANE_BANNER", "NOTE", "UNKNOWN"],
-            "description": "How the board-node classifier labelled this frame. Only SCREEN entries become screens; the others appear here solely when an unresolved classification was recorded for review. Optional — omit it when every frame classified cleanly as SCREEN."
+            "description": "ADDITION. How the board-node classifier labelled this frame. Only SCREEN entries belong in screens[]; another value appears only when an unresolved classification was recorded for review."
           },
           "classified_by": {
             "type": "string",
             "enum": ["GEOMETRY", "DESCENDANT_COUNT", "COMPONENT_NAME"],
-            "description": "Which test decided the class. GEOMETRY is the normal case. DESCENDANT_COUNT means the export carried no width/height and the proxy was used — less reliable, and paired with an extraction_note."
+            "description": "ADDITION. Which test decided the class. GEOMETRY is the normal case; DESCENDANT_COUNT means the export carried no size and the proxy was used, paired with a DEGRADED gap."
           },
-          "source_ref": { "type": "string", "description": "Figma node id of the screen frame (e.g. '2015:31162'), so a reviewer can jump straight to it." },
           "purpose": { "type": "string" },
-          "deep_link": {
-            "type": "string",
-            "description": "OPTIONAL bonus. Deep link that opens this screen, taken from a prototype URL action matching the app config's deeplink_scheme, or stated in a Note/Context text note (standard #5). Does not depend on Dev Mode. Most designs document no routing at all: absence is the NORMAL case, is never a gap, and must never produce an extraction_note, a blocking_issue, or any change to extraction_status — never construct a plausible URI to fill it. When present, sdet-plan-generator uses it as the deep_link_nav category trigger and as a navigation shortcut in preference to a full UI walk; when absent it simply falls back to the UI walk."
-          },
-          "entry_point": { "type": "boolean", "description": "True when this frame is named in the page's flowStartingPoints[] — i.e. the designer marked it as a prototype flow entry." },
-          "flow_name": { "type": "string", "description": "Name of the prototype flow this screen starts, from flowStartingPoints[].name." },
+          "deep_link": { "type": "string", "description": "ADDITION, optional. Deep link opening this screen, from a prototype URL action matching the app config's deeplink_scheme or a Note/Context note stating one. Most designs document no routing: absence is normal, never a gap, and never a constructed URI." },
+          "entry_point": { "type": "boolean", "description": "ADDITION. True when this frame is named in the page's flowStartingPoints[]." },
           "screen_states": {
             "type": "array",
-            "description": "The designer's own wording for each state, kept verbatim (e.g. 'Promo Applying (loading)').",
-            "items": { "type": "string" }
+            "items": { "type": "string" },
+            "description": "State variants of this screen, in the designer's own wording. When N sibling frames share a base name, the entries are their QUALIFIERS ('EN', 'Error', 'Filled') — never the base name repeated N times, which carries no information."
           },
           "state_kinds": {
             "type": "array",
-            "description": "screen_states normalised to a fixed vocabulary. This is what makes downstream category selection deterministic — sdet-plan-generator fires negative_error / offline / theming_darkmode / localization_regional / permission triggers off these values rather than pattern-matching free text. Keep both fields: screen_states is the source of truth for wording, state_kinds for machine decisions.",
+            "description": "ADDITION. screen_states normalised to a fixed vocabulary, so downstream category selection is a mechanical field check rather than free-text pattern matching.",
             "items": {
               "type": "string",
               "enum": ["DEFAULT", "LOADING", "EMPTY", "ERROR", "SUCCESS", "OFFLINE", "DISABLED", "PERMISSION_DENIED", "DARK_THEME", "LIGHT_THEME", "LOCALE_VARIANT", "RTL", "OTHER"]
@@ -139,23 +142,20 @@
                 "element_id": {
                   "type": "string",
                   "pattern": "^[A-Z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$",
-                  "description": "Built from the app config's naming_convention.element_id_pattern and role_vocabulary: <SCREEN_ID>.<purpose><role_suffix>, optionally .<state> (e.g. APPROVE_DISBURSEMENT.approve_btn, HISTORY_PAGE.affiliator_search_input). Screen id is UPPER_SNAKE; the role half is lower_snake, matching the config's role_vocabulary casing and the developer's locator names."
+                  "description": "Built from the app config's naming_convention.element_id_pattern + role_vocabulary: <SCREEN_ID>.<purpose><role_suffix>[.<state>] — UPPER_SNAKE screen half, lower_snake role half (e.g. CONFIRM_ACCOUNT.approve_btn). This is the join key to change_context; never re-case or re-derive it."
                 },
-                "source_ref": { "type": "string", "description": "Figma node id of this layer." },
-                "type": { "type": "string", "description": "Free-text type as read from the design (Figma node type plus the design's role token)." },
+                "source_ref": { "type": "string", "description": "ADDITION. Figma node id of this layer." },
+                "type": { "type": "string" },
                 "role": {
                   "type": "string",
                   "enum": ["BUTTON", "INPUT", "LABEL", "TOGGLE", "TAB", "LIST", "IMAGE", "LINK", "DROPDOWN", "SLIDER", "CAROUSEL", "CONTAINER", "OTHER"],
-                  "description": "Normalised role, from the layer's role token (standard #3). Machine-readable companion to `type`: sdet-plan-generator uses it to decide whether a screen is interactive (INPUT/TOGGLE/DROPDOWN/SLIDER/CAROUSEL) for the interruption_lifecycle and a11y_baseline triggers, instead of pattern-matching free text."
+                  "description": "ADDITION. Normalised role. Machine-readable companion to `type`; downstream uses it to decide whether a screen is interactive without pattern-matching free text."
                 },
-                "label": { "type": "string", "description": "Visible copy." },
-                "accessibility_id": {
-                  "type": "string",
-                  "description": "OPTIONAL bonus. Accessibility / test id the designer happened to write into a Dev Mode annotation, transcribed verbatim. When present it seeds sdet-plan-generator's element_locator_handoff, which code-change-extractor later joins to the real per-platform locator. Most Figma files carry no annotations at all: absence is the NORMAL case, is never a gap, and must never produce an extraction_note, a blocking_issue, or any change to extraction_status. Never derive this from the layer name."
-                },
+                "label": { "type": "string" },
+                "accessibility_id": { "type": "string", "description": "ADDITION, optional. Accessibility/test id the designer happened to write into a Dev Mode annotation, transcribed verbatim. Most files carry no annotations: absence is the normal case, never a gap, and never derived from the layer name." },
                 "platform_hints": {
                   "type": "object",
-                  "description": "OPTIONAL bonus. Per-platform ids when a Dev Mode annotation states them separately. Populate only from what the annotation says; omit the whole object otherwise — an omitted object is the normal case and is never flagged. Never a placeholder or an 'UNRESOLVED' string.",
+                  "description": "ADDITION, optional. Per-platform ids when an annotation states them separately. Omit entirely otherwise — never a placeholder.",
                   "additionalProperties": false,
                   "properties": {
                     "android_resource_id": { "type": "string" },
@@ -172,7 +172,7 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "trigger": { "type": "string", "description": "The reaction's trigger.type (ON_CLICK, ON_PRESS, AFTER_TIMEOUT, ...) or the designer's own wording." },
+                      "trigger": { "type": "string" },
                       "action": { "type": "string" }
                     },
                     "required": ["trigger", "action"]
@@ -184,7 +184,7 @@
                 },
                 "element_ambiguity": {
                   "type": "object",
-                  "description": "Per-element confidence, when this element specifically is less certain than the screen overall.",
+                  "description": "ADDITION. Per-element confidence, when this element is less certain than the screen overall.",
                   "additionalProperties": false,
                   "properties": {
                     "rating": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
@@ -210,26 +210,26 @@
           "trigger_element_id": {
             "type": "string",
             "pattern": "^[A-Z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$",
-            "description": "The element that triggers the transition. Absent for a frame-to-frame connector with no identifiable trigger element — omit it rather than inventing a token, and say so in blocking_issues."
+            "description": "The element that triggers the transition. OMIT the key entirely for a frame-to-frame connector with no identifiable trigger — never emit null, and never invent a token to satisfy the schema."
           },
           "to_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
           "condition": { "type": "string", "description": "The connector's label (standard #4), or the conditional block's condition. Empty string means unconditional." },
           "navigation_kind": {
             "type": "string",
             "enum": ["NAVIGATE", "OVERLAY", "BACK", "CLOSE", "DEEP_LINK"],
-            "description": "What kind of transition this is. SWAP / CHANGE_TO / SCROLL_TO reactions are element state changes, not navigation, and never appear as ui_flow edges."
+            "description": "ADDITION. SWAP / CHANGE_TO / SCROLL_TO reactions are element state changes, not navigation, and never appear as ui_flow edges."
           },
           "edge_source": {
             "type": "string",
             "enum": ["CONNECTOR", "PROTOTYPE_REACTION", "CONNECTOR_INFERRED", "REACTION_INFERRED", "CONNECTOR_CONTRACTED"],
-            "description": "Where the edge came from. The _INFERRED variants mean a design convention was not followed and the destination screen (or trigger element) was derived by walking ancestors. CONNECTOR_CONTRACTED means the edge was produced by collapsing a decision box that sat between two screens, so the condition could be attached to the screen it belongs to; source_ref then holds the decision box's node id. Each non-plain variant has a matching WORTH_CHECKING extraction_note."
+            "description": "ADDITION. Where the edge came from. _INFERRED means the destination was derived rather than drawn. CONNECTOR_CONTRACTED means a decision box between two screens was collapsed so its condition could attach to the screen it belongs to; source_ref then holds that decision box's id."
           },
-          "confidence": { "type": "string", "enum": ["EXPLICIT", "INFERRED"] },
-          "source_ref": { "type": "string", "description": "Figma node id of the connector, or of the node carrying the reaction." }
+          "confidence": { "type": "string", "enum": ["EXPLICIT", "INFERRED"], "description": "ADDITION." },
+          "source_ref": { "type": "string", "description": "ADDITION. Figma node id of the connector, or of the node carrying the reaction." }
         },
         "required": ["from_screen_id", "to_screen_id", "condition"]
       }
     }
   },
-  "required": ["extraction_status", "extraction_notes", "visual_analysis_scratchpad", "project_context", "screens", "ui_flow"]
+  "required": ["visual_analysis_scratchpad", "project_context", "screens", "ui_flow"]
 }
