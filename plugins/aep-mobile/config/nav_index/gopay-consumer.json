@@ -1,0 +1,820 @@
+{
+  "_meta": {
+    "generated_by": "extract_nav_index.py",
+    "generated_from_repo_sha": "a8c997d414a07560a1a9356c3528a6d364f27a45",
+    "generated_at": "2026-08-12T06:05:47.947419+00:00",
+    "module": "gopay-consumer",
+    "case_ids_indexed": 33,
+    "warning": "deeplinks_literal / deeplinks_enum_ref / case ids are exact regex extractions. page_object_calls_heuristic and steps_gherkin are best-effort navigation aids, NOT a guaranteed-complete or verified-correct step list -- method bodies and Gherkin text are free-form, unlike the structured id/deeplink data."
+  },
+  "cases": {
+    "4527527": [
+      {
+        "module": "gopay-consumer",
+        "title": "Validate details on clicking 'Show My Code' and verify code renewal before expiry.",
+        "method": "validateDetailsOnShowMyCodeButtonAndRenewButton",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CPMTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "tapOnQRISButton",
+          "tapOnShowMyQRCode",
+          "enterDigits",
+          "validateDetailsOnTapOfShowMyQR",
+          "checkCodeRenewalBeforeExpiry",
+          "checkCodeOnTapOfExpandAndCollapse"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4903967": [
+      {
+        "module": "gopay-consumer",
+        "title": "Validate details on clicking 'Show My Code' and verify code renewal before expiry.",
+        "method": "validateDetailsOnShowMyCodeButtonAndRenewButton",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CPMTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "tapOnQRISButton",
+          "tapOnShowMyQRCode",
+          "enterDigits",
+          "validateDetailsOnTapOfShowMyQR",
+          "checkCodeRenewalBeforeExpiry",
+          "checkCodeOnTapOfExpandAndCollapse"
+        ],
+        "framework": "GMT_JAVA"
+      },
+      {
+        "module": "gopay-consumer",
+        "title": "Validate details on clicking 'Show My Code' and verify code renewal after expiry.",
+        "method": "validateDetailsOnClickOfRenewCodeButtonAfterCodeExpiry",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CPMTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "tapOnQRISButton",
+          "tapOnShowMyQRCode",
+          "enterDigits",
+          "validateDetailsOnTapOfShowMyQR",
+          "checkCodeRenewalAfterExpiry"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4527528": [
+      {
+        "module": "gopay-consumer",
+        "title": "Validate details on clicking 'Show My Code' and verify code renewal after expiry.",
+        "method": "validateDetailsOnClickOfRenewCodeButtonAfterCodeExpiry",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CPMTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "tapOnQRISButton",
+          "tapOnShowMyQRCode",
+          "enterDigits",
+          "validateDetailsOnTapOfShowMyQR",
+          "checkCodeRenewalAfterExpiry"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4557677": [
+      {
+        "module": "gopay-consumer",
+        "title": "Verify user is able to do successful linking with GoPay and Payment with Gopay Savings",
+        "method": "verifyUserCanPerformLinkingAndSuccessfulPaymentTokenization",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/TokenizationTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [
+          "GopayDeeplinks.GOPAY_HOME",
+          "GopayDeeplinks.GOPAY_TOKENIZATION_LINKING",
+          "GopayDeeplinks.GOPAY_TOKENIZATION_PAYMENT"
+        ],
+        "page_object_calls_heuristic": [
+          "login",
+          "getUserBalance",
+          "getLinkingReferenceID",
+          "orElseThrow",
+          "getDeepLink",
+          "tapOnSubmitButton",
+          "enterDigits",
+          "getRedirectedUrl",
+          "filter",
+          "startsWith",
+          "map",
+          "findFirst",
+          "getPaymentReferenceId",
+          "validateReviewAndPaymentDetails",
+          "tapOnPayBtn"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4901186": [
+      {
+        "module": "gopay-consumer",
+        "title": "Verify user can make payment using deeplink with GoPay Coins and GoPay Savings ",
+        "method": "verifyPaymentUsingDeeplink",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/OneTimePaymentTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "getUserBalance",
+          "getOneTimePaymentQRCodeUrl",
+          "parseLong",
+          "tapOnPaymentOptions",
+          "selectPaymentMethod",
+          "tapOnPayBtn",
+          "enterDigits",
+          "isQRISDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4911669": [
+      {
+        "module": "gopay-consumer",
+        "title": "Verify user can make payment using deeplink with GoPay Coins and GoPay Savings ",
+        "method": "verifyPaymentUsingDeeplink",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/OneTimePaymentTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "getUserBalance",
+          "getOneTimePaymentQRCodeUrl",
+          "parseLong",
+          "tapOnPaymentOptions",
+          "selectPaymentMethod",
+          "tapOnPayBtn",
+          "enterDigits",
+          "isQRISDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4527555": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyDynamicQRISOnUsPayment",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/ScanQRAndPayTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeForPayment",
+          "validatePaymentDetails",
+          "tapOnCancelBtn"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4731976": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyHelpRedirection",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/ScanQRAndPayTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "tapOnQRISButton",
+          "tapOnHelpButton",
+          "isHelpSectionTitleVisibility",
+          "isHelpQnASectionVisibility",
+          "tapOnBackButton",
+          "isGalleryBtnVisibility",
+          "assertAll"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4885501": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "editAmount",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/ScanQRAndPayTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "getEnteredAmount",
+          "clickOnEditBtn",
+          "clickOnKeyboardCrossBtn",
+          "enterAmountBasedOnQR",
+          "tapOnReviewPaymentBtn"
+        ],
+        "framework": "GMT_JAVA"
+      },
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "editAmount",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "getCBEnteredAmount",
+          "parseInt",
+          "getIDRConversionRate",
+          "getCBIDRAmount",
+          "clickOnEditBtn",
+          "clickOnKeyboardCrossBtn",
+          "enterAmountBasedOnQR",
+          "tapOnReviewPaymentBtn",
+          "removeTrailingZeros",
+          "assertAll"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4900747": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS static QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithStaticQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4900743": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS static QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithStaticQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900735": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS static QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithStaticQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900737": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS static QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithStaticQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900739": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS static QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithStaticQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900751": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS static QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithStaticQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900755": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS static QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithStaticQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900759": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS static QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithStaticQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900763": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS static QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithStaticQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4900744": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS dynamic QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithDynamicQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4900748": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS dynamic QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithDynamicQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900736": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS dynamic QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithDynamicQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900764": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS dynamic QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithDynamicQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900760": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS dynamic QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithDynamicQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900740": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS dynamic QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithDynamicQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "C4900738": [
+      {
+        "module": "gopay-consumer",
+        "title": "Cross Border - Verify successful payment transaction using QRIS dynamic QR code for Malaysia.",
+        "method": "validateCrossBorderPaymentWithDynamicQR",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/CrossBorderTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "login",
+          "getUserBalance",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "fetchConversionRates",
+          "convertToIDRCurrencyFormat",
+          "validateCrossBorderReviewPaymentDetails",
+          "validateCBPaymentDetails",
+          "tapOnCancelBtn",
+          "assertCrossBorderBalance"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4527623": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyUserCanSetDefaultPaymentMethodBySwipingInListingCard",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/PaymentWidgetTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "isQRISDisplayed",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "tapOnPaymentOptions",
+          "setDefaultPaymentMethodWithSwipe",
+          "isPaymentMethodDefaultPresent"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4527625": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyUserCanClickTagDefaultPaymentMethodBySwipingToSetAsDefault",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/PaymentWidgetTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "isQRISDisplayed",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "tapOnPaymentOptions",
+          "setDefaultPaymentMethodWithSwipe",
+          "setDefaultPaymentMethodWithTap",
+          "isPaymentMethodDefaultPresent"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4903975": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyUserCanSetDefaultPaymentMethodBySwipingInListingCardCustomerPresentedMode",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/PaymentWidgetTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "isQRISDisplayed",
+          "tapOnQRISButton",
+          "tapOnShowMyQRCode",
+          "enterDigits",
+          "isCPMQRCodeVisible",
+          "tapOnPaymentOptions",
+          "setDefaultPaymentMethodWithSwipe",
+          "isPaymentMethodDefaultPresent"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4903977": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyUserCanClickTagDefaultPaymentMethodBySwipingToSetAsDefaultCustomerPresentedMode",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/PaymentWidgetTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "isQRISDisplayed",
+          "tapOnQRISButton",
+          "tapOnShowMyQRCode",
+          "enterDigits",
+          "isCPMQRCodeVisible",
+          "tapOnPaymentOptions",
+          "setDefaultPaymentMethodWithSwipe",
+          "setDefaultPaymentMethodWithTap",
+          "isPaymentMethodDefaultPresent"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4527624": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyUserCanSetAndRemoveDefaultPaymentMethodBySwipingInListingCard",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/PaymentWidgetTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "isQRISDisplayed",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "tapOnPaymentOptions",
+          "removeDefaultWithSwipe",
+          "isPaymentMethodDefaultPresent"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4527626": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyUserCanClickTagRemoveDefaultPaymentMethodBySwipingToRemoveAsDefault",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/PaymentWidgetTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "isQRISDisplayed",
+          "uploadQRCodeAndClickOnReviewPaymentBtn",
+          "tapOnPaymentOptions",
+          "removeDefaultWithSwipe",
+          "removeDefaultPaymentMethodWithTap",
+          "isPaymentMethodDefaultPresent"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4903976": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyUserCanSetOrRemoveDefaultPaymentMethodBySwipingInListingCardCustomerPresentedMode",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/PaymentWidgetTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "isQRISDisplayed",
+          "tapOnQRISButton",
+          "tapOnShowMyQRCode",
+          "enterDigits",
+          "isCPMQRCodeVisible",
+          "tapOnPaymentOptions",
+          "removeDefaultWithSwipe",
+          "isPaymentMethodDefaultPresent"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4903978": [
+      {
+        "module": "gopay-consumer",
+        "title": null,
+        "method": "verifyUserCanClickTagRemoveAsDefaultPaymentMethodBySwipingToRemoveAsDefaultCustomerPresentedMode",
+        "source_file": "gopay-consumer/src/test/java/tests/pxTests/PaymentWidgetTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "login",
+          "isQRISDisplayed",
+          "tapOnQRISButton",
+          "tapOnShowMyQRCode",
+          "enterDigits",
+          "isCPMQRCodeVisible",
+          "tapOnPaymentOptions",
+          "removeDefaultWithSwipe",
+          "removeDefaultPaymentMethodWithTap",
+          "isPaymentMethodDefaultPresent"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ]
+  }
+}
