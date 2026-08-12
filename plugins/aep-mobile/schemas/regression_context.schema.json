@@ -37,6 +37,14 @@
         }
       }
     },
+    "deeplink_dictionary": {
+      "type": "object",
+      "description": "The repo's extracted deeplink dictionary for the module(s) in scope, copied verbatim from config/deeplinks.json — { module: { SCREEN_NAME: \"<uri>\" } }, e.g. {\"driverapp\": {\"LOYALTY_HOME\": \"gojekdriver://loyalty/home\", \"LOYALTY_REWARDS\": \"gojekdriver://loyalty/rewards\"}}. This is the repo's PRIMARY navigation mechanism (deep links are used far more than UI walks), so it is surfaced here as a lookup table the sdet-plan-generator consults at rung 1 of its Navigation Resolution Ladder BEFORE falling through to UI-walk rungs — a new-feature screen with a real repo deeplink must resolve here, not land as [NAVIGATION NOT CONFIRMED]. Keys and URIs are passed through exactly as the dictionary holds them, never edited or invented. Scope it to the resolved module(s) only (never the whole file). Omit the field entirely when config/deeplinks.json was unavailable; an empty object would wrongly read downstream as 'checked, and this module genuinely has no deeplinks'.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      }
+    },
     "regression_tests": {
       "type": "array",
       "description": "Existing cases judged impacted by this change. Every entry comes from a real BrowserStack case — never invented. May be empty (see extraction_status for whether that means 'none' or 'not checked').",
@@ -58,9 +66,19 @@
           "steps_source": { "type": "string", "enum": ["repo", "browserstack"], "description": "Where 'steps' came from. repo = executable page-object/Gherkin steps matched by case_number; browserstack = the human-written steps as-is." },
           "preconditions": { "type": "string", "description": "Environment/config preconditions from the case." },
           "navigation": { "type": "array", "items": { "type": "string" }, "description": "Ordered steps to REACH the screen under test (distinct from the case's own steps), e.g. ['Login (bypass)', 'Open deeplink gojek://gocore/settings', 'Tap Edit Profile']." },
-          "nav_source": { "type": "string", "enum": ["deeplink", "existing_test", "figma", "needs_answer"], "description": "Which rung of the navigation ladder produced 'navigation'. needs_answer = no deeplink, no existing test, no Figma nav map — recorded and flagged, not guessed." }
+          "nav_source": { "type": "string", "enum": ["deeplink", "existing_test", "figma", "needs_answer"], "description": "Which rung of the navigation ladder produced 'navigation'. needs_answer = no deeplink, no existing test, no Figma nav map — recorded and flagged, not guessed." },
+          "variant_dimensions": {
+            "type": "object",
+            "description": "The population-partitioning attributes this existing case actually runs against, copied verbatim from the BrowserStack case's own custom fields (e.g. {\"DriverType\": [\"IDBike\", \"IDCar\"], \"Country v2\": [\"Indonesia\"]}). App-agnostic: whatever custom fields the project defines (DriverType/ServiceType for driver apps, payment-instrument or user-tier fields for consumer apps) are carried through as-is. This is the ONLY observed enumeration of which variants real coverage splits on, so the sdet-plan-generator can fan out test_data fixtures per variant instead of inventing or omitting one. Keys and values are never normalised or invented — absent field means the case declared none.",
+            "additionalProperties": { "type": "array", "items": { "type": "string" } }
+          }
         }
       }
+    },
+    "observed_variant_dimensions": {
+      "type": "object",
+      "description": "Run-level union of every regression_tests[].variant_dimensions value seen in this query, per dimension key (e.g. {\"DriverType\": [\"IDBike\", \"IDCar\"]}). A convenience roll-up so the sdet-plan-generator does not have to re-scan every case to learn which variants this app's existing coverage exercises. Union only — never extended with values no returned case declared. Empty/absent when no case carried custom fields.",
+      "additionalProperties": { "type": "array", "items": { "type": "string" } }
     }
   },
   "required": ["app", "extraction_status", "regression_tests"],

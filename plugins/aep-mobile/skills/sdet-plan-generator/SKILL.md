@@ -228,11 +228,27 @@ Expand scenarios across:
   scenario mid-flow as if arriving at its screen were free. Resolve reachability in this order,
   stopping at the first rung that produces a concrete, sourced answer:
 
-  1. **Test hook / deep link.** Check `plan_context.json` test hooks (`method: deeplink` /
-     `hook_id`) for the target screen first — `plan` is the primary source of test hooks. Else
-     check `rfc.navigation_changes[].deep_link` for a non-null deep link whose destination screen
-     matches. Found → the scenario opens with `Open deeplink "<uri>"`, no UI walk needed. Tag the
-     scenario's provenance as hook-resolved; no note required, this is the ideal case.
+  1. **Test hook / deep link — check all three deep-link sources, in this order.** A deep link is
+     the ideal rung: one `Open deeplink "<uri>"` step replaces a whole tap chain. Three sources
+     carry them; the target screen is resolved by the **first** that names it:
+     a. `plan_context.json` test hooks (`method: deeplink` / `hook_id`) — the primary source of
+        *test* hooks, when an impl plan was supplied.
+     b. `rfc.navigation_changes[].deep_link` — a non-null deep link whose destination screen
+        matches (a deep link the RFC itself introduces for the new feature).
+     c. **`regression_context.deeplink_dictionary`** — the repo's extracted deeplink dictionary
+        (`{ module: { SCREEN: "<uri>" } }`), surfaced by the regression-extractor from the
+        automation repo's own deeplink constants. **This is the primary navigation mechanism in the
+        corpus and resolves most screens** (the repo uses deep links far more than UI walks), so it
+        must be checked before falling through to the UI-walk rungs below — a screen with a real
+        repo deeplink is *not* `[NAVIGATION NOT CONFIRMED]`. Match the scenario's target screen to a
+        dictionary key by meaning (e.g. a "Manfaat & Pencapaian Anda" / benefits-rewards screen →
+        `LOYALTY_REWARDS = "gojekdriver://loyalty/rewards"`; a "Loyalty Home / Level Saya" screen →
+        `LOYALTY_HOME`). Use the URI **verbatim** — never edit, complete, or invent a path; a screen
+        the dictionary does not name is simply not resolved at this rung, fall through to rung 2.
+     Found at any of a/b/c → the scenario opens with `Open deeplink "<uri>"`, no UI walk needed.
+     Tag the scenario's provenance as hook-resolved and cite the source (plan hook / rfc / repo
+     deeplink dictionary); no note required, this is the ideal case. Only when **none** of the three
+     names the screen does resolution fall through to rung 2.
   2. **Design's own resolved flow (`design_context.ui_flow[]`).** If design_context has real
      screens (not an empty/failed extraction), search `ui_flow[]` for a path from a reachable
      entry screen (a `flowStartingPoints` entry, or a screen already resolved by an earlier rung)
@@ -246,16 +262,70 @@ Expand scenarios across:
      ancestor to bridge a rung-2 partial path), preferring `nav_source: "existing_test"`
      (repo-confirmed) over `"figma"` over `"needs_answer"` (never usable — that value means the
      regression-extractor itself couldn't resolve it, so it cannot resolve it for you either).
-     Use the array verbatim; cite the source case id (e.g. `C5542964`) in the scenario's
-     `test_data[].source_refs` so the path is auditable.
+
+     **Normalize, don't transcribe.** `regression_tests[].navigation`/`.steps` are repo Gherkin or
+     BrowserStack prose written for an automation engineer, not for a manual tester — copying them
+     into `steps[]` unedited is the single most common quality defect in this skill's output. Before
+     a regression-sourced line becomes a scenario step:
+     - **Resolve Scenario Outline placeholders — from a source, never a guess.** A step like
+       `"Driver Login to <Vehicle Type> as a <Driver Account> through backdoor"` is a Cucumber
+       Examples-table template, not literal text — the angle brackets are unbound variables, not
+       something a tester can act on. Substituting a value here follows the same anti-hallucination
+       rule as everything else in this skill: only use a value a source actually states —
+       the case's own Examples table (if fetched), an explicit PRD/RFC statement (e.g. PAM-06's
+       `"SDF, Kilat, or Box service type"`), or a fact directly observed elsewhere in the corpus
+       (e.g. a BrowserStack case's own `DriverType` custom field listing which types it already
+       covers). If nothing sources a concrete value, do **not** invent one (a "2-wheeler" or
+       "pilot-city" default with no source behind it is exactly the fabrication this skill's
+       provenance rule forbids) — instead generalize the wording to what the step actually needs
+       (`"Log in as a driver using the test backdoor login"`) and add an `extraction_notes` entry
+       (`follow_up: WORTH_CHECKING` or `NEEDS_ANSWER` depending on how much it blocks the scenario)
+       naming the unresolved placeholder. Whichever path you take, record it in the scenario's
+       `test_data`/`preconditions_metadata` so it stays traceable. A literal `<...>` token
+       surviving into a manual-facing step is a defect, not a faithful quote — it means the
+       normalization step was skipped.
+     - **Drop pure test-harness scaffolding.** Lines with no on-screen tester action (`"Given Test
+       case info for AEP DASHBOARD"`, `"turn off Spotlight and LeakCanary"`, feature-toggle setup
+       lines) describe automation rigging, not something a manual tester does on the device — they
+       belong in `preconditions_metadata` (and the CSV `Preconditions` column), never in `steps[]`.
+     - **Translate automation-harness vocabulary into what a tester actually does.** Repo steps name
+       mechanisms that exist only inside the harness — a login *backdoor* or bypass, a seeded
+       session, a stubbed response, an internal UI codename (`"tap on profile icon konmari"`), a
+       page-object or Fragment/ViewController class name. A manual tester can neither see nor
+       perform any of them. The test is one question: **could a person holding the device do this,
+       using only what is on screen?** If not, it is automation vocabulary and must be converted —
+       never passed through, and never merely deleted. Convert by *intent*:
+       - The mechanism **substitutes for a real user action** (backdoor/bypass login, injected
+         session) → write the real action that reaches the same state: `"Driver Login to <X>
+         through backdoor"` → `"Launch the app and log in with a test driver account"`. Dropping
+         the line instead would strand the scenario mid-flow — the ladder still owes an arrival path.
+       - The mechanism **has no user-facing counterpart** (harness plumbing, flag/state injection,
+         fixture seeding) → it is a precondition, not a step; move it per the bullet above.
+       - An **internal codename or code identifier** (`konmari`, a `*Fragment.kt`, a page-object
+         method) → name the element as it appears on screen (`"Tap the profile icon"`).
+       This governs **assertions as much as actions**: a manual step cannot verify *"the API
+       returns null"* or *"`show_claimed_once_banner` is true"* — only what the screen shows in
+       that case. Reframe backend-shaped expectations into their observable UI outcome; the
+       endpoint/field detail stays in the scenario's contract metadata and the analysis doc, where
+       it is useful, rather than in a step no tester can execute. Where a scenario genuinely needs
+       a backend condition forced (an error state, a timeout), write the **tester-executable**
+       instruction — *"using a proxy tool, force `<endpoint>` to return 500, then …"* — not a bare
+       *"simulate an API failure"*, which names an outcome without an action.
+     - **Rephrase into declarative NLP**, the same style rung 2 already uses (`Tap "Daftar Program
+       Affiliate"`, never a raw element id): third-person test-script prose (`"driver tap on
+       profile icon konmari"`) becomes a clean imperative tester action (`Tap the profile icon`).
+       Preserve the screens/order/meaning exactly — normalizing wording is not a license to change
+       the path or drop a real step.
+     Cite the source case id (e.g. `C5542964`) in the scenario's `test_data[].source_refs` so the
+     now-normalized path is still auditable back to the repo-confirmed original.
      - **Cross-case corroboration for login/session preambles.** The most common reachability gap
        isn't the target screen, it's getting to an authenticated starting state at all. If
        `plan_context` has no login/state-injection hook, look for a leading step-subsequence
        shared identically across **3 or more independent** `regression_tests[].navigation`
        entries for this app (e.g. a repeated "login via backdoor → skip walkthrough → dismiss
        vehicle card → tap profile icon" prefix). A sequence corroborated across that many
-       independent cases is the app's standard entry preamble, not a one-off guess — reuse it for
-       any scenario needing a logged-in starting point.
+       independent cases is the app's standard entry preamble, not a one-off guess — reuse it
+       (normalized per the rule above) for any scenario needing a logged-in starting point.
   4. **Reconciling two sources.** When both rung 2 (design) and rung 3 (regression) produce a
      path to the same screen: if they agree (same screens/actions, or one is a superset of the
      other) use the more complete one — this is corroboration, not a conflict, and needs no note.
@@ -265,12 +335,14 @@ Expand scenarios across:
      diverges, and add an `extraction_notes` entry (`follow_up: NEEDS_ANSWER`) naming the specific
      conflicting screens/elements from both sources. Merging them into a single path neither
      source actually states is inventing a fact.
-  5. **Nothing resolves.** No hook/deep link, no usable design `ui_flow` edge, and either no
-     regression match or only `nav_source: "needs_answer"`. Do **not** write a plausible-sounding
-     step like "Open the X page" — that is the exact failure mode this ladder exists to prevent.
-     Instead the scenario's steps open with exactly one line:
-     `[NAVIGATION NOT CONFIRMED] Manually navigate to <screen_id> — no deeplink, design flow, or
-     regression precedent was found.` The destination-screen verification steps still follow
+  5. **Nothing resolves.** No plan/RFC/repo-dictionary deep link (all three rung-1 sources
+     checked), no usable design `ui_flow` edge, and either no regression match or only
+     `nav_source: "needs_answer"`. Do **not** write a plausible-sounding step like "Open the X page"
+     — that is the exact failure mode this ladder exists to prevent. Instead the scenario's steps
+     open with exactly one line:
+     `[NAVIGATION NOT CONFIRMED] Manually navigate to <screen_id> — no deeplink (plan, RFC, or repo
+     dictionary), design flow, or regression precedent was found.` The destination-screen
+     verification steps still follow
      normally below it. Add a `testability_feedback.missing_hooks` entry naming the exact screen
      and what was checked, plus a matching `extraction_notes` entry (`follow_up: NEEDS_ANSWER`).
      The scenario still counts as covered for the Step 4 audit — the requirement is exercised —
@@ -278,8 +350,9 @@ Expand scenarios across:
 
   This ladder is feature-agnostic by construction: it never depends on this being a loyalty
   feature, a payments flow, or any specific app — it only depends on which of `plan_context`,
-  `design_context.ui_flow`, and `regression_context.navigation` actually resolved something, the
-  same fields every run of this generator already has (or explicitly lacks) by Preflight.
+  `rfc.navigation_changes`, `regression_context.deeplink_dictionary`, `design_context.ui_flow`,
+  and `regression_context.navigation` actually resolved something, the same fields every run of
+  this generator already has (or explicitly lacks) by Preflight.
 
 ### 3. Gap Analysis & Alignment Engine
 As the single integration point, the generator must actively compute the following cross-stage gaps:
@@ -304,13 +377,17 @@ This gate is what makes coverage model-independent: it does not rely on the mode
 **4c. If any checklist item has zero covering scenarios → the plan is INCOMPLETE.** Do not write the output files yet. Generate the missing scenario(s), then re-run 4b. Repeat until every item is covered. A boundary rule "covered" only by being mentioned inside an unrelated scenario does NOT count — it needs a scenario whose `requirement_ref` names it.
 
 **4c-nav. Navigation audit (mechanical, not from memory).** For every scenario in `scenario_list`,
-confirm its `steps[]` opens with one of: a hook/deep-link open, a navigation chain traceable to
+confirm its `steps[]` opens with one of: a deep-link open (from a plan hook, `rfc.navigation_changes`,
+**or `regression_context.deeplink_dictionary`**), a navigation chain traceable to
 `design_context.ui_flow` or `regression_context.navigation` (per the Navigation Resolution
-Ladder, Step 2), or an explicit `[NAVIGATION NOT CONFIRMED]` line. A scenario whose first step
-assumes arrival at a screen (e.g. "Open the X page" with nothing before it) with none of the
-above behind it is a defect in this gate — fix it (resolve the ladder properly, or replace the
-assumed step with the unresolved-flag line) before writing any output file. This check is what
-would have caught steps starting cold at a destination screen with no login/navigation path
+Ladder, Step 2), or an explicit `[NAVIGATION NOT CONFIRMED]` line. **Before accepting a
+`[NAVIGATION NOT CONFIRMED]` line, re-check `regression_context.deeplink_dictionary` for a key
+matching the target screen — an unresolved flag on a screen the repo dictionary actually names is a
+defect, not a valid outcome** (this is the exact miss the deeplink rung exists to prevent). A
+scenario whose first step assumes arrival at a screen (e.g. "Open the X page" with nothing before
+it) with none of the above behind it is likewise a defect — fix it (resolve the ladder properly, or
+replace the assumed step with the unresolved-flag line) before writing any output file. This check
+is what would have caught steps starting cold at a destination screen with no login/navigation path
 before it; it must run on every pass, not just when something looks off.
 
 **4d. Emit the audit result** into the SDET plan as a `coverage_audit` object and echo it as a table in `<feature_key>_analysis.md`:
@@ -367,9 +444,76 @@ from the structured upstream fields — **not** flattened to tag strings:
   (`"KYCed GoPay user"` + prereq `"confirmed Date of Birth"` → `{ "kyc_status": "VERIFIED",
   "gopay_active": true, "date_of_birth": "CONFIRMED" }`). Restate the source in schema vocabulary;
   never invent an attribute the source doesn't state.
+- **Fold in the feature's stated baseline facts, not only the boundary/persona-specific ones.**
+  `country` (from `prd.applicable_countries`, or the specific country this fixture targets),
+  `driver_type`/service-type cohort (`prd...target_personas[].prerequisites`, e.g. `"SDF, Kilat,
+  or Box service type"`), and any other flat fact the PRD/RFC states for *this* fixture belong in
+  `required_state` whenever the source names them — even when the fixture's distinguishing trait
+  is a `dynamic_conditions` entry. A fixture for "driver mid-way through a yearly eligibility
+  period" still states `country`/cohort if the source does; the dynamic condition explains *when*,
+  it doesn't excuse omitting *what else is known*. `required_state: {}` should be rare — it means
+  the source genuinely stated no static fact at all for this fixture, not merely that the one
+  interesting condition happens to be dynamic.
+- **Unstated variant dimension → fan out one fixture per variant; never collapse it to a guess.**
+  A *variant dimension* is any attribute that partitions the entity population into groups the
+  feature could behave differently for, and which the source docs left **unrestricted**: a driver
+  app's vehicle type (2W/4W) or service type, a consumer app's payment instrument, user tier,
+  account type, or subscription state. This is deliberately app- and domain-agnostic — the rule is
+  about *an unrestricted partition*, never about a hardcoded list of dimensions.
+
+  Resolve each dimension in this order:
+  1. **PRD/RFC restricts it** → one fixture, that value in `required_state`, done. (`"Driver
+     cohort: SDF, Kilat, or Box service type"` → `{"service_type": "SDF|Kilat|Box"}`.) A stated
+     restriction is never widened.
+  2. **Unrestricted, and a source enumerates the real values** → **emit one fixture per value.**
+     Each gets its own stable `fixture_id` suffixed by the variant, carries the dimension inside
+     `required_state`, and keeps the rest of the base fixture's state identical. This is the case
+     the QA is usually owed two rows of data for and silently gets one.
+
+     **The dimension's name, its `required_state` key, its `fixture_id` suffix, and its values all
+     come from the enumerating source's own vocabulary — never from this rule's examples.** The
+     examples below are illustrative of the *shape*, not a template to copy. Read what the source
+     actually enumerated and mirror that:
+     - A driver feature whose cases are tagged `DriverType: ["IDBike","IDCar"]` → two fixtures
+       `…-2w` / `…-4w` with `{"vehicle_type": "2W"}` / `{"vehicle_type": "4W"}`.
+     - A consumer feature whose cases are tagged `PaymentInstrument: ["GoPay","Card","PayLater"]`
+       → three fixtures `…-gopay` / `…-card` / `…-paylater` with
+       `{"payment_instrument": "GoPay"}` etc. — **there is no `vehicle_type` here; a consumer plan
+       that never saw a vehicle dimension must never grow one.**
+     - A merchant app with `NO_COVERAGE` (no regression corpus) enumerates nothing at rung 2a → it
+       does not fan out on an invented dimension; it falls to 2b/2c or to case 3 below.
+     Enumeration sources, in priority order — all *observed*, never a list you compose yourself:
+     a. `regression_context.observed_variant_dimensions` / `regression_tests[].variant_dimensions`
+        — the variants this app's **existing coverage actually splits on** (`DriverType:
+        ["IDBike","IDCar"]` for one app, `PaymentInstrument: [...]` or `UserTier: [...]` for
+        another — whatever *that* app's cases carry). Strongest evidence: real cases already run
+        every way. Whatever key appears here is the dimension; do not translate it into a term from
+        these examples.
+     b. `config/<app_id>.json`, when it enumerates the dimension.
+     c. An explicit enumeration elsewhere in the PRD/RFC — an impact/estimate table listing the
+        segments, a rollout table naming cohorts — even where the requirement text itself is silent.
+     Cite the enumeration's origin in every fanned-out fixture's `source_refs`, and add **one**
+     `extraction_notes` entry per dimension (`follow_up: WORTH_CHECKING`) recording the assumption:
+     *"PRD/RFC does not restrict <dimension>; fixtures fanned out across <values> observed in
+     <source>. Confirm the feature behaves identically across them, or state the restriction."*
+     That note is what makes this an auditable assumption rather than a silent invention.
+  3. **Unrestricted and nothing enumerates it** → a single fixture that simply omits the dimension,
+     plus a `WORTH_CHECKING` note naming the unresolved dimension. Never fabricate a plausible
+     default (`"2-wheeler"`, `"credit card"`) to fill the gap — that is the provenance rule's
+     exact failure mode, and it silently narrows coverage to a variant nobody chose.
+
+  **Bound the fan-out — vary one dimension at a time, not the cartesian product.** With two
+  unrestricted dimensions of 2 and 3 values, emit the base fixture plus one fixture per *additional*
+  value of each dimension (`1 + 1 + 2 = 4`), holding the other dimensions at the base value — not
+  all 6 combinations. Take the full product **only** when the PRD/RFC states the dimensions
+  interact. If a single dimension enumerates more than ~4 values, fan out only to the values the
+  regression corpus actually exercises and note the remainder as uncovered, so a broad enum cannot
+  detonate the test-data ask.
 - `type_signals` carries the short labels that used to be `test_data_tags`
   (`["kyc_verified_user","birthday_d_day"]`). They summarise; `required_state` is the source of
-  truth. Keep both.
+  truth. Keep both. When fixtures are fanned out across a variant, the variant belongs in every
+  copy's signals too — named after the actual dimension, e.g. `[...,"vehicle_2w"]` for a driver
+  app or `[...,"payment_gopay"]` for a consumer one — so downstream can group them.
 - **Conditions that are not static entity attributes** — a birthday-on-D-day, an N-th
   transaction, any clock- or relationship-dependent need — go in `dynamic_conditions` with the
   right `kind` (`TEMPORAL` / `RELATIONAL` / `SELECTION`), **not** in `required_state`. Forcing
@@ -432,8 +576,14 @@ Flattened CSV strictly matching squad project template headers:
 - `Priority`: `"P0"`, `"P1"`, or `"P2"`
 - `Type of Test Case`: `"Regression"` or `"Sanity"`
 - `Automation Status`: By default, set to `"Manual"` (representing not-automated) for newly generated test cases. Set to `"Automated"` only if matched with an existing automated test case.
-- `Preconditions`: Multiline string with environment, locale, deep links, and active feature flags, **using a new line break (`\n`) after each statement/line.** Any feature-flag name written here MUST be copied verbatim from `rfc.experimentation_matrix[].flag_key` / `prd.feature_flags[]` — never paraphrase or append suffixes (e.g. do not turn `birthday_feature_litmus` into `birthday_feature_litmus_content`). When a flag is in both, use the RFC record (`flag_key` + `default_variant`); PRD is name-only corroboration.
-- `Steps`: Numbered sequential actions inside double quotes with line breaks (`\n`). **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g., `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`, `3. Tap "Lanjut"`). Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`). Must include telemetry emission checks.
+- `Preconditions`: Multiline string, **using a new line break (`\n`) after each statement/line.** Render, in this order, only the lines that actually apply:
+  1. One line per `scenario.test_data[]` fixture, using its `description` (plus any `required_state` facts that change setup, e.g. `"Driver who joined Gojek before 2017"`, `"Driver cohort: SDF, Kilat, or Box"`) — a manual tester needs to know *which account/state to use* before environment plumbing. This is the line most often dropped; a `Preconditions` cell with only environment/locale and no fixture description has lost information the JSON already carries.
+  2. `country` / `driver_type` if the scenario carries them and they narrow the setup (a scenario scoped to one cohort or country should say so here, not only in the CSV's own `Country v2` column).
+  3. Environment and locale.
+  4. Target entry deep link, if any.
+  5. Active feature flags — copied verbatim from `rfc.experimentation_matrix[].flag_key` / `prd.feature_flags[]`, never paraphrased or suffixed (e.g. do not turn `birthday_feature_litmus` into `birthday_feature_litmus_content`). When a flag is in both, use the RFC record (`flag_key` + `default_variant`); PRD is name-only corroboration.
+  A scenario with `test_data: []` and no country/flag/deeplink simply omits those lines — never pad `Preconditions` with a fixed template when the scenario has nothing to say for a given line.
+- `Steps`: Numbered sequential actions inside double quotes with line breaks (`\n`). **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g., `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`, `3. Tap "Lanjut"`). Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`). Must include telemetry emission checks. This column is a direct 1-to-1 join of `scenario.steps[]` — the cleanup has to happen when `steps[]` is authored (see the Navigation Resolution Ladder's "Normalize, don't transcribe" rule under rung 3), not as a cosmetic pass at CSV-export time. A `steps[]` entry still carrying a Gherkin placeholder (`<Vehicle Type>`), third-person test-script phrasing, or a pure automation-scaffolding line (no on-screen tester action) is a defect to fix at the source, not something to "clean up" only in this column.
 - `Expected Result`: Numbered sequential assertions matching the numbered steps in the `Steps` column 1-to-1, inside double quotes with line breaks (`\n`) after each statement. **Write assertions using clean, declarative NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`, `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes in user-friendly, non-technical language. **For boundary scenarios the assertion derives from `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker rather than a guessed outcome.**
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`. **Resolution precedence: (1) `prd.applicable_platforms` (PRD is the scope authority), (2) else `rfc.scope.target_platforms`, (3) else infer from `design`.** One platform → `"Android"`/`"iOS"`; more than one → `"Cross-Platform"`. If PRD and RFC conflict, use PRD and raise it as a `prd_vs_rfc_gap` — never silently prefer one.
