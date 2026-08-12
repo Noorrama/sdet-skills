@@ -289,7 +289,10 @@ flow board, including one wrapped in a section or a group.
 **Not every board node is a screen.** A flow board also carries caption boxes, lane banners,
 decision boxes and note boxes, and Figma draws all of them as the same kind of frame under the same
 kind of section. Treating them all as screens is what produces phantom screens and dead connectors.
-Classify every board node into exactly one of these, in this order:
+
+> **The script does this classification.** The table below documents *what it decides and why*, so a
+> reviewer can audit a `node_class` / `classified_by` value or adjust a threshold. You do not run it
+> by hand. The classes are, in priority order:
 
 | Class | Test |
 | :--- | :--- |
@@ -320,6 +323,8 @@ connector or reaction targets it directly, which promotes it to a board node to 
 and then judged under *Screen vs. state*.
 
 ### Collapsed screens keep every frame id — connectors resolve against all of them
+*(Script behaviour, documented here because it is the single most expensive thing to get wrong.)*
+
 A screen is routinely drawn as **N sibling frames sharing one base name**, one per state, laid out
 side by side. They collapse into one `screen_id` (see *Screen vs. state*), and when they do:
 
@@ -602,11 +607,18 @@ does not silently fail — it fails at code-gen, months later, as a test that ca
 ---
 
 ## Model
-Fast tier — Haiku / Composer 2.5. Escalate to reasoning when:
-- A frame's screen-vs-state grouping is ambiguous after applying all three mechanical signals below.
-- A connector endpoint is floating, orphaned, or lands mid-tree so a fallback has to be judged.
-- Layer names are largely non-compliant with standard #3, so roles and purposes must be inferred.
-- `export.nodeCount` is large or `truncatedCount > 0` — connector coverage has to be exhaustive.
+**Fast tier — Haiku / Composer 2.5, and that is now a safe claim** because the graph work moved into
+`scripts/extract_design_context.py`. Model tier no longer changes `screens`, `ui_flow` or
+`convention_compliance`: those come from the script byte-for-byte. What is left for the model is
+naming, purpose, note placement and gap wording — language work.
+
+This was not true before. The same skill on Haiku, executing the passes in prose, produced 6 edges
+where the script produces 13, and reported zero gaps while dropping 41 of 47 connectors. If you ever
+find yourself counting connectors or walking ancestors by hand, stop — the script exists so that
+never happens.
+
+Escalate to a reasoning tier only for genuinely semantic calls: an app split that the page names
+don't settle, or a screen whose purpose isn't inferable from its frame name and copy.
 
 ## Tool usage & permissions
 Minimize tools requiring user approval:
@@ -645,66 +657,62 @@ one `screen_id` and reference it from every caller's `ui_flow` entry — never d
 A frame you cannot place under any of the three signals is **not** silently promoted to a screen:
 emit it as a screen, and record a `blocking_issues` entry saying the screen-vs-state call is unresolved.
 
-## Extract (→ `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`)
+## Extract — run the script, then fill the semantic fields
 
-Run these passes in order. Pass 0 exists because a note connector misread as a flow corrupts every
-later pass.
+**The mechanical half is not yours to do.** Indexing the tree, classifying board nodes, collapsing
+state frames, resolving connector endpoints, contracting decision boxes, resolving lane bands and
+tallying the conservation buckets are graph operations over ~10,000 nodes. Executing them in prose
+produces **schema-valid output with wrong values** — measured on a real board: 94 screen objects for
+33 screens, 6 of 47 connectors resolved, 41 dropped with `blocking_issues: []`, and zero schema
+errors. Nothing downstream catches that. So it runs as code:
 
-**0. Index the tree.** One traversal of `nodes[]`, building:
-   - `id → node`, `id → parent`, and `id → nearest `SCREEN` ancestor` (see *Board node
-     classification*). Classify every board node before anything else — the classes decide
-     everything downstream.
-   - the list of every `CONNECTOR` node,
-   - the list of every node carrying `reactions`,
-   - the PAGE node's `flowStartingPoints[]`.
-   Then classify each `CONNECTOR` as **note** (standard #5) or **flow** (standard #1). Note
-   connectors are removed from the flow set before pass 1 and never counted as missing flows.
-   Run the note test by walking each endpoint's **ancestors** for a `NOTE` node — the connector
-   usually lands on a child inside the note component, not on the component itself.
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/extract_design_context.py" \
+    <figma-export.json> --app <app_id> \
+    --config "${CLAUDE_PLUGIN_ROOT}/config/<app>.json" \
+    -o design_context.json --report
+```
 
-**1. ui_flow** — `{from_screen_id, trigger_element_id?, to_screen_id, condition, navigation_kind,
-   edge_source, confidence, source_ref}` edges, from the flow connectors (standard #1) **and** every
-   `reactions[]` entry (standard #2). This is the ground truth for which elements matter.
-   - Resolve every `endpointNodeId` / `destinationId` through the pass-0 index. An id that resolves
-     to nothing is orphaned or was cut by the depth cap → `blocking_issues`, not an edge.
-   - `SWAP` / `CHANGE_TO` / `SCROLL_TO` are **not** edges (they are element states) — record them so
-     the completeness audit knows they were seen and deliberately not emitted.
-   - **Deduplicate:** the same `from` / `to` / `trigger` / `condition` across frame variants is one
-     entry. A connector and a reaction expressing the *same* transition is also one entry — keep the
-     `EXPLICIT` one and prefer `edge_source: "CONNECTOR"`.
+Run it **once per app in scope** (see *Output files*), with that app's config and `--app` id.
 
-**2. screens** — `screen_id`, `screen_name`, `purpose`, `screen_states`, `state_kinds`, `deep_link`,
-   `entry_point` / `flow_name`, `screen_notes`, `source_ref`.
-   Include every screen that appears in `ui_flow` (as `from_screen_id` or `to_screen_id`) **plus**
-   every `flowStartingPoints[]` entry point. A screen frame in neither is unreachable → still emit
-   it (it is real design) and add a `blocking_issues` entry saying nothing navigates to it.
-   Normalise each free-text state into `state_kinds` so downstream triggers are deterministic:
-   `DEFAULT`, `LOADING`, `EMPTY`, `ERROR`, `SUCCESS`, `OFFLINE`, `DISABLED`, `PERMISSION_DENIED`,
-   `DARK_THEME`, `LIGHT_THEME`, `LOCALE_VARIANT`, `RTL`, `OTHER`. Keep the designer's wording in
-   `screen_states`; `state_kinds` is the normalised companion, not a replacement.
+### What the script returns, already correct
+`screens[]` (collapsed, with `source_refs`, `screen_states`, `state_kinds`, `entry_point`,
+`node_class`, `classified_by`), `elements[]` (filtered to connector triggers and interactive layers,
+with `element_id` built from the config's `role_vocabulary`), `ui_flow[]` (with `navigation_kind`,
+`edge_source`, `confidence`, `source_ref`, `trigger_element_id` where known),
+`project_context.blocking_issues`, `project_context.convention_compliance`, and `design_source`.
 
-**3. elements** (per screen, FILTERED). **Include ONLY elements that:**
-   - Appear as `trigger_element_id` in `ui_flow`, OR
-   - Carry `reactions`, `variantProperties`, or a multi-option `componentPropertyDefinitions`, OR
-   - Carry `annotations` (a Dev Mode annotation is a deliberate note to engineering), OR
-   - Are labelled text/content with semantic purpose (visible copy a test would assert on).
+`--report` prints a one-line summary to stderr. **Read it and repeat it in your reply** — it is how
+the QA sees coverage without opening the JSON.
 
-   **Omit:** spacers, dividers, wrapper groups with no functional purpose, and icons with no
-   `reactions` and no `annotations`. Decorative `VECTOR`s were already dropped by the plugin, so a
-   `VECTOR` still in the file is interactive or annotated — keep it. Keep output concise: functional,
-   navigational and state-bearing elements only.
+The script **exits non-zero** if the compliance buckets do not sum to `connectors_total`. That means
+a connector was dropped without landing in a bucket. Do not work around it and do not hand-patch the
+output: report the failure.
 
-**4. project_context** — `{overall_ambiguity_rating, blocking_issues, convention_compliance}`.
-   `blocking_issues` collects every **Flag** case from the five standards, plus:
-   - Tappable elements with no traced destination (standard #2).
-   - Unreachable screens (in the design, in no `ui_flow` edge and no flow starting point).
-   - A frame whose screen-vs-state call is unresolved.
-   Never a blocker, and never an `extraction_gaps` entry either: an element with no Dev Mode
-   annotation, an export with no annotations at all, a screen with no `deep_link`, or an element
-   with no `accessibility_id`. See *Optional enrichment*.
-   `overall_ambiguity_rating`: `HIGH` when any screen or trigger element could not be resolved;
-   `MEDIUM` when flows resolved but through fallbacks/inference; `LOW` when every edge is `EXPLICIT`
-   and every name compliant.
+### What you fill in afterwards
+The script leaves these empty because they need judgement, not traversal:
+
+| Field | What to write |
+| :--- | :--- |
+| `visual_analysis_scratchpad` | 2-3 sentences on what the board contains — screen count, how flows are drawn, what is missing |
+| `screens[].purpose` | What the screen is for. From the frame name and its copy; never speculation |
+| `screens[].screen_notes` | Note/Context text attached to that screen, plus a deep link if one is stated |
+| `screens[].deep_link` | Only if a `URL` action or a note states one (see *Optional enrichment*) |
+| `elements[].label` | Refine the script's raw first-text into the visible copy a tester would read |
+| `elements[].validations_and_edge_cases` | From annotations and note connectors landing on the element |
+| `extraction_gaps[]` | One entry per real gap, with `severity` and a concrete `action` |
+| `extraction_status` | `OK` only when `extraction_gaps` is empty |
+| `project_context.overall_ambiguity_rating` | `HIGH` if any screen or trigger was unresolved; `MEDIUM` if flows resolved through inference; `LOW` if every edge is `EXPLICIT` |
+
+**Turn the script's numbers into gaps.** A non-zero `connectors_unresolvable`,
+`non_descriptive_names` or `unreachable_screens` is a gap the QA must see — the script counts them
+and lists the specifics in `blocking_issues`, but only you can write the `reason` and `action`.
+Reporting `extraction_status: INCOMPLETE` with an empty `extraction_gaps[]` is the failure this
+section exists to prevent.
+
+**If the script cannot run** (missing, or python3 unavailable) → do **not** attempt the traversal in
+prose. Emit `extraction_status: DEGRADED` with a `DEGRADED` gap on `ENVIRONMENT` naming the failure,
+and say so in your reply.
 
 ## Rules
 - No locators — labels, types, states, interactions, flow only. **Exception:** *if* the designer
@@ -725,6 +733,10 @@ later pass.
 - **Never invent** — every gap (missing connector, unreachable screen, placeholder text) becomes a
   `blocking_issues` entry, not a filled assumption.
 - **Every fallback is recorded** — a `DEGRADED` note plus a tally in `convention_compliance`.
+- **Never hand-compute what the script reports.** Screens, elements, `ui_flow` and
+  `convention_compliance` are the script's output, copied through untouched. Adding an edge you
+  reasoned out, or adjusting a count so the buckets look tidier, breaks the one property that makes
+  this skill model-independent.
 - Output design_context.json concisely — only functional elements that matter for test automation.
 
 ## Guardrails
@@ -761,16 +773,20 @@ python3 -c "import json,jsonschema; jsonschema.validate(
   - inside a virtualenv, or with `uv`: `pip install jsonschema` / `uv pip install jsonschema`
   Never report an unvalidated output as valid — well-formed JSON is not schema conformance.
   Do not attempt the install yourself; it is the user's environment to change.
-- **Connector completeness (mechanical, not from memory):** every `CONNECTOR` node in the export is
-  accounted for in exactly one bucket — a `ui_flow` edge, a note attached under standard #5, or a
-  `blocking_issues` entry. Same for every `reactions[]` entry: an edge, a recorded
-  `SWAP`/`CHANGE_TO`/`SCROLL_TO`/`CLOSE` state change, a dropped hover trigger, or a blocker.
-  `connectors_total` in `convention_compliance` must equal the sum of the buckets. A shortfall is a
-  bug in the extraction, not an acceptable rounding.
-- **Endpoint resolution:** every `endpointNodeId` and non-null `destinationId` either resolves to a
-  node present in the export, or produced a `blocking_issues` entry.
-- **Element filtering:** every element in `elements` satisfies at least one of the four inclusion
-  tests in Extract §3. No decorative/unused elements.
+- **Duplicate `screen_id` — run this, it is the one check that catches a collapsed-screen failure.**
+  JSON Schema draft-07 cannot express uniqueness-by-property (`uniqueItems` compares whole objects,
+  and state frames differ in `source_ref`, so they slip through). Assert it explicitly:
+```
+python3 -c "import json,sys; d=json.load(open('<design_context file>')); ids=[s['screen_id'] for s in d['screens']]; dup=sorted({i for i in ids if ids.count(i)>1}); sys.exit('duplicate screen_id: '+', '.join(dup) if dup else 0)"
+```
+  A duplicate means state frames were emitted as separate screens instead of collapsed — the failure
+  that silently drops every flow drawn from the other states. On a real board this check would have
+  failed a run that reported 94 screen objects for 33 screens with **zero** schema errors.
+- **Connector conservation:** the script asserts this and exits non-zero on mismatch, so a clean run
+  is the proof. Never re-derive the buckets by hand; if the script failed, report it.
+- **Compliance block is complete:** every counter is present, including zeroes. A missing key means
+  the block was written by hand rather than by the script — an all-zero block and an absent block
+  look identical to a reader, which is exactly how a broken run passes review.
 - **ID patterns:** all `screen_id` and `element_id` values match regex exactly — `^[A-Z0-9_]+$` and
   `^[A-Z0-9_]+\.[a-z0-9_]+(\.[a-z0-9_]+)?$` respectively — UPPER screen half, lower role half, no
   stray punctuation. An id that is upper on both halves is as wrong as one that is lower on both. Every
@@ -781,5 +797,6 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 - **Fallback accounting:** every `INFERRED` edge, inferred role and inferred purpose has a matching
   `DEGRADED` entry in `extraction_gaps`. A fallback with no note is a silent guess.
 - **Truncation:** if `export.truncatedCount > 0`, the note exists and names the truncated layers.
-- **Conciseness:** output size is minimal; only functional elements included. Verify by comparing
-  element count to connector + reaction count — should be roughly proportional.
+- **Conciseness:** the script already filters elements to connector triggers and interactive layers.
+  An element count in the hundreds means the filter was bypassed — a real run emitted 2011 elements
+  where 27 were correct.
