@@ -100,6 +100,11 @@ what was not covered.
   context does not carry, that is a `blocking_issues` entry, not a guessed token.
 - Never invent a deeplink or test hook. Absent hook → the scenario states the manual
   navigation path and is flagged in testability feedback.
+- **Never assume a screen is "just open."** Reaching every screen a scenario needs — including
+  the login/authenticated starting state — must be resolved through the Navigation Resolution
+  Ladder (Step 2: hook/deep link → `design_context.ui_flow` → `regression_context.navigation` →
+  explicit `[NAVIGATION NOT CONFIRMED]` flag). A scenario whose first step starts mid-flow with no
+  resolution trace behind it is an invented fact, not a stylistic shortcut.
 - A cross-stage contradiction (PRD says one thing, design another) is reported as a gap. Do
   **not** silently resolve it by preferring one source.
 - A required schema field that cannot be satisfied from the inputs is **left absent** with a
@@ -216,7 +221,65 @@ Expand scenarios across:
   - **Local Storage & DB Migration**: Inject an N-1 upgrade and schema migration scenario *only* if `rfc_context.json` defines active `local_data_changes` (e.g. SQLite, Room, CoreData, or SharedPrefs modifications).
   - **Runtime Permission Toggles**: Inject parallel Permission Granted vs Permission Denied scenarios *only* if `rfc_context.json` declares new or modified `permissions_required`.
 - **FE-Baseline Extras**: If the QA selected any `fe_baseline` category in Step 0, expand best-effort hygiene scenarios for it, stamp `source: "fe_baseline"`, and record in analysis.md that expected behavior is not spec-derived and needs PM/dev confirmation.
-- **Navigation Priority**: Prefer test hooks (`method:deeplink` or `hook_id`) over full UI walks.
+- **Navigation Resolution Ladder (mandatory — run per scenario, before writing `steps[]`).**
+  A scenario's `steps[]` is the *only* place reachability lives in this schema (there is no
+  separate `navigation` field on `scenario_list` items, unlike the standalone
+  `scenario.schema.json`). That means every step sequence must be self-contained: never open a
+  scenario mid-flow as if arriving at its screen were free. Resolve reachability in this order,
+  stopping at the first rung that produces a concrete, sourced answer:
+
+  1. **Test hook / deep link.** Check `plan_context.json` test hooks (`method: deeplink` /
+     `hook_id`) for the target screen first — `plan` is the primary source of test hooks. Else
+     check `rfc.navigation_changes[].deep_link` for a non-null deep link whose destination screen
+     matches. Found → the scenario opens with `Open deeplink "<uri>"`, no UI walk needed. Tag the
+     scenario's provenance as hook-resolved; no note required, this is the ideal case.
+  2. **Design's own resolved flow (`design_context.ui_flow[]`).** If design_context has real
+     screens (not an empty/failed extraction), search `ui_flow[]` for a path from a reachable
+     entry screen (a `flowStartingPoints` entry, or a screen already resolved by an earlier rung)
+     to this scenario's target `screen_id`. Prefer `confidence: "EXPLICIT"` edges. Turn each edge
+     into a step using the trigger element's `label` (never its raw `element_id` — e.g. `Tap
+     "8 level Program Apresiasi Mitra"`, not `Tap PROFILE_PAGE.pam_entry_btn`). A path that only
+     reaches an intermediate screen is a partial answer — carry it forward and let rung 3 supply
+     the missing segment (see *Reconciling two sources* below).
+  3. **Regression corpus navigation (`regression_context.json`).** Search
+     `regression_tests[].navigation` for a case reaching the same screen (or a close-enough
+     ancestor to bridge a rung-2 partial path), preferring `nav_source: "existing_test"`
+     (repo-confirmed) over `"figma"` over `"needs_answer"` (never usable — that value means the
+     regression-extractor itself couldn't resolve it, so it cannot resolve it for you either).
+     Use the array verbatim; cite the source case id (e.g. `C5542964`) in the scenario's
+     `test_data[].source_refs` so the path is auditable.
+     - **Cross-case corroboration for login/session preambles.** The most common reachability gap
+       isn't the target screen, it's getting to an authenticated starting state at all. If
+       `plan_context` has no login/state-injection hook, look for a leading step-subsequence
+       shared identically across **3 or more independent** `regression_tests[].navigation`
+       entries for this app (e.g. a repeated "login via backdoor → skip walkthrough → dismiss
+       vehicle card → tap profile icon" prefix). A sequence corroborated across that many
+       independent cases is the app's standard entry preamble, not a one-off guess — reuse it for
+       any scenario needing a logged-in starting point.
+  4. **Reconciling two sources.** When both rung 2 (design) and rung 3 (regression) produce a
+     path to the same screen: if they agree (same screens/actions, or one is a superset of the
+     other) use the more complete one — this is corroboration, not a conflict, and needs no note.
+     If they genuinely disagree (different entry banners, different login mechanism, different
+     screen order) **do not silently pick one.** Emit the design-derived path as the primary
+     steps, add one inline flag line noting the regression-derived alternative and where it
+     diverges, and add an `extraction_notes` entry (`follow_up: NEEDS_ANSWER`) naming the specific
+     conflicting screens/elements from both sources. Merging them into a single path neither
+     source actually states is inventing a fact.
+  5. **Nothing resolves.** No hook/deep link, no usable design `ui_flow` edge, and either no
+     regression match or only `nav_source: "needs_answer"`. Do **not** write a plausible-sounding
+     step like "Open the X page" — that is the exact failure mode this ladder exists to prevent.
+     Instead the scenario's steps open with exactly one line:
+     `[NAVIGATION NOT CONFIRMED] Manually navigate to <screen_id> — no deeplink, design flow, or
+     regression precedent was found.` The destination-screen verification steps still follow
+     normally below it. Add a `testability_feedback.missing_hooks` entry naming the exact screen
+     and what was checked, plus a matching `extraction_notes` entry (`follow_up: NEEDS_ANSWER`).
+     The scenario still counts as covered for the Step 4 audit — the requirement is exercised —
+     but the gap stays visible instead of being papered over with an assumed arrival.
+
+  This ladder is feature-agnostic by construction: it never depends on this being a loyalty
+  feature, a payments flow, or any specific app — it only depends on which of `plan_context`,
+  `design_context.ui_flow`, and `regression_context.navigation` actually resolved something, the
+  same fields every run of this generator already has (or explicitly lacks) by Preflight.
 
 ### 3. Gap Analysis & Alignment Engine
 As the single integration point, the generator must actively compute the following cross-stage gaps:
@@ -239,6 +302,16 @@ This gate is what makes coverage model-independent: it does not rely on the mode
 **4b. Match generated scenarios to the checklist** using each scenario's `requirement_ref`. Produce a coverage map: `checklist_item → [scenario titles covering it]`.
 
 **4c. If any checklist item has zero covering scenarios → the plan is INCOMPLETE.** Do not write the output files yet. Generate the missing scenario(s), then re-run 4b. Repeat until every item is covered. A boundary rule "covered" only by being mentioned inside an unrelated scenario does NOT count — it needs a scenario whose `requirement_ref` names it.
+
+**4c-nav. Navigation audit (mechanical, not from memory).** For every scenario in `scenario_list`,
+confirm its `steps[]` opens with one of: a hook/deep-link open, a navigation chain traceable to
+`design_context.ui_flow` or `regression_context.navigation` (per the Navigation Resolution
+Ladder, Step 2), or an explicit `[NAVIGATION NOT CONFIRMED]` line. A scenario whose first step
+assumes arrival at a screen (e.g. "Open the X page" with nothing before it) with none of the
+above behind it is a defect in this gate — fix it (resolve the ladder properly, or replace the
+assumed step with the unresolved-flag line) before writing any output file. This check is what
+would have caught steps starting cold at a destination screen with no login/navigation path
+before it; it must run on every pass, not just when something looks off.
 
 **4d. Emit the audit result** into the SDET plan as a `coverage_audit` object and echo it as a table in `<feature_key>_analysis.md`:
 ```
@@ -523,3 +596,8 @@ The auto/extra partition is computed **solely** from the presence/values of sche
 - **Contract Adherence**: Fail explicitly if *all* context files are missing or if essential keys within provided contexts are missing. However, do NOT fail if individual files (like `plan_context.json` or `rfc_context.json`) are absent; instead, proceed with the inputs that are provided, noting the missing contexts in `<feature_key>_analysis.md`.
 - **Format Precision**: Outputs must strictly conform to `sdet_plan.schema.json` and the 15-column squad CSV schema without altering column headers or ordering.
 - **Frontend Focus**: Test cases/scenarios must be generated *exclusively* for Frontend (FE) context (e.g., client-side UI, mobile views, offline transitions, local error copy, and client-side telemetry verifications). Do not generate backend-only validation or server-side test cases.
+- **Navigation Resolution**: every scenario's `steps[]` must reach its screen (including the
+  logged-in starting state) through a traceable path — a test hook/deep link, a
+  `design_context.ui_flow` walk, or `regression_context.navigation` — or an explicit
+  `[NAVIGATION NOT CONFIRMED]` flag when none resolves. Never an assumed or invented arrival.
+  Enforced mechanically by Step 4's navigation audit (4c-nav), not left to memory.
