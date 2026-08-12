@@ -1,9 +1,5 @@
 {
   "name": "aep-mobile",
   "description": "Mobile QA skill set — agentic PDLC pipeline across the 5 GoTo apps",
-<<<<<<< Updated upstream
-  "version": "0.5.7"
-=======
   "version": "0.5.9"
->>>>>>> Stashed changes
 }
