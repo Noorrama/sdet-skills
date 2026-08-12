@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "task_input (Task Generation → QA)",
+  "description": "The JSON the Dev task-generation team delivers for one release: milestones and a tree of epics → user_stories → tasks derived from the PRD/RFC/design. Faithful to RFC §2.4 (modules/screens touched, routing deep-links, observable state per task, flag wiring, task dependencies). Only QA-relevant fields are kept — omit JIRA admin metadata (status, points, assignee, sprint, labels). Normalized by task-extractor into task_context.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["app_id", "epics"],
+  "properties": {
+    "app_id": {
+      "type": "string",
+      "enum": ["gojek-consumer", "gojek-driver", "gofood-merchant", "gopay-consumer", "gopay-merchant"]
+    },
+    "source_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The docs the tasks were derived from. Supply every link that exists.",
+      "properties": {
+        "prd_url": { "type": "string" },
+        "rfc_url": { "type": "string" },
+        "design_url": { "type": "string" }
+      }
+    },
+    "milestones": {
+      "type": "array",
+      "description": "Delivery milestones for this release. Epics reference one via milestone_id. Aligns with the PRD's per-requirement `milestone`.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["milestone_id", "name"],
+        "properties": {
+          "milestone_id": { "type": "string" },
+          "name": { "type": "string", "description": "Human label; should match the PRD milestone string." },
+          "target_date": { "type": "string", "description": "ISO date or sprint label." },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "epics": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The full work tree. Every user story and task lives under an epic — no top-level stories/tasks.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["epic_id", "summary", "user_stories"],
+        "properties": {
+          "epic_id": { "type": "string", "description": "JIRA epic key, e.g. GOFOOD-1000." },
+          "summary": { "type": "string" },
+          "goal": { "type": "string", "description": "The outcome the epic delivers." },
+          "milestone_id": { "type": "string", "description": "References milestones[].milestone_id." },
+          "user_stories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["user_story_id", "summary", "tasks"],
+              "properties": {
+                "user_story_id": { "type": "string", "description": "JIRA story key." },
+                "summary": { "type": "string" },
+                "requirement_id": { "type": "string", "description": "The PRD requirement this story satisfies — matches prd_context business_requirements[].req_id." },
+                "acceptance_criteria": {
+                  "type": "array",
+                  "description": "Each criterion carries its own id (minted by the task team; PRD/RFC don't emit AC ids). QA generates scenarios from these.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["acceptance_criteria_id", "description"],
+                    "properties": {
+                      "acceptance_criteria_id": { "type": "string" },
+                      "description": { "type": "string" }
+                    }
+                  }
+                },
+                "tasks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["task_id", "summary", "issue_type", "track"],
+                    "properties": {
+                      "task_id": { "type": "string", "description": "Task / sub-task key." },
+                      "summary": { "type": "string" },
+                      "issue_type": { "type": "string", "enum": ["Task", "Sub-task", "Bug", "Spike"] },
+                      "track": {
+                        "type": "string",
+                        "enum": ["android", "ios", "flutter", "backend", "design", "qa", "infra", "other"],
+                        "description": "Work-stream (not strictly a device platform)."
+                      },
+                      "deep_link": { "type": "string", "description": "Routing entry point that reaches the screen this task touches (RFC §2.4 routing). A P0 task with no deep link is a testability gap." },
+                      "observable_state": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "The UI/analytics signal a tester checks to confirm the task's effect (RFC §2.4). Required for P0 flows.",
+                        "properties": {
+                          "success_signal": { "type": "string" },
+                          "failure_signal": { "type": "string" }
+                        }
+                      },
+                      "dependencies": {
+                        "type": "array",
+                        "description": "Tasks that must land before this one is testable end-to-end.",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["type", "task_id"],
+                          "properties": {
+                            "type": { "type": "string", "enum": ["blocks", "is-blocked-by", "relates-to"] },
+                            "task_id": { "type": "string" }
+                          }
+                        }
+                      },
+                      "mr_refs": {
+                        "type": "array",
+                        "description": "GitLab MR forward-links. Optional — populated when a branch/MR exists.",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["url"],
+                          "properties": {
+                            "url": { "type": "string" },
+                            "platform": { "type": "string", "enum": ["android", "ios", "flutter", "backend"] }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "implementation_hints": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Feature-level plan signals for this epic (RFC §2.4). Optional but high-value — when absent, task-extractor infers what it can.",
+            "properties": {
+              "change_summary": { "type": "string" },
+              "target_modules": { "type": "array", "items": { "type": "string" }, "description": "Module namespaces touched (e.g. GoFood, promo-apply)." },
+              "screens_touched": { "type": "array", "items": { "type": "string" }, "description": "screen_ids." },
+              "view_models": { "type": "array", "items": { "type": "string" } },
+              "new_components": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": { "name": { "type": "string" }, "purpose": { "type": "string" } }
+                }
+              },
+              "flag_keys": {
+                "type": "array",
+                "description": "Feature-flag wiring — matches PRD feature_flags / RFC experimentation_matrix[].flag_key.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": { "key": { "type": "string" }, "default": { "type": "string" } }
+                }
+              },
+              "test_hooks": {
+                "type": "array",
+                "description": "How QA reaches/sets up a screen without a full UI walk.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["hook_id", "type", "invoke"],
+                  "properties": {
+                    "hook_id": { "type": "string" },
+                    "type": { "type": "string", "enum": ["deeplink", "flag-override", "state-injection"] },
+                    "target": { "type": "string" },
+                    "invoke": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
