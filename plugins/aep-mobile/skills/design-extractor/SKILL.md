@@ -15,7 +15,7 @@ doesn't require it, but the rest of the pipeline keys off it for multi-app runs.
 
 ## Preflight — resolve, or record and continue
 **Never stop, never guess.** Work through these before extracting. Anything that cannot be
-resolved becomes an `extraction_notes` entry and the run continues — a partial, honestly
+resolved becomes an `extraction_gaps` entry and the run continues — a partial, honestly
 labelled output is always better than no output. What is forbidden is inventing a value to
 fill the hole.
 
@@ -28,33 +28,33 @@ fill the hole.
    - **Two or more** → one output file per app (see *Output files*). Common when one Figma file
      holds a shared component's screens for every host app.
    - **Separate exports already supplied per app** → nothing to split; run once per file.
-   - **None resolvable** → emit a single file, leave `app` absent, add a `NEEDS_ANSWER` note on `app`.
+   - **None resolvable** → emit a single file, leave `app` absent, add a `BLOCKING` note on `app`.
      Do **not** guess from visual style; a dark-themed frame is not proof of an app.
    Report the decision in your reply before extracting: *"2 apps detected — gopay-consumer
    (pages 'GoPay Transfer', 'GoPay Tagihan'), gojek-consumer (page 'Gojek Tagihan'). Writing 2
    context files."*
-2. **Config, per app in the set** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Unreadable → add a `WORTH_CHECKING` note on
+2. **Config, per app in the set** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Unreadable → add a `DEGRADED` note on
    `ENVIRONMENT` with reason *"cannot read ${CLAUDE_PLUGIN_ROOT}/config/<app>.json — plugin install
    may be incomplete"* and action *"run `claude plugin update aep-mobile@aep`, restart Claude,
-   re-run"*. Set `extraction_status: LIMITED`. Continue. **`naming_convention.element_id_pattern` and `role_vocabulary` come from this file only.** If it is unreadable, do NOT improvise a convention — derive IDs from the layer names per standard #3, and raise a `WORTH_CHECKING` note warning that IDs are unverified against the app convention and may not join to real locators at code-gen.
+   re-run"*. Set `extraction_status: DEGRADED`. Continue. **`naming_convention.element_id_pattern` and `role_vocabulary` come from this file only.** If it is unreadable, do NOT improvise a convention — derive IDs from the layer names per standard #3, and raise a `DEGRADED` note warning that IDs are unverified against the app convention and may not join to real locators at code-gen.
    In a multi-app split this is the whole point of splitting: **each file's `element_id`s must
    follow its own app's pattern and `role_vocabulary`.** IDs generated under the wrong app's
    convention silently fail to join to real locators at code-gen, which surfaces much later as a
    broken test rather than a bad extraction.
-3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`. Unreadable → `WORTH_CHECKING` note on `ENVIRONMENT`, same install action.
+3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`. Unreadable → `DEGRADED` note on `ENVIRONMENT`, same install action.
    Fall back to the field list in this document **only** in that case, and say so in the note.
 4. **Input.** The Figma export JSON is attached and parses as the envelope in *Input contract* below.
    - Not that shape (no `nodes[]`, no `export` block) → it is not an `Export Design Raw JSON` plugin
-     export. Extract what you can, set `extraction_status: LIMITED`, and add a `WORTH_CHECKING`
+     export. Extract what you can, set `extraction_status: DEGRADED`, and add a `DEGRADED`
      note on `ENVIRONMENT` naming the shape you actually got.
-   - `nodes[]` present but nothing classifies as `SCREEN` (see *Board node classification*) → emit with `PARTIAL` and a
-     `NEEDS_ANSWER` note saying the export looks empty. That is a bad export, not a design with
+   - `nodes[]` present but nothing classifies as `SCREEN` (see *Board node classification*) → emit with `INCOMPLETE` and a
+     `BLOCKING` note saying the export looks empty. That is a bad export, not a design with
      zero screens.
    - `scope: "selection"` → connectors and destination frames outside the selection are simply not
-     in the file. Add a `WORTH_CHECKING` note on `ENVIRONMENT`: *"export scope is `selection`;
+     in the file. Add a `DEGRADED` note on `ENVIRONMENT`: *"export scope is `selection`;
      flows leaving the selected layers cannot be seen — re-export with `Export page` for full
      `ui_flow` coverage"*. Never report connector completeness as verified on a selection export.
-   - `export.truncatedCount > 0` → the depth cap dropped children. Add a `WORTH_CHECKING` note on
+   - `export.truncatedCount > 0` → the depth cap dropped children. Add a `DEGRADED` note on
      `ENVIRONMENT` listing `export.truncatedNodes[].name`. If any truncated node is (or contains) a
      screen frame, that is a `blocking_issues` entry too — elements below it were never exported.
 
@@ -91,15 +91,15 @@ verdict on your work — a doc still being written will always produce some, and
 normal, expected result.
 
 - `extraction_status`
-  - `COMPLETE` — everything the document specified was captured.
-  - `PARTIAL` — the document didn't specify some things; they're listed below. Normal for a
-    work-in-progress doc.
-  - `LIMITED` — a config file, schema or the validator wasn't available, so part of the run had
+  - `OK` — every field resolved from the export.
+  - `INCOMPLETE` — one or more fields could not be resolved and were left absent. Normal for a
+    work-in-progress board.
+  - `DEGRADED` — a config file, schema or the validator wasn't available, so part of the run had
     less grounding than usual.
-- `extraction_notes[]` — `{ field, reason, action, follow_up }`, where `follow_up` is:
-  - `NEEDS_ANSWER` — someone has to supply this before the tests can cover it.
-  - `WORTH_CHECKING` — a value was produced, but without its usual reference source. Confirm it.
-  - `FYI` — optional content the document simply doesn't have. No action needed.
+- `extraction_gaps[]` — `{ field, reason, action, severity }`, where `severity` is:
+  - `BLOCKING` — a schema-required field is absent; someone has to supply it before tests can cover it.
+  - `DEGRADED` — a value was produced, but without its usual grounding. Confirm it.
+  - `INFO` — optional content genuinely absent from the source. No action needed.
 
 Rules:
 - A field you cannot resolve is **left empty** and noted. Never filled with a placeholder, a
@@ -108,7 +108,7 @@ Rules:
   no module"*), not a bare *"not found"*.
 - `action` is the concrete next step (*"confirm the target module with the PM"*), so the note can
   be acted on without re-reading the doc.
-- Staying silent is the failure being designed out here. An empty `extraction_notes` on a
+- Staying silent is the failure being designed out here. An empty `extraction_gaps` on a
   half-written document is a worse outcome than a field left empty and explained.
 ## Matching the source document — normalise, don't invent
 Source docs are human-written. Labels and values vary; the schema does not. Reading a value that
@@ -130,7 +130,7 @@ Emit the schema's exact spelling, never the document's. This applies to **every*
 schema, not just the ones named here.
 
 **Synonyms — allowed when unambiguous, recorded when used.** `In Progress` → `"In Review"` is a
-fair mapping; make it, and add an `FYI` note noting the source value so the mapping is auditable.
+fair mapping; make it, and add an `INFO` note noting the source value so the mapping is auditable.
 A pure case or whitespace fix needs no note — it is not a judgement call.
 
 **When nothing matches, say what you found.** If no allowed value fits even case-insensitively,
@@ -213,7 +213,7 @@ Two things are **nice to have**, not part of the contract:
 | `screens[].deep_link` | a `URL` prototype action matching the config `deeplink_scheme`, or a `Note`/`Context` note stating one | normal — designers are not expected to document routing |
 
 For both:
-- **Never** emit an `extraction_notes` entry, a `blocking_issues` entry, or any other flag because
+- **Never** emit an `extraction_gaps` entry, a `blocking_issues` entry, or any other flag because
   a node has no `annotations`, because no element has an `accessibility_id`, or because a screen
   has no `deep_link`.
 - **Never** let their absence change `extraction_status` or `overall_ambiguity_rating`.
@@ -300,19 +300,45 @@ Classify every board node into exactly one of these, in this order:
 | `UNKNOWN` | Everything else → `blocking_issues`, never silently promoted to `SCREEN`. |
 
 **Size — the primary test.** `width` / `height` are on every `FRAME` / `INSTANCE` / `COMPONENT` /
-`SECTION` / `GROUP` / `TEXT` in the export. A `SCREEN` is device-shaped: `width` roughly 320-500 and
-`height` roughly 550-1200. Anything well under that is a caption, decision or note box. These are
-guide values, not a spec — a tablet or an intentionally tall scroll frame is still a screen; judge
-the shape, and when a frame sits on the boundary, prefer `SCREEN` and note it.
+`SECTION` / `GROUP` / `TEXT` in the export. A `SCREEN` is device-**width** with no upper bound on
+height: `width` roughly 300-520, `height` ≥ 500.
+
+**Width does the work; height only rules out strips.** There is no maximum height — a scrolling
+screen is routinely two or three viewports tall (a real board has a 360×2066 welcome screen beside
+360×918 dialogs, and both are screens). Capping height rejects exactly the long screens that matter.
+What the height floor excludes is the label strip: caption and decision boxes on a real board
+measure 360×37, 302×116, 358×118 — the same width as a screen, a fraction of the height. When a
+frame sits on the boundary, prefer `SCREEN` and record an `INFO` gap.
 
 **Fallback when the export carries no geometry** (an older export, or a `truncatedNodes` casualty):
 use descendant count. On a measured board, screens hold 200-690 descendants and caption/decision/note
 boxes hold ≤ 6 — the split is wide and unambiguous. It is still a proxy: a genuinely minimal screen
-could fall under it. **Say which test you used** in `extraction_notes` whenever it was the fallback.
+could fall under it. **Say which test you used** in `extraction_gaps` whenever it was the fallback.
 
 **A `FRAME` nested inside a `SCREEN` is an element of that screen**, never a screen — unless a
 connector or reaction targets it directly, which promotes it to a board node to be classified here
 and then judged under *Screen vs. state*.
+
+### Collapsed screens keep every frame id — connectors resolve against all of them
+A screen is routinely drawn as **N sibling frames sharing one base name**, one per state, laid out
+side by side. They collapse into one `screen_id` (see *Screen vs. state*), and when they do:
+
+- Record **every** collapsed frame id in `screens[].source_refs`, with `source_ref` as the
+  representative. A screen drawn as 9 state frames has 9 ids.
+- **Resolve every connector endpoint against the whole set.** An endpoint whose ancestor is *any*
+  collapsed frame resolves to that `screen_id`.
+- Populate `screen_states` with each frame's **qualifier**, not its base name. Nine entries all
+  reading `"Confirm account"` carry no information and are a symptom of this step being skipped.
+
+Getting this wrong is silent and expensive: designers draw the outgoing arrow from whichever state
+the transition happens in — the error state, the filled-form state — not from the first frame. On a
+real board, `Confirm account` collapses 9 frames, and the one chosen as representative had a single
+inbound connector while **six outgoing connectors hung off four of the others**. Resolving against
+the representative alone dropped all six, and the screen looked like a dead end.
+
+An endpoint that resolves to the same `screen_id` at both ends is **intra-screen**: a state
+transition or an annotation, not navigation. Count it in `convention_compliance.connectors_intra_screen`
+and do not emit an edge — but never let it silently vanish into the unresolved bucket.
 
 **Component names come from the defaults; the app config only overrides them.** The names above are
 the built-in defaults, and **an app config that says nothing about `design_components` is the normal
@@ -338,7 +364,7 @@ The design team has standardised on the five conventions below. Each has a **rea
 case), a **fallback** (the inference you may make when it was not followed — always within reason,
 always recorded), and a **flag** (when even the fallback is not defensible).
 
-Every fallback you take is an `extraction_notes` entry with `follow_up: WORTH_CHECKING`, and every
+Every fallback you take is an `extraction_gaps` entry with `severity: DEGRADED`, and every
 flag is a `project_context.blocking_issues` entry. Tally both into
 `project_context.convention_compliance` so the design team gets one actionable list per export.
 
@@ -349,7 +375,7 @@ flag is a `project_context.blocking_issues` entry. Tally both into
   destination frame. `edge_source: "CONNECTOR"`, `confidence: "EXPLICIT"`.
 - **Fallback.** The destination is an element *inside* a different screen frame → walk its
   ancestors to the nearest screen frame and use that. `edge_source: "CONNECTOR_INFERRED"`,
-  `confidence: "INFERRED"`, plus a `WORTH_CHECKING` note naming the connector `id`.
+  `confidence: "INFERRED"`, plus a `DEGRADED` note naming the connector `id`.
 - **Fallback.** The source is the screen frame itself (frame → frame connector) → emit the edge
   with **no** `trigger_element_id` if the source screen has no single obvious trigger; if it has
   exactly one interactive element whose own reaction targets the same destination, use that one and
@@ -357,12 +383,21 @@ flag is a `project_context.blocking_issues` entry. Tally both into
 - **Fallback — destination is a `CAPTION` / `LANE_BANNER`.** The connector points at the *label* of
   a group rather than at a screen. The destination is that group's **entry screen**: among the
   `SCREEN` siblings sharing the banner's parent, the topmost-then-leftmost by `y`, then `x`. Emit
-  `edge_source: "CONNECTOR_INFERRED"`, `confidence: "INFERRED"`, and a `WORTH_CHECKING` note naming
+  `edge_source: "CONNECTOR_INFERRED"`, `confidence: "INFERRED"`, and a `DEGRADED` note naming
   the banner. No `SCREEN` sibling → do not guess an entry; flag it.
   - **Order by `y`/`x` only — never by array order.** Children are stored in z-order, which has no
     relationship to reading order; picking the first array element selects an arbitrary screen that
     looks plausible and is silently wrong. Without geometry this fallback is **not available**:
     flag the connector instead, and say the export predates geometry.
+  - **A lane banner usually contains nothing — resolve it as a spatial band, not a parent.** On a
+    real board the banner is a full-width strip (1416×64) sitting *beside* the screens it fronts,
+    not wrapping them; walking up its ancestors finds only the `SECTION`. So: take the banner's
+    top-level ancestor, look at its **siblings**, and select the `SCREEN`s whose `y` is below the
+    banner and above the **next banner** (the next sibling of comparable width and under ~150pt
+    tall). The entry screen is the topmost-then-leftmost of that band.
+    Walking up to the `SECTION` and taking its first screen is the trap here: every banner in the
+    section resolves to the same screen, so two branches of one decision silently collapse onto a
+    single destination and the branch looks real while being wrong.
   - **Self-loop guard.** If the resolved entry screen is the same screen the connector started
     from, the resolution is wrong by construction — drop the edge and flag it. A lane you enter
     from outside never resolves back to the caller.
@@ -421,7 +456,11 @@ Read every `reactions[]` entry on every node.
 ### 3. Human-readable frame and layer names
 - **Screen frame name → `screen_name` verbatim.** `screen_id` = the name with any trailing state
   qualifier stripped, then UPPER_SNAKE (non-alphanumerics → `_`, repeats collapsed, ends trimmed).
-  A state qualifier is the segment after the last ` — `, ` – `, ` - ` or `/`.
+  A state qualifier is the segment after the **first** ` — `, ` – `, ` - ` or ` / ` separator.
+  **Keep the base, drop the qualifier — never the reverse.** `Confirm account / EN` is
+  `CONFIRM_ACCOUNT` with `EN` as a state; emitting a screen called `EN` is the failure mode here,
+  and it produces an id that means nothing and collides across features. Split once, from the left,
+  and take element 0.
   - `History Page` → `HISTORY_PAGE`
   - `Confirm Disbursement Dialog` → `CONFIRM_DISBURSEMENT_DIALOG`
   - `Approve Disbursement — Error` → `APPROVE_DISBURSEMENT`, and `"Error"` joins that screen's
@@ -435,10 +474,10 @@ Read every `reactions[]` entry on every node.
 - **Fallback (role).** Role token missing or unrecognised → derive the role from the node's `type`
   and `reactions` (`TEXT` with no reactions → `LABEL`; any node with a tap reaction → `BUTTON`;
   a node with a `TEXT`-typed `componentProperties` entry and a tap reaction → `INPUT`). Record a
-  `WORTH_CHECKING` note.
+  `DEGRADED` note.
 - **Fallback (purpose).** No purpose in the layer name → use the element's visible copy: the node's
   own `characters`, or the `characters` of its single TEXT descendant, or a `componentProperties`
-  `TEXT` `value`. Record a `WORTH_CHECKING` note.
+  `TEXT` `value`. Record a `DEGRADED` note.
 - **Flag.** The name is a default or a visual-only description (`Frame 427`, `Group 12`,
   `Rectangle`, `Component 3`, `Blue Button`, `Icon/24`) **and** no copy is available → the element
   gets no id and goes to `blocking_issues`: *"element `<id>` has a non-descriptive name and no
@@ -455,7 +494,7 @@ Read every `reactions[]` entry on every node.
   condition selects which destination is not stated (standard #4)"*. Emit every edge with an empty
   `condition` so the flows are not lost; do not invent the discriminator.
 - A free-floating `TEXT` / `STICKY` node that reads like a condition but is attached to nothing is
-  **not** a condition — it is unattached commentary. Note it as `FYI`, do not bind it to an edge.
+  **not** a condition — it is unattached commentary. Note it as `INFO`, do not bind it to an edge.
 
 ### 5. Notes and context are connected to what they describe
 - **Read.** A `CONNECTOR` is a **note connector** when either endpoint — or **any ancestor of
@@ -471,7 +510,7 @@ Read every `reactions[]` entry on every node.
   - The ancestor walk is what makes this work: a connector usually lands on a child *inside* the
     note component, not on the component node itself.
 - **Fallback.** A `NOTE` node with no connector at all → attach it to the `SCREEN` that geometrically
-  contains it, else the nearest `SCREEN` by centre-point distance, with an `FYI` note recording that
+  contains it, else the nearest `SCREEN` by centre-point distance, with an `INFO` note recording that
   the attachment was positional. Without geometry, fall back to the section it sits in and say so.
 - **Flag.** A `NOTE` node outside every screen, with no connector and no near neighbour → it belongs
   to nothing → `blocking_issues`, quoting the first ~100 characters so the designer can find it.
@@ -479,7 +518,7 @@ Read every `reactions[]` entry on every node.
 ### Convention compliance is reported, not enforced
 A non-compliant export still produces a full `design_context`. Falling back is the default
 behaviour; refusing to extract is not. What is forbidden is a silent fallback — every one is in
-`extraction_notes`, and the totals are in `project_context.convention_compliance`.
+`extraction_gaps`, and the totals are in `project_context.convention_compliance`.
 
 ---
 
@@ -514,7 +553,7 @@ The suffix is emitted exactly as the config writes it. `role` is the separate no
 and stays UPPER — the two are different things and do not have to match in case.
 
 A role that maps to none of these → use the closest listed suffix, set `role` to the honest enum
-value (or `OTHER`), and record a `WORTH_CHECKING` note naming the source token. Do **not** invent a
+value (or `OTHER`), and record a `DEGRADED` note naming the source token. Do **not** invent a
 seventh suffix — downstream locator joins are keyed on this vocabulary.
 
 A third `.state` segment (lower_snake, same rule) is only appended when the design genuinely ships
@@ -660,7 +699,7 @@ later pass.
    - Tappable elements with no traced destination (standard #2).
    - Unreachable screens (in the design, in no `ui_flow` edge and no flow starting point).
    - A frame whose screen-vs-state call is unresolved.
-   Never a blocker, and never an `extraction_notes` entry either: an element with no Dev Mode
+   Never a blocker, and never an `extraction_gaps` entry either: an element with no Dev Mode
    annotation, an export with no annotations at all, a screen with no `deep_link`, or an element
    with no `accessibility_id`. See *Optional enrichment*.
    `overall_ambiguity_rating`: `HIGH` when any screen or trigger element could not be resolved;
@@ -685,7 +724,7 @@ later pass.
   or shadow are not available to you and are not valid reasons for any decision.
 - **Never invent** — every gap (missing connector, unreachable screen, placeholder text) becomes a
   `blocking_issues` entry, not a filled assumption.
-- **Every fallback is recorded** — a `WORTH_CHECKING` note plus a tally in `convention_compliance`.
+- **Every fallback is recorded** — a `DEGRADED` note plus a tally in `convention_compliance`.
 - Output design_context.json concisely — only functional elements that matter for test automation.
 
 ## Guardrails
@@ -710,11 +749,11 @@ python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('<each design_context file>')),
   json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json')))"
 ```
-- Passes → `extraction_status: COMPLETE` (when `extraction_notes` is empty).
-- Fails → **still write the file.** Convert every validator error into an `extraction_notes`
-  entry (`field` = the validator's JSON path, `follow_up: NEEDS_ANSWER`) and set
-  `extraction_status: PARTIAL`. Never patch a value in just to make validation pass.
-- Validator unavailable (`jsonschema` not installed) → write the file, add a `WORTH_CHECKING` note on
+- Passes → `extraction_status: OK` (when `extraction_gaps` is empty).
+- Fails → **still write the file.** Convert every validator error into an `extraction_gaps`
+  entry (`field` = the validator's JSON path, `severity: BLOCKING`) and set
+  `extraction_status: INCOMPLETE`. Never patch a value in just to make validation pass.
+- Validator unavailable (`jsonschema` not installed) → write the file, add a `DEGRADED` note on
   `ENVIRONMENT`, **and say so in your reply to the user** — not only in the JSON, which they may
   not open. Give them the command for their platform:
   - macOS / Linux with a system Python: `pip3 install --break-system-packages jsonschema`
@@ -740,7 +779,7 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 - **Role vocabulary:** every emitted role suffix comes from the app config's `role_vocabulary`. A
   suffix outside that list is a defect, not a judgement call.
 - **Fallback accounting:** every `INFERRED` edge, inferred role and inferred purpose has a matching
-  `WORTH_CHECKING` entry in `extraction_notes`. A fallback with no note is a silent guess.
+  `DEGRADED` entry in `extraction_gaps`. A fallback with no note is a silent guess.
 - **Truncation:** if `export.truncatedCount > 0`, the note exists and names the truncated layers.
 - **Conciseness:** output size is minimal; only functional elements included. Verify by comparing
   element count to connector + reaction count — should be roughly proportional.
