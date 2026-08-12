@@ -422,8 +422,14 @@ condition sits one hop away from the screen it belongs to. Collapse that hop:
 2. **Normalise the entry/exit seam.** A decision box is typically *entered* on its child `TEXT` and
    *exited* from the parent `FRAME` — two different node ids, so the path looks broken. Lift a
    `TEXT` endpoint **exactly one level** to its parent before matching. One level, never more.
-3. Mark every edge produced this way `edge_source: "CONNECTOR_CONTRACTED"`, and put the decision
-   box's node id in `source_ref` so a reviewer can see why the condition attached where it did.
+3. Mark every edge produced this way `edge_source: "CONNECTOR_CONTRACTED"`. `source_ref` holds the
+   **exit connector** (as on every other edge); the box itself goes in `decision_node_id`.
+4. **Compose the condition rather than copying a label.** A bare `YES` is meaningless without the
+   question it answers, and the question is sitting in the decision box. Emit
+   `"<question> — <value>"` — `Does user have GoPay+? — YES` — normalising the designer's spacing
+   (`GoPay+ ?` → `GoPay+?`), and keep any label from the connector *into* the decision in front via
+   `" / "` so no authored text is lost. `decision_question` and `decision_value` carry the same two
+   halves separately, so a consumer can build a precondition without re-parsing the string.
 
 **Hard limits — these are not tuning knobs.** Contraction that chases hops through the tree
 manufactures flows that do not exist: on a real board an unbounded version (lift to any
@@ -597,10 +603,10 @@ does not silently fail — it fails at code-gen, months later, as a test that ca
 | `elements[].type` | node `type` plus the design role token |
 | `elements[].label` | `characters`, or a `componentProperties` `TEXT` `value`, or the single TEXT descendant's `characters` |
 | `elements[].states_represented` | `variantProperties`, `componentPropertyDefinitions.*.variantOptions`, `SWAP`/`CHANGE_TO` reactions |
-| `elements[].interactions` | `reactions[]` — `trigger.type` → `trigger`, the action → `action` |
+| `elements[].interactions` | one entry per connector leaving the element, carrying `connector_id`, `destination_node_id` (the literal endpoint) and `destination_screen_id` (the resolved screen, omitted when it would be the element's own screen). Note tethers produce no entry |
 | `elements[].accessibility_id` / `platform_hints` | `annotations[].label` when it reads as an id (`a11y id: x`, `testID: x`, `resource-id: x`, or a bare `^[a-z0-9_]+$` token). Prose annotations go to `validations_and_edge_cases` instead |
 | `elements[].validations_and_edge_cases` | prose `annotations[].label` / `labelMarkdown`, and note connectors landing on the element |
-| `ui_flow[]` | `CONNECTOR` nodes (standard #1) + `reactions[]` (standard #2), deduped |
+| `ui_flow[]` | `CONNECTOR` nodes (standard #1) + `reactions[]` (standard #2), deduped. On a contracted branch `condition` is **composed** — `<decision question> — <value>` — with the parts also exposed as `decision_question` / `decision_value` / `decision_node_id` |
 | `project_context.blocking_issues` | every **Flag** case above |
 | `project_context.convention_compliance` | the tallies from the five standards, plus the classifier counts (`decision_nodes`, `caption_endpoints`, `contracted_edges`, `lane_entry_inferred`) |
 
