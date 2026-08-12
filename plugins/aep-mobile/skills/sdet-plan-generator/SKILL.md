@@ -220,6 +220,26 @@ Expand scenarios across:
   - **App Backgrounding & Process Death**: Inject a backgrounding/kill-and-restore state preservation scenario *only* if the screens in `design_context.json` contain interactive elements (inputs, forms, toggles) or view models are active in `plan_context.json`. Skip on purely static/read-only informational screens.
   - **Local Storage & DB Migration**: Inject an N-1 upgrade and schema migration scenario *only* if `rfc_context.json` defines active `local_data_changes` (e.g. SQLite, Room, CoreData, or SharedPrefs modifications).
   - **Runtime Permission Toggles**: Inject parallel Permission Granted vs Permission Denied scenarios *only* if `rfc_context.json` declares new or modified `permissions_required`.
+  - **Platform variance**: Only meaningful when the feature resolves to **more than one** target
+    platform (per the Platform resolution precedence: `prd.applicable_platforms`, else
+    `rfc.scope.target_platforms`, else inferred from design). When it does, generate the variance
+    scenario **only across those resolved platforms**. When the feature resolves to a **single**
+    platform, there is no variance to test — do **not** emit a platform-variance scenario; if the
+    `platform_variance` trigger fired only because `rfc.platform_specific.<os>` documents
+    platform-specific handling for that one platform, generate at most a plain render/behaviour
+    check *on that platform*, never a cross-platform one.
+    - **Never put an off-target platform inside a scenario — not as a step, not as a caution.** A
+      platform the app *supports* (per `config.<app_id>.json`) but the PRD/RFC does **not** scope
+      into this feature (e.g. the RFC scopes `target_platforms: ["android"]` and never mentions
+      iOS) is **out of scope for every scenario**. Do not write a step like *"iOS coverage cannot
+      be scripted…"* or *"verify on iOS"* — a step naming a platform the feature doesn't target is
+      both untestable and not a tester action (same rule as automation-scaffolding: notes never
+      live in `steps[]`). The legitimate concern — "the app ships on iOS but this RFC is
+      Android-only; is iOS a separate effort?" — is surfaced **once**, as an inherited/authored
+      `extraction_notes` entry and an analysis.md open-question row, and nowhere else. The CSV's
+      own `iOS Automation Status v2` / `Android Automation Status v2` columns already encode
+      "doesn't apply" via `N/A`; that is the *only* place an untargeted platform appears in the
+      deliverables.
 - **FE-Baseline Extras**: If the QA selected any `fe_baseline` category in Step 0, expand best-effort hygiene scenarios for it, stamp `source: "fe_baseline"`, and record in analysis.md that expected behavior is not spec-derived and needs PM/dev confirmation.
 - **Navigation Resolution Ladder (mandatory — run per scenario, before writing `steps[]`).**
   A scenario's `steps[]` is the *only* place reachability lives in this schema (there is no
