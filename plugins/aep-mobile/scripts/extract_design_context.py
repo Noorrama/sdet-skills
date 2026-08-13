@@ -11,8 +11,9 @@ code and the model keeps only the semantic fields.
     ./extract_design_context.py export.json --app gopay-merchant -o design_context.json --report
 
 Semantic fields the model still fills afterwards:
-  visual_analysis_scratchpad, screens[].purpose, screens[].screen_notes,
-  elements[].label refinement, extraction_gaps[], overall_ambiguity_rating.
+  visual_analysis_scratchpad, elements[].label refinement, extraction_gaps[],
+  overall_ambiguity_rating. (purpose and states_represented are no longer produced:
+  nothing downstream reads them and a board does not carry them.)
 """
 
 from __future__ import annotations
@@ -61,12 +62,18 @@ COMPLIANCE_KEYS = (
     "connectors_to_decision",
     "note_connectors",
     "caption_endpoints",
+    "label_frames_resolved",
     "decision_nodes",
     "contracted_edges",
     "lane_entry_inferred",
     "unlabelled_branches",
     "non_descriptive_names",
+    "screen_id_from_banner",
     "unreachable_screens",
+    "notes_total",
+    "notes_attached_by_connector",
+    "notes_attached_by_geometry",
+    "notes_unattached",
 )
 
 # The buckets every connector must land in exactly once.
@@ -80,6 +87,10 @@ CONSERVED_BUCKETS = (
 )
 
 DEFAULT_ANNOTATION_COMPONENTS = ["Notes", "Note", "Annotation", "Comment", "tooltip*"]
+
+# The annotation component ships a heading layer; it is chrome, not content, and
+# repeating it on every screen would drown the actual note.
+NOTE_BOILERPLATE = frozenset({"notes / annotation", "notes", "note", "annotation", "comment"})
 
 DEFAULT_ROLE_VOCABULARY = ["_btn", "_input", "_label", "_toggle", "_tab", "_list"]
 
@@ -295,6 +306,23 @@ def state_kind(qualifier: str | None) -> str:
     return "OTHER"
 
 
+def is_non_descriptive(name: str | None) -> bool:
+    return bool(NON_DESCRIPTIVE.match((name or "").strip()))
+
+
+def usable_as_screen_name(text: str) -> bool:
+    """A banner names a SCREEN only if it is short and is not a state word.
+
+    Measured rejections on a real board: 'Scroll View with Loading State' and
+    'Loading' name a state, not a screen; '1KYC | NON-Progressive Flow (Screens
+    are only for reference, not owned by MSME Team)' is a lane header sentence.
+    """
+    text = (text or "").strip()
+    if not text or len(text) > 40 or len(text.split()) > 5:
+        return False
+    return state_kind(text) in ("DEFAULT", "OTHER")
+
+
 def role_of(name: str | None) -> str:
     lowered = (name or "").lower()
     for role, keywords in ROLE_KEYWORDS:
@@ -318,16 +346,92 @@ class Extractor:
         self.counts = Counter()
         self.blocking_issues: list[str] = []
         self.by_trigger: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
+        # screen_id -> display name, when a banner supplied it.
+        self.screen_names: dict[str, str] = {}
+        # screen_id -> state texts recovered from label frames.
+        self.label_states: dict[str, list[str]] = {}
+        # (note_node_id, other_endpoint_id, other_kind) for every note connector.
+        self.note_links: list[tuple[str, str | None, str | None]] = []
 
         self.groups: dict[str, list[str]] = defaultdict(list)
         for node_id, cls in board.node_class.items():
             if cls == "SCREEN":
                 self.groups[split_name(board.nodes[node_id]["name"])[0]].append(node_id)
+
+        # Renaming MUST happen here — before frame_to_screen exists and before any
+        # element or edge is built. screen_id is the prefix of every element_id and
+        # both ends of every ui_flow edge; renaming later leaves dangling ids.
+        self.screen_renames: list[dict[str, str]] = []
+        self._rename_from_banners()
+
         # EVERY collapsed frame maps to the screen. Resolving against only the
         # representative is what silently drops flows drawn from other states.
         self.frame_to_screen = {
             frame: screen for screen, frames in self.groups.items() for frame in frames
         }
+
+    # --- naming ---
+
+    def _banner_above(self, screen_frame: str) -> dict | None:
+        """Nearest wide, short strip above this frame in the same parent.
+
+        Wide is the discriminator: a lane/section banner spans far past a single
+        screen, while a state label matches the screen's own width.
+        """
+        board = self.board
+        node = board.nodes[screen_frame]
+        parent_id = board.parent.get(screen_frame)
+        if not parent_id or "x" not in node:
+            return None
+        candidates = [
+            c
+            for c in board.nodes[parent_id].get("children", [])
+            if "x" in c
+            and c["id"] not in self.groups.get(split_name(node["name"])[0], [])
+            and (c.get("height") or 0) < BANNER_MAX_HEIGHT
+            and (c.get("width") or 0) > 1.5 * (node.get("width") or 0)
+            and c["y"] < node["y"]
+        ]
+        if not candidates:
+            return None
+        candidates.sort(key=lambda c: -c["y"])
+        return candidates[0]
+
+    def _rename_from_banners(self) -> None:
+        """Give a gibberish-named screen the name of the section banner above it.
+
+        Only fires when the screen's own name is already useless, and only when
+        the banner reads like a screen name rather than a state or a sentence.
+        """
+        for screen_id in sorted(self.groups):
+            frames = self.groups[screen_id]
+            representative = min(
+                frames, key=lambda i: (self.board.nodes[i].get("y", 0), self.board.nodes[i].get("x", 0))
+            )
+            name = self.board.nodes[representative].get("name")
+            if not is_non_descriptive(split_name(name)[1]):
+                continue
+            banner = self._banner_above(representative)
+            if not banner:
+                continue
+            text = (self.board.texts(banner["id"], 1) or [""])[0]
+            if not usable_as_screen_name(text):
+                continue
+            new_id = split_name(text)[0]
+            if new_id in self.groups:          # never collide with a real screen
+                continue
+            self.groups[new_id] = self.groups.pop(screen_id)
+            self.screen_names[new_id] = text
+            self.screen_renames.append(
+                {
+                    "from": screen_id,
+                    "to": new_id,
+                    "banner_text": text,
+                    "banner_node_id": banner["id"],
+                    "screen_source_ref": representative,
+                }
+            )
+            self.counts["screen_id_from_banner"] += 1
 
     # --- resolution ---
 
@@ -378,6 +482,78 @@ class Extractor:
         band.sort(key=lambda c: (c["y"], c["x"]))
         return band[0]["id"]
 
+    def label_frame_target(self, node_id: str) -> tuple[str, str] | None:
+        """Is this gibberish-named strip the label of exactly one screen below it?
+
+        Fires only as a fallback, when a connector has already failed to resolve.
+        All five conditions must hold — the point is to confirm the pattern, not
+        to assume it. Returns (screen_id, label_text) or None.
+
+        Measured on a real board: accepts the two genuine label frames, rejects
+        an external-file pointer and the decision box (both score zero aligned
+        screens), so the branch labels are structurally out of reach.
+        """
+        board = self.board
+        top = node_id
+        while board.parent.get(top) and board.nodes[board.parent[top]]["type"] not in STRUCTURAL_TYPES:
+            top = board.parent[top]
+        node = board.nodes[top]
+
+        # 1. its own name must be the thing that failed us
+        if not is_non_descriptive(node.get("name")):
+            return None
+        # 2. text-only: a real screen carries dozens of nested nodes
+        subtree = []
+        def walk(n):
+            subtree.append(n)
+            for c in n.get("children", []):
+                walk(c)
+        walk(node)
+        if len(subtree) > 4 or any(n.get("type") not in ("TEXT", "FRAME", "GROUP") for n in subtree):
+            return None
+        # 3. a label is a strip
+        if "x" not in node or (node.get("height") or 0) >= BANNER_MAX_HEIGHT:
+            return None
+
+        parent_id = board.parent.get(top)
+        if not parent_id:
+            return None
+        screens = [
+            c for c in board.nodes[parent_id].get("children", [])
+            if c["id"] in self.frame_to_screen and "x" in c
+        ]
+        if not screens:
+            return None
+        # 4. not a lane banner — those head a band and belong to lane_entry
+        if (node.get("width") or 0) > 1.5 * max(c["width"] for c in screens):
+            return None
+
+        # 5. exactly ONE column-aligned screen below. Column alignment is the
+        # rule; y-proximity alone pairs a label with a screen in another column.
+        aligned = []
+        for candidate in screens:
+            overlap = min(node["x"] + node["width"], candidate["x"] + candidate["width"]) - max(
+                node["x"], candidate["x"]
+            )
+            gap = candidate["y"] - (node["y"] + node["height"])
+            if overlap >= 0.8 * min(node["width"], candidate["width"]) and 0 <= gap <= 120:
+                aligned.append((gap, candidate))
+        if len(aligned) != 1:
+            return None
+        neighbour = aligned[0][1]
+        # 6. the screen it labels must itself be properly named — that is the
+        # pattern being relied on
+        if is_non_descriptive(split_name(neighbour["name"])[1]):
+            return None
+
+        text = (board.texts(top, 1) or [""])[0].strip()
+        if not text:
+            return None
+        return self.frame_to_screen[neighbour["id"]], text
+
+    def _record_state(self, screen_id: str, text: str) -> None:
+        self.label_states.setdefault(screen_id, []).append(text)
+
     # --- flow ---
 
     def build_flow(self) -> list[dict]:
@@ -414,6 +590,14 @@ class Extractor:
 
             if src_kind == "NOTE" or dst_kind == "NOTE":
                 self.counts["note_connectors"] += 1
+                # Remember the pairing now, while the classification is in hand.
+                # The note pass reads only this list — it never re-examines a
+                # connector that reached a flow bucket, so attaching note text
+                # cannot disturb the branch labels or any conservation count.
+                note_id, other, other_kind = (
+                    (src, end, dst_kind) if src_kind == "NOTE" else (dst, start, src_kind)
+                )
+                self.note_links.append((note_id, other, other_kind))
                 continue
 
             if src_kind != "SCREEN":
@@ -447,13 +631,35 @@ class Extractor:
                     edges.append(
                         self._edge(src, target, label, "CONNECTOR_INFERRED", "INFERRED", conn["id"])
                     )
-                else:
-                    self.counts["connectors_unresolvable"] += 1
-                    caption = (self.board.texts(dst, 1) or ["(no text)"])[0][:60]
-                    self.blocking_issues.append(
-                        f"Connector {conn['id']} from {src} ends on caption {caption!r}, "
-                        f"which fronts no screen — destination unstated (standard #1)."
-                    )
+                    continue
+
+                # Fallback: the destination may be a label frame naming the state
+                # of the screen directly below it. Only reached once normal
+                # resolution has failed.
+                labelled = self.label_frame_target(dst)
+                if labelled:
+                    screen, text = labelled
+                    self.counts["label_frames_resolved"] += 1
+                    self._record_state(screen, text)
+                    if screen != src:
+                        self.counts["connectors_inferred_to_screen"] += 1
+                        edges.append(
+                            self._edge(
+                                src, screen, label, "CONNECTOR_INFERRED", "INFERRED", conn["id"]
+                            )
+                        )
+                    else:
+                        # The label names a state of the SOURCE screen, so this is
+                        # a state change, not navigation.
+                        self.counts["connectors_intra_screen"] += 1
+                    continue
+
+                self.counts["connectors_unresolvable"] += 1
+                caption = (self.board.texts(dst, 1) or ["(no text)"])[0][:60]
+                self.blocking_issues.append(
+                    f"Connector {conn['id']} from {src} ends on caption {caption!r}, "
+                    f"which fronts no screen — destination unstated (standard #1)."
+                )
                 continue
 
             self.counts["connectors_unresolvable"] += 1
@@ -559,7 +765,8 @@ class Extractor:
         for screen_id, frames in sorted(self.groups.items()):
             frames = sorted(frames, key=lambda i: (board.nodes[i].get("y", 0), board.nodes[i].get("x", 0)))
             representative = frames[0]
-            _, base, _ = split_name(board.nodes[representative]["name"])
+            renamed = self.screen_names.get(screen_id)
+            _, base, _ = split_name(renamed or board.nodes[representative]["name"])
 
             qualifiers, kinds = [], set()
             for frame in frames:
@@ -567,6 +774,10 @@ class Extractor:
                 if qualifier and qualifier not in qualifiers:
                     qualifiers.append(qualifier)
                 kinds.add(state_kind(qualifier))
+            for recovered in self.label_states.get(screen_id, []):
+                if recovered not in qualifiers:
+                    qualifiers.append(recovered)
+                    kinds.add(state_kind(recovered))
             if not qualifiers:
                 qualifiers = ["Default"]
 
@@ -580,12 +791,11 @@ class Extractor:
             screens.append(
                 {
                     "screen_id": screen_id,
-                    "screen_name": board.nodes[representative]["name"],
+                    "screen_name": renamed or board.nodes[representative]["name"],
                     "source_ref": representative,
                     "source_refs": frames,
                     "node_class": "SCREEN",
                     "classified_by": "GEOMETRY" if board.has_geometry else "DESCENDANT_COUNT",
-                    "purpose": "",
                     "entry_point": any(f in entry_points for f in frames),
                     "screen_states": qualifiers,
                     "state_kinds": sorted(kinds),
@@ -679,12 +889,131 @@ class Extractor:
                     "type": node["type"],
                     "role": role,
                     "label": label,
-                    "states_represented": [],
                     "interactions": self._interactions(node_id, screen_id),
                     "validations_and_edge_cases": [],
                 }
             )
         return elements
+
+    # --- notes ---
+
+    def note_text(self, note_id: str) -> str:
+        """Body text of a note, minus the component's own heading layer."""
+        lines = [
+            t for t in self.board.texts(note_id, 12)
+            if t.strip().lower() not in NOTE_BOILERPLATE and t.strip()
+        ]
+        return "\n".join(lines).strip()
+
+    def _centre(self, node_id: str) -> tuple[float, float] | None:
+        node = self.board.nodes.get(node_id, {})
+        if not all(k in node for k in ("x", "y", "width", "height")):
+            return None
+        return (node["x"] + node["width"] / 2, node["y"] + node["height"] / 2)
+
+    def _screen_by_position(self, note_id: str) -> str | None:
+        """Containment first, then nearest centre WITHIN THE SAME PARENT.
+
+        The parent restriction matters: without it a stray note attaches to
+        whichever screen happens to be closest across a whole SECTION, which is
+        an attachment nobody drew and nobody can verify.
+        """
+        board = self.board
+        top = note_id
+        while board.parent.get(top) and board.nodes[board.parent[top]]["type"] not in STRUCTURAL_TYPES:
+            top = board.parent[top]
+        parent_id = board.parent.get(top)
+        centre = self._centre(top)
+        if not parent_id or not centre:
+            return None
+
+        siblings = [
+            c for c in board.nodes[parent_id].get("children", []) if c["id"] in self.frame_to_screen
+        ]
+        for sib in siblings:
+            if all(k in sib for k in ("x", "y", "width", "height")):
+                if (
+                    sib["x"] <= centre[0] <= sib["x"] + sib["width"]
+                    and sib["y"] <= centre[1] <= sib["y"] + sib["height"]
+                ):
+                    return self.frame_to_screen[sib["id"]]
+
+        best, best_distance = None, None
+        for sib in siblings:
+            sib_centre = self._centre(sib["id"])
+            if not sib_centre:
+                continue
+            distance = (sib_centre[0] - centre[0]) ** 2 + (sib_centre[1] - centre[1]) ** 2
+            if best_distance is None or distance < best_distance:
+                best, best_distance = self.frame_to_screen[sib["id"]], distance
+        return best
+
+    def attach_notes(self, screens: list[dict]) -> list[str]:
+        """Route every note's text to the screen or element it describes.
+
+        Returns the ids of notes that could not be attached. Reads self.note_links
+        only — connectors already bucketed as flows are never revisited, so
+        convention_compliance is unaffected by anything here.
+        """
+        board = self.board
+        by_screen: dict[str, list[tuple[float, float, str]]] = defaultdict(list)
+        element_by_source = {
+            el["source_ref"]: el for screen in screens for el in screen["elements"]
+        }
+        handled: set[str] = set()
+        unattached: list[str] = []
+
+        all_notes = [i for i, cls in board.node_class.items() if cls == "NOTE"]
+        linked = {note_id: (other, kind) for note_id, other, kind in self.note_links}
+
+        for note_id in all_notes:
+            text = self.note_text(note_id)
+            if not text:
+                handled.add(note_id)
+                continue
+
+            target_screen = None
+            other, kind = linked.get(note_id, (None, None))
+
+            # An element-targeted note goes to validations_and_edge_cases — the
+            # one intent field with a real downstream consumer.
+            if other is not None:
+                element = next(
+                    (element_by_source[a] for a in board.ancestors(other) if a in element_by_source),
+                    None,
+                )
+                if element is not None:
+                    element["validations_and_edge_cases"].append(text)
+                    self.counts["notes_attached_by_connector"] += 1
+                    handled.add(note_id)
+                    continue
+                if kind == "SCREEN":
+                    target_screen, _ = self.resolve(other)
+
+            if target_screen:
+                self.counts["notes_attached_by_connector"] += 1
+            else:
+                target_screen = self._screen_by_position(note_id)
+                if target_screen:
+                    self.counts["notes_attached_by_geometry"] += 1
+
+            if not target_screen:
+                self.counts["notes_unattached"] += 1
+                unattached.append(note_id)
+                continue
+
+            node = board.nodes[note_id]
+            by_screen[target_screen].append((node.get("y", 0), node.get("x", 0), text))
+            handled.add(note_id)
+
+        for screen in screens:
+            entries = by_screen.get(screen["screen_id"])
+            if entries:
+                entries.sort(key=lambda e: (e[0], e[1]))
+                screen["screen_notes"] = "\n\n".join(text for _, _, text in entries)
+
+        self.counts["notes_total"] = len(all_notes)
+        return unattached
 
     # --- conservation ---
 
@@ -711,6 +1040,7 @@ def build(export: dict, app: str | None, config: dict) -> tuple[dict, Extractor]
     screens = extractor.build_screens()
     extractor.check_conservation()
 
+    unattached_notes = extractor.attach_notes(screens)
     extractor.counts["decision_nodes"] = sum(
         1 for cls in board.node_class.values() if cls == "DECISION"
     )
@@ -733,6 +1063,85 @@ def build(export: dict, app: str | None, config: dict) -> tuple[dict, Extractor]
         if match:
             edge["trigger_element_id"] = match
 
+    # One entry, not one per note: an orphan note is information for the
+    # designer, never a blocker, and a board with no notes produces nothing.
+    gaps: list[dict[str, str]] = []
+    if unattached_notes:
+        gaps.append(
+            {
+                "field": "screens[].screen_notes",
+                "severity": "INFO",
+                "reason": (
+                    f"{len(unattached_notes)} note(s) sit outside every screen and have no "
+                    f"connector, so the screen they describe could not be determined: "
+                    f"{', '.join(sorted(unattached_notes)[:10])}."
+                ),
+                "action": (
+                    "Draw a connector from each note to the frame it describes (standard #5), "
+                    "or move it inside that frame."
+                ),
+            }
+        )
+
+    # Gaps the script can PROVE from its own counters. Deriving them here is the
+    # point: a model asked to judge whether an empty field is a gap invented a
+    # BLOCKING one for a field nothing reads. These are mechanical and true.
+    counts = extractor.counts
+    if counts["connectors_unresolvable"]:
+        gaps.append(
+            {
+                "field": "ui_flow",
+                "severity": "BLOCKING",
+                "reason": (
+                    f"{counts['connectors_unresolvable']} of {counts['connectors_total']} connectors "
+                    f"end on a caption, a label strip or a node with no board ancestor, so no "
+                    f"destination screen could be resolved. See project_context.blocking_issues for "
+                    f"the specific connectors."
+                ),
+                "action": (
+                    "Redraw those connectors so they terminate on the destination FRAME rather than "
+                    "on its label (standard #1)."
+                ),
+            }
+        )
+    if counts["non_descriptive_names"]:
+        gaps.append(
+            {
+                "field": "screens[].screen_id",
+                "severity": "DEGRADED",
+                "reason": (
+                    f"{counts['non_descriptive_names']} screen(s) derive from default Figma frame "
+                    f"names such as 'Frame', so their screen_id carries no meaning and is unstable."
+                ),
+                "action": "Rename those frames to describe the screen (standard #3).",
+            }
+        )
+    if counts["unreachable_screens"]:
+        gaps.append(
+            {
+                "field": "ui_flow",
+                "severity": "INFO",
+                "reason": (
+                    f"{counts['unreachable_screens']} screen(s) are in the design but no connector "
+                    f"reaches them — either dead design or a missing connector."
+                ),
+                "action": "Confirm with design whether each is still in scope.",
+            }
+        )
+    if export.get("export", {}).get("truncatedCount"):
+        gaps.append(
+            {
+                "field": "design_source.truncated_count",
+                "severity": "DEGRADED",
+                "reason": (
+                    f"The depth cap dropped children of "
+                    f"{export['export']['truncatedCount']} node(s), so some elements were never "
+                    f"exported."
+                ),
+                "action": "Flatten the reported groups or raise maxDepth and re-export.",
+            }
+        )
+
     export_meta = export.get("export", {})
     doc = {
         "design_source": {
@@ -745,20 +1154,30 @@ def build(export: dict, app: str | None, config: dict) -> tuple[dict, Extractor]
             "truncated_count": export_meta.get("truncatedCount", 0),
             "has_geometry": board.has_geometry,
         },
-        "extraction_status": "INCOMPLETE",
-        "extraction_gaps": [],
+        "extraction_status": "INCOMPLETE" if gaps else "OK",
+        "extraction_gaps": gaps,
         "visual_analysis_scratchpad": "",
         "project_context": {
             "overall_ambiguity_rating": "MEDIUM",
             "blocking_issues": extractor.blocking_issues,
-            "convention_compliance": {k: int(extractor.counts[k]) for k in COMPLIANCE_KEYS},
         },
         "screens": screens,
         "ui_flow": flow,
     }
     if app:
         doc = {"app": app, **doc}
-    return doc, extractor
+
+    # Tallies live beside the context, not inside it: they are feedback about how
+    # the board was authored, while design_context is consumed for screens,
+    # elements and flow. The conservation proof travels with them.
+    report = {
+        "generated_at": export.get("exportedAt", ""),
+        "convention_compliance": {k: int(extractor.counts[k]) for k in COMPLIANCE_KEYS},
+        "screen_renames": extractor.screen_renames,
+    }
+    if app:
+        report["app"] = app
+    return doc, report, extractor
 
 
 def main() -> int:
@@ -768,6 +1187,7 @@ def main() -> int:
     parser.add_argument("--config", help="path to config/<app>.json")
     parser.add_argument("-o", "--output", help="write here instead of stdout")
     parser.add_argument("--report", action="store_true", help="summary on stderr")
+    parser.add_argument("--report-out", help="where to write the sidecar (default: <output>.report.json)")
     args = parser.parse_args()
 
     with open(args.input, encoding="utf-8") as handle:
@@ -785,17 +1205,22 @@ def main() -> int:
         except OSError as exc:
             print(f"warning: cannot read {args.config} ({exc}); using defaults", file=sys.stderr)
 
-    doc, extractor = build(export, args.app, config)
+    doc, report, extractor = build(export, args.app, config)
 
     text = json.dumps(doc, indent=2, ensure_ascii=False)
     if args.output:
         with open(args.output, "w", encoding="utf-8") as handle:
             handle.write(text + "\n")
+        report_path = args.report_out or re.sub(r"\.json$", "", args.output) + ".report.json"
+        report["design_context_file"] = args.output.rsplit("/", 1)[-1]
+        with open(report_path, "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
+        print(f"report written to {report_path}", file=sys.stderr)
     else:
         sys.stdout.write(text + "\n")
 
     if args.report:
-        counts = extractor.counts
+        counts = report["convention_compliance"]
         conditions = sum(1 for e in doc["ui_flow"] if e["condition"])
         print(
             f"screens {len(doc['screens'])} "

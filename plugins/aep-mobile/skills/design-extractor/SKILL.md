@@ -228,6 +228,24 @@ code-change-extractor; deep links come from `plan_context` test hooks and `rfc_c
 `navigation_changes`. An empty pre-build locator handoff, and a screen with no deep link, are the
 expected state — not gaps in the design.
 
+### The same rule covers every intent field
+`screen_notes` and `validations_and_edge_cases` describe **intent**, not structure. A board carries
+them only when a designer happened to write a note. The script derives what the board supports —
+note text routed by connector, else by position — and:
+
+- **Never raise a gap, at any severity, because one is empty.** A `BLOCKING` gap means a
+  schema-required field could not be filled *and* something downstream needs it. An empty intent
+  field is neither. A run once raised `BLOCKING` on `screens[].purpose` for all 33 screens; the
+  field had no consumer anywhere in the pipeline, and the claim that the board lacked the content
+  was false.
+- **`purpose` and `states_represented` are no longer produced at all.** Both were audited against
+  every skill and schema and had zero readers. They are optional in the schema so hand-authored
+  files stay valid; the extractor does not emit them. Do not reintroduce them, and never flag their
+  absence.
+- **The gaps you do report are the ones the script derived** — unresolvable connectors,
+  non-descriptive names, unreachable screens, truncation. They are computed from counters, not
+  judged. Add a gap of your own only for something genuinely semantic that the script cannot see.
+
 **`ConnectorEndpoint`** — exactly one of two forms, and the difference decides whether a flow is
 resolvable at all:
 ```jsonc
@@ -342,7 +360,7 @@ inbound connector while **six outgoing connectors hung off four of the others**.
 the representative alone dropped all six, and the screen looked like a dead end.
 
 An endpoint that resolves to the same `screen_id` at both ends is **intra-screen**: a state
-transition or an annotation, not navigation. Count it in `convention_compliance.connectors_intra_screen`
+transition or an annotation, not navigation. Count it in the sidecar's `connectors_intra_screen`
 and do not emit an edge — but never let it silently vanish into the unresolved bucket.
 
 **Component names come from the defaults; the app config only overrides them.** The names above are
@@ -371,7 +389,7 @@ always recorded), and a **flag** (when even the fallback is not defensible).
 
 Every fallback you take is an `extraction_gaps` entry with `severity: DEGRADED`, and every
 flag is a `project_context.blocking_issues` entry. Tally both into
-`project_context.convention_compliance` so the design team gets one actionable list per export.
+the sidecar `design_context.report.json` so the design team gets one actionable list per export.
 
 ### 1. Connectors point element → **screen**, not element → element
 - **Read.** `connectorStart.endpointNodeId` resolves to an element inside a screen frame;
@@ -449,7 +467,7 @@ Read every `reactions[]` entry on every node.
 | :--- | :--- | :--- |
 | `NODE` + `navigation: "NAVIGATE"` | real navigation | `ui_flow` edge, `navigation_kind: "NAVIGATE"` |
 | `NODE` + `"OVERLAY"` | dialog / bottom sheet | fold into the **source** screen's `screen_states` (see *Screen vs. state*), `navigation_kind: "OVERLAY"`; own `screen_id` only when ≥2 screens open it |
-| `NODE` + `"SWAP"` / `"CHANGE_TO"` | variant / state change | **not** a `ui_flow` edge — record on the element's `states_represented` |
+| `NODE` + `"SWAP"` / `"CHANGE_TO"` | variant / state change | **not** a `ui_flow` edge, and not recorded anywhere — a variant swap is presentation, and nothing downstream consumes element-level states |
 | `NODE` + `"SCROLL_TO"` | intra-screen scroll | **not** a `ui_flow` edge |
 | `BACK` | return to caller | edge with `navigation_kind: "BACK"` **only if** exactly one caller exists in `ui_flow`; otherwise flag |
 | `CLOSE` | dismiss overlay | closes the overlay state; no new screen |
@@ -526,10 +544,36 @@ Read every `reactions[]` entry on every node.
 - **Flag.** A `NOTE` node outside every screen, with no connector and no near neighbour → it belongs
   to nothing → `blocking_issues`, quoting the first ~100 characters so the designer can find it.
 
+### Label frames — a state written above the frame it describes
+Designers often wrap a state in a **label frame**: a narrow strip sitting directly above the frame it
+describes, holding one line of text (*"Not eligible to become upliner yet"*). The strip keeps Figma's
+default name, so a connector landing on it reads as a gibberish-named non-screen node.
+
+Two caption shapes, and the difference is width:
+
+| Shape | Size | Means |
+| :--- | :--- | :--- |
+| **State label** | ≈ the screen's width (360×37) | names the state of the **one** screen directly below |
+| **Lane / section banner** | ≫ any screen (1416×64) | heads a **band** of screens |
+
+**The script resolves these; it is a fallback, not a sweep.** It runs only when a connector has
+already failed to resolve and its destination has a non-descriptive name, and it requires all five
+of: text-only content (≤4 nodes), height under 150, not banner-width, **exactly one** column-aligned
+screen 0-120px below (≥80% horizontal overlap), and that screen being properly named. Anything less
+certain stays unresolved.
+
+Measured on a real board the test accepted the two genuine label frames and rejected an
+external-file pointer and the decision box — both scored **zero** aligned screens, so the fallback
+cannot reach a branch label even in principle.
+
+**What this means for design:** a label frame is genuinely useful — it is how the extractor learns a
+state name it could not otherwise see. Drawing the connector to the screen frame itself (standard #1)
+is still better, because then nothing has to be inferred.
+
 ### Convention compliance is reported, not enforced
 A non-compliant export still produces a full `design_context`. Falling back is the default
 behaviour; refusing to extract is not. What is forbidden is a silent fallback — every one is in
-`extraction_gaps`, and the totals are in `project_context.convention_compliance`.
+`extraction_gaps`, and the totals are in the sidecar `design_context.report.json`.
 
 ---
 
@@ -592,7 +636,6 @@ does not silently fail — it fails at code-gen, months later, as a test that ca
 | `design_source` | `exportedAt`, `scope`, `file.*`, `export.*` — copied verbatim for provenance |
 | `screens[].screen_id` / `screen_name` | `SCREEN`-classified board node's `name` (standard #3) |
 | `screens[].source_ref` | screen frame `id` |
-| `screens[].purpose` | frame name + the screen's own TEXT copy; never speculation |
 | `screens[].screen_states` | frame-name state qualifiers, `componentPropertyDefinitions.*.variantOptions`, `variantProperties` across sibling frames, and `OVERLAY` destinations folded in |
 | `screens[].state_kinds` | the canonical enum those states normalise to (`ERROR`, `LOADING`, `OFFLINE`, `DARK_THEME`, `LOCALE_VARIANT`, …) — this is what makes downstream category triggers deterministic |
 | `screens[].deep_link` | a `URL` action whose url starts with the config `deeplink_scheme`, or a `Note`/`Context` note that states one. Optional — see *Optional enrichment* |
@@ -602,20 +645,19 @@ does not silently fail — it fails at code-gen, months later, as a test that ca
 | `elements[].source_ref` | node `id` |
 | `elements[].type` | node `type` plus the design role token |
 | `elements[].label` | `characters`, or a `componentProperties` `TEXT` `value`, or the single TEXT descendant's `characters` |
-| `elements[].states_represented` | `variantProperties`, `componentPropertyDefinitions.*.variantOptions`, `SWAP`/`CHANGE_TO` reactions |
 | `elements[].interactions` | one entry per connector leaving the element, carrying `connector_id`, `destination_node_id` (the literal endpoint) and `destination_screen_id` (the resolved screen, omitted when it would be the element's own screen). Note tethers produce no entry |
 | `elements[].accessibility_id` / `platform_hints` | `annotations[].label` when it reads as an id (`a11y id: x`, `testID: x`, `resource-id: x`, or a bare `^[a-z0-9_]+$` token). Prose annotations go to `validations_and_edge_cases` instead |
 | `elements[].validations_and_edge_cases` | prose `annotations[].label` / `labelMarkdown`, and note connectors landing on the element |
 | `ui_flow[]` | `CONNECTOR` nodes (standard #1) + `reactions[]` (standard #2), deduped. On a contracted branch `condition` is **composed** — `<decision question> — <value>` — with the parts also exposed as `decision_question` / `decision_value` / `decision_node_id` |
 | `project_context.blocking_issues` | every **Flag** case above |
-| `project_context.convention_compliance` | the tallies from the five standards, plus the classifier counts (`decision_nodes`, `caption_endpoints`, `contracted_edges`, `lane_entry_inferred`) |
+| `design_context.report.json` (sidecar) | the tallies from the five standards, plus the classifier counts (`decision_nodes`, `caption_endpoints`, `label_frames_resolved`, `contracted_edges`, `lane_entry_inferred`, `screen_id_from_banner`) — **not** inside `design_context.json` |
 
 ---
 
 ## Model
 **Fast tier — Haiku / Composer 2.5, and that is now a safe claim** because the graph work moved into
 `scripts/extract_design_context.py`. Model tier no longer changes `screens`, `ui_flow` or
-`convention_compliance`: those come from the script byte-for-byte. What is left for the model is
+the sidecar's tallies: those come from the script byte-for-byte. What is left for the model is
 naming, purpose, note placement and gap wording — language work.
 
 This was not true before. The same skill on Haiku, executing the passes in prose, produced 6 edges
@@ -624,7 +666,7 @@ find yourself counting connectors or walking ancestors by hand, stop — the scr
 never happens.
 
 Escalate to a reasoning tier only for genuinely semantic calls: an app split that the page names
-don't settle, or a screen whose purpose isn't inferable from its frame name and copy.
+don't settle, or a note whose wording needs judgement to place.
 
 ## Tool usage & permissions
 Minimize tools requiring user approval:
@@ -679,6 +721,10 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/extract_design_context.py" \
     -o design_context.json --report
 ```
 
+This writes **two** files: `design_context.json`, and `design_context.report.json` beside it holding
+the convention tallies and the conservation proof. Hand the QA both — the report is the feedback
+loop back to design, and the checker needs it.
+
 Run it **once per app in scope** (see *Output files*), with that app's config and `--app` id.
 
 ### What the script returns, already correct
@@ -686,7 +732,8 @@ Run it **once per app in scope** (see *Output files*), with that app's config an
 `node_class`, `classified_by`), `elements[]` (filtered to connector triggers and interactive layers,
 with `element_id` built from the config's `role_vocabulary`), `ui_flow[]` (with `navigation_kind`,
 `edge_source`, `confidence`, `source_ref`, `trigger_element_id` where known),
-`project_context.blocking_issues`, `project_context.convention_compliance`, and `design_source`.
+`project_context.blocking_issues` and `design_source` — plus the sidecar `design_context.report.json`
+carrying the convention tallies and the conservation proof.
 
 `--report` prints a one-line summary to stderr. **Read it and repeat it in your reply** — it is how
 the QA sees coverage without opening the JSON.
@@ -701,11 +748,8 @@ The script leaves these empty because they need judgement, not traversal:
 | Field | What to write |
 | :--- | :--- |
 | `visual_analysis_scratchpad` | 2-3 sentences on what the board contains — screen count, how flows are drawn, what is missing |
-| `screens[].purpose` | What the screen is for. From the frame name and its copy; never speculation |
-| `screens[].screen_notes` | Note/Context text attached to that screen, plus a deep link if one is stated |
 | `screens[].deep_link` | Only if a `URL` action or a note states one (see *Optional enrichment*) |
 | `elements[].label` | Refine the script's raw first-text into the visible copy a tester would read |
-| `elements[].validations_and_edge_cases` | From annotations and note connectors landing on the element |
 | `extraction_gaps[]` | One entry per real gap, with `severity` and a concrete `action` |
 | `extraction_status` | `OK` only when `extraction_gaps` is empty |
 | `project_context.overall_ambiguity_rating` | `HIGH` if any screen or trigger was unresolved; `MEDIUM` if flows resolved through inference; `LOW` if every edge is `EXPLICIT` |
@@ -738,9 +782,9 @@ and say so in your reply.
   or shadow are not available to you and are not valid reasons for any decision.
 - **Never invent** — every gap (missing connector, unreachable screen, placeholder text) becomes a
   `blocking_issues` entry, not a filled assumption.
-- **Every fallback is recorded** — a `DEGRADED` note plus a tally in `convention_compliance`.
+- **Every fallback is recorded** — a `DEGRADED` note plus a tally in the sidecar.
 - **Never hand-compute what the script reports.** Screens, elements, `ui_flow` and
-  `convention_compliance` are the script's output, copied through untouched. Adding an edge you
+  the sidecar's tallies are the script's output, copied through untouched. Adding an edge you
   reasoned out, or adjusting a count so the buckets look tidier, breaks the one property that makes
   this skill model-independent.
 - Output design_context.json concisely — only functional elements that matter for test automation.
@@ -759,50 +803,39 @@ fallback for a missing accessibility ID.
 do not pick the app with the most frames and drop the rest, and never generate one app's
 `element_id`s under another app's `element_id_pattern`.
 
-## Validate — report, never block
-Run once **per output file** — every file in a multi-app split is validated separately, and the
-ID-pattern checks below are re-run per file against **that file's own** app convention.
+## Validate — one command, not a checklist
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/check_design_context.py" <design_context file> \
+    --schema "${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json" \
+    --report <design_context>.report.json
 ```
-python3 -c "import json,jsonschema; jsonschema.validate(
-  json.load(open('<each design_context file>')),
-  json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json')))"
-```
-- Passes → `extraction_status: OK` (when `extraction_gaps` is empty).
-- Fails → **still write the file.** Convert every validator error into an `extraction_gaps`
-  entry (`field` = the validator's JSON path, `severity: BLOCKING`) and set
-  `extraction_status: INCOMPLETE`. Never patch a value in just to make validation pass.
-- Validator unavailable (`jsonschema` not installed) → write the file, add a `DEGRADED` note on
-  `ENVIRONMENT`, **and say so in your reply to the user** — not only in the JSON, which they may
-  not open. Give them the command for their platform:
-  - macOS / Linux with a system Python: `pip3 install --break-system-packages jsonschema`
-    (plain `pip3 install` fails with an *externally-managed-environment* error under PEP 668)
-  - inside a virtualenv, or with `uv`: `pip install jsonschema` / `uv pip install jsonschema`
-  Never report an unvalidated output as valid — well-formed JSON is not schema conformance.
-  Do not attempt the install yourself; it is the user's environment to change.
-- **Duplicate `screen_id` — run this, it is the one check that catches a collapsed-screen failure.**
-  JSON Schema draft-07 cannot express uniqueness-by-property (`uniqueItems` compares whole objects,
-  and state frames differ in `source_ref`, so they slip through). Assert it explicitly:
-```
-python3 -c "import json,sys; d=json.load(open('<design_context file>')); ids=[s['screen_id'] for s in d['screens']]; dup=sorted({i for i in ids if ids.count(i)>1}); sys.exit('duplicate screen_id: '+', '.join(dup) if dup else 0)"
-```
-  A duplicate means state frames were emitted as separate screens instead of collapsed — the failure
-  that silently drops every flow drawn from the other states. On a real board this check would have
-  failed a run that reported 94 screen objects for 33 screens with **zero** schema errors.
-- **Connector conservation:** the script asserts this and exits non-zero on mismatch, so a clean run
-  is the proof. Never re-derive the buckets by hand; if the script failed, report it.
-- **Compliance block is complete:** every counter is present, including zeroes. A missing key means
-  the block was written by hand rather than by the script — an all-zero block and an absent block
-  look identical to a reader, which is exactly how a broken run passes review.
-- **ID patterns:** all `screen_id` and `element_id` values match regex exactly — `^[A-Z0-9_]+$` and
-  `^[A-Z0-9_]+\.[a-z0-9_]+(\.[a-z0-9_]+)?$` respectively — UPPER screen half, lower role half, no
-  stray punctuation. An id that is upper on both halves is as wrong as one that is lower on both. Every
-  `element_id` prefix is a `screen_id` that exists in `screens[]`, and every `from_screen_id` /
-  `to_screen_id` resolves to one too.
-- **Role vocabulary:** every emitted role suffix comes from the app config's `role_vocabulary`. A
-  suffix outside that list is a defect, not a judgement call.
-- **Fallback accounting:** every `INFERRED` edge, inferred role and inferred purpose has a matching
-  `DEGRADED` entry in `extraction_gaps`. A fallback with no note is a silent guess.
-- **Truncation:** if `export.truncatedCount > 0`, the note exists and names the truncated layers.
-- **Conciseness:** the script already filters elements to connector triggers and interactive layers.
-  An element count in the hundreds means the filter was bypassed — a real run emitted 2011 elements
-  where 27 were correct.
+
+**Always pass `--report`.** Without it, conservation, counters-complete and note accounting print
+`SKIPPED` and verify nothing — the checker says so out loud rather than passing quietly, but a
+SKIPPED run is not a checked run.
+
+Run it **per output file** and **paste its output into your reply verbatim**. It prints `OK` plus a
+one-line summary, or `FAILED` with one line per problem, and exits non-zero.
+
+This replaced a nine-bullet prose checklist because the checklist did not work: a run walked past it
+and reported `blocking_issues: []` while dropping 41 of 47 connectors — and passed schema validation
+while doing so. Every check in the script is one the schema cannot express or a model got wrong:
+
+| It checks | Because |
+| :--- | :--- |
+| schema conformance | well-formed JSON is not conformance |
+| duplicate `screen_id` | draft-07 cannot express uniqueness-by-property; duplicates mean state frames were not collapsed, which drops every flow drawn from the other states |
+| connector conservation | a silent drop is the failure mode that produced 6 edges where 13 exist |
+| every counter present | an absent counter and a zero look identical to a reader |
+| note accounting | note text vanishing without trace |
+| no `BLOCKING` gap on an intent field | the bug this section exists to prevent |
+| gaps vs `extraction_status` | an `INCOMPLETE` run that reports nothing |
+| dropped fields absent | `purpose` / `states_represented` creeping back |
+| ids resolve, no self-loops | dangling references, and intra-screen connectors emitted as navigation |
+
+**If it fails, fix the cause — never the output.** Editing the JSON to satisfy the checker
+reintroduces exactly the silent-wrongness it exists to catch. If `jsonschema` is missing it says so;
+give the user the install command and record a `DEGRADED` gap on `ENVIRONMENT`.
+
+**Never report a file as valid without pasting the checker's output.**
