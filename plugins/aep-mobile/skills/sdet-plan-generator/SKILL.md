@@ -185,6 +185,15 @@ Before scenario expansion, partition all FE-mobile test categories into tiers us
 
 Flow:
 1. **Emit the Coverage Matrix** to the user as a markdown table: `Category | Tier (🔒 Auto / ☐ Extra-adjacent / ☐ Extra-baseline) | Why`. The "Why" cites the exact input field that fired (auto) or the field checked as empty/absent (extra). Reasons are generated from *which field fired*, so they are feature-agnostic.
+   - **Directly under the matrix, print the projected balance** so the skew is visible at
+     selection time rather than after generation: the count of selected POSITIVE-producing
+     categories (`functional`/`positive`, plus the business-flow rule which always fires) vs
+     NON-POSITIVE-producing ones (negative/boundary/permission/interruption/migration/offline
+     + every `fe_baseline` group), and one line naming the risk if extras are ticked heavily —
+     *"selecting all 6 extras would put this suite at ~20% business coverage; Step 4c-mix will
+     force positive regeneration."*
+   - **`functional` / `positive` is never offered as removable**, even under an explicit QA
+     override — it is the suite's baseline, not a discretionary category.
 2. **Confirm via `AskUserQuestion`** (multiSelect), grouped into ≤4 themed questions, ≤4 options each. State the AUTO set as locked coverage; ask the QA which OPTIONAL EXTRAS to add. Each option's description = its auto-reason/rationale.
 3. **Headless / non-interactive fallback:** if no user is available to answer (e.g. CI), skip the prompt and proceed with the **AUTO** set only — never block generation.
 4. **Generate scenarios for `auto_selected ∪ optional_extras_selected`.** Stamp each scenario with `coverage_category` and a `source` (`input_derived` for AUTO/feature_adjacent, `fe_baseline`, or `qa_added`). Record the whole decision in `coverage_categories` (see Output spec) and echo it in `<feature_key>_analysis.md`.
@@ -199,7 +208,23 @@ Flow:
   - A missing context also means its Category Catalog triggers simply cannot fire (no failure) — those categories fall through to the extras tiers.
   - **Absent is not the same as malformed.** A context file that exists but fails its schema gets a `NEEDS_ANSWER` note naming the file and the validation error (Preflight step 3) — never a silent fall-through to "treat as absent", which drops coverage the QA believes they have.
 - **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and emit at least the required scenario(s) before doing anything else. Model-independence depends on this being a mechanical loop:
-  - **For each** `prd.business_requirements[i]` → emit ≥1 scenario whose `requirement_ref` = that `req_id`. (A P0 requirement always keeps ≥1.)
+  - **For each** `prd.business_requirements[i]` → emit ≥1 scenario **per distinct acceptance
+    criterion / stated behaviour** in that requirement, each with `requirement_ref` = that
+    `req_id`. One row per `req_id` is the floor, not the target: a requirement stating three
+    outcomes owes three positive scenarios. Where the requirement names user segments, entry
+    points, or valid states that change the expected outcome, **each gets its own positive
+    row** — these are alternate valid paths, not variants of one row. (A P0 requirement always
+    keeps ≥1.)
+  - **For each end-to-end business flow** → emit ≥1 multi-screen scenario that walks the whole
+    path and asserts the business outcome at its end. A business flow is a path through
+    `design_context.ui_flow[]` from a `flowStartingPoints` entry to a terminal/success screen,
+    or a journey the PRD narrates across more than one requirement. Stamp
+    `coverage_category: functional`, `source: input_derived`, and set `requirement_ref` to the
+    req_ids the flow satisfies (a flow may satisfy several — list them). **`ui_flow` is a
+    source of scenarios here, not only a navigation lookup for the Resolution Ladder** — a plan
+    that consumes `ui_flow` purely as plumbing has skipped this rule. These flows are the
+    backbone of the suite: generate them before any negative, boundary, or interruption
+    expansion.
   - **For each** `prd.boundary_conditions[i]` → emit ≥1 boundary scenario referencing that entry. Do NOT fold a boundary rule into an unrelated happy-path scenario as a substitute — it needs its own row. (This is the rule most often missed: e.g. a screenshot/privacy-mask boundary and a "shown once per customer" ordering boundary are distinct entries, each needing its own scenario.) The scenario's setup/Steps come from `edge_case_description`; its **expected outcome is taken verbatim from `proposed_default`**. If `proposed_default` is empty, still emit the scenario (the edge case must be exercised) but leave its Expected Result as a `NEEDS_ANSWER` open point — never invent the default behaviour.
   - **For each** `rfc.lifecycle_considerations[i]` (if the lifecycle category is selected) → emit ≥1 scenario for that `event`.
   - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario. **Flag record precedence: RFC is authoritative.** When the same flag appears in both, take the RFC `experimentation_matrix[]` record (`flag_key` verbatim + `default_variant` + `variants` + `kill_switch`) as the source of truth; the PRD entry is name-only corroboration. A PRD-only flag (absent from RFC) still gets a toggle scenario from its name **and** a `prd_vs_rfc_gap` note ("flag in PRD, undocumented in RFC — no variants/default"). An RFC-only flag is fine.
@@ -214,7 +239,25 @@ Flow:
 
 ### 2. Scenario Expansion
 Expand scenarios across:
-- **Core**: Happy path, boundary, negative, and contract flows.
+- **Core (generate these first — before any Mobile Extras or FE-Baseline expansion).** This is
+  the centre of gravity of the suite, and it is the part most often under-expanded. Expand, in
+  order:
+  1. **Primary happy path** per `prd.business_requirements[]` acceptance criterion — the
+     feature doing what it exists to do, with valid data, on the intended screen.
+  2. **End-to-end business flows** per the Hard Coverage Rule above — full journeys through
+     `design_context.ui_flow[]` / the PRD's narrated flow, asserting the business outcome at
+     the terminal screen, not just the next screen's render.
+  3. **Alternate valid paths** — every *valid* segment, persona, entry point, tier, or state
+     the PRD names that reaches the same outcome by a different route. These are positive
+     scenarios; do not collapse them into a single row or demote them to negatives.
+  4. **Positive state transitions** — the produced value surviving a legitimate re-entry
+     (re-open the screen, navigate away and back, pull-to-refresh) with the business state
+     intact. This is a positive assertion about persistence, distinct from the
+     process-death/interruption negatives below.
+  5. **Boundary, negative, and contract flows** — the valid-input edges, error copy, and API
+     contract behaviour required by the Hard Coverage Rules.
+  Steps 1–4 must exist before step 5 and the Extras below are expanded. Negative and edge
+  coverage complements the business suite; it never substitutes for it.
 - **Mobile Extras**: Generates mobile-specific scenarios (deep-link navigation, regional variants, feature flag toggles) and applies **Conditional Mobile-Native Interruption Rules** to ensure test suites remain highly focused and are only generated when technically valid. These rules are the `interruption_*` / `local_data_migration` / `permission` detection triggers surfaced in Step 0 — only expand a category the gate selected:
   - **Network Loss / API Timeout**: Inject a poor-network or server-timeout scenario *only* if `rfc_context.json` declares active `api_contract_changes` or `plan_context.json` specifies `observable_states` (API success/failure signals). Skip if the touchpoint screen is entirely static/local.
   - **App Backgrounding & Process Death**: Inject a backgrounding/kill-and-restore state preservation scenario *only* if the screens in `design_context.json` contain interactive elements (inputs, forms, toggles) or view models are active in `plan_context.json`. Skip on purely static/read-only informational screens.
@@ -386,7 +429,11 @@ As the single integration point, the generator must actively compute the followi
 This gate is what makes coverage model-independent: it does not rely on the model "remembering" to be thorough — it mechanically re-checks the generated scenario set against the inputs and forces a fix before output. Run it every time, in both interactive and headless modes.
 
 **4a. Build the required-coverage checklist** directly from the inputs (this is a deterministic list, not a judgment):
-- every `prd.business_requirements[].req_id`
+- every `prd.business_requirements[].req_id`, **plus each distinct acceptance criterion inside
+  it** (by index, so a 3-criterion requirement contributes 3 checklist items, not 1)
+- every **end-to-end business flow**: each `design_context.ui_flow[]` path from a
+  `flowStartingPoints` entry to a terminal/success screen, and each journey the PRD narrates
+  across multiple requirements
 - every `prd.boundary_conditions[]` entry (by index + `req_id` + `edge_case_description`)
 - every `rfc.lifecycle_considerations[].event` (if lifecycle selected)
 - every flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if flag category selected)
@@ -410,13 +457,39 @@ replace the assumed step with the unresolved-flag line) before writing any outpu
 is what would have caught steps starting cold at a destination screen with no login/navigation path
 before it; it must run on every pass, not just when something looks off.
 
+**4c-mix. Coverage-balance audit (mechanical, runs on every pass).** The checklist audit above
+proves every input item has *a* scenario; it cannot see that the suite is 3 happy paths and 25
+negatives. This step does.
+
+Classify every scenario in `scenario_list` into exactly one bucket:
+- **POSITIVE** — `coverage_category: functional`/`positive`, end-to-end business flows,
+  alternate valid paths, and positive state-transition scenarios (Step 2 Core items 1–4).
+- **NON-POSITIVE** — negative/error, boundary, permission-denied, interruption (network,
+  lifecycle, OS), local-data migration, offline, and every `source: fe_baseline` scenario.
+
+Compute `positive_pct = POSITIVE / (POSITIVE + NON_POSITIVE)`.
+
+**If `positive_pct < 50%` the plan is UNBALANCED — do not write any output file.** Return to
+Step 2 Core and generate the missing business coverage (re-read `prd.business_requirements[]`
+for un-expanded acceptance criteria and `design_context.ui_flow[]` for un-walked journeys),
+then re-run 4b and 4c-mix. **Never satisfy the ratio by deleting negative scenarios** — the
+negatives are Hard-Coverage-mandated and removing one drops real coverage; the only legal fix
+is adding the positive scenarios that were missed.
+
+If a genuine second pass still cannot reach 50% because the inputs really do describe a
+mostly-edge-case feature, write the files, record `action_taken: "under_target — inputs
+describe N requirements against M boundary/error entries"` in the balance block, and raise a
+`WORTH_CHECKING` note. That is an escape hatch for a real input shape, not a way to skip the
+regeneration pass — it is only legal *after* a documented retry.
+
 **4d. Emit the audit result** into the SDET plan as a `coverage_audit` object and echo it as a table in `<feature_key>_analysis.md`:
 ```
 "coverage_audit": {
-  "required": { "business_requirements": [...], "boundary_conditions": [...], "lifecycle_events": [...], "feature_flags": [...], "clickstream_events": [...] },
+  "required": { "business_requirements": [...], "business_flows": [...], "boundary_conditions": [...], "lifecycle_events": [...], "feature_flags": [...], "clickstream_events": [...] },
   "covered": { "<checklist_item>": ["<scenario title>", ...], ... },
   "gaps_closed_in_this_pass": ["<item that was missing and got a new scenario>", ...],
-  "still_blocked": [ { "item": "...", "reason": "expected behavior undefined (e.g. OQ-open)" } ]
+  "still_blocked": [ { "item": "...", "reason": "expected behavior undefined (e.g. OQ-open)" } ],
+  "balance": { "positive": 0, "non_positive": 0, "positive_pct": 0.0, "action_taken": "balanced | regenerated_positives | under_target — <reason>" }
 }
 ```
 An item may legitimately remain uncovered ONLY if its expected behavior is undefined in every input (e.g. an OPEN open-question). In that case it goes in `still_blocked` with the reason — it is never silently dropped.
@@ -556,6 +629,10 @@ A human-readable Markdown asset automatically generated for engineering leads de
    - A table mirroring `coverage_categories` with columns: `Category`, `Tier` (`Auto` / `Extra — feature-adjacent` / `Extra — fe_baseline`), `Selected?`, and `Why` (the field that fired, or why it was offered as an extra).
    - Note explicitly which extras were QA-added and that `fe_baseline` scenarios are hygiene, not spec-backed.
    - Immediately after the category table, render the **Coverage Audit table** from `coverage_audit`: one row per required checklist item (`Item`, `Type`, `Covered By` (scenario titles), `Status` = Covered / Blocked-with-reason). This is the reviewer-facing proof that every requirement and boundary rule has a scenario.
+   - Immediately after the Coverage Audit table, render a one-row **Coverage Balance** line from
+     `coverage_audit.balance`: `Positive (business/use-case) | Non-positive (negative, boundary,
+     hygiene) | Positive % | Action taken`. If `action_taken` is `under_target`, state the reason
+     in plain words directly beneath it, so a reviewer sees the tilt without opening the JSON.
    - Immediately after that, if any scenario in this plan carries `existing_case_ref`, render a **Regression Coverage table**: `Scenario` (title), `Existing Case` (the BrowserStack id), `Relationship` (`Duplicate — not re-created` / `Related — new variant still generated`). If `regression_context.json` itself was unavailable this run (Preflight step 8), say so in one line instead of an empty table — e.g. *"Regression check did not run this pass: <reason from the note>."*
 
 3. **Section 1: Missing Input Context:**
@@ -593,7 +670,15 @@ Flattened CSV strictly matching squad project template headers:
 **Column Value Directives**:
 - `Title`: Concise scenario description.
 - `State`: `"Active"`
-- `Priority`: `"P0"`, `"P1"`, or `"P2"`
+- `Priority`: `"P0"`, `"P1"`, or `"P2"` — **derived from business criticality, not from how
+  exotic the scenario is.** Map mechanically:
+  - `P0` — end-to-end business flows, primary happy paths, and any scenario whose
+    `requirement_ref` names a P0 requirement. The core use case is always P0.
+  - `P1` — alternate valid paths, positive state transitions, boundary conditions with a
+    stated `proposed_default`, and documented error/contract behaviour.
+  - `P2` — `source: fe_baseline` hygiene, interruption scenarios (network/lifecycle/OS), and
+    boundary conditions whose expected outcome is still an open point.
+  A hygiene or interruption scenario is never P0; a core business flow is never below P0.
 - `Type of Test Case`: `"Regression"` or `"Sanity"`
 - `Automation Status`: By default, set to `"Manual"` (representing not-automated) for newly generated test cases. Set to `"Automated"` only if matched with an existing automated test case.
 - `Preconditions`: Multiline string, **using a new line break (`\n`) after each statement/line.** Render, in this order, only the lines that actually apply:
@@ -761,7 +846,14 @@ The auto/extra partition is computed **solely** from the presence/values of sche
 - **Strict Determinism**: Do not extrapolate, infer, or hallucinate missing requirements. Map inputs directly to schemas without adding unmentioned fields or assumptions.
 - **No Fabricated Values (provenance rule)**: Every concrete identifier in the output — feature-flag keys, Litmus/experiment release IDs, deep-link URIs, clickstream event names, API paths, error codes, permission names — MUST be traceable to a specific input field. If a value is not present in any provided context, write `TBD — not in context` (or omit the field / use `null` where the schema allows) and record it as an Open Question in `<feature_key>_analysis.md`. Never invent a plausible-looking value (e.g. a UUID release ID or an event name like `birthday_animation_viewed`) to fill a gap. Clickstream event names in particular come ONLY from a non-empty `clickstream_events` array; if that array is empty, do not name events (per the Telemetry Rules).
 - **Category Gate**: AUTO-SELECTED categories (signal-derived) are the mandatory baseline and are always covered; only OPTIONAL EXTRAS are QA-discretionary. Generate for `auto_selected ∪ optional_extras_selected`. The P0 and boundary Hard Coverage Rules override the gate and are always covered.
-- **Coverage Audit is blocking**: The Step 4 Coverage Self-Audit Gate MUST pass (every checklist item either `covered` or in `still_blocked` with a reason) before any output file is written. Coverage is a mechanical property of the inputs, not a model judgment — two different models must produce the same `required` checklist and the same covered/blocked partition, even if scenario wording differs.
+- **Coverage Audit is blocking**: The Step 4 Coverage Self-Audit Gate MUST pass (every checklist item either `covered` or in `still_blocked` with a reason) — **including the 4c-mix balance audit** — before any output file is written. Coverage is a mechanical property of the inputs, not a model judgment — two different models must produce the same `required` checklist and the same covered/blocked partition, even if scenario wording differs.
+- **Business-flow primacy**: the suite's centre of gravity is what the feature is *for*. Core
+  business/use-case scenarios — happy paths, end-to-end journeys, alternate valid paths — are
+  generated first and form the majority of the suite. Negative, boundary, interruption and
+  hygiene scenarios are **complementary**: they are mandatory where the Hard Coverage Rules
+  require them, but they must never dominate. Enforced mechanically by Step 4c-mix's balance
+  audit, not left to model judgment. Never rebalance by deleting negative coverage — the only
+  legal fix is generating the business coverage that was missed.
 - **Baseline Determinism**: `fe_baseline` scenarios are curated hygiene, NOT input-derived requirements — stamp `source: "fe_baseline"` and note in `analysis.md` that expected behavior needs PM/dev confirmation. Never present them as spec-backed requirements.
 - **Contract Adherence**: Fail explicitly if *all* context files are missing or if essential keys within provided contexts are missing. However, do NOT fail if individual files (like `plan_context.json` or `rfc_context.json`) are absent; instead, proceed with the inputs that are provided, noting the missing contexts in `<feature_key>_analysis.md`.
 - **Format Precision**: Outputs must strictly conform to `sdet_plan.schema.json` and the 15-column squad CSV schema without altering column headers or ordering.
