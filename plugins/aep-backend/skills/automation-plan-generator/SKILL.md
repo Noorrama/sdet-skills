@@ -59,13 +59,40 @@ Each scenario's `test_data[]` contains one entry per independently provisioned e
 | `response_fields_used` | Set to `[]`. **Do not populate here.** TDG looks up the TDP catalog response schema and fills confirmed field names. |
 | `test_data_output` | Set to `null`. TDG writes enrichment here: `test_data_status`, `test_data_details.test_data_operations[]`, `test_buddy_prompt`. |
 
-### How to identify fixtures from scenario preconditions
+### How to identify fixtures from the full scenario context
 
-Read each scenario's `preconditions` from sdet_plan.json. Ask: *"What entity must exist, in what state, before this test can run?"*
+Read all four fields of each scenario from sdet_plan.json — not just preconditions:
 
-- Same entity + same required state → use the same `fixture_id` across those scenarios
-- Different state (e.g. customer with no card vs customer with card already saved) → different `fixture_id`
-- DB/infra setup (Testcontainers, migration) → `entity: DB_INFRA`
+| Field | What it contributes to fixture identification |
+|---|---|
+| `preconditions[]` | Prerequisite entities that must exist before the test runs — customer, driver, merchant, account |
+| `step_descriptions[].action` | Transactional records that must be set up or operated on — "3 completed bookings", "10 past transactions" |
+| `step_descriptions[].expected_result` | What data must be present to assert against — "returns list of 3 bookings with fare, distance" signals 3 booking records are needed |
+| `name` / `description` | Intent signals — words like "history", "statement", "summary", "list" indicate records are the core test data, not just a precondition |
+
+For each entity identified, ask two questions:
+1. *"Does this need to exist for test setup?"* (customer, driver) → goes into `test_data[]`
+2. *"Does this need to exist to be asserted against?"* (past bookings, transaction history) → also goes into `test_data[]`
+
+Both types need provisioning. The difference shows up in `category` and `count` — not in whether they appear in `test_data[]`.
+
+**Example — history scenario:**
+```
+preconditions:  "Customer CX-001 with valid token", "Driver DRV-001 active",
+                "3 completed bookings exist for CX-001 with DRV-001"
+expected_result: "returns array of 3 bookings with fare, distance, driver_name"
+```
+→ Three fixtures: CUSTOMER (setup), DRIVER (setup), BOOKING count=3 (the actual test data being asserted)
+
+**Example — card save scenario (no transactional records):**
+```
+preconditions:  "Customer CX-001 with wallet, card not previously saved"
+expected_result: "returns 200 with token"
+```
+→ One fixture: CUSTOMER (setup only — no prior records needed)
+
+**Grouping rule:** Same entity + same required state across scenarios → same `fixture_id` (reuse it).
+Different state → new `fixture_id`. DB/infra setup → `entity: DB_INFRA`.
 
 Assign `FIX-{FEATURE_PREFIX}-{sequence}` IDs ordered by first appearance across all scenarios.
 
