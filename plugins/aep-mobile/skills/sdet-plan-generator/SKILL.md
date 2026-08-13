@@ -417,6 +417,49 @@ Expand scenarios across:
   and `regression_context.navigation` actually resolved something, the same fields every run of
   this generator already has (or explicitly lacks) by Preflight.
 
+- **`automation_steps[]` — a MINIMAL, line-for-line restyle of `steps[]` into TapMind vocabulary.**
+  Placed **immediately after `steps[]`** in the scenario object. This is *not* a place to author a
+  full runnable automation script — the downstream **code-gen stage** fills in the exact constants,
+  credential tokens, toggle names, setup scaffolding and assertions. The generator's only job here
+  is a light 1-to-1 translation that hands code-gen a head start in the right dialect. So:
+  - **Roughly one automation line per `steps[]` line — same order, same count.** Do **not** inject
+    setup the manual step didn't mention (no extra `BLOCK_TOOLTIP`/`LOYALTY` toggles, no invented
+    skip-walkthrough lines), and do **not** substitute a deeplink for a step the manual flow
+    reaches by tapping. Convert what is there; add nothing.
+  - **One action per line — split every compound step.** No line may contain two actions. Split a
+    step at a top-level " and " / " then " that joins **distinct actions**, and inherit the first
+    fragment's leading verb into a verbless second fragment: "Skip the walkthrough and tooltip
+    prompts" → "Skip the walkthrough" + "Skip the tooltip prompts"; "Verify the red card marks the
+    end month and the green card marks the start month" → two "Verify …" lines. Applies to **all**
+    steps — but do **not** split where the connector is not a real action boundary:
+    - inside parentheses, or a comma-list ("monthly, yearly, and special tiers"), or an Oxford
+      ", and "/", then ";
+    - when the word **before** the connector is a preposition/article — "up to **and** including
+      2028", "for X **and** Y" — the "and" is mid-phrase, not two actions;
+    - when the left side is a bare shared verb (<2 words) whose object comes after the second verb
+      — "Uninstall **and** reinstall the app" stays one line (splitting would strand "Uninstall").
+  - **Use these TapMind helper calls verbatim, nothing invented; everything else is plain NLP text
+    (no `runStep(...)` wrapper — code-gen adds that):**
+    - a login / "launch + log in" step → `loginToDriver(<account>)` (or the app's login helper —
+      `loginWithRegisteredMerchant(...)`, etc.); the placeholder account is fine, code-gen resolves
+      the real credential constant.
+    - a step that explicitly opens a deep link → `openDeeplink("<uri from the step>")`.
+    - a step that explicitly sets/toggles a flag → `setDriverToggle(<flag_key>, <true|false>)`
+      (flag key verbatim from the step).
+    - **every other action or assertion → the plain step text itself** (`Tap the profile icon`,
+      `Verify 'Pusat bantuan' is visible`) — NOT wrapped in `runStep("...")`. The runStep ceremony,
+      exact constants, and any setup are the code-gen stage's job; here we only hand it clean,
+      single-action NLP lines in the right dialect.
+  - The exact toggle constants, credential constants, and any setup the code-gen stage needs are
+    **explicitly out of scope here** — never fabricate them. If a scenario maps to an existing case
+    that already has a real TapMind test (`regression_context.regression_tests[].tapmind_steps`),
+    prefer copying that verbatim over restyling, and cite the case id.
+  - **Nothing to automate** (out-of-scope/placeholder scenario) → `automation_steps: []`.
+  Add **one** `extraction_notes` entry (`follow_up: WORTH_CHECKING`) stating automation_steps are a
+  minimal TapMind-style restyle of the manual flow and the code-gen stage owns exact
+  constants/setup. `automation_steps` is **JSON-only** — not a CSV column (the CSV stays the
+  15-column manual template, fed by `steps[]`).
+
 ### 3. Gap Analysis & Alignment Engine
 As the single integration point, the generator must actively compute the following cross-stage gaps:
 - **`prd_vs_figma_gaps`**: Cross-reference `prd_context.json` with `design_context.json`. Check `business_requirements[].context_screen` against Figma `screens[].screen_id`. Identify missing screens/frames, text copy mismatches, or personas with no design representation.

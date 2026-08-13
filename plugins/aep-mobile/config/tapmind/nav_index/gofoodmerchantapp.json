@@ -1,0 +1,2359 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "gofoodmerchantapp",
+    "case_ids_indexed": 99,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "442851": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify auto-bid cpo end to end subscription by manually setting the bid value using slider",
+        "method": "verifyAutoBidCpoEndToEndSubscriptionWithAutomaticBid",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/oc/FungibleAdsOcTest.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut ke rincian iklan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Oke,sip"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe right on Jadwalkan iklan sekarang"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*circular_btn*[1]*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "442852": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyAutoBidCpoEndToEndSubscriptionWithManuallySelectingBid",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/oc/FungibleAdsOcTest.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut ke rincian iklan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Oke,sip"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Ubah' on the right of 'Mau ubah anggaran di atas?'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Simpan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe right on Jadwalkan iklan sekarang"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*circular_btn*[1]*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "565333": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Dynamic Upselling CPO RP with Booster OFF - end to end subscription flow with Promo history and details page",
+        "method": "verifyDynamicUpsellCpoRpEndToEndSubscriptionWithBoosterOn",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/DynamicUpsellCPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut atur jadwal"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut ke konfirmasi"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on join toggle on the right of 'Naikin jualan 20% pakai iklan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Konfirmasi & daftar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*circular_btn*[1]*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyDynamicUpsellCpoRpEndToEndSubscriptionWithBoosterOff",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/DynamicUpsellCPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut atur jadwal"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut ke konfirmasi"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Konfirmasi & daftar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*circular_btn*[1]*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "565390": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Dynamic Upselling CPO RP with Booster OFF - end to end subscription flow with Promo history and details page",
+        "method": "verifyDynamicUpsellCpoRpEndToEndSubscriptionWithBoosterOn",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/DynamicUpsellCPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut atur jadwal"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut ke konfirmasi"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on join toggle on the right of 'Naikin jualan 20% pakai iklan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Konfirmasi & daftar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*circular_btn*[1]*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "565391": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyDynamicUpsellCpoRpEndToEndSubscriptionWithBoosterOff",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/DynamicUpsellCPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut atur jadwal"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut ke konfirmasi"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Konfirmasi & daftar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*circular_btn*[1]*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "515867": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Standalone CPO RP with Evergreen Duration - end to end subscription flow with Promo history and details page",
+        "method": "verifyStandaloneCPORpEndToEndSubscription",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/CPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "515869": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Standalone CPO RP with Evergreen Duration - end to end subscription flow with Promo history and details page",
+        "method": "verifyStandaloneCPORpEndToEndSubscription",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/CPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Bundle CPO RP end to end subscription flow with Promo history and details page",
+        "method": "verifyStandaloneCPORpEndToEndSubscriptionWithEvergreenDuration",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/CPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "534122": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Bundle CPO RP end to end subscription flow with Promo history and details page",
+        "method": "verifyStandaloneCPORpEndToEndSubscriptionWithEvergreenDuration",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/CPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "515881": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Dynamic Bundle CPO RP - Fixed Duration - end to end subscription flow with Promo history and details page",
+        "method": "verifyBundleCPORpEndToEndSubscription",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/CPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on BundleCPO-TITLE"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "516085": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Dynamic Bundle CPO RP - Fixed Duration - end to end subscription flow with Promo history and details page",
+        "method": "verifyBundleCPORpEndToEndSubscription",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/CPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lanjut"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on BundleCPO-TITLE"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "546863": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyDynamicBundleCPORpEndToEndSubscription",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/CPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "546865": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyDynamicBundleCPORpEndToEndSubscription",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/ads/rp/CPORp.java",
+        "project_id": "174",
+        "suite_id": "28781857",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GoBizDeeplinks.valueOf(\"rpDetails\").getDeepLink() + rpId"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "727704": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyNewMenuOCEntryPoint",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/oc/NewMenuOCEntryPointTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4944948": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify upload photo SKU Bundle for Promo Special Price",
+        "method": "verifyUploadPhotoSkuBundleBuyOneGetOne",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/oc/SkuBundleOcTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4944963": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyUploadPhotoSkuBundleForPromoSpecialPrice",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/oc/SkuBundleOcTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4616444": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "createOcPromoMarkdownThenVerifyShareLinkPromoTrayIsShown",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/oc/MarkdownDiscountCartOcTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "615981": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify simplified rp list t2",
+        "method": "verifySimplifiedRpListT1",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedRpListTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "615983": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify simplified rp list t2",
+        "method": "verifySimplifiedRpListT1",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedRpListTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "615985": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify simplified rp list t2",
+        "method": "verifySimplifiedRpListT1",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedRpListTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "727690": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify simplified rp list t2",
+        "method": "verifySimplifiedRpListT1",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedRpListTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "615982": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifySimplifiedRpListT2",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedRpListTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "615986": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifySimplifiedRpListT2",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedRpListTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "615987": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifySimplifiedRpListT2",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedRpListTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "727691": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifySimplifiedRpListT2",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedRpListTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3827350": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyOutletSelectionScreenOnSKURCOnMOAccount",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/MultiOutletRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "\"gofoodmerchant://promo/package/rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'X' icon on top left corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lanjut pilih cabang' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067580": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Goal Based Dynamic MFP Bundle RP Details",
+        "method": "verifyGoalBasedDynamicMfpRpDetails",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/GoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067582": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Goal Based Fungible Ads Standalone RP Details And Subscription",
+        "method": "verifyGoalBasedDynamicMfpBundleRpDetails",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/GoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067584": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify goal based rp section on homepage",
+        "method": "verifyGoalBasedFungibleAdsStandaloneRpDetails",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/GoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067585": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify goal based rp section on homepage",
+        "method": "verifyGoalBasedFungibleAdsStandaloneRpDetails",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/GoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067569": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify nudge for grow aov",
+        "method": "verifyGoalBasedRpSectionOnHomepage",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/GoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5072090": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify campaign list for grow aov",
+        "method": "verifyNudgeForGrowAov",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/GoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067574": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyCampaignListForGrowAov",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/GoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418594": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Cancellation Flow Grow Daily Transaction",
+        "method": "verifyStarterPackGrowDailyTransactionSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418591": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Cancellation Flow Grow Daily Transaction",
+        "method": "verifyStarterPackGrowDailyTransactionSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418577": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Cancellation Flow Grow Daily Transaction",
+        "method": "verifyStarterPackGrowDailyTransactionSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418576": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Cancellation Flow Grow Daily Transaction",
+        "method": "verifyStarterPackGrowDailyTransactionSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418575": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Cancellation Flow Grow Daily Transaction",
+        "method": "verifyStarterPackGrowDailyTransactionSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418578": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify starter pack grow daily transaction in promo list and detail page",
+        "method": "verifyCancellationFlowGrowDailyTransaction",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418588": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify efficient pack grow daily transaction subscription flow",
+        "method": "verifyStarterPackGrowDailyTransactionPostBookingFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418585": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify efficient pack grow daily transaction subscription flow",
+        "method": "verifyStarterPackGrowDailyTransactionPostBookingFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418582": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify efficient pack grow daily transaction subscription flow",
+        "method": "verifyStarterPackGrowDailyTransactionPostBookingFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418593": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify efficient pack grow daily transaction in promo list and detail page",
+        "method": "verifyEfficientPackGrowDailyTransactionSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418590": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify efficient pack grow daily transaction in promo list and detail page",
+        "method": "verifyEfficientPackGrowDailyTransactionSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418587": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify aggressive pack grow daily transaction subscription flow",
+        "method": "verifyEfficientPackGrowDailyTransactionPostBookingFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418584": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify aggressive pack grow daily transaction subscription flow",
+        "method": "verifyEfficientPackGrowDailyTransactionPostBookingFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418592": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify aggressive pack grow daily transaction in promo list and detail page",
+        "method": "verifyAggressivePackGrowDailyTransactionSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418589": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify aggressive pack grow daily transaction in promo list and detail page",
+        "method": "verifyAggressivePackGrowDailyTransactionSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418586": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify modify budget button in active and deactivated state",
+        "method": "verifyAggressivePackGrowDailyTransactionPostBookingFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418583": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify modify budget button in active and deactivated state",
+        "method": "verifyAggressivePackGrowDailyTransactionPostBookingFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418580": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify modify budget will delete current package and create new package new user",
+        "method": "verifyStarterPackGrowDailyTransactionModifyBudgetFlowActiveAndDeactivatedState",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418581": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify modify budget will delete current package and create new package new user",
+        "method": "verifyStarterPackGrowDailyTransactionModifyBudgetFlowActiveAndDeactivatedState",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5494065": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify modify budget will delete current package and create new package grow daily transaction",
+        "method": "verifyModifyBudgetWillDeleteCurrentPackageAndCreateNewPackageNewUser",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418579": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov starter package subscription flow",
+        "method": "verifyModifyBudgetWillDeleteCurrentPackageAndCreateNewPackageGrowDailyTransaction",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421547": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov efficient package subscription flow",
+        "method": "verifyGrowAovStarterPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421544": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov efficient package subscription flow",
+        "method": "verifyGrowAovStarterPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421541": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov efficient package subscription flow",
+        "method": "verifyGrowAovStarterPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421538": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov efficient package subscription flow",
+        "method": "verifyGrowAovStarterPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421534": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov efficient package subscription flow",
+        "method": "verifyGrowAovStarterPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421532": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov efficient package subscription flow",
+        "method": "verifyGrowAovStarterPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421546": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Cancellation Flow Grow Aov",
+        "method": "verifyGrowAovEfficientPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421543": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Cancellation Flow Grow Aov",
+        "method": "verifyGrowAovEfficientPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421540": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Cancellation Flow Grow Aov",
+        "method": "verifyGrowAovEfficientPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421537": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify Cancellation Flow Grow Aov",
+        "method": "verifyGrowAovEfficientPackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421531": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov aggressive package subscription flow",
+        "method": "verifyCancellationFlowGrowAov",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421545": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov pre-subscription flow",
+        "method": "verifyGrowAovAggressivePackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421542": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov pre-subscription flow",
+        "method": "verifyGrowAovAggressivePackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421539": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov pre-subscription flow",
+        "method": "verifyGrowAovAggressivePackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421536": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov pre-subscription flow",
+        "method": "verifyGrowAovAggressivePackageSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421550": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov modify budget is not present in deactivated state",
+        "method": "verifyGrowAovPreSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421549": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov modify budget is not present in deactivated state",
+        "method": "verifyGrowAovPreSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421548": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify grow aov modify budget is not present in deactivated state",
+        "method": "verifyGrowAovPreSubscriptionFlow",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421535": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyGrowAovModifyBudgetIsNotPresentInDeactivatedState",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Strategi Agresif' text"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "421533": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyGrowAovModifyBudgetIsNotPresentInDeactivatedState",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/SimplifiedGoalBasedRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Strategi Agresif' text"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4590855": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyMarkdownCartPromo",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/MarkDownCartRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "\"gofoodmerchant://promo/package/rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on x icon on top left corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on input field below 'Maksimum pengeluaran' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "write '1' into input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Input '1' into max expense input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Clear the text input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write '2000' into input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Input '2000' into max expense input field"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4590854": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyMarkdownDeliveryPromo",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/MarkDownCartRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "\"gofoodmerchant://promo/package/rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on x icon on top left corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on input field below 'Maksimum pengeluaran' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "write '1' into input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Input '1' into max expense input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Clear the text input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write '2000' into input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Input '2000' into max expense input field"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4590853": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyMarkdownCartPercentagePromo",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/app/promo/rp/MarkDownCartRpTest.java",
+        "project_id": "174",
+        "suite_id": "28782774",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "\"gofoodmerchant://promo/package/rpId"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on x icon on top left corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on input field below 'Maksimum pengeluaran' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Write '10' into input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Clear the text input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Write '121000' into input field"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451764": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyMerchantCanSeeRpDynamicPromoInListRPBannerAndVerifyRPDetailsPage",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/mxpromo/SKUDynamicPromoTest.java",
+        "project_id": "174",
+        "suite_id": "28784017",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(MXPromoTestData.OWNER_1)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451765": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyMerchantCanSeeRpDynamicPromoInListRPBannerAndVerifyRPDetailsPage",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/mxpromo/SKUDynamicPromoTest.java",
+        "project_id": "174",
+        "suite_id": "28784017",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(MXPromoTestData.OWNER_1)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451766": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyMerchantCanSeeRpDynamicPromoInListRPBannerAndVerifyRPDetailsPage",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/mxpromo/SKUDynamicPromoTest.java",
+        "project_id": "174",
+        "suite_id": "28784017",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(MXPromoTestData.OWNER_1)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451773": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyMerchantCanSeeRpDynamicPromoInListRPBannerAndVerifyRPDetailsPage",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/mxpromo/SKUDynamicPromoTest.java",
+        "project_id": "174",
+        "suite_id": "28784017",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(MXPromoTestData.OWNER_1)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451802": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyMerchantCanSeeRpDynamicPromoInListRPBannerAndVerifyRPDetailsPage",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/mxpromo/SKUDynamicPromoTest.java",
+        "project_id": "174",
+        "suite_id": "28784017",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(MXPromoTestData.OWNER_1)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "67891423": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify non owner have 1FA process when login with email",
+        "method": "E2EMerchantLoginTest",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/Identity.java",
+        "project_id": "174",
+        "suite_id": "28782709",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8100066915)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap On gofood text or its ancestor"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5158109": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyNonOwnerHave1FAProcessWhenLoginWithEmail",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/Identity.java",
+        "project_id": "174",
+        "suite_id": "28782709",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithEmailStep(andri.bestriand+manager7821@gojek.com)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4562205": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyAddOutletbuttonShownWithFrsValidation",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/MA.java",
+        "project_id": "174",
+        "suite_id": "28782614",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(81231230404)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until Outlet saya is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Outlet saya"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Tambah cabang button is clickable"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Tambah cabang button is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4803243": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyUiLockPhoneVerificationWhenBiometricIsNotSetUp",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/Surface.java",
+        "project_id": "174",
+        "suite_id": "28782490",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8100059810)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Transaksi hari ini text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on user icon on top right corner. left of mail icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on pengaturan akun"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verifikasi Kunci Layar HP is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4720177": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Manager not able to see transaction commission",
+        "method": "verifyOwnerAbleToSeeTransactionCommission",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/analyticsandtransactions/NonFoodAnalyticsAndTransactions.java",
+        "project_id": "174",
+        "suite_id": "28783195",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8127333085)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Transaksi hari ini text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Transaksi hari ini"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Sip text if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4720176": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Unverified owner able to see transaction commission",
+        "method": "managerAbleToSeeTransactionCommission",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/analyticsandtransactions/NonFoodAnalyticsAndTransactions.java",
+        "project_id": "174",
+        "suite_id": "28783195",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8800032315)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Transaksi hari ini text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Transaksi hari ini"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Sip text if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4720178": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Admin able to see transaction commission",
+        "method": "unverifiedOwnerAbleToSeeTransactionCommission",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/analyticsandtransactions/NonFoodAnalyticsAndTransactions.java",
+        "project_id": "174",
+        "suite_id": "28783195",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8295936481)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Transaksi hari ini"
+          },
+          {
+            "kind": "nlp",
+            "text": "Dismiss Sip text if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4676865": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Cashier not able to see transaction commission",
+        "method": "adminAbleToSeeTransactionCommission",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/analyticsandtransactions/NonFoodAnalyticsAndTransactions.java",
+        "project_id": "174",
+        "suite_id": "28783195",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8295936482)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Transaksi hari ini"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Sip text if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4676864": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Owner able to view and filter transaction history",
+        "method": "cashierNotAbleToSeeTransactionCommission",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/analyticsandtransactions/NonFoodAnalyticsAndTransactions.java",
+        "project_id": "174",
+        "suite_id": "28783195",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsAppCashier(8800032314)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lainnya"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Transaksi hari ini"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Sip text if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4676863": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify outlet filter is working",
+        "method": "ownerAbleToViewAndFilterTransactionHistory",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/analyticsandtransactions/NonFoodAnalyticsAndTransactions.java",
+        "project_id": "174",
+        "suite_id": "28783195",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8127333085)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Transaksi hari ini text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Transaksi hari ini"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Sip' text if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*icon_btn*' on the left of 'Dari Iklan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the first dropdown icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Simpan button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the second dropdown icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hari ini text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Terapkan filter button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Jenis transaksi: GoFood is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Periode transaksi: Hari ini is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4911950": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify date filter is working",
+        "method": "verifyOutletFilterIsWorking",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/analyticsandtransactions/NonFoodAnalyticsAndTransactions.java",
+        "project_id": "174",
+        "suite_id": "28783195",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8127333085)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Laporan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Laporan performa resto"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood Merchant"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Konfirmasi pilihan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Semua outlet dropdown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on QA Env text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Terapkan button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4911949": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify owner are able to view QR code features",
+        "method": "verifyDateFilterIsWorking",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/analyticsandtransactions/NonFoodAnalyticsAndTransactions.java",
+        "project_id": "174",
+        "suite_id": "28783195",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8100032314)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Laporan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Laporan performa resto"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood Merchant"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Konfirmasi pilihan button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hari ini dropdown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Bulan ini text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Terapkan button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3839646": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyOwnerAbleToViewQrCode",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/analyticsandtransactions/NonFoodAnalyticsAndTransactions.java",
+        "project_id": "174",
+        "suite_id": "28783195",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8100059810)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Transaksi hari ini"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on QR code icon on top right"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5553716": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyFRSCheckOnqqLifetimeAccountToDoAddOutlet",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/mpm/MpmAddOutletTest.java",
+        "project_id": "174",
+        "suite_id": "28782663",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(8137673451)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until Outlet saya is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Outlet saya"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until X button is clickable"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on cross icon button or text to dismiss the popup"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Tambah cabang button is clickable"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Tambah cabang button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Belum bisa tambah cabang lagi popup is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "599793": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify FRS check on the account that NOT eligible for Change User Information button",
+        "method": "verifyEligibilityOfChangeUserInformationButton",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/mpm/MpmChangeUserInfoTest.java",
+        "project_id": "174",
+        "suite_id": "28782663",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(MpmTestData.CUI_ELIGIBLE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify eligibility of Change User Information button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "599826": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyFrsCheckOnTheAccountThatNotEligibleForChangeUserInformationButton",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/mpm/MpmChangeUserInfoTest.java",
+        "project_id": "174",
+        "suite_id": "28782663",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(MpmTestData.CUI_NOT_ELIGIBLE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify FRS check on the account that NOT eligible for Change User Information button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "598136": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": "Verify merchant is NOT eligible of change bank account button",
+        "method": "verifyMerchantIsEligibleOfChangeBankAccountButton",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/mpm/MpmChangeBankAccountTest.java",
+        "project_id": "174",
+        "suite_id": "28782663",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(MpmTestData.CBANN_ELIGIBLE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that change button of bank account is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "598647": [
+      {
+        "module": "gofoodmerchantapp",
+        "title": null,
+        "method": "verifyMerchantIsNotEligibleOfChangeBankAccountButton",
+        "source_file": "gofoodmerchantapp/src/test/java/tests/merchant/mpm/MpmChangeBankAccountTest.java",
+        "project_id": "174",
+        "suite_id": "28782663",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithWhatsApp(MpmTestData.CBANN_NOT_ELIGIBLE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that change button of bank account is NOT shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

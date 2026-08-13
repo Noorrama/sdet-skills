@@ -67,6 +67,19 @@
           "preconditions": { "type": "string", "description": "Environment/config preconditions from the case." },
           "navigation": { "type": "array", "items": { "type": "string" }, "description": "Ordered steps to REACH the screen under test (distinct from the case's own steps), e.g. ['Login (bypass)', 'Open deeplink gojek://gocore/settings', 'Tap Edit Profile']." },
           "nav_source": { "type": "string", "enum": ["deeplink", "existing_test", "figma", "needs_answer"], "description": "Which rung of the navigation ladder produced 'navigation'. needs_answer = no deeplink, no existing test, no Figma nav map — recorded and flagged, not guessed." },
+          "tapmind_steps": {
+            "type": "array",
+            "description": "If this case has an existing TapMind (NLP-framework) test in tapmind-mobile-tests, its real, repo-verified step sequence — copied verbatim from config/tapmind/nav_index/<module>.json, joined by case_number. Ordered, kind-tagged: {kind: nlp|deeplink|login|toggle|network, text}. The sdet-plan-generator reuses this verbatim as a scenario's automation_steps when the scenario maps to this case (rather than authoring TapMind steps from scratch). Absent when no TapMind counterpart exists for the case — never invented.",
+            "items": {
+              "type": "object",
+              "required": ["kind", "text"],
+              "additionalProperties": false,
+              "properties": {
+                "kind": { "type": "string", "enum": ["nlp", "deeplink", "login", "toggle", "network"], "description": "nlp = runStep() NLP command; deeplink = openDeeplink() uri; login = login* helper (the backdoor login); toggle = set*Toggle() flag setup; network = controlNetwork()." },
+                "text": { "type": "string", "description": "The step content verbatim from the TapMind test (runStep string, deeplink uri, or helper call with its args)." }
+              }
+            }
+          },
           "variant_dimensions": {
             "type": "object",
             "description": "The population-partitioning attributes this existing case actually runs against, copied verbatim from the BrowserStack case's own custom fields (e.g. {\"DriverType\": [\"IDBike\", \"IDCar\"], \"Country v2\": [\"Indonesia\"]}). App-agnostic: whatever custom fields the project defines (DriverType/ServiceType for driver apps, payment-instrument or user-tier fields for consumer apps) are carried through as-is. This is the ONLY observed enumeration of which variants real coverage splits on, so the sdet-plan-generator can fan out test_data fixtures per variant instead of inventing or omitting one. Keys and values are never normalised or invented — absent field means the case declared none.",

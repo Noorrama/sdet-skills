@@ -1,0 +1,365 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "care-platform",
+    "case_ids_indexed": 6,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "3232052": [
+      {
+        "module": "care-platform",
+        "title": "Chatbot Flow of Driver Completed My Order Without Delivering It",
+        "method": "verifyCreateChatBotForFoodCompletedOrder",
+        "source_file": "care-platform/src/test/java/io/gojek/careplatform/tests/chatbot/ChatbotODSTransactionTests.java",
+        "project_id": "176",
+        "suite_id": "28797257",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Mock location to latitude: -6.243785881051176 and longitude: 106.80293086767028"
+          },
+          {
+            "kind": "nlp",
+            "text": "Get me a food booking in driver completed state from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Do a Backdoor login"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Gojek Home visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Activity' tab"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'History' tab"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the completed Food order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Need help' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap button with 'Chat with' label"
+          },
+          {
+            "kind": "nlp",
+            "text": "If modal is showing up, tap on 'Start Chat' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3282486": [
+      {
+        "module": "care-platform",
+        "title": null,
+        "method": "verifyChatbotFlowForDriverCompletedMyOrderWithoutDeliveringIt",
+        "source_file": "care-platform/src/test/java/io/gojek/careplatform/tests/chatbot/ChatbotODSTransactionTests.java",
+        "project_id": "176",
+        "suite_id": "28797257",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(create a food booking with complete state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Activity' tab"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'History' tab"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the completed Food order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Need help' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Driver issue' category"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Driver completed my order without delivering it' issue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap button with 'Chat with' label"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 'Hi' text is visible for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 'Quick chat' to be visible for 120 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'No, I want to report this issue' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3232724": [
+      {
+        "module": "care-platform",
+        "title": null,
+        "method": "verifyUserIsAbleToOpenAllTopicsOptions",
+        "source_file": "care-platform/src/test/java/io/gojek/careplatform/tests/articles/ArticleTest.java",
+        "project_id": "176",
+        "suite_id": "28797259",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a customer from tdp)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojek://gocore/help"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5585445": [
+      {
+        "module": "care-platform",
+        "title": "Verify report an issue via article deeplink",
+        "method": "verifyTheSuccessTicketCreationScreen",
+        "source_file": "care-platform/src/test/java/io/gojek/careplatform/tests/ticketCreation/TicketCreationInAppArticleTests.java",
+        "project_id": "28797259",
+        "suite_id": "28797259",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a customer from tdp)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojek://gocore/help/article/0f05a913-9846-40ec-b60e-dfedd4a0311b"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Submit a report' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Please select'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Pay directly at merchant' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Choose one'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'No'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Input 'This is the reason for creating ticket via submit article on Gojek Help' on Share your experience input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'fitria.fiviyan@gojek.com' on eg:abc@gmail.com input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'SUBMIT' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify ticket creation success screen is displayed with 'Your report has been submitted' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Thank you. We'll respond as soon as possible. Please check the updates on 'My Tickets' page.' text is displayed on ticket creation success screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Go to My Tickets' button is displayed on ticket creation success screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Go to Help page' button is displayed on ticket creation success screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'nav_close' button is displayed on ticket creation success screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3232575": [
+      {
+        "module": "care-platform",
+        "title": "Verify report an issue via article deeplink",
+        "method": "verifyTheSuccessTicketCreationScreen",
+        "source_file": "care-platform/src/test/java/io/gojek/careplatform/tests/ticketCreation/TicketCreationInAppArticleTests.java",
+        "project_id": "28797259",
+        "suite_id": "28797259",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a customer from tdp)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojek://gocore/help/article/0f05a913-9846-40ec-b60e-dfedd4a0311b"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Submit a report' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Please select'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Pay directly at merchant' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Choose one'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'No'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Input 'This is the reason for creating ticket via submit article on Gojek Help' on Share your experience input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'fitria.fiviyan@gojek.com' on eg:abc@gmail.com input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'SUBMIT' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify ticket creation success screen is displayed with 'Your report has been submitted' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Thank you. We'll respond as soon as possible. Please check the updates on 'My Tickets' page.' text is displayed on ticket creation success screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Go to My Tickets' button is displayed on ticket creation success screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Go to Help page' button is displayed on ticket creation success screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'nav_close' button is displayed on ticket creation success screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3232737": [
+      {
+        "module": "care-platform",
+        "title": null,
+        "method": "verifyReportAnIssueViaArticleDeeplink",
+        "source_file": "care-platform/src/test/java/io/gojek/careplatform/tests/ticketCreation/TicketCreationInAppArticleTests.java",
+        "project_id": "28797259",
+        "suite_id": "28797259",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a customer from tdp)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojek://gocore/help/article/0f05a913-9846-40ec-b60e-dfedd4a0311b"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Submit a report' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Please select'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Pay directly at merchant' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Choose one'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'No'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Input 'This is the reason for creating ticket via submit article on Gojek Help' on Share your experience input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'fitria.fiviyan@gojek.com' on eg:abc@gmail.com input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'SUBMIT' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 1 minute"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Go to My Tickets' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify ticket is created successfully by checking ticket title 'New ticket is created'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}
