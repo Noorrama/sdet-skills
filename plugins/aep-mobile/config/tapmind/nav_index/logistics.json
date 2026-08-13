@@ -1,0 +1,1223 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "logistics",
+    "case_ids_indexed": 41,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "C4619066": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifySummaryScreenForSPMDCompletedOrder",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gosend/orderSummaryScreen/SPMDTests.java",
+        "project_id": "176",
+        "suite_id": "28796556",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink.replace(\"{}\", orderId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-304095": [
+      {
+        "module": "logistics",
+        "title": "Verify adding custom weight greater than 100 kg for large weight displays the disclaimer with gobox deeplink",
+        "method": "testAddingCustomWeightOver20KgForSmallCategory",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gosend/orderReviewScreen/WeightScreenTests.java",
+        "project_id": "176",
+        "suite_id": "28796556",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 30 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.ORDER_REVIEW_SCREEN)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Size & weight text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up only once"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on custom text under What's your package weight?* title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Enter weight' text box"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter the text '20' in the text box"
+          },
+          {
+            "kind": "nlp",
+            "text": "Hide the keyboard only"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Save' button at the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-304097": [
+      {
+        "module": "logistics",
+        "title": "Verify for SPMD service type large weight category is disabled",
+        "method": "testAddingCustomWeightOver100KgForLargeCategory",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gosend/orderReviewScreen/WeightScreenTests.java",
+        "project_id": "176",
+        "suite_id": "28796556",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 30 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.ORDER_REVIEW_SCREEN)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Size & weight' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Large' text displayed beside the Medium text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up only once"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'custom' text under 'What's your package weight?*' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Enter weight' text box"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter the text '200' in the text box"
+          },
+          {
+            "kind": "nlp",
+            "text": "Hide the keyboard only"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Save' button at the bottom of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-304094": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "testForSpmdLargeWeightCategoryIsDisabled",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gosend/orderReviewScreen/WeightScreenTests.java",
+        "project_id": "176",
+        "suite_id": "28796556",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 30 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.ORDER_REVIEW_SCREEN)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Add delivery button on the right side of booking details text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Search delivery location...' text box displayed below Deliver a package to text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter the text 'Central Jakarta District Court' in the text box"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap the visible search result with the exact text 'Central Jakarta District Court'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Size & weight' text"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C5407938": [
+      {
+        "module": "logistics",
+        "title": "Verify that clicking the on the Delivery code section displays the FAF screen",
+        "method": "testPlacingInstant2wOrderWithOtpOtgAndInsurance",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gosend/orderReviewScreen/OTPSecureDeliveryTests.java",
+        "project_id": "176",
+        "suite_id": "28796556",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 30 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.ORDER_REVIEW_SCREEN)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up only once"
+          },
+          {
+            "kind": "nlp",
+            "text": "Turn on the toggle besides '30 minutes delivery guarantee' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pay with' text above 'select payment method' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Cash' option is displayed in 'Select payment method' list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Select Cash as payment method"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Order Instant - Bike button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Try this feature' text on the pop up card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Okay,got it' text on the pop up card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Order Instant - Bike button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C5407916": [
+      {
+        "module": "logistics",
+        "title": "Verify that placing order with OTP and OTG and no insurance",
+        "method": "testTappingOnDeliveryCodeSectionDisplaysOTPSecureFAFScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gosend/orderReviewScreen/OTPSecureDeliveryTests.java",
+        "project_id": "176",
+        "suite_id": "28796556",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 30 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.ORDER_REVIEW_SCREEN)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up only once"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Delivery code' text below 'Upgrade your delivery with additional features!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C4619159": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "testPlacingInstantBikeOrderWithOTGAndOTPAndNoInsurance",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gosend/orderReviewScreen/OTPSecureDeliveryTests.java",
+        "project_id": "176",
+        "suite_id": "28796556",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 30 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.ORDER_REVIEW_SCREEN_WITHOUT_INSURANCE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up only once"
+          },
+          {
+            "kind": "nlp",
+            "text": "Turn on the toggle below 'Free' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the click to action button on the pop up card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Turn on the toggle besides '30 minutes delivery guarantee' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pay with' text above 'select payment method' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Cash' option is displayed in 'Select payment method' list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Select Cash as payment method"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Order Instant - Bike button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C5087972": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "testPlacingInstant2wOrderWithCODAndCash",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gosend/orderReviewScreen/CODTests.java",
+        "project_id": "176",
+        "suite_id": "28796556",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 30 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.ORDER_REVIEW_SCREEN_WITH_OTP_OTG)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Cash on delivery (COD) (Optional) text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'E.g. Rp100.000' text box"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter the text '10000' in the text box"
+          },
+          {
+            "kind": "nlp",
+            "text": "Hide the keyboard only"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Save' text on the pop up card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the payment method row directly above the 'Order Instant-Bike' button it may show text like 'Pay with', a wallet name e.g. 'Gopay', or a masked card number e.g. '*1114'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Cash' option is displayed in 'Select payment method' list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Select Cash as payment method"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Order Instant - Bike button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624013": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyBookingCreationOfTransportingGoodsVanOrderWithCashBySearchLocation",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624014": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyBookingCreationOfMovingGoodsPickupBoxOrderWithGoPayBySelectingAddressOnMaps",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.GOPAY_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C4618765": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyBookingCreationOfScheduleTransportingGoodsEngkelOrderWithCash",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyScheduleOrderScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624015": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyBookingCreationOfScheduleTransportingGoodsEngkelOrderWithCash",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624016": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyGoBoxOrderCancellationOnFindingDriverScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C4618678": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyGoBoxOrderCancellationOnFindingDriverScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624017": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyUserIsAbleToSaveDraftsAndView",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624018": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyUserIsAbleToDeleteSavedDraft",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Edit' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up only once"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Remove icon below 'Edit' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Yes,delete' button at the bottom of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624019": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyUserIsAbleToEditSavedDraft",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Edit' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up only once"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Remove icon below 'Edit' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Yes,delete' button at the bottom of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624020": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyUserIsAbleToNavigateToTransactionHistoryFromGoBoxHome",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on icon at the top right corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Activity' screen is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624021": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyGoBoxHomeScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624022": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyDestinationAddressScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624023": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyPickupAddressScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624024": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyGoBoxOrderReviewScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624025": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyLocationDetailsScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624026": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyListItemsToDeliverScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C4618793": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyListItemsToDeliverScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624027": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyAddHelperScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624028": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyInsuranceScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624029": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyPaymentDetailsWidget",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624030": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyUserIsAbleToSaveAddress",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Star icon besides Pickup address text"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624031": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyScheduleOrderScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624032": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyEditScheduleOrderScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624033": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyOTWToPickUpScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink.replace(\"{}\", orderId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C4618787": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyOTWToPickUpScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink.replace(\"{}\", orderId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624034": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyOTWToDropOffScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink.replace(\"{}\", orderId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624035": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyOrderSummaryScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink.replace(\"{}\", orderId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624036": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyChooseAVehicleScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToGoboxHome(CustomerPaymentType.CASH_CUSTOMER)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624037": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyOrderCancellationOnOTWPickUpScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink.replace(\"{}\", orderId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624038": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyTrackYouDeliveryScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink.replace(\"{}\", orderId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624039": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyVouchersScreen",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.GOBOX_HOME)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on voucher text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoBox Voucher' screen is displayed'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Available vouchers text is displayed'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624040": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyApplyAndRemoveVoucher",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.GOBOX_HOME)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-624041": [
+      {
+        "module": "logistics",
+        "title": null,
+        "method": "verifyVoucherBookingCreationOfMovingGoodsPickupBoxOrderWithCash",
+        "source_file": "logistics/src/test/java/io/gojek/logistics/tests/gobox/GoboxRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "28796767",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "commonUtils.returnDeeplinkByPlatform(Deeplinks.GOBOX_HOME)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

@@ -1,0 +1,1283 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "growth-platform",
+    "case_ids_indexed": 45,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "518559": [
+      {
+        "module": "growth-platform",
+        "title": "Verify the correct title copy is displayed on the simplified home screen",
+        "method": "verifyContinueAsGuestCTA",
+        "source_file": "growth-platform/src/test/java/home/SignupTest.java",
+        "project_id": "176",
+        "suite_id": "28797109",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for login button to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the Continue as Guest CTA is displayed on the landing page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue as Guest CTA"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "518565": [
+      {
+        "module": "growth-platform",
+        "title": "Verify four tiles are displayed on the simplified home screen",
+        "method": "verifyTitleCopyOnSimplifiedHome",
+        "source_file": "growth-platform/src/test/java/home/SignupTest.java",
+        "project_id": "176",
+        "suite_id": "28797109",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for login button to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the Continue as Guest CTA is displayed on the landing page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Continue as Guest CTA"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the 'Thank you for visiting' is displayed on the simplified home screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "518567": [
+      {
+        "module": "growth-platform",
+        "title": "Verify tapping Sign up CTA redirects to phone input screen",
+        "method": "verifyTheFourTileOnSimplifiedHome",
+        "source_file": "growth-platform/src/test/java/home/SignupTest.java",
+        "project_id": "176",
+        "suite_id": "28797109",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Continue as Guest CTA"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that there are tiles displayed below the heading on the simplified home screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Count the number of tiles displayed and verify the count is 4"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "519086": [
+      {
+        "module": "growth-platform",
+        "title": "Service CTA prompts login and signup on tap.",
+        "method": "verifySignupCTAClickRedirectsToPhoneInputScreen",
+        "source_file": "growth-platform/src/test/java/home/SignupTest.java",
+        "project_id": "176",
+        "suite_id": "28797109",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Continue as Guest CTA"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the 'Log in' and 'Sign up' CTA is displayed on the simplified home screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Sign up CTA"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the 'Enter your phone number' title is displayed on the phone input screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "519095": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyServiceCTAPromptsLoginAndSignup",
+        "source_file": "growth-platform/src/test/java/home/SignupTest.java",
+        "project_id": "176",
+        "suite_id": "28797109",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Continue as Guest CTA"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the first tile displayed on the simplified home screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the 'Enter your phone number' title is displayed on the phone input screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294762": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Tier 2 user tier pill from home",
+        "method": "verifyTier1UserPill",
+        "source_file": "growth-platform/src/test/java/loyalty/homescreen/HomeScreenTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndVerify()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294763": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Tier 3 user tier pill from home",
+        "method": "verifyTier2UserPill",
+        "source_file": "growth-platform/src/test/java/loyalty/homescreen/HomeScreenTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndVerify()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294764": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Tier 4 user tier pill  from home",
+        "method": "verifyTier3UserPill",
+        "source_file": "growth-platform/src/test/java/loyalty/homescreen/HomeScreenTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndVerify()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294765": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyTier4UserPill",
+        "source_file": "growth-platform/src/test/java/loyalty/homescreen/HomeScreenTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndVerify()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294758": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Tier 2 user curtain drop from home",
+        "method": "verifyTier1CurtainDrop",
+        "source_file": "growth-platform/src/test/java/loyalty/homescreen/CurtainDropTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndVerify()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294759": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Tier 3 user curtain drop from home",
+        "method": "verifyTier2CurtainDrop",
+        "source_file": "growth-platform/src/test/java/loyalty/homescreen/CurtainDropTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndVerify()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294760": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Tier 4 user curtain drop  from home",
+        "method": "verifyTier3CurtainDrop",
+        "source_file": "growth-platform/src/test/java/loyalty/homescreen/CurtainDropTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndVerify()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294761": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyTier4CurtainDrop",
+        "source_file": "growth-platform/src/test/java/loyalty/homescreen/CurtainDropTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndVerify()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294766": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Tier 2 user profile banner from home",
+        "method": "verifyTier1ProfileBanner",
+        "source_file": "growth-platform/src/test/java/loyalty/profilescreen/ProfileBannerTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToProfile()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294767": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Tier 3 user profile banner from home",
+        "method": "verifyTier2ProfileBanner",
+        "source_file": "growth-platform/src/test/java/loyalty/profilescreen/ProfileBannerTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToProfile()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294768": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Tier 4 user profile banner  from home",
+        "method": "verifyTier3ProfileBanner",
+        "source_file": "growth-platform/src/test/java/loyalty/profilescreen/ProfileBannerTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToProfile()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294769": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyTier4ProfileBanner",
+        "source_file": "growth-platform/src/test/java/loyalty/profilescreen/ProfileBannerTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToProfile()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294787": [
+      {
+        "module": "growth-platform",
+        "title": "Verify navigation by clicking on next arrow from My profile",
+        "method": "verifyNavigationFromTierPillFromHome",
+        "source_file": "growth-platform/src/test/java/loyalty/landingpage/LandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify user is seeing current tier as `Super star` and benefits are visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294788": [
+      {
+        "module": "growth-platform",
+        "title": "Verify landing page for tier 1 user",
+        "method": "verifyNavigationByClickingNextArrowFromProfile",
+        "source_file": "growth-platform/src/test/java/loyalty/landingpage/LandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on super star"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on cancel button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on cancel button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on got it button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify current tier is super star and benefits are visible at bottom"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294789": [
+      {
+        "module": "growth-platform",
+        "title": "Verify landing page for tier 2 user",
+        "method": "verifyLandingPageForTier1User",
+        "source_file": "growth-platform/src/test/java/loyalty/landingpage/LandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify user is seeing current tier as Super star"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294790": [
+      {
+        "module": "growth-platform",
+        "title": "Verify landing page for tier 3 user",
+        "method": "verifyLandingPageForTier2User",
+        "source_file": "growth-platform/src/test/java/loyalty/landingpage/LandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify user is seeing current tier as Rising star"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294791": [
+      {
+        "module": "growth-platform",
+        "title": "Verify landing page for tier 4 user",
+        "method": "verifyLandingPageForTier3User",
+        "source_file": "growth-platform/src/test/java/loyalty/landingpage/LandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify user is seeing current tier as New star"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294792": [
+      {
+        "module": "growth-platform",
+        "title": "Verify all the navigation points on landing screen",
+        "method": "verifyLandingPageForTier4User",
+        "source_file": "growth-platform/src/test/java/loyalty/landingpage/LandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify user is seeing current tier as Member"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294793": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyAllNavigationPointsOnLandingScreen",
+        "source_file": "growth-platform/src/test/java/loyalty/landingpage/LandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Gofood cancellation access is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Gofood cancellation access"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Let's GoFood now button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the button at the top right corner of the screen if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until see all is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on second search result with text 'Redeem'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify voucher info page is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until see all is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on see all vouchers"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify voucher catalog page is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back from top left corner"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until check all questions is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on check all questions"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Frequently asked questions page is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294770": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Priority Support tap action in My Profile screen",
+        "method": "verifyPrioritySupportInMyProfile",
+        "source_file": "growth-platform/src/test/java/loyalty/prioritysupport/PrioritySupportTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Priority is visible in help & reports section"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Priority is visible in Profile screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294776": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Priority Support in Order History screen",
+        "method": "verifyPrioritySupportTapInMyProfile",
+        "source_file": "growth-platform/src/test/java/loyalty/prioritysupport/PrioritySupportTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Priority is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Priority"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify chat with us is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294771": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Priority Support in GoFood Order Summary screen",
+        "method": "verifyPrioritySupportInOrderHistory",
+        "source_file": "growth-platform/src/test/java/loyalty/prioritysupport/PrioritySupportTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Activities"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Priority Help is visible in Activities screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294773": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Priority Support in GoFood On the Way screen",
+        "method": "verifyPrioritySupportInGoFoodOrderSummary",
+        "source_file": "growth-platform/src/test/java/loyalty/prioritysupport/PrioritySupportTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Activities"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the first visible Food order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Priority Help is visible in Order Summary screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294775": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyPrioritySupportInGoFoodOnTheWay",
+        "source_file": "growth-platform/src/test/java/loyalty/prioritysupport/PrioritySupportTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Track"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until priority help is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Priority is visible in On the Way screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294794": [
+      {
+        "module": "growth-platform",
+        "title": "Verify vouchers section in landing page",
+        "method": "verifyVoucherCatalogPage",
+        "source_file": "growth-platform/src/test/java/loyalty/vouchercatalog/VoucherCatalogTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until `See all` is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on `See all` or `see all`"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify all available vouchers are displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294795": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Redeem CTA on each voucher",
+        "method": "verifyVouchersSectionInLandingPage",
+        "source_file": "growth-platform/src/test/java/loyalty/vouchercatalog/VoucherCatalogTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Redeem rewards now! is visible if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem rewards now! is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify redeem is displayed in vouchers section"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294796": [
+      {
+        "module": "growth-platform",
+        "title": "Verify voucher detail page",
+        "method": "verifyRedeemCTAOnEachVoucher",
+        "source_file": "growth-platform/src/test/java/loyalty/vouchercatalog/VoucherCatalogTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Redeem rewards now! is visible if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem rewards now! is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on second search result with text 'Redeem'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify voucher detail page is displayed with redeem button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294800": [
+      {
+        "module": "growth-platform",
+        "title": "Verify purchase flow for each redeemable voucher",
+        "method": "verifyVoucherDetailsPage",
+        "source_file": "growth-platform/src/test/java/loyalty/vouchercatalog/VoucherCatalogTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Redeem rewards now! is visible if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem rewards now! is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on second search result with text 'Redeem'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify voucher detail page is displayed with redeem button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Redeem button from the bottom"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Back to the previous page is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294797": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Use Now flow on vouchers under your vouchers section in vouchers catalog page",
+        "method": "verifyPurchaseFlowForEachRedeemableVoucher",
+        "source_file": "growth-platform/src/test/java/loyalty/vouchercatalog/VoucherCatalogTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Redeem rewards now! is visible if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem rewards now! is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on second search result with text 'Redeem'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Redeem button from the bottom"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Back to the previous page is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "294798": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyUseNowFlowOnVouchersInCatalogPage",
+        "source_file": "growth-platform/src/test/java/loyalty/vouchercatalog/VoucherCatalogTests.java",
+        "project_id": "176",
+        "suite_id": "38266086",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Redeem rewards now! is visible if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem rewards now! is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until Redeem button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on second search result with text 'Redeem'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Redeem button from the bottom"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify back to previous page is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back to previous page button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until see all is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on see all link"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Use button on first voucher"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify no error is coming on Use Now deeplink navigation"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5575431": [
+      {
+        "module": "growth-platform",
+        "title": "Verify savings info nudge is not displayed during active flash sale",
+        "method": "verifyLifetimeSavingsComponentsAreNotDisplayedOnSubscriptionsHome",
+        "source_file": "growth-platform/src/test/java/subscriptions/savings/LifetimeSavingsTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify lifetime savings  banner is not displayed on subscription home"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5575428": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyLifetimeSavingsComponentsAreNotDisplayedWhenTheFlashSaleIsRunning",
+        "source_file": "growth-platform/src/test/java/subscriptions/savings/LifetimeSavingsTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify lifetime savings  banner is not displayed on subscription home"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451832": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyFlashSaleDisplayedOnSubscriptionsHome",
+        "source_file": "growth-platform/src/test/java/subscriptions/flashsales/FlashSaleTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify flash sale is displayed on subscription home"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4885893": [
+      {
+        "module": "growth-platform",
+        "title": "Verify removal of voucher from voucher list from subscriptions homes",
+        "method": "verifyVoucherList",
+        "source_file": "growth-platform/src/test/java/subscriptions/voucherlist/VoucherListTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 30 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on the VoucherEntryPoint or discount off pill in the bottom sheet if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 30 second"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4885895": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyVoucherRemoval",
+        "source_file": "growth-platform/src/test/java/subscriptions/voucherlist/VoucherListTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 30 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on the discount off pill in the bottom sheet"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 30 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on apply button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on the VoucherEntryPoint or discount off pill in the bottom sheet if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Remove Button"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 10 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on the view promo in the bottom sheet"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 10 second"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5016872": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifyFrictionNudgeTests",
+        "source_file": "growth-platform/src/test/java/subscriptions/frictionnudge/FrictionNudgeTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Subscribe screen is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button element at the top left corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify friction nudge screen is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify friction nudge savings is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify friction nudge benefit is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify best promo is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "621781||621784||621785||621786": [
+      {
+        "module": "growth-platform",
+        "title": "Verify soft sell nudge is displayed for 2W ",
+        "method": "verifyHardsellNudgeIsDisplayed",
+        "source_file": "growth-platform/src/test/java/subscriptions/atctransport/AtcTransportTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap confirm pickup point if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap continue to confirm the far pickup point if it is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "621788": [
+      {
+        "module": "growth-platform",
+        "title": "Verify ATC banner is displayed on the transport voucher list",
+        "method": "verifySoftsellNudgeIsDisplayed",
+        "source_file": "growth-platform/src/test/java/subscriptions/atctransport/AtcTransportTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap confirm pickup point if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap continue to confirm the far pickup point if it is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "621791": [
+      {
+        "module": "growth-platform",
+        "title": "Verify Subscription can be added from the bottom sheet",
+        "method": "verifyAtcBannerIsDisplayed",
+        "source_file": "growth-platform/src/test/java/subscriptions/atctransport/AtcTransportTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap confirm pickup point if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap continue to confirm the far pickup point if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap voucher pill on the bottom widget"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Add' button on the subscription banner"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "621789": [
+      {
+        "module": "growth-platform",
+        "title": null,
+        "method": "verifySubscriptionCanBeAddedFromTheBottomSheet",
+        "source_file": "growth-platform/src/test/java/subscriptions/atctransport/AtcTransportTests.java",
+        "project_id": "176",
+        "suite_id": "28796907",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "commonLoginStepsUIVersion()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap confirm pickup point if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap continue to confirm the far pickup point if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap goride muraaah nudge under the address bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Add' button on the bottom widget banner"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

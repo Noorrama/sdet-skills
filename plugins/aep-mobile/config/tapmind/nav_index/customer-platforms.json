@@ -1,0 +1,131 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "customer-platforms",
+    "case_ids_indexed": 3,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "C3184555": [
+      {
+        "module": "customer-platforms",
+        "title": "Verify user is able to logout",
+        "method": "TestCountrySwitchWithConfirmationPopUp",
+        "source_file": "customer-platforms/src/test/java/tests/CPHome/FCTCustomerPlatformHome.java",
+        "project_id": "PR-176",
+        "suite_id": "2880292",
+        "country": "Indonesia",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Mock location to latitude: -6.25531900600511 and longitude: 106.81074998465665"
+          },
+          {
+            "kind": "nlp",
+            "text": "Return a customer from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Do a backdoor login"
+          },
+          {
+            "kind": "nlp",
+            "text": "Mock location to latitude: 1.27580000000000 and longitude: 103.84720000000000"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Welcome to Singapore is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Welcome to Singapore page is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C3177422": [
+      {
+        "module": "customer-platforms",
+        "title": null,
+        "method": "VerifyUserIsAbleToLogout",
+        "source_file": "customer-platforms/src/test/java/tests/CPHome/FCTCustomerPlatformHome.java",
+        "project_id": "PR-176",
+        "suite_id": "2880292",
+        "country": "Indonesia",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Mock location to latitude: -6.25531900600511 and longitude: 106.81074998465665"
+          },
+          {
+            "kind": "nlp",
+            "text": "Return a customer from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Do a backdoor login"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open gojekstaging://gocore/settings"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until Manage account is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Manage account"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Log out"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Logout"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Welcome to Gojek page is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C3385461": [
+      {
+        "module": "customer-platforms",
+        "title": null,
+        "method": "testSmokeCPHomeSG",
+        "source_file": "customer-platforms/src/test/java/tests/CPHome/SmokeCPHomeSG.java",
+        "project_id": "PR-176",
+        "suite_id": "2880292",
+        "country": "Singapore",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Mock location to latitude: 1.290270 and longitude: 103.851959"
+          },
+          {
+            "kind": "nlp",
+            "text": "Return a user with phone number 623796828702 from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Do a backdoor login"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify if a Maps component is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

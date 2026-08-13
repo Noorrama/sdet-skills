@@ -1,0 +1,2003 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "transport",
+    "case_ids_indexed": 57,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "373701": [
+      {
+        "module": "transport",
+        "title": "Verify E2E instant booking from station with mqm force instant pickup point",
+        "method": "verify_Instant_Button_OnEstimate",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/NewInstantEraTests/NewInstantEraTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on confirm pickup point button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close popup dialog if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "373704": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verify_Instant_E2E_Booking_from_station_with_mqm_force_instant",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/NewInstantEraTests/NewInstantEraTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on confirm pickup point button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close popup dialog if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Select payment' or 'Payment method' or 'GoPay' or 'Cash'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Cash"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Instant' or 'Use Instant' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap the circular button or back button on top left corner of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "373705": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verify_Instant_E2E_Booking_from_airport_with_mqm_Non_force_instant",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/NewInstantEraTests/NewInstantEraTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on confirm pickup point button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close popup dialog if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Select payment' or 'Payment method' or 'GoPay' or 'Cash'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Cash"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Instant' or 'Use Instant'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap the circular button or back button on top left corner of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "373702": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verify_Instant_E2E_Booking_for_instant_with_regular_ride",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/NewInstantEraTests/NewInstantEraTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on confirm pickup point button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close popup dialog if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Select payment' or 'Payment method' or 'GoPay' or 'Cash'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Cash"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with 'Instant' button at the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Use Instant"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3125208": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "testTransportHomeScreenLoads",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/CASmoke/CASmokeTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a new customer from TDP)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Destination Input Field and Destination Search Bar is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "transport",
+        "title": "Verify Promo details on transport Home ",
+        "method": "Verify_TransportHome",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '*circular_btn*' or 'BackButton' is visible Button is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Map Widget is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3271765": [
+      {
+        "module": "transport",
+        "title": "Verify octopus Bluebird is unable to edit the destination ",
+        "method": "octopusValidatePriceShouldComingInRange",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/EstimateTests/OctopusRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3287984": [
+      {
+        "module": "transport",
+        "title": "Verify octopus Bluebird is unable to edit the pickup ",
+        "method": "octopusBluebirdUnableToEditDestination",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/EstimateTests/OctopusRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverPickup(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver on the way to destination screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up to Expand the driver allocated screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3287983": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "octopusBluebirdUnableToEditPickup",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/EstimateTests/OctopusRegressionTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverFound(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up to Expand the driver allocated screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600424": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verify_YuuOnVoucherPill",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/EstimateTests/YuuPwPTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5123809": [
+      {
+        "module": "transport",
+        "title": "Verify multiselect on SG with FDS on estimate screen",
+        "method": "verify_MultiSelect_Estimate",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/EstimateTests/MultiSelectTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5123842": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verify_FDS_WithMultiServiceTypesSelected_SG",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/EstimateTests/MultiSelectTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Select payment' or 'Payment method' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until Cash is displayed in 'Select a payment method' page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on to select Cash text as payment method"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll inside the expanded card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the next unchecked service type checkbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Confirm button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Find driver' or 'Book' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "482672": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verifyScheduleRidePromotionalBanner",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/features4W/ScheduleBookingRevampTests.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap GoCar button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on green banner displayed above minimap"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the '\u2190' back button located at the top left corner"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on green banner displayed above minimap"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap GoCar button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "482673": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verifyScheduleRideNudgeChipBehaviour",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/features4W/ScheduleBookingRevampTests.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap GoCar button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Schedule a trip' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "482674": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verifyFooterPromotionalBannerForScheduledBooking",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/features4W/ScheduleBookingRevampTests.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap GoCar button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the screen until 'Airport runs, on time and stress-free' text is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Schedule a trip' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the '\u2190' back button located at the top left corner"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the screen until 'Airport runs, on time and stress-free' text is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Schedule a trip' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "482677": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verifyScheduleOnboardingScreenUIComponents",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/features4W/ScheduleBookingRevampTests.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap GoCar button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the screen until 'Airport runs, on time and stress-free' text is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Schedule a trip' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Ok, got it' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "549622": [
+      {
+        "module": "transport",
+        "title": "Validate the flight info component on POI screen",
+        "method": "verifySearchByFlightNumberPlaceholder",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/features4W/SearchByFlightNumberTest.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap GoCar button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on input field"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "549625": [
+      {
+        "module": "transport",
+        "title": "Validate the flight detail component on schedule time picker",
+        "method": "verifyFlightInfoComponentOnPoiScreen",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/features4W/SearchByFlightNumberTest.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap GoCar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Your destination or flight number'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter the text 'GA838' in 'Your destination or flight number' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify date and time of flight is visible text"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "549627": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verifyFlightInfoComponentOnScheduleTimePicker",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/features4W/SearchByFlightNumberTest.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap GoCar button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Your destination or flight number'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter the text 'GA838' in 'Your destination or flight number' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on first search result with text Soekarno"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Confirm pickup point button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap dismiss or close button if popup dialog is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Select payment' or 'Payment method' or 'GoPay' or 'Cash'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Cash"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on schedule ride button on the left of 'Find driver' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2863329": [
+      {
+        "module": "transport",
+        "title": "ID : Verify OTW deeplink",
+        "method": "verifyTHSDeeplink",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Common/DeeplinkTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "transport",
+        "title": "Verify Promo details on transport Home ",
+        "method": "Verify_TransportHome",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '*circular_btn*' or 'BackButton' is visible Button is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Map Widget is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "transport",
+        "title": "Validate all components of new user home page ID_BIKE",
+        "method": "Verify_TransportPromotionalBannerOnHome",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLogin(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap GoRide button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3506608": [
+      {
+        "module": "transport",
+        "title": "Verify new Share trip deeplink",
+        "method": "verifyOTWDeeplink",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Common/DeeplinkTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverArrived(mobileFlowConfig)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "581304": [
+      {
+        "module": "transport",
+        "title": "Verify new OTW page deeplink",
+        "method": "verifyInvitePageDeeplink",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Common/DeeplinkTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Create GoRide booking with a driver assigned state)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Safe Trip Kit header on the top of nudge sheet"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on Share trip"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "581305": [
+      {
+        "module": "transport",
+        "title": "Verify new deeplink of Tipping page",
+        "method": "verifyOTWPageDeeplink",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Common/DeeplinkTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a GoRide booking with a driver found state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text contains Send a chat to driver is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "581308": [
+      {
+        "module": "transport",
+        "title": "Verify new deeplink of feedback page",
+        "method": "verifyTippingPageDeeplink",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Common/DeeplinkTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a GoRide booking with a driver found state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text contains The driver will receive 100% of the tip."
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "581309": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verifyFeedbackPageDeeplink",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Common/DeeplinkTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a GoRide booking with a driver found state)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify feedback screen is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5176920": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_E2EBookingPNFlow",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Common/PushNotificationTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithTDPBooking(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the your ride has arrived push notification"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2474075": [
+      {
+        "module": "transport",
+        "title": "Verify OTW Tipping Banner",
+        "method": "Verify_OTWTipping",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Tipping/TippingOTWTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverArrived(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for driver profile photo to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the driver profile photo"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until 'Tip driver' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Tip driver button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that multiple tip option cards are displayed in a grid layout, showing amounts such as Rp5.000, Rp10.000, Rp20.000, Rp25.000, and Rp30.000, along with an 'Enter tip' option."
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Rp5.000"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4195413": [
+      {
+        "module": "transport",
+        "title": "Verify OTW Tipping Banner",
+        "method": "Verify_OTWTipping",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Tipping/TippingOTWTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverArrived(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for driver profile photo to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the driver profile photo"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until 'Tip driver' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Tip driver button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that multiple tip option cards are displayed in a grid layout, showing amounts such as Rp5.000, Rp10.000, Rp20.000, Rp25.000, and Rp30.000, along with an 'Enter tip' option."
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Rp5.000"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4399857": [
+      {
+        "module": "transport",
+        "title": "Verify OTW Tipping Banner",
+        "method": "Verify_OTWTipping",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Tipping/TippingOTWTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverArrived(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for driver profile photo to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the driver profile photo"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until 'Tip driver' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Tip driver button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that multiple tip option cards are displayed in a grid layout, showing amounts such as Rp5.000, Rp10.000, Rp20.000, Rp25.000, and Rp30.000, along with an 'Enter tip' option."
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Rp5.000"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2819586": [
+      {
+        "module": "transport",
+        "title": "Verify OTW Custom Tipping Min amount error",
+        "method": "Verify_OTWTippingBanner",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Tipping/TippingOTWTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverArrived(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up gesture on the collapsed card to expand"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until 'Cancel booking' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Tip driver button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify preset tip amounts are shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on any preset tip amount"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4195412": [
+      {
+        "module": "transport",
+        "title": "Verify OTW Custom Tipping Min amount error",
+        "method": "Verify_OTWTippingBanner",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Tipping/TippingOTWTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverArrived(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up gesture on the collapsed card to expand"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until 'Cancel booking' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Tip driver button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify preset tip amounts are shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on any preset tip amount"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2482439": [
+      {
+        "module": "transport",
+        "title": "Verify OTW Custom Tipping Max amount error",
+        "method": "Verify_MinCustomTip",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Tipping/TippingOTWTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverArrived(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the driver profile photo"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until 'Tip driver' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Tip driver button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that multiple tip option cards are displayed in a grid layout, showing amounts such as Rp5.000, Rp10.000, Rp20.000, Rp25.000, and Rp30.000, along with an 'Enter tip' option."
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Enter tip' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify custom tip screen is shown with option to enter tip amount"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 1 on the keyboard shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2474084": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_MaxCustomTip",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Tipping/TippingOTWTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverArrived(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up gesture on the collapsed card to expand"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until 'Cancel booking' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Tip driver button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify preset tip amounts are shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Enter tip' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify custom tip screen is shown with option to enter tip amount"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap '1' '000' '000' on the keyboard shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600425": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verify_YuuOnVouchersScreenWhenYuuAccountIsNotLinked",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/Voucher/YuuOnVouchersScreenTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Vouchers or Use yuu Points text on the estimate screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4533772": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "userShouldBeAbleToPayCancellationFeeOBAWithCash",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OBATests/OBATests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: \"\n//                    + mobileFlowConfig.getJourneyDetail().getPickup().getLat()\n// and longitude: \"\n//                    + mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Find driver' or 'Book'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pay now' button on the pending payment screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Yes, pay with cash' button on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2790151": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "userShouldBeAbleToPayCancellationFeeOBAWithCash",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OBATests/OBATests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: \"\n//                    + mobileFlowConfig.getJourneyDetail().getPickup().getLat()\n// and longitude: \"\n//                    + mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Find driver' or 'Book'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pay now' button on the pending payment screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Yes, pay with cash' button on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4535546": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "userShouldBeAbleToPayCancellationFeeOBAWithCashless",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OBATests/OBATests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Find driver. If not present, tap Book button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pay button on the OBA payment screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pay on payment confirmation dialog if shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2790156": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "userShouldBeAbleToPayMultipleOBA",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OBATests/OBATests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Find driver' or 'Book'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pay button on the OBA payment screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Yes, pay with cash' button on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2790162": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "userShouldBeAbleToPayMultipleOBA",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OBATests/OBATests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Find driver' or 'Book'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pay button on the OBA payment screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Yes, pay with cash' button on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2790157": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "userShouldBeAbleToPayMultipleOBA",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OBATests/OBATests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Find driver' or 'Book'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pay button on the OBA payment screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Yes, pay with cash' button on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2790150": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verify_CF_OBA_on_OSS",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OBATests/OBATests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4900843": [
+      {
+        "module": "transport",
+        "title": "Validate new user home page with save address and search bar navigation",
+        "method": "Verify_NewUserHomePageComponentsWithoutMap",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back button on top left"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4900844": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_NewUserHomePageWithSavedAddressAndSearchBarNavigation",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '*circular_btn*' button or white back button or back button or a Button with no textual identity is visible on the top left corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on search lottie"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*cross' or '*back*' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4931672": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_NewUserHomePageComponentsWithMapIcon",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat()\n// and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '*circular_btn*' button or white back button or back button or a Button with no textual identity is visible on the top left corner of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4931673": [
+      {
+        "module": "transport",
+        "title": "Check quickbook confirmation screen after user tap quickbook, then tap back button, should bring user back to transport home",
+        "method": "Verify_NewUserHomePageComponentsWithMiniMap",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "SG",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3437720": [
+      {
+        "module": "transport",
+        "title": "verify nearby screen CTA navigation through minimap",
+        "method": "Verify_QuickBookDetailsAndComeBackToTransport",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Use this customer - 6616500"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return user id6616500from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on OneTap card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap back button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4624003": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "VerifyNearByScreenComponentsAndCtaNavigation",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on mini map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Edit button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify current location header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify current location sub header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Edit button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Edit button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on top left cross button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on top left cross button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "417887": [
+      {
+        "module": "transport",
+        "title": "Verify the display behavior of Popular Destinations and user ride history on the homescreen based on the availability of user history",
+        "method": "Verify_NewUserSituationalScreenSearchBarAndMap",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify search lottie is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "417919": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_SituationalHomeScreenWitPopularDestination",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "417886": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_SituationalHomeScreenWitPopularDestination",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "417885": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_SituationalHomeScreenUiValidation",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/THSTests/TransportHomeTest.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "\"Mock location to latitude: mobileFlowConfig.getJourneyDetail().getPickup().getLat() and longitude: mobileFlowConfig.getJourneyDetail().getPickup().getLng()"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(mobileFlowConfig.getCustomer().getBearerToken(),mobileFlowConfig.getCustomer().getRefreshToken())"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2862662": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_E2EBookingFlow",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/E2ETests/E2EBookingTests.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithTDPBooking(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Track button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Update order state to driver arrived using TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver arrived screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Update order state to driver picked up using TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver on the way to destination screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Update order state to driver completed using TDP"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2348350": [
+      {
+        "module": "transport",
+        "title": "Verify OTW Expanded Card Details",
+        "method": "Verify_OTWCollapsedCard",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OTWTests/OTWCardTests.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverFound(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver photo is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2228477": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_OTWExpandedCard",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OTWTests/OTWCardTests.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverFound(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the card at the bottom of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "1997052": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "Verify_FeedBackCards",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OTWTests/FeedBackCardTests.java",
+        "project_id": "176",
+        "suite_id": "30304165",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverArrived(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver photo is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the driver photo"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on How\u2019s your driver?"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify trip feedback options are shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Driver was speeding"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Driver made some traffic valiolations"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Send to Gojek'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "571646": [
+      {
+        "module": "transport",
+        "title": "Verify upsell nudge dismiss by tapping cancel booking button",
+        "method": "verifyUpSellNudgeCrossButton",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OTWTests/CrossSellOnFDS.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverFinding(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the card at the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancel booking' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on cross button or dismiss button at top right corner of the 'How about switching to*' dialog"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "571754": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "verifyUpSellNudgeCancelledByUser",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OTWTests/CrossSellOnFDS.java",
+        "project_id": "176",
+        "suite_id": "30304163",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverFinding(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on the card at the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Cancel booking' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancel booking' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2863105": [
+      {
+        "module": "transport",
+        "title": null,
+        "method": "testEditDestinationSuccess",
+        "source_file": "transport/src/test/java/io/gojek/transport/tests/OTWTests/EditDestinationTests.java",
+        "project_id": "176",
+        "suite_id": "30304164",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "backdoorLoginWithBookingUntilDriverPickup(mobileFlowConfig)"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for GoRide button to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver photo is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Edit button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap edit destination"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter Pasaraya Block M"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap first search result"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Edit destination fee will apply' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Rp*' is visble on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Let's go'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

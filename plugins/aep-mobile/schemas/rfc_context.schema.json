@@ -86,6 +86,8 @@
         "additionalProperties": false,
         "properties": {
           "min_supported_app_version": { "type": ["string", "null"] },
+          "target_platform": { "type": "string", "enum": ["android", "ios", "flutter"] },
+          "framework_type": { "type": ["string", "null"] },
           "min_os_version": {
             "type": "object",
             "properties": {
@@ -120,8 +122,6 @@
             }
           }
         },
-        "rollback_triggers": { "type": "array", "items": { "type": "string" } },
-        "rollback_strategy": { "type": "string" },
         "kill_switch_flag": { "type": "string" },
         "canary_metrics": { "type": "array", "items": { "type": "string" } },
         "rfc_section_ref": { "type": "string" }
@@ -216,8 +216,6 @@
           "entity_or_key": { "type": "string" },
           "migration_version": { "type": ["string", "null"] },
           "migration_strategy": { "type": ["string", "null"], "enum": ["ADDITIVE", "DESTRUCTIVE", "FALLBACK_VALUE", null] },
-          "data_loss_risk": { "type": "boolean" },
-          "rollback_safe": { "type": "boolean" },
           "inferred_from_prose": { "type": "boolean" },
           "rfc_section_ref": { "type": "string" }
         }
@@ -265,12 +263,10 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["permission", "platform", "purpose"],
+        "required": ["permission", "purpose"],
         "properties": {
           "permission": { "type": "string" },
-          "platform": { "type": "string", "enum": ["ANDROID", "IOS", "BOTH"] },
           "purpose": { "type": "string" },
-          "is_new": { "type": "boolean" },
           "deny_behavior": { "type": "string" },
           "rationale_shown": { "type": "boolean" },
           "inferred_from_prose": { "type": "boolean" },

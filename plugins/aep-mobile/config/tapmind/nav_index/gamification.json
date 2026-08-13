@@ -1,0 +1,1530 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "gamification",
+    "case_ids_indexed": 66,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "650009": [
+      {
+        "module": "gamification",
+        "title": "Status 2: Verify Played few game status of Game Streak",
+        "method": "testNoProgress",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameStreak.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "653801": [
+      {
+        "module": "gamification",
+        "title": "Status 3 & 4 of Game Streak",
+        "method": "testInProgress",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameStreak.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 60 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Done' is under text 'Windvane Task'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "653802": [
+      {
+        "module": "gamification",
+        "title": "Verify 3 status of each game task",
+        "method": "testClaimReward",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameStreak.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 60 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 60 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 60 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on close button next to text 'Congratulation!'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "654105": [
+      {
+        "module": "gamification",
+        "title": "Verify 3 status of each game task",
+        "method": "testClaimReward",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameStreak.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 60 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 60 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 60 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on close button next to text 'Congratulation!'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "648383": [
+      {
+        "module": "gamification",
+        "title": "Verify info button interaction of Game Streak",
+        "method": "testGameTaskStatus",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameStreak.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Play 2min' is under text 'Webkit Task'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Play 1min' is under text 'Webkit Task'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 60 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Done' is under text 'Windvane Task'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Play 1min' is under text 'Webkit Task'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "650087": [
+      {
+        "module": "gamification",
+        "title": "Game Streak: Verify locale",
+        "method": "testInfoButtonInteraction",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameStreak.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on glp_streak_info_icon"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "648360": [
+      {
+        "module": "gamification",
+        "title": "Game Streak: Verify countdown timer format",
+        "method": "testGameStreakLocale",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameStreak.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "LoginWithUserId(userId)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "650168": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testCountdownTimerFormat",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameStreak.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "LoginWithUserId(userId)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5553941": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on getting system info v1",
+        "method": "testWindVaneAuthV1",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451786": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on getting system info v1",
+        "method": "testWindVaneAuthV1",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gamification",
+        "title": "Windvane container test on launch uri v2",
+        "method": "testWindVaneAuthV2",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451774": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on getting system info v1",
+        "method": "testWindVaneAuthV1",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "334791": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on getting app version v1",
+        "method": "testWindVaneSystemInfoV1",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "334792": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on launch uri v1",
+        "method": "testWindVaneAppVersionV1",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "334790": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on launch native page deeplink v1",
+        "method": "testWindVaneLaunchUriV1",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "334789": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on launch another mini app deeplink v1",
+        "method": "testWindVaneLaunchDeeplinkV1NativePage",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "649415": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on appsflyer share v1",
+        "method": "testWindVaneLaunchDeeplinkV1MiniApp",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "334793": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on native share text",
+        "method": "testWindVaneAppsflyerShare",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "463023": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on invalid mini app id",
+        "method": "testWindVaneNativeShareText",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451785": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on track clickstream",
+        "method": "testWindVaneInvalidMiniAppID",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "334794": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on mini_app_path",
+        "method": "testWindVaneTrackClickstream",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5553939": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on getting auth code v2",
+        "method": "testWindVaneMiniAppPath",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "466487": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on launch uri v2",
+        "method": "testWindVaneAuthV2",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "466485": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on launch native page deeplink v2",
+        "method": "testWindVaneLaunchUriV2",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "466486": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on launch another mini app deeplink v2",
+        "method": "testWindVaneLaunchDeeplinkV2NativePage",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "649437": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on appsflyer share v2",
+        "method": "testWindVaneLaunchDeeplinkV2MiniApp",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "466482": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on callGPShare",
+        "method": "testWindVaneAppsflyerShareV2",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "466480": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on launch payment v2",
+        "method": "testWindVaneGPShare",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "466484": [
+      {
+        "module": "gamification",
+        "title": "Windvane container test on launch payment then cancel v2",
+        "method": "testWindVanePaymentV2",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on button on the bottom containing the text 'Pay' and 'Rp4'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Do not use' is the 1st record under the text Today"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testWindVanePaymentCancelV2",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WindVaneContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on the exit button in front of the text 'Review payment'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "518878": [
+      {
+        "module": "gamification",
+        "title": "Verify the header part of game landing page",
+        "method": "testGameLandingPageEntrypoint",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GamesLandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "518986": [
+      {
+        "module": "gamification",
+        "title": "Verify the footer part of game landing page",
+        "method": "testGameLandingPageHeader",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GamesLandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on glp_ruby_button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text contain 'Win rewards up to 100k everyday' is not visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the back button on the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on glp_gpc_button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the back button on the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on glp_back_button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "519151": [
+      {
+        "module": "gamification",
+        "title": "Verify items/widget can be controlled by litmus",
+        "method": "testGameLandingPageFooter",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GamesLandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the bottom of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "520032": [
+      {
+        "module": "gamification",
+        "title": "Verify items/widget can be controlled by time window",
+        "method": "testGameLandingPageLitmus",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GamesLandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "LoginWithUserId(userId)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "520030": [
+      {
+        "module": "gamification",
+        "title": "Verify T&C link of game landing page",
+        "method": "testGameLandingPageTimeWindow",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GamesLandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "519087": [
+      {
+        "module": "gamification",
+        "title": "Verify items are scrollable and clickable",
+        "method": "testGameLandingPageTermsCondition",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GamesLandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on glp_tnc_button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on glp_tnc_button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "519311": [
+      {
+        "module": "gamification",
+        "title": "Games Landing Page: Verify locale",
+        "method": "testGameLandingPageClickItem",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GamesLandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "520174": [
+      {
+        "module": "gamification",
+        "title": "Games Landing Page: Verify error when offline",
+        "method": "testGameLandingPageLocale",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GamesLandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "LoginWithUserId(userId)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "520173": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testGameLandingPageOffline",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GamesLandingPageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "network",
+            "text": "NetworkCondition.NO_NETWORK"
+          },
+          {
+            "kind": "network",
+            "text": "NetworkCondition.RESET"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "576206": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testAPlusWidgetWorkflow",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/APlusOnHomepageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 50 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until the text 'Daily check-in by A+Rewards' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until the button Claim is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the button Claim"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the button 'Daily Reminder' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the close button is on the upper right of the text containing 'Yay! You'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the close button on the upper right of the text containing 'Yay! You'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the down-wards arrow icon on the right of the text 'Ends in 6 days'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the up-wards arrow icon on the right of the text 'Ends in 6 days'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Info icon on the right of the text 'Claim better rewards tomorrow!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Coins dari A+ Rewards' is the 1st record under the text Today"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "575633": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testAPlusWidgetWorkflow",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/APlusOnHomepageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 50 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until the text 'Daily check-in by A+Rewards' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until the button Claim is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the button Claim"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the button 'Daily Reminder' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the close button is on the upper right of the text containing 'Yay! You'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the close button on the upper right of the text containing 'Yay! You'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the down-wards arrow icon on the right of the text 'Ends in 6 days'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the up-wards arrow icon on the right of the text 'Ends in 6 days'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Info icon on the right of the text 'Claim better rewards tomorrow!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Coins dari A+ Rewards' is the 1st record under the text Today"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "575930": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testAPlusWidgetWorkflow",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/APlusOnHomepageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 50 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until the text 'Daily check-in by A+Rewards' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until the button Claim is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the button Claim"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the button 'Daily Reminder' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the close button is on the upper right of the text containing 'Yay! You'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the close button on the upper right of the text containing 'Yay! You'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the down-wards arrow icon on the right of the text 'Ends in 6 days'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the up-wards arrow icon on the right of the text 'Ends in 6 days'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Info icon on the right of the text 'Claim better rewards tomorrow!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Coins dari A+ Rewards' is the 1st record under the text Today"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "575931": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testAPlusWidgetWorkflow",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/APlusOnHomepageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 50 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until the text 'Daily check-in by A+Rewards' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until the button Claim is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the button Claim"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the button 'Daily Reminder' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the close button is on the upper right of the text containing 'Yay! You'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the close button on the upper right of the text containing 'Yay! You'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the down-wards arrow icon on the right of the text 'Ends in 6 days'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the up-wards arrow icon on the right of the text 'Ends in 6 days'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the Info icon on the right of the text 'Claim better rewards tomorrow!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Coins dari A+ Rewards' is the 1st record under the text Today"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "575928": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testAPlusWidgetWorkflowLocale",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/APlusOnHomepageTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until the button Klaim is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the button Klaim"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the button 'Pengingat Harian' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the close button is on the upper right of the text containing 'Hore! Kamu sudah'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the close button on the upper right of the text containing 'Hore! Kamu sudah'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Coins dari A+ Rewards' is the 1st record under the text 'Hari ini'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "470218": [
+      {
+        "module": "gamification",
+        "title": "Dynamic icon should only show during the valid period",
+        "method": "testDynamicIconVisibility",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/PromoTabDynamicIconTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "LoginWithUserId(userId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Promos' not exist in bottom navigation tab"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify bottom_navigation_tab_layout[2] is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "478669": [
+      {
+        "module": "gamification",
+        "title": "Badge for Dynamic icon should only show during the valid period",
+        "method": "testDynamicIconTimeWindow",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/PromoTabDynamicIconTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "LoginWithUserId(userId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Promos' exist in bottom navigation tab"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "478693": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testDynamicIconBadge",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/PromoTabDynamicIconTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "LoginWithUserId(userId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Promos' exist in bottom navigation tab"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "347152": [
+      {
+        "module": "gamification",
+        "title": "Webkit container test on getting system info",
+        "method": "testWebkitAuth",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "347147": [
+      {
+        "module": "gamification",
+        "title": "Webkit container test on getting system info",
+        "method": "testWebkitAuth",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "347150": [
+      {
+        "module": "gamification",
+        "title": "Webkit container missing valid mini app id",
+        "method": "testWebkitSystemInfo",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "347153": [
+      {
+        "module": "gamification",
+        "title": "Webkit container test on launch uri",
+        "method": "testWebkitInvalidMiniAppID",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "347149": [
+      {
+        "module": "gamification",
+        "title": "Webkit container test on launch native page deeplink",
+        "method": "testWebkitLaunchUriSuccess",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "347148": [
+      {
+        "module": "gamification",
+        "title": "Webkit container test on launch mini app deeplink",
+        "method": "testWebkitLaunchNativeDeeplinkSuccess",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on the Clear button for the Deeplink"
+          },
+          {
+            "kind": "nlp",
+            "text": "Clear text in the input field for Deeplink"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter text 'gojek://gocar?dp_nav_stack=true' in the input field for Deeplink"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "649414": [
+      {
+        "module": "gamification",
+        "title": "Webkit container test on appsflyer share deeplink",
+        "method": "testWebkitLaunchMiniAppDeeplinkSuccess",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on the Clear button for the Deeplink"
+          },
+          {
+            "kind": "nlp",
+            "text": "Clear text in the input field for Deeplink"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter text gojek://MiniAppDeeplinks.WINDVANE_MINI_APP_DEEPLINK_QA in the input field for Deeplink"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "347151": [
+      {
+        "module": "gamification",
+        "title": "Webkit container test on track clickstream",
+        "method": "testWebkitShareLinks",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "440543": [
+      {
+        "module": "gamification",
+        "title": "Webkit container test on redirect-to",
+        "method": "testWebkitTrackClickStream",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "440541": [
+      {
+        "module": "gamification",
+        "title": "Webkit container test on hide nav bar",
+        "method": "testWebkitRedirectToSuccess",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "573739": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testWebkitHideNavBar",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/WebkitContainer.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5142182": [
+      {
+        "module": "gamification",
+        "title": "Verify check-in flow in A+ widget in different locale",
+        "method": "testAPlusWidgetWorkflow",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/APlusWidgetTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Wait until the text starting with 'By clicking' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the checkbox in front of the text starting with 'By clicking'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the button Claim is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the button Claim"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the text 'Ok, got it' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Coins dari A+ Rewards' is the 1st record under the text Today"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5142189": [
+      {
+        "module": "gamification",
+        "title": "Verify check-in flow in A+ widget in different locale",
+        "method": "testAPlusWidgetWorkflow",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/APlusWidgetTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Wait until the text starting with 'By clicking' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the checkbox in front of the text starting with 'By clicking'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the button Claim is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the button Claim"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the text 'Ok, got it' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Coins dari A+ Rewards' is the 1st record under the text Today"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5142192": [
+      {
+        "module": "gamification",
+        "title": "Verify A+ widget on promo page",
+        "method": "testAPlusWidgetWorkflowLocale",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/APlusWidgetTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "Login()"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gopromos\", \"gopromos"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until the text starting with 'By clicking' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the checkbox in front of the text starting with 'By clicking'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the button Claim is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the button Claim"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the text 'Ok, got it' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Coins dari A+ Rewards' is the 1st record under the text 'Hari ini'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5142181": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testAPlusWidgetView",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/APlusWidgetTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451795": [
+      {
+        "module": "gamification",
+        "title": "Verify games can be opened from game section",
+        "method": "testGameSectionEntrypoint",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameSectionTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451798": [
+      {
+        "module": "gamification",
+        "title": "Verify game section can be swiped",
+        "method": "testGameSectionOpenGames",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameSectionTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on the icon above the text 'Windvane Sample app'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451797": [
+      {
+        "module": "gamification",
+        "title": "Verify gocats can be seen from game section",
+        "method": "testGameSectionSwipeGames",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameSectionTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Swipe left on the grid row under text 'Gojek games' until the text 'Invalid Webkit' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe right on the grid row under text 'Gojek games' until the text 'Invalid Webkit' is invisible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "440540": [
+      {
+        "module": "gamification",
+        "title": "Verify See All button for game section",
+        "method": "testGameSectionSeeGocats",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameSectionTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Swipe left on the grid row under text 'Gojek games' until the text 'GoCats' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "692136": [
+      {
+        "module": "gamification",
+        "title": "Game section: Verify Multiple big + small banner",
+        "method": "testGameSectionSeeAllButton",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameSectionTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5451796": [
+      {
+        "module": "gamification",
+        "title": null,
+        "method": "testGameSectionBigAndSmallBanner",
+        "source_file": "gamification/src/test/java/io/gojek/gamification/tests/tests/GameSectionTests.java",
+        "project_id": "176",
+        "suite_id": "28797510",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "LoginWithUserId(userId)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe left on the text 'Webkit Big Banner' with fast speed until the text 'Second' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

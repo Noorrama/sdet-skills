@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RegressionContextSchema",
+  "description": "Output of the regression-extractor. Combines the BrowserStack Test Management inventory (which existing cases exist) with repo-derived navigation (how to reach the screen), so the sdet-plan-generator can dedup against existing coverage and attach runnable steps. Consumed inside the generator during pre-build ingest.",
+  "type": "object",
+  "properties": {
+    "extraction_status": { "type": "string", "enum": ["COMPLETE", "PARTIAL", "LIMITED"], "description": "COMPLETE = the BrowserStack query ran and extraction_notes is empty. PARTIAL = ran but some fields could not be resolved (see notes). LIMITED = BrowserStack/MCP or the module->project map was unavailable, so coverage was NOT fully checked. Never COMPLETE when extraction_notes is non-empty. A bare empty regression_tests[] with COMPLETE means the query genuinely matched nothing; an empty list with LIMITED means the lookup could not run." },
+    "extraction_notes": {
+      "type": "array",
+      "description": "What could not be resolved, recorded instead of guessing. Empty = clean run. A failed BrowserStack lookup, an unmapped project, or a screen with no navigation source all land here — never silently dropped.",
+      "items": {
+        "type": "object",
+        "required": ["field", "reason", "follow_up"],
+        "additionalProperties": false,
+        "properties": {
+          "field": { "type": "string", "description": "JSON path of the unresolved field, e.g. regression_tests[3].navigation. Use 'ENVIRONMENT' for MCP/connection/mapping failures not tied to one field." },
+          "reason": { "type": "string", "description": "What was checked and what was found, e.g. 'BrowserStack MCP unavailable — regression coverage was NOT checked'." },
+          "action": { "type": "string", "description": "The concrete next step, e.g. 'configure the BrowserStack MCP server and re-run, or dedup manually'." },
+          "follow_up": { "type": "string", "enum": ["NEEDS_ANSWER", "WORTH_CHECKING", "FYI"], "description": "NEEDS_ANSWER = someone must act before this coverage is trustworthy. WORTH_CHECKING = produced without its usual source, confirm it. FYI = no action needed." }
+        }
+      }
+    },
+    "app": { "type": "string", "description": "Target app id, e.g. gojek-consumer, gojek-driver (from config)." },
+    "feature_key": { "type": "string", "description": "The feature being planned, e.g. OneKYC." },
+    "module_namespace": { "type": "array", "items": { "type": "string" }, "description": "Modules searched — the feature's own module plus any impacted modules pulled from rfc.affected_modules." },
+    "browserstack_project": { "type": "string", "description": "Resolved BrowserStack project identifier, e.g. PR-176. Resolved from the module->project map, never guessed among all projects." },
+    "resolved_folders": {
+      "type": "array",
+      "description": "The BrowserStack folders searched within the project, resolved from the module->folder map.",
+      "items": {
+        "type": "object",
+        "required": ["id", "name"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": ["integer", "string"], "description": "BrowserStack folder id." },
+          "name": { "type": "string", "description": "Folder name, e.g. 'Customer Platform - Home'." }
+        }
+      }
+    },
+    "deeplink_dictionary": {
+      "type": "object",
+      "description": "The repo's extracted deeplink dictionary for the module(s) in scope, copied verbatim from config/deeplinks.json — { module: { SCREEN_NAME: \"<uri>\" } }, e.g. {\"driverapp\": {\"LOYALTY_HOME\": \"gojekdriver://loyalty/home\", \"LOYALTY_REWARDS\": \"gojekdriver://loyalty/rewards\"}}. This is the repo's PRIMARY navigation mechanism (deep links are used far more than UI walks), so it is surfaced here as a lookup table the sdet-plan-generator consults at rung 1 of its Navigation Resolution Ladder BEFORE falling through to UI-walk rungs — a new-feature screen with a real repo deeplink must resolve here, not land as [NAVIGATION NOT CONFIRMED]. Keys and URIs are passed through exactly as the dictionary holds them, never edited or invented. Scope it to the resolved module(s) only (never the whole file). Omit the field entirely when config/deeplinks.json was unavailable; an empty object would wrongly read downstream as 'checked, and this module genuinely has no deeplinks'.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      }
+    },
+    "regression_tests": {
+      "type": "array",
+      "description": "Existing cases judged impacted by this change. Every entry comes from a real BrowserStack case — never invented. May be empty (see extraction_status for whether that means 'none' or 'not checked').",
+      "items": {
+        "type": "object",
+        "required": ["id", "title"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "BrowserStack case identifier verbatim, e.g. C2879733." },
+          "case_number": { "type": "string", "description": "The numeric case id without the 'C' prefix (e.g. 2879733 for C2879733). BrowserStack is the system of record; this number was carried over unchanged from TestRail during the migration, so it is the join key to the repo's @TestInfo/@GBTTestRail testCaseIds and Cucumber Examples. Each module's result-listener (e.g. CucumberExecutionListener / lumosClient.getProjectIdFromTestCaseId) resolves it to the BrowserStack project id when pushing results." },
+          "title": { "type": "string", "description": "Exact case title from BrowserStack." },
+          "status": { "type": "string", "description": "BrowserStack state, e.g. Active, Draft. Only Active cases should normally be included." },
+          "priority": { "type": "string", "description": "Priority tier as reported by BrowserStack, e.g. P0, P1, P2 (human data — not enum-constrained)." },
+          "case_type": { "type": "string", "description": "e.g. Regression, Functional." },
+          "is_automated": { "type": "boolean", "description": "Whether an automated counterpart exists (true when matched to the repo by case_number)." },
+          "scope": { "type": "string", "enum": ["own_module", "impacted_area"], "description": "own_module = the feature's own module; impacted_area = pulled in via rfc.affected_modules." },
+          "source_module": { "type": "string", "description": "The repo module this case was resolved through, e.g. 'gopay', 'gofood', 'driverapp'. Required when app maps to more than one module (app_id_to_modules in browserstack_project_map.json) -- e.g. gojek-consumer spans 10 modules -- so a reader can tell which one a given case belongs to." },
+          "steps": { "type": "array", "items": { "type": "string" }, "description": "Execution steps. Preferred source is the repo (accurate) when an automated counterpart exists; otherwise BrowserStack's own steps, which may be weak/empty (flag via extraction_notes)." },
+          "steps_source": { "type": "string", "enum": ["repo", "browserstack"], "description": "Where 'steps' came from. repo = executable page-object/Gherkin steps matched by case_number; browserstack = the human-written steps as-is." },
+          "preconditions": { "type": "string", "description": "Environment/config preconditions from the case." },
+          "navigation": { "type": "array", "items": { "type": "string" }, "description": "Ordered steps to REACH the screen under test (distinct from the case's own steps), e.g. ['Login (bypass)', 'Open deeplink gojek://gocore/settings', 'Tap Edit Profile']." },
+          "nav_source": { "type": "string", "enum": ["deeplink", "existing_test", "figma", "needs_answer"], "description": "Which rung of the navigation ladder produced 'navigation'. needs_answer = no deeplink, no existing test, no Figma nav map — recorded and flagged, not guessed." },
+          "tapmind_steps": {
+            "type": "array",
+            "description": "If this case has an existing TapMind (NLP-framework) test in tapmind-mobile-tests, its real, repo-verified step sequence — copied verbatim from config/tapmind/nav_index/<module>.json, joined by case_number. Ordered, kind-tagged: {kind: nlp|deeplink|login|toggle|network, text}. The sdet-plan-generator reuses this verbatim as a scenario's automation_steps when the scenario maps to this case (rather than authoring TapMind steps from scratch). Absent when no TapMind counterpart exists for the case — never invented.",
+            "items": {
+              "type": "object",
+              "required": ["kind", "text"],
+              "additionalProperties": false,
+              "properties": {
+                "kind": { "type": "string", "enum": ["nlp", "deeplink", "login", "toggle", "network"], "description": "nlp = runStep() NLP command; deeplink = openDeeplink() uri; login = login* helper (the backdoor login); toggle = set*Toggle() flag setup; network = controlNetwork()." },
+                "text": { "type": "string", "description": "The step content verbatim from the TapMind test (runStep string, deeplink uri, or helper call with its args)." }
+              }
+            }
+          },
+          "variant_dimensions": {
+            "type": "object",
+            "description": "The population-partitioning attributes this existing case actually runs against, copied verbatim from the BrowserStack case's own custom fields (e.g. {\"DriverType\": [\"IDBike\", \"IDCar\"], \"Country v2\": [\"Indonesia\"]}). App-agnostic: whatever custom fields the project defines (DriverType/ServiceType for driver apps, payment-instrument or user-tier fields for consumer apps) are carried through as-is. This is the ONLY observed enumeration of which variants real coverage splits on, so the sdet-plan-generator can fan out test_data fixtures per variant instead of inventing or omitting one. Keys and values are never normalised or invented — absent field means the case declared none.",
+            "additionalProperties": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "observed_variant_dimensions": {
+      "type": "object",
+      "description": "Run-level union of every regression_tests[].variant_dimensions value seen in this query, per dimension key (e.g. {\"DriverType\": [\"IDBike\", \"IDCar\"]}). A convenience roll-up so the sdet-plan-generator does not have to re-scan every case to learn which variants this app's existing coverage exercises. Union only — never extended with values no returned case declared. Empty/absent when no case carried custom fields.",
+      "additionalProperties": { "type": "array", "items": { "type": "string" } }
+    }
+  },
+  "required": ["app", "extraction_status", "regression_tests"],
+  "additionalProperties": false
+}
