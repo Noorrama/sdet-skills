@@ -1,0 +1,107 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "goshop",
+    "case_ids_indexed": 3,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "4634986": [
+      {
+        "module": "goshop",
+        "title": null,
+        "method": "verifyGoShopNearbyMerchantDisplayed",
+        "source_file": "goshop/src/test/java/io/gojek/goshop/tests/GoShopHomePageTest.java",
+        "project_id": "176",
+        "suite_id": "28796803",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoShopServiceLocation.PASARAYA_LATITUDE, GoShopServiceLocation.PASARAYA_LONGITUDE, \"get a customer from TDP\")"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify user lands on GoShop home page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until 'GO_SHOP_NEARBY_MERCHANT_SECTION_TITLE_EN' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GO_SHOP_NEARBY_MERCHANT_SECTION_TITLE_EN' text title is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GO_SHOP_NEARBY_MERCHANT_SECTION_DESCRIPTION_EN' text description is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4635053": [
+      {
+        "module": "goshop",
+        "title": "Verify GoShop order creation using GoPay payment method",
+        "method": "verifyGoShopOrderWithCashPayment",
+        "source_file": "goshop/src/test/java/io/gojek/goshop/tests/GoShopEndToEndTest.java",
+        "project_id": "176",
+        "suite_id": "28796803",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoShopServiceLocation.PASARAYA_LATITUDE, GoShopServiceLocation.PASARAYA_LONGITUDE,\n                    \"get a customer from TDP\")"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the floating cart button at the bottom of the page showing the total estimated price"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until text contains 'Looking for a driver' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text contains 'Looking for a driver' text is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4635054": [
+      {
+        "module": "goshop",
+        "title": null,
+        "method": "verifyGoShopOrderWithGoPayPayment",
+        "source_file": "goshop/src/test/java/io/gojek/goshop/tests/GoShopEndToEndTest.java",
+        "project_id": "176",
+        "suite_id": "28796803",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoShopServiceLocation.PASARAYA_LATITUDE, GoShopServiceLocation.PASARAYA_LONGITUDE, \"get a customer from TDP\")"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the floating cart button at the bottom of the page showing the total estimated price"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until text contains 'Looking for a driver' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text contains 'Looking for a driver' text is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

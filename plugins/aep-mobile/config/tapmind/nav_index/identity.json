@@ -1,0 +1,725 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "identity",
+    "case_ids_indexed": 12,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "C5253966": [
+      {
+        "module": "identity",
+        "title": null,
+        "method": "verifyPinReminderConfirmThePin",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/nudge/PinReminderTest.java",
+        "project_id": "PR-176",
+        "suite_id": "28797385",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628243464729)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for Home page to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "close the pop up if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Confirm' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 123321 as PIN"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C5407971": [
+      {
+        "module": "identity",
+        "title": "Login History: Verify if user is on current session with gopay app",
+        "method": "testSSOLogin",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/goauth/sso/SSOTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28797331",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Log in or sign up button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on country code dropdown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Indonesia' under popular countries section"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter phoneNumber on phone number input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Continue' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "select 'OTP via SMS' as verification method if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 1234 on OTP input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Gojek Home visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Oke,lanjut'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on While using the app option on location permission pop up if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Masukkan nomor HP-mu' if displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4900961": [
+      {
+        "module": "identity",
+        "title": null,
+        "method": "testCurrentSession",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/goauth/sso/SSOTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28797331",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(phoneNumber)"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Login' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify +62\"2894085685\" is pre-filled and displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Continue as' Field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Gojek Home visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on profile icon on home screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Account Safety option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until 'Login history' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Login history' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Login history screen visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify First Active session with GoPay app is displayed in login history"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5254025": [
+      {
+        "module": "identity",
+        "title": null,
+        "method": "testCurrentSession",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/goauth/sso/SSOTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28797331",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(phoneNumber)"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Login' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify +62\"2894085685\" is pre-filled and displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Continue as' Field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Gojek Home visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on profile icon on home screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Account Safety option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until 'Login history' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Login history' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Login history screen visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify First Active session with GoPay app is displayed in login history"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C4690868": [
+      {
+        "module": "identity",
+        "title": null,
+        "method": "testCurrentSession",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/goauth/sso/SSOTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28797331",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(phoneNumber)"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Login' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify +62\"2894085685\" is pre-filled and displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Continue as' Field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Gojek Home visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on profile icon on home screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Account Safety option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until 'Login history' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Login history' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Login history screen visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify First Active session with GoPay app is displayed in login history"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-550648": [
+      {
+        "module": "identity",
+        "title": null,
+        "method": "verifyFallbackToSmsMethodForLoginFlow",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/goauth/login/OTPFallbackTests.java",
+        "project_id": "PR-176",
+        "suite_id": "2880292",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Log in or sign up button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on country code dropdown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 'India' in seach bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'India'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter phoneNumber on phone number input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Continue' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "select 'OTP via SMS' as verification method if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 30 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C5407986": [
+      {
+        "module": "identity",
+        "title": null,
+        "method": "verifyUserCanAddMultipleTrustedDevices",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/goauth/login/OneTapTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28797383",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628095355497)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for Home page to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "close the pop up if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Profile icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Account Safety"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until 'Trusted devices' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Trusted devices' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Trusted devices screen visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C4751335": [
+      {
+        "module": "identity",
+        "title": null,
+        "method": "testChangeGoToPIN",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/goauth/login/GoToPinTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28797344",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Log in or sign up button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on country code dropdown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Indonesia' under popular countries section"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter phoneNumber on phone number input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Continue' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "select 'OTP via SMS' as verification method if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on OTP input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 1234 in input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Gojek Home visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "close the pop up if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on profile icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on Account Safety"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Set PIN' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER '123321' on Create PIN screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER 123321 as PIN on confirm PIN screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Select 'OTP via SMS' as verification method"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter '1234' as OTP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Continue' button on 'Go To PIN' setup success pop up if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify you 've successfully set up a new PIN msg displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Okay, got it' button if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on Change PIN"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER 123321 as current PIN"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER 321123 as new PIN"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER 321123 as PIN on confirm PIN screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify you 've successfully changed your PIN msg displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C4751292": [
+      {
+        "module": "identity",
+        "title": null,
+        "method": "testChangeGoToPIN",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/goauth/login/GoToPinTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28797344",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Log in or sign up button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on country code dropdown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Indonesia' under popular countries section"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter phoneNumber on phone number input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on 'Continue' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "select 'OTP via SMS' as verification method if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on OTP input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 1234 in input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Gojek Home visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "close the pop up if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on profile icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on Account Safety"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Set PIN' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER '123321' on Create PIN screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER 123321 as PIN on confirm PIN screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Select 'OTP via SMS' as verification method"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter '1234' as OTP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Continue' button on 'Go To PIN' setup success pop up if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify you 've successfully set up a new PIN msg displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Okay, got it' button if displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on Change PIN"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER 123321 as current PIN"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER 321123 as new PIN"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "ENTER 321123 as PIN on confirm PIN screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "click on continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify you 've successfully changed your PIN msg displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "587333": [
+      {
+        "module": "identity",
+        "title": "Verify Error Popup is Displayed for Passport Verified User",
+        "method": "verifyHelpIcon",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/cif/CIFTests.java",
+        "project_id": "PR-176",
+        "suite_id": "47917967",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628253216533)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for Home page to be visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Help icon '?' on top right corner of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "587337": [
+      {
+        "module": "identity",
+        "title": "Verify Error Popup is Displayed for Passport Verified User",
+        "method": "verifyHelpIcon",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/cif/CIFTests.java",
+        "project_id": "PR-176",
+        "suite_id": "47917967",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628253216533)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for Home page to be visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Help icon '?' on top right corner of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "587335": [
+      {
+        "module": "identity",
+        "title": null,
+        "method": "verifyErrorPopupDisplayedForPassportVerifiedUser",
+        "source_file": "identity/src/test/java/io/gojek/identity/tests/cif/CIFTests.java",
+        "project_id": "PR-176",
+        "suite_id": "47917967",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628277543705)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for Home page to be visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "deeplink"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

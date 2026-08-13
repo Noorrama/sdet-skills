@@ -1,0 +1,1875 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "cartography",
+    "case_ids_indexed": 41,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "3184345": [
+      {
+        "module": "cartography",
+        "title": "Verify search in pickup field when destination is selected from transport home page",
+        "method": "VerifyCloseButtonOnSearchPageToRedirectToTHP",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/BookingForSomeoneElseTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +62823832893)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on GoCar service to open"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for search for a destination text field is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on search for a destination textbox"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3115040": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifySearchInPickupWhenDestinationSelectedFromTHP",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/BookingForSomeoneElseTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628224181706)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on GoCar service to open"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for search for a destination text field is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Select the first displayed saved address from saved address carousel"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on edit button on bottom card of set pickup location map screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify cursor is on pickup location input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'RSKD Duren Sawit' on search pickup input field"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3281492": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "toVerify_SaveAddressOnHomeScreenUsedHomeLabel",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SavedAddressTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until text more ways to book is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Save Home' label"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on add new button on right top corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Home' in text field below text 'Address name'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Save' button in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Home' is visible in saved address list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap back icon on top left corner of the screen to go back to screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3281491": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "toVerify_SaveAddressOnHomeScreenUsedWorkLabel",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SavedAddressTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until text more ways to book is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Save Work' label"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on add new button on right top corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Work' in text field below text 'Address name'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Save' button in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Work' is visible in saved address list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap back icon on top left corner of the screen to go back to screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3281496": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "toVerify_TapSavedAddressFarFromUserNavigatesToPickupScreen",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SavedAddressTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until text more ways to book is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on save work"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on add new button on right top corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap search button on the right side of text 'Add an address' in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'rumah sakit universitas indonesia' in search for a location text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Work' in text field below text 'Address name'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Save' button in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Work' is visible in saved address list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap back icon on top left corner of the screen to go back to transport home screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Work' appearing on screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2861736": [
+      {
+        "module": "cartography",
+        "title": "Verify user able to share Business saved address",
+        "method": "toVerify_UserIsAbleToSaveAddress_FromSearchLocationList",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SavedAddressTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Ciputat ONE Futsal & Badminton' on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text choose name below text 'Save address as'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Futsal' in text field appeared after tapping on choose name pill"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4601934": [
+      {
+        "module": "cartography",
+        "title": "Verify user able to click saved address in THP",
+        "method": "validateShareAddress_business",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SavedAddressTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a fresh customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Profile and Settings"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until text 'Saved addresses' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Business' on right side of text 'Personal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on scrollable area until Business is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Business text on the right of 'Personal Selected'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Store' in text field below text 'Address name'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Save' button in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on share icon on right side of text 'Store' in the card"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4701889||4701891": [
+      {
+        "module": "cartography",
+        "title": "Verify user will see input field for custom label if all the Label Chips already used",
+        "method": "verifyClickSavedAddressFromTHP",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SavedAddressTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +628253443900)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2861758": [
+      {
+        "module": "cartography",
+        "title": "Verify user able to delete saved address",
+        "method": "verifyUserAbleToInputFieldForCustomLabelIfAllLabelChipsAlreadyUsed",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SavedAddressTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +6287830000003)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2863191": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyUserAbleToDeleteSavedAddress",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SavedAddressTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until text more ways to book is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Save Work' label below destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on add new button on right top corner of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Work' in text field below text 'Address name'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Save' button in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Work' is visible in saved address list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on three dots icon on the right side of text work"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on delete option from the menu appeared after tapping three dots icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button containing text delete"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673775": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "VerifyPickupForSTRUnfamiliarPlace",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SnapToRoadTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628224210877)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on pickup location input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Select via map' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673756": [
+      {
+        "module": "cartography",
+        "title": "Verify nearest tag is shown for gate in bottom sheet and map view of gate marker with nearest distance from user current location from SVM Flow",
+        "method": "verifyHistoricalTagForGateWithPastUsedLocationInPickupHistoryFromPickupSearchFlow",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/PPOIFlowTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +6287830000021)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for destination text field to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'SMA Negeri 55 Jakarta' on search for destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'SMA Negeri 55 Jakarta' from search result list appearing below Select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify title 'GOR Bulungan' text in the card is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text/label of first selected gate metadata is You\u2019ve been here"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067600||673765||673757||673750": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyNearestTagForGateWithNearestDistanceFromUserCurrentLocationFromSVMFlow",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/PPOIFlowTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +6287830000023)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Your current location' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click 'Select via map' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify title 'SMA Negeri 55 Jakarta' text in the card is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673763": [
+      {
+        "module": "cartography",
+        "title": "Verify most popular tag is shown for gate with highest popularity from PPOI Pickup Search",
+        "method": "verifyMostPopularTagForGateWithHighestPopularityFromSVMFlow",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/PPOIFlowTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +6287810000001)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for destination text field to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Your current location' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click 'Select via map' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify title 'Plaza Senayan' text in the card is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text/label of selected gate metadata is selected by % of customers"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067602||673755": [
+      {
+        "module": "cartography",
+        "title": "Verify nearest tag for instant gate with nearest distance from user current location",
+        "method": "verifyMostPopularTagForGateWithHighestPopularityFromPickupSearchFlow",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/PPOIFlowTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +6287810000002)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for destination text field to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Plaza Senayan' on search for pickup field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Plaza Senayan' from search results list appearing below Select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify title 'Plaza Senayan' text in the card is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text/label of selected gate metadata contain selected by % of customers"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673762||673768": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyNearestTagForInstantGateWithNearestDistanceFromUserCurrentLocation",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/PPOIFlowTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a newly created customer with no booking history)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close Airport Welcome Screen dialog by clicking the continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Your current location' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click 'Select via map' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that the title 'Soekarno Hatta International Airport T2' is visible in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap the clickable gate marker bubble in the Map View that shows NEAREST_TAG_LABEL beside the chevron icon"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2555980||673759||673770": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyUserSeeInstantLabelOnInstantPPOITest",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/PPOIFlowTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +623805403524)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'CGK - Soekarno Hatta International Airport T3' on search for pickup field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'CGK - Soekarno Hatta International Airport T3' from search results list appearing below Select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that the title 'CGK - Soekarno Hatta International Airport T3' is visible in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text T3 Domestic - GoCar Luxe inside list container below text 'Select a pickup point' in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text T3 Domestic - GoCar Luxe inside table container below text 'Select a pickup point' in the card"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673760||673766": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyPopularTagForInstantGate",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/PPOIFlowTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a newly created customer with no booking history)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Your current location' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click 'Select via map' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on the PPOI list card to change the main highlighted pickup point from 'in front of Kapal Api Cafe' to 'STASIUN_TANAH_ABANG_INSTANT_PICKUP_POINT_NAME', until the highlighted chevron bubble in the Map View shows the 'popularTagLabel' label instead of the 'NEAREST_TAG_LABEL' gate"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap the clickable gate marker bubble in the Map View that shows popularTagLabel beside the chevron icon"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673761||673767": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyVisitedTagForInstantGateOnSvmAndSearchScreens",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/PPOIFlowTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628215346727)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Your current location' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Stasiun Depok Baru' on search for pickup field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click 'Stasiun Depok Baru' POI name"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap the clickable gate marker bubble in the Map View that shows the 'visitedTagLabel' tag label"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673764": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyVisitedTagForNormalGateOnSvmAndSearchScreens",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/PPOIFlowTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +6287830000021)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Your current location' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'GOR_BULUNGAN_NAME' on search for pickup field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click 'GOR_BULUNGAN_NAME' POI name"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673754||673753": [
+      {
+        "module": "cartography",
+        "title": "Verify tag pickup marker for single saved suggestion",
+        "method": "verifyTagPickupMarkerAndSubtitleForSavedHistoricalNearestPOIs",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/ReverseGeocodeTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +628219148734)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Your current location' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click 'Select via map' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text nearby saved badge label below text nearby history bade label inside list container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text nearby nearest badge label below text nearby saved badge label inside list container"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673752": [
+      {
+        "module": "cartography",
+        "title": "Verify tag pickup marker for single history suggestion",
+        "method": "verifyTagPickupMarkerForSingleSavedSuggestion",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/ReverseGeocodeTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +628214373804)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Your current location' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click 'Select via map' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673751": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyTagPickupMarkerForSingleHistorySuggestion",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/ReverseGeocodeTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +628214373804)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Your current location' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on 'Select via map' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "379167": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyCustomerPickupLocationInMinimap",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/MiniMapTests.java",
+        "project_id": "176",
+        "suite_id": "28796541",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on GoRide"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for destination field to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click minimap on Transport Home Page above input destination textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Your current location text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify current pickup location title text is Pasaraya Blok M"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5521289||5073118||5073128||5304670||5304669||518547||673748": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyDropoffAndPickupWhenSearchingPOIInsideAOIAndSelectingSuggestedGate",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/WidgetizationTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +6287830000006)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'CGV Grand Indonesia' on search for a destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Store the first gate name appearing under 'CGV Grand Indonesia' in variable suggestedDropoffGate"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'CGV Grand Indonesia' from search result list appearing below select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Edit button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Plaza Senayan' on search for a pickup field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Plaza Senayan' from search result list appearing below select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Store the first gate name appearing below 'Plaza Senayan' in variable suggestedPickupGate"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button containing text confirm pickup point"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify far pickup nudge card is showing with text 'Pickup point is a bit far'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text km from you in the card is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Continue' button in the far pickup nudge card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Dismiss any popup or tooltip if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "669823": [
+      {
+        "module": "cartography",
+        "title": "Verify THP suggested gate selection for POI inside AOI",
+        "method": "verifyDropoffDetailsPOIInsideAOIAndNormalAOIInTHP",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/WidgetizationTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628232580733)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until text 'Where do you want to go?' is visible on top"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "669858": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyDropoffDetailsSelectingSuggestedGatePOIInsideAOIInTHP",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/WidgetizationTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628280182833)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until text 'Where do you want to go?' is visible on top"
+          },
+          {
+            "kind": "nlp",
+            "text": "Dismiss any popup or tooltip if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5553036": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifyDropoffPlaceDetailWhenSelectingSavedAddressAOI",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/WidgetizationTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +6287830000006)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on search for destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'GOR Bulungan' on search for a destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'GOR Bulungan' from search result list appearing below select via map'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Dismiss any popup or tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Find driver' or 'Book' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text Book button if it is showing again otherwise ignore this step"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2652081||2652088": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "verifySelectingDestinationForRedzoneFlow",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/RedzoneTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +628238256453)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click 'Select via map' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click edit button in the card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Pizza Hut Restoran - Jatiwaringin' on search for a destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on poicard restriction action containing text 'Learn more here'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button containing text Select another location in the bottom card"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673749": [
+      {
+        "module": "cartography",
+        "title": "Verify popular tag is present on Search Screen",
+        "method": "testSearchforPOIThatIsInsideAOIforPickupandDropoff",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for destination text field is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Fore Coffee Kalibata' on destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Kalibata City' text element is shown in search result below select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify array list of gates/pickup points should be contain text Lobby in search result below select via map"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673771": [
+      {
+        "module": "cartography",
+        "title": "Verify nearest tag is present on Search Screen",
+        "method": "verifyPopularTagOnSearchScreen",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for destination text field is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Airport T2' on destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Most popular' text element is shown in search result below select via map"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673773": [
+      {
+        "module": "cartography",
+        "title": "Verify historical tag is present on Search Screen",
+        "method": "verifyNearestTagOnSearchScreen",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for destination text field is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'indonesia grand mall' on pickup field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Nearest to you' text element is shown in search result below select via map"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673772": [
+      {
+        "module": "cartography",
+        "title": "Verify expand and close gate button function",
+        "method": "verifyHistoricalTagOnSearchScreen",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +6287830000021)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for destination text field to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'SMA Negeri 55 Jakarta' on search for destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'SMA Negeri 55 Jakarta' text element is shown in search result below select via map"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2352601": [
+      {
+        "module": "cartography",
+        "title": "Verify user able to see route overview after multidestination search for gate or AOI",
+        "method": "verifyExpandAndCloseGateInSearchScreen",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for destination text field is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Kalibata City' on destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until text view all points is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Click on text view all points below 'Kalibata City'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until Tulip Tower Lobby is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until Close is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until text Close is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Close text"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4896544": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "multistopDestinationConfirmedSearchAndTapChildPPOI",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +6287830000006)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on add destination button on the bottom right of destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Pacific Place' on 'Destination 1' text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'East Lobby Across Artha Graha' from search result list appearing below select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'SMA Negeri 66 Jakarta' on 'Destination 2' text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'In Front of Entrance/Exit Gate' from search result list appearing below select via map"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2352595||2352590": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "multistopDestinationConfirmedSearchAndTapParentPPOI",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +6287810000001)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on add destination button on the bottom right of destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Kos 49 Tebet' on 'Destination 1' text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Kos 49 Tebet' from search result list appearing below select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Kopikalyan Menteng' on 'Destination 2' text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Kopikalyan Menteng' from search result list appearing below select via map"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "2352578||2553430": [
+      {
+        "module": "cartography",
+        "title": "Verify user enters invalid location",
+        "method": "pickupNotConfirmedSearchAndTapParentDPOI",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Kalibata City' on destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Kalibata City' from search result list appearing below select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back button on the top left above the card"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "1849056": [
+      {
+        "module": "cartography",
+        "title": "Verify that the user is able to see historical tag for POI",
+        "method": "verifyUserEntersInvalidLocation",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoCar to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Papua nugini cuk dadak' on destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on papua nugini from search result list appearing below select via map"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on confirm pickup point button in the card"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673747": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "VerifyHistoricalTagForPOI",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/SearchTests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +6281377534365)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for GoRide to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoRide'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination text field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Rukita toska binus kemanggisan' on destination field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Rukita toska binus kemanggisan' text element is shown in search result below select via map"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673745": [
+      {
+        "module": "cartography",
+        "title": "Verify the POI and AOI name on pickup spots screen",
+        "method": "VerifyAOINameForPOIInsideAOIInLHS",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/POIinsideAOITests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628224181706)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination input field"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "673746": [
+      {
+        "module": "cartography",
+        "title": null,
+        "method": "VerifyAOIPOINameOnPickupScreen",
+        "source_file": "cartography/src/test/java/io/gojek/cartography/tests/tests/POIinsideAOITests.java",
+        "project_id": "176",
+        "suite_id": "28797391",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +628224181706)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoCar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on destination input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on pickup location input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 'Fore Coffee - Kalibata City' in pickup to search"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap to select the 'Fore Coffee - Kalibata City, Jakarta' from the search list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Select 'Borneo Tower Lobby' gate for pickup"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button 'Confirm Pickup point'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Select the place from history places lists appearing below select via map button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Continue' button for Pickup point is a bit far popup"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

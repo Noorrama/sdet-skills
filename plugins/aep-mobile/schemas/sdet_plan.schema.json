@@ -159,7 +159,12 @@
           "steps": {
             "type": "array",
             "items": { "type": "string" },
-            "description": "Supports automated execution steps and manual/legacy regression test steps."
+            "description": "MANUAL / human-tester steps: clean declarative NLP a person can perform on the device, with automation-harness scaffolding (backdoor login, toggle/flag injection, stubs) stripped out and lifted to preconditions. This is the tester-facing sequence that flows into the CSV Steps column."
+          },
+          "automation_steps": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "A MINIMAL restyle of 'steps' into TapMind NLP-framework vocabulary, placed directly after 'steps'. NOT a full runnable script -- the downstream code-gen stage adds the runStep() wrapper, exact constants, credential tokens, toggle names and setup. Rules: (1) ONE action per line -- split every compound step (top-level ' and '/' then ' joining distinct actions, verb inherited by the second fragment; not comma-lists, not inside parentheses). (2) TapMind helper calls verbatim where the step is that operation: login -> loginToDriver(<account>); explicit deeplink -> openDeeplink(\"<uri>\"); explicit flag set -> setDriverToggle(<flag_key>, <true|false>). (3) EVERY other action/assertion is the plain step text itself, NOT wrapped in runStep(). No injected scaffolding, no fabricated constants. When the scenario maps to an existing case with a real TapMind test, this is that test's verbatim sequence (from the tapmind nav_index) instead. Empty array when there is nothing to automate."
           },
           "expected_result": { "type": "string" },
           "execution_mode": { "type": "string" },

@@ -1,0 +1,783 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "gopaypinjam",
+    "case_ids_indexed": 13,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "384999": [
+      {
+        "module": "gopaypinjam",
+        "title": "Validate entry point for gopaypinjam for approved user",
+        "method": "verifyEntryPointPinjamPillNewUser",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaypinjam/EntryPointTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGopay(TestData.GOPAY_NEW_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Activate Pinjam' button on GoPay Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "385001": [
+      {
+        "module": "gopaypinjam",
+        "title": "Validate entry point for gopaypinjam for pre approved user",
+        "method": "verifyEntryPointPinjamPillApprovedUser",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaypinjam/EntryPointTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGopay(TestData.GOPAY_APPROVED_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pinjam Rp6.000.000' button on GoPay Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gopaypinjam",
+        "title": "Validate entry point for gopaypinjam for pre approved user",
+        "method": "verifyEntryPointPinjamPillApprovedUser",
+        "source_file": "gopaypinjam/src/test/java/tests/gojek/EntryPointTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGojekViaTDP(TestData.GOJEK_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'More' button next to 'Pay' and 'History' on GoJek Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Got it'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Coins is visible for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe left slowly on Coins"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button containing the text 'Rp 6.000.000'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "385000": [
+      {
+        "module": "gopaypinjam",
+        "title": "Validate entry point for gopaypinjam for driver user",
+        "method": "verifyEntryPointPinjamPillPreApprovedUser",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaypinjam/EntryPointTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGopay(TestData.GOPAY_PRE_APPROVED_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pinjam up to 35mio' button on GoPay Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gopaypinjam",
+        "title": null,
+        "method": "verifyEntryPointPinjamPillPreApprovedUser",
+        "source_file": "gopaypinjam/src/test/java/tests/gojek/EntryPointTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGojekViaTDP(TestData.GOPAY_PRE_APPROVED_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'More' button next to 'Pay' and 'History' on GoJek Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Got it'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Coins is visible for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe left slowly on Coins"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button containing the text 'Get a cash loan up to 35mio'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "385003": [
+      {
+        "module": "gopaypinjam",
+        "title": "Validate entry point for gopaypinjam at Gotagihan page ",
+        "method": "verifyEntryPointPinjamPillDriverUser",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaypinjam/EntryPointTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGopay(TestData.GOPAY_DRIVER_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Repay only 2k/day' button on GoPay Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "293125": [
+      {
+        "module": "gopaypinjam",
+        "title": "Validate withdraw button is enable",
+        "method": "verifyUserWithActiveDue",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaypinjam/HomePageTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGopay(TestData.GOPAY_USER_WITH_ACTIVE_DUE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pinjam' button on GoPay Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Repay' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Repayment details' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Repayment details' is visible in title header"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gopaypinjam",
+        "title": "Validate withdraw button is enable",
+        "method": "verifyUserWithActiveDue",
+        "source_file": "gopaypinjam/src/test/java/tests/gojek/HomePageTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGojekViaTDP(TestData.GOJEK_USER_WITH_ACTIVE_DUE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'More' button next to 'Pay' and 'History' on GoJek Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Got it'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Coins is visible for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe left slowly on Coins"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button containing the text 'Overdue payment' or 'Lewat jatuh tempo'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Repay' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Repayment details' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Repayment details' is visible in title header"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "293123": [
+      {
+        "module": "gopaypinjam",
+        "title": null,
+        "method": "verifyUserWithoutDue",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaypinjam/HomePageTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGopay(TestData.GOPAY_USER_WITHOUT_DUE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pinjam' button on GoPay Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button contains 'Withdraw'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Enter loan details' is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Enter loan details' is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gopaypinjam",
+        "title": null,
+        "method": "verifyUserWithoutDue",
+        "source_file": "gopaypinjam/src/test/java/tests/gojek/HomePageTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGojekViaTDP(TestData.GOPAY_APPROVED_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'More' button next to 'Pay' and 'History' on GoJek Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Got it'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Coins is visible for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe left slowly on Coins"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button containing the text 'Pinjam'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button contains 'Withdraw limit'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Enter loan details' is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Enter loan details' is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "582168": [
+      {
+        "module": "gopaypinjam",
+        "title": "Verify credit application FR is displayed",
+        "method": "verifyLoanApplicationFrTriggered",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaypinjam/KycTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGopay(TestData.GOPAY_USER_LOAN_FR)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pinjam' button on GoPay Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button contains 'Withdraw'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Enter loan details' is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Input '5000000' on loan amount field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tenor 3 months"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Select disbursement account"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'BCA SIMULATOR A'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Continue' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Daily needs' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Agree & submit' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Start face verification' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Make sure your face is visible' is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Make sure your face is visible' is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "555115": [
+      {
+        "module": "gopaypinjam",
+        "title": null,
+        "method": "verifyCreditApplicationFrTriggered",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaypinjam/KycTests.java",
+        "project_id": "179",
+        "suite_id": "47813098",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGopay(TestData.GOPAY_USER_CREDIT_FR)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Activate Pinjam' button on GoPay Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPayPinjam' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Continue' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Data review' title is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Submit' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Skip' button on pop up consent"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Start face verification' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Make sure your face is visible' is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Make sure your face is visible' is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-630415": [
+      {
+        "module": "gopaypinjam",
+        "title": "Validate ineligible user on pinjam modal",
+        "method": "verifyEligibleUserPinjamModal",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaymerchant/GomodalTests.java",
+        "project_id": "179",
+        "suite_id": "50460523",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGMA(TestData.GMA_ELIGIBLE_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Dompet' menu"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Pinjam Modal' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element contains 'Pinjam Modal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Aktifkan Pinjam Modal' button is enabled"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Aktifkan Pinjam Modal' button is enabled"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-700511": [
+      {
+        "module": "gopaypinjam",
+        "title": "Validate withdraw button on credit approved user",
+        "method": "verifyIneligibleUserPinjamModal",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaymerchant/GomodalTests.java",
+        "project_id": "179",
+        "suite_id": "50460523",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGMA(TestData.GMA_INELIGIBLE_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Dompet' menu"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Pinjam Modal' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element contains 'Pinjam Modal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPay Pinjam Modal belum tersedia' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPay Pinjam Modal belum tersedia' text is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-630416": [
+      {
+        "module": "gopaypinjam",
+        "title": "Validate repayment for pinjam modal",
+        "method": "verifyCreditApprovedUserHaveLimit",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaymerchant/GomodalTests.java",
+        "project_id": "179",
+        "suite_id": "50460523",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGMA(TestData.GMA_CREDIT_APPROVED_USER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Dompet' menu"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Pinjam Modal' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element contains 'Pinjam Modal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Tarik dana' button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Tarik dana' button is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-630425": [
+      {
+        "module": "gopaypinjam",
+        "title": "Validate loan application FR triggered",
+        "method": "verifyRepaymentUserHaveLoan",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaymerchant/GomodalTests.java",
+        "project_id": "179",
+        "suite_id": "50460523",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGMA(TestData.GMA_USER_HAVE_LOAN)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Dompet' menu"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Pinjam Modal' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element contains 'Pinjam Modal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Bayar' button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Bayar' button is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-630427": [
+      {
+        "module": "gopaypinjam",
+        "title": null,
+        "method": "verifyLoanApplicationFrTriggered",
+        "source_file": "gopaypinjam/src/test/java/tests/gopaymerchant/GomodalTests.java",
+        "project_id": "179",
+        "suite_id": "50460523",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWithGMA(TestData.GMA_LOAN_APPLICATION_FR)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Dompet' menu"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Pinjam Modal' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element contains 'Pinjam Modal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Tarik dana' button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Tarik dana' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Masukkan detail pinjaman' is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Input '10000000' on nominal pinjaman field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tenor 3 bulan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lanjutkan' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lanjutkan' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Menambah stok bahan baku' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Konfirmasi & Kirimkan' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Mulai verifikasi wajah' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Pastiin wajahmu terlihat jelas' is displayed"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Pastiin wajahmu terlihat jelas' is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}
