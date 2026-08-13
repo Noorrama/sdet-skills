@@ -64,31 +64,8 @@
         "blocking_issues": {
           "type": "array",
           "items": { "type": "string" }
-        },
-        "convention_compliance": {
-          "type": "object",
-          "description": "ADDITION. Tallies of how well the export follows the design team's flow-authoring conventions — the feedback loop back to design. connectors_total must equal the sum of every bucket below; a shortfall means connectors were dropped silently, which is the failure this block exists to make impossible.",
-          "additionalProperties": false,
-          "properties": {
-            "connectors_total": { "type": "integer", "description": "Every CONNECTOR node in the export." },
-            "connectors_resolved_to_screen": { "type": "integer", "description": "Both endpoints resolved to screens (standard #1 followed)." },
-            "connectors_inferred_to_screen": { "type": "integer", "description": "Destination was an element or a lane caption; the screen was inferred." },
-            "connectors_unresolvable": { "type": "integer", "description": "Floating endpoint, orphaned node id, or a destination with no board-node ancestor. Each is also a blocking_issues entry." },
-            "connectors_intra_screen": { "type": "integer", "description": "Both endpoints inside the same screen (including two state-frames of one screen) — a state transition or annotation, not navigation." },
-            "connectors_to_decision": { "type": "integer", "description": "Connectors terminating on a DECISION box. Each is consumed by contraction, which emits one edge per labelled exit — so this is its own bucket, not part of connectors_resolved_to_screen." },
-            "note_connectors": { "type": "integer", "description": "Either endpoint (or an ancestor of it) is an annotation component or Note/Context text." },
-            "caption_endpoints": { "type": "integer", "description": "Connectors landing on a CAPTION / LANE_BANNER rather than a screen." },
-            "decision_nodes": { "type": "integer", "description": "Board nodes classified DECISION — a small question box with 2+ outgoing connectors." },
-            "contracted_edges": { "type": "integer", "description": "Edges emitted by collapsing a decision box (edge_source CONNECTOR_CONTRACTED). Far above connectors_total means contraction escaped its one-hop / fan-out bounds and is manufacturing flows." },
-            "lane_entry_inferred": { "type": "integer", "description": "Edges whose destination is a lane's entry screen picked by reading order rather than stated." },
-            "reactions_with_destination": { "type": "integer", "description": "Tap-family reactions naming a destination (standard #2 followed)." },
-            "reactions_without_destination": { "type": "integer", "description": "Tap trigger with a null/absent destination (standard #2 not followed)." },
-            "unlabelled_branches": { "type": "integer", "description": "A trigger element with 2+ outgoing connectors and no labels to discriminate them (standard #4 not followed)." },
-            "non_descriptive_names": { "type": "integer", "description": "Frames/layers named Frame 427, Group 12, Rectangle, etc (standard #3 not followed)." },
-            "unreachable_screens": { "type": "integer", "description": "Screens in no ui_flow edge and no flowStartingPoints entry." }
-          }
         }
-      },
+},
       "required": ["overall_ambiguity_rating", "blocking_issues"]
     },
     "screens": {
@@ -119,7 +96,7 @@
             "enum": ["GEOMETRY", "DESCENDANT_COUNT", "COMPONENT_NAME"],
             "description": "ADDITION. Which test decided the class. GEOMETRY is the normal case; DESCENDANT_COUNT means the export carried no size and the proxy was used, paired with a DEGRADED gap."
           },
-          "purpose": { "type": "string" },
+          "purpose": { "type": "string", "description": "OPTIONAL, no longer produced. A Figma board carries no purpose statement, and nothing downstream reads this field, so the extractor does not emit it and its absence is never a gap. Kept defined so hand-authored contexts stay valid." },
           "deep_link": { "type": "string", "description": "ADDITION, optional. Deep link opening this screen, from a prototype URL action matching the app config's deeplink_scheme or a Note/Context note stating one. Most designs document no routing: absence is normal, never a gap, and never a constructed URI." },
           "entry_point": { "type": "boolean", "description": "ADDITION. True when this frame is named in the page's flowStartingPoints[]." },
           "screen_states": {
@@ -198,12 +175,12 @@
                   "required": ["rating", "reason"]
                 }
               },
-              "required": ["element_id", "type", "label", "states_represented", "interactions", "validations_and_edge_cases"]
+              "required": ["element_id", "type", "label", "interactions", "validations_and_edge_cases"]
             }
           },
           "screen_notes": { "type": "string" }
         },
-        "required": ["screen_id", "screen_name", "purpose", "screen_states", "elements", "screen_notes"]
+        "required": ["screen_id", "screen_name", "screen_states", "elements", "screen_notes"]
       }
     },
     "ui_flow": {
