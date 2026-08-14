@@ -18,6 +18,21 @@ Reasoning tier — Opus
 | Pass 2 | Post-build, Epic QA Ready | All Pass 1 inputs + `code_change_context` | Delta scenarios only (`is_delta: true`) |
 | Re-trigger | Upstream doc changed | Existing `sdet_plan.json` + `doc_change_context` + human feedback | Patch affected scenarios only |
 
+## Mode detection — determined by file presence
+
+Check in this order before doing anything else:
+
+| Check | Mode |
+|---|---|
+| `sdet_plan.json` absent | **Pass 1** — generate full scenario set |
+| `sdet_plan.json` present + `code_change_context.json` present | **Pass 2** — delta only, do not regenerate existing scenarios |
+| `sdet_plan.json` present + `doc_change_context.json` present | **Re-trigger** — patch affected scenarios only |
+| `sdet_plan.json` present + neither delta file present | **Error** — surface: "sdet_plan.json already exists. Provide code_change_context.json for Pass 2 or doc_change_context.json for Re-trigger." |
+
+If both `code_change_context.json` and `doc_change_context.json` are present alongside `sdet_plan.json`: prefer **Re-trigger** — doc changes can invalidate more existing scenarios and take priority. Note in qa_analysis.md that a Pass 2 run is also pending.
+
+Set `generation_mode` in the sdet_plan.json root to the detected mode: `pass1` | `pass2` | `retrigger`.
+
 ## Reads
 
 | File | Read for |
@@ -223,8 +238,10 @@ Schema root:
   - `test_layer: component|integration|e2e`
   - `priority: P0|P1|P2`
   - `source: RFC|PRD|CODE_DIFF|RETRIGGER`, `source_ref`
+  - `generated_by_mode: pass1|pass2|retrigger` — which execution mode created this scenario. Pass 1 = original design-time plan; Pass 2 = caught during implementation (code diff gap); retrigger = requirement change. Set once at creation; never overwritten on subsequent runs.
   - `provisional: boolean` — true when `approach_finalised: false` or `edge_case.inferred: true`
-  - `is_delta`, `is_legacy_regression`, `is_dedup`
+  - `is_delta: boolean` — true for pass2 and retrigger scenarios (shorthand for `generated_by_mode != pass1`; kept for downstream tool compatibility)
+  - `is_legacy_regression`, `is_dedup`
   - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`
   - `preconditions[]`, `fixture_ids[]`
   - `tags[]` — `happy_path|negative|boundary|flag_on|flag_off|e2e|load|concurrency|security|reliability|compliance|nfr|deferred|underspecified|provisional`
@@ -249,14 +266,39 @@ Columns: `scenario_id, name, test_layer, priority, tags, is_delta, is_legacy_reg
 
 ## Pass 2 rules
 
-- Output only `is_delta: true` scenarios — do not regenerate the full plan
-- Trace each code diff signal to an existing RFC validation step where possible
+Do not regenerate the full plan. Append delta scenarios only.
+
+**Delta matching — skip if already covered:**
+
+For each item in `code_change_context.json`, check whether an existing scenario in `sdet_plan.json` already covers it:
+
+| code_change_context item | Match criterion | If matched | If not matched |
+|---|---|---|---|
+| New endpoint | `(method + path)` appears in any scenario's `step_descriptions[].curl_reference` or `endpoint` | Skip | Generate new scenario |
+| New error code | Error code string appears in any scenario's `step_descriptions[].expected_result` | Skip | Generate new negative scenario |
+| New validation rule | Rule description closely matches any scenario's `step_descriptions[].action` or `expected_result` | Skip | Generate new scenario + flag as `rfc_gap` |
+| New feature flag | Flag name appears in any scenario's `tags[]` (flag_on / flag_off pair) | Skip | Generate flag_on + flag_off pair |
+
+All generated scenarios: `generated_by_mode: "pass2"`, `is_delta: true`.
+Flag code-diff items that have no RFC match with `source: CODE_DIFF` and add to `coverage_summary.rfc_gaps[]`.
 
 ## Re-trigger rules
 
-- Read existing `sdet_plan.json` — do not regenerate unaffected scenarios
-- Apply only the delta from `doc_change_context.json`
-- Output only added/modified/deprecated scenarios with `change_reason` field
+Do not regenerate unaffected scenarios. Patch only what the doc change touched.
+
+**Scenario matching — find what to patch:**
+
+Re-trigger uses `source_ref` on each existing scenario to trace back to the source AC, flow, or validation step. When `doc_change_context.json` reports a change:
+
+| doc_change_context item | Find affected scenarios by | Action |
+|---|---|---|
+| AC modified | `source_ref` contains the AC ID | Update step_descriptions, assertions, preconditions. Set `generated_by_mode: "retrigger"`, add `change_reason`. |
+| AC removed | `source_ref` contains the AC ID | Set `status: "deprecated"`, add `change_reason`. Do not delete — human reviewer decides final removal. |
+| AC added | No existing match | Generate new scenario. `generated_by_mode: "retrigger"`, `is_delta: true`. |
+| Flow changed | `source_ref` contains the flow name | Update outcome assertion and steps. Set `generated_by_mode: "retrigger"`, add `change_reason`. |
+| Validation step changed | `source_ref` contains the step ref | Update constraint / failure_code assertions. Set `generated_by_mode: "retrigger"`, add `change_reason`. |
+
+`change_reason` field: one sentence stating what changed and why the scenario was updated, e.g. "AC-003 updated: error code changed from 409 to 422 per PRD v2".
 
 ## Validate
 
