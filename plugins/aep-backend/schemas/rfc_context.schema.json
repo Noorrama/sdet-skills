@@ -5,106 +5,482 @@
   "additionalProperties": false,
   "required": ["feature_name", "validation_sequence"],
   "properties": {
-    "feature_name": { "type": "string" },
-    "rfc_version": { "type": ["string", "null"] },
+
+    "id":                 { "type": "string",  "description": "RFC identifier, e.g. RFC-618. Used to disambiguate when a PRD spawns multiple RFCs." },
+    "feature_name":       { "type": "string" },
+    "rfc_version":        { "type": ["string", "null"] },
+
+    "provenance": {
+      "type": "object",
+      "description": "Extraction lineage. Used to detect RFC document updates (hash change → re-extract → re-generate sdet_plan) and to understand which extractor logic produced this file.",
+      "additionalProperties": false,
+      "required": ["extracted_at", "extractor_version"],
+      "properties": {
+        "extracted_at":           { "type": "string",           "description": "ISO 8601 timestamp of when this rfc_context was extracted" },
+        "extractor_version":      { "type": "string",           "description": "Version of the rfc-extractor SKILL that produced this file, e.g. rfc-extractor/phase-a" },
+        "rfc_document_version":   { "type": ["string", "null"], "description": "Version label of the source RFC document, if the RFC system provides one" },
+        "hash":                   { "type": ["string", "null"], "description": "Content hash of the source RFC document. Hash change signals the RFC was updated and re-extraction is needed." }
+      }
+    },
+    "status":             {
+      "type": ["string", "null"],
+      "enum": ["DRAFT", "IN_REVIEW", "PUBLISHED", "ABANDONED", null],
+      "description": "RFC lifecycle status. null when the extractor could not determine a clean value (see extraction_gaps)."
+    },
+    "approach_finalised": {
+      "type": "boolean",
+      "description": "True only when the technical approach is locked and contracts can be used as test oracles. When false, treat all contracts as draft — do not freeze as test assertions."
+    },
+
+    "milestones": {
+      "type": "array",
+      "description": "Release milestones. Used to scope which scenarios to generate (M1 vs M2) and to set environment defaults (staging-only for early milestones, prod for GA).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "scope"],
+        "properties": {
+          "id":               { "type": "string",           "description": "Milestone label, e.g. M1, M2, GA" },
+          "scope":            { "type": "string",           "description": "Human-readable summary of what ships in this milestone" },
+          "target_date":      { "type": ["string", "null"], "description": "ISO 8601 target date, or null if not yet set" },
+          "requirement_refs": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+
+    "contracts": {
+      "type": "object",
+      "description": "Multi-protocol API contracts. Contributing source (C) for endpoint definitions and schema — tasks_context is authoritative (A). Use underspecified:true to signal contracts that must not be used as test oracles.",
+      "additionalProperties": false,
+      "properties": {
+
+        "rest": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "method"],
+            "properties": {
+              "path":             { "type": "string" },
+              "method":           { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+              "contract_status":  { "type": "string", "enum": ["draft", "finalised"] },
+              "description":      { "type": "string" },
+              "design_level":     { "type": "boolean", "description": "True = design-time contract; implementation may differ." },
+              "underspecified":   { "type": "boolean", "description": "True = contract is incomplete. Do not generate concrete scenario assertions from it." },
+              "auth":             { "type": ["string", "null"] },
+              "path_params": {
+                "type": "array",
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["name", "type"],
+                  "properties": {
+                    "name":     { "type": "string" },
+                    "type":     { "type": "string" },
+                    "required": { "type": "boolean" },
+                    "details":  { "type": "string" }
+                  }
+                }
+              },
+              "query_params": {
+                "type": "array",
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["name", "type"],
+                  "properties": {
+                    "name":     { "type": "string" },
+                    "type":     { "type": "string" },
+                    "required": { "type": "boolean" }
+                  }
+                }
+              },
+              "request_body": {
+                "type": ["array", "null"],
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["field", "type"],
+                  "properties": {
+                    "field":      { "type": "string" },
+                    "type":       { "type": "string" },
+                    "required":   { "type": "boolean" },
+                    "validation": { "type": "string", "description": "Validation rule description" }
+                  }
+                }
+              },
+              "responses": {
+                "type": "array",
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["condition"],
+                  "properties": {
+                    "status":    { "type": ["integer", "null"] },
+                    "condition": { "type": "string" },
+                    "body":      { "type": ["object", "null"] }
+                  }
+                }
+              },
+              "success_http_status": { "type": ["integer", "null"] },
+              "error_codes":   {
+                "type": "array", "items": { "type": "string" },
+                "description": "Error code strings returned by this endpoint. Cross-reference root error_codes[] for full catalog entry."
+              },
+              "requirement_refs": { "type": "array", "items": { "type": "string" } },
+              "ac_refs":          { "type": "array", "items": { "type": "string" } },
+              "sla":              { "type": ["string", "null"] },
+              "notes":            { "type": ["string", "null"] }
+            }
+          }
+        },
+
+        "grpc": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["service", "method"],
+            "properties": {
+              "service":          { "type": "string" },
+              "method":           { "type": "string", "description": "RPC method name(s). Pipe-separate when multiple methods share the same service block." },
+              "contract_status":  { "type": "string", "enum": ["draft", "finalised"] },
+              "streaming_type":   { "type": "string", "enum": ["unary", "server_streaming", "client_streaming", "bidi_streaming"] },
+              "request_message":  { "type": ["string", "null"], "description": "Protobuf request message name" },
+              "response_message": { "type": ["string", "null"], "description": "Protobuf response message name" },
+              "proto_file":       { "type": ["string", "null"] },
+              "error_handling":   { "type": ["string", "null"] },
+              "timeout_ms":       { "type": ["integer", "null"] },
+              "requirement_refs": { "type": "array", "items": { "type": "string" } },
+              "ac_refs":          { "type": "array", "items": { "type": "string" } },
+              "notes":            { "type": ["string", "null"] }
+            }
+          }
+        },
+
+        "kafka": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["topic", "direction"],
+            "properties": {
+              "topic":               { "type": "string" },
+              "direction":           { "type": "string", "enum": ["produces_to", "consumes_from"] },
+              "contract_status":     { "type": "string", "enum": ["draft", "finalised"] },
+              "message_schema":      { "type": ["object", "null"] },
+              "schema_registry_ref": { "type": ["string", "null"] },
+              "partition_key":       { "type": ["string", "null"] },
+              "consumer_group":      { "type": ["string", "null"] },
+              "delivery_guarantee":  {
+                "type": ["string", "null"],
+                "enum": ["at_most_once", "at_least_once", "exactly_once", null]
+              },
+              "retry_behavior":      { "type": ["string", "null"] },
+              "dlq":                 { "type": ["string", "null"], "description": "Dead-letter queue topic name, if applicable" },
+              "requirement_refs":    { "type": "array", "items": { "type": "string" } },
+              "ac_refs":             { "type": "array", "items": { "type": "string" } },
+              "notes":               { "type": ["string", "null"] }
+            }
+          }
+        },
+
+        "other": {
+          "type": "array",
+          "description": "Non-standard protocols: DB-direct, scheduled workers, migration pipelines, lockless Postgres patterns, etc.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name":             { "type": "string" },
+              "contract_status":  { "type": "string", "enum": ["draft", "finalised"] },
+              "trigger":          { "type": "string" },
+              "frequency":        { "type": ["string", "null"] },
+              "data_touched":     { "type": "array", "items": { "type": "string" } },
+              "requirement_refs": { "type": "array", "items": { "type": "string" } },
+              "ac_refs":          { "type": "array", "items": { "type": "string" } },
+              "notes":            { "type": ["string", "null"] }
+            }
+          }
+        }
+
+      }
+    },
+
     "validation_sequence": {
       "type": "array",
+      "description": "AUTHORITATIVE (A) source for business validation rules and logic. Ordered steps per API call. RFC owns this — tasks_context.validation_constraints contributes implementation confirmation only. Distinct from flows: one sequence per API; flows describe end-to-end scenario paths.",
       "items": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
         "required": ["step", "name", "what_is_validated", "why"],
         "properties": {
-          "step": { "type": "integer" },
-          "name": { "type": "string" },
-          "what_is_validated": { "type": "string" },
-          "why": { "type": "string" },
-          "failure_error_code": { "type": "string" },
-          "failure_http_status": { "type": "integer" },
-          "notes": { "type": ["string", "null"] }
+          "step":                { "type": "integer",          "description": "Execution order (1-indexed). Drives test step ordering." },
+          "name":                { "type": "string" },
+          "what_is_validated":   { "type": "string" },
+          "why":                 { "type": "string",           "description": "Business reason this validation exists" },
+          "layer":               {
+            "type": "string",
+            "enum": ["controller", "service", "repository", "gateway", "db", "infra"],
+            "description": "Architectural layer where this validation executes. Maps to test_layer for scenario assignment."
+          },
+          "inputs":              { "type": "array", "items": { "type": "string" }, "description": "Input fields or signals consumed by this step" },
+          "constraint":          { "type": "string",           "description": "Specific condition that must hold for the step to pass. Used in test assertions." },
+          "failure_error_code":  { "type": ["string", "null"], "description": "Error code emitted when this step fails. Cross-reference root error_codes[]." },
+          "failure_http_status": { "type": ["integer", "null"] },
+          "notes":               { "type": ["string", "null"] }
         }
       }
     },
-    "api_contracts": {
-      "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "properties": {
-          "endpoint": { "type": "string" },
-          "method": { "type": "string" },
-          "design_level": { "type": "boolean" },
-          "auth": { "type": "string" },
-          "request_schema": { "type": "object" },
-          "response_schema": { "type": "object" },
-          "error_codes": { "type": "array", "items": { "type": "string" } }
-        }
-      }
-    },
+
     "flows": {
       "type": "array",
+      "description": "End-to-end scenario paths. Multiple flows per feature (happy_path / fallback / deviation). Distinct from validation_sequence: flows are scenario-level paths; validation_sequence is a single API's fine-grained rule chain.",
       "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["name", "steps"],
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type", "steps"],
         "properties": {
-          "name": { "type": "string" },
-          "trigger": { "type": "string" },
-          "steps": { "type": "array", "items": { "type": "string" } }
+          "name":    { "type": "string" },
+          "type":    {
+            "type": "string",
+            "enum": ["happy_path", "fallback", "deviation"],
+            "description": "happy_path = primary success path; fallback = degraded / error-recovery path; deviation = alternate valid path (lazy creation, dual-read, etc.)"
+          },
+          "trigger": { "type": "string", "description": "Precondition or event that activates this flow" },
+          "steps":   { "type": "array", "items": { "type": "string" } },
+          "outcome": { "type": "string", "description": "Expected end state after all steps complete. Used directly in test assertions." }
         }
       }
     },
-    "error_scenarios": {
+
+    "error_codes": {
       "type": "array",
+      "description": "Root-level error code catalog for this RFC. Contributing source (C) — prd_context is authoritative (A) for business error classification. Use these for cross-story dedup and for aligning scenario assertions.",
       "items": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code"],
         "properties": {
-          "condition": { "type": "string" },
-          "error_code": { "type": "string" },
-          "http_status": { "type": "integer" },
-          "validation_step_ref": { "type": "integer" }
+          "code":         { "type": "string" },
+          "http_status":  { "type": ["integer", "null"] },
+          "body":         { "type": ["object", "null"], "description": "Representative response body shape for this error" },
+          "message":      { "type": "string",           "description": "Human-readable description: when this error occurs and what triggers it" },
+          "is_retriable": { "type": "boolean",          "default": false, "description": "True = client should retry. Generates a retry-behaviour test scenario." }
         }
       }
     },
+
     "edge_cases": {
       "type": "array",
       "items": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "description", "type"],
         "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "type": { "type": "string", "enum": ["boundary", "race_condition", "timeout", "concurrent"] }
+          "name":                { "type": "string" },
+          "description":         { "type": "string" },
+          "type":                {
+            "type": "string",
+            "enum": ["boundary", "race_condition", "timeout", "concurrent", "idempotency"],
+            "description": "boundary = limit/overflow; race_condition = concurrent write conflict; timeout = downstream latency; concurrent = parallel request behaviour; idempotency = duplicate request handling"
+          },
+          "expected_behaviour":  { "type": "string", "description": "What the system must do in this case. Used directly in test assertion prose." },
+          "validation_step_ref": { "type": ["integer", "null"], "description": "Step number from validation_sequence this edge case exercises. Null if cross-cutting." },
+          "inferred":            { "type": "boolean", "default": false, "description": "True = edge case was inferred by the extractor, not explicitly stated in the RFC. Treat assertions as provisional." }
         }
       }
     },
+
     "cross_service_dependencies": {
       "type": "array",
+      "description": "Downstream services called by this feature. is_critical drives stub/mock prioritisation in test setup.",
       "items": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["service"],
         "properties": {
-          "service": { "type": "string" },
-          "call_order": { "type": "integer" },
-          "failure_behaviour": { "type": "string" }
+          "service":           { "type": "string" },
+          "protocol":          { "type": "string", "description": "Communication protocol: REST, gRPC, Kafka, event, DB-direct, etc." },
+          "call_order":        { "type": "integer", "description": "Relative call order in the happy-path sequence (0 = event-driven, no fixed order)" },
+          "is_critical":       { "type": "boolean", "description": "True = failure of this dependency causes the feature to fail end-to-end. Generates a dependency-failure scenario." },
+          "failure_behaviour": { "type": "string",  "description": "How the feature behaves when this dependency is unavailable or slow" },
+          "timeout_ms":        { "type": ["integer", "null"] }
         }
       }
     },
+
     "feature_flags": {
       "type": "array",
+      "description": "Feature flags that gate or alter behaviour. Each flag generates a flag_on and flag_off test scenario pair.",
       "items": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
         "properties": {
-          "flag": { "type": "string" },
-          "on_behaviour": { "type": "string" },
-          "off_behaviour": { "type": "string" }
+          "name":               { "type": "string" },
+          "default_state":      { "type": ["string", "null"], "description": "Default value as a string (e.g. 'false', 'true', 'null')" },
+          "on_behaviour":       { "type": "string" },
+          "off_behaviour":      { "type": "string" },
+          "kill_switch":        { "type": "boolean", "default": false, "description": "True = this flag can shut the feature off entirely. Generates a kill-switch scenario." },
+          "default_staging":    { "type": ["boolean", "null"] },
+          "default_production": { "type": ["boolean", "null"] },
+          "gated_behavior":     { "type": "string", "description": "One-line summary of what system behaviour this flag controls" },
+          "rollout":            { "type": ["string", "null"], "description": "Rollout strategy description, e.g. '5%->10%->50%->100% gradual with per-merchant rollback'" }
         }
       }
     },
-    "timeouts": {
+
+    "non_functional_requirements": {
+      "type": "object",
+      "description": "Non-functional requirements in two layers: nfr_statements[] captures everything verbatim from the RFC (qualitative + quantitative); performance_targets[] is the structured subset extracted only when numbers are unambiguous. sdet-plan-generator reads both — statements for qualitative NFRs, targets for load scenario parameters.",
+      "additionalProperties": false,
+      "properties": {
+
+        "nfr_statements": {
+          "type": "array",
+          "description": "Verbatim NFR text from the RFC, one string per requirement. Always populated by the extractor — cheap, no parsing errors, preserves qualitative NFRs (data integrity, rollout strategy, cluster isolation) that cannot be meaningfully structured. sdet-plan-generator reads these for scenario intent; performance_targets[] provides the parsed numbers.",
+          "items": { "type": "string" }
+        },
+
+        "performance_targets": {
+          "type": "array",
+          "description": "Structured subset of NFRs where the extractor can confidently parse numbers. Filled only for quantitative NFRs (throughput, latency, concurrency ceilings, time-based SLOs). Left empty when all NFRs are qualitative — nfr_statements[] is the fallback.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["description"],
+            "description": "Only fields extractable from an RFC document. Test configuration decisions (load_test_type, ramp_up, duration, error rate threshold) belong in sdet_plan, not here.",
+            "properties": {
+              "description":           { "type": "string",            "description": "Raw NFR statement as written in the RFC, e.g. '~4.5M+ wallet write ops/day; 500-1000 TPS per shard'" },
+              "requirement_ref":       { "type": "string",            "description": "e.g. NFR2" },
+              "api_or_operation":      { "type": ["string", "null"],  "description": "Endpoint or named operation this target applies to, e.g. 'POST /wallets/balance-update'. Null when the target applies to the system as a whole." },
+              "throughput_tps":        { "type": ["integer", "null"], "description": "Target throughput in transactions per second, if stated in the RFC." },
+              "throughput_ops_per_day":{ "type": ["integer", "null"], "description": "Target daily operation volume, if stated in the RFC, e.g. 4500000." },
+              "latency_target_ms":     { "type": ["integer", "null"], "description": "Stated latency target in milliseconds, e.g. 200 for '<200ms'. Null if not specified." },
+              "latency_percentile":    { "type": ["string",  "null"], "description": "Percentile the latency target applies to, e.g. 'p99', 'p95'. Null if the RFC does not specify a percentile (treat as p99 by convention)." },
+              "slo_deadline":          { "type": ["string",  "null"], "description": "Time-based SLO written in the RFC, e.g. 'must complete before 01:15 WIB', 'daily at 04:00 WIB'. Generates a deadline-breach scenario in sdet_plan." },
+              "concurrency_ceiling": {
+                "type": ["object", "null"],
+                "description": "Per-entity concurrency ceiling explicitly stated in the RFC. Generates two scenarios: (1) at safe_tps — assert 0% failure; (2) at degraded_onset_tps — assert failures are within documented bounds.",
+                "additionalProperties": false,
+                "required": ["entity", "safe_tps"],
+                "properties": {
+                  "entity":             { "type": "string",            "description": "Domain entity the ceiling applies to, e.g. 'wallet', 'booking', 'merchant_account'" },
+                  "safe_tps":           { "type": "integer",           "description": "TPS below which the RFC guarantees 0% failure." },
+                  "degraded_onset_tps": { "type": ["integer", "null"], "description": "TPS at which failures begin, per the RFC. Null if not stated." },
+                  "notes":              { "type": ["string",  "null"] }
+                }
+              },
+              "notes": { "type": ["string", "null"] }
+            }
+          }
+        },
+
+        "security_compliance": {
+          "type": "array",
+          "description": "Security and compliance requirements that generate explicit test scenarios: data masking, auth enforcement, PCI-DSS, GDPR, etc.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "description"],
+            "properties": {
+              "type":            {
+                "type": "string",
+                "enum": ["PCI-DSS", "GDPR", "auth", "encryption", "data_masking", "other"],
+                "description": "Compliance category. PCI-DSS / data_masking = card data must not appear in responses or logs."
+              },
+              "description":     { "type": "string" },
+              "requirement_ref": { "type": "string" }
+            }
+          }
+        },
+
+        "reliability_targets": {
+          "type": "array",
+          "description": "Timeout, retry, circuit-breaker, and availability targets. Generates timeout-behaviour and retry-exhaustion scenarios.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["context"],
+            "properties": {
+              "context":                       { "type": "string",           "description": "What this target applies to, e.g. 'IRIS async callback', 'balance update', 'cutoff worker SLO'" },
+              "timeout_ms":                    { "type": ["integer", "null"], "description": "Hard timeout for this operation in milliseconds. Generates a slow-downstream scenario: inject latency above timeout_ms and assert correct timeout behaviour." },
+              "retry_count":                   { "type": ["integer", "null"], "description": "Max retry attempts on failure. Generates a retry-exhaustion scenario: downstream fails N+1 times → assert final error is surfaced correctly." },
+              "retry_policy":                  { "type": ["string", "null"],  "description": "Retry timing strategy, e.g. 'exponential backoff 1s/2s/4s', 'linear 1s'. Informs retry-storm load scenario." },
+              "circuit_breaker":               { "type": ["string", "null"],  "description": "Circuit-breaker strategy description, e.g. 'opens after 50% error rate over 10s window, half-open after 30s'." },
+              "circuit_breaker_error_rate_pct":{ "type": ["number",  "null"], "description": "Structured error rate % at which the circuit breaker opens (e.g. 50.0). Used to configure the circuit-breaker activation load scenario: sustain errors above this threshold and assert circuit opens + fallback activates." },
+              "requirement_ref":               { "type": "string" }
+            }
+          }
+        }
+
+      }
+    },
+
+    "risk_areas": {
       "type": "array",
+      "description": "Risk areas identified in or derived from the RFC. P0 risks must have test coverage before any merge. Drives scenario priority in sdet_plan.",
       "items": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk", "priority"],
         "properties": {
-          "context": { "type": "string" },
-          "value_ms": { "type": "integer" },
-          "retry_count": { "type": "integer" }
+          "risk":       { "type": "string" },
+          "priority":   {
+            "type": "string",
+            "enum": ["P0", "P1", "P2", "P3"],
+            "description": "P0 = blocking (test must exist before merge); P1 = required; P2 = recommended; P3 = nice-to-have"
+          },
+          "severity":   { "type": "string", "description": "Impact category, e.g. 'Money-movement / data-integrity', 'Outage / data-loss'" },
+          "mitigation": { "type": "string", "description": "How the RFC/implementation mitigates this risk — informs test assertion targets" }
+        }
+      }
+    },
+
+    "extraction_gaps": {
+      "type": "array",
+      "description": "Fields or sections the extractor could not fully resolve. Blocking gaps must prevent scenario generation for the affected area. SKILL must report extraction_gaps where blocking=true and halt generation for those scenarios.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "reason", "blocking"],
+        "properties": {
+          "field":    {
+            "type": "string",
+            "description": "JSON path of the missing/ambiguous field, e.g. contracts.rest[*].responses, status"
+          },
+          "reason":   {
+            "type": "string",
+            "enum": ["missing_from_source", "ambiguous", "contract_incomplete", "status_ambiguous", "missing_timeline", "flag_underspecified"],
+            "description": "Root cause category"
+          },
+          "detail":   { "type": "string", "description": "Full explanation of what is missing and why" },
+          "blocking": {
+            "type": "boolean",
+            "description": "True = do not generate test scenarios for the affected area until this gap is resolved. SKILL must surface these as blockers in sdet_plan."
+          }
+        }
+      }
+    },
+
+    "open_questions": {
+      "type": "array",
+      "description": "Unresolved design or implementation questions from the RFC. SKILL should surface these in sdet_plan as precondition gaps or deferred scenarios.",
+      "items": { "type": "string" }
+    },
+
+    "team_ownership": {
+      "type": "array",
+      "description": "Teams involved in this RFC. Used for BrowserStack project routing (a PRD can span multiple RFCs across teams) and for dependency escalation paths.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["team"],
+        "properties": {
+          "team":                 { "type": "string" },
+          "owns":                 { "type": "string",           "description": "What system, service, or module this team owns within this RFC scope" },
+          "browserstack_project": { "type": ["string", "null"], "description": "BrowserStack project slug for E2E test routing. Null if not applicable to this team's scope." }
         }
       }
     }
+
   }
 }
