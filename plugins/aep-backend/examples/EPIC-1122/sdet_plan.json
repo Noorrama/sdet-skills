@@ -59,7 +59,12 @@
       "tags": [
         "happy_path",
         "flag_on"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-002",
@@ -99,7 +104,12 @@
       ],
       "tags": [
         "negative"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-003",
@@ -138,7 +148,12 @@
       ],
       "tags": [
         "negative"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-004",
@@ -177,7 +192,12 @@
       ],
       "tags": [
         "negative"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-005",
@@ -216,7 +236,12 @@
       ],
       "tags": [
         "negative"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-006",
@@ -255,7 +280,12 @@
       ],
       "tags": [
         "negative"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-007",
@@ -294,7 +324,12 @@
       ],
       "tags": [
         "negative"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-008",
@@ -346,7 +381,12 @@
       ],
       "tags": [
         "negative"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-009",
@@ -399,7 +439,12 @@
       ],
       "tags": [
         "negative"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-010",
@@ -446,7 +491,12 @@
       "tags": [
         "flag_off",
         "negative"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-011",
@@ -496,7 +546,12 @@
       "tags": [
         "negative",
         "concurrency"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-012",
@@ -556,7 +611,12 @@
       ],
       "tags": [
         "security"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-013",
@@ -596,7 +656,12 @@
       ],
       "tags": [
         "boundary"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-014",
@@ -636,7 +701,12 @@
       ],
       "tags": [
         "boundary"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-015",
@@ -676,7 +746,12 @@
       ],
       "tags": [
         "boundary"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-016",
@@ -737,7 +812,12 @@
       "tags": [
         "negative",
         "reliability"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-017",
@@ -796,7 +876,12 @@
       ],
       "tags": [
         "db"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-018",
@@ -842,7 +927,12 @@
       ],
       "tags": [
         "db"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-019",
@@ -888,7 +978,12 @@
       ],
       "tags": [
         "db"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-020",
@@ -934,7 +1029,12 @@
       ],
       "tags": [
         "db"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-021",
@@ -974,7 +1074,12 @@
       "tags": [
         "negative",
         "boundary"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     },
     {
       "scenario_id": "SC-EPIC1122-022",
@@ -1024,7 +1129,12 @@
       "tags": [
         "nfr",
         "load"
-      ]
+      ],
+      "human_corrected": false,
+      "human_correction_types": [],
+      "review_round": 0,
+      "provisional": false,
+      "status": "active"
     }
   ],
   "coverage_summary": {
@@ -1041,7 +1151,15 @@
     },
     "rfc_steps_covered": 9,
     "rfc_steps_total": 9,
-    "rfc_gaps": []
+    "rfc_gaps": [],
+    "llm_quality": {
+      "auto_approved": 22,
+      "human_modified": 0,
+      "human_deprecated": 0,
+      "human_added": 0,
+      "llm_accuracy_pct": null,
+      "review_rounds_completed": 0
+    }
   },
   "dedup_report": {
     "total_legacy_regression": 5,

@@ -1,6 +1,6 @@
 ---
 name: backend-sdet-plan-generator
-description: Generate the backend SDET test plan from extracted context files. Three modes: Pass 1 (pre-build, 4 context files), Pass 2 (post-build, adds code_change_context), Re-trigger (doc change, patches affected scenarios). Outputs sdet_plan.json, qa_analysis.md, and sdet_testcases.csv. RFC drives completeness, PRD drives priority, Tasks drive classification, regression drives deduplication.
+description: Generate the backend SDET test plan from extracted context files. Four modes: Pass 1 (full generation), Pass 2 (code delta), Re-trigger (doc change), Review (human feedback via qa_analysis.md). Outputs sdet_plan.json, qa_analysis.md, and sdet_testcases.csv. RFC drives completeness, PRD drives priority, Tasks drive classification, regression drives deduplication.
 ---
 
 # Backend SDET Plan Generator
@@ -17,21 +17,27 @@ Reasoning tier — Opus
 | Pass 1 | Pre-build, first run | prd + rfc + tasks + regression context | Full scenario set |
 | Pass 2 | Post-build, Epic QA Ready | All Pass 1 inputs + `code_change_context` | Delta scenarios only (`is_delta: true`) |
 | Re-trigger | Upstream doc changed | Existing `sdet_plan.json` + `doc_change_context` + human feedback | Patch affected scenarios only |
+| Review | Human feedback written in `qa_analysis.md` | Existing `sdet_plan.json` + `qa_analysis.md` (feedback section filled) | Apply human corrections; add/modify/deprecate scenarios |
 
 ## Mode detection — determined by file presence
 
-Check in this order before doing anything else:
+Check in **priority order** — use the first match:
 
-| Check | Mode |
-|---|---|
-| `sdet_plan.json` absent | **Pass 1** — generate full scenario set |
-| `sdet_plan.json` present + `code_change_context.json` present | **Pass 2** — delta only, do not regenerate existing scenarios |
-| `sdet_plan.json` present + `doc_change_context.json` present | **Re-trigger** — patch affected scenarios only |
-| `sdet_plan.json` present + neither delta file present | **Error** — surface: "sdet_plan.json already exists. Provide code_change_context.json for Pass 2 or doc_change_context.json for Re-trigger." |
+| Priority | Check | Mode |
+|---|---|---|
+| 1 (highest) | `sdet_plan.json` present + `qa_analysis.md` present + `### Feedback` section in `qa_analysis.md` has content beyond the placeholder | **Review** — apply human feedback; other change files deferred until review is incorporated |
+| 2 | `sdet_plan.json` absent | **Pass 1** — generate full scenario set |
+| 3 | `sdet_plan.json` present + `doc_change_context.json` present | **Re-trigger** — patch affected scenarios only |
+| 4 | `sdet_plan.json` present + `code_change_context.json` present | **Pass 2** — delta only, do not regenerate existing scenarios |
+| 5 (error) | `sdet_plan.json` present + no feedback and no change files | **Error** — surface: "sdet_plan.json already exists. Write feedback in qa_analysis.md ## Human Review section, or provide code_change_context.json / doc_change_context.json." |
 
-If both `code_change_context.json` and `doc_change_context.json` are present alongside `sdet_plan.json`: prefer **Re-trigger** — doc changes can invalidate more existing scenarios and take priority. Note in qa_analysis.md that a Pass 2 run is also pending.
+**Detecting Review mode:** Read `qa_analysis.md`. Find the `## Human Review` → `### Feedback` block. If it contains any text other than the placeholder comment `<!-- add feedback here -->`, trigger Review mode.
 
-Set `generation_mode` in the sdet_plan.json root to the detected mode: `pass1` | `pass2` | `retrigger`.
+If `doc_change_context.json` or `code_change_context.json` is also present when Review mode is triggered: run Review first. After clearing the feedback section, the next invocation picks up the remaining change file. Note this in qa_analysis.md.
+
+If both `code_change_context.json` and `doc_change_context.json` are present (no review feedback): prefer **Re-trigger** (priority 3). Note that a Pass 2 run is also pending.
+
+Set `generation_mode` in the sdet_plan.json root to the detected mode: `pass1` | `pass2` | `retrigger` | `review`.
 
 ## Reads
 
@@ -42,6 +48,7 @@ Set `generation_mode` in the sdet_plan.json root to the detected mode: `pass1` |
 | `tasks_context.json` | test_layer per story (authoritative), api_contract (authoritative endpoint + schema), validation_constraints (implementation confirmation), preconditions (contributing input for writing sdet_plan preconditions) |
 | `regression_context.json` | Active non-legacy non-flaky tests — deduplication signal |
 | `code_change_context.json` | Pass 2 only — new endpoints, new error mappings, new validation rules not in RFC |
+| `qa_analysis.md` | Review mode — read the `## Human Review → ### Feedback` section for human corrections. Also read in all modes to preserve the Human Review section when regenerating. |
 
 ## Ownership contract — A = authoritative (wins conflicts), C = contributes
 
@@ -232,15 +239,16 @@ Once `sdet_plan.json` is written and approved by a human:
 ## Output → sdet_plan.json
 
 Schema root:
-- `feature_name`, `plan_version`, `generation_mode: pass1|pass2|retrigger`
+- `feature_name`, `plan_version`, `generation_mode: pass1|pass2|retrigger|review`
 - `scenarios[]` — each with:
   - `scenario_id`, `name`, `description`
   - `test_layer: component|integration|e2e`
   - `priority: P0|P1|P2`
-  - `source: RFC|PRD|CODE_DIFF|RETRIGGER`, `source_ref`
-  - `generated_by_mode: pass1|pass2|retrigger` — which execution mode created this scenario. Pass 1 = original design-time plan; Pass 2 = caught during implementation (code diff gap); retrigger = requirement change. Set once at creation; never overwritten on subsequent runs.
+  - `source: RFC|PRD|CODE_DIFF|RETRIGGER|REVIEW`, `source_ref`
+  - `generated_by_mode: pass1|pass2|retrigger|review` — which execution mode **created** this scenario. Set once at creation; never overwritten. `review` = scenario added purely from human review feedback (not present in any automated pass).
+  - `review_round: integer` — which review round last touched this scenario. `0` = not yet reviewed. Incremented on every Review-mode run that modifies or creates the scenario. Unmodified scenarios retain their current `review_round`.
   - `provisional: boolean` — true when `approach_finalised: false` or `edge_case.inferred: true`
-  - `is_delta: boolean` — true for pass2 and retrigger scenarios (shorthand for `generated_by_mode != pass1`; kept for downstream tool compatibility)
+  - `is_delta: boolean` — true for pass2, retrigger, and review-added scenarios (shorthand for `generated_by_mode != pass1`; kept for downstream tool compatibility)
   - `is_legacy_regression`, `is_dedup`
   - `test_type: string[]` — BrowserStack TestType. **Multi-select array** — collect all applicable values (see CSV section). Minimum one entry; never null or empty.
   - `execution_mode: Automatable|Manual` — BrowserStack Execution Mode. `Manual` for scenarios tagged `deferred` or `underspecified`; `Automatable` for all others.
@@ -249,9 +257,22 @@ Schema root:
   - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`
   - `preconditions[]`, `fixture_ids[]`
   - `tags[]` — `happy_path|negative|boundary|flag_on|flag_off|e2e|load|concurrency|security|reliability|compliance|nfr|deferred|underspecified|provisional`
+  - `human_corrected: boolean` — `false` at generation time. Set to `true` in Review mode when the scenario is modified or deprecated by human feedback. Never reset to false. For scenarios with `generated_by_mode: "review"`, this is implicitly `true` (the scenario is itself a human addition) but the field is still set explicitly.
+  - `human_correction_types: string[]` — empty at generation. Appended per review round with the type of correction applied: `"field_change"` (one or more fields corrected), `"deprecated"` (LLM generated an incorrect/duplicate scenario), `"missed_scenario"` (LLM failed to generate this; set on review-added scenarios). Multiple rounds may push multiple entries.
 - `coverage_summary` — `total`, `by_layer`, `by_priority`, `rfc_steps_covered`, `rfc_steps_total`, `rfc_gaps[]`
+- `llm_quality` — updated after each Review run; tracks LLM generation accuracy:
+  - `auto_approved: integer` — scenarios not touched by any review round
+  - `human_modified: integer` — scenarios with `human_correction_types` containing `"field_change"`
+  - `human_deprecated: integer` — scenarios deprecated by review (LLM over-generated)
+  - `human_added: integer` — scenarios added by review (LLM under-generated; `generated_by_mode: "review"`)
+  - `llm_accuracy_pct: float` — `auto_approved / (auto_approved + human_modified + human_deprecated)` × 100. Excludes `human_added` from denominator (can't penalise the LLM for what it never generated)
+  - `review_rounds_completed: integer`
 
 ## Output → qa_analysis.md
+
+`qa_analysis.md` is a **living document** — the generated analysis sections are above a `---` divider; the `## Human Review` section below the divider is written once and preserved across all subsequent regenerations (Pass 2, Re-trigger). Never overwrite the Human Review section during generation.
+
+### Generated sections (above `---`)
 
 Human-readable summary for SDET + PM review gate:
 - Total scenarios by layer and priority
@@ -262,6 +283,38 @@ Human-readable summary for SDET + PM review gate:
 - RFC ↔ Tasks contract conflicts (endpoint drift, schema drift)
 - Open questions surfaced as deferred scenarios
 - Provenance staleness warning if applicable
+- LLM generation quality (after first Review run): auto-approved count, human-modified, human-deprecated, human-added, accuracy %
+
+### Human Review section (below `---`, written once, never regenerated)
+
+Append this block when first generating `qa_analysis.md`. On subsequent Pass 1/2/Re-trigger runs, preserve it verbatim — do not regenerate it.
+
+```markdown
+---
+
+## Human Review
+
+**Review Round:** 0
+**Status:** `pending`
+
+### Feedback
+
+<!-- add feedback here -->
+
+### Applied
+
+_(History of incorporated feedback rounds appears here after each Review run.)_
+```
+
+**Feedback format:** free-form text — one item per line works well. No JSON required. Examples:
+```
+SC-EPIC1122-003: change test_layer to integration, priority to P1 — spans multiple services
+SC-EPIC1122-018: remove — duplicate of SC-006
+Add: card save when vault is under degraded load — should queue and retry, not fail (ties to NFR-02)
+General: missing coverage for concurrent same-customer saves
+```
+
+The human writes in the `### Feedback` block and re-invokes the skill. The LLM interprets the free-form text and applies corrections.
 
 ## Output → sdet_testcases.csv
 
@@ -290,7 +343,9 @@ Flat CSV for BrowserStack upload via BrowserStack MCP after human approval. Colu
 | `is_delta` | `is_delta` | Filter new scenarios from existing in PR reviews |
 | `is_legacy_regression` | `is_legacy_regression` | Flag pre-existing covered scenarios |
 | `source_ref` | `source_ref` | Traceability back to RFC step / PRD AC |
-| `tags` | `tags[]` joined | Comma-separated for filtering |
+| `tags` | `tags[]` joined | Pipe-separated for filtering |
+| `human_corrected` | `human_corrected` | `true` if any review round modified or deprecated this scenario — LLM accuracy signal |
+| `human_correction_types` | `human_correction_types[]` joined | Pipe-separated: `field_change`, `deprecated`, `missed_scenario` |
 
 ### `TestType` derivation — additive multi-select (collect **all** that apply)
 
@@ -366,6 +421,87 @@ Re-trigger uses `source_ref` on each existing scenario to trace back to the sour
 | Validation step changed | `source_ref` contains the step ref | Update constraint / failure_code assertions. Set `generated_by_mode: "retrigger"`, add `change_reason`. |
 
 `change_reason` field: one sentence stating what changed and why the scenario was updated, e.g. "AC-003 updated: error code changed from 409 to 422 per PRD v2".
+
+## Review Incorporation rules
+
+Read and apply the human's free-form feedback from the `### Feedback` block in `qa_analysis.md`. Do not regenerate unaffected scenarios.
+
+### Reading the feedback
+
+The `### Feedback` block is free-form text. Parse it as a list of intent statements. For each statement, classify the intent:
+
+| Intent | Signal words / patterns | Action |
+|---|---|---|
+| **Modify** | Scenario ID mentioned + correction described | Find the scenario; apply the correction |
+| **Remove** | "remove", "delete", "drop", "duplicate of" | Deprecate the scenario |
+| **Add** | "add", "missing", "add a scenario for", no scenario ID | Generate a new scenario |
+| **General comment** | No specific scenario, no action implied | Capture in review summary; no plan change |
+
+If a statement is ambiguous, apply the most conservative interpretation and surface the ambiguity in the review summary for human follow-up.
+
+### Per-intent behaviour
+
+**Modify** — find by scenario ID mentioned in the feedback text:
+- Apply the stated change (priority, test_layer, name, description, preconditions, tags, step corrections, etc.)
+- Re-derive `test_type`, `execution_mode`, `type_of_test` after applying the change
+- Increment `review_round` on the scenario
+- Set `change_reason` to a one-sentence summary of what changed and why (from the feedback text)
+- Set `human_corrected: true`
+- Append `"field_change"` to `human_correction_types[]` (if not already present)
+
+**Remove** — find by scenario ID:
+- Set `status: "deprecated"`, `change_reason: <reason from feedback>`
+- **Do not delete** — human decides final removal in a later pass
+- Increment `review_round`
+- Set `human_corrected: true`
+- Append `"deprecated"` to `human_correction_types[]`
+
+**Add** — generate a new scenario from the description:
+- Apply all standard scenario generation rules (test_type derivation, execution_mode, markets, type_of_test, step_descriptions, preconditions)
+- Assign next `scenario_id` in sequence
+- Set `generated_by_mode: "review"`, `is_delta: true`, `review_round: <current round>`
+- Set `source: REVIEW`, `source_ref: "human-review-r{N}"`
+- Set `human_corrected: true`, `human_correction_types: ["missed_scenario"]`
+
+### Invariants
+
+- **`generated_by_mode` is never changed** on existing scenarios — only `review_round` is updated.
+- **`is_legacy_regression`** is immutable — cannot be changed by review feedback.
+- **Unmodified scenarios** keep their current `review_round`; do not touch them.
+- If a scenario ID mentioned in feedback does not exist in the plan → surface a warning in the review summary; skip, do not crash.
+- After all items are applied, re-derive `test_type` for every modified scenario.
+
+### Post-application steps
+
+1. Increment `plan_version` in the root (`1.0` → `1.1`).
+2. Set root `generation_mode: "review"`.
+3. Recompute `llm_quality` block in `coverage_summary`:
+   - Count `auto_approved` = scenarios where `human_corrected: false` and `generated_by_mode != "review"`
+   - Count `human_modified` = scenarios where `human_correction_types` contains `"field_change"`
+   - Count `human_deprecated` = scenarios where `human_correction_types` contains `"deprecated"`
+   - Count `human_added` = scenarios where `generated_by_mode: "review"` (i.e. `human_correction_types` contains `"missed_scenario"`)
+   - Compute `llm_accuracy_pct` = `auto_approved / (auto_approved + human_modified + human_deprecated) * 100` (round to 1 decimal)
+   - Increment `review_rounds_completed`
+4. Regenerate `sdet_testcases.csv` with the full updated scenario set.
+5. **Update `qa_analysis.md`** — this is the key step:
+   - Increment `Review Round` counter in the Human Review section header.
+   - **Clear** the `### Feedback` block — replace its content with `<!-- add feedback here -->` so the next invocation does not re-apply the same feedback.
+   - **Append** to the `### Applied` block a round summary:
+
+```markdown
+#### Round {N} — {date}
+
+- **Modified** SC-EPIC1122-003: test_layer component → integration; priority P0 → P1
+- **Removed** SC-EPIC1122-018: deprecated (duplicate of SC-006)
+- **Added** SC-EPIC1122-023: vault degraded load resilience (NFR-02)
+- ⚠️ Ambiguous: "check concurrent saves" — no scenario ID found; please clarify in next round
+
+**LLM generation quality after round {N}:**
+Auto-approved: {N} | Human-modified: {N} | Human-deprecated: {N} | Human-added (missed): {N}
+LLM accuracy: {X}% ({auto_approved}/{auto_approved+modified+deprecated} scenarios needed no correction)
+```
+
+This preserves the full audit trail in the same file the human is reading. The LLM accuracy metric accumulates across rounds — each round adds to `human_corrected` counts so the figure reflects total corrections over the plan's lifetime, not just the latest round.
 
 ## Validate
 
