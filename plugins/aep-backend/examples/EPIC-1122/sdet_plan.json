@@ -7,12 +7,23 @@
   "scenarios": [
     {
       "scenario_id": "SC-EPIC1122-001",
-      "name": "Valid card saved successfully — returns 200 with non-null token",
+      "name": "Valid card saved successfully \u2014 returns 200 with non-null token",
       "description": "A verified customer with a valid Bearer token POSTs a complete, new Visa card with a future expiry. The system fingerprints, deduplicates, tokenises via vault, persists, and returns a reusable token.",
       "test_layer": "integration",
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-9 / REQ-001 / AC-001",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Regression",
+        "Smoke"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": true,
       "is_dedup": false,
@@ -27,7 +38,7 @@
           "step": 2,
           "action": "POST /payment/v1/cards with complete valid CardDto for customer CX-001",
           "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\",\"holderName\":\"Test User\"}'",
-          "expected_result": "HTTP 200 with body {\"token\": \"tok_test_abc123\"} — token is non-null string"
+          "expected_result": "HTTP 200 with body {\"token\": \"tok_test_abc123\"} \u2014 token is non-null string"
         },
         {
           "step": 3,
@@ -42,8 +53,13 @@
         "Vault-service mock configured to return 'tok_test_abc123'",
         "Feature flag payment.card_save.enabled = ON"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["happy_path", "flag_on"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "happy_path",
+        "flag_on"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-002",
@@ -53,6 +69,16 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-2 / REQ-002 / AC-002",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Regression"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": true,
       "is_dedup": false,
@@ -66,10 +92,14 @@
       ],
       "preconditions": [
         "CardValidationService bean present in Spring context",
-        "No vault-service mock needed — validation fires before vault call"
+        "No vault-service mock needed \u2014 validation fires before vault call"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "negative"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-003",
@@ -79,6 +109,16 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-2 / REQ-002",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -93,8 +133,12 @@
       "preconditions": [
         "CardValidationService bean present in Spring context"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "negative"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-004",
@@ -104,6 +148,16 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-2 / REQ-002",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -118,8 +172,12 @@
       "preconditions": [
         "CardValidationService bean present in Spring context"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "negative"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-005",
@@ -129,6 +187,16 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-2 / REQ-002",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -143,8 +211,12 @@
       "preconditions": [
         "CardValidationService bean present in Spring context"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "negative"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-006",
@@ -154,6 +226,16 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-4 / REQ-004 / AC-004",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Regression"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": true,
       "is_dedup": false,
@@ -168,8 +250,12 @@
       "preconditions": [
         "System clock set to 2026; expiryYear=2024 is clearly in the past"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "negative"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-007",
@@ -179,6 +265,16 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-4 / REQ-004 / AC-005",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Regression"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": true,
       "is_dedup": false,
@@ -193,8 +289,12 @@
       "preconditions": [
         "System clock: August 2026; expiryMonth=3 is 5 months in the past"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "negative"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-008",
@@ -204,6 +304,16 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-6 / REQ-003 / AC-003",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Regression"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": true,
       "is_dedup": false,
@@ -231,17 +341,31 @@
         "Customer CX-001 has card fingerprint SHA256('CX-001:4111111111111111') already persisted in payment_cards",
         "Feature flag payment.card_save.enabled = ON"
       ],
-      "fixture_ids": ["FIX-CARDPAY-002"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-002"
+      ],
+      "tags": [
+        "negative"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-009",
-      "name": "Vault service returns 503 — API returns 503 SERVICE_UNAVAILABLE with no DB row written",
+      "name": "Vault service returns 503 \u2014 API returns 503 SERVICE_UNAVAILABLE with no DB row written",
       "description": "Vault-service mock returns 503. No row must be written to payment_cards; API returns 503.",
       "test_layer": "integration",
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-7 / NFR-003",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -262,7 +386,7 @@
           "step": 3,
           "action": "Query payment_cards for customer_id=CX-001",
           "curl_reference": null,
-          "expected_result": "Zero rows — no partial DB state written"
+          "expected_result": "Zero rows \u2014 no partial DB state written"
         }
       ],
       "preconditions": [
@@ -270,8 +394,12 @@
         "Vault-service mock configured to return 503",
         "Feature flag payment.card_save.enabled = ON"
       ],
-      "fixture_ids": ["FIX-CARDPAY-003"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-003"
+      ],
+      "tags": [
+        "negative"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-010",
@@ -281,6 +409,16 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-1 / RFC-78:feature-flags",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -295,24 +433,40 @@
           "step": 2,
           "action": "POST /payment/v1/cards with any valid or invalid payload",
           "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "expected_result": "HTTP 404 — no validation error, no vault call, no DB write"
+          "expected_result": "HTTP 404 \u2014 no validation error, no vault call, no DB write"
         }
       ],
       "preconditions": [
         "Feature flag payment.card_save.enabled set to OFF",
-        "Vault mock not needed — should never be called"
+        "Vault mock not needed \u2014 should never be called"
       ],
-      "fixture_ids": ["FIX-CARDPAY-005"],
-      "tags": ["flag_off", "negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-005"
+      ],
+      "tags": [
+        "flag_off",
+        "negative"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-011",
-      "name": "Concurrent duplicate save race condition — exactly one succeeds with 200, other returns 409",
+      "name": "Concurrent duplicate save race condition \u2014 exactly one succeeds with 200, other returns 409",
       "description": "Two identical requests for the same customer+card arrive simultaneously. DB unique constraint is the final guard; exactly one request succeeds and the other receives 409.",
       "test_layer": "integration",
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:edge-concurrent / RFC-78:risk-areas",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Non-FCT",
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "performance",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -321,13 +475,13 @@
           "step": 1,
           "action": "Launch two concurrent POST /payment/v1/cards requests for customer CX-001 with the same card 4111111111111111, in parallel threads",
           "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "expected_result": "Both requests complete. Response set: {200, 409} — exactly one 200 and one 409 DUPLICATE_CARD"
+          "expected_result": "Both requests complete. Response set: {200, 409} \u2014 exactly one 200 and one 409 DUPLICATE_CARD"
         },
         {
           "step": 2,
           "action": "Query payment_cards for customer_id=CX-001",
           "curl_reference": null,
-          "expected_result": "Exactly one row in payment_cards — no duplicate row"
+          "expected_result": "Exactly one row in payment_cards \u2014 no duplicate row"
         }
       ],
       "preconditions": [
@@ -336,8 +490,13 @@
         "Feature flag payment.card_save.enabled = ON",
         "Test harness capable of launching parallel HTTP requests"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "negative",
+        "concurrency"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-012",
@@ -347,6 +506,17 @@
       "priority": "P0",
       "source": "PRD",
       "source_ref": "REQ-005 / NFR-002 / AC-006",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Non-FCT",
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -381,8 +551,12 @@
         "In-memory log appender or log capture mechanism available",
         "Feature flag payment.card_save.enabled = ON"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["security"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "security"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-013",
@@ -392,6 +566,16 @@
       "priority": "P1",
       "source": "RFC",
       "source_ref": "RFC-78:edge-boundary / RFC-78:step-3",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -400,15 +584,19 @@
           "step": 1,
           "action": "POST /payment/v1/cards with a 13-digit Luhn-valid card number (e.g. 4222222222222)",
           "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4222222222222\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "expected_result": "HTTP 200 — validation accepts 13-digit card; response includes non-null token"
+          "expected_result": "HTTP 200 \u2014 validation accepts 13-digit card; response includes non-null token"
         }
       ],
       "preconditions": [
         "CardValidationService configured with 13-digit minimum",
         "Vault-service mock returning test token"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["boundary"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "boundary"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-014",
@@ -418,6 +606,16 @@
       "priority": "P1",
       "source": "RFC",
       "source_ref": "RFC-78:edge-boundary / RFC-78:step-3",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -426,24 +624,38 @@
           "step": 1,
           "action": "POST /payment/v1/cards with a 19-digit Luhn-valid card number (e.g. 6703444444444444449)",
           "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"6703444444444444449\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"1234\"}'",
-          "expected_result": "HTTP 200 — validation accepts 19-digit card; response includes non-null token"
+          "expected_result": "HTTP 200 \u2014 validation accepts 19-digit card; response includes non-null token"
         }
       ],
       "preconditions": [
         "CardValidationService configured with 19-digit maximum",
         "Vault-service mock returning test token"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["boundary"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "boundary"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-015",
       "name": "Card expiring in current month and year is valid and accepted",
-      "description": "Boundary test: expiryYear=currentYear and expiryMonth=currentMonth (August 2026) — card is NOT in the past. RFC specifies this as valid.",
+      "description": "Boundary test: expiryYear=currentYear and expiryMonth=currentMonth (August 2026) \u2014 card is NOT in the past. RFC specifies this as valid.",
       "test_layer": "component",
       "priority": "P1",
       "source": "RFC",
       "source_ref": "RFC-78:edge-boundary / RFC-78:step-4",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -452,15 +664,19 @@
           "step": 1,
           "action": "POST /payment/v1/cards with expiryYear=2026 and expiryMonth=8 (current month)",
           "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":8,\"expiryYear\":2026,\"cvv\":\"123\"}'",
-          "expected_result": "HTTP 200 — expiry check passes; card is accepted (not INVALID_EXPIRY)"
+          "expected_result": "HTTP 200 \u2014 expiry check passes; card is accepted (not INVALID_EXPIRY)"
         }
       ],
       "preconditions": [
         "System clock: August 2026",
         "Vault-service mock returning test token"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["boundary"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "boundary"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-016",
@@ -470,6 +686,17 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:timeout / RFC-78:step-7 / NFR-003",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Non-FCT",
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "performance",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -484,13 +711,13 @@
           "step": 2,
           "action": "POST /payment/v1/cards with complete valid CardDto",
           "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "expected_result": "HTTP 503 with body {\"error\": \"SERVICE_UNAVAILABLE\"} — returned after 1 retry (~10s total vault wait)"
+          "expected_result": "HTTP 503 with body {\"error\": \"SERVICE_UNAVAILABLE\"} \u2014 returned after 1 retry (~10s total vault wait)"
         },
         {
           "step": 3,
           "action": "Query payment_cards for customer_id=CX-001",
           "curl_reference": null,
-          "expected_result": "Zero rows — no DB write on vault timeout"
+          "expected_result": "Zero rows \u2014 no DB write on vault timeout"
         },
         {
           "step": 4,
@@ -504,8 +731,13 @@
         "Vault-service mock configured with 6000ms delay",
         "Feature flag payment.card_save.enabled = ON"
       ],
-      "fixture_ids": ["FIX-CARDPAY-004"],
-      "tags": ["negative"]
+      "fixture_ids": [
+        "FIX-CARDPAY-004"
+      ],
+      "tags": [
+        "negative",
+        "reliability"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-017",
@@ -515,6 +747,16 @@
       "priority": "P0",
       "source": "PRD",
       "source_ref": "STORY-1233:AC-1 / RFC-78:db-schema",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -549,8 +791,12 @@
         "Flyway migration file V001__create_payment_cards.sql present in resources",
         "No existing payment_cards table"
       ],
-      "fixture_ids": ["FIX-CARDPAY-006"],
-      "tags": ["db"]
+      "fixture_ids": [
+        "FIX-CARDPAY-006"
+      ],
+      "tags": [
+        "db"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-018",
@@ -560,6 +806,16 @@
       "priority": "P0",
       "source": "PRD",
       "source_ref": "STORY-1233:AC-3",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -581,8 +837,12 @@
         "Testcontainers PostgreSQL with V001 migration applied",
         "Spring Data JPA context loaded"
       ],
-      "fixture_ids": ["FIX-CARDPAY-006"],
-      "tags": ["db"]
+      "fixture_ids": [
+        "FIX-CARDPAY-006"
+      ],
+      "tags": [
+        "db"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-019",
@@ -592,6 +852,16 @@
       "priority": "P1",
       "source": "PRD",
       "source_ref": "STORY-1233:AC-4",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -613,8 +883,12 @@
         "Testcontainers PostgreSQL with V001 migration applied",
         "Test row pre-inserted"
       ],
-      "fixture_ids": ["FIX-CARDPAY-006"],
-      "tags": ["db"]
+      "fixture_ids": [
+        "FIX-CARDPAY-006"
+      ],
+      "tags": [
+        "db"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-020",
@@ -624,6 +898,16 @@
       "priority": "P1",
       "source": "PRD",
       "source_ref": "STORY-1233:AC-5",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -645,8 +929,12 @@
         "Testcontainers PostgreSQL with V001 migration applied",
         "No rows for CX-001"
       ],
-      "fixture_ids": ["FIX-CARDPAY-006"],
-      "tags": ["db"]
+      "fixture_ids": [
+        "FIX-CARDPAY-006"
+      ],
+      "tags": [
+        "db"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-021",
@@ -656,6 +944,16 @@
       "priority": "P1",
       "source": "RFC",
       "source_ref": "RFC-78:step-3",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "functional",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -664,14 +962,19 @@
           "step": 1,
           "action": "POST /payment/v1/cards with cardNumber=1234567890123456 (fails Luhn check)",
           "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"1234567890123456\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "expected_result": "HTTP 400 with body {\"error\": \"MISSING_FIELD\", \"field\": \"cardNumber\"} — Luhn failure uses MISSING_FIELD envelope per RFC"
+          "expected_result": "HTTP 400 with body {\"error\": \"MISSING_FIELD\", \"field\": \"cardNumber\"} \u2014 Luhn failure uses MISSING_FIELD envelope per RFC"
         }
       ],
       "preconditions": [
         "CardValidationService with Luhn check enabled"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": ["negative", "boundary"]
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "negative",
+        "boundary"
+      ]
     },
     {
       "scenario_id": "SC-EPIC1122-022",
@@ -681,6 +984,17 @@
       "priority": "P1",
       "source": "PRD",
       "source_ref": "NFR-001",
+      "generated_by_mode": "pass1",
+      "test_type": [
+        "Non-FCT",
+        "Story"
+      ],
+      "execution_mode": "Automatable",
+      "markets": [
+        "Indonesia",
+        "Singapore"
+      ],
+      "type_of_test": "performance",
       "is_delta": false,
       "is_legacy_regression": false,
       "is_dedup": false,
@@ -695,7 +1009,7 @@
           "step": 2,
           "action": "Calculate p95 latency from response time distribution",
           "curl_reference": null,
-          "expected_result": "p95 latency ≤ 300ms"
+          "expected_result": "p95 latency \u2264 300ms"
         }
       ],
       "preconditions": [
@@ -704,8 +1018,13 @@
         "100 distinct (customer, card) fixture pairs pre-provisioned",
         "Feature flag payment.card_save.enabled = ON"
       ],
-      "fixture_ids": ["FIX-CARDPAY-001"],
-      "tags": []
+      "fixture_ids": [
+        "FIX-CARDPAY-001"
+      ],
+      "tags": [
+        "nfr",
+        "load"
+      ]
     }
   ],
   "coverage_summary": {
@@ -727,17 +1046,37 @@
   "dedup_report": {
     "total_legacy_regression": 5,
     "legacy_regression_scenarios": [
-      {"scenario_id": "SC-EPIC1122-001", "coverage_source": "GBT-PAY-001", "gap": "Controller unit test only; integration coverage missing"},
-      {"scenario_id": "SC-EPIC1122-002", "coverage_source": "BS-PAY-012", "gap": "Manual test only; needs automation"},
-      {"scenario_id": "SC-EPIC1122-006", "coverage_source": "GBT-PAY-002", "gap": "Service unit test; HTTP response envelope not verified"},
-      {"scenario_id": "SC-EPIC1122-007", "coverage_source": "GBT-PAY-003", "gap": "Service unit test; HTTP response envelope not verified"},
-      {"scenario_id": "SC-EPIC1122-008", "coverage_source": "BS-PAY-011, GBT-PAY-004", "gap": "BS-PAY-011 is manual; GBT-PAY-004 tests DB layer only, not HTTP 409 response"}
+      {
+        "scenario_id": "SC-EPIC1122-001",
+        "coverage_source": "GBT-PAY-001",
+        "gap": "Controller unit test only; integration coverage missing"
+      },
+      {
+        "scenario_id": "SC-EPIC1122-002",
+        "coverage_source": "BS-PAY-012",
+        "gap": "Manual test only; needs automation"
+      },
+      {
+        "scenario_id": "SC-EPIC1122-006",
+        "coverage_source": "GBT-PAY-002",
+        "gap": "Service unit test; HTTP response envelope not verified"
+      },
+      {
+        "scenario_id": "SC-EPIC1122-007",
+        "coverage_source": "GBT-PAY-003",
+        "gap": "Service unit test; HTTP response envelope not verified"
+      },
+      {
+        "scenario_id": "SC-EPIC1122-008",
+        "coverage_source": "BS-PAY-011, GBT-PAY-004",
+        "gap": "BS-PAY-011 is manual; GBT-PAY-004 tests DB layer only, not HTTP 409 response"
+      }
     ],
     "total_net_new": 17,
     "key_gaps_addressed": [
       "REQ-005: No raw card data in logs (SC-EPIC1122-012)",
-      "NFR-001: p95 latency ≤ 300ms (SC-EPIC1122-022)",
-      "NFR-003: Vault timeout → 503 graceful, no DB write (SC-EPIC1122-009, SC-EPIC1122-016)"
+      "NFR-001: p95 latency \u2264 300ms (SC-EPIC1122-022)",
+      "NFR-003: Vault timeout \u2192 503 graceful, no DB write (SC-EPIC1122-009, SC-EPIC1122-016)"
     ]
   }
 }
