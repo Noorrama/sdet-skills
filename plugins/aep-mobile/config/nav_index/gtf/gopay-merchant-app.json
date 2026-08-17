@@ -1,0 +1,85 @@
+{
+  "_meta": {
+    "generated_by": "extract_nav_index.py",
+    "repo": "gtf",
+    "generated_from_repo_sha": "0320541e13c90347d8a9ce5d053fd5f5e30e5824",
+    "generated_at": "2026-08-17T09:56:49.526813+00:00",
+    "module": "gopay-merchant-app",
+    "case_ids_indexed": 5,
+    "warning": "deeplinks_literal / deeplinks_enum_ref / case ids are exact regex extractions. page_object_calls_heuristic and steps_gherkin are best-effort navigation aids, NOT a guaranteed-complete or verified-correct step list -- method bodies and Gherkin text are free-form, unlike the structured id/deeplink data."
+  },
+  "cases": {
+    "4524928": [
+      {
+        "module": "gopay-merchant-app",
+        "title": "Verify the owner is able to see the help center button from the home page",
+        "source_file": "gopay-merchant-app/src/test/resources/features/main.feature",
+        "steps_gherkin": [
+          "Given The user has logged in as \"single_outlet_owner\"",
+          "And The user is on the home page",
+          "Then The user sees the \"Home shortcut menu item - Bantuan\""
+        ],
+        "framework": "CUCUMBER"
+      }
+    ],
+    "4718103": [
+      {
+        "module": "gopay-merchant-app",
+        "title": "Verify the merchant sees the ODP button on the homepage",
+        "source_file": "gopay-merchant-app/src/test/resources/features/main.feature",
+        "steps_gherkin": [
+          "Given The user has logged in as \"single_outlet_owner_with_bank_partner\"",
+          "Then The user sees the \"Odp button\"",
+          "And The user sees the \"Odp text\" displaying the \"Cairkan\" text"
+        ],
+        "framework": "CUCUMBER"
+      }
+    ],
+    "4916711": [
+      {
+        "module": "gopay-merchant-app",
+        "title": "Verify the multi outlet merchant of all outlet sees the select outlet dialog on the homepage",
+        "source_file": "gopay-merchant-app/src/test/resources/features/main.feature",
+        "steps_gherkin": [
+          "Given The user has logged in as \"multi_outlet_owner\"",
+          "When The user taps on the \"Odp button\"",
+          "Then The user sees \"Pilih tokonya dulu, ya\" text",
+          "And The user sees \"Pencairan hanya bisa dilakukan per toko. Silakan pilih salah satu toko untuk melanjutkan.\" text"
+        ],
+        "framework": "CUCUMBER"
+      }
+    ],
+    "4903931": [
+      {
+        "module": "gopay-merchant-app",
+        "title": "Verify the employee does not see the GoPay Spiker banner on the homepage",
+        "source_file": "gopay-merchant-app/src/test/resources/features/main.feature",
+        "steps_gherkin": [
+          "Given The user has logged in as \"single_outlet_manager\"",
+          "And The user is on the home page",
+          "Then The user does not see the \"Home go pay spiker banner\""
+        ],
+        "framework": "CUCUMBER"
+      }
+    ],
+    "4708423": [
+      {
+        "module": "gopay-merchant-app",
+        "title": "Verify the Oke button on dialog success bottom sheet on the profile and settings page",
+        "source_file": "gopay-merchant-app/src/test/resources/features/main.feature",
+        "steps_gherkin": [
+          "Given The user has logged in as \"single_outlet_owner\"",
+          "And The user is on the profile page",
+          "When The user taps on the \"Account and application section item 2\"",
+          "And The user submits the \"Biasa saja\" sentiment feedback",
+          "And The user inputs \"Feedback\" in the \"Feedback form dialog input field\"",
+          "And The user taps on the \"Feedback form dialog send button\"",
+          "And The user taps on the \"Oke\" text",
+          "Then The user does not see the \"Feedback form dialog\"",
+          "And The user sees the \"Profile page\""
+        ],
+        "framework": "CUCUMBER"
+      }
+    ]
+  }
+}

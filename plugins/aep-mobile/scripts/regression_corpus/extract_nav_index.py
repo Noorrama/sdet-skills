@@ -190,17 +190,29 @@ def process_feature_file(path: str, rel: str, mod: str, index: dict, stats: dict
     lines = text.splitlines()
     background_steps = []
     in_background = False
-    scenarios = []  # list of dicts: {title, steps[], examples_header, examples_rows[]}
+    scenarios = []  # list of dicts: {title, steps[], examples_header, examples_rows[], tag_case_ids}
     cur = None
+    pending_tags = []  # tag lines accumulate here until the Scenario they belong to opens
 
     for line in lines:
         stripped = line.strip()
+        # Tag line, e.g. "@GMA" or "@C4524928" -- gtf-mobile-tests embeds the
+        # BrowserStack case id directly as a scenario tag (confirmed: no
+        # Examples table at all in that repo's feature files, unlike
+        # gojek-mobile-tests' Project/Suite/Testcase-Id-column convention).
+        # Accumulate every tag line until the Scenario it decorates opens.
+        if stripped.startswith("@"):
+            pending_tags.extend(stripped.split())
+            continue
         if stripped.startswith("Background:"):
             in_background = True
             continue
         if stripped.startswith("Scenario Outline:") or stripped.startswith("Scenario:"):
             in_background = False
-            cur = {"title": stripped.split(":", 1)[1].strip(), "steps": [], "examples_header": None, "examples_rows": []}
+            tag_case_ids = [t[2:] for t in pending_tags if re.match(r'^@C[0-9]+$', t, re.I)]
+            pending_tags = []
+            cur = {"title": stripped.split(":", 1)[1].strip(), "steps": [], "examples_header": None,
+                   "examples_rows": [], "tag_case_ids": tag_case_ids}
             scenarios.append(cur)
             continue
         if stripped.startswith(("Given ", "When ", "Then ", "And ", "But ")):
@@ -245,6 +257,24 @@ def process_feature_file(path: str, rel: str, mod: str, index: dict, stats: dict
 
     file_had_ids = False
     for sc in scenarios:
+        full_steps = list(background_steps) + list(sc["steps"])
+
+        # Tag-based ids (gtf-mobile-tests style: "@C4524928" directly above
+        # the Scenario, no Examples table, no template substitution needed --
+        # the steps ARE the concrete steps, not placeholders).
+        for cid in sc["tag_case_ids"]:
+            record = {
+                "module": mod,
+                "title": sc["title"],
+                "source_file": rel,
+                "steps_gherkin": full_steps,
+                "framework": "CUCUMBER",
+            }
+            index.setdefault(cid, []).append(record)
+            stats["cucumber_case_ids_found"] += 1
+            file_had_ids = True
+
+        # Examples-table ids (gojek-mobile-tests style).
         header = sc["examples_header"]
         if not header:
             continue
@@ -253,7 +283,6 @@ def process_feature_file(path: str, rel: str, mod: str, index: dict, stats: dict
         except StopIteration:
             continue
         file_had_ids = True
-        full_steps = list(background_steps) + list(sc["steps"])
         for row in sc["examples_rows"]:
             if tc_idx >= len(row):
                 continue
@@ -282,7 +311,12 @@ def git_sha(repo_root: str) -> str:
 
 
 def main():
-    repo_root, out_dir = sys.argv[1], sys.argv[2]
+    # <repo_root> <repo_key> <base_out_dir> -- writes one file per module to
+    # <base_out_dir>/<repo_key>/<module>.json, so a second repo's modules
+    # (gtf-mobile-tests) never collide with or overwrite the first's
+    # (gojek-mobile-tests, repo_key "gmt").
+    repo_root, repo_key, base_out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
+    out_dir = os.path.join(base_out_dir, repo_key)
     os.makedirs(out_dir, exist_ok=True)
 
     per_module_index = collections.defaultdict(dict)
@@ -313,6 +347,7 @@ def main():
         out = {
             "_meta": {
                 "generated_by": "extract_nav_index.py",
+                "repo": repo_key,
                 "generated_from_repo_sha": sha,
                 "generated_at": now,
                 "module": mod,
@@ -327,7 +362,7 @@ def main():
         files_written.append(path)
         total_case_ids += len(index)
 
-    print(f"Java files scanned: {stats['java_files_scanned']}")
+    print(f"[{repo_key}] Java files scanned: {stats['java_files_scanned']}")
     print(f"Feature files scanned: {stats['feature_files_scanned']}")
     print(f"Commented-out @TestInfo/@GBTTestRail skipped: {stats['skipped_commented_annotations']}")
     print(f"Annotations with no parseable testCaseIds: {stats['annotations_with_no_case_ids']}")
