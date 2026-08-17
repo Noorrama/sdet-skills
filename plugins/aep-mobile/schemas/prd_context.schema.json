@@ -36,6 +36,7 @@
           "req_id": { "type": "string" },
           "milestone": { "type": "string" },
           "target_module": { "type": "string" },
+          "team_name": { "type": "string" },
           "user_story": { "type": "string" },
           "context_screen": { "type": "string" },
           "expected_ui_copy": {
