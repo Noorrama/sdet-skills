@@ -34,13 +34,13 @@ Fast tier — Haiku. Escalate to a reasoning model when the PRD has an undecided
 |---|---|---|
 | Metadata | Title, PRD id (slug if none), readiness, owner (NOT comment authors), team, source path | `title`, `id`, `readiness`, `owner`, `team`, `source_ref` |
 | Scope | Explicit in-scope and out-of-scope bullets, verbatim | `in_scope[]`, `out_of_scope[]` |
-| Personas & prereqs | Actors and any eligibility/state precondition to reach the flow | `personas[]`, `persona_prerequisites[]` |
+| **Personas & prereqs** | **User personas — distinct journeys/states, not teams.** Examples: "Fresh Lead" (new), "Existing User (Resigned)", "Deleted Account". Capture actor states/preconditions that branch the flow. | `personas[]`, `persona_prerequisites[]` |
 | Applicability | Service verticals (Food …) and country gating | `applicable_service_types[]`, `applicable_countries[]` |
-| End-to-end flow | Ordered steps (actor + action) and every named failure/edge outcome | `user_flow.steps[]`, `user_flow.failure_states[]` |
+| End-to-end flow | Ordered steps (actor + action) showing **persona-specific paths** where they diverge. Every named failure/edge outcome. | `user_flow.steps[]`, `user_flow.failure_states[]` |
 | Involved teams | Each team the flow touches and its role (per-branch role if the design is forked) | `involved_teams[]` |
-| User stories | *As a [persona] I want [goal] so that [benefit].* Assign `US-001…` if unnumbered | `user_stories[]` |
-| **Requirements** | Pair the **business_requirement** (why) with the **product_requirement** (concrete, testable what). Tag owning team | `requirements[]` |
-| **Acceptance criteria** | One per testable rule, as **GIVEN/WHEN/THEN**, copying the PRD's operators verbatim. Set **`verifiable`** honestly | `acceptance_criteria[]` |
+| User stories | *As a [persona] I want [goal] so that [benefit].* **Map to the personas extracted above.** Assign `US-001…` if unnumbered | `user_stories[]` |
+| **Requirements** | Pair the **business_requirement** (why) with the **product_requirement** (concrete, testable what). **Map to affected persona(s) via `story_ref`.** Tag owning team | `requirements[]` |
+| **Acceptance criteria** | One per testable rule, as **GIVEN/WHEN/THEN**, copying the PRD's operators verbatim. Set **`verifiable`** honestly. **Include persona-specific ACs when paths diverge** | `acceptance_criteria[]` |
 | **Boundary values** | Every threshold/default (legacy value, new default, clamp, compare operator) — copied, never derived | `boundary_values[]` |
 | **Boundary conditions** | Edge-case table rows with their expected default behaviour; carry "example only" notes | `boundary_conditions[]` |
 | Feature flags | **All** flag/field names — including competing candidate names for the same flag | `feature_flags[]` |
@@ -48,7 +48,7 @@ Fast tier — Haiku. Escalate to a reasoning model when the PRD has an undecided
 | NFR | Quantitative latency/throughput/uptime/security targets only | `non_functional_requirements[]` |
 | **Open decisions** | Unresolved decisions with a testing impact; `blocking` if the oracle is undefined until resolved | `open_decisions[]` |
 | **Approach branches** | When a blocking decision forks the design into mutually exclusive options | `approach_branches` |
-| **Comment resolutions** | Decisions/clarifications mined from the review thread, with status + verbatim quote | `comment_resolutions[]` |
+| **Comment resolutions** | Decisions/clarifications mined from the review thread. **Show what was ambiguous, what's now clear, and how SDET plan uses this.** NOT passive recording — active guidance. | `comment_resolutions[]` |
 | Risk areas | High-value/high-risk flows | `risk_areas[]` |
 | Success / rollout | Metrics and rollout/experiment ramp if stated | `rollout_plan`, (metrics → `risk_areas`/`needs_clarification` if only qualitative) |
 | **Needs clarification** | Every gap, ambiguity, conflict, and non-verifiable criterion — the Definition-of-Ready gate | `needs_clarification[]` |
@@ -86,7 +86,7 @@ Root fields (see `schemas/prd_context.schema.json` for the authoritative shape).
 - `non_functional_requirements[]`
 - `open_decisions[]` — `id`, `decision`, `blocking`
 - `approach_branches` — `decision_ref`, `status: undecided|resolved`, `chosen_branch`, `rule`, `shared_*_refs[]`, `branches[]`
-- `comment_resolutions[]` — `id`, `status: resolves|clarifies|unanswered`, `topic`, `quote`, `affects[]`, `related_open_decision`
+- `comment_resolutions[]` — `id`, `status: resolves|clarifies|unanswered`, `topic`, `quote`, `affects[]` (specific item refs like REQ-003, AC-041, not generic categories), `related_open_decision`, **`what_was_ambiguous`** (original PRD gap), **`what_is_now_clear`** (resolution from thread), **`implication_for_sdet`** (how SDET plan uses this to refine requirements/ACs or lock decisions)
 - `risk_areas[]` — `risk`, `severity`, `mitigation`
 - `needs_clarification[]` (required) — `field`, `reason: missing_from_source|ambiguous|non_verifiable|conflicting|contradictory|non_extractable`, `blocking`, `detail`
 
@@ -133,7 +133,11 @@ Root fields (see `schemas/prd_context.schema.json` for the authoritative shape).
   },
   "comment_resolutions": [
     { "id": "CR-001", "status": "resolves", "topic": "SDMC Config 1/2 as treatment",
-      "quote": "This is example for understanding ,not for treatment", "affects": ["boundary_conditions", "AC-012"], "related_open_decision": null }
+      "quote": "This is example for understanding ,not for treatment", "affects": ["boundary_conditions[SDMC row]", "AC-012"],
+      "related_open_decision": null,
+      "what_was_ambiguous": "Is User click 'see all' Config 1 vs Config 2 (SDMC row) a real treatment arm in the feature design?",
+      "what_is_now_clear": "No — SDMC Config 1/2 is illustrative only, not a real A/B treatment. Do not assert different behaviour per config.",
+      "implication_for_sdet": "Mark AC-012 verifiable:false if it reads SDMC configs as distinct arms. Do not generate paired SDMC Config 1 vs Config 2 scenarios." }
   ],
   "needs_clarification": [
     { "field": "boundary_values[min_dish_count default]", "reason": "conflicting", "blocking": true,
@@ -171,7 +175,7 @@ Validate the output against the schema before handing off:
 Do not treat "I confirmed it's valid JSON" as validation — that only checks syntax, not the schema. Fix any reported field and re-validate until it passes.
 
 ## Downstream consumers
-- **sdet-plan-generator** — uses `requirements` + `acceptance_criteria` for coverage; **`verifiable: false` criteria and `blocking` `needs_clarification` gate deterministic scenario generation** for the affected area; `boundary_values` + `boundary_conditions` + `user_flow.failure_states` seed boundary/negative scenarios; `feature_flags` seed flag_on/flag_off pairs; `approach_branches` (while `undecided`) drive **parallel contingent** scenario paths per option; `out_of_scope` suppresses scenario generation; `risk_areas` drive P0/P1/P2 weighting; `comment_resolutions` tell the plan which decisions are authoritative.
+- **sdet-plan-generator** — uses `requirements` + `acceptance_criteria` for coverage; **`verifiable: false` criteria and `blocking` `needs_clarification` gate deterministic scenario generation** for the affected area; `boundary_values` + `boundary_conditions` + `user_flow.failure_states` seed boundary/negative scenarios; `feature_flags` seed flag_on/flag_off pairs; `approach_branches` (while `undecided`) drive **parallel contingent** scenario paths per option; `out_of_scope` suppresses scenario generation; `risk_areas` drive P0/P1/P2 weighting; **`comment_resolutions` actively guide the plan**: each resolution shows what PRD ambiguity was resolved (`what_was_ambiguous`), what is now clear (`what_is_now_clear`), and how to apply the resolution to refine requirements/ACs or lock decisions (`implication_for_sdet`). Resolutions with `status: resolves` are authoritative; `clarifies` provide context but do not lock decisions; `unanswered` leave decisions open.
 
 ## Log
 One-line summary: requirements, acceptance criteria (and how many are `verifiable: false`), boundary values/conditions, feature flags, open decisions (blocking count), approach-branch status, comment resolutions, and `needs_clarification` (blocking count) flagged.
