@@ -49,6 +49,77 @@ Set `generation_mode` in the sdet_plan.json root to the detected mode: `pass1` |
 | `regression_context.json` | Active non-legacy non-flaky tests — deduplication signal |
 | `code_change_context.json` | Pass 2 only — new endpoints, new error mappings, new validation rules not in RFC |
 | `qa_analysis.md` | Review mode — read the `## Human Review → ### Feedback` section for human corrections. Also read in all modes to preserve the Human Review section when regenerating. |
+| `team_registry.json` | Canonical team resolution — maps free-form PRD/RFC team names and dashboard PDG labels to stable `canonical_id`, `code_module`, and `regression_id_prefix`. Read once at startup before scenario generation begins. |
+
+## Team name resolution
+
+PRD/RFC fields use free-form team names (`"Transport"`, `"GoTrip"`, `"payments-team"`). The test code repo uses module directory names (`transport`, `payments`). Dashboards use PDG labels (`"Transport PDG"`). These three naming systems rarely align exactly. The `team_registry.json` is the single source of truth that maps all three to a stable `canonical_id`.
+
+### Why this matters
+
+| Downstream consumer | What it needs | What goes wrong without registry |
+|---|---|---|
+| **automation-plan-generator** | Exact module directory name for Java package path | Wrong package → test code in wrong module, fails to compile |
+| **regression-extractor** | `regression_id_prefix` to filter the correct team's suite | Pulls regression scenarios from a different team |
+| **BrowserStack CSV upload** | `browserstack_project` for correct project routing | Tests uploaded to wrong project |
+
+### Context fields that carry team identity
+
+> ⚠️ **Do not confuse these.** Three different fields all contain the word "team" but serve completely different purposes.
+
+| Field path | Example value | Purpose in this skill |
+|---|---|---|
+| `prd_context.team[]` | `["Transport"]` | **Owning team** — the product group responsible for the PRD. **Primary input for registry lookup.** |
+| `prd_context.pdg[]` | `["Transport"]` | **PDG label** — the dashboard/reporting group name. **Secondary input for registry lookup** (matched against `aliases.pdg`). |
+| `prd_context.owner` | `null` or a person name | Tertiary input only — rarely the team name; check for a team-like string as last resort. |
+| `prd_context.involved_teams[].team` | `"Backend"`, `"Frontend"`, `"Product"` | **Functional roles** — NOT a team identity. These tell you *which discipline* implements each requirement. Used only to filter requirements for scenario generation (this backend skill processes requirements where `team == "Backend"`). Never use for registry lookup. |
+| `rfc_context.team_ownership[].team` | `"Transport"` | **RFC owning team** — fallback when `prd_context.team` is absent or null. |
+
+### Resolution algorithm — priority order
+
+Execute the steps in order; stop at the first successful match.
+
+**Step 1 — Read candidate names:**
+
+```
+candidates = []
+if prd_context.team is non-empty:
+    candidates.append( ("prd", "prd.team", prd_context.team[0]) )
+if prd_context.pdg is non-empty:
+    candidates.append( ("pdg", "prd.pdg", prd_context.pdg[0]) )
+if rfc_context.team_ownership is non-empty:
+    candidates.append( ("prd", "rfc.team_ownership", rfc_context.team_ownership[0].team) )
+if prd_context.owner is non-null and looks like a team name (not a person name):
+    candidates.append( ("prd", "prd.owner", prd_context.owner) )
+```
+
+**Step 2 — For each candidate, attempt registry match:**
+
+For each `(alias_type, source_path, raw_name)` in candidates:
+1. Normalise: lowercase → strip hyphens/underscores/spaces → strip trailing suffixes `team|platform|pdg|backend`.
+2. Try **full match**: for each registry entry, normalise each alias in `aliases.{alias_type}[]` the same way. If normalised alias == normalised raw_name → **match**.
+3. If no full match: try **substring match**: normalised alias is contained in normalised raw_name, or vice versa → **match**.
+4. On match: use that registry entry. Record `source_path` in a `team_resolution_source` note in qa_analysis.md.
+
+**Step 3 — On no match after all candidates:**
+- Write `canonical_team_id: "unknown"`, `code_module: null`.
+- Surface warning in qa_analysis.md (see Fallback behaviour below).
+
+### Fallback behaviour
+
+If no registry entry matches the PRD/RFC team name:
+- Write `canonical_team_id: "unknown"`, `code_module: null` in `sdet_plan.json`
+- Add to `qa_analysis.md` generated section:
+  > ⚠️ **Team resolution warning:** Team name `"{raw_name}"` from PRD/RFC not found in `team_registry.json`. Downstream code generation and regression lookup will not work correctly. Add an entry or alias to `config/team_registry.json` before raising the MR.
+
+### What resolution populates in `sdet_plan.json`
+
+| Root field | Source |
+|---|---|
+| `canonical_team_id` | `team_registry.teams[matched].canonical_id` |
+| `code_module` | `team_registry.teams[matched].code.module` |
+
+> **`code_module` is the contract field.** `automation-plan-generator` reads it from `sdet_plan.json` to build Java package paths. It does not re-read `tasks_context` or `prd_context` for the module name.
 
 ## Ownership contract — A = authoritative (wins conflicts), C = contributes
 
@@ -306,6 +377,8 @@ Once `sdet_plan.json` is written and approved by a human:
 
 Schema root:
 - `feature_name`, `plan_version`, `generation_mode: pass1|pass2|retrigger|review`
+- `canonical_team_id: string` — resolved from `team_registry.json`. `"unknown"` if no match; triggers warning in qa_analysis.md. Stable across plan versions even if team renames (update registry alias instead).
+- `code_module: string | null` — exact test code module directory name from `team_registry.json code.module`. Consumed verbatim by `automation-plan-generator` for Java package path construction. `null` when resolution failed.
 - `scenarios[]` — each with:
   - `scenario_id`, `name`, `description`
   - `test_layer: component|integration|e2e`

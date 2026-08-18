@@ -14,6 +14,15 @@
       "enum": ["pass1", "pass2", "retrigger", "review"],
       "description": "Mode of the last run that wrote this file"
     },
+    "canonical_team_id": {
+      "type": "string",
+      "description": "Stable team identifier resolved from team_registry.json. 'unknown' signals a registry miss — triggers a warning in qa_analysis.md and blocks downstream module path construction."
+    },
+    "code_module": {
+      "type": ["string", "null"],
+      "description": "Exact test code module directory name from team_registry.json code.module. Consumed verbatim by automation-plan-generator for Java package path. null when team resolution failed."
+    },
+
     "created_at":  { "type": "string", "format": "date-time" },
     "updated_at":  { "type": "string", "format": "date-time" },
 
