@@ -1,0 +1,1154 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-07-24T00:00:00Z",
+  "updated_at": "2026-07-24T00:00:00Z",
+  "feature_metadata": {
+    "feature_key": "birthday_feature",
+    "module_namespace": "home,birthday,push_notification,sharing"
+  },
+  "scope_summary": "GoPay Consumer Birthday Feature (Project Aura): KYC-verified users with a confirmed DOB see a birthday Genie card on Home V3.1 on their birthday D-Day. Tapping the card launches a full-screen Lottie celebration animation, an intermediary blow-candle screen, and a 10-card selection gallery. The selected card can be saved and shared via WhatsApp and Instagram Stories. All screen content (texts, assets, background colors) is Litmus-driven. Feature has no API changes — pure Litmus + FE local cache implementation. plan_context.json was not provided; test hooks and code-change view models are excluded.",
+  "risk_assessment": [
+    "RISK-001 (High): Litmus is not birthday-date-aware. Birthday gating depends entirely on BE Genie/PN trigger. FE has no date guard — a cached deeplink could theoretically open the flow on a non-birthday day.",
+    "RISK-002 (High): Litmus one-session-late staleness — first cold launch on birthday may serve stale (pre-birthday) Litmus snapshot. Not mitigated in RFC. Manual test required.",
+    "RISK-003 (Low): Display name from AuthSDK cache may be stale if user recently updated profile name. Accepted tradeoff per RFC.",
+    "RISK-004 (Medium): Cache invalidation strategy for birthday Litmus payload and selected card ID is undefined (OQ-010 OPEN). Stale birthday content risk on non-birthday days.",
+    "PRD vs RFC High drift: PRD implies BE/server-side persistence for selected card ('saved to user profile'). RFC implements FE-local cache/persistence only. Must be resolved before release.",
+    "PRD vs RFC Medium drift: PRD sharing scope is WhatsApp-only. RFC scope includes IG, TikTok, link share. MVP sharing scope must be clarified with PM.",
+    "Design blocking issue: ANIMATION_FLASH → BIRTHDAY_RESULT prototype connector is null (broken). Post-candle transition not prototyped. PUSH_NOTIFICATION frame has no prototype connectors to birthday flow."
+  ],
+  "environments": ["QA"],
+  "scenario_list": [
+    {
+      "csv_title_association": "Birthday Genie card appears at position 1 in home carousel on birthday D-Day",
+      "requirement_ref": "BR-001",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Sanity",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a KYC-verified user whose birthday date (DD/MM) matches today's date",
+        "Navigate to the GoPay home screen (Home V3.1)",
+        "Scroll to the Business Genie carousel section",
+        "Observe the card at position 1 in the Genie carousel",
+        "Verify the card displays 'Happy birthday' and 'Click for surprise' copy",
+        "Tap the birthday card and verify the birthday_genie_card_tap clickstream event fires"
+      ],
+      "expected_result": "Birthday Genie card appears at position 1 in the Business Genie carousel displaying 'Happy birthday 🎂' and 'Click for surprise'. Tapping the card triggers the birthday flow. The birthday_genie_card_tap clickstream event fires on tap.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HOMESCREEN",
+        "trigger_action": "TAP_BIRTHDAY_CARD",
+        "destination_screen": "LOTTIE_ANIMATION"
+      },
+      "clickstream_events": [
+        {
+          "event_name": "birthday_genie_card_tap",
+          "trigger_condition": "User taps the birthday Genie card on the home carousel",
+          "required_attributes": {}
+        }
+      ],
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "no_card_selected"]
+    },
+    {
+      "csv_title_association": "Birthday Genie card is NOT visible on home carousel on a non-birthday day",
+      "requirement_ref": "BR-001",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a KYC-verified user whose birthday date does NOT match today's date",
+        "Navigate to the GoPay home screen (Home V3.1)",
+        "Scroll through the entire Business Genie carousel",
+        "Verify no birthday card ('Happy birthday' / 'Click for surprise') is present at any position"
+      ],
+      "expected_result": "No birthday card appears in the Business Genie carousel. The carousel shows its standard non-birthday content. Birthday flow is not accessible from the home screen.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HOMESCREEN",
+        "trigger_action": "NO_ACTION",
+        "destination_screen": "HOMESCREEN"
+      },
+      "test_data_tags": ["kyc_verified_user", "non_birthday_day", "litmus_enabled"]
+    },
+    {
+      "csv_title_association": "Birthday celebration animation plays and exit CTA is visible when Genie card is tapped",
+      "requirement_ref": "BR-002",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Sanity",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a KYC-verified user on birthday D-Day",
+        "Tap the birthday Genie card on the home carousel",
+        "Observe the full-screen celebration animation",
+        "Verify an exit/skip button (CTA) is visible throughout the animation",
+        "Verify the birthday_animation_viewed clickstream event fires on animation load",
+        "Wait for animation to complete automatically or verify auto-advance to blow candle screen"
+      ],
+      "expected_result": "A full-screen Lottie celebration animation (confetti, balloons, cake) plays immediately after tapping the birthday card. An exit/skip CTA button is visible and tappable at all times during the animation. The birthday_animation_viewed clickstream event fires. After the animation completes, the screen automatically advances to the blow candle screen.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HOMESCREEN",
+        "trigger_action": "TAP_BIRTHDAY_CARD",
+        "destination_screen": "LOTTIE_ANIMATION"
+      },
+      "clickstream_events": [
+        {
+          "event_name": "birthday_genie_card_tap",
+          "trigger_condition": "User taps birthday Genie card",
+          "required_attributes": {}
+        },
+        {
+          "event_name": "birthday_animation_viewed",
+          "trigger_condition": "Lottie celebration animation screen loads",
+          "required_attributes": {}
+        }
+      ],
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "no_card_selected"]
+    },
+    {
+      "csv_title_association": "Exit CTA tapped during animation navigates away from animation screen",
+      "requirement_ref": "BR-002",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a KYC-verified user on birthday D-Day",
+        "Tap the birthday Genie card to launch the animation",
+        "While the animation is playing, tap the exit or skip button (CTA visible on the animation screen)",
+        "Observe the navigation destination after the tap",
+        "Verify the birthday_exit_animation_tapped clickstream event fires"
+      ],
+      "expected_result": "Tapping the exit CTA during the animation navigates away from the animation screen without crash or UI freeze. The birthday_exit_animation_tapped clickstream event fires. [NOTE: Exact destination is undefined in Figma — flag implementation decision with dev team and update this test once behavior is confirmed.]",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "LOTTIE_ANIMATION",
+        "trigger_action": "TAP_SKIP_BTN",
+        "destination_screen": "HOMESCREEN"
+      },
+      "clickstream_events": [
+        {
+          "event_name": "birthday_exit_animation_tapped",
+          "trigger_condition": "User taps the exit/skip CTA during the celebration animation",
+          "required_attributes": {}
+        }
+      ],
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "no_card_selected"]
+    },
+    {
+      "csv_title_association": "Blow candle screen renders user display name and CTA text correctly",
+      "requirement_ref": "BR-003",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Sanity",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a KYC-verified user on birthday D-Day with a known display name",
+        "Complete the celebration animation (tap birthday Genie card and wait for animation to finish)",
+        "Observe the blow candle intermediary screen",
+        "Verify the user's display name is shown in the 'Happy Birthday [Name]' heading",
+        "Verify 'Don't forget to make a wish!' text is present",
+        "Verify 'Tap to blow the candle' CTA button is present and tappable"
+      ],
+      "expected_result": "The blow candle screen renders with: (1) 'Happy Birthday [User Display Name]' heading with the correct name from AuthSDK cache, (2) 'Don't forget to make a wish!' text, (3) 'Tap to blow the candle' CTA button. No layout overflow or missing content.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "LOTTIE_ANIMATION",
+        "trigger_action": "TIMEOUT_COMPLETE",
+        "destination_screen": "HAPPY_BIRTHDAY"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "no_card_selected"]
+    },
+    {
+      "csv_title_association": "First-time card selection: 10 birthday cards visible in swipeable gallery and a card can be selected",
+      "requirement_ref": "BR-004",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Sanity",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a KYC-verified first-time user on birthday D-Day (no card previously selected)",
+        "Complete the animation and blow candle steps, then tap 'Tap to blow the candle'",
+        "Observe the card selection gallery screen",
+        "Swipe through the gallery and count the total number of cards",
+        "Tap 'Suka yang ini!' (or equivalent card select button) to select a card",
+        "Verify the birthday_candle_tapped and birthday_card_selected clickstream events fire at the correct steps"
+      ],
+      "expected_result": "Exactly 10 unique birthday cards are displayed in a swipeable carousel gallery. The card gallery ordering is deterministic (same order for all users). Selecting a card advances the screen to the result/share state. birthday_candle_tapped fires on candle tap; birthday_card_selected fires on card selection confirmation.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HAPPY_BIRTHDAY",
+        "trigger_action": "TAP_CANDLE_BTN",
+        "destination_screen": "BIRTHDAY_RESULT"
+      },
+      "clickstream_events": [
+        {
+          "event_name": "birthday_candle_tapped",
+          "trigger_condition": "User taps 'Tap to blow the candle' CTA button",
+          "required_attributes": {}
+        },
+        {
+          "event_name": "birthday_card_selected",
+          "trigger_condition": "User confirms card selection in the gallery",
+          "required_attributes": {}
+        }
+      ],
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "no_card_selected"]
+    },
+    {
+      "csv_title_association": "Save and Share bottom sheet appears with correct share options after card selection",
+      "requirement_ref": "BR-004",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Complete birthday flow and select a card from the gallery",
+        "Tap the save or share action button on the birthday result screen",
+        "Observe the Save and Share bottom sheet that appears",
+        "Verify WhatsApp share option is present",
+        "Verify Instagram (social media) share option is present",
+        "Verify a save/download option is present"
+      ],
+      "expected_result": "A Save and Share bottom sheet appears over the birthday card result screen. The bottom sheet contains at minimum a WhatsApp share button, an Instagram/social media share button, and a save option. No crash or layout break on sheet open.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "BIRTHDAY_RESULT",
+        "trigger_action": "TAP_SAVE_SHARE_BTN",
+        "destination_screen": "BIRTHDAY_RESULT"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected"]
+    },
+    {
+      "csv_title_association": "Re-trigger flow: second Genie card tap within birthday window skips card selection and shows previously selected card",
+      "requirement_ref": "BR-005",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Sanity",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a KYC-verified user on birthday D-Day who has already selected a birthday card (card_selected state)",
+        "Tap the birthday Genie card on the home carousel",
+        "Complete the celebration animation",
+        "Tap 'Tap to blow the candle' on the blow candle screen",
+        "Observe the next screen after the candle tap",
+        "Verify the birthday_retrigger_tapped clickstream event fires and no card selection gallery is shown"
+      ],
+      "expected_result": "After tapping the candle on the re-trigger flow, the card selection gallery is skipped. The previously selected birthday card is shown directly on the result screen. birthday_retrigger_tapped clickstream event fires.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HAPPY_BIRTHDAY",
+        "trigger_action": "TAP_CANDLE_BTN",
+        "destination_screen": "BIRTHDAY_RESULT"
+      },
+      "clickstream_events": [
+        {
+          "event_name": "birthday_retrigger_tapped",
+          "trigger_condition": "User taps candle on re-trigger flow (card was previously selected)",
+          "required_attributes": {}
+        }
+      ],
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected"]
+    },
+    {
+      "csv_title_association": "Push notification received on birthday D-Day and tapping it deeplinks to celebration animation",
+      "requirement_ref": "BR-006",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Ensure the test device has GoPay push notifications enabled in OS settings",
+        "Wait for the birthday D-Day push notification to be delivered (sent once per account by BE)",
+        "Verify the notification displays: Title 'Happy Birthday to you from Gopay! 🎂' and Body 'Gopay team wish you a very joyful birthday. Hope you best in this year.'",
+        "Tap the push notification",
+        "Observe the landing screen after tapping",
+        "Verify the birthday celebration animation screen launches (not the home screen or an error)"
+      ],
+      "expected_result": "The push notification is delivered exactly once on birthday D-Day with the correct title and body copy. Tapping the notification opens the GoPay app and lands directly on the birthday celebration animation screen. No duplicate notifications are sent.",
+      "execution_mode": "Manual",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PUSH_NOTIFICATION",
+        "trigger_action": "TAP_NOTIFICATION",
+        "destination_screen": "LOTTIE_ANIMATION"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "push_notification_enabled", "litmus_enabled"]
+    },
+    {
+      "csv_title_association": "Kill switch (Litmus disabled) hides birthday feature — Genie card and flow not visible",
+      "requirement_ref": "FE-BIRTHDAY-001 kill_switch_flag",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Set the Litmus birthday_feature_litmus_content flag to the 'disabled' variant in the QA Litmus environment",
+        "Log in as a KYC-verified user on birthday D-Day",
+        "Navigate to the GoPay home screen",
+        "Scroll through the entire Business Genie carousel",
+        "Attempt to navigate to the birthday flow via any available route"
+      ],
+      "expected_result": "No birthday Genie card appears in the home carousel. The birthday flow screens are not accessible. The kill switch fully disables the feature without crash or broken UI on the home screen.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "disabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HOMESCREEN",
+        "trigger_action": "NO_ACTION",
+        "destination_screen": "HOMESCREEN"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_disabled"]
+    },
+    {
+      "csv_title_association": "First cold launch on birthday D-Day loads birthday Litmus content (not a stale prior-session snapshot)",
+      "requirement_ref": "RISK-002",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Ensure the test device has NOT opened GoPay for at least 24 hours before birthday D-Day (simulate multi-day app-close gap)",
+        "On birthday D-Day, cold-launch the GoPay app for the first time",
+        "Navigate to the home screen and tap the birthday Genie card",
+        "Proceed through the animation to the blow candle screen and then to the card gallery",
+        "Verify that all Litmus-driven content (animation assets, card images, text copy, background colors) matches the birthday variant — not a stale non-birthday Litmus snapshot"
+      ],
+      "expected_result": "All birthday screens (animation, blow candle, card selection, result) display the correct birthday Litmus content. No stale pre-birthday assets or placeholder content is shown. Birthday-specific text, card images, and background colors all render correctly on first cold launch.",
+      "execution_mode": "Manual",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HOMESCREEN",
+        "trigger_action": "TAP_BIRTHDAY_CARD",
+        "destination_screen": "LOTTIE_ANIMATION"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "cold_launch_birthday", "no_card_selected"]
+    },
+    {
+      "csv_title_association": "Birthday Genie card disappears from home carousel after the 24-hour birthday window closes",
+      "requirement_ref": "BR-001 BC-001",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Verify the birthday Genie card is visible in the home carousel at 23:59 WIB on birthday D-Day",
+        "Wait until 00:01 WIB the following day (birthday window has closed)",
+        "Open or refresh the GoPay home screen",
+        "Scroll through the Business Genie carousel",
+        "Verify no birthday card is present"
+      ],
+      "expected_result": "The birthday Genie card is no longer visible in the home carousel after the birthday window closes (after 23:59 on birthday D-Day). The carousel returns to its standard non-birthday content. No birthday flow screens are accessible.",
+      "execution_mode": "Manual",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HOMESCREEN",
+        "trigger_action": "NO_ACTION",
+        "destination_screen": "HOMESCREEN"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day"]
+    },
+    {
+      "csv_title_association": "Birthday flow is not accessible via navigation outside Genie card or push notification on a non-birthday day",
+      "requirement_ref": "RISK-001",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a KYC-verified user on a non-birthday day",
+        "Attempt to navigate to any birthday flow screen via any available route (e.g., back-stack manipulation, URL scheme, in-app navigation)",
+        "Verify the birthday celebration animation screen does not render",
+        "Verify the blow candle, card selection, and result screens are not accessible"
+      ],
+      "expected_result": "On a non-birthday day, no birthday flow screen is accessible via any navigation path outside of the Genie card tap or PN deeplink. Attempting to access birthday screens via alternative routes results in graceful handling (redirect to home or no-op) — not a crash or white screen.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HOMESCREEN",
+        "trigger_action": "NO_ACTION",
+        "destination_screen": "HOMESCREEN"
+      },
+      "test_data_tags": ["kyc_verified_user", "non_birthday_day", "litmus_enabled"]
+    },
+    {
+      "csv_title_association": "Process death after card selection — re-opening birthday flow within window shows previously selected card",
+      "requirement_ref": "OQ-006 lifecycle:PROCESS_DEATH",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Complete the birthday card selection flow so a card is selected and persisted (birthday_selected_card_id is set in local persistence)",
+        "Force-kill the GoPay app process (via OS task manager or adb shell am kill on Android)",
+        "Re-open GoPay within the same birthday D-Day window",
+        "Navigate to home and tap the birthday Genie card",
+        "Complete the animation and tap 'Tap to blow the candle'",
+        "Verify the card selection gallery is bypassed and the previously selected card result screen appears"
+      ],
+      "expected_result": "After process death, re-opening the birthday flow within the birthday window skips the card selection gallery and shows the previously selected card on the result screen. The birthday_selected_card_id persisted state is correctly restored from local storage.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HAPPY_BIRTHDAY",
+        "trigger_action": "TAP_CANDLE_BTN",
+        "destination_screen": "BIRTHDAY_RESULT"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected"]
+    },
+    {
+      "csv_title_association": "Uninstall and reinstall within birthday window — card selection starts from scratch",
+      "requirement_ref": "OQ-007 lifecycle:APP_UNINSTALL_REINSTALL",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Complete the birthday card selection flow so a card is selected and persisted",
+        "Uninstall the GoPay app from the device",
+        "Reinstall the GoPay app on the same birthday D-Day",
+        "Log in and navigate to home",
+        "Tap the birthday Genie card and complete the animation and blow candle steps",
+        "Observe whether the card selection gallery appears or is bypassed"
+      ],
+      "expected_result": "After uninstall and reinstall within the birthday window, the local cache (birthday_selected_card_id) is cleared. The card selection gallery is shown from scratch — the user must select a card again. No crash or error on first launch post-reinstall.",
+      "execution_mode": "Manual",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HAPPY_BIRTHDAY",
+        "trigger_action": "TAP_CANDLE_BTN",
+        "destination_screen": "BIRTHDAY_RESULT"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled"]
+    },
+    {
+      "csv_title_association": "Android: photo library permission DENIED — save fails silently and WhatsApp share still works",
+      "requirement_ref": "BR-004 permissions:READ_MEDIA_IMAGES",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "On an Android device, explicitly deny the 'Photos and videos' (READ_MEDIA_IMAGES) permission for GoPay in OS settings",
+        "Complete the birthday card selection flow",
+        "Open the Save and Share bottom sheet",
+        "Tap the save/download button to save the birthday card to the device gallery",
+        "Observe the result of the save attempt",
+        "Tap the WhatsApp share button and verify sharing still functions"
+      ],
+      "expected_result": "Saving the birthday card to the gallery fails silently (or with a graceful inline error message) — no crash, no force close. The sharing flow (WhatsApp) remains fully functional after the save failure. The app does not freeze or enter a broken state.",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "BIRTHDAY_RESULT",
+        "trigger_action": "TAP_SAVE_SHARE_BTN",
+        "destination_screen": "BIRTHDAY_RESULT"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected", "gallery_permission_denied"]
+    },
+    {
+      "csv_title_association": "iOS: photo library permission DENIED — save fails silently and WhatsApp share still works",
+      "requirement_ref": "BR-004 permissions:NSPhotoLibraryAddUsageDescription",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "On an iOS device, deny the 'Add Photos Only' or 'None' option for GoPay photo library access in iOS Settings",
+        "Complete the birthday card selection flow",
+        "Open the Save and Share bottom sheet",
+        "Tap the save/download button to save the birthday card to the photo library",
+        "Observe the result of the save attempt",
+        "Tap the WhatsApp share button and verify sharing still functions"
+      ],
+      "expected_result": "Saving the birthday card to the iOS photo library fails silently (or with a graceful inline error message) — no crash, no force close. The sharing flow (WhatsApp) remains fully functional after the save failure.",
+      "execution_mode": "Automatable",
+      "platform": "iOS",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "BIRTHDAY_RESULT",
+        "trigger_action": "TAP_SAVE_SHARE_BTN",
+        "destination_screen": "BIRTHDAY_RESULT"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected", "gallery_permission_denied"]
+    },
+    {
+      "csv_title_association": "Second and subsequent launches within birthday window serve Litmus data from cache with no network calls",
+      "requirement_ref": "OQ-004 local_data:birthday_litmus_data",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Complete the full birthday flow at least once on birthday D-Day (Litmus data is now cached)",
+        "Attach a network proxy (Charles Proxy or mitmproxy) to intercept network traffic",
+        "Tap the birthday Genie card a second time to trigger the re-trigger flow",
+        "Observe network traffic during the entire second birthday flow session",
+        "Verify no Litmus CDN calls (i.gojekapi.com) are made during the second launch"
+      ],
+      "expected_result": "On the second and subsequent birthday flow launches within the birthday window, the Litmus content (assets, texts, card images) is served entirely from local cache. Zero Litmus/CDN network calls are made. All screen content renders correctly without a network connection.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HOMESCREEN",
+        "trigger_action": "TAP_BIRTHDAY_CARD",
+        "destination_screen": "LOTTIE_ANIMATION"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected"]
+    },
+    {
+      "csv_title_association": "Non-KYC user does not see birthday Genie card in home carousel",
+      "requirement_ref": "BR-001 persona:non_kyc_user",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a GoPay user without completed KYC (no confirmed date of birth in system)",
+        "Navigate to the GoPay home screen on what would be their birthday date",
+        "Scroll through the entire Business Genie carousel",
+        "Verify no birthday Genie card ('Happy birthday' / 'Click for surprise') is present"
+      ],
+      "expected_result": "The birthday Genie card does not appear in the home carousel for a non-KYC user, even on the user's birthday date. The birthday flow is inaccessible to non-KYC users.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "HOMESCREEN",
+        "trigger_action": "NO_ACTION",
+        "destination_screen": "HOMESCREEN"
+      },
+      "test_data_tags": ["non_kyc_user", "birthday_d_day", "litmus_enabled"]
+    },
+    {
+      "csv_title_association": "Birthday card shared directly to Instagram Stories with no native OS share popup",
+      "requirement_ref": "BR-007 OQ-002",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Complete the birthday card selection flow",
+        "Tap the Instagram (social media) share icon on the birthday result screen or in the share sheet",
+        "Observe whether the native OS share sheet appears or Instagram opens directly",
+        "Verify the Instagram Stories composer opens with the birthday card image pre-loaded",
+        "Verify the birthday_share_tapped clickstream event fires"
+      ],
+      "expected_result": "Tapping the Instagram share icon opens the Instagram app directly (no native OS share popup/sheet appears). The Instagram Stories composer opens with the birthday card image pre-loaded and ready to post. The birthday_share_tapped clickstream event fires.",
+      "execution_mode": "Manual",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "BIRTHDAY_RESULT",
+        "trigger_action": "TAP_SOCIAL_MEDIA_BTN",
+        "destination_screen": "INSTA_STORIES"
+      },
+      "clickstream_events": [
+        {
+          "event_name": "birthday_share_tapped",
+          "trigger_condition": "User taps the Instagram/social media share icon",
+          "required_attributes": {}
+        }
+      ],
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected"]
+    },
+    {
+      "csv_title_association": "Long user display name is truncated with ellipsis on blow candle screen without layout breakage",
+      "requirement_ref": "BR-003 RISK-003",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Log in as a KYC-verified user with a long display name (e.g., 'Rizky Anggara Prasetya Budiawan') on birthday D-Day",
+        "Tap the birthday Genie card and wait for the animation to complete",
+        "Observe the blow candle screen heading and display name rendering",
+        "Verify the name is truncated with an ellipsis (...) and does not overflow or overlap other UI elements",
+        "Verify the rest of the screen (wish text and candle CTA) renders correctly"
+      ],
+      "expected_result": "Long display names are truncated with an ellipsis on the 'Happy Birthday [Name]' heading. No text overflow, UI layout breakage, or clipping of adjacent UI elements occurs. The blow candle CTA button and wish text remain fully visible.",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "LOTTIE_ANIMATION",
+        "trigger_action": "TIMEOUT_COMPLETE",
+        "destination_screen": "HAPPY_BIRTHDAY"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "long_display_name", "no_card_selected"]
+    },
+    {
+      "csv_title_association": "App backgrounded and foregrounded during celebration animation — state is handled gracefully",
+      "requirement_ref": "lifecycle:BACKGROUND_FOREGROUND",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Tap the birthday Genie card to launch the celebration animation",
+        "While the Lottie animation is playing, press the Home button to send the app to the background",
+        "Wait approximately 5 seconds",
+        "Bring the app back to the foreground (tap the GoPay app icon or use the app switcher)",
+        "Observe the state of the animation screen after foregrounding"
+      ],
+      "expected_result": "The app handles the background/foreground transition gracefully with no crash or frozen screen. The animation either resumes, restarts from the beginning, or the user is returned to the blow candle screen. [NOTE: Exact behavior is unspecified in RFC — document actual behavior and confirm with PM/dev for acceptance criteria.]",
+      "execution_mode": "Automatable",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "LOTTIE_ANIMATION",
+        "trigger_action": "BACKGROUND_FOREGROUND_TRANSITION",
+        "destination_screen": "LOTTIE_ANIMATION"
+      },
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "no_card_selected"]
+    },
+    {
+      "csv_title_association": "Android: photo library permission GRANTED — birthday card saves to device gallery successfully",
+      "requirement_ref": "BR-004 BR-007 permissions:READ_MEDIA_IMAGES",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "On an Android device, grant the 'Photos and videos' (READ_MEDIA_IMAGES) permission for GoPay in OS settings",
+        "Complete the birthday card selection flow",
+        "Open the Save and Share bottom sheet",
+        "Tap the save/download button",
+        "Open the device Photos/Gallery app and verify the birthday card image is saved",
+        "Verify the birthday_save_tapped clickstream event fires"
+      ],
+      "expected_result": "The birthday card image is saved successfully to the Android device gallery. A success confirmation is shown in the app. The birthday card image is visible in the device Photos app. The birthday_save_tapped clickstream event fires.",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "BIRTHDAY_RESULT",
+        "trigger_action": "TAP_SAVE_SHARE_BTN",
+        "destination_screen": "BIRTHDAY_RESULT"
+      },
+      "clickstream_events": [
+        {
+          "event_name": "birthday_save_tapped",
+          "trigger_condition": "User taps the save/download button on the birthday result screen",
+          "required_attributes": {}
+        }
+      ],
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected", "gallery_permission_granted"]
+    },
+    {
+      "csv_title_association": "iOS: photo library permission GRANTED — birthday card saves to device photo library successfully",
+      "requirement_ref": "BR-004 BR-007 permissions:NSPhotoLibraryAddUsageDescription",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "On an iOS device, grant 'Add Photos Only' or 'Full Access' to GoPay for photo library in iOS Settings",
+        "Complete the birthday card selection flow",
+        "Open the Save and Share bottom sheet",
+        "Tap the save/download button",
+        "Open the iOS Photos app and verify the birthday card image is saved in Recents",
+        "Verify the birthday_save_tapped clickstream event fires"
+      ],
+      "expected_result": "The birthday card image is saved successfully to the iOS photo library. A success confirmation is shown in the app. The birthday card image is visible in the iOS Photos app under Recents. The birthday_save_tapped clickstream event fires.",
+      "execution_mode": "Automatable",
+      "platform": "iOS",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "BIRTHDAY_RESULT",
+        "trigger_action": "TAP_SAVE_SHARE_BTN",
+        "destination_screen": "BIRTHDAY_RESULT"
+      },
+      "clickstream_events": [
+        {
+          "event_name": "birthday_save_tapped",
+          "trigger_condition": "User taps the save/download button on the birthday result screen",
+          "required_attributes": {}
+        }
+      ],
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected", "gallery_permission_granted"]
+    },
+    {
+      "csv_title_association": "WhatsApp share: birthday card image and GoPay deeplink sent via WhatsApp",
+      "requirement_ref": "BR-007",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "steps": [
+        "Complete the birthday card selection flow on a device with WhatsApp installed",
+        "Open the Save and Share bottom sheet",
+        "Tap the WhatsApp share button",
+        "Verify WhatsApp opens with the birthday card image attached",
+        "Verify a pre-filled message text and a GoPay deeplink are present in the WhatsApp compose window",
+        "Verify the birthday_share_tapped clickstream event fires and send the message to a test recipient"
+      ],
+      "expected_result": "WhatsApp opens with the birthday card image attached and a pre-filled message including the GoPay deeplink. The deeplink routes the recipient to GoPay home (if GoPay is installed) or to the App Store/Play Store (if not installed). The birthday_share_tapped clickstream event fires.",
+      "execution_mode": "Manual",
+      "platform": "Cross-Platform",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "birthday_feature_litmus_content": "enabled"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "BIRTHDAY_RESULT",
+        "trigger_action": "TAP_WHATSAPP_BTN",
+        "destination_screen": "WHATSAPP_CHAT"
+      },
+      "clickstream_events": [
+        {
+          "event_name": "birthday_share_tapped",
+          "trigger_condition": "User taps the WhatsApp share button",
+          "required_attributes": {}
+        }
+      ],
+      "test_data_tags": ["kyc_verified_user", "birthday_d_day", "litmus_enabled", "card_selected", "whatsapp_installed"]
+    }
+  ],
+  "cross_stage_gap_analysis": {
+    "prd_vs_figma_gaps": [
+      {
+        "requirement_id": "BR-002",
+        "severity": "CRITICAL_BLOCKER",
+        "gap_description": "Lottie animation exit CTA (Gamified skip button, Figma id 7222:34856) has ON_CLICK → null in the prototype. Skip/exit behavior during animation is undefined in Figma. Implementation decision required: does tapping skip navigate to HAPPY_BIRTHDAY, exit the birthday flow entirely, or advance to BIRTHDAY_RESULT?"
+      },
+      {
+        "requirement_id": "BR-005",
+        "severity": "CRITICAL_BLOCKER",
+        "gap_description": "No dedicated re-trigger flow is prototyped in Figma. The path where card selection is skipped and the previously selected card is shown has no design representation. Test execution for TC-007 and TC-014 depends entirely on dev implementation, not any Figma spec."
+      },
+      {
+        "requirement_id": "BR-006",
+        "severity": "CRITICAL_BLOCKER",
+        "gap_description": "PUSH_NOTIFICATION frame (Figma 7009:8321) has no prototype connectors to any birthday flow screen. The deeplink routing spec from PN tap to celebration animation is missing from both the Figma prototype and the RFC (deep_link: null for all navigation_changes entries)."
+      },
+      {
+        "requirement_id": "BR-004",
+        "severity": "WARNING",
+        "gap_description": "ANIMATION_FLASH (Figma 7222:34944) AFTER_TIMEOUT connector has destinationId=null. The post-candle-tap transition to BIRTHDAY_RESULT card selection is broken in the prototype. Automation for TC-006 must rely on dev-implemented navigation, not Figma connector."
+      },
+      {
+        "requirement_id": "BR-007",
+        "severity": "WARNING",
+        "gap_description": "Design prototypes only WhatsApp (WHATSAPP_CHAT) and Instagram Stories (INSTA_STORIES) share paths. No TikTok or link-share UI is designed. RFC mentions onboarding module dependency for IG/TikTok. MVP sharing scope must be clarified before additional share-path test cases are written."
+      }
+    ],
+    "prd_vs_rfc_gaps": [
+      {
+        "requirement_id": "BR-004",
+        "gap_description": "High severity drift: PRD states selected card is 'saved to user profile' (implies server-side BE persistence). RFC implements birthday_selected_card_id as FE-local PERSISTENCE key only — no BE sync. If BE persistence is required, the RFC is incomplete and BE work is missing. PM and dev must align before release."
+      },
+      {
+        "requirement_id": "BR-007",
+        "gap_description": "Medium severity drift: PRD sharing scope is WhatsApp-only. RFC includes native popup, direct-to-platform IG/TikTok, and link share. Expanded sharing scope introduces an unresolved dependency on the onboarding module. MVP sharing scope must be clarified with PM."
+      },
+      {
+        "requirement_id": "BR-001",
+        "gap_description": "Low severity: PRD lists platforms as [android, ios] separately. RFC implements as Flutter (single cross-platform build). No functional impact but test matrix must explicitly cover both platform flavors."
+      },
+      {
+        "requirement_id": "BR-001",
+        "gap_description": "Low severity: PRD has no named feature flags. RFC uses Litmus release ID as gate (birthday_feature_litmus_content). QA environment must use integration Litmus release 19d9e576-5789-4d69-9b78-ca0e76304674."
+      }
+    ],
+    "rfc_vs_impl_plan_gaps": []
+  },
+  "testability_feedback": {
+    "missing_hooks": [
+      "No deeplink defined for any birthday flow screen in RFC (deep_link: null for all navigation_changes). Direct deeplink entry to LOTTIE_ANIMATION, HAPPY_BIRTHDAY, or BIRTHDAY_RESULT is not possible. All test entry must go through HOMESCREEN Genie card tap or PN tap.",
+      "No test override for Litmus content injection at screen level. To test Litmus failure scenarios, a mock Litmus server or Litmus content reset tool is required.",
+      "No method to time-travel the birthday_today BE segment for a test account without coordination with the BE team. Birthday D-Day tests require pre-scheduled test account setup.",
+      "No FE-level date override hook to simulate birthday vs non-birthday day without BE dependency. Tests requiring specific date conditions (BC-001 window boundary) require manual time manipulation or coordinated BE segment control.",
+      "audioplayer package feasibility unconfirmed — no test hook for sound effect verification. Sound playback tests are blocked until the package is confirmed and an audio capture mechanism is available."
+    ],
+    "locator_readiness_checklist": [
+      "HOMESCREEN.TAP_BIRTHDAY_CARD — Genie birthday card tap target. Confirm accessibility ID (Figma 'header' sub-element, I7165:24462). Note: 'tile v3/gift' (I7165:24459) has a broken connector — clarify which element is the actual tap target.",
+      "LOTTIE_ANIMATION.TAP_SKIP_BTN — Gamified skip/exit button (Figma 7222:34856). ON_CLICK destination null — confirm implemented screen_id before automating.",
+      "HAPPY_BIRTHDAY.TAP_CANDLE_BTN — 'Tap to blow the candle' Gamified button (Figma 7222:53351). Confirm flutter_key or accessibilityId.",
+      "HAPPY_BIRTHDAY.TAP_CLOSE_BTN — X/close button (Figma I7002:34036;79:5112). Confirm resource-id (Android) / accessibilityId (iOS).",
+      "BIRTHDAY_RESULT.TAP_SAVE_SHARE_BTN — Save/share action (Figma 'Frame 2085663103'). Label not visible in design — confirm implemented accessibility label.",
+      "BIRTHDAY_RESULT.TAP_SOCIAL_MEDIA_BTN — Instagram/social media icon (Figma 7222:59167). Confirm accessibility label.",
+      "BIRTHDAY_RESULT.TAP_WHATSAPP_BTN — WhatsApp button (Figma 7246:57283). Confirm resource-id / accessibilityId.",
+      "BIRTHDAY_RESULT.TAP_CLOSE_BTN — X/close button on result screen. Confirm locator.",
+      "BIRTHDAY_RESULT.SWIPE_CARD_CAROUSEL — Birthday card gallery. Confirm scrollable container locator for swipe automation.",
+      "BIRTHDAY_RESULT.TAP_DISMISS_SHEET_BTN — Dismiss share sheet (Figma 7246:57205). Confirm locator.",
+      "INSTA_STORIES.TAP_CLOSE_BTN — Close on Instagram Stories preview (Figma 7002:45171). Confirm locator.",
+      "WHATSAPP_CHAT.TAP_BACK_BTN — Back on WhatsApp chat preview (Figma 7013:8160). Confirm locator."
+    ],
+    "unclear_ac": [
+      "BR-002: Animation exit CTA destination is undefined. What screen does tapping skip/exit during the animation navigate to? Cannot write a complete TC-004 expected result without this answer.",
+      "BR-002: Animation duration and auto-advance timeout value are not defined in PRD or RFC. AFTER_TIMEOUT trigger in Figma has no delay value. Tests for TC-003 cannot validate timing without a defined timeout.",
+      "BR-003: The blow candle screen is described as non-skippable in BC-003 MVP, but RFC notes this is deferred to next iteration. Is the skip/timeout behavior on HAPPY_BIRTHDAY screen also undefined for MVP?",
+      "BR-006: PN deeplink URL scheme and parameters are not defined in the RFC (deep_link: null). What is the FE deeplink that the PN payload routes to? TC-008 cannot be fully specified without this.",
+      "BR-007: WhatsApp pre-filled message copy is TBD/pending approval. TC-009 expected result verification of message copy is blocked.",
+      "OQ-003 (OPEN): Dark mode handling for birthday screens is undefined. Dark mode test cases cannot be scoped.",
+      "OQ-010 (OPEN): Cache invalidation strategy after 24-hour window is undefined. TC-012 post-window state verification has incomplete acceptance criteria.",
+      "RISK-004: No acceptance criteria defined for what 'cache cleared' means — is it on OS midnight, on next app launch after midnight, or on explicit TTL expiry?"
+    ]
+  },
+  "element_locator_handoff": [
+    {
+      "screen_id": "HOMESCREEN",
+      "element_role": "Birthday Genie card tap target in home carousel",
+      "generated_logical_id": "HOMESCREEN.TAP_BIRTHDAY_CARD",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOTTIE_ANIMATION",
+      "element_role": "Auto-advance timeout trigger (AFTER_TIMEOUT) — no user interaction",
+      "generated_logical_id": "LOTTIE_ANIMATION.TIMEOUT_COMPLETE",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOTTIE_ANIMATION",
+      "element_role": "Exit/skip CTA button during celebration animation",
+      "generated_logical_id": "LOTTIE_ANIMATION.TAP_SKIP_BTN",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "HAPPY_BIRTHDAY",
+      "element_role": "Tap to blow the candle CTA button — primary action",
+      "generated_logical_id": "HAPPY_BIRTHDAY.TAP_CANDLE_BTN",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "HAPPY_BIRTHDAY",
+      "element_role": "Close/exit button to return to home",
+      "generated_logical_id": "HAPPY_BIRTHDAY.TAP_CLOSE_BTN",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "HAPPY_BIRTHDAY",
+      "element_role": "User display name label (sourced from AuthSDK cache)",
+      "generated_logical_id": "HAPPY_BIRTHDAY.LABEL_USER_NAME",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "ANIMATION_FLASH",
+      "element_role": "Auto-advance timeout trigger (AFTER_TIMEOUT) after candle tap — destination is broken in prototype",
+      "generated_logical_id": "ANIMATION_FLASH.TIMEOUT_COMPLETE",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "BIRTHDAY_RESULT",
+      "element_role": "Save/share action button — opens Save and Share bottom sheet",
+      "generated_logical_id": "BIRTHDAY_RESULT.TAP_SAVE_SHARE_BTN",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "BIRTHDAY_RESULT",
+      "element_role": "Swipeable birthday card selection carousel",
+      "generated_logical_id": "BIRTHDAY_RESULT.SWIPE_CARD_CAROUSEL",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "BIRTHDAY_RESULT",
+      "element_role": "Social media (Instagram Stories) share icon",
+      "generated_logical_id": "BIRTHDAY_RESULT.TAP_SOCIAL_MEDIA_BTN",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "BIRTHDAY_RESULT",
+      "element_role": "WhatsApp share button",
+      "generated_logical_id": "BIRTHDAY_RESULT.TAP_WHATSAPP_BTN",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "BIRTHDAY_RESULT",
+      "element_role": "Close/exit button to return to home from result screen",
+      "generated_logical_id": "BIRTHDAY_RESULT.TAP_CLOSE_BTN",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "BIRTHDAY_RESULT",
+      "element_role": "Dismiss button to close the Save and Share bottom sheet",
+      "generated_logical_id": "BIRTHDAY_RESULT.TAP_DISMISS_SHEET_BTN",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "INSTA_STORIES",
+      "element_role": "Close button to return to birthday result from Instagram Stories preview",
+      "generated_logical_id": "INSTA_STORIES.TAP_CLOSE_BTN",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "WHATSAPP_CHAT",
+      "element_role": "Back button to return to birthday result from WhatsApp chat preview",
+      "generated_logical_id": "WHATSAPP_CHAT.TAP_BACK_BTN",
+      "accessibility_mapping_directives": {}
+    }
+  ]
+}

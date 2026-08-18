@@ -1,0 +1,100 @@
+{
+  "contract_version": "1.0.0",
+  "generated_at": "2026-07-27T00:00:00Z",
+  "app": "gopay-consumer",
+  "epic_ref": "birthday_feature",
+  "platform": "cross-platform",
+  "framework": "flutter",
+  "scoped_to_modules": ["home", "birthday", "push_notification", "sharing"],
+  "ready_jira_ids": ["AURA-201", "AURA-202", "AURA-203"],
+  "merge_requests": ["!7101", "!7102", "!7103"],
+  "changed_screens": ["HOMESCREEN", "LOTTIE_ANIMATION", "HAPPY_BIRTHDAY", "ANIMATION_FLASH", "BIRTHDAY_RESULT", "INSTA_STORIES", "WHATSAPP_CHAT"],
+  "screens": [
+    {
+      "screen_id": "HOMESCREEN",
+      "deep_links": [],
+      "nav_macro_fallback": "Launch as KYC-verified user on birthday D-Day; scroll Business Genie carousel to the birthday card at position 1 (RFC defines no deeplink).",
+      "observable_state": ["birthday Genie card visible at carousel position 1", "card headline 'Happy birthday' visible"]
+    },
+    {
+      "screen_id": "LOTTIE_ANIMATION",
+      "deep_links": [],
+      "nav_macro_fallback": "From HOMESCREEN tap HOMESCREEN.TAP_BIRTHDAY_CARD. No direct deeplink; PN-tap routing to this screen is undefined in RFC.",
+      "observable_state": ["celebration animation playing", "skip CTA visible", "auto-advances to HAPPY_BIRTHDAY on timeout"]
+    },
+    {
+      "screen_id": "HAPPY_BIRTHDAY",
+      "deep_links": [],
+      "nav_macro_fallback": "Reach via LOTTIE_ANIMATION auto-advance (LOTTIE_ANIMATION.TIMEOUT_COMPLETE). No direct deeplink.",
+      "observable_state": ["'Happy Birthday [name]' heading", "'Don't forget to make a wish!' text", "'Tap to blow the candle' CTA visible"]
+    },
+    {
+      "screen_id": "ANIMATION_FLASH",
+      "deep_links": [],
+      "nav_macro_fallback": "Reach via HAPPY_BIRTHDAY.TAP_CANDLE_BTN; auto-advances to BIRTHDAY_RESULT (Figma connector was broken — dev-implemented transition).",
+      "observable_state": ["transient flash transition; auto-advances to BIRTHDAY_RESULT"]
+    },
+    {
+      "screen_id": "BIRTHDAY_RESULT",
+      "deep_links": [],
+      "nav_macro_fallback": "Reach via ANIMATION_FLASH auto-advance (ANIMATION_FLASH.TIMEOUT_COMPLETE) after candle tap. No direct deeplink.",
+      "observable_state": ["10-card swipeable gallery (first-time)", "selected card shown (re-trigger)", "Save & Share bottom sheet with WhatsApp + Instagram + Save"]
+    },
+    {
+      "screen_id": "INSTA_STORIES",
+      "deep_links": [],
+      "nav_macro_fallback": "Reach via BIRTHDAY_RESULT.TAP_SOCIAL_MEDIA_BTN.",
+      "observable_state": ["Instagram Stories composer preview with card pre-loaded"]
+    },
+    {
+      "screen_id": "WHATSAPP_CHAT",
+      "deep_links": [],
+      "nav_macro_fallback": "Reach via BIRTHDAY_RESULT.TAP_WHATSAPP_BTN.",
+      "observable_state": ["WhatsApp compose with card image + GoPay deeplink"]
+    }
+  ],
+  "elements": [
+    { "element_id": "HOMESCREEN.TAP_BIRTHDAY_CARD", "screen_id": "HOMESCREEN", "flutter_locator": "Key('birthday_genie_card')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7101", "file": "lib/home/genie/birthday_genie_card.dart", "line": 41 } },
+    { "element_id": "HOMESCREEN.birthday_card_headline", "screen_id": "HOMESCREEN", "flutter_locator": "Key('birthday_genie_card_headline')", "role": "label", "interaction": "view", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7101", "file": "lib/home/genie/birthday_genie_card.dart", "line": 58 } },
+    { "element_id": "LOTTIE_ANIMATION.TIMEOUT_COMPLETE", "screen_id": "LOTTIE_ANIMATION", "flutter_locator": "Key('birthday_lottie_animation_view')", "role": "label", "interaction": "view", "states": ["auto_advance"], "change_type": "added", "provenance": { "mr": "!7101", "file": "lib/birthday/animation/lottie_celebration_screen.dart", "line": 30 } },
+    { "element_id": "LOTTIE_ANIMATION.TAP_SKIP_BTN", "screen_id": "LOTTIE_ANIMATION", "flutter_locator": "Key('birthday_animation_skip_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7101", "file": "lib/birthday/animation/lottie_celebration_screen.dart", "line": 74 } },
+    { "element_id": "HAPPY_BIRTHDAY.TAP_CANDLE_BTN", "screen_id": "HAPPY_BIRTHDAY", "flutter_locator": "Key('birthday_blow_candle_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7102", "file": "lib/birthday/candle/blow_candle_screen.dart", "line": 96 } },
+    { "element_id": "HAPPY_BIRTHDAY.TAP_CLOSE_BTN", "screen_id": "HAPPY_BIRTHDAY", "flutter_locator": "Key('birthday_happy_close_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7102", "file": "lib/birthday/candle/blow_candle_screen.dart", "line": 52 } },
+    { "element_id": "HAPPY_BIRTHDAY.LABEL_USER_NAME", "screen_id": "HAPPY_BIRTHDAY", "flutter_locator": "Semantics(identifier: 'birthday_user_name_label')", "role": "label", "interaction": "view", "states": ["default", "truncated"], "change_type": "added", "provenance": { "mr": "!7102", "file": "lib/birthday/candle/blow_candle_screen.dart", "line": 68 } },
+    { "element_id": "HAPPY_BIRTHDAY.wish_text_label", "screen_id": "HAPPY_BIRTHDAY", "flutter_locator": "Key('birthday_wish_text')", "role": "label", "interaction": "view", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7102", "file": "lib/birthday/candle/blow_candle_screen.dart", "line": 80 } },
+    { "element_id": "ANIMATION_FLASH.TIMEOUT_COMPLETE", "screen_id": "ANIMATION_FLASH", "flutter_locator": "Key('birthday_animation_flash_view')", "role": "label", "interaction": "view", "states": ["auto_advance"], "change_type": "added", "provenance": { "mr": "!7102", "file": "lib/birthday/candle/flash_transition.dart", "line": 24 } },
+    { "element_id": "BIRTHDAY_RESULT.SWIPE_CARD_CAROUSEL", "screen_id": "BIRTHDAY_RESULT", "flutter_locator": "Key('birthday_card_carousel')", "role": "list", "interaction": "swipe", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7103", "file": "lib/birthday/result/card_gallery_screen.dart", "line": 44 } },
+    { "element_id": "BIRTHDAY_RESULT.card_select_btn", "screen_id": "BIRTHDAY_RESULT", "flutter_locator": "Key('birthday_card_select_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7103", "file": "lib/birthday/result/card_gallery_screen.dart", "line": 61 } },
+    { "element_id": "BIRTHDAY_RESULT.TAP_SAVE_SHARE_BTN", "screen_id": "BIRTHDAY_RESULT", "flutter_locator": "Key('birthday_save_share_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7103", "file": "lib/birthday/result/birthday_result_screen.dart", "line": 88 } },
+    { "element_id": "BIRTHDAY_RESULT.TAP_WHATSAPP_BTN", "screen_id": "BIRTHDAY_RESULT", "flutter_locator": "Key('birthday_whatsapp_share_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7103", "file": "lib/birthday/result/save_share_bottomsheet.dart", "line": 33 } },
+    { "element_id": "BIRTHDAY_RESULT.TAP_SOCIAL_MEDIA_BTN", "screen_id": "BIRTHDAY_RESULT", "flutter_locator": "Key('birthday_instagram_share_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7103", "file": "lib/birthday/result/save_share_bottomsheet.dart", "line": 41 } },
+    { "element_id": "BIRTHDAY_RESULT.TAP_DISMISS_SHEET_BTN", "screen_id": "BIRTHDAY_RESULT", "flutter_locator": "Key('birthday_share_sheet_dismiss_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7103", "file": "lib/birthday/result/save_share_bottomsheet.dart", "line": 20 } },
+    { "element_id": "BIRTHDAY_RESULT.TAP_CLOSE_BTN", "screen_id": "BIRTHDAY_RESULT", "flutter_locator": "Key('birthday_result_close_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7103", "file": "lib/birthday/result/birthday_result_screen.dart", "line": 50 } },
+    { "element_id": "INSTA_STORIES.TAP_CLOSE_BTN", "screen_id": "INSTA_STORIES", "flutter_locator": "Key('birthday_insta_preview_close_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7103", "file": "lib/birthday/share/insta_stories_preview.dart", "line": 29 } },
+    { "element_id": "WHATSAPP_CHAT.TAP_BACK_BTN", "screen_id": "WHATSAPP_CHAT", "flutter_locator": "Key('birthday_whatsapp_preview_back_btn')", "role": "button", "interaction": "tap", "states": ["default"], "change_type": "added", "provenance": { "mr": "!7103", "file": "lib/birthday/share/whatsapp_preview.dart", "line": 26 } }
+  ],
+  "routes": [],
+  "api": [],
+  "flags": ["birthday_feature_litmus_content"],
+  "feature_flags": [
+    { "name": "birthday_feature_litmus_content", "state_at_merge": "enabled" }
+  ],
+  "analytics": [
+    "birthday_genie_card_tap",
+    "birthday_animation_viewed",
+    "birthday_exit_animation_tapped",
+    "birthday_candle_tapped",
+    "birthday_card_selected",
+    "birthday_retrigger_tapped",
+    "birthday_share_tapped",
+    "birthday_save_tapped"
+  ],
+  "app_api_version": "GoPay Flutter single cross-platform build; no service/API change (pure Litmus content + FE-local cache); QA Litmus integration release 19d9e576-5789-4d69-9b78-ca0e76304674",
+  "cr_risks": [
+    { "id": "RISK-002", "area": "HOMESCREEN / LOTTIE_ANIMATION", "category": "litmus-staleness", "suggested_test": "First cold launch on D-Day after a 24h+ app-close gap may serve a stale pre-birthday Litmus snapshot; verify birthday variant renders (SDET plan RISK-002, TC first-cold-launch).", "severity": "High", "disposition": "becomes-scenario" },
+    { "id": "BR-002-GAP", "area": "LOTTIE_ANIMATION.TAP_SKIP_BTN", "category": "navigation", "suggested_test": "Figma ON_CLICK is null for the skip CTA — confirm the dev-implemented skip destination and verify no crash/freeze (SDET plan cross_stage_gap_analysis, CRITICAL_BLOCKER).", "severity": "High", "disposition": "becomes-scenario" },
+    { "id": "BR-004-DRIFT", "area": "BIRTHDAY_RESULT / card persistence", "category": "persistence", "suggested_test": "PRD implies BE profile persistence of the selected card; RFC/build implement FE-local birthday_selected_card_id only — verify uninstall/reinstall clears the card and escalate the drift (SDET plan prd_vs_rfc_gaps).", "severity": "High", "disposition": "becomes-bug" },
+    { "id": "BR-006-GAP", "area": "PUSH_NOTIFICATION → LOTTIE_ANIMATION", "category": "deeplink", "suggested_test": "No PN deeplink is defined in RFC or bound in the manifest; verify PN-tap actually lands on the celebration animation, else fall back to nav-macro (SDET plan cross_stage_gap_analysis, CRITICAL_BLOCKER).", "severity": "Medium", "disposition": "becomes-scenario" }
+  ],
+  "id_compliance": { "status": "PASS", "ref": "id_compliance.json" }
+}

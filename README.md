@@ -10,6 +10,7 @@ Claude Code skills marketplace for the AEP team.
    claude plugin marketplace add https://source.golabs.io/aep/skills.git
    claude plugin install aep@aep
    claude plugin install aep-mobile@aep
+   claude plugin install aep-tapmind@aep
    ```
    (skip whichever plugin you don't need)
 3. Open the Claude desktop app and check **+ → Plugins → Manage plugins** — the
@@ -56,6 +57,10 @@ plugins/
     .claude-plugin/plugin.json
     skills/                       # 8 skills, prd through test-code-gen
     config/, schemas/, examples/  # per-app config + supporting data
+  aep-tapmind/                    # TapMind MCP squad — device automation via TapMind
+    .claude-plugin/plugin.json
+    skills/
+      goal-driven-exploration/    # plain-English goal -> device run -> graph report
 ```
 
 Add a new plugin directory under `plugins/` (with its own `.claude-plugin/plugin.json`)

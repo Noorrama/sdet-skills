@@ -1,0 +1,975 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TapMind Step Validation — GoFood checkout with saved address</title>
+<style>
+  :root{
+    --bg:#fbfbfa; --panel:#ffffff; --panel-2:#f5f4f1; --border:#e4e2dd;
+    --text:#1f1e1c; --muted:#6b6862; --faint:#98948c;
+    --accent:#2563eb;
+    --pass:#15803d; --dev:#d97706; --fail:#dc2626; --skip:#98948c; --intr:#7c3aed;
+    --sev-high:#dc2626; --sev-med:#d97706; --sev-low:#64748b;
+    --shot-bg:#eceae5;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#131316; --panel:#1c1c20; --panel-2:#24242a; --border:#33333b;
+      --text:#ececed; --muted:#9c9ca6; --faint:#6e6e78;
+      --accent:#60a5fa;
+      --pass:#4ade80; --dev:#fbbf24; --fail:#f87171; --skip:#6e6e78; --intr:#a78bfa;
+      --sev-high:#f87171; --sev-med:#fbbf24; --sev-low:#8b96a8;
+      --shot-bg:#2a2a31;
+    }
+  }
+  :root[data-theme="dark"]{
+      --bg:#131316; --panel:#1c1c20; --panel-2:#24242a; --border:#33333b;
+      --text:#ececed; --muted:#9c9ca6; --faint:#6e6e78;
+      --accent:#60a5fa;
+      --pass:#4ade80; --dev:#fbbf24; --fail:#f87171; --skip:#6e6e78; --intr:#a78bfa;
+      --sev-high:#f87171; --sev-med:#fbbf24; --sev-low:#8b96a8;
+      --shot-bg:#2a2a31;
+  }
+  :root[data-theme="light"]{
+      --bg:#fbfbfa; --panel:#ffffff; --panel-2:#f5f4f1; --border:#e4e2dd;
+      --text:#1f1e1c; --muted:#6b6862; --faint:#98948c;
+      --accent:#2563eb;
+      --pass:#15803d; --dev:#d97706; --fail:#dc2626; --skip:#98948c; --intr:#7c3aed;
+      --sev-high:#dc2626; --sev-med:#d97706; --sev-low:#64748b;
+      --shot-bg:#eceae5;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow-x:hidden}
+  a{color:var(--accent)}
+  .wrap{max-width:1360px;margin:0 auto;padding:24px 20px 60px}
+
+  /* ---------- header ---------- */
+  header.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+  .eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  h1{margin:0;font-size:21px;line-height:1.3;font-weight:600;letter-spacing:-.01em}
+  .meta{margin-top:8px;color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:14px}
+  .meta b{color:var(--text);font-weight:500}
+
+  .result{border-radius:10px;padding:12px 16px;min-width:250px;border:1px solid var(--border);background:var(--panel)}
+  .result.completed{border-color:color-mix(in srgb,var(--pass) 45%,var(--border));
+    background:color-mix(in srgb,var(--pass) 8%,var(--panel))}
+  .result.deviations{border-color:color-mix(in srgb,var(--dev) 45%,var(--border));
+    background:color-mix(in srgb,var(--dev) 8%,var(--panel))}
+  .result.stopped{border-color:color-mix(in srgb,var(--fail) 45%,var(--border));
+    background:color-mix(in srgb,var(--fail) 8%,var(--panel))}
+  .result .vlabel{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+  .result .vval{font-size:19px;font-weight:650;margin:2px 0 4px;letter-spacing:-.01em}
+  .result.completed .vval{color:var(--pass)}
+  .result.deviations .vval{color:var(--dev)}
+  .result.stopped .vval{color:var(--fail)}
+  .result .vwhy{font-size:12.5px;color:var(--muted)}
+
+  /* ---------- the headline sentence ---------- */
+  .headline{background:var(--panel);border:1px solid var(--border);border-radius:11px;
+    padding:15px 18px;margin:0 0 16px;font-size:15px;line-height:1.6}
+  .headline b{font-weight:650}
+  .headline .n{font-variant-numeric:tabular-nums;font-weight:650}
+  .headline .c-dev{color:var(--dev)} .headline .c-intr{color:var(--intr)}
+  .headline .c-fail{color:var(--fail)} .headline .c-pass{color:var(--pass)}
+  .headline .sub{display:block;margin-top:7px;font-size:12.5px;color:var(--muted)}
+
+  .limits{border:1px solid color-mix(in srgb,var(--dev) 45%,var(--border));
+    background:color-mix(in srgb,var(--dev) 7%,var(--panel));border-radius:11px;
+    padding:13px 17px;margin:0 0 16px;font-size:12.5px}
+  .limits b{display:block;color:var(--dev);font-size:12.5px;margin-bottom:6px}
+  .limits ul{margin:0 0 7px;padding-left:19px;color:var(--text)}
+  .limits li{margin-bottom:2px}
+  .limits span{color:var(--muted);font-size:12px}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin:0 0 20px}
+  .tile{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:11px 13px}
+  .tile .k{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint)}
+  .tile .v{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums}
+  .tile .v small{font-size:12px;font-weight:400;color:var(--muted);letter-spacing:0}
+  .tile.dev .v{color:var(--dev)} .tile.fail .v{color:var(--fail)}
+  .tile.intr .v{color:var(--intr)} .tile.pass .v{color:var(--pass)}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:11px;margin-bottom:18px}
+  .card > h2{margin:0;padding:13px 16px;font-size:13px;font-weight:600;letter-spacing:.01em;
+    border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .card > h2 .hint{font-weight:400;font-size:11.5px;color:var(--faint)}
+
+  /* ---------- filmstrip ---------- */
+  .strip{display:flex;gap:0;overflow-x:auto;padding:14px 16px 16px;align-items:flex-start}
+  .frame{flex:0 0 auto;width:96px;cursor:pointer;text-align:center;position:relative}
+  .frame img{width:78px;height:139px;object-fit:cover;border-radius:7px;background:var(--shot-bg);
+    border:2px solid var(--border);display:block;margin:0 auto;transition:border-color .12s}
+  .frame:hover img{border-color:var(--accent)}
+  .frame.sel img{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+  .frame.v-pass img{border-color:color-mix(in srgb,var(--pass) 60%,var(--border))}
+  .frame.v-pass_with_deviation img{border-color:color-mix(in srgb,var(--dev) 70%,var(--border))}
+  .frame.v-fail img{border-color:var(--fail)}
+  .frame.v-dismissed img{border-color:color-mix(in srgb,var(--intr) 65%,var(--border));border-style:dashed}
+  .frame.v-not_reached img{opacity:.32;border-style:dotted}
+  .frame .fnum{font-size:10.5px;font-family:var(--mono);color:var(--faint);margin-top:5px}
+  .frame .flab{font-size:10.5px;color:var(--muted);line-height:1.35;margin-top:2px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:0 3px}
+  .frame .fbadge{position:absolute;top:-5px;right:11px;font-size:9px;font-weight:700;
+    padding:1px 5px;border-radius:9px;color:#fff;letter-spacing:.02em}
+  .frame .fbadge.dev{background:var(--dev)} .frame .fbadge.fail{background:var(--fail)}
+  .frame .fbadge.intr{background:var(--intr)} .frame .fbadge.ins{background:var(--accent)}
+  .striplegend{display:flex;flex-wrap:wrap;gap:14px;padding:0 16px 13px;font-size:11.5px;color:var(--muted)}
+  .striplegend span{display:inline-flex;align-items:center;gap:5px}
+  .striplegend i{width:11px;height:11px;border-radius:3px;border:2px solid;display:inline-block}
+
+  /* ---------- step table ---------- */
+  .tblwrap{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:820px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:600;
+    background:var(--panel-2)}
+  tbody tr.srow{cursor:pointer}
+  tbody tr.srow:hover{background:var(--panel-2)}
+  tbody tr.srow.sel{background:color-mix(in srgb,var(--accent) 7%,var(--panel))}
+  td.num{font-family:var(--mono);color:var(--faint);width:1%;white-space:nowrap;font-size:12px}
+  td.given{max-width:290px}
+  td.did{color:var(--muted);font-size:12.5px;max-width:340px}
+  tr.o-inserted td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+  tr.o-interruption td{background:color-mix(in srgb,var(--intr) 6%,transparent)}
+  tr.v-not_reached td{opacity:.5}
+  tr.o-inserted td.num, tr.o-interruption td.num{font-style:italic}
+
+  .vd{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:12.5px;white-space:nowrap}
+  .vd::before{content:"";width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .vd.pass{color:var(--pass)} .vd.pass::before{background:var(--pass)}
+  .vd.pass_with_deviation{color:var(--dev)} .vd.pass_with_deviation::before{background:var(--dev)}
+  .vd.fail{color:var(--fail)} .vd.fail::before{background:var(--fail)}
+  .vd.dismissed{color:var(--intr)} .vd.dismissed::before{background:var(--intr)}
+  .vd.not_reached{color:var(--skip)} .vd.not_reached::before{background:var(--skip)}
+  .vsub{display:block;font-weight:400;font-size:11.5px;color:var(--muted);margin-top:2px;white-space:normal}
+
+  .rung{display:inline-block;font-size:10.5px;font-family:var(--mono);padding:2px 7px;border-radius:5px;
+    border:1px solid var(--border);background:var(--panel-2);color:var(--muted);white-space:nowrap}
+  .rung.hierarchy{color:var(--pass);border-color:color-mix(in srgb,var(--pass) 35%,var(--border))}
+  .rung.vision{color:var(--dev);border-color:color-mix(in srgb,var(--dev) 45%,var(--border));font-weight:600}
+  .rung.scroll,.rung.fuzzy{color:var(--dev);border-color:color-mix(in srgb,var(--dev) 30%,var(--border))}
+  .rung.coordinates{color:var(--fail);border-color:color-mix(in srgb,var(--fail) 35%,var(--border))}
+  .fault{display:inline-block;font-size:10px;padding:1px 6px;border-radius:20px;font-weight:600;
+    letter-spacing:.03em;text-transform:uppercase;margin-left:5px}
+  .fault.app{background:color-mix(in srgb,var(--fail) 15%,transparent);color:var(--fail)}
+  .fault.authoring{background:color-mix(in srgb,var(--dev) 15%,transparent);color:var(--dev)}
+
+  /* expanded detail row */
+  tr.detail td{background:var(--panel-2);padding:0;border-bottom:2px solid var(--border)}
+  tr.detail.hidden{display:none}
+  .dwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;padding:16px 18px}
+  @media (max-width:900px){.dwrap{grid-template-columns:1fr}}
+  .shots{display:flex;gap:12px}
+  .shots figure{margin:0;text-align:center}
+  .shots img{width:132px;border-radius:8px;border:1px solid var(--border);background:var(--shot-bg);display:block}
+  .shots figcaption{font-size:10.5px;color:var(--faint);margin-top:5px;letter-spacing:.06em;text-transform:uppercase}
+  .kv{display:grid;grid-template-columns:112px minmax(0,1fr);gap:6px 12px;font-size:12.5px;margin:0 0 12px}
+  .kv dt{color:var(--faint)} .kv dd{margin:0;word-break:break-word}
+  h3.sec{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
+    margin:14px 0 7px;font-weight:600}
+  h3.sec:first-child{margin-top:0}
+  pre{margin:0;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;
+    font-family:var(--mono);font-size:11px;line-height:1.55;overflow-x:auto;white-space:pre}
+  .why{border-left:3px solid var(--dev);background:var(--panel);border-radius:0 7px 7px 0;
+    padding:10px 13px;font-size:12.5px;margin:0 0 12px}
+  .why.appfault{border-left-color:var(--fail)}
+  .why b{display:block;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--faint);margin-bottom:4px;font-weight:600}
+  .rewrite{font-family:var(--mono);font-size:12px;background:color-mix(in srgb,var(--pass) 9%,var(--panel));
+    border:1px solid color-mix(in srgb,var(--pass) 30%,var(--border));border-radius:7px;
+    padding:9px 12px;margin-top:9px}
+  .rewrite::before{content:"Write it as";display:block;font-family:inherit;font-size:10px;
+    letter-spacing:.07em;text-transform:uppercase;color:var(--pass);font-weight:700;margin-bottom:4px}
+
+  /* ---------- tabs ---------- */
+  .tabs{display:flex;gap:2px;margin:24px 0 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .tabs button{appearance:none;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);
+    font:inherit;font-size:13px;padding:9px 13px;cursor:pointer}
+  .tabs button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--accent);font-weight:600}
+  .tabs button .cnt{font-size:11px;color:var(--faint);margin-left:4px;font-variant-numeric:tabular-nums}
+  .tabpanel{display:none;padding-top:16px} .tabpanel.on{display:block}
+
+  .flist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+  .fitem{border:1px solid var(--border);border-left-width:3px;border-radius:7px;padding:10px 13px;background:var(--panel)}
+  .fitem.high{border-left-color:var(--sev-high)} .fitem.medium{border-left-color:var(--sev-med)}
+  .fitem.low{border-left-color:var(--sev-low)}
+  .fitem .ft{font-weight:600;font-size:13px;margin-bottom:3px}
+  .fitem .fd{font-size:12.5px;color:var(--muted)}
+  .fitem .fe{font-size:11.5px;font-family:var(--mono);color:var(--text);margin-top:7px;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:5px;padding:7px 9px;overflow-x:auto}
+  .fitem .fmeta{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px}
+  .chip{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:20px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--muted)}
+  .chip.high{color:var(--sev-high);border-color:color-mix(in srgb,var(--sev-high) 40%,var(--border))}
+  .chip.medium{color:var(--sev-med);border-color:color-mix(in srgb,var(--sev-med) 40%,var(--border))}
+  .chip.app{color:var(--fail);border-color:color-mix(in srgb,var(--fail) 40%,var(--border))}
+  .chip.authoring{color:var(--dev);border-color:color-mix(in srgb,var(--dev) 40%,var(--border))}
+
+  /* corrected steps */
+  .corrhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:11px;flex-wrap:wrap}
+  .corrhead p{margin:0;font-size:12.5px;color:var(--muted);max-width:70ch}
+  .copybtn{appearance:none;background:var(--accent);border:0;color:#fff;border-radius:7px;
+    padding:7px 14px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .copybtn:active{transform:translateY(1px)}
+  .corr{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .cline{display:grid;grid-template-columns:52px minmax(0,1fr) 128px;gap:12px;padding:9px 14px;
+    border-bottom:1px solid var(--border);font-size:13px;align-items:baseline}
+  .cline:last-child{border-bottom:0}
+  .cline .cn{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .cline .ct{font-family:var(--mono);font-size:12.5px}
+  .cline .cc{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;text-align:right}
+  .cline .cwas{display:block;font-family:-apple-system,sans-serif;font-size:11.5px;color:var(--faint);
+    margin-top:3px;text-decoration:line-through}
+  .cline .cwhy{display:block;font-family:-apple-system,sans-serif;font-size:11.5px;color:var(--muted);margin-top:3px}
+  .cline.unchanged .cc{color:var(--faint)}
+  .cline.reworded{background:color-mix(in srgb,var(--dev) 6%,transparent)} .cline.reworded .cc{color:var(--dev)}
+  .cline.inserted{background:color-mix(in srgb,var(--accent) 6%,transparent)} .cline.inserted .cc{color:var(--accent)}
+  .cline.guard{background:color-mix(in srgb,var(--intr) 6%,transparent)} .cline.guard .cc{color:var(--intr)}
+  /* one invalid selector invalidates a whole CSS selector list — keep this rule on its own */
+  .cline.not-verified{opacity:.55} .cline.not-verified .cc{color:var(--faint)}
+
+  .dev-group{margin-bottom:20px}
+  .dev-group > h3{font-size:13px;font-weight:600;margin:0 0 3px}
+  .dev-group > p{margin:0 0 10px;font-size:12.5px;color:var(--muted);max-width:78ch}
+  .dcard{border:1px solid var(--border);border-left-width:3px;border-radius:8px;background:var(--panel);
+    padding:11px 14px;margin-bottom:8px}
+  .dcard.vision-fallback,.dcard.scroll-needed,.dcard.reworded-target,.dcard.retry-needed{border-left-color:var(--dev)}
+  .dcard.inserted-step{border-left-color:var(--accent)}
+  .dcard.interruption{border-left-color:var(--intr)}
+  .dcard .dh{font-weight:600;font-size:12.5px;margin-bottom:4px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .dcard .dh .dn{font-family:var(--mono);font-size:11.5px;color:var(--faint);font-weight:400}
+  .dcard .dw{font-size:12.5px;color:var(--muted)}
+  .dcard .dshot{float:right;width:62px;margin:0 0 8px 14px;border-radius:6px;border:1px solid var(--border);
+    background:var(--shot-bg)}
+  .impact{display:inline-block;font-size:10px;padding:1px 6px;border-radius:20px;font-weight:600;
+    letter-spacing:.03em;text-transform:uppercase}
+  .impact.state-changing{background:color-mix(in srgb,var(--fail) 15%,transparent);color:var(--fail)}
+  .impact.neutral{background:var(--panel-2);color:var(--muted)}
+
+  .empty{color:var(--muted);font-size:13px;padding:26px 16px;text-align:center;
+    border:1px dashed var(--border);border-radius:9px}
+  .note{font-size:12px;color:var(--faint);margin-top:16px;padding:11px 13px;border:1px dashed var(--border);
+    border-radius:9px;background:var(--panel)}
+  .themebtn{appearance:none;background:var(--panel);border:1px solid var(--border);color:var(--muted);
+    border-radius:7px;padding:5px 10px;font:inherit;font-size:12px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <div class="eyebrow">TapMind · Step validation</div>
+      <h1 id="title"></h1>
+      <div class="meta" id="meta"></div>
+    </div>
+    <div>
+      <div class="result" id="resultBox">
+        <div class="vlabel">Result</div>
+        <div class="vval" id="result"></div>
+        <div class="vwhy" id="resultWhy"></div>
+      </div>
+      <div style="margin-top:8px;text-align:right">
+        <button class="themebtn" id="themeToggle">Toggle theme</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="headline" id="headline"></div>
+  <div id="limits"></div>
+  <div class="tiles" id="tiles"></div>
+
+  <section class="card">
+    <h2>How the run progressed <span class="hint">click a frame to jump to that step</span></h2>
+    <div class="strip" id="strip"></div>
+    <div class="striplegend">
+      <span><i style="border-color:var(--pass)"></i>as written</span>
+      <span><i style="border-color:var(--dev)"></i>deviated</span>
+      <span><i style="border-color:var(--fail)"></i>failed</span>
+      <span><i style="border-color:var(--intr);border-style:dashed"></i>interruption dismissed</span>
+      <span><i style="border-color:var(--accent)"></i>step I had to insert</span>
+      <span><i style="border-color:var(--skip);border-style:dotted;opacity:.5"></i>not reached</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Step by step <span class="hint">click any row for screenshots and evidence</span></h2>
+    <div class="tblwrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Your step</th><th>Result</th><th>How</th><th>What happened</th>
+        </tr></thead>
+        <tbody id="stepBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="corrected">Corrected steps</button>
+    <button role="tab" aria-selected="false" data-tab="deviations">Deviations <span class="cnt" id="cntDev"></span></button>
+    <button role="tab" aria-selected="false" data-tab="findings">Findings <span class="cnt" id="cntFind"></span></button>
+    <button role="tab" aria-selected="false" data-tab="logs">Logs <span class="cnt" id="cntLogs"></span></button>
+  </div>
+  <div class="tabpanel on" id="tab-corrected"></div>
+  <div class="tabpanel" id="tab-deviations"></div>
+  <div class="tabpanel" id="tab-findings"></div>
+  <div class="tabpanel" id="tab-logs"></div>
+
+  <div class="note" id="sampleNote">
+    <b>Sample report.</b> Screenshot thumbnails here are generated placeholders. In a real run every
+    step points at <code>screens/step-NN-before.png</code> and <code>screens/step-NN-after.png</code>
+    captured via <code>adb exec-out screencap</code>. The whole file is self-contained — the trace
+    below is inlined, no network requests.
+  </div>
+</div>
+
+<script type="application/json" id="trace">
+{
+  "run": {
+    "id": "20260806-1432-gofood-checkout-steps",
+    "mode": "steps",
+    "title": "GoFood checkout with saved address",
+    "platform": "Android",
+    "runMode": "local",
+    "device": "Pixel 7 · Android 14",
+    "app": "com.gojek.app 5.412.0 (build 41207)",
+    "conversationId": "c7f1a2e0-9b44-4d61-8f0a-2ac31d55e918",
+    "startedAt": "2026-08-06T14:32:11+07:00",
+    "durationMs": 318000,
+    "theme": "light",
+    "result": "STOPPED",
+    "resultReason": "Stopped at your step 8 — \"Bayar\" resolved and was tapped twice with no state change.",
+    "stoppedAtStep": 8,
+    "stepsGiven": 10,
+    "actionsTaken": 11,
+    "insertedSteps": 1,
+    "interruptions": 2,
+    "deviations": 2,
+    "appFaults": 2,
+    "correctedSteps": [
+      { "n": "1", "text": "Open GoFood", "change": "unchanged" },
+      { "n": "2", "text": "Tap \"Akun\"", "change": "reworded", "was": "Tap the profile button",
+        "why": "Nothing in the hierarchy matches \"profile\" — the account icon has no content-desc (finding f1). \"Akun\" is the visible label on the tab." },
+      { "n": "2a", "text": "Dismiss the \"Rate your last order\" prompt if shown", "change": "guard",
+        "why": "Transient modal, appeared ~1.5s after the account tab settled. Not always present." },
+      { "n": "3", "text": "Scroll down, then tap \"Alamat tersimpan\"", "change": "reworded",
+        "was": "Open saved addresses",
+        "why": "The row is below the fold on a 1080x2400 screen — needs one scroll before it resolves." },
+      { "n": "3a", "text": "Tap \"Lanjutkan\" on the address confirmation sheet", "change": "inserted",
+        "why": "The app requires this confirm before the address list becomes interactive. Your list goes straight from opening addresses to selecting one." },
+      { "n": "4", "text": "Select the \"Rumah\" address", "change": "unchanged" },
+      { "n": "5", "text": "Verify the delivery address shows \"Jl. Kemang Raya 12\"", "change": "unchanged" },
+      { "n": "6", "text": "Tap \"Pesan\"", "change": "unchanged" },
+      { "n": "6a", "text": "Allow location access when prompted (\"While using the app\")", "change": "guard",
+        "why": "OS permission dialog. STATE-CHANGING — denying it changes what steps 7-10 test, so the choice must be explicit in the steps, not left to whoever runs them." },
+      { "n": "7", "text": "Verify the \"Simpan kartu\" checkbox is checked", "change": "unchanged",
+        "why": "Step is correct. It failed — the checkbox renders checked=\"false\" on a fresh session. App bug, not a step problem (finding f3)." },
+      { "n": "8", "text": "Tap \"Bayar\"", "change": "unchanged",
+        "why": "Step is correct. The control resolved cleanly and did nothing on two taps. App bug (finding f4)." },
+      { "n": "9", "text": "Verify the order confirmation screen is shown", "change": "not-verified",
+        "why": "Run stopped at step 8." },
+      { "n": "10", "text": "Verify the order appears in order history", "change": "not-verified",
+        "why": "Run stopped at step 8." }
+    ],
+    "model": "claude-sonnet-5",
+    "modelEffort": "high",
+    "tokenUsage": { "inputTokens": 41200, "outputTokens": 68400, "cacheReadTokens": 4180000, "cacheWriteTokens": 96000 },
+    "costUsd": 2.31,
+    "costEstimated": false
+  },
+
+  "steps": [
+    { "id":"s1","seq":1,"n":1,"origin":"author","kind":"action",
+      "given":"Open GoFood","did":"Tapped the \"GoFood\" service tile (element_14)",
+      "verdict":"pass","fault":null,"deviation":null,
+      "resolution":{"rung":"hierarchy","attempts":1,"matched":"\"GoFood\" (element_14)","candidates":1},
+      "tool":"appium_tap_element","args":{"elementId":"element_14","reason":"GoFood service tile on the home grid"},
+      "assertion":null,"impact":null,"dismissedBy":null,
+      "screenBefore":"screens/step-01-before.png","screenAfter":"screens/step-01-after.png",
+      "pageSource":"pagesource/step-01.xml",
+      "hierarchySnippet":"element_11 RecyclerView  [0,320][1080,780]  service-tiles\nelement_14 ViewGroup  \"GoFood\"  clickable=true  [24,340][276,520]\nelement_15 ViewGroup  \"GoRide\"  clickable=true",
+      "durationMs":2140,"observation":"","findings":[] },
+
+    { "id":"s2","seq":2,"n":2,"origin":"author","kind":"action",
+      "given":"Tap the profile button","did":"Located the account icon visually and tapped [880,120][944,176]",
+      "verdict":"pass_with_deviation","fault":"authoring",
+      "deviation":{"type":"vision-fallback",
+        "why":"No hierarchy node matches \"profile\" — not by text, content-desc, or resource-id, and the row is fully on screen so scrolling wasn't the cause. The account icon is a clickable ImageView with an empty content-desc (lint flagged it as f1). Read the screenshot to locate it.",
+        "suggestedRewrite":"Tap \"Akun\""},
+      "resolution":{"rung":"vision","attempts":1,"matched":"account icon at [880,120][944,176]","candidates":1},
+      "tool":"appium_tap_element_by_coordinates","args":{"x":912,"y":148,"reason":"Account icon located by vision; no addressable hierarchy node"},
+      "assertion":null,"impact":null,"dismissedBy":null,
+      "screenBefore":"screens/step-02-before.png","screenAfter":"screens/step-02-after.png",
+      "pageSource":"pagesource/step-02.xml",
+      "hierarchySnippet":"element_28 TextView   \"Beranda\"    [40,2280][200,2360]\nelement_29 ImageView  content-desc=\"\"  clickable=true  [880,120][944,176]\nelement_31 TextView   \"Akun\"       [860,2280][980,2360]",
+      "durationMs":3620,
+      "observation":"The bottom-nav label \"Akun\" (element_31) is addressable and lands on the same screen — that's the robust target.",
+      "findings":["f1"] },
+
+    { "id":"s3","seq":3,"n":null,"origin":"interruption","kind":"action",
+      "given":null,"did":"Dismissed the \"Rate your last order\" modal",
+      "verdict":"dismissed","fault":null,
+      "deviation":{"type":"interruption","why":"Rating prompt appeared ~1.5s after the account screen settled, covering the menu list. Nothing in your steps accounts for it.","suggestedRewrite":"Dismiss the \"Rate your last order\" prompt if shown"},
+      "resolution":{"rung":"hierarchy","attempts":1,"matched":"\"Nanti saja\" (element_9)","candidates":1},
+      "tool":"appium_tap_element","args":{"elementId":"element_9","reason":"Dismiss control on the rating modal"},
+      "assertion":null,
+      "impact":"neutral","dismissedBy":"\"Nanti saja\" (Later) button — one tap, modal closed cleanly",
+      "screenBefore":"screens/step-03-before.png","screenAfter":"screens/step-03-after.png",
+      "pageSource":"pagesource/step-03.xml",
+      "hierarchySnippet":"element_4 TextView  \"Bagaimana pesanan terakhirmu?\"\nelement_7 RatingBar  [240,980][840,1080]\nelement_9 Button    \"Nanti saja\"  [64,1200][1016,1300]",
+      "durationMs":1480,"observation":"No state change beyond closing the modal — the account screen was unchanged underneath.","findings":[] },
+
+    { "id":"s4","seq":4,"n":3,"origin":"author","kind":"action",
+      "given":"Open saved addresses","did":"Scrolled the account list once, then tapped \"Alamat tersimpan\" (element_47)",
+      "verdict":"pass_with_deviation","fault":"authoring",
+      "deviation":{"type":"scroll-needed",
+        "why":"\"Alamat tersimpan\" is below the fold on this 1080x2400 screen — absent from the first dump, resolved cleanly after one scroll. Your step assumes it's visible on arrival.",
+        "suggestedRewrite":"Scroll down, then tap \"Alamat tersimpan\""},
+      "resolution":{"rung":"scroll","attempts":1,"matched":"\"Alamat tersimpan\" (element_47) after 1 scroll","candidates":1},
+      "tool":"appium_tap_element","args":{"elementId":"element_47","reason":"Saved addresses row, revealed after scrolling"},
+      "assertion":null,"impact":null,"dismissedBy":null,
+      "screenBefore":"screens/step-04-before.png","screenAfter":"screens/step-04-after.png",
+      "pageSource":"pagesource/step-04.xml",
+      "hierarchySnippet":"element_44 TextView  \"Metode pembayaran\"  [48,1180][600,1240]\nelement_47 TextView  \"Alamat tersimpan\"   [48,1360][600,1420]\nelement_50 TextView  \"Pengaturan\"         [48,1540][600,1600]",
+      "durationMs":4210,"observation":"","findings":["f2"] },
+
+    { "id":"s5","seq":5,"n":null,"origin":"inserted","kind":"action",
+      "given":null,"did":"Tapped \"Lanjutkan\" (element_12) on the address confirmation sheet",
+      "verdict":"pass","fault":null,
+      "deviation":{"type":"inserted-step",
+        "why":"The address list opens behind a confirmation sheet that must be dismissed with \"Lanjutkan\" before any address row becomes interactive. Your steps go straight from opening saved addresses to selecting one — the run cannot get there without this.",
+        "suggestedRewrite":"Tap \"Lanjutkan\" on the address confirmation sheet"},
+      "resolution":{"rung":"hierarchy","attempts":1,"matched":"\"Lanjutkan\" (element_12)","candidates":1},
+      "tool":"appium_tap_element","args":{"elementId":"element_12","reason":"Required confirm before the address list is interactive"},
+      "assertion":null,"impact":null,"dismissedBy":null,
+      "screenBefore":"screens/step-05-before.png","screenAfter":"screens/step-05-after.png",
+      "pageSource":"pagesource/step-05.xml",
+      "hierarchySnippet":"element_8  TextView  \"Konfirmasi alamat pengiriman\"\nelement_10 TextView  \"Pastikan alamatmu sudah benar\"\nelement_12 Button    \"Lanjutkan\"  enabled=true  [64,2100][1016,2220]",
+      "durationMs":1930,"observation":"This sheet appeared on every visit to the address list, not just the first — it's not a one-time onboarding screen.","findings":[] },
+
+    { "id":"s6","seq":6,"n":4,"origin":"author","kind":"action",
+      "given":"Select the home address","did":"Tapped \"Rumah — Jl. Kemang Raya 12\" (element_22)",
+      "verdict":"pass","fault":null,"deviation":null,
+      "resolution":{"rung":"fuzzy","attempts":1,"matched":"\"Rumah\" (element_22) — Indonesian for \"home\"","candidates":1},
+      "tool":"appium_tap_element","args":{"elementId":"element_22","reason":"Saved address labelled Rumah / home"},
+      "assertion":null,"impact":null,"dismissedBy":null,
+      "screenBefore":"screens/step-06-before.png","screenAfter":"screens/step-06-after.png",
+      "pageSource":"pagesource/step-06.xml",
+      "hierarchySnippet":"element_22 ViewGroup  \"Rumah\"  \"Jl. Kemang Raya 12\"  clickable=true\nelement_26 ViewGroup  \"Kantor\" \"Jl. Sudirman 52\"     clickable=true",
+      "durationMs":1670,"observation":"Matched on the Indonesian label. Unambiguous — only one address is tagged Rumah — so this isn't reported as a deviation, but note the app is localised and English targets won't match.","findings":[] },
+
+    { "id":"s7","seq":7,"n":5,"origin":"author","kind":"assertion",
+      "given":"Verify the delivery address shows \"Jl. Kemang Raya 12\"","did":"Read the delivery address field from the hierarchy",
+      "verdict":"pass","fault":null,"deviation":null,
+      "resolution":{"rung":"hierarchy","attempts":1,"matched":"element_18","candidates":1},
+      "tool":"get_view_hierarchy","args":{"context":"NATIVE_APP"},
+      "assertion":{"expected":"the delivery address shows \"Jl. Kemang Raya 12\"","actual":"\"Jl. Kemang Raya 12\"","method":"hierarchy",
+        "evidence":"element_18 TextView  \"Jl. Kemang Raya 12\"  [48,420][720,478]","passed":true},
+      "impact":null,"dismissedBy":null,
+      "screenBefore":"screens/step-07-before.png","screenAfter":"screens/step-07-after.png",
+      "pageSource":"pagesource/step-07.xml",
+      "hierarchySnippet":"element_16 TextView  \"Dikirim ke\"\nelement_18 TextView  \"Jl. Kemang Raya 12\"  [48,420][720,478]\nelement_20 TextView  \"Ubah\"  clickable=true",
+      "durationMs":890,"observation":"","findings":[] },
+
+    { "id":"s8","seq":8,"n":6,"origin":"author","kind":"action",
+      "given":"Tap \"Pesan\"","did":"Tapped \"Pesan\" (element_31)",
+      "verdict":"pass","fault":null,"deviation":null,
+      "resolution":{"rung":"hierarchy","attempts":1,"matched":"\"Pesan\" (element_31)","candidates":1},
+      "tool":"appium_tap_element","args":{"elementId":"element_31","reason":"Primary CTA on the cart"},
+      "assertion":null,"impact":null,"dismissedBy":null,
+      "screenBefore":"screens/step-08-before.png","screenAfter":"screens/step-08-after.png",
+      "pageSource":"pagesource/step-08.xml",
+      "hierarchySnippet":"element_23 TextView  \"Total\"  \"Rp 56.000\"\nelement_31 Button    \"Pesan\"  enabled=true  clickable=true  [64,2180][1016,2300]",
+      "durationMs":2410,"observation":"","findings":[] },
+
+    { "id":"s9","seq":9,"n":null,"origin":"interruption","kind":"action",
+      "given":null,"did":"Granted location access via \"Selagi menggunakan aplikasi\"",
+      "verdict":"dismissed","fault":null,
+      "deviation":{"type":"interruption","why":"OS location permission dialog. Your steps don't mention it, so whoever runs this list decides ad hoc — and the choice changes what steps 7-10 actually test.","suggestedRewrite":"Allow location access when prompted (\"While using the app\")"},
+      "resolution":{"rung":"hierarchy","attempts":1,"matched":"\"Selagi menggunakan aplikasi\" (element_5)","candidates":1},
+      "tool":"appium_tap_element","args":{"elementId":"element_5","reason":"Grant location — required for delivery ETA on the payment screen"},
+      "assertion":null,
+      "impact":"state-changing","dismissedBy":"\"Selagi menggunakan aplikasi\" (While using the app) — granted, one tap",
+      "screenBefore":"screens/step-09-before.png","screenAfter":"screens/step-09-after.png",
+      "pageSource":"pagesource/step-09.xml",
+      "hierarchySnippet":"element_2 TextView  \"Izinkan Gojek mengakses lokasi perangkat ini?\"\nelement_5 Button  \"Selagi menggunakan aplikasi\"\nelement_6 Button  \"Hanya kali ini\"\nelement_7 Button  \"Jangan izinkan\"",
+      "durationMs":2260,
+      "observation":"Granting vs denying changes the payment screen: denied, the ETA block is replaced by a \"set location\" prompt and the layout shifts. Steps 7-8 target elements whose position depends on this choice.",
+      "findings":[] },
+
+    { "id":"s10","seq":10,"n":7,"origin":"author","kind":"assertion",
+      "given":"Verify the \"Save card\" checkbox is checked","did":"Read the checkbox state from the hierarchy, confirmed with appium_get_element_attribute",
+      "verdict":"fail","fault":"app","deviation":null,
+      "resolution":{"rung":"fuzzy","attempts":1,"matched":"\"Simpan kartu\" (element_44) — Indonesian for \"save card\"","candidates":1},
+      "tool":"appium_get_element_attribute","args":{"elementId":"element_44","attribute":"checked"},
+      "assertion":{"expected":"the \"Save card\" checkbox is checked","actual":"checked=\"false\"","method":"hierarchy",
+        "evidence":"element_44 CheckBox  \"Simpan kartu\"  checked=\"false\"  enabled=\"true\"  [64,1188][112,1236]\nappium_get_element_attribute(element_44, \"checked\") -> \"false\"","passed":false},
+      "impact":null,"dismissedBy":null,
+      "screenBefore":"screens/step-10-before.png","screenAfter":"screens/step-10-after.png",
+      "pageSource":"pagesource/step-10.xml",
+      "hierarchySnippet":"element_41 TextView  \"Metode pembayaran\"\nelement_44 CheckBox  \"Simpan kartu\"  checked=\"false\"  [64,1188][112,1236]\nelement_48 Button    \"Bayar\"  enabled=true",
+      "durationMs":1120,
+      "observation":"Your step is correct as written — the app defaults this off on a fresh session. Assertion failures don't stop the run, so step 8 was still attempted.",
+      "findings":["f3"] },
+
+    { "id":"s11","seq":11,"n":8,"origin":"author","kind":"action",
+      "given":"Tap \"Bayar\"","did":"Tapped \"Bayar\" (element_48) twice — the hierarchy was byte-identical after both",
+      "verdict":"fail","fault":"app",
+      "deviation":{"type":"retry-needed","why":"The control resolved cleanly from the hierarchy on both attempts and is enabled=\"true\". Two taps, no state change, no navigation, nothing in logcat. This is a dead control — your step is correct.","suggestedRewrite":null},
+      "resolution":{"rung":"hierarchy","attempts":2,"matched":"\"Bayar\" (element_48)","candidates":1},
+      "tool":"appium_tap_element","args":{"elementId":"element_48","reason":"Pay CTA — second attempt after re-resolving from a fresh dump"},
+      "assertion":null,"impact":null,"dismissedBy":null,
+      "screenBefore":"screens/step-11-before.png","screenAfter":"screens/step-11-after.png",
+      "pageSource":"pagesource/step-11.xml",
+      "hierarchySnippet":"element_48 Button  \"Bayar\"  enabled=true  clickable=true  [64,2180][1016,2300]\n(hierarchy identical before and after both taps — 0 nodes changed)",
+      "durationMs":9840,
+      "observation":"Run stopped here per the 2-attempt budget. Steps 9 and 10 are marked not reached rather than attempted against a diverged state.",
+      "findings":["f4"] },
+
+    { "id":"s12","seq":12,"n":9,"origin":"author","kind":"assertion",
+      "given":"Verify the order confirmation screen is shown","did":null,
+      "verdict":"not_reached","fault":null,"deviation":null,
+      "resolution":{"rung":"none","attempts":0,"matched":null,"candidates":0},
+      "tool":null,"args":null,"assertion":null,"impact":null,"dismissedBy":null,
+      "screenBefore":null,"screenAfter":null,"pageSource":null,"hierarchySnippet":null,
+      "durationMs":0,"observation":"Run stopped at your step 8.","findings":[] },
+
+    { "id":"s13","seq":13,"n":10,"origin":"author","kind":"assertion",
+      "given":"Verify the order appears in order history","did":null,
+      "verdict":"not_reached","fault":null,"deviation":null,
+      "resolution":{"rung":"none","attempts":0,"matched":null,"candidates":0},
+      "tool":null,"args":null,"assertion":null,"impact":null,"dismissedBy":null,
+      "screenBefore":null,"screenAfter":null,"pageSource":null,"hierarchySnippet":null,
+      "durationMs":0,"observation":"Run stopped at your step 8.","findings":[] }
+  ],
+
+  "findings": [
+    { "id":"f4","severity":"high","confidence":"high","source":"model","fault":"app",
+      "type":"dead-control","step":8,"seq":11,
+      "title":"\"Bayar\" does nothing — two taps, zero state change",
+      "detail":"The pay CTA reports enabled=\"true\" and clickable=\"true\", resolves unambiguously from the hierarchy, and produces no navigation, no dialog, no spinner and no hierarchy diff across two taps 9.8s apart. logcat shows no exception and no network activity around either tap.",
+      "evidence":"element_48 Button \"Bayar\" enabled=true clickable=true [64,2180][1016,2300]\nhierarchy diff before/after tap 1: 0 nodes changed\nhierarchy diff before/after tap 2: 0 nodes changed\nlogcat -t 400: no ANR, no FATAL, no HTTP around t=+0..10s" },
+
+    { "id":"f3","severity":"high","confidence":"high","source":"model","fault":"app",
+      "type":"assertion-failed","step":7,"seq":10,
+      "title":"\"Simpan kartu\" checkbox defaults to unchecked",
+      "detail":"Your step 7 asserts this is checked. On a fresh session it renders checked=\"false\". Confirmed against the attribute directly, not just the dump. Either the default changed or the step encodes an expectation the app no longer meets — worth confirming with the payments team which is intended.",
+      "evidence":"expected: checked\nactual:   element_44 CheckBox \"Simpan kartu\" checked=\"false\" enabled=\"true\"\nappium_get_element_attribute(element_44, \"checked\") -> \"false\"" },
+
+    { "id":"f1","severity":"medium","confidence":"high","source":"lint","fault":"app",
+      "type":"missing-a11y-label","step":2,"seq":2,
+      "title":"Account icon has no content-desc — unaddressable from the hierarchy",
+      "detail":"A clickable ImageView in the top bar with empty text and empty content-desc. This is why step 2 needed a vision fallback, and it's an accessibility defect in its own right — a screen reader announces nothing here. If the app team adds a content-desc, the original step starts working as written.",
+      "evidence":"element_29 ImageView content-desc=\"\" text=\"\" clickable=\"true\" [880,120][944,176]" },
+
+    { "id":"f2","severity":"low","confidence":"high","source":"lint","fault":"app",
+      "type":"truncated-text","step":4,"seq":4,
+      "title":"Account row label truncated at the container edge",
+      "detail":"\"Metode pembayaran & tagihan\" renders clipped to \"Metode pembayaran & tagih…\" — the text bounds exceed the parent's. Cosmetic; not on the path of any of your steps.",
+      "evidence":"element_44 TextView \"Metode pembayaran & tagih…\" bounds=[48,1180][600,1240] parent=[48,1180][592,1240]" }
+  ],
+
+  "logs": [
+    { "seq":11, "source":"logcat", "file":"logs/step-11.log",
+      "excerpt":"08-06 14:37:02.118  I ActivityTaskManager: Displayed com.gojek.app/.payment.PaymentActivity\n08-06 14:37:09.442  D GojekPay: onPayClicked() enter\n08-06 14:37:09.443  D GojekPay: onPayClicked() guard=featureFlagDisabled -> return\n08-06 14:37:14.901  D GojekPay: onPayClicked() enter\n08-06 14:37:14.902  D GojekPay: onPayClicked() guard=featureFlagDisabled -> return\n(no exception, no network call)" }
+  ]
+}
+</script>
+
+<script>
+(function(){
+  const T = JSON.parse(document.getElementById("trace").textContent);
+  const R = T.run;
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const secs = ms => ms == null ? "—" : (ms < 1000 ? ms + " ms" : (ms/1000).toFixed(1) + " s");
+  const clip = (s,n) => { s = String(s||""); return s.length > n ? s.slice(0,n-1)+"…" : s; };
+
+  const VERDICT = {
+    pass: "Passed", pass_with_deviation: "Passed — deviated", fail: "Failed",
+    not_reached: "Not reached", dismissed: "Dismissed"
+  };
+  const DEVTYPE = {
+    "vision-fallback": "Resolved by vision", "scroll-needed": "Needed a scroll",
+    "reworded-target": "Target reworded", "retry-needed": "Needed a retry",
+    "inserted-step": "Step I had to insert", "interruption": "Transient screen"
+  };
+  const RUNGLABEL = {
+    hierarchy: "hierarchy", fuzzy: "fuzzy match", scroll: "scroll → hierarchy",
+    vision: "vision", coordinates: "coordinates", none: "—"
+  };
+
+  /* ---------- header ---------- */
+  document.getElementById("title").textContent = R.title || "Step validation run";
+  const metaBits = [
+    ["Device", R.device], ["App", R.app], ["Mode", R.runMode],
+    ["Theme", R.theme], ["Duration", secs(R.durationMs)],
+    ["Model", R.model + (R.modelEffort ? " · " + R.modelEffort : "")],
+    ["Cost", R.costUsd == null ? null : "$" + Number(R.costUsd).toFixed(2) + (R.costEstimated ? " (est)" : "")]
+  ].filter(x => x[1]);
+  document.getElementById("meta").innerHTML = metaBits
+    .map(([k,v]) => `${esc(k)} <b>${esc(v)}</b>`).join("");
+
+  const rkey = R.result === "COMPLETED" ? "completed"
+             : R.result === "STOPPED" ? "stopped" : "deviations";
+  document.getElementById("resultBox").classList.add(rkey);
+  document.getElementById("result").textContent =
+    R.result === "COMPLETED" ? "Completed"
+    : R.result === "STOPPED" ? `Stopped at step ${R.stoppedAtStep}`
+    : `Completed with ${R.deviations} deviation${R.deviations === 1 ? "" : "s"}`;
+  document.getElementById("resultWhy").textContent = R.resultReason || "";
+
+  /* ---------- headline sentence ---------- */
+  const extra = (R.insertedSteps||0) + (R.interruptions||0);
+  // Count yours-that-ran from steps[] rather than subtracting, so the sentence stays true on a
+  // run that stopped early (where authored-executed < stepsGiven).
+  const yoursRan = T.steps.filter(s => s.origin === "author" && s.verdict !== "not_reached").length;
+  const reached = R.result === "STOPPED"
+    ? `The run stopped at your step <span class="n c-fail">${R.stoppedAtStep}</span>, so
+       <span class="n">${R.stepsGiven - yoursRan}</span> of your steps were never reached.`
+    : `All <span class="n">${R.stepsGiven}</span> of your steps were carried out.`;
+  document.getElementById("headline").innerHTML = `
+    You gave <span class="n">${R.stepsGiven}</span> steps. Running them took
+    <span class="n">${R.actionsTaken}</span> actions — <b>${yoursRan} of yours</b> plus
+    <b class="c-intr">${extra} I had to add</b>
+    (<span class="n">${R.insertedSteps}</span> missing step${R.insertedSteps === 1 ? "" : "s"},
+     <span class="n">${R.interruptions}</span> transient screen${R.interruptions === 1 ? "" : "s"} dismissed).
+    ${reached}
+    <span class="sub">
+      <span class="c-dev">${R.deviations} of your steps needed a deviation</span> to work as written ·
+      <span class="c-fail">${R.appFaults} failure${R.appFaults === 1 ? "" : "s"} attributable to the app, not your steps</span>
+    </span>`;
+
+  /* ---------- capture limitations banner ----------
+     A remote run can't lint or read logcat. Without this banner, "0 lint findings" reads as
+     "the screens were clean" when it means "that check never ran". */
+  const lims = R.captureLimitations || [];
+  if (lims.length) {
+    document.getElementById("limits").innerHTML = `
+      <div class="limits">
+        <b>Not everything could be checked on this run${R.runMode ? " (" + esc(R.runMode) + ")" : ""}</b>
+        <ul>${lims.map(l => `<li>${esc(l)}</li>`).join("")}</ul>
+        <span>Absence of findings from these checks means they did not run — not that nothing was wrong.</span>
+      </div>`;
+  }
+
+  /* ---------- tiles ---------- */
+  const tiles = [
+    { k:"Steps given",    v:R.stepsGiven,    s:"as written",       c:"" },
+    { k:"Actions taken",  v:R.actionsTaken,  s:"to get through",   c:"" },
+    { k:"Deviations",     v:R.deviations,    s:"your steps",       c:R.deviations ? "dev" : "" },
+    { k:"Inserted",       v:R.insertedSteps, s:"missing steps",    c:R.insertedSteps ? "intr" : "" },
+    { k:"Interruptions",  v:R.interruptions, s:"dismissed",        c:R.interruptions ? "intr" : "" },
+    { k:"App faults",     v:R.appFaults,     s:"not your steps",   c:R.appFaults ? "fail" : "" },
+    { k:"Findings",       v:T.findings.length, s:"total",          c:"" }
+  ];
+  document.getElementById("tiles").innerHTML = tiles.map(t =>
+    `<div class="tile ${t.c}"><div class="k">${esc(t.k)}</div>
+      <div class="v">${t.v} <small>${esc(t.s)}</small></div></div>`).join("");
+
+  /* ---------- placeholder screenshot (sample only; real runs have PNGs) ---------- */
+  function ph(step){
+    const tint = { pass:"#8fbf9f", pass_with_deviation:"#e0b070", fail:"#d98b8b",
+                   dismissed:"#b09ad9", not_reached:"#c9c6bd" }[step.verdict] || "#c9c6bd";
+    const lines = (step.hierarchySnippet||"").split("\n").slice(0,6);
+    const rows = lines.map((l,i) => {
+      const bw = Math.max(24, Math.min(88, 30 + (l.length % 9) * 7));
+      return `<rect x="8" y="${46 + i*15}" width="${bw}" height="7" rx="3" fill="#9c9890" opacity=".5"/>`;
+    }).join("");
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 196">
+      <rect width="110" height="196" rx="9" fill="#e9e7e2"/>
+      <rect x="0" y="0" width="110" height="22" rx="9" fill="${tint}"/>
+      <rect x="8" y="8" width="52" height="6" rx="3" fill="#fff" opacity=".85"/>
+      <rect x="8" y="30" width="94" height="10" rx="4" fill="#b7b3ab" opacity=".7"/>
+      ${rows}
+      <rect x="8" y="168" width="94" height="18" rx="6" fill="${tint}" opacity=".75"/></svg>`;
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+  const shot = (step, which) => step[which] || ph(step);
+
+  /* ---------- filmstrip ---------- */
+  const strip = document.getElementById("strip");
+  strip.innerHTML = T.steps.map(s => {
+    const badge = s.origin === "inserted"     ? '<span class="fbadge ins">+</span>'
+                : s.origin === "interruption" ? '<span class="fbadge intr">!</span>'
+                : s.verdict === "fail"        ? '<span class="fbadge fail">✕</span>'
+                : s.verdict === "pass_with_deviation" ? '<span class="fbadge dev">≠</span>' : "";
+    const num = s.n != null ? "step " + s.n : (s.origin === "inserted" ? "inserted" : "transient");
+    const lab = s.origin === "author" ? clip(s.given, 44) : clip(s.did || "", 44);
+    return `<div class="frame v-${s.verdict}" data-step="${s.id}">
+      ${badge}
+      <img src="${shot(s,"screenBefore")}" alt="${esc(num)}">
+      <div class="fnum">${esc(num)}</div>
+      <div class="flab">${esc(lab)}</div>
+    </div>`;
+  }).join("");
+
+  /* ---------- step table ---------- */
+  const body = document.getElementById("stepBody");
+  function rungHTML(s){
+    const r = s.resolution || {};
+    if (!r.rung || r.rung === "none") return '<span class="rung">—</span>';
+    const att = r.attempts > 1 ? ` <span class="rung">${r.attempts} attempts</span>` : "";
+    return `<span class="rung ${esc(r.rung)}">${esc(RUNGLABEL[r.rung] || r.rung)}</span>${att}`;
+  }
+  function verdictHTML(s){
+    let sub = "";
+    if (s.origin === "inserted")      sub = "step you didn't write";
+    else if (s.origin === "interruption")
+      sub = `<span class="impact ${esc(s.impact)}">${esc(s.impact === "state-changing" ? "changed app state" : "no state change")}</span>`;
+    else if (s.deviation && s.verdict === "pass_with_deviation") sub = DEVTYPE[s.deviation.type] || "";
+    else if (s.verdict === "fail" && s.fault === "app") sub = "the app, not your step";
+    const f = s.fault ? `<span class="fault ${esc(s.fault)}">${esc(s.fault)}</span>` : "";
+    return `<span class="vd ${esc(s.verdict)}">${esc(VERDICT[s.verdict] || s.verdict)}</span>${f}
+            ${sub ? `<span class="vsub">${sub}</span>` : ""}`;
+  }
+  function labelCell(s){
+    if (s.origin === "author") return `<b>${esc(s.given)}</b>`;
+    if (s.origin === "inserted")
+      return `<i style="color:var(--accent)">— inserted —</i>`;
+    return `<i style="color:var(--intr)">— transient screen —</i>`;
+  }
+  function detailHTML(s){
+    const a = s.assertion, d = s.deviation, r = s.resolution || {};
+    const fs = (s.findings||[]).map(id => T.findings.find(f => f.id === id)).filter(Boolean);
+    return `<div class="dwrap">
+      <div>
+        ${d && d.why ? `<div class="why ${s.fault === "app" ? "appfault" : ""}">
+            <b>${esc(DEVTYPE[d.type] || d.type)}</b>${esc(d.why)}
+            ${d.suggestedRewrite ? `<div class="rewrite">${esc(d.suggestedRewrite)}</div>` : ""}
+          </div>` : ""}
+        ${a ? `<h3 class="sec">Assertion — ${a.passed ? "held" : "did not hold"}</h3>
+          <dl class="kv">
+            <dt>Expected</dt><dd>${esc(a.expected)}</dd>
+            <dt>Actual</dt><dd><b style="color:var(--${a.passed ? "pass" : "fail"})">${esc(a.actual)}</b></dd>
+            <dt>Checked via</dt><dd>${esc(a.method)}</dd>
+          </dl>
+          <pre>${esc(a.evidence)}</pre>` : ""}
+        <h3 class="sec">Resolution</h3>
+        <dl class="kv">
+          <dt>What I did</dt><dd>${esc(s.did) || "—"}</dd>
+          <dt>Rung</dt><dd>${esc(RUNGLABEL[r.rung] || r.rung || "—")}</dd>
+          <dt>Matched</dt><dd><code>${esc(r.matched) || "—"}</code></dd>
+          <dt>Attempts</dt><dd>${r.attempts == null ? "—" : r.attempts}</dd>
+          ${s.dismissedBy ? `<dt>Dismissed by</dt><dd>${esc(s.dismissedBy)}</dd>` : ""}
+          ${s.impact ? `<dt>State impact</dt><dd><span class="impact ${esc(s.impact)}">${esc(s.impact)}</span></dd>` : ""}
+          <dt>Tool</dt><dd><code>${esc(s.tool) || "—"}</code></dd>
+          <dt>Took</dt><dd>${secs(s.durationMs)}</dd>
+        </dl>
+        ${s.args ? `<h3 class="sec">Tool arguments</h3><pre>${esc(JSON.stringify(s.args, null, 2))}</pre>` : ""}
+        ${s.hierarchySnippet ? `<h3 class="sec">Hierarchy at this step</h3><pre>${esc(s.hierarchySnippet)}</pre>` : ""}
+        ${s.observation ? `<h3 class="sec">Note</h3><div class="fd" style="font-size:12.5px;color:var(--muted)">${esc(s.observation)}</div>` : ""}
+        ${fs.length ? `<h3 class="sec">Findings raised here</h3>
+          <ul class="flist">${fs.map(findingHTML).join("")}</ul>` : ""}
+      </div>
+      <div>
+        <h3 class="sec">Screens</h3>
+        ${s.screenBefore || s.verdict !== "not_reached" ? `<div class="shots">
+          <figure><img src="${shot(s,"screenBefore")}" alt="before"><figcaption>before</figcaption></figure>
+          <figure><img src="${shot(s,"screenAfter")}" alt="after"><figcaption>after</figcaption></figure>
+        </div>` : `<div class="empty" style="padding:14px">Not reached — no capture.</div>`}
+        ${s.pageSource ? `<dl class="kv" style="margin-top:12px">
+          <dt>Page source</dt><dd><code>${esc(s.pageSource)}</code></dd></dl>` : ""}
+      </div>
+    </div>`;
+  }
+  function findingHTML(f){
+    // Every one of these fields has come back null from a real run. Render the gap as a visible
+    // "not recorded" rather than an empty box or the string "undefined" — an unlabelled blank
+    // reads as "nothing to say here" when it actually means the trace writer dropped a field.
+    const missing = t => `<em style="color:var(--faint);font-style:normal">${t} not recorded</em>`;
+    const where = f.step != null ? "your step " + f.step
+                : f.seq != null ? "seq " + f.seq : "step not recorded";
+    const faultChip = f.fault === "app" ? `<span class="chip app">app fault</span>`
+                    : f.fault === "authoring" ? `<span class="chip authoring">authoring</span>`
+                    : `<span class="chip" style="color:var(--fail)">fault not recorded</span>`;
+    return `<li class="fitem ${esc(f.severity || "low")}">
+      <div class="ft">${esc(f.title) || missing("Title")}</div>
+      <div class="fd">${f.detail ? esc(f.detail) : missing("Detail")}</div>
+      ${f.evidence ? `<div class="fe">${esc(f.evidence)}</div>`
+                   : `<div class="fe">${missing("Evidence")}</div>`}
+      <div class="fmeta">
+        <span class="chip ${esc(f.severity)}">${esc(f.severity) || "severity?"}</span>
+        ${faultChip}
+        <span class="chip">${esc(f.source) || "source?"}</span>
+        ${f.confidence ? `<span class="chip">confidence ${esc(f.confidence)}</span>` : ""}
+        ${f.type ? `<span class="chip">${esc(f.type)}</span>` : ""}
+        <span class="chip">${esc(where)}</span>
+        ${f.kbRef ? `<span class="chip">known: ${esc(f.kbRef)}</span>` : ""}
+      </div></li>`;
+  }
+
+  body.innerHTML = T.steps.map(s => `
+    <tr class="srow o-${esc(s.origin)} v-${esc(s.verdict)}" data-step="${s.id}">
+      <td class="num">${s.n != null ? s.n : "—"}</td>
+      <td class="given">${labelCell(s)}</td>
+      <td>${verdictHTML(s)}</td>
+      <td>${rungHTML(s)}</td>
+      <td class="did">${esc(s.did || s.observation || "—")}</td>
+    </tr>
+    <tr class="detail hidden" data-detail="${s.id}"><td colspan="5">${detailHTML(s)}</td></tr>`).join("");
+
+  /* ---------- selection ---------- */
+  function select(id, scroll){
+    document.querySelectorAll("tr.detail").forEach(tr => tr.classList.add("hidden"));
+    const d = document.querySelector(`tr.detail[data-detail="${id}"]`);
+    if (d) d.classList.remove("hidden");
+    document.querySelectorAll("tr.srow").forEach(tr => tr.classList.toggle("sel", tr.dataset.step === id));
+    document.querySelectorAll(".frame").forEach(f => f.classList.toggle("sel", f.dataset.step === id));
+    if (scroll){
+      const row = document.querySelector(`tr.srow[data-step="${id}"]`);
+      if (row) row.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+  }
+  body.addEventListener("click", ev => {
+    const tr = ev.target.closest("tr.srow");
+    if (!tr) return;
+    const open = !document.querySelector(`tr.detail[data-detail="${tr.dataset.step}"]`).classList.contains("hidden");
+    if (open){
+      document.querySelector(`tr.detail[data-detail="${tr.dataset.step}"]`).classList.add("hidden");
+      tr.classList.remove("sel");
+    } else select(tr.dataset.step, false);
+  });
+  strip.addEventListener("click", ev => {
+    const f = ev.target.closest(".frame");
+    if (f) select(f.dataset.step, true);
+  });
+
+  /* ---------- tab: corrected steps ---------- */
+  const CHANGE = { unchanged:"unchanged", reworded:"reworded", inserted:"inserted",
+                   guard:"guard added", "not-verified":"not verified" };
+  // The schema wants objects ({n,text,change,was,why}), but a run once emitted plain strings and
+  // every field came back undefined — the whole tab rendered as blank rows. Normalise instead of
+  // rendering nothing: a degraded list the author can still read beats an empty panel.
+  // render-report.sh warns separately so the trace writer gets fixed too.
+  const corr = (R.correctedSteps || []).map(c => {
+    if (typeof c === "string") {
+      const m = c.match(/^\s*(\d+[a-z]?)[.)]\s*(.*)$/s);
+      const body = m ? m[2] : c;
+      const change = /\[INSERT\]|\binserted\b/i.test(body) ? "inserted"
+                   : /\brewrite\b|\breworded\b/i.test(body) ? "reworded"
+                   : /\bunchanged\b/i.test(body) ? "unchanged" : "";
+      return { n: m ? m[1] : "—", text: body.replace(/^\[INSERT\]\s*/i, ""), change, _raw: true };
+    }
+    return c || {};
+  });
+  document.getElementById("tab-corrected").innerHTML = `
+    <div class="corrhead">
+      <p>Your steps, rewritten against what the app actually does — real labels, the steps you were
+         missing, and guards for the transient screens. Copy this back into your test.</p>
+      <button class="copybtn" id="copyBtn">Copy step list</button>
+    </div>
+    <div class="corr">${corr.map(c => `
+      <div class="cline ${esc(c.change)}">
+        <div class="cn">${esc(c.n)}.</div>
+        <div class="ct">${esc(c.text)}
+          ${c.was ? `<span class="cwas">was: ${esc(c.was)}</span>` : ""}
+          ${c.why ? `<span class="cwhy">${esc(c.why)}</span>` : ""}
+        </div>
+        <div class="cc">${esc(CHANGE[c.change] || c.change)}</div>
+      </div>`).join("")}</div>`;
+
+  document.getElementById("copyBtn").addEventListener("click", ev => {
+    const text = corr.map(c => `${c.n}. ${c.text}`).join("\n");
+    const done = () => { ev.target.textContent = "Copied"; setTimeout(() => ev.target.textContent = "Copy step list", 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+    function fallback(){
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch(e){ ev.target.textContent = "Copy failed"; }
+      document.body.removeChild(ta);
+    }
+  });
+
+  /* ---------- tab: deviations ---------- */
+  const devs = T.steps.filter(s => s.deviation && s.deviation.why);
+  const groups = [
+    { key:"authoring", title:"Your steps needed rewriting",
+      why:"These worked, but only because the run compensated. As written they are fragile — the target label is wrong, the element isn't addressable, or the step assumes something is on screen when it isn't.",
+      match: s => s.origin === "author" && s.verdict === "pass_with_deviation" },
+    { key:"inserted", title:"Steps missing from your list",
+      why:"The app required these and your list doesn't mention them. Anyone following the steps by hand would get stuck here.",
+      match: s => s.origin === "inserted" },
+    { key:"interruption", title:"Transient screens I dismissed",
+      why:"Screens that appeared unprompted. How each was dismissed is recorded — and whether the dismissal changed app state, which decides whether it can be ignored or must become an explicit step.",
+      match: s => s.origin === "interruption" },
+    { key:"appfault", title:"Failures that are the app's fault, not your steps'",
+      why:"These steps are correct as written. Something in the app is broken.",
+      match: s => s.verdict === "fail" && s.fault === "app" }
+  ];
+  document.getElementById("tab-deviations").innerHTML = groups.map(g => {
+    const items = T.steps.filter(g.match);
+    if (!items.length) return "";
+    return `<div class="dev-group">
+      <h3>${esc(g.title)} <span style="color:var(--faint);font-weight:400">(${items.length})</span></h3>
+      <p>${esc(g.why)}</p>
+      ${items.map(s => {
+        const d = s.deviation || {};
+        const num = s.n != null ? `your step ${s.n}` : `after step ${
+          (T.steps.filter(x => x.seq < s.seq && x.n != null).pop() || {}).n || "—"}`;
+        return `<div class="dcard ${esc(d.type || (s.fault === "app" ? "appfault" : ""))}">
+          <img class="dshot" src="${shot(s,"screenBefore")}" alt="">
+          <div class="dh">${esc(s.origin === "author" ? s.given : s.did)}
+            <span class="dn">${esc(num)}${s.impact ? ` · <span class="impact ${esc(s.impact)}">${esc(s.impact)}</span>` : ""}</span></div>
+          <div class="dw">${esc(d.why || "")}</div>
+          ${s.dismissedBy ? `<div class="dw" style="margin-top:6px"><b>Dismissed by:</b> ${esc(s.dismissedBy)}</div>` : ""}
+          ${d.suggestedRewrite ? `<div class="rewrite">${esc(d.suggestedRewrite)}</div>` : ""}
+          <div style="clear:both"></div>
+        </div>`;
+      }).join("")}
+    </div>`;
+  }).join("") || `<div class="empty">No deviations — every step ran exactly as written.</div>`;
+
+  /* ---------- tab: findings ---------- */
+  const sev = {high:0, medium:1, low:2};
+  const sortedF = T.findings.slice().sort((a,b) => (sev[a.severity]??9)-(sev[b.severity]??9));
+  const appF  = sortedF.filter(f => f.fault === "app");
+  const authF = sortedF.filter(f => f.fault === "authoring");
+  // Anything with no fault recorded gets its own section. Previously these fell into the
+  // authoring bucket by default, which actively misled: a run put a navigation defect
+  // ("payment row opens Vouchers") under "step-authoring issues" purely because fault was null.
+  const unkF  = sortedF.filter(f => f.fault !== "app" && f.fault !== "authoring");
+  document.getElementById("tab-findings").innerHTML =
+    ((appF.length ? `<h3 class="sec" style="margin-top:0">App defects (${appF.length}) — file these</h3>
+       <ul class="flist">${appF.map(findingHTML).join("")}</ul>` : "") +
+     (authF.length ? `<h3 class="sec">Step-authoring issues (${authF.length})</h3>
+       <ul class="flist">${authF.map(findingHTML).join("")}</ul>` : "") +
+     (unkF.length ? `<h3 class="sec" style="color:var(--fail)">Unclassified (${unkF.length}) — no fault recorded</h3>
+       <p style="font-size:12.5px;color:var(--muted);margin:0 0 9px;max-width:78ch">These findings
+        don't say whether the app is broken or the step was written wrong, so they can't be routed.
+        The trace writer omitted <code>fault</code>; read each one and decide.</p>
+       <ul class="flist">${unkF.map(findingHTML).join("")}</ul>` : "")) ||
+    `<div class="empty">No findings.</div>`;
+
+  /* ---------- tab: logs ---------- */
+  document.getElementById("tab-logs").innerHTML = (T.logs||[]).map(l => {
+    const st = T.steps.find(s => s.seq === l.seq);
+    return `<h3 class="sec" style="margin-top:0">${st && st.n != null ? "your step " + st.n : "seq " + l.seq}
+      · ${esc(l.source)} · <code>${esc(l.file)}</code></h3><pre>${esc(l.excerpt)}</pre>`;
+  }).join("") || `<div class="empty">No logs captured — logs are taken only around failures.</div>`;
+
+  document.getElementById("cntDev").textContent = devs.length || "";
+  document.getElementById("cntFind").textContent = T.findings.length || "";
+  document.getElementById("cntLogs").textContent = (T.logs||[]).length || "";
+
+  document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".tabs button").forEach(x => x.setAttribute("aria-selected", String(x===b)));
+    document.querySelectorAll(".tabpanel").forEach(p => p.classList.toggle("on", p.id === "tab-"+b.dataset.tab));
+  }));
+
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    const cur = document.documentElement.dataset.theme ||
+      (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = cur === "dark" ? "light" : "dark";
+  });
+})();
+</script>
+</body>
+</html>

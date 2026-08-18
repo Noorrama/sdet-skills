@@ -1,0 +1,194 @@
+{
+  "contract_version": "1.0.0",
+  "feature_key": "birthday_feature",
+  "epic_ref": "birthday_feature",
+  "app": "gopay-consumer",
+  "platforms": ["android", "ios"],
+  "framework": "flutter",
+  "jira_ids": ["AURA-201", "AURA-202", "AURA-203"],
+  "merge_requests": ["!7101", "!7102", "!7103"],
+  "screens": [
+    {
+      "screen_id": "HOMESCREEN",
+      "elements": [
+        {
+          "generated_logical_id": "HOMESCREEN.TAP_BIRTHDAY_CARD",
+          "flutter_locator": "Key('birthday_genie_card')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7101", "file": "lib/home/genie/birthday_genie_card.dart", "line": 41 }
+        },
+        {
+          "generated_logical_id": "HOMESCREEN.birthday_card_headline",
+          "flutter_locator": "Key('birthday_genie_card_headline')",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!7101", "file": "lib/home/genie/birthday_genie_card.dart", "line": 58 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "birthday_feature_litmus_content", "state": "enabled" }],
+      "apis_touched": []
+    },
+    {
+      "screen_id": "LOTTIE_ANIMATION",
+      "elements": [
+        {
+          "generated_logical_id": "LOTTIE_ANIMATION.TIMEOUT_COMPLETE",
+          "flutter_locator": "Key('birthday_lottie_animation_view')",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!7101", "file": "lib/birthday/animation/lottie_celebration_screen.dart", "line": 30 }
+        },
+        {
+          "generated_logical_id": "LOTTIE_ANIMATION.TAP_SKIP_BTN",
+          "flutter_locator": "Key('birthday_animation_skip_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7101", "file": "lib/birthday/animation/lottie_celebration_screen.dart", "line": 74 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "birthday_feature_litmus_content", "state": "enabled" }],
+      "apis_touched": []
+    },
+    {
+      "screen_id": "HAPPY_BIRTHDAY",
+      "elements": [
+        {
+          "generated_logical_id": "HAPPY_BIRTHDAY.TAP_CANDLE_BTN",
+          "flutter_locator": "Key('birthday_blow_candle_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7102", "file": "lib/birthday/candle/blow_candle_screen.dart", "line": 96 }
+        },
+        {
+          "generated_logical_id": "HAPPY_BIRTHDAY.TAP_CLOSE_BTN",
+          "flutter_locator": "Key('birthday_happy_close_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7102", "file": "lib/birthday/candle/blow_candle_screen.dart", "line": 52 }
+        },
+        {
+          "generated_logical_id": "HAPPY_BIRTHDAY.LABEL_USER_NAME",
+          "flutter_locator": "Semantics(identifier: 'birthday_user_name_label')",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!7102", "file": "lib/birthday/candle/blow_candle_screen.dart", "line": 68 }
+        },
+        {
+          "generated_logical_id": "HAPPY_BIRTHDAY.wish_text_label",
+          "flutter_locator": "Key('birthday_wish_text')",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!7102", "file": "lib/birthday/candle/blow_candle_screen.dart", "line": 80 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "birthday_feature_litmus_content", "state": "enabled" }],
+      "apis_touched": []
+    },
+    {
+      "screen_id": "ANIMATION_FLASH",
+      "elements": [
+        {
+          "generated_logical_id": "ANIMATION_FLASH.TIMEOUT_COMPLETE",
+          "flutter_locator": "Key('birthday_animation_flash_view')",
+          "role": "label",
+          "change_type": "added",
+          "provenance": { "mr": "!7102", "file": "lib/birthday/candle/flash_transition.dart", "line": 24 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "birthday_feature_litmus_content", "state": "enabled" }],
+      "apis_touched": []
+    },
+    {
+      "screen_id": "BIRTHDAY_RESULT",
+      "elements": [
+        {
+          "generated_logical_id": "BIRTHDAY_RESULT.SWIPE_CARD_CAROUSEL",
+          "flutter_locator": "Key('birthday_card_carousel')",
+          "role": "list",
+          "change_type": "added",
+          "provenance": { "mr": "!7103", "file": "lib/birthday/result/card_gallery_screen.dart", "line": 44 }
+        },
+        {
+          "generated_logical_id": "BIRTHDAY_RESULT.card_select_btn",
+          "flutter_locator": "Key('birthday_card_select_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7103", "file": "lib/birthday/result/card_gallery_screen.dart", "line": 61 }
+        },
+        {
+          "generated_logical_id": "BIRTHDAY_RESULT.TAP_SAVE_SHARE_BTN",
+          "flutter_locator": "Key('birthday_save_share_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7103", "file": "lib/birthday/result/birthday_result_screen.dart", "line": 88 }
+        },
+        {
+          "generated_logical_id": "BIRTHDAY_RESULT.TAP_WHATSAPP_BTN",
+          "flutter_locator": "Key('birthday_whatsapp_share_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7103", "file": "lib/birthday/result/save_share_bottomsheet.dart", "line": 33 }
+        },
+        {
+          "generated_logical_id": "BIRTHDAY_RESULT.TAP_SOCIAL_MEDIA_BTN",
+          "flutter_locator": "Key('birthday_instagram_share_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7103", "file": "lib/birthday/result/save_share_bottomsheet.dart", "line": 41 }
+        },
+        {
+          "generated_logical_id": "BIRTHDAY_RESULT.TAP_DISMISS_SHEET_BTN",
+          "flutter_locator": "Key('birthday_share_sheet_dismiss_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7103", "file": "lib/birthday/result/save_share_bottomsheet.dart", "line": 20 }
+        },
+        {
+          "generated_logical_id": "BIRTHDAY_RESULT.TAP_CLOSE_BTN",
+          "flutter_locator": "Key('birthday_result_close_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7103", "file": "lib/birthday/result/birthday_result_screen.dart", "line": 50 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "birthday_feature_litmus_content", "state": "enabled" }],
+      "apis_touched": []
+    },
+    {
+      "screen_id": "INSTA_STORIES",
+      "elements": [
+        {
+          "generated_logical_id": "INSTA_STORIES.TAP_CLOSE_BTN",
+          "flutter_locator": "Key('birthday_insta_preview_close_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7103", "file": "lib/birthday/share/insta_stories_preview.dart", "line": 29 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "birthday_feature_litmus_content", "state": "enabled" }],
+      "apis_touched": []
+    },
+    {
+      "screen_id": "WHATSAPP_CHAT",
+      "elements": [
+        {
+          "generated_logical_id": "WHATSAPP_CHAT.TAP_BACK_BTN",
+          "flutter_locator": "Key('birthday_whatsapp_preview_back_btn')",
+          "role": "button",
+          "change_type": "added",
+          "provenance": { "mr": "!7103", "file": "lib/birthday/share/whatsapp_preview.dart", "line": 26 }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "birthday_feature_litmus_content", "state": "enabled" }],
+      "apis_touched": []
+    }
+  ]
+}
