@@ -28,6 +28,21 @@
           "assertion_class":      { "type": "string" },
           "endpoint":             { "type": "string", "description": "HTTP method + path, e.g. POST /payment/v1/cards. Empty string for DB/infra-only tests." },
           "curl_reference":       { "type": "string", "description": "Minimal valid curl using {{FIX-xxx.fieldName}} scoped placeholders." },
+          "step_descriptions": {
+            "type": "array",
+            "description": "Propagated verbatim from sdet_plan.json for the matching scenario_id. Drives Given/When/Then @Step annotations in generated test code.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["step", "action", "expected_result"],
+              "properties": {
+                "step":            { "type": "integer", "minimum": 1 },
+                "action":          { "type": "string" },
+                "curl_reference":  { "type": ["string", "null"], "description": "Step-level curl, if different from scenario-level. null for non-HTTP steps." },
+                "expected_result": { "type": "string" }
+              }
+            }
+          },
           "test_data": {
             "type": "array",
             "minItems": 1,
