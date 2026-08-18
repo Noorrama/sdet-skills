@@ -2,9 +2,57 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
+    "extraction_status": { "type": "string", "enum": ["OK", "INCOMPLETE", "DEGRADED"], "description": "OK = every field resolved from the inputs. INCOMPLETE = one or more fields could not be resolved and were left absent. DEGRADED = a config/schema/tool the skill depends on was unavailable. Never OK when extraction_gaps is non-empty." },
+    "extraction_gaps": {
+      "type": "array",
+      "description": "Everything the skill could NOT resolve, written instead of guessing a value. Empty array = clean extraction.",
+      "items": {
+        "type": "object",
+        "required": ["field", "reason", "severity"],
+        "additionalProperties": false,
+        "properties": {
+          "field": { "type": "string", "description": "JSON path of the unresolved field, e.g. business_requirements[3].target_module. Use 'ENVIRONMENT' for install/tool failures not tied to one field." },
+          "reason": { "type": "string", "description": "Why it could not be resolved, citing the source section checked." },
+          "action": { "type": "string", "description": "What a human must do to close the gap." },
+          "severity": { "type": "string", "enum": ["BLOCKING", "DEGRADED", "INFO"], "description": "BLOCKING = schema-required field absent. DEGRADED = resolved without normal grounding. INFO = optional content genuinely absent from the source." }
+        }
+      }
+    },
+    "app": {
+      "type": "string",
+      "enum": ["gojek-consumer", "gojek-driver", "gofood-merchant", "gopay-consumer", "gopay-merchant"],
+      "description": "ADDITION. App this context belongs to. Optional, but sdet-plan-generator keys off it to match contexts for a run, so omitting it in a multi-app split defeats the split."
+    },
+    "design_source": {
+      "type": "object",
+      "description": "ADDITION. Provenance of the Figma export, copied from the Export Design Raw JSON plugin envelope. Lets a reviewer tell a full-page export from a partial selection export, and tells them whether geometry was available, without re-opening Figma.",
+      "additionalProperties": false,
+      "properties": {
+        "file_name": { "type": "string", "description": "envelope file.name" },
+        "page_name": { "type": "string", "description": "envelope file.page" },
+        "scope": { "type": "string", "enum": ["page", "selection"], "description": "envelope scope. 'selection' means flows leaving the selected layers are not in the export, so ui_flow coverage cannot be verified." },
+        "exported_at": { "type": "string", "description": "envelope exportedAt (ISO-8601)" },
+        "max_depth": { "type": "integer", "description": "envelope export.maxDepth" },
+        "node_count": { "type": "integer", "description": "envelope export.nodeCount" },
+        "truncated_count": { "type": "integer", "description": "envelope export.truncatedCount. Non-zero means the depth cap dropped children — elements below those layers were never exported." },
+        "has_geometry": { "type": "boolean", "description": "Whether the export carried x/y/width/height. False means board nodes were classified by the descendant-count proxy instead of by size, and lane-entry resolution was unavailable." },
+        "truncated_nodes": {
+          "type": "array",
+          "description": "envelope export.truncatedNodes (up to 20 samples) — the layers worth flattening before the next export.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "type": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
     "visual_analysis_scratchpad": {
       "type": "string",
-      "description": "Write a 2-3 sentence overview of what you visually detect in the image before compiling the technical fields. List screens found."
+      "description": "Write a 2-3 sentence overview of what you detect in the export before compiling the technical fields. List screens found. Note: the export carries frame size and position but no styling, so this is a structural reading of names, variants, reactions and frame size — not a visual one."
     },
     "project_context": {
       "type": "object",
@@ -17,48 +65,97 @@
           "type": "array",
           "items": { "type": "string" }
         }
-      },
+},
       "required": ["overall_ambiguity_rating", "blocking_issues"]
     },
     "screens": {
       "type": "array",
+      "uniqueItems": true,
       "items": {
         "type": "object",
         "properties": {
-          "screen_id": { 
+          "screen_id": {
             "type": "string",
             "pattern": "^[A-Z0-9_]+$",
-            "description": "Figma frame title forced into UPPER_SNAKE_CASE (e.g., LOGIN_SCREEN)"
+            "description": "Figma frame title forced into UPPER_SNAKE_CASE (e.g., LOGIN_SCREEN). Any trailing state/locale qualifier is stripped and the BASE name kept — 'Confirm account / EN' is CONFIRM_ACCOUNT with 'EN' as a state, never EN."
           },
           "screen_name": { "type": "string" },
-          "purpose": { "type": "string" },
+          "source_ref": { "type": "string", "description": "ADDITION. Figma node id of the representative frame (e.g. '1997:31939'), so a reviewer can jump straight to it." },
+          "source_refs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "ADDITION. Every frame collapsed into this screen. A screen drawn as N sibling state-frames has N ids here, and a connector touching ANY of them resolves to this screen — resolving against source_ref alone silently drops the flows drawn from the other states."
+          },
+          "node_class": {
+            "type": "string",
+            "enum": ["SCREEN", "DECISION", "CAPTION", "LANE_BANNER", "NOTE", "UNKNOWN"],
+            "description": "ADDITION. How the board-node classifier labelled this frame. Only SCREEN entries belong in screens[]; another value appears only when an unresolved classification was recorded for review."
+          },
+          "classified_by": {
+            "type": "string",
+            "enum": ["GEOMETRY", "DESCENDANT_COUNT", "COMPONENT_NAME"],
+            "description": "ADDITION. Which test decided the class. GEOMETRY is the normal case; DESCENDANT_COUNT means the export carried no size and the proxy was used, paired with a DEGRADED gap."
+          },
+          "purpose": { "type": "string", "description": "OPTIONAL, no longer produced. A Figma board carries no purpose statement, and nothing downstream reads this field, so the extractor does not emit it and its absence is never a gap. Kept defined so hand-authored contexts stay valid." },
+          "deep_link": { "type": "string", "description": "ADDITION, optional. Deep link opening this screen, from a prototype URL action matching the app config's deeplink_scheme or a Note/Context note stating one. Most designs document no routing: absence is normal, never a gap, and never a constructed URI." },
+          "entry_point": { "type": "boolean", "description": "ADDITION. True when this frame is named in the page's flowStartingPoints[]." },
           "screen_states": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": { "type": "string" },
+            "description": "State variants of this screen, in the designer's own wording. When N sibling frames share a base name, the entries are their QUALIFIERS ('EN', 'Error', 'Filled') — never the base name repeated N times, which carries no information."
+          },
+          "state_kinds": {
+            "type": "array",
+            "description": "ADDITION. screen_states normalised to a fixed vocabulary, so downstream category selection is a mechanical field check rather than free-text pattern matching.",
+            "items": {
+              "type": "string",
+              "enum": ["DEFAULT", "LOADING", "EMPTY", "ERROR", "SUCCESS", "OFFLINE", "DISABLED", "PERMISSION_DENIED", "DARK_THEME", "LIGHT_THEME", "LOCALE_VARIANT", "RTL", "OTHER"]
+            }
           },
           "elements": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "element_id": { 
+                "element_id": {
                   "type": "string",
-                  "pattern": "^[A-Z0-9_]+\\.[A-Z0-9_]+(\\.[A-Z0-9_]+)?$",
-                  "description": "Syntax: <SCREEN_ID>.<ACTION>_<ELEMENT_TYPE>.<STATE> all in UPPER_SNAKE_CASE (e.g., LOGIN_SCREEN.TAP_BUTTON.DISABLED)"
+                  "pattern": "^[A-Z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$",
+                  "description": "Built from the app config's naming_convention.element_id_pattern + role_vocabulary: <SCREEN_ID>.<purpose><role_suffix>[.<state>] — UPPER_SNAKE screen half, lower_snake role half (e.g. CONFIRM_ACCOUNT.approve_btn). This is the join key to change_context; never re-case or re-derive it."
                 },
+                "source_ref": { "type": "string", "description": "ADDITION. Figma node id of this layer." },
                 "type": { "type": "string" },
+                "role": {
+                  "type": "string",
+                  "enum": ["BUTTON", "INPUT", "LABEL", "TOGGLE", "TAB", "LIST", "IMAGE", "LINK", "DROPDOWN", "SLIDER", "CAROUSEL", "CONTAINER", "OTHER"],
+                  "description": "ADDITION. Normalised role. Machine-readable companion to `type`; downstream uses it to decide whether a screen is interactive without pattern-matching free text."
+                },
                 "label": { "type": "string" },
+                "accessibility_id": { "type": "string", "description": "ADDITION, optional. Accessibility/test id the designer happened to write into a Dev Mode annotation, transcribed verbatim. Most files carry no annotations: absence is the normal case, never a gap, and never derived from the layer name." },
+                "platform_hints": {
+                  "type": "object",
+                  "description": "ADDITION, optional. Per-platform ids when an annotation states them separately. Omit entirely otherwise — never a placeholder.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "android_resource_id": { "type": "string" },
+                    "ios_accessibility_identifier": { "type": "string" },
+                    "flutter_key": { "type": "string" }
+                  }
+                },
                 "states_represented": {
                   "type": "array",
                   "items": { "type": "string" }
                 },
                 "interactions": {
                   "type": "array",
+                  "description": "One entry per connector leaving this element — a trigger with two connectors gets two entries. A connector whose endpoint is a NOTE produces no entry: an annotation tether is not behaviour, and its text belongs in validations_and_edge_cases instead.",
                   "items": {
                     "type": "object",
                     "properties": {
                       "trigger": { "type": "string" },
-                      "action": { "type": "string" }
+                      "action": { "type": "string", "description": "Readable on its own, without cross-referencing ui_flow: names the destination and the connector it came from." },
+                      "connector_id": { "type": "string", "description": "ADDITION. Figma node id of the connector this interaction came from." },
+                      "destination_node_id": { "type": "string", "description": "ADDITION. The literal connectorEnd.endpointNodeId — the layer the arrow actually lands on, which is often a caption or label rather than a frame. Present whenever the connector is attached; absent for a floating endpoint. This is the id to paste into Figma." },
+                      "destination_screen_id": { "type": "string", "description": "ADDITION. The RESOLVED destination screen, which frequently differs from destination_node_id. Absent when the endpoint resolves to a decision box, to a caption fronting no distinct screen, or back to this element's own screen — the same self-loop guard ui_flow applies, so the two halves of the file never disagree." }
                     },
                     "required": ["trigger", "action"]
                   }
@@ -66,14 +163,24 @@
                 "validations_and_edge_cases": {
                   "type": "array",
                   "items": { "type": "string" }
+                },
+                "element_ambiguity": {
+                  "type": "object",
+                  "description": "ADDITION. Per-element confidence, when this element is less certain than the screen overall.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "rating": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+                    "reason": { "type": "string" }
+                  },
+                  "required": ["rating", "reason"]
                 }
               },
-              "required": ["element_id", "type", "label", "states_represented", "interactions", "validations_and_edge_cases"]
+              "required": ["element_id", "type", "label", "interactions", "validations_and_edge_cases"]
             }
           },
           "screen_notes": { "type": "string" }
         },
-        "required": ["screen_id", "screen_name", "purpose", "screen_states", "elements", "screen_notes"]
+        "required": ["screen_id", "screen_name", "screen_states", "elements", "screen_notes"]
       }
     },
     "ui_flow": {
@@ -82,11 +189,30 @@
         "type": "object",
         "properties": {
           "from_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
-          "trigger_element_id": { "type": "string", "pattern": "^[A-Z0-9_]+\\.[A-Z0-9_]+(\\.[A-Z0-9_]+)?$" },
+          "trigger_element_id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$",
+            "description": "The element that triggers the transition. OMIT the key entirely for a frame-to-frame connector with no identifiable trigger — never emit null, and never invent a token to satisfy the schema."
+          },
           "to_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
-          "condition": { "type": "string" }
+          "condition": { "type": "string", "description": "The connector's label (standard #4). For a contracted branch this is COMPOSED, not copied: '<decision question> — <value>' (e.g. 'Does user have GoPay+? — YES'), with any label on the connector into the decision kept in front via ' / '. Empty string means unconditional." },
+          "decision_question": { "type": "string", "description": "ADDITION, contracted edges only. The decision box's question, whitespace-normalised (a designer's 'Does user have GoPay+ ?' becomes 'Does user have GoPay+?'). Lets a consumer build a precondition without re-parsing `condition`." },
+          "decision_value": { "type": "string", "description": "ADDITION, contracted edges only. The branch this edge takes — the exit connector's label, e.g. YES / NO." },
+          "decision_node_id": { "type": "string", "description": "ADDITION, contracted edges only. Figma node id of the decision box, so a reviewer can see why the condition attached where it did." },
+          "navigation_kind": {
+            "type": "string",
+            "enum": ["NAVIGATE", "OVERLAY", "BACK", "CLOSE", "DEEP_LINK"],
+            "description": "ADDITION. SWAP / CHANGE_TO / SCROLL_TO reactions are element state changes, not navigation, and never appear as ui_flow edges."
+          },
+          "edge_source": {
+            "type": "string",
+            "enum": ["CONNECTOR", "PROTOTYPE_REACTION", "CONNECTOR_INFERRED", "REACTION_INFERRED", "CONNECTOR_CONTRACTED"],
+            "description": "ADDITION. Where the edge came from. _INFERRED means the destination was derived rather than drawn. CONNECTOR_CONTRACTED means a decision box between two screens was collapsed so its condition could attach to the screen it belongs to; source_ref holds the EXIT connector (the one carrying the branch label), consistent with every other edge, and the box itself is in decision_node_id."
+          },
+          "confidence": { "type": "string", "enum": ["EXPLICIT", "INFERRED"], "description": "ADDITION." },
+          "source_ref": { "type": "string", "description": "ADDITION. Figma node id of the connector, or of the node carrying the reaction." }
         },
-        "required": ["from_screen_id", "trigger_element_id", "to_screen_id", "condition"]
+        "required": ["from_screen_id", "to_screen_id", "condition"]
       }
     }
   },

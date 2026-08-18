@@ -1,0 +1,190 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "note": "Observed @TestInfo projectId/suiteId values per module, resolved from module constants. project_id N is TapMind's BrowserStack project id; verify against BrowserStack PR-<N> before treating as authoritative. This is a SUPERSET source: TapMind covers merchant apps (gopaymerchant, gofoodmerchantapp) that gojek-mobile-tests does not."
+  },
+  "modules": {
+    "care-platform": {
+      "project_ids": [
+        "176",
+        "28797259"
+      ],
+      "suite_ids": [
+        "28797257",
+        "28797259"
+      ]
+    },
+    "cartography": {
+      "project_ids": [
+        "176"
+      ],
+      "suite_ids": [
+        "28796541",
+        "28797391"
+      ]
+    },
+    "communication-platform": {
+      "project_ids": [
+        "107"
+      ],
+      "suite_ids": [
+        "16256"
+      ]
+    },
+    "customer-platforms": {
+      "project_ids": [
+        "PR-176"
+      ],
+      "suite_ids": [
+        "2880292"
+      ]
+    },
+    "driverapp": {
+      "project_ids": [
+        "122",
+        "143",
+        "DRIVER_IOS"
+      ],
+      "suite_ids": [
+        "18739",
+        "28584834",
+        "28586233"
+      ]
+    },
+    "gamification": {
+      "project_ids": [
+        "176"
+      ],
+      "suite_ids": [
+        "28797510"
+      ]
+    },
+    "gofood": {
+      "project_ids": [
+        "PR-176"
+      ],
+      "suite_ids": [
+        "28796102",
+        "30945403"
+      ]
+    },
+    "gofoodmerchantapp": {
+      "project_ids": [
+        "174"
+      ],
+      "suite_ids": [
+        "28781857",
+        "28782490",
+        "28782614",
+        "28782663",
+        "28782709",
+        "28782774",
+        "28783195",
+        "28784017"
+      ]
+    },
+    "gomart": {
+      "project_ids": [
+        "107"
+      ],
+      "suite_ids": [
+        "16687"
+      ]
+    },
+    "gopay-consumer-app": {
+      "project_ids": [
+        "139",
+        "190",
+        "3031149"
+      ],
+      "suite_ids": [
+        "13467",
+        "19547",
+        "373500018",
+        "37350008",
+        "37350020"
+      ]
+    },
+    "gopaylater": {
+      "project_ids": [
+        "PR-178"
+      ],
+      "suite_ids": [
+        "39945442"
+      ]
+    },
+    "gopaymerchant": {
+      "project_ids": [
+        "168"
+      ],
+      "suite_ids": [
+        "28723537",
+        "28724587",
+        "31134332",
+        "35046178"
+      ]
+    },
+    "gopaypinjam": {
+      "project_ids": [
+        "179"
+      ],
+      "suite_ids": [
+        "47813098",
+        "50460523"
+      ]
+    },
+    "goshop": {
+      "project_ids": [
+        "176"
+      ],
+      "suite_ids": [
+        "28796803"
+      ]
+    },
+    "growth-platform": {
+      "project_ids": [
+        "176"
+      ],
+      "suite_ids": [
+        "28796907",
+        "28797109",
+        "38266086"
+      ]
+    },
+    "identity": {
+      "project_ids": [
+        "PR-176"
+      ],
+      "suite_ids": [
+        "28797331",
+        "28797344",
+        "28797383",
+        "28797385",
+        "2880292",
+        "47917967"
+      ]
+    },
+    "logistics": {
+      "project_ids": [
+        "176"
+      ],
+      "suite_ids": [
+        "28796556",
+        "28796767"
+      ]
+    },
+    "transport": {
+      "project_ids": [
+        "176"
+      ],
+      "suite_ids": [
+        "30304163",
+        "30304164",
+        "30304165"
+      ]
+    }
+  }
+}

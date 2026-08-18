@@ -1,0 +1,192 @@
+{
+  "_meta": {
+    "generated_by": "extract_nav_index.py",
+    "repo": "gmt",
+    "generated_from_repo_sha": "a8c997d414a07560a1a9356c3528a6d364f27a45",
+    "generated_at": "2026-08-17T09:56:48.838571+00:00",
+    "module": "campaign-manager",
+    "case_ids_indexed": 9,
+    "warning": "deeplinks_literal / deeplinks_enum_ref / case ids are exact regex extractions. page_object_calls_heuristic and steps_gherkin are best-effort navigation aids, NOT a guaranteed-complete or verified-correct step list -- method bodies and Gherkin text are free-form, unlike the structured id/deeplink data."
+  },
+  "cases": {
+    "4699631": [
+      {
+        "module": "campaign-manager",
+        "title": null,
+        "method": "verifyInboxNotification",
+        "source_file": "campaign-manager/src/test/java/io/gojek/campaignmanager/tests/CampaignManagerInboxTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "log",
+          "generateRandomString",
+          "editCampaignInBoxRequestBody",
+          "sleep",
+          "tapChatBtn",
+          "tapInboxtBtn",
+          "assertNotificationTitle",
+          "tapInboxNotification",
+          "assertGoCarInboxDeeplinkLanding"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4698388": [
+      {
+        "module": "campaign-manager",
+        "title": "Verify Marketer is able to Create PN in Gojek app with multi-variant",
+        "method": "verifyPushNotification",
+        "source_file": "campaign-manager/src/test/java/io/gojek/campaignmanager/tests/CampaignManagerPushNotificationTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "log",
+          "createCampaignPushNotificationAndroid",
+          "openNotifications",
+          "assertNotificationTitle",
+          "tapNotification",
+          "assertGoFoodLocationIcon"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4698459": [
+      {
+        "module": "campaign-manager",
+        "title": "Verify Marketer is able to Create PN in Gojek app with multi-variant",
+        "method": "verifyPushNotification",
+        "source_file": "campaign-manager/src/test/java/io/gojek/campaignmanager/tests/CampaignManagerPushNotificationTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "log",
+          "createCampaignPushNotificationAndroid",
+          "openNotifications",
+          "assertNotificationTitle",
+          "tapNotification",
+          "assertGoFoodLocationIcon"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4699562": [
+      {
+        "module": "campaign-manager",
+        "title": "Verify Marketer is able to Create PN in Gojek app with multi-variant ",
+        "method": "verifyPushNotificationWithMultiVariant",
+        "source_file": "campaign-manager/src/test/java/io/gojek/campaignmanager/tests/CampaignManagerPushNotificationTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "log",
+          "createCampaignPushNotificationAndroidWithVariant",
+          "openNotifications",
+          "assertTittleVariant",
+          "assertGoFoodLocationIcon"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4698421": [
+      {
+        "module": "campaign-manager",
+        "title": "Verify Marketer is able to Send Test notification on Gojek app",
+        "method": "verifyPushNotificationNotDisplayedWithControlGroup",
+        "source_file": "campaign-manager/src/test/java/io/gojek/campaignmanager/tests/CampaignManagerPushNotificationTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "log",
+          "createCampaignPushNotificationAndroidWithControlGroup",
+          "openNotifications",
+          "assertNotificationNotDisplayedClosedGroup"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4698424": [
+      {
+        "module": "campaign-manager",
+        "title": "Verify Marketer is able to Send Test notification on Gojek app",
+        "method": "verifyPushNotificationNotDisplayedWithControlGroup",
+        "source_file": "campaign-manager/src/test/java/io/gojek/campaignmanager/tests/CampaignManagerPushNotificationTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "log",
+          "createCampaignPushNotificationAndroidWithControlGroup",
+          "openNotifications",
+          "assertNotificationNotDisplayedClosedGroup"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4698403": [
+      {
+        "module": "campaign-manager",
+        "title": "Verify Marketer is able to Create dynamic Campaign and verify it in device ",
+        "method": "verifyTestNotification",
+        "source_file": "campaign-manager/src/test/java/io/gojek/campaignmanager/tests/CampaignManagerPushNotificationTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "log",
+          "createCampaignAndTestPushNotification",
+          "openNotifications",
+          "assertNotificationTitle",
+          "tapNotification",
+          "assertGoFoodLocationIcon"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4698444": [
+      {
+        "module": "campaign-manager",
+        "title": null,
+        "method": "verifyDynamicPushNotification",
+        "source_file": "campaign-manager/src/test/java/io/gojek/campaignmanager/tests/CampaignManagerPushNotificationTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "log",
+          "createCampaignPushNotificationAndroid",
+          "openNotifications",
+          "assertDynamicNotificationTitle",
+          "tapDynamicNotification",
+          "assertGoFoodLocationIcon"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "4698430": [
+      {
+        "module": "campaign-manager",
+        "title": null,
+        "method": "verifyChatBoxNotification",
+        "source_file": "campaign-manager/src/test/java/io/gojek/campaignmanager/tests/CampaignManagerChatBoxTest.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "log",
+          "generateRandomString",
+          "createCampaignChatBoxNotification",
+          "sleep",
+          "tapChatBtn",
+          "tapJeklin",
+          "assertLastChatText"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ]
+  }
+}

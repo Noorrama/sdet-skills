@@ -1,0 +1,318 @@
+{
+  "_meta": {
+    "generated_by": "extract_project_map.py",
+    "generated_from_repo_sha": "a8c997d414a07560a1a9356c3528a6d364f27a45",
+    "generated_at": "2026-08-12T06:05:47.055322+00:00",
+    "constants_files_found": 16,
+    "literal_PR_ids_found_repo_wide": {
+      "PR-176": [
+        "transport/src/main/java/io/gojek/transport/reports/browserstack/TransportBrowserStackHelper.java"
+      ],
+      "PR-143": [
+        "driverapp/src/test/java/io/gojek/driverapptest/utils/UITestRailHelper.java"
+      ]
+    },
+    "note": "consumer_super_app (gmt) + its folder ids are a LIVE-VERIFIED fact from the BrowserStack MCP, not derived from static scan. separate_projects (gmt), gtf_source.separate_projects (gtf), and tapmind_source (tapmind) are all derived purely from static scan and need BrowserStack-side confirmation (no listProjects MCP tool exists to auto-verify).",
+    "generated_per_repo": {
+      "gmt": {
+        "generated_by": "extract_project_map.py",
+        "generated_from_repo_sha": "a8c997d414a07560a1a9356c3528a6d364f27a45",
+        "generated_at": "2026-08-17T10:08:33.314302+00:00",
+        "constants_files_found": 16,
+        "literal_PR_ids_found_repo_wide": {
+          "PR-176": [
+            "transport/src/main/java/io/gojek/transport/reports/browserstack/TransportBrowserStackHelper.java"
+          ],
+          "PR-143": [
+            "driverapp/src/test/java/io/gojek/driverapptest/utils/UITestRailHelper.java"
+          ]
+        }
+      },
+      "gtf": {
+        "generated_by": "extract_project_map.py",
+        "generated_from_repo_sha": "0320541e13c90347d8a9ce5d053fd5f5e30e5824",
+        "generated_at": "2026-08-17T09:56:49.318193+00:00",
+        "constants_files_found": 1,
+        "literal_PR_ids_found_repo_wide": {}
+      }
+    }
+  },
+  "consumer_super_app": {
+    "browserstack_project": "PR-176",
+    "browserstack_project_numeric": "2880292",
+    "testrail_project": "107",
+    "verified": "live, via BrowserStack MCP listFolders(PR-176) -- 36 top-level folders match the module namespaces below",
+    "folders": {
+      "gofood": {
+        "booking": 28796662,
+        "discovery": 28796102,
+        "expansion": 28796829,
+        "group_order": 30945403,
+        "free_meal": 28797551,
+        "food_fulfilment": 28797554
+      },
+      "transport": {
+        "partnership": 28796253,
+        "gocorp": 28796308,
+        "iron_bank_growth": 28796414,
+        "booking_experience": 28796341,
+        "journeys": 28796820,
+        "two_wheeler": 30304163,
+        "four_wheeler": 30304164,
+        "live_tracking": 28796541,
+        "location_places": 28797391
+      },
+      "logistics": {
+        "gosend": 28796556,
+        "gobox": 28796767,
+        "goshop": 28796803
+      },
+      "gomart": {
+        "gomart": 28797431
+      },
+      "customer-platforms": {
+        "voucher_discovery": 28796895,
+        "subscriptions": 28796907,
+        "home": 28797004,
+        "archived_pilot": 28796867
+      },
+      "icp": {
+        "identity": 28797331,
+        "comms_gojek_user": 28797135,
+        "comms_user_user": 28797181
+      },
+      "helpcenter": {
+        "helpcenter": 28797278,
+        "chatbot": 28797257
+      },
+      "gamification": {
+        "gamification": 28797510
+      },
+      "ads-promo-platform": {
+        "ads_and_promo": 28797521
+      }
+    }
+  },
+  "separate_projects": {
+    "driverapp": {
+      "browserstack_project": null,
+      "resolution": "PER-CASE at runtime via lumosClient.getProjectIdFromTestCaseId(testCaseId), see driverapp/src/test/java/io/gojek/driverapptest/utils/UITestRailHelper.java",
+      "static_fallback_pr_id": "PR-143",
+      "note": "No single project id applies to all driverapp cases -- resolve per case_number via Lumos; PR-143 is only the hardcoded fallback when that lookup fails. Confirmed by human review to also apply to driver-platforms and driver-platform-android (same TestRail project 122, same BrowserStack project ids).",
+      "testrail_ids": {},
+      "source_files": []
+    },
+    "driver-platforms": {
+      "browserstack_project": null,
+      "resolution": "PER-CASE at runtime via lumosClient.getProjectIdFromTestCaseId(testCaseId), see driverapp/src/test/java/io/gojek/driverapptest/utils/UITestRailHelper.java",
+      "static_fallback_pr_id": "PR-143",
+      "note": "No single project id applies to all driverapp cases -- resolve per case_number via Lumos; PR-143 is only the hardcoded fallback when that lookup fails. Confirmed by human review to also apply to driver-platforms and driver-platform-android (same TestRail project 122, same BrowserStack project ids).",
+      "testrail_ids": {
+        "DP_PROJECT_ID": "122",
+        "DP_SUITE_ID": "7642"
+      },
+      "source_files": [
+        "driver-platforms/src/main/java/io/gojek/driverplatforms/utils/testRail/DPTestRailConfig.java"
+      ]
+    },
+    "driver-platform-android": {
+      "browserstack_project": null,
+      "resolution": "PER-CASE at runtime via lumosClient.getProjectIdFromTestCaseId(testCaseId), see driverapp/src/test/java/io/gojek/driverapptest/utils/UITestRailHelper.java",
+      "static_fallback_pr_id": "PR-143",
+      "note": "No single project id applies to all driverapp cases -- resolve per case_number via Lumos; PR-143 is only the hardcoded fallback when that lookup fails. Confirmed by human review to also apply to driver-platforms and driver-platform-android (same TestRail project 122, same BrowserStack project ids).",
+      "testrail_ids": {
+        "DP_PROJECT_ID": "122",
+        "DP_SUITE_ID": "18240"
+      },
+      "source_files": [
+        "driver-platform-android/src/main/java/io/gojek/utils/DriverPlatformTestRailConfig.java"
+      ]
+    },
+    "campaign-manager": {
+      "browserstack_project": null,
+      "testrail_ids": {
+        "CM_PROJECT_ID": "186",
+        "CM_SUITE_ID": "14474"
+      },
+      "source_files": [
+        "campaign-manager/src/main/java/io/gojek/campaignmanager/constants/CMProjectDetails.java"
+      ]
+    },
+    "gopay": {
+      "browserstack_project": "PR-173",
+      "testrail_ids": {
+        "GO_PAY_PROJECT_ID": "138",
+        "PE_SUITE_ID": "9291",
+        "CX_SUITE_ID": "9179",
+        "US_SUITE_ID": "9189",
+        "MM_SUITE_ID": "9187"
+      },
+      "source_files": [
+        "gopay/src/main/java/constants/testrail/GoPayProjectDetails.java"
+      ],
+      "verified": "human-confirmed, seen live in BrowserStack"
+    },
+    "gopay-consumer": {
+      "browserstack_project": null,
+      "testrail_ids": {
+        "PX_MOBILE_PROJECT_ID": "139"
+      },
+      "source_files": [
+        "gopay-consumer/src/test/java/constants/ProjectConstants.java"
+      ]
+    },
+    "gopay_later": {
+      "browserstack_project": null,
+      "testrail_ids": {},
+      "source_files": [],
+      "note": "no PROJECT_ID/SUITE_ID constants found in this module -- join by tag/title only"
+    }
+  },
+  "app_id_to_modules": {
+    "gojek-consumer": {
+      "modules": [
+        "gofood",
+        "transport",
+        "logistics",
+        "gomart",
+        "customer-platforms",
+        "icp",
+        "helpcenter",
+        "gamification",
+        "ads-promo-platform",
+        "gopay"
+      ],
+      "note": "9 modules share BrowserStack project PR-176 (TestRail 107); 'gopay' is a 10th module for the same app binary (package com.gojek.app) filed under its own TestRail project 138 -- query it separately, it is not part of PR-176."
+    },
+    "gojek-driver": {
+      "modules": [
+        "driverapp",
+        "driver-platforms",
+        "driver-platform-android"
+      ],
+      "note": "All three share TestRail project 122 (confirmed via DP_PROJECT_ID / Cucumber Examples project id). driverapp is the primary Cucumber suite; the other two are older TestNG suites for the same app."
+    },
+    "gopay-consumer": {
+      "modules": [
+        "gopay-consumer"
+      ],
+      "gtf_modules": [
+        "gopay-consumer-app"
+      ],
+      "note": "Standalone GoPay app, confirmed by exact android_package match (com.gojek.gopay) for the gmt module. ALSO tested from gtf-mobile-tests via gopay-consumer-app -- package variants com.gojek.gopay.sandbox / com.gojek.gopay.nightly.staging (same app, staging/nightly builds). gtf has 4 TestRail projects for it (GOPAY_MOBILE=166, GW_MOBILE=172, INSURANCE_MOBILE=3031149, CX_MOBILE=283), none yet confirmed against BrowserStack -- note 3031149 also appears in tapmind_source's gopay-consumer-app entry, a cross-repo agreement worth flagging to whoever confirms these."
+    },
+    "gofood-merchant": {
+      "modules": [],
+      "note": "NO_COVERAGE in gojek-mobile-tests (no GoFood Merchant / GoBiz app UI automation here; the only 'gobiz' references are consumer/driver-side helpers hitting GoBiz's backend). Confirmed gtf-mobile-tests has the same zero-coverage result (same style of incidental-reference-only search). HOWEVER the tapmind-mobile-tests repo DOES cover this app -- module 'gofoodmerchantapp', project id 174 (see tapmind_source below). Use the TapMind corpus (config/nav_index/tapmind/, including its project_map.json) as the automation source for this app_id.",
+      "tapmind_modules": [
+        "gofoodmerchantapp"
+      ]
+    },
+    "gopay-merchant": {
+      "modules": [],
+      "gtf_modules": [
+        "gopay-merchant-app"
+      ],
+      "note": "NO_COVERAGE in gojek-mobile-tests (zero gopaymerchant references). TapMind DOES cover this app -- module 'gopaymerchant', project id 168 (see tapmind_source below) -- and remains the primary automation source. gtf-mobile-tests ALSO has 5 case ids for it (via @C<digits> Cucumber tags, package com.gojek.gopaymerchant.stg -- a near-match, not exact, to gopay-merchant.json's com.gojek.gopay.merchant, needs PIC confirmation) but no project/suite id is recorded anywhere in gtf for this module, so treat it as a secondary source pending that confirmation, not a replacement for TapMind.",
+      "tapmind_modules": [
+        "gopaymerchant"
+      ]
+    }
+  },
+  "tapmind_source": {
+    "note": "Third automation source repo (tapmind-mobile-tests, NLP framework). Its nav_index is checked in under config/nav_index/tapmind/<module>.json -- a sibling of nav_index/gmt/ and nav_index/gtf/ under the same nav_index/ root; its module->project map lives right alongside those files, at config/nav_index/tapmind/project_map.json (not a separate top-level folder). Namespaced separately because its module names collide with gojek-mobile-tests. TapMind's @TestInfo carries projectId/suiteId/testCaseIds STATICALLY (no per-case Lumos lookup). Project ids below are observed verbatim from @TestInfo/module constants; a bare number N is TapMind's BrowserStack project id -- verify against BrowserStack PR-<N> before treating as authoritative, and note some modules store the value already as 'PR-<N>'. Crucially, TapMind covers the two MERCHANT apps that gojek-mobile-tests marks NO_COVERAGE. Regenerated by extract_tapmind_nav_index.py.",
+    "module_project_ids": {
+      "driverapp": [
+        "143",
+        "122"
+      ],
+      "gofoodmerchantapp": [
+        "174"
+      ],
+      "gopaymerchant": [
+        "168"
+      ],
+      "gopaypinjam": [
+        "179"
+      ],
+      "gopay-consumer-app": [
+        "139",
+        "190",
+        "3031149"
+      ],
+      "gomart": [
+        "107"
+      ],
+      "gofood": [
+        "PR-176"
+      ],
+      "transport": [
+        "176"
+      ],
+      "logistics": [
+        "176"
+      ],
+      "goshop": [
+        "176"
+      ],
+      "cartography": [
+        "176"
+      ],
+      "care-platform": [
+        "176"
+      ],
+      "gamification": [
+        "176"
+      ],
+      "growth-platform": [
+        "176"
+      ],
+      "customer-platforms": [
+        "PR-176"
+      ],
+      "identity": [
+        "PR-176"
+      ],
+      "communication-platform": [
+        "107"
+      ],
+      "gopaylater": [
+        "PR-178"
+      ]
+    }
+  },
+  "gtf_source": {
+    "note": "Second automation source repo (gtf-mobile-tests, GoPay-focused: gopay-consumer-app, gopay-merchant-app, gopay-kyc-mob-web). Namespaced separately, same pattern as tapmind_source, because gmt's consumer_super_app/separate_projects are read directly by the shipped regression-extractor SKILL.md and must not change shape. Regenerated by extract_project_map.py.",
+    "separate_projects": {
+      "gopay-consumer-app": {
+        "browserstack_project": null,
+        "testrail_ids": {
+          "PAYMENTS_CORE_BS_SUITE_ID": "36122496",
+          "FINSERV_BS_SUITE_ID": "31634208",
+          "PAYMENTS_CORE_MOBILE_SUITE_ID": "36098906",
+          "PAYMENTS_CORE_CONTAINER_SUITE_ID": "36119797",
+          "CX_MOBILE_SUITE_ID": "51106442",
+          "GOPAY_MOBILE_PROJECT_ID": "166",
+          "GW_MOBILE_PROJECT_ID": "172",
+          "INSURANCE_MOBILE_PROJECT_ID": "3031149",
+          "CX_MOBILE_PROJECT_ID": "283"
+        },
+        "source_files": [
+          "gopay-consumer-app/src/main/java/com/gopay/constants/ProjectConstants.java"
+        ]
+      },
+      "gopay-merchant-app": {
+        "browserstack_project": null,
+        "testrail_ids": {},
+        "source_files": [],
+        "note": "Case ids ARE known (5 scenarios tagged directly with @C<digits> on the Cucumber Scenario line, e.g. @C4524928 -- see src/test/resources/features/main.feature), but NO project/suite id of any kind exists anywhere in this module or its neighbours. TapMind's gopaymerchant (project 168, see tapmind_source) remains the primary automation source for the gopay-merchant app_id; this is a secondary source pending PIC confirmation of a project id."
+      },
+      "gopay-kyc-mob-web": {
+        "browserstack_project": null,
+        "testrail_ids": {},
+        "source_files": [],
+        "note": "No case-id mechanism of any kind (confirmed: zero PROJECT_ID / SUITE_ID / @TestInfo / @C<digits> matches across all 23 .java files). This is a Chrome-driven web KYC flow, not an app module -- not mapped to any of the 5 canonical app_ids."
+      }
+    }
+  }
+}

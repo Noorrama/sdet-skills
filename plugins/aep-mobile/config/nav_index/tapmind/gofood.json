@@ -1,0 +1,5183 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "gofood",
+    "case_ids_indexed": 65,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "302767": [
+      {
+        "module": "gofood",
+        "title": "Host Delete the GroupOrder",
+        "method": "validateHostRemovingMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoCar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until Remove member button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Remove member' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Yes, remove' button on the right of 'Cancel' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "302765": [
+      {
+        "module": "gofood",
+        "title": "Validate host shared cart without items added",
+        "method": "validateHostDeleteTheGroupOrder",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoCar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?\"merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Delete group' button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Delete group' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Delete group'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "302762": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateHostSharedCartWithoutMemberAndMenuItems",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoCar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?\"merchant_id=GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Invite friends button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Group cart' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for '1'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify From is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Pinky Porky' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'You pay for everyone' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for Choosing items..."
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for the title 'Others in the group'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for the description 'Lets invite friends to eat together, and enjoy discounts!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down on menu item list until Terms & Conditions is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for button 'Delete group'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for 'Terms & Conditions' link"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify if 'Add items' button is enabled"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Go to checkout , no dialogue should appear"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "447777": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateDeleteGroupOrderDialogue",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?\"merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down on menu item list until 'Delete group' button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Delete group' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate the text 'Delete this group?'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate the text 'This will delete all items added in the group. You can\"'\"t undo this later'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate Delete group dialogue for button 'Keep it'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Keep it' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Delete group' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Delete group' button on the right of 'Keep it' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "validate if text 'Group order' is present"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "302775": [
+      {
+        "module": "gofood",
+        "title": "Validate Leave the group dialogue",
+        "method": "validateMemberLeavingTheGroup",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a gopay customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down on menu item list until 'Leave group' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Leave group'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Yes, leave group'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "447772": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateLeavingTheGroupDialogue",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a gopay customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down on menu item list until 'Leave group' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Leave group'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate for title with text 'Are you sure you want to leave the group?'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate for description 'Your items will be removed. If you rejoin, you'll you need to re-add your items.'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate for button with text 'Stay'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate for button with text 'Yes, leave group'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Stay'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Leave group'"
+          },
+          {
+            "kind": "nlp",
+            "text": "dismiss the Leave group dialogue by clicking on dismiss button at the right corner of the dialogue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Leave group'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Yes, leave group'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "345480": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateRemovingMemberDialogue",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down on menu item list until 'Remove member' button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Remove member' button above 'Delete group' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate the text 'Remove member?'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate the text 'Any items they added will also be removed from the cart. You can't undo this later.'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate for button with text 'Cancel' below the text 'Any items they added will also be removed from the cart. You can't undo this later.'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate for button with text 'Yes, remove'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancel' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Remove member' button above 'Delete group' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close the Remove member dialogue by clicking on dismiss button at the right corner of the dialogue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Remove member' button above 'Delete group' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Yes, remove' button on the right of 'Cancel' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "302776": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateDoneChoosingItemsDialogue",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a gopay customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Done choosing items' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate the text All good! Now let\"'\"s\"wait for the host to check out"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate the text 'You can still add or edit items before the Host proceeds to checkout'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate button with text 'Add more items' below the text 'You can still add or edit items before the Host proceeds to checkout'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate button with text 'Go to GoFood Home' below the text 'You can still add or edit items before the Host proceeds to checkout'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Add more items' below the text 'You can still add or edit items before the Host proceeds to checkout'"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Done choosing items' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "dismiss the Done choosing items dialogue by clicking dismiss button at the right corner of the dialogue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Done choosing items' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Go to GoFood Home' below description with text 'You can still add or edit items before the Host proceeds to checkout"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Go to GoFood Home' below description with text 'You can still add or edit items before the Host proceeds to checkout"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "302974": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateMembersStillChoosingItemsDialogue",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Go to checkout' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Looks like some members are still choosing items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'After you go to checkout, members won't be able to make any changes'"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify the button with text Proceed to checkout below description 'After you go to checkout, members won't be able to make any changes'"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify the button 'Go back' below the button with text Proceed to checkout"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button 'Go back' below the button with text Proceed to checkout"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Go to checkout' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Proceed to checkout' button below description 'After you go to checkout, members won't be able to make any changes'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Harisen Outlet' title on checkout page"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "302774": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateSharedCartForTheMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a gopay customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify title with text 'Group cart'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify title with text '2'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for text 'From'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for text 'Harisen Outlet'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for title with text 'Host pays for everyone'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for text '(You)'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for Choosing items..."
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down on menu item list until Terms & Conditions is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for button 'Leave group'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for Terms & Conditions link"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for button 'Add items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for button 'Done choosing items'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600976": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoTieringTrayOnGroupOrderSharedCartPageOfHost",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Invite friends & get up to 35% off!"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Group purchase 35% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '25%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '3 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '30%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '4 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '35%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '5 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Min. group spend 30k'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Min. 5 persons, with each person purchases at least 1 item'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Pay with any payment method'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Applicable for group purchase only'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the link 'Terms and Conditions' below text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terms and Conditions'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'close' button on the dialogue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button on right corner of the dialogue above the text 'Group purchase 35% off!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '25%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '3 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '30%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '4 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '35%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '5 persons'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600978": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoTieringNudgesOnSharedCartPageOfHost",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for text '1 person(s) need to add items to get 25% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 25% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for text '1 person(s) need to add items to get 30% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 30% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for text '1 person(s) need to add items to get 35% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 35% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for text 'Congrats, enjoy the highest discount of 35%!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Congrats, enjoy the highest discount of 35%!'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "591009": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateTotalItemsSectionInSharedCart",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a gopay customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify title with text 'Group cart'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify title with text '2'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for text 'From'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for text 'Harisen Outlet'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for title with text 'Host pays for everyone'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for text '(You)'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for Choosing items..."
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '8 total items' or '6 total items' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify for text 'Excludes handling and delivery fees'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600982": [
+      {
+        "module": "gofood",
+        "title": "Verify the illustration for member when host delete the Group order",
+        "method": "validatePriceDisclaimerForMemberItemsSectionInSharedCart",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a gopay customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoCar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe down until 'Others in the group' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Price excludes handling and delivery fees' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600994": [
+      {
+        "module": "gofood",
+        "title": "Validate Done Choosing items dialogue for Member in shared Cart page ",
+        "method": "validateDeleteGroupOrderBottomTrayForMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a gopay customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until Gocar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Others in the group' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until 'The group order has been deleted' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'The Host already deleted the group.' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600998": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "ValidateDoneChoosingItemsDialogueForMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a gopay customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down until text 'Done choosing items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Done choosing items' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "If All good! Now let's wait for the host to check out is visible, dismiss it"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button 'Done choosing items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Done choosing items'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600966": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoTieringTrayOnGroupOrderSharedCartPageOfMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a gopay customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Invite friends & get up to 35% off!"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Group purchase 35% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '25%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '3 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '30%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '4 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '35%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '5 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Min. group spend 30k'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Min. 5 persons, with each person purchases at least 1 item'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Pay with any payment method'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Applicable for group purchase only'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the link 'Terms and Conditions' below text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terms and Conditions'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'close' button on the dialogue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button on right corner of the dialogue above the text 'Group purchase 35% off!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '25%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '3 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '30%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '4 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '35%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '5 persons'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600967": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoTieringNudgesOnSharedCartPageOfMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a new gopay customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until text '1 person(s) need to add items to get 25% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 25% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until text '1 person(s) need to add items to get 30% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 30% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until text '1 person(s) need to add items to get 35% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 35% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until text 'Congrats, enjoy the highest discount of 35%!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Congrats, enjoy the highest discount of 35%!'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600969": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateNudgeTwoPersonsToAddItemsNudgeOnSharedCartPageForMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a cash customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until text '2 person(s) need to add items to get 25% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '2 person(s) need to add items to get 25% off'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600970": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateNudgeOnePersonNeedToAddAnItemOnMemberSharedCartPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderSharedCartMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until text '1 person(s) need to add items to get 25% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 25% off'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "302470": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateOfferBarOnGroupOrderLandingPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderLandingPageTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoCar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button next to text 'Buy GoFood with friends in one purchase'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Buy GoFood with friends in one purchase' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button next to text 'New! Save resto to collections'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Group Order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up in the middle of screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Now you can set a deadline so members know how long they can choose items.' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until Group purchase is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe horizontally until next offer card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on offer card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close the dialogue by tapping dismiss button on right side of the dialogue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on offer card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate text 'GO Offer'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate text '25k food discount'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate icon right side of the text '25k food discount'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate text 'Min. group spend 25k'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate text 'Min. 2 persons, with each person purchase at least 1 item'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate text 'Pay with any payment method'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate text 'Applicable for group purchase only'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate link 'Terms and Conditions >' below text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terms and Conditions >'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Close"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "302383": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateGroupOrderLandingPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderLandingPageTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoCar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Buy GoFood with friends in one purchase' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Group Order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up in the middle of screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Now you can set a deadline so members know how long they can choose items.' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify From Harisen Outlet is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify if 'Choose who pays' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Everyone pays for their items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Everyone pays for their items"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Everyone pays an equal share'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Everyone pays an equal share"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Everyone pays an equal share"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'You pay for everyone'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on You pay for everyone"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on You pay for everyone"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Learn more about billing methods' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button on right corner of the dialogue above the text 'Choose who pays'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Deadline to add items' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'No deadline' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate text 'You can invite up to 7 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify button with text 'Create & invite friends'"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Create & invite friends' button is clickable or enabled"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "302358": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateGroupOrderLandingPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderLandingPageTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoCar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Buy GoFood with friends in one purchase' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Group Order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up in the middle of screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Now you can set a deadline so members know how long they can choose items.' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify From Harisen Outlet is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify if 'Choose who pays' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Everyone pays for their items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Everyone pays for their items"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Everyone pays an equal share'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Everyone pays an equal share"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Everyone pays an equal share"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'You pay for everyone'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on You pay for everyone"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on You pay for everyone"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Learn more about billing methods' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button on right corner of the dialogue above the text 'Choose who pays'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Deadline to add items' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'No deadline' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate text 'You can invite up to 7 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify button with text 'Create & invite friends'"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Create & invite friends' button is clickable or enabled"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600979": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoTieringTrayOnGroupOrderLandingPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderLandingPageTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Buy GoFood with friends in one purchase' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Group Order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up in the middle of screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Now you can set a deadline so members know how long they can choose items.' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Enjoy up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Spend min. 30k as a group. The more people who join, the bigger the discount!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Enjoy up to 35% off!"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Group purchase 35% off is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 25% is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 3 persons"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '30%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '4 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '35%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '5 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Min. group spend 30k'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Min. 5 persons, with each person purchases at least 1 item'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Pay with any payment method'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Applicable for group purchase only'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the link 'Terms and Conditions' below text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terms and Conditions'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on close button on the dialogue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button on right corner of the dialogue above the text 'Group purchase 35% off!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '25%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '3 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '30%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '4 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '35%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '5 persons'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "591011": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateDeadlinePresentInGroupOrderLandingPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderLandingPageTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Buy GoFood with friends in one purchase' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Group Order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'Now you can set a deadline so members know how long they can choose items.' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify From Harisen Outlet is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Choose who pays' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Everyone pays for their items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Deadline to add items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'No deadline'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on deadline button on the right of 'Deadline to add items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Set a deadline for members to choose items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Validate 'Set deadline' button is clickable or enabled"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "591010": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePaymentOptionsToggleForMemberInSharedCart",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderPaymentWidgetTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer having userId 8456115)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down until text 'Others in the group' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'GoPay'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'GoPay'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Select a payment method'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '** 1114'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600975": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoTieringNudgesOnMPSPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsPageTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until GoCar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/8a55d97a-d8c7-47a8-ab8e-74d533e7899a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 25% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 30% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 35% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Congrats, enjoy the highest discount of 35%!'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600972": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateNudgeTwoPersonsToAddItemsNudgeOnMpsPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsPageTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/8a55d97a-d8c7-47a8-ab8e-74d533e7899a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button next to text 'New! Save resto to collections'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '2 person(s) need to add items to get 25% off'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateNudgeTwoPersonsToAddItemsNudgeOnMpsPageMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for text '2 person(s) need to add items to get 25% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '2 person(s) need to add items to get 25% off'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600981": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateNudgeOnePersonNeedToAddAnItemOnHostMpsPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsPageTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/8a55d97a-d8c7-47a8-ab8e-74d533e7899a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button next to text 'New! Save resto to collections'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 25% off'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600983\u00ae\u00ae": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoTieringTrayOnGroupOrderMpsPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsPageTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button next to text 'New! Save resto to collections'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Invite friends & get up to 35% off!"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Group purchase 35% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '25%' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '3 persons' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '30%' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '4 persons' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '35%' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '5 persons' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Min. group spend 30k' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Min. 5 persons, with each person purchases at least 1 item' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Pay with any payment method' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Applicable for group purchase only' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Limited availability' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the link 'Terms and Conditions' below text 'Limited availability' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terms and Conditions' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on close button on the dialogue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button on right corner of the dialogue above 'Group purchase 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '25%' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '3 persons' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '30%' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '4 persons' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '35%' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '5 persons' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "303070": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateGroupOrderCheckoutPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderCheckOutPage.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +622913895280)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/cart\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text Harisen Outlet"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/cart\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Delivery is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify if Change button is disabled or not clickable"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until add notes button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Notes item on the right of Add address details or Add address details"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type text test notes"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Done button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify test notes is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until Add more button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Add more' button is clickable or enabled"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Payment summary' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Host pays for everyone' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until Host pays for everyone or Everyone pays for their items or You pay for everyone is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Host pays for everyone or Everyone pays for their items or You pay for everyone is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until Group purchase is visible'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify if Group purchase text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Best promo is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "303003": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateHostIsCheckingOutDialogue",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/group_order_shared_cart/groupOrderId?merchant_id=ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Go to checkout' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Proceed to checkout' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Harisen Outlet' title on checkout page"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gocore/settings\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Manage account' section is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Manage account' section"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Log out' below text 'Manage account'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Log out' on the dialogue"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(commonUtils.getValueFromTdpRes(memberLoginResponse.responseBody(), \"$.metadata.tdp.accessToken\"), commonUtils.getValueFromTdpRes(memberLoginResponse.responseBody(), \"$.metadata.tdp.refreshToken\"))"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text on dialogue 'The Host is checking out'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text on dialogue 'If you want to add or edit items, ask the Host to go back to menu'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button with text 'Check my items'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text Host is checking out..."
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\""
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the button text 'Go to GoFood home'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text on dialogue 'If you want to add or edit items, ask the Host to go back to menu'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button text 'Go to GoFood home'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600980": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateNudgeOnMemberForYouNeedToAddAnItemOnMpsPage",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoCar is visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'You need to add item to get 25% off' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600971": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoTieringNudgesOnMPSPageOfMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a fresh customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for text '1 person(s) need to add items to get 25% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 25% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for text '1 person(s) need to add items to get 30% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 30% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for text '1 person(s) need to add items to get 35% off' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 35% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for text 'Congrats, enjoy the highest discount of 35%!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Congrats, enjoy the highest discount of 35%!'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600973": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateNudgeOnePersonNeedToAddAnItemOnHostMpsPageMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button next to text 'New! Save resto to collections'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until '1 person(s) need to add items to get 25% off' is visible'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '1 person(s) need to add items to get 25% off'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "600974": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoTieringTrayOnGroupOrderMpsPageForMember",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/groupOrder/GroupOrderMpsMemberTests.java",
+        "project_id": "PR-176",
+        "suite_id": "30945403",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "platform://gofood/merchant/GroupOrderConstants.GO_PROMO_TIERING_RESTO"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*aloha_tooltip_action*' OR \u2018*ToolTipView.actionButton*\u2019 if 'New! Save resto to collections' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until 'Invite friends & get up to 35% off!' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Invite friends & get up to 35% off!"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Group purchase 35% off'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '25%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '3 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '30%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '4 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '35%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '5 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Min. group spend 30k'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Min. 5 persons, with each person purchases at least 1 item'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Pay with any payment method'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Applicable for group purchase only'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the link 'Terms and Conditions' below text 'Limited availability'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terms and Conditions'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'close' button on the dialogue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on dismiss button on right corner of the dialogue above the text 'Group purchase 35% off!'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '25%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '3 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '30%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '4 persons'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '35%'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify the text '5 persons'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4671008": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "testGoFoodHomeScreenLoads",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/CASmoke/CASmokeTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer from TDP)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify GoFood home screen is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "568657": [
+      {
+        "module": "gofood",
+        "title": "Check variant menu item flow from Reorder Variant",
+        "method": "validateFilterInfiniteListing",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/GoFoodHomeTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button if text 'Swipe up to see more content' visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on popup close button or cancel button on the left of Flash Sale 50% off"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 5 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 5 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 5 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 5 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 5 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 5 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 5 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on filter button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Rated 4.5+' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text '4.5 and above' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Apply button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gofood",
+        "title": "Verify spell correct in search bar MLS with refiner",
+        "method": "validateSpellCorrect",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_NEAR_ME)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type burgr on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Show me burgr"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3411747": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateVariantNotesReorder",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/GoFoodHomeTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +62815780544182)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.HISTORY_PAGE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Reorder button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "379705": [
+      {
+        "module": "gofood",
+        "title": "Verify that users will see different nudges in one search id/result",
+        "method": "testSearchBarInMLSWithBanner",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_NEAR_ME)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close the tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the search field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type pizza on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "487095": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateDifferentNudgesOnSearchMlS",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_SCREEN_KEYWORD_PIZZA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on More picks you should taste"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Drag from the text 'Pizza Hut Delivery' to the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 3 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 1 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on More picks you should taste if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe down on screen until top content is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "487434": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateDifferentNudgesOnSearchMlS",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_SCREEN_KEYWORD_PIZZA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on More picks you should taste"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Drag from the text 'Pizza Hut Delivery' to the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 3 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 1 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on More picks you should taste if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe down on screen until top content is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418656": [
+      {
+        "module": "gofood",
+        "title": "Verify when search bar is empty and keyboard dismissed on scrolled state then hide the search bar and show icon",
+        "method": "validateTapOnCTAOnEmptyState",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_NEAR_ME)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type qwertyiuyeiu98 on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Expand my search"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back button on the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418660": [
+      {
+        "module": "gofood",
+        "title": "Verify when there's refiner and user type on search bar the refiner should be hidden",
+        "method": "validateHideSearchBarAndShowIcon",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_NEAR_ME)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tooltip action button if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down 3 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 2 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tooltip action button if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on search menu button or icon on top right corner"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type ayam on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Clear the input field of ayam"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on search menu button or icon on top right corner"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418602": [
+      {
+        "module": "gofood",
+        "title": "Verify sort filter",
+        "method": "validateRefinerInMLS",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_CHICKEN_AND_DUCK_REFINER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type Ayam on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3408996": [
+      {
+        "module": "gofood",
+        "title": "Verify that the scroll nudge copy has ID and EN template",
+        "method": "validateSortFilter",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_SCREEN_KEYWORD_AYAM)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe left on rv choices until text Rated 4.5+ visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Rated 4.5+' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text '4.5 and above' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 2 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe left on element QuickFilter.collectionView until text Rated 4.5+ visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Rated 4.5+' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text '4.5 and above' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "487125": [
+      {
+        "module": "gofood",
+        "title": "Verify spell correct is shown and when user tap on it then user will get result for that spell correct query",
+        "method": "validateScrollNudgeInBahasa",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 20 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profile on top right"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on screen until Languages visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Languages button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Bahasa"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Ok button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Yes button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_SCREEN_KEYWORD_PIZZA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down 1 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "568680": [
+      {
+        "module": "gofood",
+        "title": "Verify after user select spell correct then delete the query then search another query then select filter and unselect filter user should see the correct listing restos result",
+        "method": "validateSpellCorrectWithRefiner",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_CHICKEN_AND_DUCK_REFINER)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tooltip action button or icon on right if tooltip message visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type burgr on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Show me burgr"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Delete text burgr on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "568738": [
+      {
+        "module": "gofood",
+        "title": "Verify the Thankyou feedback submitted when user tap on helpful button on Search Feedback Widget",
+        "method": "validateSpellCorrectRestoResult",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_NEAR_ME)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tooltip action button or icon on right if tooltip message visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the search field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type burgr on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Show me burgr"
+          },
+          {
+            "kind": "nlp",
+            "text": "Clear the input field of burgr"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type ayam on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on filter button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Rated 4.5+' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text '4.5 and above' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Apply button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on filter button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Clear filter button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "576441": [
+      {
+        "module": "gofood",
+        "title": "Verify when user tap on not helpful button on Search Feedback Widget",
+        "method": "validateTapHelpfulSearchFeedbackWidget",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_SCREEN_KEYWORD_PIZZA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Helpful button and immediately verify text Thank you! Feedback submitted is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "576442": [
+      {
+        "module": "gofood",
+        "title": "Verify when user select Other reason on Not Helpful feedback",
+        "method": "validateTapNotHelpfulSearchFeedbackWidget",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_SCREEN_KEYWORD_PIZZA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Not Helpful button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text Irrelevant Ads button and immediately verify text Thank you! Feedback submitted is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text Irrelevant Ads button and immediately verify text Thank you! Feedback submitted is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "579361": [
+      {
+        "module": "gofood",
+        "title": "Verify when user select Other reason on Not Helpful feedback",
+        "method": "validateTapNotHelpfulSearchFeedbackWidget",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_SCREEN_KEYWORD_PIZZA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Not Helpful button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text Irrelevant Ads button and immediately verify text Thank you! Feedback submitted is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text Irrelevant Ads button and immediately verify text Thank you! Feedback submitted is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "576444": [
+      {
+        "module": "gofood",
+        "title": "Verify search empty state CTA flow on search bar MLS",
+        "method": "validateTapOtherOnSearchFeedbackWidget",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_SCREEN_KEYWORD_PIZZA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Not Helpful button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Other reason' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type Testing QA on the tray that appear"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Other reason' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type Testing QA on the tray that appear"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Submit button and immediately verify text Thank you! Feedback submitted is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "418655": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateMlsSearchEmptyStateCtaFlow",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_NEAR_ME)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tooltip action button if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the search field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type zxcvbnkjhg444 on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Expand my search'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Expand my search'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Clear the input field of zxcvbnkjhg444"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type ayam on search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back button on the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen 1 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back button on the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "568737": [
+      {
+        "module": "gofood",
+        "title": "Verify when in empty state then select any filter user will see No resto with that filter with Clear filter CTA",
+        "method": "validateSpellCorrectExpandSearch",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_BEVERAGES)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Search in beverage"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type burgr"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Expand my search"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on back button on the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "422061": [
+      {
+        "module": "gofood",
+        "title": "Verify when tap on Not helpful then when in feedback unselected state tap on filter the feedback widget should disappear",
+        "method": "validateSelectFilterOnEmptyState",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_COLLECTION_NEAR_ME)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the search field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type qwertyiuyeiu98"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on filter button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Rated 4.5+' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text '4.5 and above' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 4 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Apply button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on `Clear filter`"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Clear the input field of qwertyiuyeiu98"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "579349": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateTapFilterWhenFeedbackShown",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/MLSTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until GoFood is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MLS_SCREEN_KEYWORD_PIZZA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Not Helpful button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on filter button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Rated 4.5+' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text '4.5 and above' if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 4 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Apply button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4671021": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validatePromoShuffleCard",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/GrowthTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer with phone number +62815780544182)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.PROMO_PAGE)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until text 'Promos on your foodprints!' is shown"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5553629": [
+      {
+        "module": "gofood",
+        "title": "Verify the minimum and maximum phone number",
+        "method": "validateEcardGiftingOnPickup",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/checkout/GiftingTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MPS_SCREEN_H_ASEP_MARIA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Add button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on multi cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the close 'X' button at the top right of the popup if text MURAAAH delivery isn't available for now is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Change button on the top right"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Pickup"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Confirm button on the right of Cancel button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Confirm button on the right of Cancel button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until text 'Request cutlery or straws' visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5553609": [
+      {
+        "module": "gofood",
+        "title": "Verify the error state when user tap save button without filling the requirement setup",
+        "method": "validateMinAndMaxPhoneNumber",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/checkout/GiftingTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MPS_SCREEN_H_ASEP_MARIA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Add button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on multi cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until text 'Send as a gift' visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Send as a gift"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Recipient phone number"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type 081 on recipient phone bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap +62"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Save button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5553608": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateErrorMessageOnGifting",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/checkout/GiftingTests.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MPS_SCREEN_H_ASEP_MARIA)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on X button on the tooltip if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Add button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on multi cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until text 'Send as a gift' visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Send as a gift"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Save button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "590728": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateGateTray",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/checkout/PoiTest.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MPS_SCREEN_DOMINOS_PIZZZA_MENTENG_HUIS)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Add button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on multi cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the close 'X' button at the top right of the popup if text MURAAAH delivery isn't available for now is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element overflowButton"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element viewContainerMethodSelector"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up 4 times to scroll down the page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Cash"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Change button on the second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Search bar"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type grand indonesia in Search location"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the text 'Grand Indonesia' on the second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Place delivery order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Confirm delivery point"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "590926": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateUpdatePriceTray",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/checkout/PoiTest.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MPS_SCREEN_GADO_GADO_RICH_15_SENAYAN)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Add button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on multi cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the close 'X' button at the top right of the popup if text MURAAAH delivery isn't available for now is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element overflowButton"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element viewContainerMethodSelector"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up 4 times to scroll down the page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Cash"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Change button on the second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Search location"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type grand indonesia in Search location"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the text 'Grand Indonesia' on the second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Place delivery order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Confirm delivery point"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until text 'Jl. MH Thamrin' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "590730": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateGateTrayHemat",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/checkout/PoiTest.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MPS_SCREEN_HEMAT_PAGE_KETAN_GURIH_TEST)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Add button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 1 item"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Change button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Search location"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type pasaraya in Search location"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pasaraya Blok M"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element overflowButton"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element viewContainerMethodSelector"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Cash"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Place delivery order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pasaraya Main Lobby"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Confirm delivery point"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until text 'Pasaraya' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "590883": [
+      {
+        "module": "gofood",
+        "title": null,
+        "method": "validateRecentSearch",
+        "source_file": "gofood/src/test/java/io/gojek/gofood/tests/discovery/checkout/PoiTest.java",
+        "project_id": "PR-176",
+        "suite_id": "28796102",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get a customer with phone number +62815780544182)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoFood"
+          },
+          {
+            "kind": "deeplink",
+            "text": "returnDeeplinkByPlatform(Deeplinks.MPS_SCREEN_GADO_GADO_RICH_15_SENAYAN)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Close tooltip text if it is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Add button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on multi cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the cart container"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "If text 'MURAAAH delivery isn't available for now' is visible, tap on the close 'X' button at the top right of the popup to dismiss it"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Change button on the second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pasaraya main lobby"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element overflowButton"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on element viewContainerMethodSelector"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Cash"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Place delivery order"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up on screen until text 'Pasaraya' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

@@ -1,0 +1,1159 @@
+{
+  "_meta": {
+    "generated_by": "extract_nav_index.py",
+    "repo": "gmt",
+    "generated_from_repo_sha": "a8c997d414a07560a1a9356c3528a6d364f27a45",
+    "generated_at": "2026-08-17T09:56:48.838571+00:00",
+    "module": "driver-platform-android",
+    "case_ids_indexed": 49,
+    "warning": "deeplinks_literal / deeplinks_enum_ref / case ids are exact regex extractions. page_object_calls_heuristic and steps_gherkin are best-effort navigation aids, NOT a guaranteed-complete or verified-correct step list -- method bodies and Gherkin text are free-form, unlike the structured id/deeplink data."
+  },
+  "cases": {
+    "5087867": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testHomeScreenSanity",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getHomePage",
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "assertHomePageElements",
+          "goOnlineIfOffline",
+          "verifyDriverIsOnline",
+          "assertOnlineElement"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087868": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testHomeAlohaToolTip",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "assertAlohaTooltip",
+          "verifyToolTipCloseActions"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087869": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testHomeAlohaToolTip",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "assertAlohaTooltip",
+          "verifyToolTipCloseActions"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087870": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToProfilePictureSideMenuAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "verifyProfilePictureIsDisplayed",
+          "clickOnProfilePicture",
+          "verifyProfileMenuPageIsDisplayed",
+          "pressBackOnProfileSideMenu"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087871": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToProfilePictureSideMenuAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "verifyProfilePictureIsDisplayed",
+          "clickOnProfilePicture",
+          "verifyProfileMenuPageIsDisplayed",
+          "pressBackOnProfileSideMenu"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087872": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToBidSettingsAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "clickOnCollapsedView",
+          "skipAlohaToolTip",
+          "verifyBidSettingPageDisplayed",
+          "tabOnCloseBtnOfBidSetting",
+          "verifyBidSettingViewDisappeared"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087873": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGoOnlineAndOfflineFunctionality",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "goOnlineIfOffline",
+          "verifyDriverIsOnline",
+          "assertDriverOnlineElements",
+          "goOfflineIfOnline",
+          "verifyDriverIsOffline"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087874": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGoOnlineAndOfflineFunctionality",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "goOnlineIfOffline",
+          "verifyDriverIsOnline",
+          "assertDriverOnlineElements",
+          "goOfflineIfOnline",
+          "verifyDriverIsOffline"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087878": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToPendapatanAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnPendapatanTab",
+          "verifyPendatanPageIsDisplayed",
+          "pressBackOnPendapatanPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087879": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToPendapatanAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnPendapatanTab",
+          "verifyPendatanPageIsDisplayed",
+          "pressBackOnPendapatanPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087880": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToSwadayaAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnSwadayaTab",
+          "verifySwadayaPageIsDisplayed",
+          "pressBackOnSwadayaPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087881": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToSwadayaAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnSwadayaTab",
+          "verifySwadayaPageIsDisplayed",
+          "pressBackOnSwadayaPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087882": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToPesanAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnPesanTab",
+          "verifyPesanPageIsDisplayed",
+          "pressBackOnPessanPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087883": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToPesanAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnPesanTab",
+          "verifyPesanPageIsDisplayed",
+          "pressBackOnPessanPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087886": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToRainReportAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnRainReportIcon",
+          "verifyRainReportPageIsDisplayed",
+          "clickOnCloseRainReportPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087887": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToRainReportAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnRainReportIcon",
+          "verifyRainReportPageIsDisplayed",
+          "clickOnCloseRainReportPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087884": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToPoiRecommendationAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnPoiRecommendationIcon",
+          "verifyPoiRecommendationPageDisplayed",
+          "pressOnBackBtnOnPoiRecommendationPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087885": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToPoiRecommendationAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "clickOnPoiRecommendationIcon",
+          "verifyPoiRecommendationPageDisplayed",
+          "pressOnBackBtnOnPoiRecommendationPage",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087888": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testCurrentLocationIconHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "scrollOnHomeScreenToActivateCurrentLocationIcon",
+          "verifyCurrentLocationIconIsPresent",
+          "clickOnCurrentLocationIcon"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087876": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testSuspendedBlockingCardHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "updateDriverStatus",
+          "getUserId",
+          "goOnlineIfOffline",
+          "verifySuspendBlockingCardIsDisplayed",
+          "assertSuspensionBlockingCardElements",
+          "clickOnOpenHelpBtn",
+          "verifyHelpCenterPageDisplayed",
+          "pressSystemBackBtn",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087875": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testFiredBlockingCardHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "updateDriverStatus",
+          "getUserId",
+          "goOnlineIfOffline",
+          "verifyFiredBlockingCardIsDisplayed",
+          "assertFiredBlockingCardElements",
+          "clickOnOpenHelpBtn",
+          "verifyHelpCenterPageDisplayed",
+          "pressSystemBackBtn",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087896": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGPSMandatoryCardWhenLocationPermissionDeniesOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "changePermissionAndRelaunch",
+          "verifyMandatoryPermissionPageDisplayed",
+          "clickOnLocationPermission",
+          "clickOnStepOneToProvideLocationPermission",
+          "handleRuntimePermissionAction",
+          "clickOnGiveAccessBtn",
+          "clickOnDoneBtn",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087890": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGPSMandatoryCardWhenLocationPermissionDeniesOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "changePermissionAndRelaunch",
+          "verifyMandatoryPermissionPageDisplayed",
+          "clickOnLocationPermission",
+          "clickOnStepOneToProvideLocationPermission",
+          "handleRuntimePermissionAction",
+          "clickOnGiveAccessBtn",
+          "clickOnDoneBtn",
+          "verifyHomePageIsDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087910": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToTransportBookingScreensAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "makeTransportBookingAndUpdateBookingStatusToPickedUp",
+          "goOnlineIfOffline",
+          "verifyTransportDropOffPageIsDisplayed",
+          "swipeToCompleteTransportBooking",
+          "verifyTransportSummeryIsDisplayed",
+          "clickOnFinishedOnSummerPage",
+          "pressSystemBackBtn",
+          "verifyTransportSummeryIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087911": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToTransportBookingScreensAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "makeTransportBookingAndUpdateBookingStatusToPickedUp",
+          "goOnlineIfOffline",
+          "verifyTransportDropOffPageIsDisplayed",
+          "swipeToCompleteTransportBooking",
+          "verifyTransportSummeryIsDisplayed",
+          "clickOnFinishedOnSummerPage",
+          "pressSystemBackBtn",
+          "verifyTransportSummeryIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087877": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToTransportBookingScreensAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "makeTransportBookingAndUpdateBookingStatusToPickedUp",
+          "goOnlineIfOffline",
+          "verifyTransportDropOffPageIsDisplayed",
+          "swipeToCompleteTransportBooking",
+          "verifyTransportSummeryIsDisplayed",
+          "clickOnFinishedOnSummerPage",
+          "pressSystemBackBtn",
+          "verifyTransportSummeryIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087912": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToTransportBookingScreensAndBackToHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "makeTransportBookingAndUpdateBookingStatusToPickedUp",
+          "goOnlineIfOffline",
+          "verifyTransportDropOffPageIsDisplayed",
+          "swipeToCompleteTransportBooking",
+          "verifyTransportSummeryIsDisplayed",
+          "clickOnFinishedOnSummerPage",
+          "pressSystemBackBtn",
+          "verifyTransportSummeryIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087913": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToTransportBookingScreensAndBackToHomeScreenWhenBookingCancelledByCustomer",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "makeTransportBooking",
+          "goOnlineIfOffline",
+          "verifyTransportPickUpPageIsDisplayed",
+          "cancelByUser",
+          "assertBookingCancelCardElements",
+          "clickOnPopUpOkay"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087929": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToAirportScreenAndBackToHomeAfterExit",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "setAirportQueueTogglesEnabled",
+          "emptyTheAirport",
+          "addADriverToAirportQueue",
+          "whitelistDriverForAirportQueue",
+          "getUserId",
+          "setLocation",
+          "goOnlineIfOffline",
+          "verifyAirportQueuePageDisplayed",
+          "clickOnExitBtnOfAirportQueue",
+          "clickOnAcceptExitConfirmation"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087930": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testNavigationToAirportScreenAndBackToHomeAfterExit",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "setAirportQueueTogglesEnabled",
+          "emptyTheAirport",
+          "addADriverToAirportQueue",
+          "whitelistDriverForAirportQueue",
+          "getUserId",
+          "setLocation",
+          "goOnlineIfOffline",
+          "verifyAirportQueuePageDisplayed",
+          "clickOnExitBtnOfAirportQueue",
+          "clickOnAcceptExitConfirmation"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087889": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGPSMandatoryCardWhenLocationSystemSettingIsDisabledOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "changeSettingAndRelaunch",
+          "verifyLocationSettingPopUpIsDisplayed",
+          "assertLocationSettingPopUpElementsOfCard1",
+          "clickOnPopUpOkay",
+          "assertLocationSettingPopUpElementsOfCard2",
+          "clickOnSystemPopupOkayIfDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087891": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGPSMandatoryCardWhenLocationSystemSettingIsDisabledOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "verifyHomePageIsDisplayed",
+          "changeSettingAndRelaunch",
+          "verifyLocationSettingPopUpIsDisplayed",
+          "assertLocationSettingPopUpElementsOfCard1",
+          "clickOnPopUpOkay",
+          "assertLocationSettingPopUpElementsOfCard2",
+          "clickOnSystemPopupOkayIfDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087906": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGTPDCardOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "setPreferredDestinationToggle",
+          "setHomeToggleValueAndRestart",
+          "closeAndLaunchApp",
+          "goOnlineIfOffline",
+          "verifyDriverIsOnline",
+          "setGTPD",
+          "verifyGTPDCardIsDisplayed",
+          "assertGTPDCardElements"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087907": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGTPDCancelFunctionalityOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "setPreferredDestinationToggle",
+          "setHomeToggleValueAndRestart",
+          "closeAndLaunchApp",
+          "goOnlineIfOffline",
+          "verifyDriverIsOnline",
+          "setGTPD",
+          "verifyGTPDCardIsDisplayed",
+          "clickOnCancelGTPDOnHomeScreen",
+          "verifyGTPDCancelPopupDisplayed",
+          "assertGTPDCancelPopupElements",
+          "clickOnDeleteGTPD",
+          "verifyGTPDCardIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087916": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testMockLocationBlockCardOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "setMockLocationToggle",
+          "closeAndLaunchApp",
+          "setLocation",
+          "goOnlineIfOffline",
+          "verifyMockLocationBlockingCardIsDisplayed",
+          "assertMockLocationBlockCardElements",
+          "clickOnPopUpCloseBtn",
+          "verifyMockLocationBlockingCardIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087919": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGoFoodBookingNavigationHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "createDriverUsingType",
+          "loginBackDoor",
+          "clickOnCompleteWalkThrough",
+          "closeAllAlohaToolTipIfDisplayed",
+          "makeFoodBooking",
+          "goOnlineIfOffline",
+          "sleep"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087920": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGoFoodBookingNavigationHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "createDriverUsingType",
+          "loginBackDoor",
+          "clickOnCompleteWalkThrough",
+          "closeAllAlohaToolTipIfDisplayed",
+          "makeFoodBooking",
+          "goOnlineIfOffline",
+          "sleep"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087926": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGoMartBookingNavigationHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "createDriverUsingType",
+          "makeGoMartBooking",
+          "loginBackDoor",
+          "clickOnCompleteWalkThrough",
+          "closeAllAlohaToolTipIfDisplayed",
+          "goOnlineIfOffline",
+          "sleep"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087925": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGoMartBookingNavigationHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "createDriverUsingType",
+          "makeGoMartBooking",
+          "loginBackDoor",
+          "clickOnCompleteWalkThrough",
+          "closeAllAlohaToolTipIfDisplayed",
+          "goOnlineIfOffline",
+          "sleep"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087927": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGoShopBookingNavigationHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "createDriverUsingType",
+          "makeGoShopBooking",
+          "loginBackDoor",
+          "clickOnCompleteWalkThrough",
+          "closeAllAlohaToolTipIfDisplayed",
+          "goOnlineIfOffline",
+          "verifyUlyssesPickUpPageIsDisplayed",
+          "slideToPickUp",
+          "verifyPurchaseReceiptPageIsDisplayed",
+          "enterAmountAndSubmit",
+          "verifyPhotoUploadPopUpDisplayed",
+          "clickOnSubmitBtn",
+          "verifyPhotoUploadPageDisplayed",
+          "clickOnCTAPhoto"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087928": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGoShopBookingNavigationHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "createDriverUsingType",
+          "makeGoShopBooking",
+          "loginBackDoor",
+          "clickOnCompleteWalkThrough",
+          "closeAllAlohaToolTipIfDisplayed",
+          "goOnlineIfOffline",
+          "verifyUlyssesPickUpPageIsDisplayed",
+          "slideToPickUp",
+          "verifyPurchaseReceiptPageIsDisplayed",
+          "enterAmountAndSubmit",
+          "verifyPhotoUploadPopUpDisplayed",
+          "clickOnSubmitBtn",
+          "verifyPhotoUploadPageDisplayed",
+          "clickOnCTAPhoto"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087895": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testGPSMandatoryCardWhenLocationPermissionIsDeniedOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "changePermissionAndRelaunch",
+          "verifyMandatoryPermissionPageDisplayed",
+          "clickOnLocationPermission",
+          "clickOnStepOneToProvideLocationPermission",
+          "handleRuntimePermissionAction",
+          "verifyAccessLocationPopupIsDisplayed",
+          "assertCantAccessYourLocationPopup"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087898": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testMandatoryPhysicalActivityErrorWhenPhysicalPermissionIsDeniedOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "changePermissionAndRelaunch",
+          "verifyMandatoryPermissionPageDisplayed",
+          "clickOnActivityPermission",
+          "clickOnAllowBtn",
+          "clickOnDoneBtn",
+          "verifyMockLocationBlockingCardIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087899": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testMandatoryPhysicalActivityErrorWhenPhysicalPermissionIsDeniedOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "changePermissionAndRelaunch",
+          "verifyMandatoryPermissionPageDisplayed",
+          "clickOnActivityPermission",
+          "clickOnAllowBtn",
+          "clickOnDoneBtn",
+          "verifyMockLocationBlockingCardIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087900": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testMandatoryPhysicalActivityErrorWhenPhysicalPermissionIsNotGrantedAndDeniedOnMandatoryPageOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "changePermissionAndRelaunch",
+          "verifyMandatoryPermissionPageDisplayed",
+          "clickOnActivityPermission",
+          "clickOnDenyPermissionBtn"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087901": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testMandatoryNotificationErrorWhenNotificationPermissionIsNotGrantedOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getCapabilities",
+          "getCapability",
+          "parseDouble",
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "changePermissionAndRelaunch",
+          "verifyMandatoryPermissionPageDisplayed",
+          "clickOnNotificationPermission",
+          "clickOnAllowBtn",
+          "clickOnDoneBtn",
+          "verifyMockLocationBlockingCardIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087902": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testMandatoryNotificationErrorWhenNotificationPermissionIsNotGrantedOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getCapabilities",
+          "getCapability",
+          "parseDouble",
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "changePermissionAndRelaunch",
+          "verifyMandatoryPermissionPageDisplayed",
+          "clickOnNotificationPermission",
+          "clickOnAllowBtn",
+          "clickOnDoneBtn",
+          "verifyMockLocationBlockingCardIsNotDisplayed"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087903": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testMandatoryNotificationErrorWhenNotificationPermissionIsNotGrantedAndDeniedOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getCapabilities",
+          "getCapability",
+          "parseDouble",
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "changePermissionAndRelaunch",
+          "verifyMandatoryPermissionPageDisplayed",
+          "clickOnNotificationPermission",
+          "clickOnDenyPermissionBtn"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ],
+    "5087914": [
+      {
+        "module": "driver-platform-android",
+        "title": null,
+        "method": "testBidOnHomeScreen",
+        "source_file": "driver-platform-android/src/test/java/io/gojek/driverplatform/tests/componenttests/DPHomePageTests.java",
+        "annotation": "TestInfo",
+        "deeplinks_literal": [],
+        "deeplinks_enum_ref": [],
+        "page_object_calls_heuristic": [
+          "getDriver",
+          "goToHomePageComponent",
+          "closeAllAlohaToolTipIfDisplayed",
+          "goOnlineIfOffline",
+          "setLocation",
+          "consumerMakeTransportBooking",
+          "sleep"
+        ],
+        "framework": "GMT_JAVA"
+      }
+    ]
+  }
+}

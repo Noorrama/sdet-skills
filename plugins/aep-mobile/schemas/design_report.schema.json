@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "design_report — the sidecar written beside design_context.json",
+  "description": "Design-process feedback and the extraction's own conservation proof. Kept out of design_context.json because that file is consumed for screens, elements and flow, while these are tallies about how the board was authored. Written as <design_context>.report.json. Downstream: sdet-plan-generator renders the Design Convention Compliance table from it, and check_design_context.py verifies conservation against it — an absent sidecar makes those checks report SKIPPED, never silently pass.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["convention_compliance"],
+  "properties": {
+    "generated_at": { "type": "string", "description": "ISO-8601 timestamp of the extraction run." },
+    "design_context_file": { "type": "string", "description": "Name of the design_context this report describes, so a stray sidecar cannot be paired with the wrong context." },
+    "app": { "type": "string" },
+    "convention_compliance": {
+      "type": "object",
+      "description": "Tallies of how well the export follows the design team's flow-authoring conventions — the feedback loop back to design. connectors_total must equal the sum of the six connector buckets; a shortfall means connectors were dropped silently, which is the failure this block exists to make impossible.",
+      "additionalProperties": false,
+      "properties": {
+        "connectors_total": { "type": "integer", "description": "Every CONNECTOR node in the export." },
+        "connectors_resolved_to_screen": { "type": "integer", "description": "Both endpoints resolved to screens (standard #1 followed)." },
+        "connectors_inferred_to_screen": { "type": "integer", "description": "Destination was an element, a lane caption or a label frame; the screen was inferred." },
+        "connectors_unresolvable": { "type": "integer", "description": "Floating endpoint, orphaned node id, or a destination with no board-node ancestor. Each is also a blocking_issues entry." },
+        "connectors_intra_screen": { "type": "integer", "description": "Both endpoints inside the same screen (including two state-frames of one screen) — a state transition or annotation, not navigation." },
+        "connectors_to_decision": { "type": "integer", "description": "Connectors terminating on a DECISION box. Each is consumed by contraction, which emits one edge per labelled exit — so this is its own bucket, not part of connectors_resolved_to_screen." },
+        "note_connectors": { "type": "integer", "description": "Either endpoint (or an ancestor of it) is an annotation component or Note/Context text." },
+        "caption_endpoints": { "type": "integer", "description": "Connectors landing on a CAPTION / LANE_BANNER rather than a screen." },
+        "label_frames_resolved": { "type": "integer", "description": "Connectors rescued by the label-frame fallback: the destination was a gibberish-named strip that proved to be the label of exactly one column-aligned screen below it. Fires only on a resolution failure, never as a sweep." },
+        "decision_nodes": { "type": "integer", "description": "Board nodes classified DECISION — a small question box with 2+ outgoing connectors." },
+        "contracted_edges": { "type": "integer", "description": "Edges emitted by collapsing a decision box (edge_source CONNECTOR_CONTRACTED). Far above connectors_total means contraction escaped its one-hop / fan-out bounds and is manufacturing flows." },
+        "lane_entry_inferred": { "type": "integer", "description": "Edges whose destination is a lane's entry screen picked by reading order rather than stated." },
+        "reactions_with_destination": { "type": "integer", "description": "Tap-family reactions naming a destination (standard #2 followed)." },
+        "reactions_without_destination": { "type": "integer", "description": "Tap trigger with a null/absent destination (standard #2 not followed)." },
+        "unlabelled_branches": { "type": "integer", "description": "A trigger element with 2+ outgoing connectors and no labels to discriminate them (standard #4 not followed)." },
+        "non_descriptive_names": { "type": "integer", "description": "Screens still named Frame 427, Group 12 etc after the banner-rename fallback ran (standard #3 not followed)." },
+        "screen_id_from_banner": { "type": "integer", "description": "Screens whose gibberish name was replaced by the text of the section banner above them. Each rename moves a join key, so each is also a DEGRADED gap in design_context." },
+        "unreachable_screens": { "type": "integer", "description": "Screens in no ui_flow edge and no flowStartingPoints entry." },
+        "notes_total": { "type": "integer", "description": "NOTE-classified board nodes found. The three notes_* buckets must sum to this; a shortfall means note text was dropped silently." },
+        "notes_attached_by_connector": { "type": "integer", "description": "Notes routed by an explicit connector to the screen or element they describe (standard #5 followed)." },
+        "notes_attached_by_geometry": { "type": "integer", "description": "Notes with no connector, attached to the screen containing them or nearest within the same parent. Inferred, not drawn." },
+        "notes_unattached": { "type": "integer", "description": "Notes belonging to no screen — outside every frame and with no connector. Reported as one INFO gap, never a blocker." }
+      }
+    },
+    "screen_renames": {
+      "type": "array",
+      "description": "Every screen_id replaced by a banner name, so a QA holding an older plan can re-map. Empty when nothing was renamed.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "banner_text": { "type": "string" },
+          "banner_node_id": { "type": "string" },
+          "screen_source_ref": { "type": "string" }
+        }
+      }
+    }
+  }
+}

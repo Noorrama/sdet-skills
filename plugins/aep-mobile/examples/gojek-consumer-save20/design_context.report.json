@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-01-14T09:22:11.004Z",
+  "design_context_file": "design_context.json",
+  "app": "gojek-consumer",
+  "convention_compliance": {
+    "connectors_total": 3,
+    "connectors_resolved_to_screen": 1,
+    "connectors_inferred_to_screen": 0,
+    "connectors_unresolvable": 0,
+    "connectors_intra_screen": 0,
+    "connectors_to_decision": 0,
+    "note_connectors": 2,
+    "caption_endpoints": 0,
+    "decision_nodes": 0,
+    "contracted_edges": 0,
+    "lane_entry_inferred": 0,
+    "unlabelled_branches": 0,
+    "non_descriptive_names": 0,
+    "unreachable_screens": 0,
+    "notes_total": 2,
+    "notes_attached_by_connector": 2,
+    "notes_attached_by_geometry": 0,
+    "notes_unattached": 0,
+    "label_frames_resolved": 0,
+    "screen_id_from_banner": 0
+  },
+  "screen_renames": []
+}

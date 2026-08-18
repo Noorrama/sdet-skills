@@ -1,0 +1,199 @@
+{
+  "feature_name": "Save Payment-Method API (EPIC-1122)",
+  "epics": [
+    {
+      "id": "EPIC-1122",
+      "title": "Save Payment-Method API — wallet-service",
+      "stories": [
+        {
+          "id": "STORY-1233",
+          "title": "DB Schema & Repository Layer for payment_cards",
+          "tasks": [
+            {
+              "id": "STORY-1233-T1",
+              "type": "DB_SCHEMA",
+              "component": "wallet-service",
+              "package": "com.gojek.wallet.repository",
+              "api_contract": {
+                "route": null,
+                "method": null,
+                "request_fields": [],
+                "response_fields": [],
+                "error_codes": [],
+                "auth": null
+              },
+              "validation_constraints": [
+                {
+                  "layer": "db",
+                  "rule": "payment_cards table: columns id (UUID PK), customer_id (VARCHAR 64, NOT NULL), fingerprint (VARCHAR 64, NOT NULL), token (VARCHAR 128, NOT NULL), created_at (TIMESTAMP, NOT NULL default NOW())",
+                  "reuses": null
+                },
+                {
+                  "layer": "db",
+                  "rule": "UNIQUE constraint on (customer_id, fingerprint) — enforces deduplication at DB level",
+                  "reuses": null
+                },
+                {
+                  "layer": "db",
+                  "rule": "Index on customer_id for fast fingerprint lookup",
+                  "reuses": null
+                },
+                {
+                  "layer": "repository",
+                  "rule": "CardRepository#save persists PaymentCard entity and returns auto-generated UUID id",
+                  "reuses": null
+                },
+                {
+                  "layer": "repository",
+                  "rule": "CardRepository#existsByCustomerIdAndFingerprint returns true when (customer_id, fingerprint) pair exists",
+                  "reuses": null
+                },
+                {
+                  "layer": "repository",
+                  "rule": "CardRepository#existsByCustomerIdAndFingerprint returns false when pair not found",
+                  "reuses": null
+                }
+              ],
+              "test_layer": "integration",
+              "preconditions": [
+                "Testcontainers PostgreSQL (or local PostgreSQL) available",
+                "Flyway migration V001__create_payment_cards.sql applied",
+                "No existing payment_cards table in test schema before migration"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "STORY-1234",
+          "title": "Field Validation & Expiry Check for POST /payment/v1/cards",
+          "tasks": [
+            {
+              "id": "STORY-1234-T1",
+              "type": "NEW_HTTP_API",
+              "component": "wallet-service",
+              "package": "com.gojek.wallet.service",
+              "api_contract": {
+                "route": "POST /payment/v1/cards",
+                "method": "POST",
+                "request_fields": [
+                  {"name": "cardNumber",  "type": "string", "required": true,  "validation": "13-19 digits, Luhn-valid"},
+                  {"name": "expiryMonth", "type": "int",    "required": true,  "validation": "1-12"},
+                  {"name": "expiryYear",  "type": "int",    "required": true,  "validation": "4-digit calendar year"},
+                  {"name": "cvv",         "type": "string", "required": true,  "validation": "3-4 digits"},
+                  {"name": "holderName",  "type": "string", "required": false, "validation": "max 50 chars"}
+                ],
+                "response_fields": [],
+                "error_codes": ["MISSING_FIELD", "INVALID_EXPIRY"],
+                "auth": "Bearer {token}"
+              },
+              "validation_constraints": [
+                {
+                  "layer": "controller",
+                  "rule": "cardNumber present and 13-19 digits, Luhn-valid — 400 MISSING_FIELD {field: cardNumber} if absent or invalid",
+                  "reuses": "CardValidationService"
+                },
+                {
+                  "layer": "controller",
+                  "rule": "expiryMonth present — 400 MISSING_FIELD {field: expiryMonth} if absent",
+                  "reuses": "CardValidationService"
+                },
+                {
+                  "layer": "controller",
+                  "rule": "expiryYear present — 400 MISSING_FIELD {field: expiryYear} if absent",
+                  "reuses": "CardValidationService"
+                },
+                {
+                  "layer": "controller",
+                  "rule": "cvv present — 400 MISSING_FIELD {field: cvv} if absent",
+                  "reuses": "CardValidationService"
+                },
+                {
+                  "layer": "service",
+                  "rule": "Expiry check: reject if expiryYear < currentYear OR (expiryYear == currentYear AND expiryMonth < currentMonth) — 400 INVALID_EXPIRY",
+                  "reuses": "CardValidationService"
+                },
+                {
+                  "layer": "service",
+                  "rule": "Validation fires before any DB call or vault-service call",
+                  "reuses": null
+                }
+              ],
+              "test_layer": "component",
+              "preconditions": [
+                "STORY-1233 merged — payment_cards table exists",
+                "CardValidationService bean present in Spring context",
+                "No vault-service mock needed for this story (validation is pre-vault)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "STORY-1235",
+          "title": "Deduplication, Vault Tokenisation & Happy-Path Response",
+          "tasks": [
+            {
+              "id": "STORY-1235-T1",
+              "type": "NEW_HTTP_API",
+              "component": "wallet-service",
+              "package": "com.gojek.wallet.service, com.gojek.wallet.controller",
+              "api_contract": {
+                "route": "POST /payment/v1/cards",
+                "method": "POST",
+                "request_fields": [
+                  {"name": "cardNumber",  "type": "string", "required": true},
+                  {"name": "expiryMonth", "type": "int",    "required": true},
+                  {"name": "expiryYear",  "type": "int",    "required": true},
+                  {"name": "cvv",         "type": "string", "required": true},
+                  {"name": "holderName",  "type": "string", "required": false}
+                ],
+                "response_fields": [
+                  {"status": 200, "body": "{\"token\": \"<string>\"}"},
+                  {"status": 409, "error_code": "DUPLICATE_CARD", "body": "{\"error\": \"DUPLICATE_CARD\"}"},
+                  {"status": 503, "error_code": "SERVICE_UNAVAILABLE", "body": "{\"error\": \"SERVICE_UNAVAILABLE\"}"},
+                  {"status": 404, "condition": "Feature flag payment.card_save.enabled is OFF"}
+                ],
+                "error_codes": ["DUPLICATE_CARD", "SERVICE_UNAVAILABLE"],
+                "auth": "Bearer {token}"
+              },
+              "validation_constraints": [
+                {
+                  "layer": "service",
+                  "rule": "SHA-256 fingerprint of {customerId}:{cardNumber} (UTF-8 bytes, hex output) — 409 DUPLICATE_CARD if (customer_id, fingerprint) already exists in DB",
+                  "reuses": null
+                },
+                {
+                  "layer": "service",
+                  "rule": "Vault call POST /vault/v1/tokenise — 503 SERVICE_UNAVAILABLE if vault returns 503 or times out after 5000ms (1 retry); no DB write on failure",
+                  "reuses": "VaultClient"
+                },
+                {
+                  "layer": "controller",
+                  "rule": "Feature flag payment.card_save.enabled OFF → 404 Not Found — no payload validation or DB call",
+                  "reuses": null
+                },
+                {
+                  "layer": "db",
+                  "rule": "DB persist only after successful vault response — no partial state on vault failure",
+                  "reuses": "CardRepository"
+                },
+                {
+                  "layer": "db",
+                  "rule": "DataIntegrityViolationException from DB unique constraint translated to 409 DUPLICATE_CARD (handles concurrent duplicate race condition)",
+                  "reuses": "CardRepository"
+                }
+              ],
+              "test_layer": "integration",
+              "preconditions": [
+                "STORY-1233 and STORY-1234 merged",
+                "vault-service stub/mock configured: valid cards return fixed token; designated test cards return 503",
+                "Feature flag payment.card_save.enabled set to ON in test environment",
+                "Test fixtures: verified customer CX-001, new valid Visa card 4111111111111111 (not yet saved), card already persisted for CX-001"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "rfc_conflicts": []
+}

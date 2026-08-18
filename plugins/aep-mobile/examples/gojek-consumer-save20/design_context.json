@@ -1,5 +1,23 @@
 {
   "app": "gojek-consumer",
+  "design_source": {
+    "file_name": "GoFood — SAVE20 Promo",
+    "page_name": "SAVE20 Checkout",
+    "scope": "page",
+    "exported_at": "2026-01-14T09:22:11.004Z",
+    "max_depth": 15,
+    "node_count": 612,
+    "truncated_count": 0
+  },
+  "extraction_status": "INCOMPLETE",
+  "extraction_gaps": [
+    {
+      "field": "screens[1].elements[2].label",
+      "reason": "Only the insufficient-balance rejection copy exists in the frames; the RFC lists three further error codes with no designed copy.",
+      "action": "ask design for the NOT_FIRST_TIME / NOT_GOPAY / EXPIRED rejection copy",
+      "severity": "BLOCKING"
+    }
+  ],
   "visual_analysis_scratchpad": "Design covers two navigational screens for the SAVE20 promo feature: the GoFood restaurant menu (with its 'Checkout' entry point) and the GoFood cart-review/checkout screen, which holds the promo-code field, apply button, an error label, and the cart total. Promo validation, loading, success and rejection are all visual states of the single cart-review screen rather than separate screens.",
   "project_context": {
     "overall_ambiguity_rating": "MEDIUM",
@@ -13,20 +31,23 @@
     {
       "screen_id": "GOFOOD_MENU",
       "screen_name": "GoFood Restaurant Menu",
-      "purpose": "Browse a restaurant's menu, build the cart, and proceed to checkout.",
+      "deep_link": "gojek://food/menu/{restaurant_id}",
+      "entry_point": true,
+      "flow_name": "SAVE20 Checkout",
       "screen_states": [
         "Default",
         "Loading (fetching menu)"
       ],
+      "state_kinds": [
+        "DEFAULT",
+        "LOADING"
+      ],
       "elements": [
         {
-          "element_id": "GOFOOD_MENU.TAP_CHECKOUT_BUTTON",
+          "element_id": "GOFOOD_MENU.checkout_btn",
           "type": "Button",
+          "role": "BUTTON",
           "label": "Checkout",
-          "states_represented": [
-            "Enabled (cart non-empty)",
-            "Disabled (cart empty)"
-          ],
           "interactions": [
             {
               "trigger": "onTap",
@@ -47,7 +68,7 @@
     {
       "screen_id": "GOFOOD_CART_REVIEW",
       "screen_name": "GoFood Cart Review",
-      "purpose": "Let the user review their order, optionally apply a SAVE20 promo code, and see the resulting total before placing the order.",
+      "deep_link": "gojek://food/cart/review",
       "screen_states": [
         "Default",
         "Promo Applying (loading)",
@@ -55,16 +76,19 @@
         "Promo Rejected (error shown)",
         "Offline"
       ],
+      "state_kinds": [
+        "DEFAULT",
+        "LOADING",
+        "SUCCESS",
+        "ERROR",
+        "OFFLINE"
+      ],
       "elements": [
         {
-          "element_id": "GOFOOD_CART_REVIEW.ENTER_PROMO_CODE_FIELD",
+          "element_id": "GOFOOD_CART_REVIEW.promo_input",
           "type": "TextField",
+          "role": "INPUT",
           "label": "Masukkan kode promo",
-          "states_represented": [
-            "Empty (placeholder)",
-            "Typing",
-            "Filled"
-          ],
           "interactions": [
             {
               "trigger": "onTap",
@@ -84,18 +108,14 @@
           }
         },
         {
-          "element_id": "GOFOOD_CART_REVIEW.TAP_APPLY_BUTTON",
+          "element_id": "GOFOOD_CART_REVIEW.apply_btn",
           "type": "Button",
+          "role": "BUTTON",
           "label": "Terapkan",
-          "states_represented": [
-            "Disabled (empty code)",
-            "Default (enabled)",
-            "Loading (validating)"
-          ],
           "interactions": [
             {
               "trigger": "onTap",
-              "action": "Validates the code via the promo API; on success shows Promo Applied state, on failure shows Promo Rejected state with VIEW_PROMO_ERROR_LABEL populated."
+              "action": "Validates the code via the promo API; on success shows Promo Applied state, on failure shows Promo Rejected state with GOFOOD_CART_REVIEW.promo_error_label populated."
             }
           ],
           "validations_and_edge_cases": [
@@ -108,13 +128,10 @@
           }
         },
         {
-          "element_id": "GOFOOD_CART_REVIEW.VIEW_PROMO_ERROR_LABEL",
+          "element_id": "GOFOOD_CART_REVIEW.promo_error_label",
           "type": "Label",
+          "role": "LABEL",
           "label": "Promo error message",
-          "states_represented": [
-            "Hidden (default)",
-            "Insufficient Balance ('Saldo GoPay tidak cukup')"
-          ],
           "interactions": [],
           "validations_and_edge_cases": [
             "Only the insufficient-balance message is designed; other rejection reasons have no copy."
@@ -125,13 +142,10 @@
           }
         },
         {
-          "element_id": "GOFOOD_CART_REVIEW.VIEW_CART_TOTAL_LABEL",
+          "element_id": "GOFOOD_CART_REVIEW.cart_total_label",
           "type": "Label",
+          "role": "LABEL",
           "label": "Total belanja",
-          "states_represented": [
-            "Default",
-            "Discounted (after SAVE20 applied)"
-          ],
           "interactions": [],
           "validations_and_edge_cases": [
             "Must reflect the discounted amount immediately once a promo is successfully applied."
@@ -148,9 +162,12 @@
   "ui_flow": [
     {
       "from_screen_id": "GOFOOD_MENU",
-      "trigger_element_id": "GOFOOD_MENU.TAP_CHECKOUT_BUTTON",
+      "trigger_element_id": "GOFOOD_MENU.checkout_btn",
       "to_screen_id": "GOFOOD_CART_REVIEW",
-      "condition": "Tapped with a non-empty cart."
+      "condition": "Tapped with a non-empty cart.",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT"
     }
   ]
 }

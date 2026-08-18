@@ -1,0 +1,4292 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "driverapp",
+    "case_ids_indexed": 112,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "452641": [
+      {
+        "module": "driverapp",
+        "title": "Verify that if clicked on services dropdown- services popup should be displayed along with the service types",
+        "method": "testShiftFilterToggleON",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ShiftFilter.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cari jadwal"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "452643": [
+      {
+        "module": "driverapp",
+        "title": "Verify driver should be able to select the multiple service types or all the service types",
+        "method": "testShiftFilterPopUp",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ShiftFilter.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cari jadwal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Layanan"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "452644": [
+      {
+        "module": "driverapp",
+        "title": "Verify that if driver clicks on clear filter all the selected filter should be removed",
+        "method": "testShiftFilterSelectMultipleServiceTypes",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ShiftFilter.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cari jadwal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Layanan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on service type group checkbox toggle on the right of 'GoCar (ID)'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on service type group checkbox toggle on the right of 'Logistics & Send'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "452645": [
+      {
+        "module": "driverapp",
+        "title": "verify that If driver clicks on apply by selecting the service type",
+        "method": "testShiftFilterRemoved",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ShiftFilter.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cari jadwal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Layanan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on service type group checkbox toggle on the right of 'GoCar (ID)'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on service type group checkbox toggle on the right of 'Logistics & Send'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Hapus filter'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "452646": [
+      {
+        "module": "driverapp",
+        "title": "Verify that if clicked on Date dropdown- date popup should be displayed along with the list of dates",
+        "method": "testShiftFilterverifySelectingServiceType",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ShiftFilter.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cari jadwal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Layanan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on service type group checkbox toggle on the right of 'GoCar (ID)'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on service type group checkbox toggle on the right of 'Logistics & Send'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the text 'Terapkan'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "452647": [
+      {
+        "module": "driverapp",
+        "title": "Verify driver should be able to select only one dates from the list and click on set filter",
+        "method": "testShiftFilterVerifyDate",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ShiftFilter.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cari jadwal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on date chip background"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "452648": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "testShiftFilterSelectDates",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ShiftFilter.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cari jadwal'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on date chip background"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*dateFilterRadioButton*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4391794": [
+      {
+        "module": "driverapp",
+        "title": "Driver should able to enabled/disabled service toggle",
+        "method": "validateServiceAvailabilityCTA",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/BidSettingTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_2)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Offline' OR '*incentivePointsTextView*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4391806": [
+      {
+        "module": "driverapp",
+        "title": "Validate Service availability onboarding on Bid settings",
+        "method": "validateEditServiceToggle",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/BidSettingTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Atur' button associated with 'Ketersediaan layanan' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'GoCar' toggle if 'GoCar' toggle with attributes.checked=true found"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'GoCar' toggle"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4391791": [
+      {
+        "module": "driverapp",
+        "title": "Validate active service number reveals correct number",
+        "method": "testServiceAvailabilityOnboarding",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/BidSettingTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_2)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on aloha tooltip action icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on aloha tooltip action icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on aloha tooltip action icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on aloha tooltip action icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'circular_btn' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Offline' OR '*incentivePointsTextView*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4391796": [
+      {
+        "module": "driverapp",
+        "title": "Verify Driver preference for Rentals",
+        "method": "validateCorrectNumberOfAvailableService",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/BidSettingTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_RENTAL)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Offline' OR '*incentivePointsTextView*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5543021": [
+      {
+        "module": "driverapp",
+        "title": "Verify Prefered duration option for rentals",
+        "method": "verifyRentalPreference",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/BidSettingTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_RENTAL)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Offline' OR '*incentivePointsTextView*'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Atur on the right of 'Ketersediaan layanan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on service preference list 3 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pelajari lebih lanjut'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5543022": [
+      {
+        "module": "driverapp",
+        "title": "Validate error toast message if driver try to disabled all services toggle",
+        "method": "verifyRentalPrefDuration",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/BidSettingTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_RENTAL)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Offline' OR '*incentivePointsTextView*'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Atur on the right of 'Ketersediaan layanan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on service preference list 3 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Edit durasi pilihan"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4391808": [
+      {
+        "module": "driverapp",
+        "title": "Service preference for Goride and Goride hemat will be dependent to each other",
+        "method": "verifyErrorWhenDisableAllServices",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/BidSettingTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(BIKE_ID_DRIVER_1)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Offline' OR '*incentivePointsTextView*'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Layanan aktif: 1' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Atur on the right of 'Ketersediaan layanan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify preference toggle next to 'GoRide' text is checked"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on preference toggle next to 'GoRide' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify on 'Anda harus mengaktifkan minimal 1 layanan.' text"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4397809": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyServicePreferenceDependency",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/BidSettingTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(BIKE_ID_HEMAT)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Offline' OR '*incentivePointsTextView*'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Atur on the right of 'Ketersediaan layanan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on preference toggle next to 'GoRide' text, if it is checked"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify preference toggle next to 'GoRide' text is not checked"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify preference toggle next to 'GoRide Hemat' text is also not checked"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on preference toggle next to 'GoRide' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify preference toggle next to 'GoRide' text is checked"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5354919": [
+      {
+        "module": "driverapp",
+        "title": "Verify Mobil(Car) vehicle type with fleet ownership",
+        "method": "testVehicleOwnershipProfileFlow",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'Mobil' text present in center of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'I'll use my own vehicle' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify both 'You\u2019ll register as a:' and 'Mobil' texts are present on the page"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5354921": [
+      {
+        "module": "driverapp",
+        "title": "Verify phone already exists pop up while using registered driver phone number",
+        "method": "testFleetOwnershipProfileFlow",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'Mobil' text present in center of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'I\u2019d like to rent a vehicle and have a Fleet partner.' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Next button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5084511": [
+      {
+        "module": "driverapp",
+        "title": "Verify enter phone number screen when lead didn't input phone number",
+        "method": "testAlreadyRegisteredDriverPopUp",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on Register or track your application button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write '82119830720' into the text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tnc checkbox toggle, if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Continue' text button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Phone no. already registered' text element is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5084509": [
+      {
+        "module": "driverapp",
+        "title": "Verify continue button enabled with non registered phone number",
+        "method": "testEnterPhoneNumberScreen",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on Register or track your application button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Enter your primary phone number to register' text element is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5084510": [
+      {
+        "module": "driverapp",
+        "title": "Verify invalid verification code with non registered phone number",
+        "method": "testContinueButtonEnabledAfterUsingNonRegisteredDriverNumber",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on Register or track your application button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write phoneNumber in input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tnc checkbox toggle, if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Continue' text button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Verification code sent via SMS!' text is visible on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5084543": [
+      {
+        "module": "driverapp",
+        "title": "Verify input correct verification code with non registered phone number",
+        "method": "testInvalidVerificationCodeUsingNonRegisteredDriverNumber",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on Register or track your application button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write phoneNumber in input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tnc checkbox toggle, if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Continue' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on input text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "write 1333 on otp edit text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on interactive button present in center of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Invalid verification code' text is visible on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5084542": [
+      {
+        "module": "driverapp",
+        "title": "Verify select operating city with non registered phone number",
+        "method": "testInputCorrectVerificationCodeUsingNonRegisteredDriverNumber",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "verify 'Select operating city' text is visible on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5084541": [
+      {
+        "module": "driverapp",
+        "title": "Verify vehicle type selection with non registered phone number",
+        "method": "testSelectOperatingCityUsingNonRegisteredDriverNumber",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "verify 'Select operating city' text is visible on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5084540": [
+      {
+        "module": "driverapp",
+        "title": "Verify rent a vehicle and do not have a fleet option with non registered phone number",
+        "method": "testVehicleTypeSelectionUsingNonRegisteredDriverNumber",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on input text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Select Vehicle type', 'Motor', 'Mobil' text are visible on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067547": [
+      {
+        "module": "driverapp",
+        "title": "Verify I'd like to rent a vehicle and have a Fleet partner option selection with non registered phone number",
+        "method": "testVehicleAndDoNotHaveAFleetUsingNonRegisteredDriverNumber",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Mobil' vehicle type option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'I\u2019d like to rent a vehicle, but don\u2019t have a Fleet partner' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Our partners will contact you with their rental offers.' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Setup your account' is visible on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067546": [
+      {
+        "module": "driverapp",
+        "title": "Verify 4W pre-question page with non registered phone number",
+        "method": "testRentAVehicleAndFleetOptionUsingNonRegisteredDriverNumber",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Mobil' vehicle type option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'I\u2019d like to rent a vehicle and have a Fleet partner.' option"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'You'll need to submit your Fleet partner ID.' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Next button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Enter the Fleet Partner ID you'd like to proceed with' is visible on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067545": [
+      {
+        "module": "driverapp",
+        "title": "Verify that when lead clicks on guidelines for uploading the docs for driver registration - Taxi",
+        "method": "test4WPreQuestionPageUsingNonRegisteredDriverNumber",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Mobil' vehicle type option"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Do you want to use your own vehicle or rent one?' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'I'll use my own vehicle' option is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Please prepare your vehicle ownership document.' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'I\u2019d like to rent a vehicle and have a Fleet partner.' option is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'You'll need to submit your Fleet partner ID.' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'I\u2019d like to rent a vehicle, but don\u2019t have a Fleet partner' option is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Our partners will contact you with their rental offers.' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Next' button is not clickable on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "341869": [
+      {
+        "module": "driverapp",
+        "title": "Verify that when lead clicks on guidelines for uploading the docs for driver registration - Private Car",
+        "method": "TestGuidelinesForUploadingDocsTaxi",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on Register or track your application button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on +62 country code"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'SINGAPORE' country code"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write randomPhoneNumber in input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tnc checkbox toggle, if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on input text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "write 1234 on otp edit text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Confirm button present in center of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Taxi Driver' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "write randomPersonName in name field"
+          },
+          {
+            "kind": "nlp",
+            "text": "close the keyboard"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down to email field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write randomEmail in email field"
+          },
+          {
+            "kind": "nlp",
+            "text": "close the keyboard"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on PROCEED button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Upload documents' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on  'Profile Picture' text element on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Take a photo' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "342175": [
+      {
+        "module": "driverapp",
+        "title": "Validate select vehicle type of matric on-boarding screen",
+        "method": "TestGuidelinesForUploadingDocsPrivateCar",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on Register or track your application button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on +62 country code"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'SINGAPORE' country code"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write randomPhoneNumber in input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on tnc checkbox toggle, if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on input text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "write 1234 on otp edit text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Confirm button present in center of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Private Hire Car Driver' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "write randomPersonName in name field"
+          },
+          {
+            "kind": "nlp",
+            "text": "close the keyboard"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down to email field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write randomEmail in email field"
+          },
+          {
+            "kind": "nlp",
+            "text": "close the keyboard"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on PROCEED button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Upload documents' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Profile Picture' text element on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Take a photo' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5254111": [
+      {
+        "module": "driverapp",
+        "title": "Validate Bike selection as vehicle type when both Generalist and Specialist modes are elegible",
+        "method": "selectVehicleTypeMatrixOnboarding",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5254112": [
+      {
+        "module": "driverapp",
+        "title": "Validate Bike selection as vehicle type when any of the one mode (Generalist or Specialist) is elegible/open",
+        "method": "selectBikeSelectionVehicleTypeMatrixOnboarding",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Motor' vehicle type option"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5254113": [
+      {
+        "module": "driverapp",
+        "title": "Validate Bike selection as vehicle type when both Generalist and Specialist modes are not elegible/open",
+        "method": "selectVehicleTypeRegistrationMatrixOnboarding",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'BALI' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Motor' vehicle type option"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Specialist' and 'Get trips for 1 specific service type.' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Generalist' and 'Get trips for various service types.' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Specialist' or 'Specialis' option"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5254114": [
+      {
+        "module": "driverapp",
+        "title": "Validate infomormation screen when clicked on closed mode(Generalist or Specialist)",
+        "method": "RegistrationClosedBothModesMatrixOnboarding",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'PALEMBANG' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Motor' vehicle type option"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5254115": [
+      {
+        "module": "driverapp",
+        "title": "Verify choose fleet partner unfilled",
+        "method": "selectVehicleTypeRegistrationClosedMatrixOnboarding",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'BALI' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Motor' vehicle type option"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Specialist' and 'Get trips for 1 specific service type.' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Generalist' and 'Get trips for various service types.' text is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Generalist' or 'Generalis' option"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067548": [
+      {
+        "module": "driverapp",
+        "title": "Verify choose fleet partner filled",
+        "method": "verifyFleetPartnerUnfilled",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Mobil"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on I\u2019d like to rent a vehicle and have a Fleet partner."
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067549": [
+      {
+        "module": "driverapp",
+        "title": "Verify fleet partner's name confirmation if the fleet partner ID exist",
+        "method": "verifyFleetPartnerFilled",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Mobil"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on I\u2019d like to rent a vehicle and have a Fleet partner."
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'XX - XXXX - XXXX' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 'b599d370' in XX - XXXX - XXXX"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067550": [
+      {
+        "module": "driverapp",
+        "title": "Verify fleet partner's name confirmation if the fleet partner ID is not found",
+        "method": "verifyFleetPartnerIDisFound",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Mobil"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on I\u2019d like to rent a vehicle and have a Fleet partner."
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'XX - XXXX - XXXX' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 'b599d370' in XX - XXXX - XXXX"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on SUBMIT"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "driverapp",
+        "title": "Verify Driver self-registration detail page with without having a fleet partner id",
+        "method": "verifySelfRegistrationWithFleetPartnerID",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Mobil"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on I\u2019d like to rent a vehicle and have a Fleet partner."
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'XX - XXXX - XXXX' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 'b599d370' in XX - XXXX - XXXX"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on SUBMIT"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Confirm if your Fleet Partner is Fleet Automation Regression Test on INT?' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Confirm"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Driver self-registration' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5067551": [
+      {
+        "module": "driverapp",
+        "title": "Verify Driver self-registration detail page with having a fleet partner id",
+        "method": "verifyFleetPartnerIDisNotFound",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Mobil"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on I\u2019d like to rent a vehicle and have a Fleet partner."
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'XX - XXXX - XXXX' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 'b599d331' in XX - XXXX - XXXX"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on SUBMIT"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C5067554": [
+      {
+        "module": "driverapp",
+        "title": "Verify lead with rental car don't have Fleet Partner submit profile with didn't check consent box",
+        "method": "verifySelfRegistrationWithoutFleetPartnerID",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Mobil"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'I\u2019d like to rent a vehicle, but don't have a Fleet partner'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Driver self-registration' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "C5084562": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifySelfRegistrationWithoutFleetPartnerIDConsentBox",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OnboardingTests.java",
+        "project_id": "122",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'JABODETABEK' city option"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Next' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify text 'Motor' and 'Mobil' is visible on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on Mobil"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'I'd like to rent a vehicle, but don't have a Fleet partner'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Next"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Driver self-registration' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "write randomPersonName in name field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down to NIK Number field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write 8989787867675656 in NIK Number field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down to email field"
+          },
+          {
+            "kind": "nlp",
+            "text": "write randomEmail in email field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Regular (Sigra/Calya): Rp 145,000 \u2013 Rp 200,000 per day"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Submit data"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4199386": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyShuffleSuspensionCard",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ShuffleCardTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_RENTAL)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pendapatan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Beranda'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "665739": [
+      {
+        "module": "driverapp",
+        "title": "Very info banner banner shown at the top for the driver with new sanction v2 enabled",
+        "method": "verifyLMSSanction",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSanctionRevamp.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(SANCTION, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(BIKE_ID_SUSPENDED)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profile picture icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Status akun & sanksi"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "698640": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyBannerSanctionM2",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSanctionRevamp.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(SANCTION, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(BIKE_ID_SUSPENDED)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profile picture icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Status akun & sanksi"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lihat total pelanggaran"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3054862": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "testCounterIsVisibleOnChatIcon",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/BookingFeatureTests.java",
+        "project_id": "122",
+        "suite_id": "18739",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a transport bike booking with driver assigned from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lihat tampilan baru' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on right most circular button on top right corner"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that unread message counter is showing '1' near the circular chat button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4202788": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "testSwadayaWalletLinkingErrorDrawer",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/SwadayaTests.java",
+        "project_id": "122",
+        "suite_id": "18739",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Mock location to latitude: -6.25531900600511 and longitude: 106.81074998465665"
+          },
+          {
+            "kind": "nlp",
+            "text": "create a new bike driver from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink GojekDriver://toggles?name=block_tool_tip&enabled=true"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink GojekDriver://toggles?name=feature_benefits_enabled&enabled=true"
+          },
+          {
+            "kind": "nlp",
+            "text": "Do driver backdoor login for driver created from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lihat tampilan baru' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Swadaya' menu item"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Hubungkan GoPay' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Kami akan bantu daftarkan akun Gojek pelanggan Anda. Lanjut?' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Tidak jadi' button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Ya, lanjut' button is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055384": [
+      {
+        "module": "driverapp",
+        "title": "Fresh install app and login for the first time with valid credentials on Konmari UI",
+        "method": "testOTPLoginInvalidCredential",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverLoginTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'Log in as Driver-partner' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'OK'"
+          },
+          {
+            "kind": "nlp",
+            "text": "write 'CAR_ID_DRIVER_2' into the text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'login_sdk_continue'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'OTP via WhatsApp'"
+          },
+          {
+            "kind": "nlp",
+            "text": "input string number '1111' into OTP field element"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055382": [
+      {
+        "module": "driverapp",
+        "title": "Validate close and reopen app when walkthrough screen appear",
+        "method": "testKonmariAfterFreshInstall",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverLoginTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_1)"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055376": [
+      {
+        "module": "driverapp",
+        "title": "Validate walkthrough screen appear after driver landed on Konmari UI for the first time",
+        "method": "testKonmariAfterCloseNOpenApp",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverLoginTest.java",
+        "project_id": "143",
+        "suite_id": "18739",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get bike driver from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "close the app"
+          },
+          {
+            "kind": "nlp",
+            "text": "open the app with package name 'com.gojek.partner.staging'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Tampilan baru Gojek Driver' text element is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055371": [
+      {
+        "module": "driverapp",
+        "title": "Validate put app to background when walkthrough screen appear",
+        "method": "testKonmariUiAfterFirstTimeLogin",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverLoginTest.java",
+        "project_id": "143",
+        "suite_id": "18739",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(get bike driver from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Tampilan baru Gojek Driver' text element is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055375": [
+      {
+        "module": "driverapp",
+        "title": "Verify register as a driver partner button visible after app open",
+        "method": "testKonmariUiAfterPuttingAppToBackground",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverLoginTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a bike driver from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Put app to background"
+          },
+          {
+            "kind": "nlp",
+            "text": "open the app with package name 'com.gojek.partner.staging'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Tampilan baru Gojek Driver' text element is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5084512": [
+      {
+        "module": "driverapp",
+        "title": "Verify fired driver not able to login",
+        "method": "verifyRegisterAsDriverPartner",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverLoginTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "verify 'Register or track your application' button is visible on the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3288007": [
+      {
+        "module": "driverapp",
+        "title": "Verify fired driver able to open help",
+        "method": "verifyFiredDriverNotAbleToLogin",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverLoginTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'Log in as Driver-partner' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'OK' text button"
+          },
+          {
+            "kind": "nlp",
+            "text": "write '8100095638' into the text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Continue' text button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Sorry, you can\u2019t log in' or 'Sorry, you can't log in' text is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3288003": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyFiredDriverAbleToOpenHelp",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverLoginTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on 'Log in as Driver-partner' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'OK' text button"
+          },
+          {
+            "kind": "nlp",
+            "text": "write '8100095638' into the text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Continue' text button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Sorry, you can\u2019t log in' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Open Help' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'I can\u2019t log in to my existing account' or 'I can't log in to my existing account' text is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4749357": [
+      {
+        "module": "driverapp",
+        "title": "Verify scrolling on history sanction list with > 3 sanctions",
+        "method": "GenericErrorSanctionScreen",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSanction.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(SANCTION, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_4)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profilePictureContainer button"
+          },
+          {
+            "kind": "network",
+            "text": "NetworkCondition.NO_NETWORK"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Status akun & sanksi"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4749364": [
+      {
+        "module": "driverapp",
+        "title": "Verify generic error screen on Total Violations screen",
+        "method": "verifySanctionHistory",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSanction.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(SANCTION, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(BIKE_ID_SUSPENDED)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profile picture icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Status akun & sanksi"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Riwayat sanksi"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Tingkat 1 Aktif item"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Tingkat 2 Aktif item"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Tingkat 3 Aktif item"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4749384": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyErrorTotalViolationsScreen",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSanction.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(SANCTION, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(BIKE_ID_SUSPENDED)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profile picture icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Status akun & sanksi"
+          },
+          {
+            "kind": "network",
+            "text": "NetworkCondition.NO_NETWORK"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Lihat total pelanggaran"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4509583": [
+      {
+        "module": "driverapp",
+        "title": "Check edit phone when wallets are linked.",
+        "method": "checkLinkWalletsWhenCustomerNumberExists",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/FleetWalletLinking.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BENEFIT, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(FLEET_ID_1)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap om Swadaya"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4509581": [
+      {
+        "module": "driverapp",
+        "title": "Check warning card is not shown while editing the phone number in the Settings page when wallets are not linked",
+        "method": "checkEditPhoneWhenWalletsLinked",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/FleetWalletLinking.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(SHOW_SETTING, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(EDIT_PHONE,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(EDIT_EMAIL,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BENEFIT, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(FLEET_ID_2)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*profilePicture*'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Pengaturan' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pengaturan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on MANTAP if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on LEWATI"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Ganti nomor hape"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on IYA, GANTI"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4509584": [
+      {
+        "module": "driverapp",
+        "title": "Check clicking on link wallets button when customer number does not exist.",
+        "method": "checkWarningCardNotShownWhenWalletsNotLinked",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/FleetWalletLinking.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(SHOW_SETTING, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(EDIT_PHONE,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BENEFIT, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(FLEET_ID_3)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*profilePicture*'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Pengaturan' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pengaturan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on MANTAP if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on LEWATI"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Ganti nomor hape"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on IYA, GANTI"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4509580": [
+      {
+        "module": "driverapp",
+        "title": "If toggle is off and driver is not linked, Swadaya menu should not be displayed.",
+        "method": "checkLinkWalletsWhenCustomerNumberDoesNotExist",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/FleetWalletLinking.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BENEFIT, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(FLEET_ID_4)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Swadaya"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hubungkan Gopay"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Ya, lanjut'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4509579": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "checkSwadayaMenuWhenToggleOff",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/FleetWalletLinking.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BENEFIT, false)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(FLEET_ID_3)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4719819": [
+      {
+        "module": "driverapp",
+        "title": "Validate 'Self Diagnostic tool' is not displayed when app diagnosis toggle is disabled",
+        "method": "testDriverAppRecheckDiagnosticTool",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DiagnosticToolTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(DIAGNOSTIC,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(RECHECK_DIAGNOSTIC,true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_2)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profilePictureContainer button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cek aplikasi'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3327422": [
+      {
+        "module": "driverapp",
+        "title": "Verify Driver is able to view Diagnostic tool for No Order CTA",
+        "method": "testDiagnosticsToolNotVisibleWhenToggleIsDisabled",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DiagnosticToolTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(DIAGNOSTIC,false)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_2)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profilePictureContainer button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3935353": [
+      {
+        "module": "driverapp",
+        "title": "Verify Driver is able to run Diagnostic tool",
+        "method": "testDiagnosticToolFromHelpArticleVisible",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DiagnosticToolTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(DIAGNOSTIC,true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_1)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profilePictureContainer button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Bantuan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Ada masalah soal\u2026'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Saya merasa sulit mendapatkan order'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down 5 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Sebelum Laporkan Masalahmu, Cek Kondisi Akun & Aplikasi Anda Disini!'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3935361": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyRunDiagnosticToolFromHelpArticle",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DiagnosticToolTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cek aplikasi'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4391792": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyServiceAvailabilityCTAFromProfileSetting",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ProfileSettingTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(SHOW_SETTING, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_1)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profilePictureContainer button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pengaturan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055451": [
+      {
+        "module": "driverapp",
+        "title": "Check edit phone when wallets are linked.",
+        "method": "checkLinkWallets",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/WalletLinking.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BENEFIT, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_4)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap om Swadaya"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055449": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "checkEditPhoneWhenWalletsLinked",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/WalletLinking.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(SHOW_SETTING, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(EDIT_PHONE,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BENEFIT, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_4)"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*profilePicture*'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up until 'Pengaturan' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pengaturan"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on MANTAP if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on LEWATI"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Ganti nomor hape"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on IYA, GANTI"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5258847": [
+      {
+        "module": "driverapp",
+        "title": "Verify credit and debit transaction in history",
+        "method": "verifyOrderHistoryForCashBooking",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PendapatanTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(create a car booking with complete state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' or 'Lihat tampilan baru', if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pendapatan' menu item"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Riwayat booking' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Tunai' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify GoCar is visible on top right side of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'ID transaksi' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'RB-*' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down to the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Pendapatan' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Total pendapatan' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Tunai' is visible in Pendapatan section"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Lihat riwayat transaksi' button is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055319": [
+      {
+        "module": "driverapp",
+        "title": "Verify transaction show date and time",
+        "method": "verifyOrderHistoryShowsCreditNDebitTrans",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PendapatanTests.java",
+        "project_id": "143",
+        "suite_id": "18739",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(create a car booking with complete state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' or 'Lihat tampilan baru', if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pendapatan' menu item"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Riwayat transaksi' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'DOMPET' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify if '+Rp*' or '-Rp*' is visible in the transaction list"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055322": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyTransactionShowsDateNTime",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PendapatanTests.java",
+        "project_id": "143",
+        "suite_id": "18739",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(create a car booking with complete state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' or 'Lihat tampilan baru', if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pendapatan' menu item"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Riwayat transaksi' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'DOMPET' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify if '+Rp*' or '-Rp*' is visible in the transaction list"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify date and time is visible on the right side of amount in the transaction list"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5017042": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyRIEShownInSettings",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RIETests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Mock location to latitude: -6.490546 and longitude: 106.8118856"
+          },
+          {
+            "kind": "nlp",
+            "text": "create a bike driver from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink GojekDriver://toggles?name=block_tool_tip&enabled=true"
+          },
+          {
+            "kind": "nlp",
+            "text": "Do driver backdoor login for driver created from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lihat tampilan baru' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on offline button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoRide Instant' text element is not visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4663827": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "HistoryNoInternetConnectionTest",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/OrderHistory.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_4)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Hilangkan button if visible"
+          },
+          {
+            "kind": "network",
+            "text": "NetworkCondition.NO_NETWORK"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojekdriver://orderhistory"
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down once"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Ada sedikit kendala' is visible"
+          },
+          {
+            "kind": "network",
+            "text": "NetworkCondition.FOUR_G_GOOD"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pencet untuk mencoba lagi"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5542967": [
+      {
+        "module": "driverapp",
+        "title": "Verify Points Page -> Point History -> Generic Error State",
+        "method": "historyPagination",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/LoyaltyRevampTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(LOYALTY, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(POINT_REDEEM, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_BALI)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojekdriver://point/history"
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down 2 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on point redeem help button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Pusat bantuan' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5542970": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "PointGenericErrorState",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/LoyaltyRevampTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(LOYALTY, true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(POINT_REDEEM, true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_BALI)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on profile button on top left corner"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on `Coba lagi` button if visible"
+          },
+          {
+            "kind": "network",
+            "text": "NetworkCondition.NO_NETWORK"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Saldo poin"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on `Riwayat poin`"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text 'Ada sedikit kendala' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3328965": [
+      {
+        "module": "driverapp",
+        "title": "Showing banner with irrelevant ratings excluded",
+        "method": "verifyRatingsSummaryTab",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify 'Ratings and feedback' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Summary item"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4180734": [
+      {
+        "module": "driverapp",
+        "title": "Verify feedback tab details",
+        "method": "verifyBannerIrrelevantRatingsTab",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4180741": [
+      {
+        "module": "driverapp",
+        "title": "Verify Summary tab details",
+        "method": "verifyFeedbackTabDetails",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify 'Here are the ratings for the last 3 months for you.' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Filter"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Last 7 days"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Apply filter'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4180743": [
+      {
+        "module": "driverapp",
+        "title": "Verify Feedback tab - when driver has more than 10 Ratings",
+        "method": "verifySummaryTabDetails",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on Summary"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4180746": [
+      {
+        "module": "driverapp",
+        "title": "Verify Ratings Exclusion Detail screen and functionality from Exclusion Banner",
+        "method": "verifyFeedbackTabMultipleRatings",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Scroll down on the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '2 irrelevant rating removed' is not visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Filter' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4180747": [
+      {
+        "module": "driverapp",
+        "title": "Verify filter on Feedback",
+        "method": "verifyIrrelevantRatingsBannerDetails",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify '2 irrelevant rating removed' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2 irrelevant rating removed'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Low ratings exclusion is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Irrelevant to your performance', 'No comments from customer' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*circular_btn*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4180754": [
+      {
+        "module": "driverapp",
+        "title": "Verify scrolling mechanism on Feedbacks section",
+        "method": "verifyFiltersOnFeedbackTab",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify '2 irrelevant rating removed' is not visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Filter' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Filter"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Last 7 days' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Last 14 days' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Last 30 days' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Last 14 days"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Apply filter'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Filter"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Clear filter'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Feedback with comments' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on comment check box toggle on the right of 'Feedback with comments'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Apply filter'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4180762": [
+      {
+        "module": "driverapp",
+        "title": "Verify back button mechanism from Feedbacks tab",
+        "method": "verifyScrollMechanismOnFeedbackSection",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify '2 irrelevant rating removed' is not visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Filter' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4180763": [
+      {
+        "module": "driverapp",
+        "title": "Verify server error page",
+        "method": "verifyBackButtonMechanismFromFeedbackTab",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify 'Feedback' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '*navigation_back*'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4180759": [
+      {
+        "module": "driverapp",
+        "title": "Verify that new ratings screen is displayed when the toggle is on",
+        "method": "verifyServerErrorPage",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on '*navigation_back*'"
+          },
+          {
+            "kind": "network",
+            "text": "NetworkCondition.NO_NETWORK"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Rating"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait till Retry is visible for 30 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3056174": [
+      {
+        "module": "driverapp",
+        "title": "Verify filtering ratings by number of stars",
+        "method": "verifyNewRatingsScreen",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Verify 'Rating dan masukan' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Coba lagi', if visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3056176": [
+      {
+        "module": "driverapp",
+        "title": "Verify filtering ratings by tips",
+        "method": "verifyFilteringRatingsByStars",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap 'Coba lagi', if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Filter'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '5'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terapkan filter'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3056177": [
+      {
+        "module": "driverapp",
+        "title": "Verify filtering ratings by comments",
+        "method": "verifyFilteringRatingsByTips",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap 'Coba lagi', if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Filter'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on comment check box checkbox toggle on the right of 'Masukan dengan tip'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terapkan filter'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3056178": [
+      {
+        "module": "driverapp",
+        "title": "Verify filtering ratings by days filter",
+        "method": "verifyFilteringRatingsByComments",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap 'Coba lagi', if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Filter'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on comment check box checkbox toggle on the right of 'Masukan dengan komentar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terapkan filter'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3056179": [
+      {
+        "module": "driverapp",
+        "title": "Verify pagination when there are more than 20 ratings",
+        "method": "verifyFilteringRatingsByDays",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap 'Coba lagi', if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Filter'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 7 hari terakhir"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Terapkan filter'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3056181": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyPaginationRatings",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/RatingsTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Scroll down 3 times"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055250": [
+      {
+        "module": "driverapp",
+        "title": "Validate Suspended drivers unable to go online",
+        "method": "verifyFiredDriver",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSanctionLogin.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on text 'OK' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'Log in as Driver-partner' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on text 'OK' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "write '85744444444' into the text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Continue' text button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Your account has been permanently deactivated and automatically logged out.' text element is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055249": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifySuspendedDriver",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSanctionLogin.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "driverLoginWith(DriverDetails.getPhoneNumberByDriverType(\"SUSPENDED\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button positioned at the top right of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text contains 'Akun Anda terkena suspend' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055458": [
+      {
+        "module": "driverapp",
+        "title": "Driver is too close with preferred destination",
+        "method": "canSeeGTPDInBidSetting",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PreferredDestinationTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(GTPD,true)"
+          },
+          {
+            "kind": "login",
+            "text": "loginToDriver(CAR_ID_DRIVER_2)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Offline' OR '*incentivePointsTextView*'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pilih tujuan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lanjut'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Coba sekarang'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055473": [
+      {
+        "module": "driverapp",
+        "title": "Driver set preferred destination via map",
+        "method": "setGTPDTooClose",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PreferredDestinationTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pilih lewat peta'"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Lanjut' is visible and clickable"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lanjut'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Konfirmasi tujuan ini'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Ya, konfirmasi'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055465": [
+      {
+        "module": "driverapp",
+        "title": "Driver set preferred destination using search feature",
+        "method": "setPreferredDestinationViaMap",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PreferredDestinationTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Pilih lewat peta'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll up on the map"
+          },
+          {
+            "kind": "nlp",
+            "text": "wait for 1 second"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lanjut'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Konfirmasi tujuan ini'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Ya, konfirmasi'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055464": [
+      {
+        "module": "driverapp",
+        "title": "Driver set preferred destination using history",
+        "method": "setPreferredDestinationViaSearch",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PreferredDestinationTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on search bar or 'Cari lokasi' field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Write 'Jakarta' into search field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on first item in search result list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Konfirmasi tujuan ini'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Ya, konfirmasi'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055466": [
+      {
+        "module": "driverapp",
+        "title": "Driver remove preferred destination",
+        "method": "setPreferredDestinationViaHistory",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PreferredDestinationTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Tap on first item in history list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Konfirmasi tujuan ini'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Ya, konfirmasi'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055471": [
+      {
+        "module": "driverapp",
+        "title": "Driver doesn't get any PD booking",
+        "method": "removePreferredDestination",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PreferredDestinationTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Hapus tujuan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Iya, hapus'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055477": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyDriverGetNoGTPDBookingDrawer",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/PreferredDestinationTest.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Wait for 30 seconds'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055441": [
+      {
+        "module": "driverapp",
+        "title": "Validate entry point to access profile menu",
+        "method": "verifyLMSModuleAvailable",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ProfileTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Mock location to latitude: -6.25531900600511 and longitude: 106.81074998465665"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(LMS,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(LMS_SPECIAL_MODULES,true)"
+          },
+          {
+            "kind": "nlp",
+            "text": "create a new bike driver from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink GojekDriver://toggles?name=block_tool_tip&enabled=true"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink GojekDriver://toggles?name=feature_lms&enabled=true"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink GojekDriver://toggles?name=feature_lms_special_modules&enabled=true"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get bike driver from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Do driver backdoor login for driver created from TDP"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lihat tampilan baru' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button positioned at the top left of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Tips pintar' text element is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055389": [
+      {
+        "module": "driverapp",
+        "title": "Validate All buttons to see all topics in lms",
+        "method": "verifyAccessProfileMenu",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ProfileTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get bike driver from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lihat tampilan baru' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button positioned at the top left of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Akun' text element is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3055444": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyAllButtonOnLMSTopicPage",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ProfileTests.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(LMS,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(LMS_SPECIAL_MODULES,true)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get bike driver from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' or 'Lihat tampilan baru' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button positioned at the top left of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Tips pintar' text element is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lihat semua' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'LANJUT' button"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on 'OKE, SIP'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Semua' button is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3270600": [
+      {
+        "module": "driverapp",
+        "title": "Verify if the My ticket link is appearing at the right top corner of the help screen",
+        "method": "verifySupportInboxEntryPoint",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSupportInbox.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "TDPIDCarDriverBackdoorLoginWithCompleteState()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button positioned at the top left of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down to the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Bantuan' / 'Help'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3270602": [
+      {
+        "module": "driverapp",
+        "title": "verify if the Laporan saya is appearing on the Pesan screen",
+        "method": "verifyLeporanSayaOnHelpScreen",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSupportInbox.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(CARETECH_CHATBOT,true)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a bike driver from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' or 'Lihat tampilan baru' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button positioned at the top left of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down to the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'Bantuan' / 'Help'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3270605": [
+      {
+        "module": "driverapp",
+        "title": "raise tickets from the help article from the on going order and check if the tickets shows up under laporan saya",
+        "method": "verifyLaporanSayaOnPesanScreen",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSupportInbox.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(BLOCK_TOOLTIP,true)"
+          },
+          {
+            "kind": "toggle",
+            "text": "setDriverToggle(CARETECH_CHATBOT,true)"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a bike driver from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Lewati' or 'Lihat tampilan baru' button if visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'pesan' button on the bottom navigation bar"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3270606": [
+      {
+        "module": "driverapp",
+        "title": "Raise tickets from the help article of the Completed order and check if the tickets shows up under the laporan saya",
+        "method": "verifyTicketfromOnGoingOrder",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSupportInbox.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "TDPIDCarDriverBackdoorLoginWithOngoingOrderState()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on powerButtonContainer"
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down to the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down to the bottom from center of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on text 'Bantuan' / 'Help' or help_center_layout if available"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on text 'Kendala dengan pelanggan'"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on text: tidak bisa menghubungi atau menemui pelanggan or Tidak bisa menyelesaikan pesanan"
+          },
+          {
+            "kind": "nlp",
+            "text": "scroll down to the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "input 'test automation ticket from ongoing booking' on the text area"
+          },
+          {
+            "kind": "nlp",
+            "text": "hide the keyboard"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the widget checkbox to agree"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on text 'KIRIM'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Ke halaman Laporan Saya' button"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3270607": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "verifyTicketfromCompletedOrder",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/DriverSupportInbox.java",
+        "project_id": "143",
+        "suite_id": "28586233",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "tap on text `Laporan Saya` button"
+          },
+          {
+            "kind": "nlp",
+            "text": "verify 'Transaksi batal karena gagal terhubung' text element is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3493424": [
+      {
+        "module": "driverapp",
+        "title": "Validate Pull to refresh feature on Service Availibility Screen",
+        "method": "testServicePreferencesSectionInProfileSetting",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ios/IOSServicePreferences.java",
+        "project_id": "DRIVER_IOS",
+        "suite_id": "28584834",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginToiOSDriver(CAR_SG_DRIVER_1)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojekdriver://preference-settings"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button label24Help"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify text containing 'Help Center' is visible in the profile setting page"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3493426": [
+      {
+        "module": "driverapp",
+        "title": "Validate warning message should shown when driver disable all service availabilty",
+        "method": "testPullToRefreshOnServiceAvailabilityScreen",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ios/IOSServicePreferences.java",
+        "project_id": "DRIVER_IOS",
+        "suite_id": "28584834",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginToiOSDriver(CAR_SG_DRIVER_2)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojekdriver://preference-settings"
+          },
+          {
+            "kind": "nlp",
+            "text": "Perform pull to refresh action on service availability screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that the Service availability page is displayed"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3493427": [
+      {
+        "module": "driverapp",
+        "title": "Validate Service availability section when change default vehicle",
+        "method": "testWarningMessageWhenDisableAllServiceAvailability",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ios/IOSServicePreferences.java",
+        "project_id": "DRIVER_IOS",
+        "suite_id": "28584834",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginToiOSDriver(CAR_SG_DRIVER_2)"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojekdriver://preference-settings"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that text containing 'minimum 1 service type should be active' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3493430": [
+      {
+        "module": "driverapp",
+        "title": null,
+        "method": "testServiceAvailabilitySectionWhenChangeDefaultVehicle",
+        "source_file": "driverapp/src/test/java/io/gojek/driverapp/tests/ios/IOSServicePreferences.java",
+        "project_id": "DRIVER_IOS",
+        "suite_id": "28584834",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginToiOSDriver(CAR_SG_DRIVER_2)"
+          },
+          {
+            "kind": "nlp",
+            "text": "driver tap on profile button on top left of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on button Settings with gear icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on navigation24NextIos"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the second vehicle option to change default vehicle"
+          },
+          {
+            "kind": "nlp",
+            "text": "tap on button 'Set default'"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gojekdriver://preference-settings"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that the Service availability section is displayed according to the default vehicle"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

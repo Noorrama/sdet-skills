@@ -16,6 +16,11 @@
       "description": "Mobile QA skill set — agentic PDLC pipeline across the 5 GoTo apps"
     },
     {
+      "name": "aep-backend",
+      "source": "./plugins/aep-backend",
+      "description": "Backend QA skill set — agentic PDLC pipeline for GoTo backend services"
+    },
+    {
       "name": "aep-tapmind",
       "source": "./plugins/aep-tapmind",
       "description": "TapMind MCP squad's skills — goal-driven exploratory testing, written-step validation, and BrowserStack-derived exploratory charters on real devices via the TapMind MCP tools"

@@ -3,9 +3,36 @@
   "title": "SDETPlanMasterOutputSchema",
   "type": "object",
   "properties": {
+    "extraction_status": { "type": "string", "enum": ["COMPLETE", "PARTIAL", "LIMITED"], "description": "How much of the source document was captured. COMPLETE = everything the document specified was captured. PARTIAL = the document did not specify some things, so they were left empty and listed in extraction_notes; this is the normal result for a work-in-progress doc and is not an error. LIMITED = a config file, schema or the validator was unavailable, so part of the run had less grounding than usual — see extraction_notes. Not COMPLETE whenever extraction_notes is non-empty." },
+    "extraction_notes": {
+      "type": "array",
+      "description": "Things the source document did not say, recorded instead of guessing a value. An empty array means nothing was left open. A non-empty array is normal and expected on a work-in-progress document — it is a to-do list for the author, not a list of errors.",
+      "items": {
+        "type": "object",
+        "required": ["field", "reason", "follow_up"],
+        "additionalProperties": false,
+        "properties": {
+          "field": { "type": "string", "description": "JSON path of the field left empty, e.g. business_requirements[3].target_module. Use 'ENVIRONMENT' for tool or install issues not tied to one field." },
+          "reason": { "type": "string", "description": "What was checked and what was found there, e.g. 'PRD section 4.2 states the rule but names no module'." },
+          "action": { "type": "string", "description": "The concrete next step, e.g. 'confirm the target module with the PM'." },
+          "follow_up": { "type": "string", "enum": ["NEEDS_ANSWER", "WORTH_CHECKING", "FYI"], "description": "How much attention this needs. NEEDS_ANSWER = someone has to supply this before the tests can cover it. WORTH_CHECKING = a value was produced, but without its usual reference source, so confirm it. FYI = optional content the document simply does not have; no action needed." }
+        }
+      }
+    },
     "version": { "type": "string" },
     "created_at": { "type": "string", "format": "date-time" },
     "updated_at": { "type": "string", "format": "date-time" },
+    "unmapped_extractor_data": {
+      "type": "object",
+      "description": "Catch-all for anything the extractors produced that no other field in this schema accommodates. The generator NEVER drops extractor data — whatever it cannot place elsewhere is copied here verbatim, so the plan is a lossless superset of its inputs. Keyed by source (prd / rfc / design / plan); each value holds the un-placed fields exactly as received. Empty object when everything mapped cleanly. Downstream may ignore it, but it must never be the reason information was lost.",
+      "properties": {
+        "prd": { "type": "object", "description": "prd_context fields not represented elsewhere." },
+        "rfc": { "type": "object", "description": "rfc_context fields not represented elsewhere." },
+        "design": { "type": "object", "description": "design_context fields not represented elsewhere." },
+        "plan": { "type": "object", "description": "plan_context fields not represented elsewhere." }
+      },
+      "additionalProperties": true
+    },
     "feature_metadata": {
       "type": "object",
       "properties": {
@@ -25,6 +52,80 @@
       "items": { "type": "string", "enum": ["QA", "Prod"] },
       "minItems": 1
     },
+    "coverage_categories": {
+      "type": "object",
+      "description": "Output of the Test-Category Selection Gate (Step 0). auto_selected is the mandatory signal-derived baseline; optional_extras are QA-discretionary.",
+      "properties": {
+        "auto_selected": {
+          "type": "array",
+          "description": "Categories whose detection signal fired in the supplied contexts. Always generated.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": { "type": "string" },
+              "reason": { "type": "string", "description": "The exact input field that fired, e.g. rfc.lifecycle_considerations[0].event = PROCESS_DEATH" }
+            },
+            "required": ["category", "reason"],
+            "additionalProperties": false
+          }
+        },
+        "optional_extras_available": {
+          "type": "object",
+          "properties": {
+            "feature_adjacent": {
+              "type": "array",
+              "description": "Categories whose trigger field exists in the schema but was empty/absent for this feature.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "category": { "type": "string" },
+                  "rationale": { "type": "string" }
+                },
+                "required": ["category", "rationale"],
+                "additionalProperties": false
+              }
+            },
+            "fe_baseline": {
+              "type": "array",
+              "description": "Universal FE-mobile hygiene categories not derivable from the docs, gated by an applicability predicate.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "group": { "type": "string" },
+                  "category": { "type": "string" },
+                  "rationale": { "type": "string" },
+                  "applicability": { "type": "string" },
+                  "source": { "type": "string", "enum": ["fe_baseline"] }
+                },
+                "required": ["group", "category", "rationale"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["feature_adjacent", "fe_baseline"],
+          "additionalProperties": false
+        },
+        "optional_extras_selected": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "user_removed": {
+          "type": "array",
+          "description": "AUTO categories the QA explicitly overrode out of scope, with reason.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": { "type": "string" },
+              "reason": { "type": "string" }
+            },
+            "required": ["category", "reason"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["auto_selected", "optional_extras_available"],
+      "additionalProperties": false
+    },
     "scenario_list": {
       "type": "array",
       "items": {
@@ -33,22 +134,37 @@
           "csv_title_association": { "type": "string" },
           "requirement_ref": { "type": "string" },
           "priority_tier": { "type": "string", "enum": ["P0", "P1", "P2"] },
-          "execution_scope": { 
-            "type": "string", 
-            "enum": ["FRONTEND_ONLY", "BACKEND_ONLY", "END_TO_END"] 
+          "execution_scope": {
+            "type": "string",
+            "enum": ["FRONTEND_ONLY", "BACKEND_ONLY", "END_TO_END"]
           },
           "is_legacy_regression": { "type": "boolean" },
+          "existing_case_ref": { "type": "string", "description": "BrowserStack case id (e.g. 'C2879733') this scenario was found to duplicate or closely overlap, from the regression-extractor's regression_context.json. Set whenever is_legacy_regression is true because of a real match -- 'true' with no ref is a bare flag nobody can audit. Omit when the scenario is genuinely new (no existing case)." },
           "automatable": { "type": "boolean" },
-          "target_execution_framework": { 
-            "type": "string", 
-            "enum": ["TAPMIND_NLP", "GMT_JAVA"] 
+          "target_execution_framework": {
+            "type": "string",
+            "enum": ["TAPMIND_NLP", "GMT_JAVA"]
           },
           "test_case_type": { "type": "string" },
           "automation_status": { "type": "string" },
-          "steps": { 
-            "type": "array", 
+          "coverage_category": {
+            "type": "string",
+            "description": "Which Category Catalog category this scenario belongs to (e.g. boundary, interruption_network, session_auth)."
+          },
+          "source": {
+            "type": "string",
+            "enum": ["input_derived", "feature_adjacent", "fe_baseline", "qa_added"],
+            "description": "Provenance of the scenario. fe_baseline/qa_added are curated hygiene, NOT input-derived requirements."
+          },
+          "steps": {
+            "type": "array",
             "items": { "type": "string" },
-            "description": "Supports automated execution steps and manual/legacy regression test steps."
+            "description": "MANUAL / human-tester steps: clean declarative NLP a person can perform on the device, with automation-harness scaffolding (backdoor login, toggle/flag injection, stubs) stripped out and lifted to preconditions. This is the tester-facing sequence that flows into the CSV Steps column."
+          },
+          "automation_steps": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "A MINIMAL restyle of 'steps' into TapMind NLP-framework vocabulary, placed directly after 'steps'. NOT a full runnable script -- the downstream code-gen stage adds the runStep() wrapper, exact constants, credential tokens, toggle names and setup. Rules: (1) ONE action per line -- split every compound step (top-level ' and '/' then ' joining distinct actions, verb inherited by the second fragment; not comma-lists, not inside parentheses). (2) TapMind helper calls verbatim where the step is that operation: login -> loginToDriver(<account>); explicit deeplink -> openDeeplink(\"<uri>\"); explicit flag set -> setDriverToggle(<flag_key>, <true|false>). (3) EVERY other action/assertion is the plain step text itself, NOT wrapped in runStep(). No injected scaffolding, no fabricated constants. When the scenario maps to an existing case with a real TapMind test, this is that test's verbatim sequence (from the tapmind nav_index) instead. Empty array when there is nothing to automate."
           },
           "expected_result": { "type": "string" },
           "execution_mode": { "type": "string" },
@@ -97,9 +213,26 @@
             },
             "description": "Clickstream/analytics telemetry specs extracted from prd-extractor."
           },
-          "test_data_tags": {
+          "test_data": {
             "type": "array",
-            "items": { "type": "string" }
+            "description": "One entry per test-data fixture the scenario needs. Carries the full structured state assembled from PRD (target_personas, prerequisites, boundary_conditions) and RFC (flags, N-1, api/state changes) — NOT flattened to tag strings. This is the identification input for the downstream test-data-generation stage.",
+            "items": {
+              "type": "object",
+              "required": ["fixture_id", "description"],
+              "additionalProperties": false,
+              "properties": {
+                "fixture_id": { "type": "string", "description": "Stable id for this fixture, reused across scenarios that need the same entity/state so downstream can dedup, e.g. 'fixture-kyced-gopay-user'." },
+                "entity": { "type": "string", "description": "Test-data domain/entity, e.g. CUSTOMER, DRIVER, VOUCHER, PAYMENT_INSTRUMENT. From the persona/requirement, not invented." },
+                "description": { "type": "string", "description": "Human-readable description of the fixture, verbatim or normalised from the PRD persona/prerequisite." },
+                "required_state": { "type": "object", "description": "Structured state predicates the entity must satisfy, e.g. {\"kyc_status\":\"VERIFIED\",\"gopay_active\":true}. Assembled from target_personas.prerequisites + boundary_conditions. Static entity attributes ONLY — see dynamic_conditions for temporal/relational needs. Empty object if the source states an entity but no attributes." },
+                "type_signals": { "type": "array", "items": { "type": "string" }, "description": "Short signal labels for this fixture (the former test_data_tags), e.g. ['kyc_verified_user','birthday_d_day']. Downstream maps these to test_data_type_signals. Signals summarise; required_state is the source of truth." },
+                "dynamic_conditions": { "type": "array", "items": { "type": "object", "required": ["kind", "condition"], "additionalProperties": false, "properties": { "kind": { "type": "string", "enum": ["TEMPORAL", "RELATIONAL", "SELECTION"] }, "condition": { "type": "string", "description": "Plain-language condition that is NOT a static entity attribute, e.g. 'current date equals the customer date_of_birth' for a birthday trigger. Kept out of required_state because no static category can match it." } }, "description": "Conditions that are relationships or time-based rather than stored attributes — birthday-on-D-day, N-th transaction, clock-dependent. These become selection constraints or operations downstream, never required_state predicates." } },
+                "provision": { "type": "string", "enum": ["lease", "construct", "synthetic", "override"], "description": "How the fixture is expected to be provisioned. Omit if unknown at plan time." },
+                "sensitive": { "type": "boolean", "description": "True for KYC identity, card, or PII state that must be synthetic, never real prod data." },
+                "count": { "type": "integer", "description": "How many distinct instances of this fixture the scenario needs. Default 1 if omitted." },
+                "source_refs": { "type": "array", "items": { "type": "string" }, "description": "What this fixture traces to — PRD req_id / persona type / boundary_condition id / RFC flag_key. Keeps every fixture auditable back to a real source field." }
+              }
+            }
           }
         },
         "required": [
@@ -117,7 +250,7 @@
           "execution_mode",
           "preconditions_metadata",
           "mapped_user_flow",
-          "test_data_tags"
+          "test_data"
         ],
         "additionalProperties": false
       }
@@ -195,9 +328,9 @@
           }
         },
         "required": [
-          "screen_id", 
-          "element_role", 
-          "generated_logical_id", 
+          "screen_id",
+          "element_role",
+          "generated_logical_id",
           "accessibility_mapping_directives"
         ],
         "additionalProperties": false

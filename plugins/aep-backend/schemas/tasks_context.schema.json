@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "tasks_context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feature_name", "epics"],
+  "properties": {
+    "feature_name": { "type": "string" },
+    "epics": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "title", "stories"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "stories": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["id", "title", "tasks"],
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "tasks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object", "additionalProperties": false,
+                    "required": ["id", "type", "component"],
+                    "properties": {
+                      "id": { "type": "string" },
+                      "type": { "type": "string", "enum": ["NEW_HTTP_API", "NEW_GRPC_API", "EXISTING_API_CHANGE", "DB_SCHEMA", "PROTO_UPDATE", "OTHER"] },
+                      "component": { "type": "string" },
+                      "package": { "type": "string" },
+                      "api_contract": {
+                        "type": "object", "additionalProperties": false,
+                        "properties": {
+                          "route": { "type": "string" },
+                          "method": { "type": "string" },
+                          "request_fields": { "type": "array", "items": { "type": "object" } },
+                          "response_fields": { "type": "array", "items": { "type": "object" } },
+                          "error_codes": { "type": "array", "items": { "type": "string" } },
+                          "auth": { "type": "string" }
+                        }
+                      },
+                      "validation_constraints": {
+                        "type": "array",
+                        "items": {
+                          "type": "object", "additionalProperties": false,
+                          "properties": {
+                            "layer": { "type": "string", "enum": ["controller", "service", "repository", "db"] },
+                            "rule": { "type": "string" },
+                            "reuses": { "type": ["string", "null"] }
+                          }
+                        }
+                      },
+                      "test_layer": { "type": "string", "enum": ["component", "integration", "e2e"] },
+                      "preconditions": { "type": "array", "items": { "type": "string" } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rfc_conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "field": { "type": "string" },
+          "rfc_value": { "type": "string" },
+          "tasks_value": { "type": "string" },
+          "resolution": { "type": "string", "enum": ["tasks_wins", "needs_review"] }
+        }
+      }
+    }
+  }
+}

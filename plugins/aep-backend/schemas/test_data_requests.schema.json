@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "test_data_requests",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feature_name", "fixtures"],
+  "properties": {
+    "feature_name": { "type": "string" },
+    "tdp_version": { "type": "string" },
+    "fixtures": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["fixture_id", "entities"],
+        "properties": {
+          "fixture_id": { "type": "string" },
+          "description": { "type": "string" },
+          "used_by_methods": { "type": "array", "items": { "type": "string" } },
+          "entities": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["entity_type", "tdp_resource", "fields", "ref_id"],
+              "properties": {
+                "entity_type": { "type": "string" },
+                "tdp_resource": { "type": "string" },
+                "fields": { "type": "object" },
+                "ref_id": { "type": "string" },
+                "belongs_to": { "type": "string" }
+              }
+            }
+          },
+          "state_assertions": { "type": "array", "items": { "type": "string" } },
+          "cleanup": { "type": "string", "enum": ["delete_all_created_entities", "rollback"] },
+          "constraint_notes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "tdp_payload_summary": { "type": "object" }
+  }
+}
