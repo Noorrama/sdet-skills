@@ -66,40 +66,47 @@
       "description": "Explicit exclusions — as important as in-scope; the SDET plan uses this to SUPPRESS scenario generation. Record even when it conflicts with a later section (flag that conflict in needs_clarification / open_decisions).",
       "items": { "type": "string" }
     },
-    "user_flow": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "The end-to-end request/render flow plus its failure states — the skeleton the SDET plan turns into happy-path and negative scenarios.",
-      "properties": {
-        "steps": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["actor", "action"],
-            "properties": {
-              "step": { "type": ["integer", "null"] },
-              "actor": {
-                "type": "string",
-                "description": "The system/persona performing the step, e.g. user, Gateway, MLS, Frontend."
-              },
-              "action": {
-                "type": "string",
-                "description": "What happens at this step. Prefix branch-specific behaviour with the branch, e.g. '[Option B path] ...'."
+    "user_flows": {
+      "type": "array",
+      "description": "Multiple end-to-end flows: happy path, persona-specific paths, and deviation paths (retry, fallback, error). Each flow is a skeleton the SDET plan turns into scenario sequences.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "steps"],
+        "properties": {
+          "name": { "type": "string", "description": "Flow name, e.g. 'Happy Path', 'Fresh Lead Path', 'Resigned Driver Path', 'Fallback Path'." },
+          "trigger": { "type": ["string", "null"], "description": "Condition that triggers this flow (null for happy path). e.g. 'Persona = Fresh Lead', 'Fallback required'." },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["step", "actor", "action"],
+              "properties": {
+                "step": { "type": "integer", "description": "Ordered step number (1, 2, 3, ...)." },
+                "actor": {
+                  "type": "string",
+                  "description": "The system/persona performing the step, e.g. user, Gateway, MLS, Frontend, OneKYC Agent."
+                },
+                "action": {
+                  "type": "string",
+                  "description": "What happens at this step. Prefix branch-specific behaviour with the branch, e.g. '[Option B path] ...'."
+                }
               }
             }
-          }
-        },
-        "failure_states": {
-          "type": "array",
-          "description": "Named failure/edge outcomes on this flow — each is a negative-scenario seed.",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["name", "outcome"],
-            "properties": {
-              "name": { "type": "string", "description": "The triggering condition, e.g. 'dish_list = 0', 'Missing flag'." },
-              "outcome": { "type": "string", "description": "Expected observable result, e.g. 'Do not show', 'use old logic'." }
+          },
+          "failure_states": {
+            "type": "array",
+            "description": "Named failure/edge outcomes on this flow — each is a negative-scenario seed.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "outcome"],
+              "properties": {
+                "name": { "type": "string", "description": "The triggering condition, e.g. 'dish_list = 0', 'Missing flag', 'Dedup check blocked'." },
+                "outcome": { "type": "string", "description": "Expected observable result, e.g. 'Do not show', 'use old logic', 'Reject and return to signup'." },
+                "persona_ref": { "type": ["string", "null"], "description": "Which persona(s) this failure applies to, e.g. 'Resigned Driver', or null if applies to all." }
+              }
             }
           }
         }
@@ -307,18 +314,21 @@
     },
     "comment_resolutions": {
       "type": "array",
-      "description": "Decisions/clarifications mined from the PRD's review comment thread. status tells the SDET plan how much to trust each: 'resolves' = authoritative; 'clarifies' = context, does not lock a decision; 'unanswered' = open, do not act on. Always keep the quote and what it affects.",
+      "description": "Decisions/clarifications mined from the PRD's review comment thread. Active guidance structure: what was ambiguous → what is now clear → how SDET plan uses this. status tells the plan how to trust each: 'resolves' = authoritative; 'clarifies' = context, does not lock decision; 'unanswered' = open.",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "status", "topic"],
         "properties": {
-          "id": { "type": "string", "description": "CR-001 ..." },
+          "id": { "type": "string", "description": "CR-001, CR-002, ..." },
           "status": { "type": "string", "enum": ["resolves", "clarifies", "unanswered", "open", "superseded"] },
-          "topic": { "type": "string" },
-          "quote": { "type": ["string", "null"], "description": "Short verbatim quote from the thread (attribute the source; keep it brief)." },
-          "affects": { "type": "array", "items": { "type": "string" }, "description": "Refs to fields/requirements/ACs/open_decisions this comment bears on." },
-          "related_open_decision": { "type": ["string", "null"] },
+          "topic": { "type": "string", "description": "Category of the resolution, e.g. 'KESP Document Handling', 'Binary OneKYC Decisions'." },
+          "quote": { "type": ["string", "null"], "description": "Short verbatim quote from the thread (attribute source; keep brief)." },
+          "affects": { "type": "array", "items": { "type": "string" }, "description": "Specific item refs: REQ-003, AC-041, boundary_conditions[row-name], etc. Not generic categories." },
+          "related_open_decision": { "type": ["string", "null"], "description": "open_decisions[].id this resolution addresses, if any." },
+          "what_was_ambiguous": { "type": ["string", "null"], "description": "The original PRD gap or unanswered question from the body." },
+          "what_is_now_clear": { "type": ["string", "null"], "description": "The resolution stated in the comment thread." },
+          "implication_for_sdet": { "type": ["string", "null"], "description": "How SDET plan should use this: which ACs become verifiable, which open_decisions are locked, which requirements are refined, etc." },
           "detail": { "type": ["string", "null"] }
         }
       }

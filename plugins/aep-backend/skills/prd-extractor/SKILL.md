@@ -36,7 +36,7 @@ Fast tier — Haiku. Escalate to a reasoning model when the PRD has an undecided
 | Scope | Explicit in-scope and out-of-scope bullets, verbatim | `in_scope[]`, `out_of_scope[]` |
 | **Personas & prereqs** | **User personas — distinct journeys/states, not teams.** Examples: "Fresh Lead" (new), "Existing User (Resigned)", "Deleted Account". Capture actor states/preconditions that branch the flow. | `personas[]`, `persona_prerequisites[]` |
 | Applicability | Service verticals (Food …) and country gating | `applicable_service_types[]`, `applicable_countries[]` |
-| End-to-end flow | Ordered steps (actor + action) showing **persona-specific paths** where they diverge. Every named failure/edge outcome. | `user_flow.steps[]`, `user_flow.failure_states[]` |
+| End-to-end flow | **Multiple flows**: happy path, persona-specific paths, deviation paths (retry, fallback). Ordered steps (actor + action, numbered) showing where paths diverge. Failure/edge outcomes labeled by persona. | `user_flows[]` (name, trigger, steps[], failure_states[] with persona_ref) |
 | Involved teams | Each team the flow touches and its role (per-branch role if the design is forked) | `involved_teams[]` |
 | User stories | *As a [persona] I want [goal] so that [benefit].* **Map to the personas extracted above.** Assign `US-001…` if unnumbered | `user_stories[]` |
 | **Requirements** | Pair the **business_requirement** (why) with the **product_requirement** (concrete, testable what). **Map to affected persona(s) via `story_ref`.** Tag owning team | `requirements[]` |
@@ -73,7 +73,7 @@ Root fields (see `schemas/prd_context.schema.json` for the authoritative shape).
 
 - `id`, `title` (required), `priority`, `readiness`, `owner`, `team[]`, `pdg[]`, `milestones[]`, `summary`, `source_ref`
 - `in_scope[]`, `out_of_scope[]`
-- `user_flow` — `steps[]` (`step`, `actor`, `action`), `failure_states[]` (`name`, `outcome`)
+- **`user_flows[]`** — `name`, `trigger`, `steps[]` (required: `step`=integer, `actor`, `action`), `failure_states[]` (`name`, `outcome`, optional `persona_ref`)
 - `personas[]`, `persona_prerequisites[]`, `applicable_countries[]`, `applicable_service_types[]`, `rollout_plan`
 - `involved_teams[]` — `team`, `role`
 - `user_stories[]` — `id`, `description`, optional `owner`/`team`
@@ -96,6 +96,19 @@ Root fields (see `schemas/prd_context.schema.json` for the authoritative shape).
 
 ```json
 {
+  "user_flows": [
+    { "name": "Happy Path", "trigger": null,
+      "steps": [
+        { "step": 1, "actor": "User", "action": "Views list of dishes" },
+        { "step": 2, "actor": "MLS", "action": "Evaluates enable_see_all_flag and min_dish_count" },
+        { "step": 3, "actor": "MLS", "action": "Shows 'See All' button when threshold met" },
+        { "step": 4, "actor": "User", "action": "Clicks 'See All' to expand list" }
+      ],
+      "failure_states": [
+        { "name": "dish_list = 0", "outcome": "Do not show 'See All' button", "persona_ref": null }
+      ]
+    }
+  ],
   "requirements": [
     { "id": "REQ-003", "story_ref": "US-001", "team": "MLS",
       "business_requirement": "When the flag is on, apply a configurable threshold instead of the hard-coded > 9 rule.",
