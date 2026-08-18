@@ -82,10 +82,17 @@ what was not covered.
    the resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
    coverage) to get `regression_context.json`. This is an internal call, the same as any other
    skill invocation in this pipeline — not something to wait on the QA for.
-   - **Absent is normal, not an error.** `extraction_status: LIMITED` with an `FYI` note (the two
-     merchant apps have no coverage in the automation repo at all; BrowserStack MCP can be
-     unreachable) means proceed with **zero** regression context — same as any other optional
-     input being absent. Never block generation on this.
+   - **BrowserStack MCP unavailable → STOP.** If the regression-extractor reports that
+     BrowserStack MCP is unreachable or unauthorised (no `regression_context.json` written),
+     **do NOT proceed with generation.** Stop and tell the user:
+     *"BrowserStack MCP is not connected. Run `/aep-mobile:setup` for setup steps, then re-run."*
+     Generating without regression dedup risks duplicating the entire existing suite into TMS
+     on CSV import — that is not recoverable, so it is a hard gate.
+   - **`extraction_status: LIMITED` for a non-MCP reason is different — continue.**
+     The two merchant apps have `NO_COVERAGE` in the automation repo (no cases to query) —
+     that is a legitimate zero-result, not a connection failure. The extractor writes
+     `regression_context.json` with `[]` and `COMPLETE`/`LIMITED` with an `FYI` note. That is
+     fine — proceed with zero regression context.
    - **A schema-invalid or unreadable `regression_context.json` is different** — treat it like
      any other malformed input context (Preflight step 3): use nothing from it, raise a
      `NEEDS_ANSWER` note naming the failure, never silently treat malformed as merely absent.

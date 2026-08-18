@@ -118,7 +118,16 @@ write it with a `WORTH_CHECKING` note on `ENVIRONMENT`; never report an unvalida
 ## Guardrails
 - **No Hallucinations:** Only return test cases actually returned by the BrowserStack MCP tool. Never invent, complete, or "reconstruct" a test case, ID, title or step list.
 - **Distinguish zero results from no answer.** A query that ran and matched nothing → `[]` with `extraction_status: COMPLETE`. A query that could not run → `[]` **plus** `extraction_status: LIMITED` and a `NEEDS_ANSWER` note on `ENVIRONMENT`. Never emit a bare `[]` for a failed lookup: downstream that reads as "no existing coverage" and the SDET plan duplicates the entire existing suite.
-- **Connection failure → continue, flagged.** If the BrowserStack MCP server is unreachable or unauthorised, return `[]` with a `NEEDS_ANSWER` note: reason *"BrowserStack MCP unavailable — regression coverage was NOT checked"*, action *"configure the BrowserStack MCP server and re-run, or dedup manually"*.
+- **Connection failure → STOP, do not continue.** If the BrowserStack MCP server is unreachable or unauthorised, **do NOT write `regression_context.json`, do NOT continue generation, and do NOT fall through to "proceed without regression data."** Instead, stop immediately and tell the user:
+  > ⚠️ **BrowserStack MCP is not connected.**
+  >
+  > The regression-extractor requires a live connection to BrowserStack Test Management.
+  > Without it, new test cases will duplicate existing coverage — this is not recoverable
+  > after import.
+  >
+  > **Run `/aep-mobile:setup` to see the setup steps, then re-run.**
+  
+  This is a hard gate, not a soft warning. The risk of duplicating an entire regression suite into TMS is higher than the cost of pausing to connect.
 - **Project mapping failure → continue, flagged.** If a module cannot be resolved to a project via `config/browserstack_project_map.json` (not present in `consumer_super_app.folders`, `separate_projects`, or `gtf_source.separate_projects`, or present with `browserstack_project: null`), return `[]` for that module with a `NEEDS_ANSWER` note naming the repo+module and stating the map has no confirmed project id for it — but still resolve and query the app_id's *other* modules/repos (see Step 1a) rather than failing the whole run. Never guess a `PR-` id and never search all BrowserStack projects to find one.
 - **Never read `deeplinks.json` or a `nav_index/<repo>/<module>.json` file whole.** Always extract the single repo+module/case_number needed via a shell one-liner (Step 0). Some `nav_index` files exceed 3 MB; reading one directly can consume the entire context window for a single lookup.
 - **Secure Credentials:** Never attempt to prompt for, read, or print BrowserStack API tokens. All authorization is handled securely at the client-mcp level.
