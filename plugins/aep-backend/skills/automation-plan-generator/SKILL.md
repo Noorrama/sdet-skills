@@ -38,6 +38,7 @@ Fast tier — Haiku
 | `assertion_class` | Derived from test_class, e.g. `SaveCardAssertions`, `CardRepositoryAssertions` |
 | `endpoint` | HTTP method + path from tasks_context api_contract, e.g. `POST /payment/v1/cards`. Empty string for DB/infra-only tests (no HTTP call). |
 | `curl_reference` | Minimal valid curl from code_change_context or tasks_context api_contract. Use fixture-scoped placeholders: `{{FIX-xxx.fieldName}}` — e.g. `{{FIX-CARDPAY-001.bearerToken}}`, `{{FIX-CARDPAY-002.savedCardNumber}}`. Placeholder field names are **candidates** — TDG confirms and corrects them against the catalog response schema. Empty string for DB/infra-only tests. |
+| `step_descriptions[]` | **Propagated verbatim** from sdet_plan.json for the matching `scenario_id`. Copy all steps as-is — do not rewrite or summarise. test-code-generator uses these to build `@Step` annotations and assertions; without them it cannot write correct Given/When/Then. |
 | `test_data[]` | One entry per independently provisioned entity needed by this scenario. See fixture guidance below. |
 | `tags` | From sdet_plan.json tags + priority, e.g. `["negative", "P0"]` |
 | `environments` | From tasks_context.json environments or default `["dev-cluster", "staging-cluster"]` |
