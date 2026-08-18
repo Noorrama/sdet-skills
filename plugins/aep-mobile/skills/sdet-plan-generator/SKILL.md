@@ -815,7 +815,68 @@ The skill supports a two-way synchronization flow to allow human QA to review, r
      - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `mapped_user_flow`, `test_data`, `unmapped_extractor_data`, `clickstream_events`, `coverage_category`, `source`, `requirement_ref`, the top-level `coverage_categories` / `coverage_audit` blocks, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
      - **Re-run the Step 4 Coverage Self-Audit** after merging and refresh the `coverage_audit` block, so QA-added/removed rows keep the coverage proof accurate.
      - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>_SDET_plan.json` to reflect the synchronization event.
-   - **Then emit the automation plan.** After the merge, run the *Automation-Plan-Generator emission* below — the CSV feedback is precisely the trigger to (re)produce `<feature_key>_automation_plan_generator.json` for the downstream Test-Data-Generation stage.
+   - **Then upload to BrowserStack and emit the automation plan.** After the merge, run the
+     *BrowserStack Upload & Case-ID Resolution* step below, then the *Automation-Plan-Generator
+     emission* — the CSV feedback is precisely the trigger to (re)produce
+     `<feature_key>_automation_plan_generator.json` with real BrowserStack case IDs for the
+     downstream Test-Data-Generation stage.
+
+---
+
+## BrowserStack Upload & Case-ID Resolution
+
+**SYNC mode only.** This step runs only when the user provides a modified CSV (SYNC mode trigger).
+It does NOT run during GENERATE mode — generation produces the CSV for the first time; there is
+nothing to upload yet.
+
+After the SYNC merge completes, upload the finalised test cases to BrowserStack Test Management
+and stamp the returned case IDs back into `<feature_key>_SDET_plan.json` before emitting the
+automation plan.
+
+### 1. Resolve Upload Target (project + folder)
+
+Use the first source that resolves — do not search all BrowserStack projects:
+
+1. **`regression_context.json` exists** → read `browserstack_project` (e.g. `PR-176`) and
+   `resolved_folders` (the folder IDs the extractor already queried). Use the first
+   `resolved_folders[]` entry as the upload folder.
+2. **No `regression_context.json`** → read
+   `/Users/adarsh/.claude/plugins/cache/aep/aep-mobile/0.8.4/config/browserstack_project_map.json` and resolve
+   the project from `app_id` → module → `consumer_super_app.folders` or `separate_projects`,
+   same logic as the regression-extractor's Step 1b.
+3. **Feature subfolder** — look for a folder matching `feature_key` under the resolved project
+   (use `listFolders`). If found → use it. If not → create it via `createProjectOrFolder` with
+   the `feature_key` as the folder name.
+4. **Project unresolvable** (module not in the map, or `browserstack_project: null`) → ask the
+   user for the BrowserStack project identifier. Do not guess a `PR-` id.
+
+### 2. Upload Test Cases
+
+Use the BrowserStack MCP tool `createTestCasesFromFile` with the finalised
+`<feature_key>_test_cases.csv` and the resolved project + folder.
+
+- **BrowserStack MCP unavailable at upload time → do not block.** The SYNC and automation-plan
+  emission still complete. Add a `WORTH_CHECKING` note:
+  *"BrowserStack upload skipped — MCP unavailable. Run `/aep-mobile:setup`, then re-run SYNC
+  to upload and stamp case IDs."*
+  Emit the automation plan without `browserstack_case_id` fields (they stay `null`).
+
+### 3. Stamp Case IDs
+
+`createTestCasesFromFile` returns the created case identifiers (e.g. `TC-XXXXXX`). Map each
+returned ID back to its scenario by matching on `csv_title_association` (the title column is the
+join key between the CSV rows and the returned results).
+
+- Write `browserstack_case_id` into each matched scenario in `<feature_key>_SDET_plan.json`.
+- For existing regression cases that already had a `browserstack_case_id` from
+  `regression_context.json`, **keep the original ID** — do not overwrite with a duplicate upload.
+  Only stamp new IDs onto scenarios that had no prior `browserstack_case_id`.
+- Update `<feature_key>_SDET_plan.json`'s `updated_at` timestamp.
+
+### 4. Summary
+
+Print a one-line summary: *"Uploaded N test cases to BrowserStack project PR-XXX / folder
+<feature_key>. M existing cases kept their original IDs."*
 
 ---
 
@@ -829,10 +890,11 @@ fixtures only exist in `<feature_key>_SDET_plan.json`. Order of operations: SYNC
 JSON first (above), then emit from that merged JSON. The JSON is the single source of truth; the
 CSV only carried the QA's column edits.
 
-**Filter.** Include a scenario **only if its post-sync `execution_mode` is `Automatable`.** Manual
-scenarios stay in the SDET plan and are omitted from the automation plan. (For a purely backend
-consumer you may additionally scope to `execution_scope` ∈ {`BACKEND_ONLY`, `END_TO_END`}; state
-it if you do.)
+**Filter.** Include a scenario **only if its post-sync `execution_mode` matches `Automatable`
+(case-insensitive — `automatable`, `AUTOMATABLE`, `Automatable` all qualify).** Manual scenarios
+stay in the SDET plan and are omitted from the automation plan. (For a purely backend consumer
+you may additionally scope to `execution_scope` ∈ {`BACKEND_ONLY`, `END_TO_END`}; state it if
+you do.)
 
 **Field mapping** (SDET scenario → automation_scenario):
 - `scenario_id` — assign `SC-001`, `SC-002`… in scenario order; **reuse the same id on
@@ -846,6 +908,9 @@ it if you do.)
   re-derive `required_state` here; it was already assembled at generation time. Emit the
   identification INPUT only — never add `test_data_output`, that is the test-data stage's job.
 - `epic_id` — the EPIC/Jira id from `feature_metadata` if present, else `feature_key`.
+- `browserstack_case_id` — the real BrowserStack case identifier (`TC-XXXXXX`) stamped during
+  the *BrowserStack Upload & Case-ID Resolution* step. Carry it verbatim from the scenario's
+  `browserstack_case_id` field. `null` when the upload was skipped or the MCP was unavailable.
 
 **Backend-only fields** (`service_name`, `package`, `test_class`, `assertion_class`, `endpoint`,
 `curl_reference`) — a mobile SDET plan does not carry these. **Never fabricate them.** Emit them
