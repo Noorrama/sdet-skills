@@ -41,8 +41,20 @@ import sys, os, re, json, subprocess, datetime
 # shared "gojekstaging://"). Excluded from this list on purpose: "bs://"
 # (a BrowserStack build-path check, not a deeplink), and generic
 # "http(s)://"/"media://"/"mongodb://" (infra protocols, not app deeplinks).
+#
+# Repeated the same sweep on gtf-mobile-tests (a second, separate repo --
+# see --repo-key below) and found four more real schemes: "gopay://" (bare,
+# never appears in gojek-mobile-tests but is literal here), "gopaystaging://"
+# (shared name, different app), "gopaysandbox://" (this repo's other
+# environment variant -- paired positionally with gopaystaging as the
+# enum's 2nd constructor arg, so no special "staging in name" handling is
+# needed for it), "gopaybackdoor://" (a real backdoor-login utility link),
+# and "ktbs://" (a Kitabisa-donation partner deeplink, found only as an
+# inline string in test-data/helper code, never in an actual dictionary
+# file -- included for completeness in case that changes).
 SCHEMES = ("gojek://", "gojekstaging://", "gojeksg://", "gojekstagingsg://",
-           "gojekdriver://", "gopartner://", "gopaystaging://")
+           "gojekdriver://", "gopartner://", "gopaystaging://",
+           "gopay://", "gopaysandbox://", "gopaybackdoor://", "ktbs://")
 # Case variants of the same schemes are used inconsistently in places
 # (confirmed: "GoJekDriver://", "GojekDriver://", "gojekdriver://" all occur).
 # Classification below is done against v.lower() so any of these are
@@ -63,6 +75,9 @@ TYPO_PATTERNS = [
     (re.compile(r'^gojek:/(?!/)', re.I), "gojek://"),
     (re.compile(r'^gopartner:/(?!/)', re.I), "gopartner://"),
     (re.compile(r'^gopaystaging:/(?!/)', re.I), "gopaystaging://"),
+    (re.compile(r'^gopaysandbox:/(?!/)', re.I), "gopaysandbox://"),
+    (re.compile(r'^gopaybackdoor:/(?!/)', re.I), "gopaybackdoor://"),
+    (re.compile(r'^gopay:/(?!/)', re.I), "gopay://"),
 ]
 
 CONST_RE = re.compile(r'static\s+final\s+String\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*"([^"]*)"')
@@ -214,14 +229,21 @@ def git_sha(repo_root: str):
 
 
 def main():
-    repo_root, out_path = sys.argv[1], sys.argv[2]
+    # <repo_root> <repo_key> <output.json> -- repo_key namespaces this repo's
+    # results under out["repos"][repo_key], merged into any existing file
+    # rather than overwriting it, so running this for "gtf" never wipes out
+    # "gmt"'s already-extracted data (and vice versa). This plugin now draws
+    # on two separate automation repos (gojek-mobile-tests="gmt",
+    # gtf-mobile-tests="gtf") with different module sets and different
+    # deeplink-scheme families -- see SCHEMES above.
+    repo_root, repo_key, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
     files = find_candidate_files(repo_root)
 
     modules = {}
-    global_prefixes = {}
+    repo_prefixes = {}
     files_scanned = 0
     files_contributed = 0
-    files_skipped_no_gojek = []
+    files_skipped_no_scheme = []
     files_skipped_test_class = []
 
     for path in files:
@@ -231,8 +253,15 @@ def main():
         except OSError:
             continue
 
-        if "gojek" not in text.lower():
-            files_skipped_no_gojek.append(os.path.relpath(path, repo_root))
+        # Content gate: does this file contain ANY recognised scheme at all?
+        # An earlier version of this check hardcoded "gojek" specifically --
+        # correct for gojek-mobile-tests, but it would have silently
+        # rejected gtf-mobile-tests' entire deeplink dictionary, none of
+        # which contains the substring "gojek" anywhere (its schemes are
+        # gopay/gopaystaging/gopaysandbox/gopaybackdoor/ktbs).
+        low = text.lower()
+        if not any(s in low for s in SCHEMES_LOWER):
+            files_skipped_no_scheme.append(os.path.relpath(path, repo_root))
             continue
 
         mod = module_of(repo_root, path)
@@ -247,7 +276,7 @@ def main():
             prefixes, entries = {}, parse_yaml_simple(text)
 
         if prefixes:
-            global_prefixes.update(prefixes)
+            repo_prefixes.update(prefixes)
         if entries:
             files_contributed += 1
             bucket = modules.setdefault(mod, {})
@@ -262,34 +291,43 @@ def main():
 
     total_entries = sum(len(v) for v in modules.values())
 
-    out = {
-        "_meta": {
-            "generated_by": "extract_deeplinks.py",
-            "generated_from_repo_sha": git_sha(repo_root),
-            "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            "files_scanned": files_scanned,
-            "files_contributed": files_contributed,
-            "files_skipped_no_gojek_content": len(files_skipped_no_gojek),
-            "files_skipped_as_test_class": len(files_skipped_test_class),
-            "total_entries": total_entries,
-            "modules_covered": sorted(modules.keys()),
-        },
-        "prefixes": dict(sorted(global_prefixes.items())),
+    out = {"_meta": {"repos": {}}, "repos": {}}
+    if os.path.exists(out_path):
+        try:
+            out = json.load(open(out_path))
+        except (json.JSONDecodeError, OSError):
+            pass  # start fresh rather than fail on a corrupted prior file
+    out.setdefault("_meta", {}).setdefault("repos", {})
+    out.setdefault("repos", {})
+
+    out["_meta"]["repos"][repo_key] = {
+        "generated_by": "extract_deeplinks.py",
+        "generated_from_repo_sha": git_sha(repo_root),
+        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "files_scanned": files_scanned,
+        "files_contributed": files_contributed,
+        "files_skipped_no_scheme_found": len(files_skipped_no_scheme),
+        "files_skipped_as_test_class": len(files_skipped_test_class),
+        "total_entries": total_entries,
+        "modules_covered": sorted(modules.keys()),
+    }
+    out["repos"][repo_key] = {
+        "prefixes": dict(sorted(repo_prefixes.items())),
         "modules": {m: dict(sorted(v.items())) for m, v in sorted(modules.items())},
     }
 
     with open(out_path, "w") as f:
         json.dump(out, f, indent=2, sort_keys=False)
 
-    print(f"Scanned {files_scanned} candidate files.")
+    print(f"[{repo_key}] Scanned {files_scanned} candidate files.")
     print(f"  contributed entries from {files_contributed} files")
-    print(f"  skipped (no 'gojek' string found): {len(files_skipped_no_gojek)}")
+    print(f"  skipped (no recognised scheme found): {len(files_skipped_no_scheme)}")
     print(f"  skipped (real @Test( class, not a dictionary): {len(files_skipped_test_class)}")
     print(f"Total deeplink entries: {total_entries} across {len(modules)} modules")
-    print(f"Wrote {out_path}")
-    if files_skipped_no_gojek:
-        print("\nFiles matched 'deeplink' by name but skipped (no gojek scheme found) -- review manually:")
-        for r in files_skipped_no_gojek:
+    print(f"Wrote {out_path} (repos: {sorted(out['repos'].keys())})")
+    if files_skipped_no_scheme:
+        print("\nFiles matched 'deeplink' by name but skipped (no recognised scheme found) -- review manually:")
+        for r in files_skipped_no_scheme:
             print(f"  - {r}")
 
 
