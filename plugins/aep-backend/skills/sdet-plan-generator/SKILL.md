@@ -44,11 +44,82 @@ Set `generation_mode` in the sdet_plan.json root to the detected mode: `pass1` |
 | File | Read for |
 |---|---|
 | `rfc_context.json` | validation_sequence (business rules), flows, edge_cases, error_codes, contracts (all protocols), feature_flags, risk_areas, non_functional_requirements, extraction_gaps, open_questions, provenance |
-| `prd_context.json` | Acceptance criteria, business error classification, scenario priority (P0/P1/P2), out-of-scope flows |
+| `prd_context.json` | `acceptance_criteria[]` (incl. `verifiable` flag), `user_flows[]` + `failure_states[]`, `requirements[]`, `boundary_values[]`, `boundary_conditions[]`, `error_codes[]`, `feature_flags[]`, `non_functional_requirements[]`, `risk_areas[]`, `open_decisions[]` (blocking gate), `needs_clarification[]` (blocking gate), `comment_resolutions[]` (`implication_for_sdet`), `rollout_plan.phases[].variants`, `in_scope`, `out_of_scope` |
 | `tasks_context.json` | test_layer per story (authoritative), api_contract (authoritative endpoint + schema), validation_constraints (implementation confirmation), preconditions (contributing input for writing sdet_plan preconditions) |
 | `regression_context.json` | Active non-legacy non-flaky tests — deduplication signal |
 | `code_change_context.json` | Pass 2 only — new endpoints, new error mappings, new validation rules not in RFC |
 | `qa_analysis.md` | Review mode — read the `## Human Review → ### Feedback` section for human corrections. Also read in all modes to preserve the Human Review section when regenerating. |
+| `team_registry.json` | Canonical team resolution — maps free-form PRD/RFC team names and dashboard PDG labels to stable `canonical_id`, `code_module`, and `regression_id_prefix`. Read once at startup before scenario generation begins. |
+
+## Team name resolution
+
+PRD/RFC fields use free-form team names (`"Transport"`, `"GoTrip"`, `"payments-team"`). The test code repo uses module directory names (`transport`, `payments`). Dashboards use PDG labels (`"Transport PDG"`). These three naming systems rarely align exactly. The `team_registry.json` is the single source of truth that maps all three to a stable `canonical_id`.
+
+### Why this matters
+
+| Downstream consumer | What it needs | What goes wrong without registry |
+|---|---|---|
+| **automation-plan-generator** | Exact module directory name for Java package path | Wrong package → test code in wrong module, fails to compile |
+| **regression-extractor** | `regression_id_prefix` to filter the correct team's suite | Pulls regression scenarios from a different team |
+| **BrowserStack CSV upload** | `browserstack_project` for correct project routing | Tests uploaded to wrong project |
+
+### Context fields that carry team identity
+
+> ⚠️ **Do not confuse these.** Three different fields all contain the word "team" but serve completely different purposes.
+
+| Field path | Example value | Purpose in this skill |
+|---|---|---|
+| `prd_context.team[]` | `["Transport"]` | **Owning team** — the product group responsible for the PRD. **Primary input for registry lookup.** |
+| `prd_context.pdg[]` | `["Transport"]` | **PDG label** — the dashboard/reporting group name. **Secondary input for registry lookup** (matched against `aliases.pdg`). |
+| `prd_context.owner` | `null` or a person name | Tertiary input only — rarely the team name; check for a team-like string as last resort. |
+| `prd_context.involved_teams[].team` | `"Backend"`, `"Frontend"`, `"Product"` | **Functional roles** — NOT a team identity. These tell you *which discipline* implements each requirement. Used only to filter requirements for scenario generation (this backend skill processes requirements where `team == "Backend"`). Never use for registry lookup. |
+| `rfc_context.team_ownership[].team` | `"Transport"` | **RFC owning team** — fallback when `prd_context.team` is absent or null. |
+
+### Resolution algorithm — priority order
+
+Execute the steps in order; stop at the first successful match.
+
+**Step 1 — Read candidate names:**
+
+```
+candidates = []
+if prd_context.team is non-empty:
+    candidates.append( ("prd", "prd.team", prd_context.team[0]) )
+if prd_context.pdg is non-empty:
+    candidates.append( ("pdg", "prd.pdg", prd_context.pdg[0]) )
+if rfc_context.team_ownership is non-empty:
+    candidates.append( ("prd", "rfc.team_ownership", rfc_context.team_ownership[0].team) )
+if prd_context.owner is non-null and looks like a team name (not a person name):
+    candidates.append( ("prd", "prd.owner", prd_context.owner) )
+```
+
+**Step 2 — For each candidate, attempt registry match:**
+
+For each `(alias_type, source_path, raw_name)` in candidates:
+1. Normalise: lowercase → strip hyphens/underscores/spaces → strip trailing suffixes `team|platform|pdg|backend`.
+2. Try **full match**: for each registry entry, normalise each alias in `aliases.{alias_type}[]` the same way. If normalised alias == normalised raw_name → **match**.
+3. If no full match: try **substring match**: normalised alias is contained in normalised raw_name, or vice versa → **match**.
+4. On match: use that registry entry. Record `source_path` in a `team_resolution_source` note in qa_analysis.md.
+
+**Step 3 — On no match after all candidates:**
+- Write `canonical_team_id: "unknown"`, `code_module: null`.
+- Surface warning in qa_analysis.md (see Fallback behaviour below).
+
+### Fallback behaviour
+
+If no registry entry matches the PRD/RFC team name:
+- Write `canonical_team_id: "unknown"`, `code_module: null` in `sdet_plan.json`
+- Add to `qa_analysis.md` generated section:
+  > ⚠️ **Team resolution warning:** Team name `"{raw_name}"` from PRD/RFC not found in `team_registry.json`. Downstream code generation and regression lookup will not work correctly. Add an entry or alias to `config/team_registry.json` before raising the MR.
+
+### What resolution populates in `sdet_plan.json`
+
+| Root field | Source |
+|---|---|
+| `canonical_team_id` | `team_registry.teams[matched].canonical_id` |
+| `code_module` | `team_registry.teams[matched].code.module` |
+
+> **`code_module` is the contract field.** `automation-plan-generator` reads it from `sdet_plan.json` to build Java package paths. It does not re-read `tasks_context` or `prd_context` for the module name.
 
 ## Ownership contract — A = authoritative (wins conflicts), C = contributes
 
@@ -90,11 +161,27 @@ This is the RFC's formal A/C matrix applied per dimension. When sources conflict
 | `open_questions[]` | Deferred scenarios — see section below |
 | `provenance` | Staleness warning in qa_analysis.md if `extracted_at` is stale |
 
-**READ FROM `prd_context` (A) for priority and business error classification:**
-- Acceptance criteria → scenario list (Given/When/Then)
-- Error scenarios → what the business expects to fail; authoritative for error classification even if RFC does not name the error
-- Priority signal → P0/P1/P2 per AC
-- Out-of-scope markers → do not generate scenarios for flagged flows
+**READ FROM `prd_context` (A) for priority, business intent, and scenario completeness:**
+
+| Field | What it drives in scenario generation |
+|---|---|
+| `acceptance_criteria[]` | One scenario minimum per AC. `verifiable: false` → mark scenario `provisional: true`, tag `["provisional"]`, note in qa_analysis.md that deterministic assertion is not yet possible |
+| `acceptance_criteria[].condition` | Given/When/Then text; extract exact thresholds and preconditions from the condition string |
+| `user_flows[]` | One end-to-end scenario per flow (`tags: ["happy_path"]` or `["fallback"]` per flow type) |
+| `user_flows[].failure_states[]` | One negative scenario per failure state; `outcome` → assertion prose; tag `["negative"]` |
+| `requirements[].product_requirement` | Read alongside AC — encodes implementation constraints and edge cases the AC condition may abbreviate |
+| `boundary_values[]` | One boundary scenario per entry; use the exact `value` in assertions (e.g. `distance ≤ 20m` → test at exactly 20m, 21m) |
+| `boundary_conditions[]` | One edge case scenario per entry; `proposed_default` → expected system behaviour to assert |
+| `error_codes[]` | One negative scenario per error code; `trigger` → precondition; `expected_recovery` → assertion on fallback behaviour |
+| `feature_flags[]` | flag-on + flag-off pair per flag; cross-reference with `rfc_context.feature_flags[]` for richer metadata (default_state, kill_switch) |
+| `non_functional_requirements[]` | Latency/SLA scenario per entry with `target` as the assertion threshold; tag `["nfr"]` |
+| `risk_areas[]` | `severity: high` → force P0 on covering scenario; `mitigation` → add a destructive/chaos variant scenario |
+| `comment_resolutions[]` | Read `implication_for_sdet` — use as additional scenario hints or constraints. `status: "unanswered"` → mark covering scenarios `provisional: true` |
+| `rollout_plan.phases[].variants` | If multiple experiment variants exist (e.g. ≤30m vs ≤40m distance gate) → generate one scenario per variant, tag with variant name |
+| `in_scope` | Cross-check: every in-scope item must have at least one scenario; flag gaps in qa_analysis.md |
+| `out_of_scope` | Do not generate scenarios for flagged flows; note in coverage_summary.rfc_gaps[] if RFC has steps for them |
+| `open_decisions[]` | `blocking: true` → see Blocking gates; `blocking: false` → mark covering scenarios `provisional: true` |
+| `needs_clarification[]` | `blocking: true` → see Blocking gates; `blocking: false` → mark covering scenarios `provisional: true` |
 
 **READ FROM `tasks_context` (A) for test layer and endpoint schema:**
 - `test_layer` per story → authoritative for all scenarios in that story; do not infer test_layer from `rfc_context.validation_sequence[].layer`
@@ -129,6 +216,9 @@ Run in order. Blocked areas must not produce scenarios.
 | `rfc_context.contracts.rest[underspecified: true]` | Skip concrete request/response assertions for that endpoint; generate a placeholder scenario with `tags: ["underspecified"]` |
 | `rfc_context.open_questions[]` not empty | For each question add a deferred scenario with `tags: ["deferred"]`, `source_ref` pointing to the question; do not block other scenarios |
 | `rfc_context.provenance` stale (extracted_at old relative to current date) | Surface warning in qa_analysis.md: "rfc_context was extracted on {extracted_at} — verify RFC has not changed since extraction" |
+| `prd_context.open_decisions[blocking: true]` | Do not generate final scenarios for areas affected by the decision; generate a placeholder with `tags: ["deferred"]` and `source_ref` pointing to the open decision ID; surface in qa_analysis.md as a blocking PRD gap |
+| `prd_context.needs_clarification[blocking: true]` | Same as above — deferred placeholder per item; `reason` field → note in placeholder description; surface in qa_analysis.md |
+| `prd_context.acceptance_criteria[verifiable: false]` | Generate scenario but mark `provisional: true`; note in qa_analysis.md that assertion cannot be deterministic until clarified by product/design |
 
 ## Scenario generation rules
 
@@ -215,11 +305,58 @@ For each flag:
 - `retry_count` → retry-exhaustion scenario: downstream fails `retry_count + 1` times, assert final error is surfaced correctly and no infinite loop
 - `circuit_breaker_error_rate_pct` → circuit-breaker-activation scenario: sustain error rate above threshold, assert circuit opens and fallback activates; `tags: ["reliability", "nfr"]`
 
-### PRD acceptance criteria — error scenarios (A)
+### PRD — full scenario generation (A)
 
-- Each PRD AC → one scenario minimum
+**acceptance_criteria[]** — one scenario minimum per AC:
 - PRD error classification is authoritative: if PRD says 409 for duplicate card, generate that scenario regardless of whether RFC names the error
+- `verifiable: false` → `provisional: true`; note in qa_analysis.md that assertion is not yet deterministic
 - If RFC already has a matching scenario → link via `source_ref`, do not duplicate
+
+**user_flows[]** — one end-to-end scenario per flow:
+- `trigger` → Given precondition; `steps[]` → step_descriptions actions in sequence
+- `tags: ["happy_path"]` for normal flows; `tags: ["fallback"]` for fallback flows
+- `failure_states[]` — one negative scenario per failure state:
+  - `name` → scenario name; `outcome` → expected_result assertion; `tags: ["negative"]`
+  - Priority: `P0` if the flow failure can cause user-visible mismatch (e.g. wrong pickup location); `P1` otherwise
+
+**boundary_values[]** — one boundary scenario per entry:
+- Generate three test points per threshold: at exactly the boundary, one unit below, one unit above
+- Use the exact numeric `value` in assertions (e.g. `≤20m` → test at 20m, 19m, 21m)
+- `source_ref` → `requirement_ref` from the boundary_values entry
+- `tags: ["boundary"]`
+
+**boundary_conditions[]** — one edge case scenario per entry:
+- `edge_case_description` → scenario description and Given precondition
+- `proposed_default` → expected system behaviour; use as the assertion in expected_result
+- `tags: ["boundary"]`; mark `provisional: true` if `proposed_default` says "TBD" or is vague
+
+**error_codes[]** — one negative scenario per error code:
+- `trigger` → precondition; `expected_recovery` → fallback assertion; `user_facing_message` → assert displayed to user
+- `source_ref` → `"prd_context.error_codes[{code}]"`
+
+**feature_flags[]** — flag-on + flag-off pair per flag string:
+- Cross-reference with `rfc_context.feature_flags[]` for richer metadata (default_state, kill_switch)
+- PRD flag list is the source of truth for flag names; RFC flag metadata drives scenario variants
+
+**non_functional_requirements[]** — one scenario per entry:
+- `target` → assertion threshold (e.g. `p95 ≤ 500ms`)
+- `tags: ["nfr"]`; `type_of_test: "performance"`
+
+**risk_areas[]** — one destructive/chaos scenario per `severity: high` risk:
+- `risk` → scenario description; `mitigation` → what the scenario verifies
+- `priority: P0`; `tags: ["reliability"]` or `["security"]` as appropriate
+
+**rollout_plan.phases[].variants** — if experiment variants exist:
+- One scenario per variant, tagged with the variant name (e.g. `["variant_30m"]`, `["variant_40m"]`)
+- If open_decisions[blocking] covers the variant choice → mark all variant scenarios `provisional: true`
+
+**comment_resolutions[]** — read `implication_for_sdet` for each entry:
+- `status: "resolves"` → use `what_is_now_clear` to refine existing AC-derived scenario assertions
+- `status: "clarifies"` → add detail from `implication_for_sdet` to relevant scenario step_descriptions
+- `status: "unanswered"` → mark covering scenarios `provisional: true`
+
+**in_scope cross-check** — after generating all scenarios:
+- Every item in `in_scope[]` must map to at least one generated scenario; flag unmapped items in qa_analysis.md
 
 ### Pass 2 — code_change_context (C)
 
@@ -240,6 +377,8 @@ Once `sdet_plan.json` is written and approved by a human:
 
 Schema root:
 - `feature_name`, `plan_version`, `generation_mode: pass1|pass2|retrigger|review`
+- `canonical_team_id: string` — resolved from `team_registry.json`. `"unknown"` if no match; triggers warning in qa_analysis.md. Stable across plan versions even if team renames (update registry alias instead).
+- `code_module: string | null` — exact test code module directory name from `team_registry.json code.module`. Consumed verbatim by `automation-plan-generator` for Java package path construction. `null` when resolution failed.
 - `scenarios[]` — each with:
   - `scenario_id`, `name`, `description`
   - `test_layer: component|integration|e2e`
