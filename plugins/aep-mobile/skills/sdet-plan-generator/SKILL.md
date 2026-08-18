@@ -859,7 +859,8 @@ Use the BrowserStack MCP tool `createTestCasesFromFile` with the finalised
   emission still complete. Add a `WORTH_CHECKING` note:
   *"BrowserStack upload skipped — MCP unavailable. Run `/aep-mobile:setup`, then re-run SYNC
   to upload and stamp case IDs."*
-  Emit the automation plan without `browserstack_case_id` fields (they stay `null`).
+  Scenarios that already carry a `browserstack_case_id` from regression context keep it;
+  new scenarios simply omit the field (never set it to `null`).
 
 ### 3. Stamp Case IDs
 
@@ -868,9 +869,11 @@ returned ID back to its scenario by matching on `csv_title_association` (the tit
 join key between the CSV rows and the returned results).
 
 - Write `browserstack_case_id` into each matched scenario in `<feature_key>_SDET_plan.json`.
-- For existing regression cases that already had a `browserstack_case_id` from
-  `regression_context.json`, **keep the original ID** — do not overwrite with a duplicate upload.
-  Only stamp new IDs onto scenarios that had no prior `browserstack_case_id`.
+- Existing regression cases already carry a `browserstack_case_id` from
+  `regression_context.json` (e.g. `C2879733`) — **keep the original ID**, do not overwrite.
+  Only stamp new IDs onto scenarios that don't already have one.
+- Scenarios with no BS ID (upload failed or not applicable) simply **omit** the field — never
+  set it to `null`.
 - Update `<feature_key>_SDET_plan.json`'s `updated_at` timestamp.
 
 ### 4. Summary
@@ -908,9 +911,11 @@ you do.)
   re-derive `required_state` here; it was already assembled at generation time. Emit the
   identification INPUT only — never add `test_data_output`, that is the test-data stage's job.
 - `epic_id` — the EPIC/Jira id from `feature_metadata` if present, else `feature_key`.
-- `browserstack_case_id` — the real BrowserStack case identifier (`TC-XXXXXX`) stamped during
-  the *BrowserStack Upload & Case-ID Resolution* step. Carry it verbatim from the scenario's
-  `browserstack_case_id` field. `null` when the upload was skipped or the MCP was unavailable.
+- `browserstack_case_id` — the real BrowserStack case identifier. For regression cases this is
+  the existing ID from `regression_context.json` (e.g. `C2879733`); for newly uploaded cases
+  this is the `TC-XXXXXX` returned by `createTestCasesFromFile`. Carry verbatim from the
+  scenario's `browserstack_case_id` field. **Omit entirely** when the scenario has no BS ID —
+  never emit `null`.
 
 **Backend-only fields** (`service_name`, `package`, `test_class`, `assertion_class`, `endpoint`,
 `curl_reference`) — a mobile SDET plan does not carry these. **Never fabricate them.** Emit them
