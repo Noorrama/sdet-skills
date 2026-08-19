@@ -78,10 +78,17 @@ what was not covered.
    `endpoint`). Generate scenarios for them normally — they are in scope for this app too — and
    list those ids under a *Shared across apps* note in `<feature_key>_analysis.md`, so the QA
    reviewing both plans knows which scenarios are duplicates rather than distinct coverage.
-8. **Invoke `regression-extractor` — before any scenario is created, not after.** Call it with
-   the resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
-   coverage) to get `regression_context.json`. This is an internal call, the same as any other
-   skill invocation in this pipeline — not something to wait on the QA for.
+8. **Invoke `regression-extractor` as a subagent — before any scenario is created, not after.**
+   Use the `Agent` tool to spawn the regression-extractor in an isolated context. Pass it the
+   resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
+   coverage). The subagent does all BrowserStack MCP querying, nav_index joins, and deeplink
+   extraction, writes `regression_context.json` to disk, and exits. The main generator then
+   reads only the final JSON file — the raw MCP responses and intermediate corpus data never
+   enter the generator's context window. This is critical for token efficiency: a single
+   BrowserStack query can return 30-60K tokens of case data that would otherwise persist in
+   context for the rest of the generation run.
+   Wait for the subagent to complete, then read `regression_context.json` from the working
+   directory. This is an internal call — not something to wait on the QA for.
    - **BrowserStack MCP unavailable → STOP.** If the regression-extractor reports that
      BrowserStack MCP is unreachable or unauthorised (no `regression_context.json` written),
      **do NOT proceed with generation.** Stop and tell the user:
@@ -930,46 +937,10 @@ other output: on failure, still write it, record the validator error, and say so
 
 ## Appendix: Category Catalog
 
-The auto/extra partition is computed **solely** from the presence/values of schema fields across the supplied contexts — it is feature-independent. For each category: evaluate its trigger; if it fires → `auto_selected` (with the field as `reason`); if it does not → `optional_extras.feature_adjacent`. Universal hygiene categories with no schema trigger live in `optional_extras.fe_baseline`, gated by an applicability predicate.
-
-### A. Detection Rules (AUTO when the field fires)
-
-| Category | AUTO when |
-|---|---|
-| `functional` / `positive` | `prd.business_requirements[]` non-empty **or** `design.screens[]` non-empty |
-| `negative_error` | `prd.boundary_conditions[]` has invalid/edge entries **or** any `rfc.api_contract_changes[].error_codes` |
-| `boundary` | `prd.boundary_conditions[]` non-empty |
-| `permission` | `rfc.permissions_required[]` non-empty **or** any design element's `validations_and_edge_cases` mentions a permission |
-| `interruption_network` | `rfc.api_contract_changes[]` non-empty **or** `plan.observable_states` present **or** `rfc.offline_behavior.offline_capable`/`sync_strategy` **or** a network/remote-asset `architectural_risk` |
-| `interruption_lifecycle` (background/process-death) | `rfc.lifecycle_considerations[]` non-empty **or** design has interactive elements (input/toggle/form/carousel) **or** `plan` active view-models |
-| `local_data_migration` (N-1) | `rfc.local_data_changes[]` with non-null `migration_version`/`migration_strategy` **or** `rfc.compatibility_mandates[]` non-empty |
-| `feature_flag_killswitch` | `rfc.experimentation_matrix[]` **or** `prd.feature_flags[]` **or** `plan.feature_flags` non-empty |
-| `deep_link_nav` | `plan` test hook `method:deeplink` **or** any `rfc.navigation_changes[].deep_link` non-null |
-| `telemetry_clickstream` | `prd.clickstream_events[]` **or** `rfc.cross_cutting_concerns.observability.clickstream_events[]` non-empty |
-| `localization_regional` | `prd.applicable_countries.length > 1` **or** multiple locales / localized copy in design |
-| `platform_variance` | `prd.applicable_platforms.length > 1` **or** `rfc.platform_specific.android`/`.ios` non-null **or** `rfc.scope.target_platforms.length > 1` |
-| `theming_darkmode` | design theme-state variants **or** an `open_question` matching theme/dark-mode |
-| `accessibility` | `rfc.accessibility_impacts[]` non-empty |
-| `non_functional_perf` | `rfc.cross_cutting_concerns.performance` has any non-null target/impact |
-| `offline` | `rfc.offline_behavior.offline_capable == true` **or** a `sync_strategy` present |
-
-> A category whose trigger does NOT fire → `optional_extras.feature_adjacent` (rationale = the field checked was empty/absent). A missing context file simply means its triggers cannot fire — no failure.
-
-### B. FE-Baseline Extras Library (`fe_baseline` pool; offer only when the predicate matches)
-
-| Group | Categories | Offer only if… |
-|---|---|---|
-| `session_auth` | `multi_device_concurrent_login`, `forced_signout_mid_flow`, `session_expiry`, `logout_during_flow` | feature needs auth/identity (design uses login/AuthSDK, or `prd.target_personas` require an account) |
-| `app_upgrade` | `n_minus_1_upgrade`, `fresh_vs_upgrade`, `uninstall_reinstall`, `data_migration` | app ships incrementally (always true for the 5 GoTo apps) |
-| `device_env` | `rotation`, `split_screen`, `font_scaling`, `low_storage`, `low_battery`, `system_locale_tz_change` | screens not locked-portrait in `config.<app>.json` |
-| `os_interruptions` | `incoming_call`, `notification_shade`, `background_foreground`, `permission_revoked_runtime`, `network_flip` | any interactive/networked screen |
-| `nav_gesture` | `hardware_back`, `deeplink_tamper`, `up_navigation`, `restore_after_death` | any multi-screen flow |
-| `privacy_security` | `screenshot_screenrecord`, `background_snapshot_mask`, `clipboard_exposure`, `log_leakage` | UI shows sensitive data (`rfc…data_sensitivity`, balance/PII) |
-| `a11y_baseline` | `screenreader_traversal`, `contrast`, `touch_target` | any interactive screen |
-| `l10n_baseline` | `rtl`, `string_truncation`, `number_date_currency` | `config.<app>.json` supports the relevant locale surface |
-| `resilience` | `double_tap_debounce`, `offline_cold_start`, `empty_error_states` | any networked/stateful screen |
-
-> When a `fe_baseline` extra is selected, generate best-effort hygiene scenarios, stamp `source: "fe_baseline"`, and note in `analysis.md` that expected behavior is not spec-derived and needs PM/dev confirmation.
+**Read `category_catalog.md`** (in this skill's directory) when you reach Step 0
+(Test-Category Selection Gate). It contains the detection rules table (Section A)
+and the FE-Baseline extras library (Section B). Do NOT read it at skill load —
+only when Step 0 needs it.
 
 ---
 
