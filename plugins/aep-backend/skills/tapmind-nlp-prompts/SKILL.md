@@ -270,6 +270,36 @@ runStep("Hit estimate api with token as customer_token and header X-AppVersion:4
 runStep("Hit estimate api with only header 'X-AppVersion'");                        // send ONLY this header (drops the rest)
 ```
 
+### 8.1 Overriding nested / cross-referenced array fields in the body
+
+Some endpoints need the same value written to several nested fields at once — e.g. an
+array of objects, or fields that cross-reference each other by id/name across different
+parts of the body. Describing the intent with one generic field name (e.g. "template_name")
+only overrides a field with that *exact* key. It will NOT propagate into nested/array
+fields that use a different key name, even if they logically hold "the same" value — those
+fields silently fall back to the spec's example values instead of failing.
+
+**How to spot it:** after running, check the executor log for a line like:
+`references identifier(s) [...] that are not defined by any 'name'/'id' entry elsewhere
+in the request body — likely a partially filled array`. That WARN means your override
+landed on the wrong field, and the fields that actually needed the value are still using
+spec examples.
+
+**Fix:** don't rely on one generic field name — name the exact JSON key path for every
+field that must carry the value:
+
+```
+Create <resource> with <arrayA>[<idx>].<key> = ${memory.value}, <arrayB>[<idx>].<key> = ${memory.value}, ...
+```
+
+(e.g. for a create-template endpoint where `templates[0].id/en/default` must all match a
+`name` inside `whatsapp_templates[]`, you'd set each of those six paths individually to
+`${memory.templateName}` rather than saying "template_name = ...".)
+
+This indexed-path override isn't a formally documented grammar feature (unlike header/query
+param edits above) — it works because the planner matches literal key names. Always verify
+against the executor log after running; don't assume it took effect.
+
 ---
 
 ## 9. Response schema validation
@@ -300,3 +330,4 @@ Two independent mechanisms — know which one applies to your API:
 | Pasting a raw secret into the prompt string | `saveMemory(...)` first, then `${memory.<key>}` in the prompt | See §7. |
 | Loading strict assertions onto a shared setup step (e.g. a "create booking" step other scenarios also reuse as a precondition) | Keep setup steps assertion-free (or a bare `status is 200`); put the detailed checks in the dedicated verify-only step for that specific scenario | Over-asserting a shared step breaks reuse by other scenarios (e.g. negative tests) that need that same step's evidence to look different. |
 | `data.whatsapp_templates.provider is X` (dotted path into a list) | `whatsapp_templates contains an entry with provider X` | Same "entry" rule as above — a scalar dotted path can't reach into a list. |
+| One generic field name (e.g. "template_name = X") when the schema actually needs the value on several nested/cross-referenced fields | Name each real field path explicitly: `arrayA[0].key = X, arrayB[1].key = X, ...` | A generic/wrapper field name only overrides an exact key match — nested or cross-referenced fields with different key names silently keep spec-example defaults instead of erroring. See §8.1. |
