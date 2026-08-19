@@ -1,6 +1,6 @@
 ---
 name: step-validation
-description: Run a list of written test steps against a real Android/iOS device via TapMind and report, step by step, exactly how each one was carried out — which resolved from the view hierarchy, which needed a vision fallback because the element isn't in the hierarchy, which needed a scroll or retry, which extra steps had to be inserted because the list was incomplete, and which transient screens were dismissed along the way. Use when someone hands over "here are my steps, they aren't working" or asks to validate, verify, or debug a written test-step list — not for open-ended exploration (that's goal-driven-exploration).
+description: Run a list of written test steps — pasted by hand, or an SDET_PLAN scenario's automation_steps — against a real Android/iOS device via TapMind, report step by step exactly how each one was carried out (which resolved from the view hierarchy, which needed a vision fallback, a scroll or a retry, which extra steps had to be inserted, which transient screens were dismissed), and emit a ready-to-paste TapMind mobile-test @Test method built only from steps that actually ran. Use when someone hands over "here are my steps, they aren't working", asks to validate/verify/debug a written test-step list, or asks to turn an SDET plan into runnable tapmind-mobile-tests Java — not for open-ended exploration (that's goal-driven-exploration).
 ---
 
 # Step validation (TapMind)
@@ -38,7 +38,27 @@ The run's job is to find out which, and say so per step. So:
 
 ## 0. Resolve inputs before touching a device
 
-**First, parse and echo the steps back.** Normalize the list into numbered entries, each tagged
+**First, work out where the steps are coming from.** Two input modes:
+
+- **A — a written list.** Pasted in chat, or a file. Use it as given.
+- **B — an SDET plan.** The user names a `*_sdet_plan.json` (or a scenario in one). Read
+  `scenario_list[]`, pick the scenario, and **use its `automation_steps[]` as the step list** —
+  not `steps[]`, which is the manual-QA prose. `automation_steps` is already one action per line
+  in TapMind vocabulary, which is the shape this skill wants. Carry
+  `csv_title_association`, `requirement_ref`, `existing_case_ref`, `priority_tier`, `platform` and
+  `test_data` through as metadata for §6; they populate `@Test(description=…)` and `@TestInfo`.
+
+  **One scenario per run.** A plan holds many; validating several in one session breaks the linear
+  `steps[]` spine and every counter in §5. If the user wants the whole plan, run the skill once
+  per scenario and paste the emitted methods into one class.
+
+  Some `automation_steps` are written as pseudo-calls rather than prose —
+  `loginToDriver(<test driver account>)`. Those are **direct-API steps**: they map to a client
+  method, not to a UI interaction. Resolve them against
+  `references/direct-api-map.md` at §0 (they are setup, and §0 is where setup is resolved
+  anyway), and mark them so §6 emits the call rather than a `runStep`.
+
+**Then parse and echo the steps back.** Normalize the list into numbered entries, each tagged
 `action` or `assertion`, and show it to the user once for confirmation before any device work:
 
 ```
@@ -65,6 +85,21 @@ than reinventing it. Two step-validation-specific notes:
 - **Theme**: default to a single theme (ask which). Running both doubles the run and duplicates
   every step row, which makes the report harder to read for its actual purpose. Only run both if
   the user explicitly wants theme coverage.
+
+**Then the target module** — which `tapmind-mobile-tests` module the emitted test belongs to, so
+§6 can match its package, base class and groups:
+
+```
+bash assets/module-profile.sh "$(bash assets/resolve-config.sh --path)" [repo-root]
+```
+
+The active profile usually *is* the module's own config (`driverApp/driver_android.json`), so the
+module falls out of the path for free. Pass the repo root explicitly, or export
+`TAPMIND_TESTS_REPO`, if the checkout isn't findable from there. If the script can't derive a
+module it prints the list and stops — ask the user which one, then re-run it with that name.
+Everything it prints (`PACKAGE`, `BASE_CLASS`, `TEST_GROUPS`, `SAMPLE_TEST`) is read from that
+module's own tests, so it stays correct for modules that don't exist yet. **Never hardcode a
+module table, and never guess a package or base class** — read `$SAMPLE_TEST`.
 
 ## 1. Preflight
 
@@ -310,7 +345,124 @@ the sibling skill's graph exists because exploration branches).
 Deviation types: `vision-fallback` · `scroll-needed` · `reworded-target` · `retry-needed` ·
 `inserted-step` · `interruption`.
 
-## 6. Close out
+## 6. Emit the TapMind mobile test
+
+The run just proved which steps work and what the app really calls things. Turn that into a
+`@Test` method the author pastes straight into their module and runs — locally or on CI.
+
+Write it into `run.tapmindTest` (schema in `references/trace-schema.md`); the report renders it
+as the **TapMind test** tab with a copy button.
+
+### 6a. One line per state-changing tool call — not per author step
+
+The MCP loop already makes exactly one tool call per action, and `runStep` has the same
+constraint: the server's system prompt requires it to *"complete your turn by invoking exactly ONE
+tool"*, and `ActionVerbExtractor` only ever reads the **leading** verb of the sentence
+(`stripped.split("\\s+", 2)[0]`). A compound line doesn't error — it silently does half the step.
+
+So don't try to split English. **Emit from the tool calls you actually made.** The decomposition
+already happened:
+
+- one author step that took a scroll then a tap → **two** lines
+- "Skip the walkthrough and tooltip prompts" that took two taps → **two** lines
+- an interruption dismissed with two taps → two lines, or one if the first tap was a misfire
+  (emit the corrected action only, and say so in the line's `note`)
+
+Excluded: reads (`get_view_hierarchy`, `appium_get_element_attribute`, `capture.sh`) emit nothing,
+and a retry of the same intent is **one** line, not two. Assertions don't come from tool calls at
+all — they come from the step's `assertion` record.
+
+### 6b. Which call to emit
+
+Follow the ladder in `references/direct-api-map.md` — **direct API → `assertStep` → `runStep`** —
+and its "when in doubt, emit the base API" rule. `TapMind.setMockLocation(-6.200000, 106.816666)`
+compiles in every module; an invented `SomeModule.mockLocation(PLACE)` compiles in none.
+
+The §0 setup resolutions emit deterministically from the run context, with the values that
+actually ran — never a placeholder:
+
+```java
+TapMind.setMockLocation(-6.2615, 106.8106);
+TapMind.performBackdoorLogin("get bike driver from TDP");
+```
+
+**Never emit a literal credential, token, phone number or account id** — emit the TDP prompt that
+fetched the account, not what it returned. If the run used tokens from config, emit the
+config-reading expression `$SAMPLE_TEST` uses, not the values.
+
+### 6c. Phrasing rules for `runStep` lines
+
+These are what make a line resolve the same way on the hundredth run as on this one:
+
+- **Start every line with a verb the server maps.** `single-verb-map` has `tap/click/press/touch/
+  hit/choose/select/toggle`, `type/enter/input/fill/write`, `scroll/browse`, `swipe/fling/flick/
+  pull`, `drag/slide`. `"On the home screen, tap GoRide"` loses gesture-family correction because
+  the leading token is `on`; `"Tap GoRide on the home screen"` keeps it.
+- **`scroll`, not `swipe`, for revealing content.** Different gesture families. Prefer
+  `TapMind.scrollToText(Direction.DOWN, "GoRide")` over a `runStep` sentence when the target is
+  just off-screen.
+- **Quote only what resolved at the `hierarchy` rung.** Rule F makes single quotes a strict,
+  case-sensitive, no-translation exact match; Rule G makes unquoted text fuzzy. A label that
+  resolved at the `fuzzy` rung — including any translation like `profile` → `Akun` — **must stay
+  unquoted**, or the test breaks the first time it meets another locale.
+- **Use the label the app actually renders**, from `deviation.suggestedRewrite`, not the author's
+  wording.
+
+### 6d. Transient screens are conditionals, not steps
+
+Every `origin: "interruption"` row emits an `if visible` guard rather than a bare action:
+
+```java
+runStep("Skip the walkthrough if visible");
+runStep("Dismiss the set-vehicle-information card if visible");
+```
+
+This is a real server feature, not a phrasing convention: `patterns/conditional_actions.pattern`
+routes the sentence to the conditional prompt, whose contract is **condition UNMET ⇒
+`appium_report_skip`, never a failure**. So the line passes whether or not the screen appears —
+which is the whole point, because a walkthrough that only fires on first login would otherwise
+make the test pass once and fail forever.
+
+Place `impact: "state-changing"` guards at the exact position they fired and comment why; a
+`neutral` one can sit with the other guards. Never guard a step the flow genuinely depends on —
+an `if visible` on a required action turns a real failure into a silent skip.
+
+### 6e. Assertions
+
+Intermediate checks → `assertStep("Verify …", "<why this failing matters>")`. The terminal
+assertion follows the module's own idiom from `$SAMPLE_TEST`, usually:
+
+```java
+StepResult result = runStep("Verify Order screen visible");
+Assert.assertTrue(result.passed(), "Test Case <methodName> Failed");
+```
+
+An assertion that **failed with `fault: "app"` keeps its line**, marked
+`// FAILS TODAY — app bug (f2)`. Never weaken or drop an assertion to make the emitted test green;
+that converts a found bug into a hidden one. An assertion that was unresolvable is emitted
+commented out with the reason.
+
+### 6f. Mark the two lines that can drift
+
+The run resolved elements itself; `runStep` re-resolves them server-side. That agrees almost
+always, but flag the two cases where it might not — **don't tax every line for it**:
+
+- the match was **ambiguous** (several candidates; `resolution.candidates > 1`) — Rule I
+  tie-breaks to the parent container, then first-in-array, which may not be what you picked
+- the element resolved only at the **`vision`/`coordinates`** rung — the server has vision too, so
+  the line can run, but with no hierarchy anchor the mark isn't stable run to run
+
+Both get `// verify once` and a `note`. Everything else is emitted clean.
+
+### 6g. Wrap it in the module's own shape
+
+Read `$SAMPLE_TEST` from §0 and copy its annotations, imports, and try/catch shape. Fill
+`@TestInfo` `testCaseIds` from the SDET scenario's `existing_case_ref` when input mode B gave one;
+leave a field empty rather than inventing an id. Pick `groups` from `$TEST_GROUPS` — those strings
+are what CI selects on, so a guessed group means the test never runs there. Emit the method, not
+a whole file: the author already has a class.
+
+## 7. Close out
 
 - MCP `appium_destroy_session(conversationId, errorMessage)` — **always**, even on a stopped run.
   One TapMind server pins one active session; leaving it alive corrupts the next run.
@@ -357,6 +509,8 @@ Deviation types: `vision-fallback` · `scroll-needed` · `reworded-target` · `r
 - Populate `run.tokenUsage` / `run.costUsd` by running
   `python3 ${CLAUDE_PLUGIN_ROOT}/skills/goal-driven-exploration/assets/session-usage.py` with no
   arguments. It's exact — set `costEstimated: false`. Only fall back to `/cost` if it errors.
+- **Populate `run.tapmindTest`** (§6). Every `lines[]` entry needs `fromSeq` pointing at the step
+  it came from, so the tab can show provenance; a line with no `fromSeq` is a line nobody proved.
 - Write `trace.json`, then `bash assets/render-report.sh <run-dir>` → `report.html`.
 - **Read render-report.sh's stderr.** It warns on steps missing screenshots, assertions with no
   evidence, deviations with no `why`, an author-step count that disagrees with `stepsGiven`, and

@@ -242,6 +242,47 @@ if unevidenced:
     warn(f'step(s) {unevidenced} are marked fault="app" but link no fault="app" finding. '
          f"Blaming the app without attaching the evidence gives the reader nothing to file.")
 
+# --- 12-15. the emitted TapMind test (§6) -------------------------------------------------
+tt = run.get("tapmindTest") or {}
+jlines = [l for l in (tt.get("lines") or []) if isinstance(l, dict) and l.get("code")]
+if authored and not jlines:
+    warn("run.tapmindTest.lines is empty although author steps executed. That method is the "
+         "artifact the author pastes into tapmind-mobile-tests; the tab renders an empty state "
+         "without it. See SKILL.md §6.")
+if jlines:
+    for k in ("module", "package", "baseClass", "methodName"):
+        if not tt.get(k):
+            warn(f"run.tapmindTest.{k} is empty — assets/module-profile.sh prints it. Emitting a "
+                 f"method without it means the author has to guess where it belongs.")
+    seqs = {s.get("seq") for s in steps}
+    bad_seq = [l.get("code", "")[:40] for l in jlines
+               if l.get("fromSeq") is not None and l.get("fromSeq") not in seqs]
+    if bad_seq:
+        warn(f"tapmindTest line(s) point at a fromSeq with no matching step: {bad_seq[:4]}. "
+             f"A line nobody can trace back to an executed step is a line nobody proved.")
+    # A guard that isn't actually conditional fails the moment the transient screen is absent —
+    # which is the exact bug guards exist to prevent, so it is worth catching here.
+    unconditional = [l.get("code", "")[:60] for l in jlines
+                     if l.get("kind") == "guard" and "if visible" not in l.get("code", "").lower()
+                     and "if not visible" not in l.get("code", "").lower()]
+    if unconditional:
+        warn(f"guard line(s) with no conditional clause: {unconditional[:4]}. The server routes on "
+             f"patterns/conditional_actions.pattern — without 'if visible' this is a plain action "
+             f"that fails whenever the transient screen doesn't appear.")
+    unnoted = [l.get("code", "")[:40] for l in jlines if l.get("flag") and not l.get("note")]
+    if unnoted:
+        warn(f"flagged tapmindTest line(s) with no note: {unnoted[:4]}. A flag with no explanation "
+             f"tells the author to be suspicious without saying of what.")
+    # Emitted Java is copy-pasted into a repo and committed; a literal secret here is a leak that
+    # outlives the run. Backdoor logins must emit the TDP prompt, never what it returned.
+    import re as _re
+    secretish = _re.compile(r"(?i)\b(bearer\s+[A-Za-z0-9._-]{12,}|eyJ[A-Za-z0-9._-]{20,}"
+                            r"|(?:token|password|passwd|secret|apikey|api_key)\s*[:=]\s*[\"']\S{6,})")
+    leaked = [l.get("code", "")[:50] for l in jlines if secretish.search(l.get("code", ""))]
+    if leaked:
+        warn(f"tapmindTest line(s) look like they embed a literal credential: {leaked[:3]}. "
+             f"Emit the TDP prompt that fetched the account, never the value it returned.")
+
 # --- inline ------------------------------------------------------------------------------
 title = f"TapMind Step Validation — {run.get('title', 'step run')}"
 out = re.sub(r'<script type="application/json" id="trace">.*?</script>',

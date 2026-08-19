@@ -65,7 +65,7 @@ and interruptions have a `seq` but no `n`, and they need screenshots too.
     "deviations": 3,                // author steps with verdict "pass_with_deviation"
     "appFaults": 1,                 // rows with fault === "app"
 
-    "correctedSteps": [             // §6 — the copy-pasteable artifact
+    "correctedSteps": [             // §7 — the copy-pasteable artifact
       { "n": "1",  "text": "Open GoFood", "change": "unchanged" },
       { "n": "2",  "text": "Tap \"Akun\"", "change": "reworded",
         "was": "Tap the profile button",
@@ -75,6 +75,45 @@ and interruptions have a `seq` but no `n`, and they need screenshots too.
       { "n": "8",  "text": "Verify the total shows Rp 56.000", "change": "not-verified",
         "why": "Run stopped at step 7." }
     ],
+
+    // §6 — the ready-to-paste @Test method. Rendered as the "TapMind test" tab.
+    // Module fields come from assets/module-profile.sh, which reads them off the module's own
+    // tests — never hardcode them, and never guess a package or base class.
+    "tapmindTest": {
+      "module": "driverApp",
+      "package": "io.gojek.driverapp.tests",
+      "baseClass": "BaseTest",
+      "sampleTest": "driverApp/.../ShiftFilter.java",   // the file the house style was copied from
+      "className": "LevelSayaTests",                    // the class the author pastes INTO
+      "methodName": "testPencapaianSayaCalendarPeriod",
+      "description": "Level Saya — Pencapaian Saya calendar shows the Lebaran eligibility period",
+      "groups": ["\"driverTest\""],                     // verbatim from $TEST_GROUPS: literals keep
+                                                        // their quotes, constants stay bare
+      "testInfo": { "countryName": "ID", "projectId": "", "suiteId": "",
+                    "testCaseIds": ["5354919"], "owner": "ashish.sharma@gojek.com" },
+      "platformObserved": "Android",
+      "source": { "kind": "sdet_plan | written_list",
+                  "file": "..._sdet_plan.json", "scenarioRef": "...", "requirementRef": "..." },
+
+      // One entry per emitted line, in order. Reads and retries emit nothing (§6a).
+      "lines": [
+        { "code": "TapMind.setMockLocation(-6.2615, 106.8106);",
+          "kind": "direct-api", "fromSeq": null, "note": "run context (§0)" },
+        { "code": "TapMind.performBackdoorLogin(\"get bike driver from TDP\");",
+          "kind": "direct-api", "fromSeq": 1, "note": "author step 1 — UI login bypassed by design" },
+        { "code": "runStep(\"Skip the walkthrough if visible\");",
+          "kind": "guard", "fromSeq": 2,
+          "note": "Fired once at seq 2. Conditional: UNMET is a skip, not a failure." },
+        { "code": "runStep(\"Tap the profile icon\"); // verify once",
+          "kind": "step", "fromSeq": 5, "flag": "vision-resolved", "findings": ["f3"],
+          "note": "Not in the hierarchy; resolved visually. Server has vision too, but the mark isn't stable." },
+        { "code": "assertStep(\"Verify the year selector shows 2027\", \"...\");",
+          "kind": "assert", "fromSeq": 8 }
+      ],
+      // `kind`: direct-api | step | guard | assert | commented
+      // `flag` (optional): vision-resolved | ambiguous-match | app-bug | not-verified
+      "counts": { "lines": 12, "directApi": 2, "guards": 3, "asserts": 4, "flagged": 1 }
+    },
 
     "model": "claude-sonnet-5", "modelEffort": "high",
     "tokenUsage": { "inputTokens": 0, "outputTokens": 0,
@@ -177,6 +216,17 @@ It warns (never fails) on each of these. Treat every warning as a bug in the tra
     at least one of `step`/`seq`.
 11. Every finding id appears in some `step.findings[]`, every id referenced by a step exists, and
     the count of `fault: "app"` steps matches the count of `fault: "app"` findings.
+
+12. `run.tapmindTest.lines[]` is non-empty whenever at least one author step executed, every
+    `fromSeq` resolves to a real `steps[].seq` (or is null for §0 setup lines), and every id in a
+    line's `findings[]` exists in `findings[]`.
+13. Every `kind: "guard"` line's `code` contains a conditional the server's
+    `patterns/conditional_actions.pattern` actually matches — in practice `… if visible`. A guard
+    that isn't conditional is just an action that will fail when the screen doesn't appear.
+14. Every line with `flag: "vision-resolved"` or `"ambiguous-match"` carries a `note`, and its
+    `code` ends in `// verify once`.
+15. No line contains a literal credential, bearer token, phone number, or account id. Backdoor
+    logins emit the TDP prompt, not what it returned.
 
 ## Why counters live in `run` as well as in `steps[]`
 

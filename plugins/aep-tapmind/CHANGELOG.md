@@ -1,5 +1,66 @@
 # aep-tapmind changelog
 
+## 1.0.0
+
+**Extended `step-validation` to emit ready-to-paste TapMind mobile-test `@Test` methods.** A
+validated run now produces a `@Test` method in the module's own house style (imports, base class,
+groups, `@TestInfo` annotation) that the author pastes into their test class and runs — locally or
+on CI. The method is built only from steps that actually executed on the device, with direct API
+calls for everything not touching the UI (mock location, backdoor login, deeplink, kill/launch),
+and transient screens guarded with `if visible` conditionals so first-login-only flows don't break
+repeat runs.
+
+Rendered as the **TapMind test** tab in the report with a copy button.
+
+### Design
+
+- **One line per state-changing tool call, not per author step.** The MCP loop already makes
+  exactly one call per action, matching the server's `runStep` constraint: `ActionVerbExtractor`
+  only reads the leading verb, so a compound sentence silently does half the step. Emission reads
+  the tool trace instead of parsing English — a step that scrolled then tapped emits two lines,
+  for free.
+- **Direct API beats `runStep`.** Anything not touching the UI has a client method
+  (`TapMind.setMockLocation()`, `performBackdoorLogin()`, `openDeeplink()`, etc.). Using `runStep`
+  would spend a server LLM turn and can drift; the base API compiles everywhere.
+- **Transient screens are conditionals.** Every `if visible` guard is routed through the
+  server's conditional prompt, whose contract is **condition UNMET ⇒ `appium_report_skip`, never
+  a failure**. So a first-login-only walkthrough can't break repeat runs.
+- **Module derivation, not hardcoding.** New `assets/module-profile.sh` reads package, base
+  class, test groups, and a sample test *from each module's own tests* — no hardcoded map. The 19
+  modules have no agreement on packages, base classes, or groups; derivation stays correct for
+  modules that don't exist yet.
+- **Phrasing rules that survive the hundredth run** — captured in SKILL.md §6: leading verb
+  from `single-verb-map`, quote only at `hierarchy` rung (fuzzy matches stay unquoted or tests
+  break on locale changes), and flag only vision-resolved and ambiguous-match lines as
+  `// verify once`.
+
+### New files
+
+- `references/direct-api-map.md` — which steps must not become `runStep`, with the trap of
+  `performBackdoorLogin(String)` taking an NLP prompt (not an id) and never carrying a literal
+  credential.
+- `assets/module-profile.sh` — works out the target module from a config path or name, derives
+  package/base class/groups by reading the module's own tests, gracefully fails on modules with
+  no tests.
+
+### Updated files
+
+- `SKILL.md` — §0 gains input mode B (SDET plans) and module resolution; new §6 (emit rules);
+  §7 (close-out) gains `run.tapmindTest` population.
+- `references/trace-schema.md` — `run.tapmindTest` with line-level provenance and confidence;
+  new invariants 12–15.
+- `assets/report-template.html` — **TapMind test** tab rendering, shared copy-button handler.
+- `assets/render-report.sh` — enforces the new invariants, warns on missing module fields, guards
+  without conditionals, flagged lines with no explanation, and any literal-looking credentials.
+
+### Verification
+
+- Swept all 19 modules; 18 resolve automatically, `commons` correctly reports it has no tests.
+- Caught and fixed a live bash bug: `GROUPS` is a builtin array — assignment is silently ignored.
+  Renamed to `TEST_GROUPS`.
+- All five new invariants confirmed firing on a corrupted trace, silent on a good one.
+- Emitted method compiled in `driverApp` with `./gradlew :driverApp:compileTestJava` → exit 0.
+
 ## 0.6.0
 
 **New skill: `charter-exploration`.** Derives goal-driven exploratory charters from a
