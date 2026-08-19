@@ -78,10 +78,17 @@ what was not covered.
    `endpoint`). Generate scenarios for them normally — they are in scope for this app too — and
    list those ids under a *Shared across apps* note in `<feature_key>_analysis.md`, so the QA
    reviewing both plans knows which scenarios are duplicates rather than distinct coverage.
-8. **Invoke `regression-extractor` — before any scenario is created, not after.** Call it with
-   the resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
-   coverage) to get `regression_context.json`. This is an internal call, the same as any other
-   skill invocation in this pipeline — not something to wait on the QA for.
+8. **Invoke `regression-extractor` as a subagent — before any scenario is created, not after.**
+   Use the `Agent` tool to spawn the regression-extractor in an isolated context. Pass it the
+   resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
+   coverage). The subagent does all BrowserStack MCP querying, nav_index joins, and deeplink
+   extraction, writes `regression_context.json` to disk, and exits. The main generator then
+   reads only the final JSON file — the raw MCP responses and intermediate corpus data never
+   enter the generator's context window. This is critical for token efficiency: a single
+   BrowserStack query can return 30-60K tokens of case data that would otherwise persist in
+   context for the rest of the generation run.
+   Wait for the subagent to complete, then read `regression_context.json` from the working
+   directory. This is an internal call — not something to wait on the QA for.
    - **BrowserStack MCP unavailable → STOP.** If the regression-extractor reports that
      BrowserStack MCP is unreachable or unauthorised (no `regression_context.json` written),
      **do NOT proceed with generation.** Stop and tell the user:
@@ -435,21 +442,37 @@ Expand scenarios across:
   and `regression_context.navigation` actually resolved something, the same fields every run of
   this generator already has (or explicitly lacks) by Preflight.
 
-- **`automation_steps[]` — a MINIMAL, line-for-line restyle of `steps[]` into TapMind vocabulary.**
-  Placed **immediately after `steps[]`** in the scenario object. This is *not* a place to author a
-  full runnable automation script — the downstream **code-gen stage** fills in the exact constants,
-  credential tokens, toggle names, setup scaffolding and assertions. The generator's only job here
-  is a light 1-to-1 translation that hands code-gen a head start in the right dialect. So:
-  - **Roughly one automation line per `steps[]` line — same order, same count.** Do **not** inject
-    setup the manual step didn't mention (no extra `BLOCK_TOOLTIP`/`LOYALTY` toggles, no invented
-    skip-walkthrough lines), and do **not** substitute a deeplink for a step the manual flow
-    reaches by tapping. Convert what is there; add nothing.
-  - **One action per line — split every compound step.** No line may contain two actions. Split a
-    step at a top-level " and " / " then " that joins **distinct actions**, and inherit the first
-    fragment's leading verb into a verbless second fragment: "Skip the walkthrough and tooltip
-    prompts" → "Skip the walkthrough" + "Skip the tooltip prompts"; "Verify the red card marks the
-    end month and the green card marks the start month" → two "Verify …" lines. Applies to **all**
-    steps — but do **not** split where the connector is not a real action boundary:
+- **`automation_steps[]` — a consolidated action + verification sequence for code generation.**
+  Placed **immediately after `steps[]`** in the scenario object. Unlike the CSV (where `Steps` =
+  pure actions and `Expected Result` = pure verifications, kept apart for manual testers),
+  `automation_steps` **interleaves actions and their verifications in execution order** — this is
+  what the downstream code-gen stage needs to produce a runnable test method. Each action is
+  immediately followed by its corresponding verification(s), forming a single linear sequence:
+  ```
+  "automation_steps": [
+    "Open deeplink \"gojek://food/group-order\"",
+    "Verify \"Group Order\" screen is visible",
+    "Tap \"Invite Friends\"",
+    "Verify share sheet is displayed",
+    "Enter \"CODE123\" into \"Referral Code\"",
+    "Tap \"Apply\"",
+    "Verify \"Code applied successfully\" toast is visible"
+  ]
+  ```
+  This is *not* a full runnable automation script — the downstream **code-gen stage** fills in the
+  exact constants, credential tokens, toggle names, and setup scaffolding. The generator's job
+  here is to hand code-gen a clean, ordered sequence of what-to-do and what-to-check in the right
+  dialect. So:
+  - **Merge `steps[]` (actions) and `expected_result` (verifications) into one ordered list.**
+    After each action step, insert its corresponding verification(s) from `expected_result`.
+    An action with no verification (`—` in expected result) has no verify line after it.
+  - **One action or verification per line — split every compound step.** No line may contain two
+    actions. Split a step at a top-level " and " / " then " that joins **distinct actions**, and
+    inherit the first fragment's leading verb into a verbless second fragment: "Skip the
+    walkthrough and tooltip prompts" → "Skip the walkthrough" + "Skip the tooltip prompts";
+    "Verify the red card marks the end month and the green card marks the start month" → two
+    "Verify …" lines. Applies to **all** steps — but do **not** split where the connector is not
+    a real action boundary:
     - inside parentheses, or a comma-list ("monthly, yearly, and special tiers"), or an Oxford
       ", and "/", then ";
     - when the word **before** the connector is a preposition/article — "up to **and** including
@@ -474,9 +497,9 @@ Expand scenarios across:
     prefer copying that verbatim over restyling, and cite the case id.
   - **Nothing to automate** (out-of-scope/placeholder scenario) → `automation_steps: []`.
   Add **one** `extraction_notes` entry (`follow_up: WORTH_CHECKING`) stating automation_steps are a
-  minimal TapMind-style restyle of the manual flow and the code-gen stage owns exact
-  constants/setup. `automation_steps` is **JSON-only** — not a CSV column (the CSV stays the
-  15-column manual template, fed by `steps[]`).
+  consolidated action+verification sequence in TapMind dialect and the code-gen stage owns exact
+  constants/setup. `automation_steps` is **JSON-only** — not a CSV column (the CSV keeps actions
+  in `Steps` and verifications in `Expected Result` as separate columns for manual testers).
 
 ### 3. Gap Analysis & Alignment Engine
 As the single integration point, the generator must actively compute the following cross-stage gaps:
@@ -749,8 +772,32 @@ Flattened CSV strictly matching squad project template headers:
   4. Target entry deep link, if any.
   5. Active feature flags — copied verbatim from `rfc.experimentation_matrix[].flag_key` / `prd.feature_flags[]`, never paraphrased or suffixed (e.g. do not turn `birthday_feature_litmus` into `birthday_feature_litmus_content`). When a flag is in both, use the RFC record (`flag_key` + `default_variant`); PRD is name-only corroboration.
   A scenario with `test_data: []` and no country/flag/deeplink simply omits those lines — never pad `Preconditions` with a fixed template when the scenario has nothing to say for a given line.
-- `Steps`: Numbered sequential actions inside double quotes with line breaks (`\n`). **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g., `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`, `3. Tap "Lanjut"`). Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`). Must include telemetry emission checks. This column is a direct 1-to-1 join of `scenario.steps[]` — the cleanup has to happen when `steps[]` is authored (see the Navigation Resolution Ladder's "Normalize, don't transcribe" rule under rung 3), not as a cosmetic pass at CSV-export time. A `steps[]` entry still carrying a Gherkin placeholder (`<Vehicle Type>`), third-person test-script phrasing, or a pure automation-scaffolding line (no on-screen tester action) is a defect to fix at the source, not something to "clean up" only in this column. **A single high-level line that collapses a multi-action flow (e.g. "Complete the split bill creation", "Finish the checkout") is equally a defect — each discrete tester action the PRD or RFC describes must be its own numbered step, written as NLP, even when the design context is DEGRADED or has empty `elements[]`.** The design being absent means `element_id` tokens are unavailable; it never means the steps themselves are unavailable — they come from the PRD's acceptance criteria, the RFC's flow descriptions, and the regression corpus's existing test titles.
-- `Expected Result`: Numbered sequential assertions matching the numbered steps in the `Steps` column 1-to-1, inside double quotes with line breaks (`\n`) after each statement. **Write assertions using clean, declarative NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`, `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes in user-friendly, non-technical language. **For boundary scenarios the assertion derives from `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker rather than a guessed outcome.**
+- `Steps`: Numbered sequential **actions only** inside double quotes with line breaks (`\n`).
+  **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g.,
+  `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`,
+  `3. Tap "Lanjut"`). **No "Verify" / "Assert" / "Check" lines in this column** — all
+  verifications belong in `Expected Result`. A step is something the tester *does* on the
+  device (tap, scroll, enter, open, navigate, wait); an assertion is something they *observe*
+  after doing it. Mixing them makes the CSV unusable for both manual testers (who read Steps
+  as a to-do list) and automation (which needs actions separated from assertions).
+  Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write
+  `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`).
+  This column is a direct 1-to-1 join of `scenario.steps[]`. A `steps[]` entry still carrying
+  a Gherkin placeholder (`<Vehicle Type>`), third-person test-script phrasing, or a pure
+  automation-scaffolding line (no on-screen tester action) is a defect to fix at the source.
+  **A single high-level line that collapses a multi-action flow (e.g. "Complete the split bill
+  creation") is equally a defect — each discrete tester action must be its own numbered step.**
+- `Expected Result`: Numbered sequential assertions inside double quotes with line breaks
+  (`\n`) after each statement. **ALL verifications live here, not in Steps.** Each assertion
+  corresponds to the action step at the same number — after step 3 (an action), expected
+  result 3 states what the tester should observe. **Write assertions using clean, declarative
+  NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`,
+  `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes
+  in user-friendly, non-technical language. **For boundary scenarios the assertion derives from
+  `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker
+  rather than a guessed outcome.** When multiple actions share one observable outcome, the
+  earlier actions' expected results can be `—` (no assertion at that step) with the combined
+  assertion on the final action's line.
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`. **Resolution precedence: (1) `prd.applicable_platforms` (PRD is the scope authority), (2) else `rfc.scope.target_platforms`, (3) else infer from `design`.** One platform → `"Android"`/`"iOS"`; more than one → `"Cross-Platform"`. If PRD and RFC conflict, use PRD and raise it as a `prd_vs_rfc_gap` — never silently prefer one.
 - `Country v2`: MUST be derived from `prd.applicable_countries` (map ISO code → name, e.g. `ID`→`"Indonesia"`, `SG`→`"Singapore"`, `VN`→`"Vietnam"`). Never pick a country the inputs do not list. If `applicable_countries` has one entry, every row uses that country.
@@ -930,46 +977,10 @@ other output: on failure, still write it, record the validator error, and say so
 
 ## Appendix: Category Catalog
 
-The auto/extra partition is computed **solely** from the presence/values of schema fields across the supplied contexts — it is feature-independent. For each category: evaluate its trigger; if it fires → `auto_selected` (with the field as `reason`); if it does not → `optional_extras.feature_adjacent`. Universal hygiene categories with no schema trigger live in `optional_extras.fe_baseline`, gated by an applicability predicate.
-
-### A. Detection Rules (AUTO when the field fires)
-
-| Category | AUTO when |
-|---|---|
-| `functional` / `positive` | `prd.business_requirements[]` non-empty **or** `design.screens[]` non-empty |
-| `negative_error` | `prd.boundary_conditions[]` has invalid/edge entries **or** any `rfc.api_contract_changes[].error_codes` |
-| `boundary` | `prd.boundary_conditions[]` non-empty |
-| `permission` | `rfc.permissions_required[]` non-empty **or** any design element's `validations_and_edge_cases` mentions a permission |
-| `interruption_network` | `rfc.api_contract_changes[]` non-empty **or** `plan.observable_states` present **or** `rfc.offline_behavior.offline_capable`/`sync_strategy` **or** a network/remote-asset `architectural_risk` |
-| `interruption_lifecycle` (background/process-death) | `rfc.lifecycle_considerations[]` non-empty **or** design has interactive elements (input/toggle/form/carousel) **or** `plan` active view-models |
-| `local_data_migration` (N-1) | `rfc.local_data_changes[]` with non-null `migration_version`/`migration_strategy` **or** `rfc.compatibility_mandates[]` non-empty |
-| `feature_flag_killswitch` | `rfc.experimentation_matrix[]` **or** `prd.feature_flags[]` **or** `plan.feature_flags` non-empty |
-| `deep_link_nav` | `plan` test hook `method:deeplink` **or** any `rfc.navigation_changes[].deep_link` non-null |
-| `telemetry_clickstream` | `prd.clickstream_events[]` **or** `rfc.cross_cutting_concerns.observability.clickstream_events[]` non-empty |
-| `localization_regional` | `prd.applicable_countries.length > 1` **or** multiple locales / localized copy in design |
-| `platform_variance` | `prd.applicable_platforms.length > 1` **or** `rfc.platform_specific.android`/`.ios` non-null **or** `rfc.scope.target_platforms.length > 1` |
-| `theming_darkmode` | design theme-state variants **or** an `open_question` matching theme/dark-mode |
-| `accessibility` | `rfc.accessibility_impacts[]` non-empty |
-| `non_functional_perf` | `rfc.cross_cutting_concerns.performance` has any non-null target/impact |
-| `offline` | `rfc.offline_behavior.offline_capable == true` **or** a `sync_strategy` present |
-
-> A category whose trigger does NOT fire → `optional_extras.feature_adjacent` (rationale = the field checked was empty/absent). A missing context file simply means its triggers cannot fire — no failure.
-
-### B. FE-Baseline Extras Library (`fe_baseline` pool; offer only when the predicate matches)
-
-| Group | Categories | Offer only if… |
-|---|---|---|
-| `session_auth` | `multi_device_concurrent_login`, `forced_signout_mid_flow`, `session_expiry`, `logout_during_flow` | feature needs auth/identity (design uses login/AuthSDK, or `prd.target_personas` require an account) |
-| `app_upgrade` | `n_minus_1_upgrade`, `fresh_vs_upgrade`, `uninstall_reinstall`, `data_migration` | app ships incrementally (always true for the 5 GoTo apps) |
-| `device_env` | `rotation`, `split_screen`, `font_scaling`, `low_storage`, `low_battery`, `system_locale_tz_change` | screens not locked-portrait in `config.<app>.json` |
-| `os_interruptions` | `incoming_call`, `notification_shade`, `background_foreground`, `permission_revoked_runtime`, `network_flip` | any interactive/networked screen |
-| `nav_gesture` | `hardware_back`, `deeplink_tamper`, `up_navigation`, `restore_after_death` | any multi-screen flow |
-| `privacy_security` | `screenshot_screenrecord`, `background_snapshot_mask`, `clipboard_exposure`, `log_leakage` | UI shows sensitive data (`rfc…data_sensitivity`, balance/PII) |
-| `a11y_baseline` | `screenreader_traversal`, `contrast`, `touch_target` | any interactive screen |
-| `l10n_baseline` | `rtl`, `string_truncation`, `number_date_currency` | `config.<app>.json` supports the relevant locale surface |
-| `resilience` | `double_tap_debounce`, `offline_cold_start`, `empty_error_states` | any networked/stateful screen |
-
-> When a `fe_baseline` extra is selected, generate best-effort hygiene scenarios, stamp `source: "fe_baseline"`, and note in `analysis.md` that expected behavior is not spec-derived and needs PM/dev confirmation.
+**Read `category_catalog.md`** (in this skill's directory) when you reach Step 0
+(Test-Category Selection Gate). It contains the detection rules table (Section A)
+and the FE-Baseline extras library (Section B). Do NOT read it at skill load —
+only when Step 0 needs it.
 
 ---
 
