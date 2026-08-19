@@ -442,21 +442,37 @@ Expand scenarios across:
   and `regression_context.navigation` actually resolved something, the same fields every run of
   this generator already has (or explicitly lacks) by Preflight.
 
-- **`automation_steps[]` — a MINIMAL, line-for-line restyle of `steps[]` into TapMind vocabulary.**
-  Placed **immediately after `steps[]`** in the scenario object. This is *not* a place to author a
-  full runnable automation script — the downstream **code-gen stage** fills in the exact constants,
-  credential tokens, toggle names, setup scaffolding and assertions. The generator's only job here
-  is a light 1-to-1 translation that hands code-gen a head start in the right dialect. So:
-  - **Roughly one automation line per `steps[]` line — same order, same count.** Do **not** inject
-    setup the manual step didn't mention (no extra `BLOCK_TOOLTIP`/`LOYALTY` toggles, no invented
-    skip-walkthrough lines), and do **not** substitute a deeplink for a step the manual flow
-    reaches by tapping. Convert what is there; add nothing.
-  - **One action per line — split every compound step.** No line may contain two actions. Split a
-    step at a top-level " and " / " then " that joins **distinct actions**, and inherit the first
-    fragment's leading verb into a verbless second fragment: "Skip the walkthrough and tooltip
-    prompts" → "Skip the walkthrough" + "Skip the tooltip prompts"; "Verify the red card marks the
-    end month and the green card marks the start month" → two "Verify …" lines. Applies to **all**
-    steps — but do **not** split where the connector is not a real action boundary:
+- **`automation_steps[]` — a consolidated action + verification sequence for code generation.**
+  Placed **immediately after `steps[]`** in the scenario object. Unlike the CSV (where `Steps` =
+  pure actions and `Expected Result` = pure verifications, kept apart for manual testers),
+  `automation_steps` **interleaves actions and their verifications in execution order** — this is
+  what the downstream code-gen stage needs to produce a runnable test method. Each action is
+  immediately followed by its corresponding verification(s), forming a single linear sequence:
+  ```
+  "automation_steps": [
+    "Open deeplink \"gojek://food/group-order\"",
+    "Verify \"Group Order\" screen is visible",
+    "Tap \"Invite Friends\"",
+    "Verify share sheet is displayed",
+    "Enter \"CODE123\" into \"Referral Code\"",
+    "Tap \"Apply\"",
+    "Verify \"Code applied successfully\" toast is visible"
+  ]
+  ```
+  This is *not* a full runnable automation script — the downstream **code-gen stage** fills in the
+  exact constants, credential tokens, toggle names, and setup scaffolding. The generator's job
+  here is to hand code-gen a clean, ordered sequence of what-to-do and what-to-check in the right
+  dialect. So:
+  - **Merge `steps[]` (actions) and `expected_result` (verifications) into one ordered list.**
+    After each action step, insert its corresponding verification(s) from `expected_result`.
+    An action with no verification (`—` in expected result) has no verify line after it.
+  - **One action or verification per line — split every compound step.** No line may contain two
+    actions. Split a step at a top-level " and " / " then " that joins **distinct actions**, and
+    inherit the first fragment's leading verb into a verbless second fragment: "Skip the
+    walkthrough and tooltip prompts" → "Skip the walkthrough" + "Skip the tooltip prompts";
+    "Verify the red card marks the end month and the green card marks the start month" → two
+    "Verify …" lines. Applies to **all** steps — but do **not** split where the connector is not
+    a real action boundary:
     - inside parentheses, or a comma-list ("monthly, yearly, and special tiers"), or an Oxford
       ", and "/", then ";
     - when the word **before** the connector is a preposition/article — "up to **and** including
@@ -481,9 +497,9 @@ Expand scenarios across:
     prefer copying that verbatim over restyling, and cite the case id.
   - **Nothing to automate** (out-of-scope/placeholder scenario) → `automation_steps: []`.
   Add **one** `extraction_notes` entry (`follow_up: WORTH_CHECKING`) stating automation_steps are a
-  minimal TapMind-style restyle of the manual flow and the code-gen stage owns exact
-  constants/setup. `automation_steps` is **JSON-only** — not a CSV column (the CSV stays the
-  15-column manual template, fed by `steps[]`).
+  consolidated action+verification sequence in TapMind dialect and the code-gen stage owns exact
+  constants/setup. `automation_steps` is **JSON-only** — not a CSV column (the CSV keeps actions
+  in `Steps` and verifications in `Expected Result` as separate columns for manual testers).
 
 ### 3. Gap Analysis & Alignment Engine
 As the single integration point, the generator must actively compute the following cross-stage gaps:
@@ -756,8 +772,32 @@ Flattened CSV strictly matching squad project template headers:
   4. Target entry deep link, if any.
   5. Active feature flags — copied verbatim from `rfc.experimentation_matrix[].flag_key` / `prd.feature_flags[]`, never paraphrased or suffixed (e.g. do not turn `birthday_feature_litmus` into `birthday_feature_litmus_content`). When a flag is in both, use the RFC record (`flag_key` + `default_variant`); PRD is name-only corroboration.
   A scenario with `test_data: []` and no country/flag/deeplink simply omits those lines — never pad `Preconditions` with a fixed template when the scenario has nothing to say for a given line.
-- `Steps`: Numbered sequential actions inside double quotes with line breaks (`\n`). **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g., `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`, `3. Tap "Lanjut"`). Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`). Must include telemetry emission checks. This column is a direct 1-to-1 join of `scenario.steps[]` — the cleanup has to happen when `steps[]` is authored (see the Navigation Resolution Ladder's "Normalize, don't transcribe" rule under rung 3), not as a cosmetic pass at CSV-export time. A `steps[]` entry still carrying a Gherkin placeholder (`<Vehicle Type>`), third-person test-script phrasing, or a pure automation-scaffolding line (no on-screen tester action) is a defect to fix at the source, not something to "clean up" only in this column. **A single high-level line that collapses a multi-action flow (e.g. "Complete the split bill creation", "Finish the checkout") is equally a defect — each discrete tester action the PRD or RFC describes must be its own numbered step, written as NLP, even when the design context is DEGRADED or has empty `elements[]`.** The design being absent means `element_id` tokens are unavailable; it never means the steps themselves are unavailable — they come from the PRD's acceptance criteria, the RFC's flow descriptions, and the regression corpus's existing test titles.
-- `Expected Result`: Numbered sequential assertions matching the numbered steps in the `Steps` column 1-to-1, inside double quotes with line breaks (`\n`) after each statement. **Write assertions using clean, declarative NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`, `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes in user-friendly, non-technical language. **For boundary scenarios the assertion derives from `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker rather than a guessed outcome.**
+- `Steps`: Numbered sequential **actions only** inside double quotes with line breaks (`\n`).
+  **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g.,
+  `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`,
+  `3. Tap "Lanjut"`). **No "Verify" / "Assert" / "Check" lines in this column** — all
+  verifications belong in `Expected Result`. A step is something the tester *does* on the
+  device (tap, scroll, enter, open, navigate, wait); an assertion is something they *observe*
+  after doing it. Mixing them makes the CSV unusable for both manual testers (who read Steps
+  as a to-do list) and automation (which needs actions separated from assertions).
+  Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write
+  `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`).
+  This column is a direct 1-to-1 join of `scenario.steps[]`. A `steps[]` entry still carrying
+  a Gherkin placeholder (`<Vehicle Type>`), third-person test-script phrasing, or a pure
+  automation-scaffolding line (no on-screen tester action) is a defect to fix at the source.
+  **A single high-level line that collapses a multi-action flow (e.g. "Complete the split bill
+  creation") is equally a defect — each discrete tester action must be its own numbered step.**
+- `Expected Result`: Numbered sequential assertions inside double quotes with line breaks
+  (`\n`) after each statement. **ALL verifications live here, not in Steps.** Each assertion
+  corresponds to the action step at the same number — after step 3 (an action), expected
+  result 3 states what the tester should observe. **Write assertions using clean, declarative
+  NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`,
+  `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes
+  in user-friendly, non-technical language. **For boundary scenarios the assertion derives from
+  `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker
+  rather than a guessed outcome.** When multiple actions share one observable outcome, the
+  earlier actions' expected results can be `—` (no assertion at that step) with the combined
+  assertion on the final action's line.
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`. **Resolution precedence: (1) `prd.applicable_platforms` (PRD is the scope authority), (2) else `rfc.scope.target_platforms`, (3) else infer from `design`.** One platform → `"Android"`/`"iOS"`; more than one → `"Cross-Platform"`. If PRD and RFC conflict, use PRD and raise it as a `prd_vs_rfc_gap` — never silently prefer one.
 - `Country v2`: MUST be derived from `prd.applicable_countries` (map ISO code → name, e.g. `ID`→`"Indonesia"`, `SG`→`"Singapore"`, `VN`→`"Vietnam"`). Never pick a country the inputs do not list. If `applicable_countries` has one entry, every row uses that country.
