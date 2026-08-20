@@ -66,7 +66,7 @@ TapMind.runStep("Get a customer from TDP");
 |---|---|---|---|
 | 1 | Standard action + optional check | `runStep("<action> \| verify: <check>")` | `runStep("Get a customer from TDP");` |
 | 2 | Poll until a state changes | `runStep(prompt, maxAttempts, intervalMs)` | `runStep("fetch booking ... verify status is confirmed", 5, 3000);` |
-| 3 | Search a list & save a value | `save <field> from the <list> entry where <field> equals <value> as <var>` | `runStep("save token from payment_options entry where type equals GOPAY_WALLET as token");` |
+| 3 | Search a list & save a value | `save <field> from the <list> entry where <field> equals <value> as <var>` | `runStep("Get payment options with intent EWALLET_QR_COINS and save token from the payment_options entry where type equals GOPAY_WALLET as gopayWalletToken");` |
 | 4 | Verify-only (reuse previous response) | Starts with `verify`/`assert`/`validate`/`check`/`expect` | `runStep("Verify booking status is CONFIRMED");` |
 | 5 | Direct DB / Redis / Kafka call | `run query ...` / `run redis ...` / `produce to kafka ...` / `consume from kafka ...` | `runStep("Run redis GET 'driver:active_session:123'");` |
 | 6 | Pin to a specific PDG / service | `runStep(prompt, pdg)` / `runStep(prompt, pdg, targetServiceId)` | `runStep("Get driver details", "transport-pdg", "driver-service");` |
@@ -120,7 +120,23 @@ entry first — not a plain dotted path.
 ```
 save <field to extract> from the <list name> entry where <filter field> equals <filter value> as <variable_name>
 ```
+
+**`<list name>`** is the JSON array field name in the response (e.g. `payment_options`), not a
+query-param name and not a full path like `data.payment_options`.
+
+**Query / intent ≠ row filter.** If the call takes a query like `intent=EWALLET_QR_COINS`, that
+value belongs only in the action clause. The `entry where <field> equals <value>` clause must use
+the **response row field** (e.g. `type equals GOPAY_WALLET`). Never copy the intent/query value
+into `where type equals …` — they are different fields and a wrong filter saves nothing (the step
+may still PASS if there is no `verify:`).
+
 ```java
+// Combined: call API with a query intent + save from a list by a different response field
+runStep("Get payment options with intent EWALLET_QR_COINS, header User-ID: ${memory.userId} "
+    + "and save token from the payment_options entry where type equals GOPAY_WALLET as gopayWalletToken",
+    "gopay", "payment-options-service");
+
+// Presence check + save (same response)
 runStep("Verify payment_options contains type GOPAY_WALLET; save token from the payment_options entry where type equals GOPAY_WALLET as gopay_token");
 
 // Filtering by a value saved earlier
@@ -142,6 +158,12 @@ method inside it by `payment_method_type`:
 **Presence-only check** (confirm a match exists, without saving anything):
 ```java
 runStep("verify payment_options contains an entry with type GOPAY_WALLET");
+```
+
+**Later steps** must reuse the exact `as <name>`:
+```java
+runStep("Set default payment option with body token as ${memory.gopayWalletToken} | verify: status is 200 and success is true",
+    "gopay", "payment-options-service");
 ```
 
 ### 3.4 Verify-only steps (reuse the previous response, no re-fetch)
@@ -321,6 +343,8 @@ Two independent mechanisms — know which one applies to your API:
 | Don't write | Write instead | Why |
 |---|---|---|
 | `data.payment_options.type equals GOPAY` | `payment_options entry where type equals GOPAY` | TapMind needs the word **"entry"** to know it's searching a list. |
+| `... with intent EWALLET_QR_COINS ... where type equals EWALLET_QR_COINS` | `... with intent EWALLET_QR_COINS ... where type equals GOPAY_WALLET` | **Query intent ≠ response `type`.** Intent is a request query; `type` is a field on each list row. Reusing the intent value in `where` matches no rows and saves nothing. |
+| `where type equals GOPAY_WALLET` but later `${memory.gopay_token}` when you saved `as gopayWalletToken` | Use the exact `as <name>` everywhere | Memory keys are exact; a different spelling is unbound. |
 | `verify state is A and state is B` | `verify state is one of A, B` | Separate checks are ANDed — always fails for a single field. |
 | Guessed variable name, e.g. `as customerToken` when you never saved it | The exact name used in the earlier `save ... as <name>` | Hallucinated names won't match what was actually stored. |
 | `[?(@.type=='paymentMethod')]` (quoting a variable name as a literal) | `entry where type equals ${memory.paymentMethod}` | Quoting filters for that literal text, not the saved value — matches nothing, silently saves empty. |
