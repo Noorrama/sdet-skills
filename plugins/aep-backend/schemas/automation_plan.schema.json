@@ -171,11 +171,15 @@
                 },
                 "test_data_output": {
                   "type": [
-                    "object",
+                    "array",
                     "null"
                   ],
                   "default": null,
-                  "description": "Set to null by APG. TDG writes enrichment: test_data_status, test_data_details, test_buddy_prompt."
+                  "description": "Set to null by APG. Written by test-data-identification: one test_data_output record per scenario using this fixture (test_data_status, test_data_details, test_buddy_prompt, match_confidence, identification_notes), shaped as test_data_manifest.schema.json#/definitions/test_data_output. Array per the RFC contract, and a sibling of required_state — never nested under an 'output' wrapper.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
                 }
               }
             }
