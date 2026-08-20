@@ -4,7 +4,7 @@
     {
       "scenario_id": "SC-EPIC1122-001",
       "requirement_ref": "RFC-78:step-9 / REQ-001 / AC-001",
-      "description": "Valid card saved successfully — returns 200 with non-null token",
+      "description": "Valid card saved successfully \u2014 returns 200 with non-null token",
       "is_legacy_regression": true,
       "is_dedup": false,
       "target_framework": "GBT",
@@ -25,22 +25,28 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["happy_path", "flag_on", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "happy_path",
+        "flag_on",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -67,22 +73,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -109,22 +120,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -151,22 +167,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -193,22 +214,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -235,22 +261,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -277,22 +308,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -319,28 +355,34 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_SAVED_CARD",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "saved_card_type": "VISA", "saved_card_number": "4111111111111111" }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "saved_card_type": "VISA",
+              "saved_card_number": "4111111111111111"
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken", "savedCardNumber", "savedCardFingerprint"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_SAVED_CARD",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET", "SAVE_CARD"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_SAVED_CARD. Config: wallet_status=ACTIVE, saved_card_type=VISA, saved_card_number=4111111111111111. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
       "scenario_id": "SC-EPIC1122-009",
       "requirement_ref": "RFC-78:step-7 / NFR-003",
-      "description": "Vault service returns 503 — API returns 503 SERVICE_UNAVAILABLE with no DB row written",
+      "description": "Vault service returns 503 \u2014 API returns 503 SERVICE_UNAVAILABLE with no DB row written",
       "is_legacy_regression": false,
       "is_dedup": false,
       "target_framework": "GBT",
@@ -361,22 +403,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -403,28 +450,34 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["flag_off", "negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "flag_off",
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
       "scenario_id": "SC-EPIC1122-011",
       "requirement_ref": "RFC-78:edge-concurrent / RFC-78:risk-areas",
-      "description": "Concurrent duplicate save race condition — exactly one succeeds with 200, other returns 409",
+      "description": "Concurrent duplicate save race condition \u2014 exactly one succeeds with 200, other returns 409",
       "is_legacy_regression": false,
       "is_dedup": false,
       "target_framework": "GBT",
@@ -445,22 +498,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -487,22 +545,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["security", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "security",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -529,22 +592,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["boundary", "P1"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "boundary",
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -571,22 +639,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["boundary", "P1"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "boundary",
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -613,22 +686,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["boundary", "P1"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "boundary",
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -655,22 +733,27 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -704,19 +787,21 @@
             }
           },
           "response_fields_used": [],
-          "test_data_output": {
-            "test_data_status": "TDP_COMPLETE_FALLBACK",
-            "test_data_details": {
-              "tdp_test_data_category": "TESTCONTAINERS_POSTGRESQL",
-              "test_data_operations": ["SPIN_UP_CONTAINER", "RUN_FLYWAY_MIGRATION"]
-            },
-            "test_buddy_prompt": null
-          }
+          "test_data_output": null
         }
       ],
-      "tags": ["db", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 30000 },
+      "tags": [
+        "db",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 30000
+      },
       "jira_ids": []
     },
     {
@@ -750,19 +835,21 @@
             }
           },
           "response_fields_used": [],
-          "test_data_output": {
-            "test_data_status": "TDP_COMPLETE_FALLBACK",
-            "test_data_details": {
-              "tdp_test_data_category": "TESTCONTAINERS_POSTGRESQL",
-              "test_data_operations": ["SPIN_UP_CONTAINER", "RUN_FLYWAY_MIGRATION"]
-            },
-            "test_buddy_prompt": null
-          }
+          "test_data_output": null
         }
       ],
-      "tags": ["db", "P0"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 30000 },
+      "tags": [
+        "db",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 30000
+      },
       "jira_ids": []
     },
     {
@@ -796,19 +883,21 @@
             }
           },
           "response_fields_used": [],
-          "test_data_output": {
-            "test_data_status": "TDP_COMPLETE_FALLBACK",
-            "test_data_details": {
-              "tdp_test_data_category": "TESTCONTAINERS_POSTGRESQL",
-              "test_data_operations": ["SPIN_UP_CONTAINER", "RUN_FLYWAY_MIGRATION"]
-            },
-            "test_buddy_prompt": null
-          }
+          "test_data_output": null
         }
       ],
-      "tags": ["db", "P1"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 30000 },
+      "tags": [
+        "db",
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 30000
+      },
       "jira_ids": []
     },
     {
@@ -842,19 +931,21 @@
             }
           },
           "response_fields_used": [],
-          "test_data_output": {
-            "test_data_status": "TDP_COMPLETE_FALLBACK",
-            "test_data_details": {
-              "tdp_test_data_category": "TESTCONTAINERS_POSTGRESQL",
-              "test_data_operations": ["SPIN_UP_CONTAINER", "RUN_FLYWAY_MIGRATION"]
-            },
-            "test_buddy_prompt": null
-          }
+          "test_data_output": null
         }
       ],
-      "tags": ["db", "P1"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 30000 },
+      "tags": [
+        "db",
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 30000
+      },
       "jira_ids": []
     },
     {
@@ -881,22 +972,28 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["negative", "boundary", "P1"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "tags": [
+        "negative",
+        "boundary",
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
       "jira_ids": []
     },
     {
@@ -923,22 +1020,26 @@
             "entity": "CUSTOMER",
             "category": "CUSTOMER_WITH_WALLET",
             "count": 1,
-            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+            "config": {
+              "wallet_status": "ACTIVE",
+              "card_already_saved": false
+            }
           },
-          "response_fields_used": ["customerId", "bearerToken"],
-          "test_data_output": {
-            "test_data_status": "TDP_SUPPORTED",
-            "test_data_details": {
-              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
-            },
-            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-          }
+          "response_fields_used": [],
+          "test_data_output": null
         }
       ],
-      "tags": ["P1"],
-      "environments": ["dev-cluster", "staging-cluster"],
-      "execution_hints": { "retry_count": 2, "timeout_ms": 60000 },
+      "tags": [
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 60000
+      },
       "jira_ids": []
     }
   ]
