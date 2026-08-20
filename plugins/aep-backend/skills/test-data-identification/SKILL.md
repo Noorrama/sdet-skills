@@ -33,6 +33,48 @@ If the plan carries fixtures inline as per-scenario `test_data[]` (the RFC's ill
 instead of a root `fixtures_summary[]`, treat each entry identically — `fixture_id` + `description`
 + `required_state` is the contract, not its position in the document.
 
+## Preflight — one hard stop, everything else degrades
+
+**The hard stop is the TestBuddy MCP.** If the connection fails, or a required tool is absent, or the
+first real call errors — **stop. Do not proceed to any fixture, do not write output.** Without the
+category and operation catalogs there is nothing to identify against, and continuing would express an
+infrastructure outage as a data verdict: fixtures labelled `TDP_NOT_SUPPORTED` when the truth is
+"the skill could not reach TestBuddy".
+
+| Check | On failure |
+|---|---|
+| TestBuddy MCP reachable | **ABORT RUN** |
+| `TestDataAgent_get_supported_category` present | **ABORT RUN** |
+| `TestDataAgent_get_supported_operation` present | **ABORT RUN** |
+| Input plan missing / unparseable / zero fixtures | **ABORT RUN** — there is no work to do |
+
+Check TestBuddy **first**, before reading knowledge or looping fixtures: a 3-second connect test
+saves a run that would otherwise fail after minutes of catalog calls.
+
+### Knowledge gaps degrade, they do not abort
+
+A knowledge problem is scoped to the fixtures that depend on it, so it must not kill the whole run:
+
+| Situation | Behaviour |
+|---|---|
+| Domain bundle missing for a domain the plan uses | Identify from `test_data_domains.md`; cap `match_confidence` at `medium`; add the fixture to `needs_human_review` |
+| Bundle loads but parses partially (e.g. 7 of 8 category rows) | Continue with what parsed, record the shortfall in `run_log`, and cap affected fixtures at `medium` — an `isEnabled` check against an incomplete table cannot be trusted |
+| `sequence/sequence.md` missing | Continue; operation ordering falls back to the sequencing rules in this skill, flagged in `run_log` |
+| `references/index.md` missing | Continue via `test_data_domains.md`; every fixture caps at `medium` |
+
+Every degradation must be **visible**: an entry in `run_log.json` naming the missing or partial
+source, and reduced confidence on the records it touched. Silent degradation is the failure this
+section exists to prevent — a run that looks clean while built on knowledge it never loaded.
+
+### Single-fixture failures
+
+Once TestBuddy proved reachable, a later lookup failure is that fixture's problem alone:
+`unidentified_fixtures[].reason: CATALOG_UNAVAILABLE`, and the run continues.
+
+On an abort, write **no** `enriched_automation_plan.json` and **no** `test_data_manifest.json` —
+leaving the previous run's files intact beats replacing them with a partial. Emit `run_log.json`
+with the failed check, and stop.
+
 ## Model
 Fast tier — Haiku. The work is catalog lookup plus semantic match; only operation sequencing reasons.
 
@@ -319,6 +361,7 @@ Scope each entry with `fixture_id`; omit it for run-level setup steps (knowledge
 stays absent from identification output entirely.
 
 ## Guardrails
+- **TestBuddy unreachable aborts the run** (see Preflight) — never express an infrastructure failure as a data verdict, and never emit partial output. Knowledge gaps degrade instead: continue, cap confidence at `medium`, and record the gap in `run_log.json`. Degradation must always be visible.
 - **Never invent a category name.** It must be verbatim from `TestDataAgent_get_supported_category`. If the catalog is unreachable, stop and report `CATALOG_UNAVAILABLE` — do not guess a plausible name.
 - **Never accept a category the signals do not corroborate.** The matcher has no no-match answer; an unvalidated category is a silent mis-provision. Reject, null the category, keep the proposal in `identification_notes`.
 - **Never invent an operation name.** It must be verbatim from `get_supported_operations` or the live `<Domain>Agent_*` inventory. A needed capability with no tool is a `missing_operations` entry, never an operation.
