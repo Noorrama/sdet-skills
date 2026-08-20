@@ -95,7 +95,8 @@ Do not confuse the two — refusing to normalise is not caution, it is a false o
 **Field labels — match by meaning, not by key name.** Schema keys are output names, never strings
 to search for. Look for the concept, whatever the doc calls it. A section headed `Requirements`,
 `Business Requirements`, `User Stories` or `Scope` all feed `business_requirements`; `Edge Cases`
-/ `Boundary Conditions` / `Validations` all feed `boundary_conditions`.
+/ `Boundary Conditions` / `Validations` all feed `boundary_conditions`; `Owning Team`, `Squad` or
+`Pod` all feed `team_name` on the requirement they scope.
 
 **Enum values — match case-insensitively, emit the canonical spelling.** Compare the document's
 value to the schema's allowed values ignoring:
@@ -139,6 +140,11 @@ Each item must include:
 
 Optional fields for each business requirement:
 - `milestone` (string)
+- `team_name` (string) — when the PRD scopes requirements by owning team (e.g. sections or a
+  table naming the team responsible for each requirement or a
+  per-team breakdown), record that team against each requirement it belongs to. Read for meaning,
+  not by key name — "Owning team", "Squad", "Pod" all feed this field. If the PRD gives no
+  team-wise scope, omit the key; do not invent a team from the app or module name.
 - `context_screen` (string)
 - `expected_ui_copy` (array of objects with `screen` and `ui_copy`)
 - `target_personas` (array of objects with `type` and optional `prerequisites`)

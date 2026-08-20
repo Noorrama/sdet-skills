@@ -11,7 +11,7 @@ Bridge between *what to test* (SDET plan) and *how to implement it* (test code +
 
 | File | Purpose |
 |---|---|
-| `sdet_plan.json` (approved) | Human-reviewed output from sdet-plan-generator. Source of scenario_id, source_ref, is_legacy_regression, description, preconditions, test_layer, tags, priority. |
+| `sdet_plan.json` (approved) | Human-reviewed output from sdet-plan-generator. Source of scenario_id, source_ref, is_legacy_regression, description, preconditions, test_layer, tags, priority. Also read `canonical_team_id` and `code_module` (root fields) — these are resolved by the team registry and must not be re-derived here. |
 | `tasks_context.json` | Package/class naming conventions, component boundaries, api_contract, service_name, target_framework. |
 | `code_change_context.json` | `curl_reference` construction from actual endpoint signatures. |
 | `regression_context.json` | Existing class naming patterns for consistency. |
@@ -30,14 +30,15 @@ Fast tier — Haiku
 | `is_dedup` | `false` — dedup scenarios are skipped entirely |
 | `target_framework` | From tasks_context.json, e.g. `GBT` |
 | `service_name` | From tasks_context.json component field |
-| `module` | From tasks_context.json component field |
-| `package` | Fully qualified Java package based on `test_layer` + component grouping from tasks_context + existing regression naming patterns |
+| `module` | **From `sdet_plan.json` root field `code_module`** (resolved by team_registry — use verbatim). If `code_module` is `null` or `"unknown"` in sdet_plan, flag an error and halt: *"code_module is unresolved in sdet_plan.json — add team alias to config/team_registry.json and re-run sdet-plan-generator."* Do not fall back to tasks_context for the module name. |
+| `package` | `{sdet_plan.code_module}.test.{test_layer}.{feature_component}` — substitute `code_module` verbatim; use `tasks_context` for `feature_component` (feature/domain grouping within the module). Example: `transport.test.component.pickup` |
 | `test_class` | Class name based on `test_layer` + feature/component grouping. Group related scenarios — not one class per scenario. e.g. `SaveCardComponentTest`, `SaveCardIntegrationTest`, `CardRepositoryIntegrationTest` |
 | `test_layer` | From sdet_plan.json: `component` \| `integration` \| `e2e` |
 | `method_name` | `should[ExpectedOutcome]When[Condition]` — Java-valid camelCase. Append suffix if collision within class. |
 | `assertion_class` | Derived from test_class, e.g. `SaveCardAssertions`, `CardRepositoryAssertions` |
 | `endpoint` | HTTP method + path from tasks_context api_contract, e.g. `POST /payment/v1/cards`. Empty string for DB/infra-only tests (no HTTP call). |
 | `curl_reference` | Minimal valid curl from code_change_context or tasks_context api_contract. Use fixture-scoped placeholders: `{{FIX-xxx.fieldName}}` — e.g. `{{FIX-CARDPAY-001.bearerToken}}`, `{{FIX-CARDPAY-002.savedCardNumber}}`. Placeholder field names are **candidates** — TDG confirms and corrects them against the catalog response schema. Empty string for DB/infra-only tests. |
+| `step_descriptions[]` | **Propagated verbatim** from sdet_plan.json for the matching `scenario_id`. Copy all steps as-is — do not rewrite or summarise. test-code-generator uses these to build `@Step` annotations and assertions; without them it cannot write correct Given/When/Then. |
 | `test_data[]` | One entry per independently provisioned entity needed by this scenario. See fixture guidance below. |
 | `tags` | From sdet_plan.json tags + priority, e.g. `["negative", "P0"]` |
 | `environments` | From tasks_context.json environments or default `["dev-cluster", "staging-cluster"]` |

@@ -3,107 +3,439 @@
   "title": "rfc_context",
   "type": "object",
   "additionalProperties": false,
-  "required": ["feature_name", "validation_sequence"],
+  "required": ["id", "service_name", "validation_sequence"],
   "properties": {
-    "feature_name": { "type": "string" },
-    "rfc_version": { "type": ["string", "null"] },
-    "validation_sequence": {
-      "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["step", "name", "what_is_validated", "why"],
-        "properties": {
-          "step": { "type": "integer" },
-          "name": { "type": "string" },
-          "what_is_validated": { "type": "string" },
-          "why": { "type": "string" },
-          "failure_error_code": { "type": "string" },
-          "failure_http_status": { "type": "integer" },
-          "notes": { "type": ["string", "null"] }
-        }
+    "id": { "type": "string" },
+    "status": { "type": ["string", "null"] },
+    "approach_finalised": { "type": ["boolean", "null"] },
+    "prd_ref": { "type": ["string", "null"] },
+    "jira_epic": { "type": ["string", "null"] },
+    "author": { "type": ["string", "null"] },
+    "approver": { "type": ["string", "null"] },
+    "service_name": { "type": ["string", "null"] },
+    "related_docs": { "type": "array", "items": { "$ref": "#/definitions/RelatedDoc" }, "description": "PRD / sibling RFCs / analyses the RFC references" },
+    "in_scope": { "type": "array", "items": { "$ref": "#/definitions/ScopeItem" }, "description": "numbered {id, item}" },
+    "out_of_scope": { "type": "array", "items": { "$ref": "#/definitions/ScopeItem" }, "description": "numbered {id, item}" },
+    "requirements": { "type": "array", "items": { "$ref": "#/definitions/Requirement" }, "description": "requirements the RFC states in its own Requirements section; ids minted locally when the RFC gives none" },
+    "milestones": { "type": "array", "items": { "$ref": "#/definitions/Milestone" } },
+    "protocols_used": { "type": "array", "items": { "type": "string" } },
+    "contracts": { "$ref": "#/definitions/Contracts" },
+    "rejected_alternatives": { "type": "array", "items": { "$ref": "#/definitions/RejectedAlternative" }, "description": "design-decision options the RFC considered and rejected, with the reason and what was chosen instead" },
+    "error_codes": { "type": "array", "items": { "$ref": "#/definitions/ErrorCode" } },
+    "validation_sequence": { "type": "array", "items": { "$ref": "#/definitions/ValidationStep" } },
+    "business_logic": { "type": "array", "items": { "$ref": "#/definitions/BusinessLogicRule" } },
+    "db_schema_changes": { "type": "array", "items": { "$ref": "#/definitions/DbSchemaChange" } },
+    "user_flows": { "type": "array", "items": { "$ref": "#/definitions/UserFlow" }, "description": "named flow scenarios (happy path + deviations), each with a numbered steps[] (formerly a flat sequence_flows step list)" },
+    "cross_service_dependencies": { "type": "array", "items": { "$ref": "#/definitions/CrossServiceDependency" } },
+    "service_level_changes": { "type": "array", "items": { "$ref": "#/definitions/ServiceLevelChange" } },
+    "feature_flags": { "type": "array", "items": { "$ref": "#/definitions/FeatureFlag" } },
+    "risk_areas": { "type": "array", "items": { "$ref": "#/definitions/RiskArea" } },
+    "non_functional_requirements": { "$ref": "#/definitions/NonFunctionalRequirements" },
+    "team_ownership": { "type": "array", "items": { "$ref": "#/definitions/TeamOwnership" } },
+    "extraction_gaps": { "type": "array", "items": { "$ref": "#/definitions/ClarificationGap" } },
+    "open_questions": { "type": "array", "items": { "$ref": "#/definitions/OpenQuestion" }, "description": "numbered {id, question}" },
+    "prd_drift_flags": {
+      "anyOf": [
+        { "type": "array", "items": { "$ref": "#/definitions/PrdDriftFlag" } },
+        { "type": "null" }
+      ],
+      "description": "null = drift not assessed (no PRD); [] = compared, no mismatches. Read together with prd_drift_status."
+    },
+    "prd_drift_status": {
+      "type": ["string", "null"],
+      "enum": ["assessed", "not_assessed", null],
+      "description": "explicit companion to prd_drift_flags so null is never read as 'no drift': 'not_assessed' = no PRD was available; 'assessed' = a PRD comparison actually ran"
+    },
+    "provenance": { "anyOf": [{ "$ref": "#/definitions/Provenance" }, { "type": "null" }] }
+  },
+  "definitions": {
+    "Milestone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "scope": { "type": ["string", "null"] },
+        "timeline": { "type": ["string", "null"] }
       }
     },
-    "api_contracts": {
-      "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "properties": {
-          "endpoint": { "type": "string" },
-          "method": { "type": "string" },
-          "design_level": { "type": "boolean" },
-          "auth": { "type": "string" },
-          "request_schema": { "type": "object" },
-          "response_schema": { "type": "object" },
-          "error_codes": { "type": "array", "items": { "type": "string" } }
-        }
+    "RestField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field"],
+      "properties": {
+        "field": { "type": "string" },
+        "type": { "type": ["string", "null"] },
+        "required": { "type": ["boolean", "null"] },
+        "validation": { "type": ["string", "null"] }
       }
     },
-    "flows": {
-      "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["name", "steps"],
-        "properties": {
-          "name": { "type": "string" },
-          "trigger": { "type": "string" },
-          "steps": { "type": "array", "items": { "type": "string" } }
-        }
+    "RestResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": ["integer", "null"], "description": "HTTP status, or null for envelope-style (success:true/false) responses with no stated code" },
+        "condition": { "type": ["string", "null"] },
+        "body": {},
+        "error_codes": { "type": "array", "items": { "type": "string" }, "description": "codes referenced by name from error_codes[] — never re-inline error bodies here" }
       }
     },
-    "error_scenarios": {
-      "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "properties": {
-          "condition": { "type": "string" },
-          "error_code": { "type": "string" },
-          "http_status": { "type": "integer" },
-          "validation_step_ref": { "type": "integer" }
-        }
+    "RestContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "method", "contract_status"],
+      "properties": {
+        "path": { "type": "string" },
+        "method": { "type": "string" },
+        "contract_status": { "type": "string", "enum": ["ready", "draft", "not_specified"] },
+        "headers": { "type": "object", "additionalProperties": { "type": "string" } },
+        "request_body": { "type": "array", "items": { "$ref": "#/definitions/RestField" } },
+        "responses": { "type": "array", "items": { "$ref": "#/definitions/RestResponse" } },
+        "sla": { "type": ["string", "null"] },
+        "requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "ac_refs": { "type": "array", "items": { "type": "string" } }
       }
     },
-    "edge_cases": {
-      "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "type": { "type": "string", "enum": ["boundary", "race_condition", "timeout", "concurrent"] }
-        }
+    "GrpcContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_status"],
+      "properties": {
+        "service": { "type": ["string", "null"] },
+        "method": { "type": ["string", "null"] },
+        "streaming": { "type": ["string", "null"] },
+        "request": { "type": ["string", "null"] },
+        "response": { "type": ["string", "null"] },
+        "proto_ref": { "type": ["string", "null"] },
+        "error_convention": { "type": ["string", "null"] },
+        "sla": { "type": ["string", "null"] },
+        "contract_status": { "type": "string", "enum": ["ready", "draft", "not_specified"] },
+        "requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "ac_refs": { "type": "array", "items": { "type": "string" } }
       }
     },
-    "cross_service_dependencies": {
-      "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "properties": {
-          "service": { "type": "string" },
-          "call_order": { "type": "integer" },
-          "failure_behaviour": { "type": "string" }
-        }
+    "KafkaContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_status"],
+      "properties": {
+        "topic": { "type": ["string", "null"] },
+        "direction": { "type": ["string", "null"], "description": "produces | consumes" },
+        "schema_ref": { "type": ["string", "null"] },
+        "key_strategy": { "type": ["string", "null"] },
+        "consumer_group": { "type": ["string", "null"] },
+        "delivery_guarantee": { "type": ["string", "null"] },
+        "retry_dlq": { "type": ["string", "null"] },
+        "contract_status": { "type": "string", "enum": ["ready", "draft", "not_specified"] },
+        "requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "ac_refs": { "type": "array", "items": { "type": "string" } }
       }
     },
-    "feature_flags": {
-      "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "properties": {
-          "flag": { "type": "string" },
-          "on_behaviour": { "type": "string" },
-          "off_behaviour": { "type": "string" }
-        }
+    "OtherContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mechanism", "contract_status"],
+      "properties": {
+        "mechanism": { "type": "string" },
+        "details": { "type": ["string", "null"] },
+        "contract_status": { "type": "string", "enum": ["ready", "draft", "not_specified"] },
+        "requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "ac_refs": { "type": "array", "items": { "type": "string" } }
       }
     },
-    "timeouts": {
-      "type": "array",
-      "items": {
-        "type": "object", "additionalProperties": false,
-        "properties": {
-          "context": { "type": "string" },
-          "value_ms": { "type": "integer" },
-          "retry_count": { "type": "integer" }
-        }
+    "Contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rest": { "type": "array", "items": { "$ref": "#/definitions/RestContract" } },
+        "grpc": { "type": "array", "items": { "$ref": "#/definitions/GrpcContract" } },
+        "kafka": { "type": "array", "items": { "$ref": "#/definitions/KafkaContract" } },
+        "other": { "type": "array", "items": { "$ref": "#/definitions/OtherContract" } }
+      }
+    },
+    "ErrorCode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string" },
+        "status": { "type": ["integer", "null"] },
+        "body": {}
+      }
+    },
+    "ValidationStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step", "name"],
+      "properties": {
+        "step": { "type": "integer" },
+        "name": { "type": "string" },
+        "what_is_validated": { "type": ["string", "null"] },
+        "layer": { "type": ["string", "null"], "enum": ["controller", "service", "repository", "db", "gateway", null] },
+        "inputs": { "type": "array", "items": { "type": "string" } },
+        "constraint": { "type": ["string", "null"] },
+        "failure_error_code": { "type": ["string", "null"], "description": "lookup key into error_codes[]; null if the step cannot fail" },
+        "failure_condition": { "type": ["string", "null"] },
+        "inferred": { "type": ["boolean", "null"], "description": "true when the step is implied by the RFC, not stated verbatim" },
+        "notes": { "type": ["string", "null"] },
+        "requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "ac_refs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "CrossServiceDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["service"],
+      "properties": {
+        "service": { "type": "string" },
+        "protocol": { "type": ["string", "null"] },
+        "call_order": { "type": ["integer", "null"] },
+        "is_critical": { "type": ["boolean", "null"] },
+        "timeout_ms": { "type": ["integer", "null"] },
+        "retry_count": { "type": ["integer", "null"] },
+        "failure_behavior": { "type": ["string", "null"] },
+        "circuit_breaker_threshold": { "type": ["integer", "null"] }
+      }
+    },
+    "BusinessLogicRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule"],
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "rule": { "type": "string" },
+        "validation_step_ref": { "type": ["integer", "null"], "description": "step number in validation_sequence this rule refines; null when independent" },
+        "requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "ac_refs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "FlowStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step", "action"],
+      "description": "One numbered step within a user flow.",
+      "properties": {
+        "step": { "type": "integer", "description": "1-based, contiguous, execution order within this flow" },
+        "action": { "type": "string", "description": "what happens at this step (may name caller->callee inline, e.g. 'SE -> RPS: /addOrder')" },
+        "caller": { "type": ["string", "null"] },
+        "callee": { "type": ["string", "null"] }
+      }
+    },
+    "UserFlow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "steps"],
+      "description": "A named flow scenario reconstructed from sequence diagrams / prose: the happy path and each deviation (retry, timeout, fallback, rollback, expiry) is its own entry.",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": ["string", "null"], "description": "happy_path | deviation | failure | alternate | edge_case" },
+        "trigger": { "type": ["string", "null"], "description": "the condition/input that starts this flow" },
+        "steps": { "type": "array", "items": { "$ref": "#/definitions/FlowStep" }, "description": "numbered, execution-ordered steps" },
+        "outcome": { "type": ["string", "null"], "description": "the end state / result of the flow" },
+        "requirement_refs": { "type": "array", "items": { "type": "string" } },
+        "ac_refs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "ScopeItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "item"],
+      "description": "A numbered in-scope / out-of-scope entry, referenceable by number downstream.",
+      "properties": {
+        "id": { "type": "integer", "description": "1-based, contiguous" },
+        "item": { "type": "string" }
+      }
+    },
+    "OpenQuestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "question"],
+      "description": "A numbered unresolved question (author-unanswered thread, conflict needing confirmation, derived priority to confirm).",
+      "properties": {
+        "id": { "type": "integer", "description": "1-based, contiguous" },
+        "question": { "type": "string" }
+      }
+    },
+    "SlaTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "target"],
+      "description": "A numbered SLA/NFR target (latency/throughput/SLA goal), literal values only.",
+      "properties": {
+        "id": { "type": "integer", "description": "1-based, contiguous" },
+        "target": { "type": "string" }
+      }
+    },
+    "Requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "requirement"],
+      "description": "A requirement stated in the RFC's own Requirements section. Not a PRD acceptance criterion; ids are minted locally (REQ-#) when the RFC gives none.",
+      "properties": {
+        "id": { "type": "string", "description": "REQ-# (locally minted if the RFC states no id)" },
+        "requirement": { "type": "string" },
+        "source": { "type": ["string", "null"], "description": "where in the RFC this was stated" },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "RejectedAlternative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "option", "rejected_reason"],
+      "description": "A design-decision option the RFC considered and did not choose.",
+      "properties": {
+        "decision": { "type": "string", "description": "the design decision this option belonged to" },
+        "option": { "type": "string" },
+        "rejected_reason": { "type": "string", "description": "the RFC's stated cons / reason for rejection" },
+        "chosen_instead": { "type": ["string", "null"] }
+      }
+    },
+    "RelatedDoc": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title"],
+      "description": "A document the RFC references (PRD, sibling RFC, analysis, etc.).",
+      "properties": {
+        "type": { "type": ["string", "null"], "description": "prd | rfc | analysis | other" },
+        "title": { "type": "string" },
+        "ref": { "type": ["string", "null"], "description": "URL / id if stated" },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "FeatureFlag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "default_staging": { "type": ["boolean", "null"] },
+        "default_production": { "type": ["boolean", "null"] },
+        "gated_behavior": { "type": ["string", "null"] },
+        "on_behavior": { "type": ["string", "null"] },
+        "off_behavior": { "type": ["string", "null"] },
+        "rollout": { "type": ["string", "null"] }
+      }
+    },
+    "RiskArea": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["risk", "priority", "priority_source"],
+      "properties": {
+        "risk": { "type": "string" },
+        "priority": { "type": "string", "enum": ["P0", "P1", "P2"] },
+        "priority_source": { "type": "string", "enum": ["stated", "derived"] },
+        "severity": { "type": ["string", "null"] },
+        "mitigation": { "type": ["string", "null"] }
+      }
+    },
+    "Timeout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["context"],
+      "properties": {
+        "context": { "type": "string", "description": "the operation/resilience config this timeout applies to" },
+        "value_ms": { "type": ["integer", "null"] },
+        "retry_count": { "type": ["integer", "null"] },
+        "backoff": { "type": ["string", "null"] },
+        "circuit_breaker_threshold": { "type": ["integer", "null"] }
+      }
+    },
+    "NonFunctionalRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Groups operational dimensions; never emit sla_nfr_targets or timeouts at the root.",
+      "properties": {
+        "sla_nfr_targets": { "type": "array", "items": { "$ref": "#/definitions/SlaTarget" }, "description": "numbered {id, target}; latency/throughput/SLA goals as free-text, literal values only" },
+        "timeouts": { "type": "array", "items": { "$ref": "#/definitions/Timeout" }, "description": "operation-level/resilience config; per-downstream-call timeouts stay on cross_service_dependencies[].timeout_ms" }
+      }
+    },
+    "TeamOwnership": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "team": { "type": ["string", "null"], "description": "team / service name only — never a person" },
+        "scope_ref": { "type": ["string", "null"] },
+        "timeline": { "type": ["string", "null"] }
+      }
+    },
+    "ServiceLevelChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["service", "change"],
+      "properties": {
+        "service": { "type": "string" },
+        "change": { "type": "string" }
+      }
+    },
+    "DbColumn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": ["string", "null"] },
+        "constraints": { "type": ["string", "null"] }
+      }
+    },
+    "DbSchemaChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["table"],
+      "properties": {
+        "table": { "type": "string" },
+        "type": { "type": ["string", "null"], "description": "new | modified" },
+        "columns": { "type": "array", "items": { "$ref": "#/definitions/DbColumn" } },
+        "unique_constraint": { "type": ["string", "null"] }
+      }
+    },
+    "PrdDriftFlag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "detail"],
+      "properties": {
+        "type": { "type": "string" },
+        "prd_ref": { "type": ["string", "null"] },
+        "rfc_ref": { "type": ["string", "null"] },
+        "detail": { "type": "string" }
+      }
+    },
+    "ClarificationGap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "reason", "detail"],
+      "properties": {
+        "field": { "type": "string" },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "missing_from_source",
+            "ambiguous",
+            "contract_incomplete",
+            "flag_underspecified",
+            "missing_timeline",
+            "status_ambiguous"
+          ]
+        },
+        "detail": { "type": "string" },
+        "blocking": { "type": "boolean" }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_ref", "source_type", "extracted_at", "extractor_skill"],
+      "properties": {
+        "source_ref": { "type": "string" },
+        "source_type": { "type": "string", "enum": ["prd", "rfc"] },
+        "source_revision": { "type": ["string", "null"] },
+        "source_content_hash": { "type": ["string", "null"], "description": "sha256:<hex> or null" },
+        "extracted_at": { "type": "string", "description": "UTC ISO-8601" },
+        "extractor_skill": { "type": "string", "enum": ["prd-extractor", "rfc-extractor"] },
+        "extractor_skill_version": { "type": ["string", "null"] },
+        "status_at_extract": { "type": ["string", "null"] },
+        "finalised_at_extract": { "type": "boolean" },
+        "prior_run": { "type": ["string", "null"] }
       }
     }
   }

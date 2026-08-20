@@ -25,8 +25,10 @@ free-form Java method body -- stated in _meta so nobody treats it as a verified,
 complete script.
 
 Run: python3 extract_tapmind_nav_index.py <tapmind_repo_root> <config_root>
-Writes: <config_root>/tapmind/nav_index/<module>.json  (one per module)
-        <config_root>/tapmind/project_map.json          (module -> observed ids)
+Writes: <config_root>/nav_index/tapmind/<module>.json      (one per module -- sibling
+        of nav_index/gmt/ and nav_index/gtf/, all three under one nav_index/ root)
+        <config_root>/nav_index/tapmind/project_map.json   (module -> observed ids;
+        lives alongside the per-module files, not a separate top-level folder)
 """
 import sys, os, re, json, subprocess, datetime, collections
 
@@ -219,7 +221,7 @@ def git_sha(root):
 
 def main():
     repo_root, config_root = sys.argv[1], sys.argv[2]
-    nav_dir = os.path.join(config_root, "tapmind", "nav_index")
+    nav_dir = os.path.join(config_root, "nav_index", "tapmind")
     os.makedirs(nav_dir, exist_ok=True)
 
     # test java files per module (for @TestInfo extraction) + all java files per
@@ -290,7 +292,7 @@ def main():
             for mod, v in sorted(module_ids.items()) if v["project_ids"] or v["suite_ids"]
         },
     }
-    with open(os.path.join(config_root, "tapmind", "project_map.json"), "w") as f:
+    with open(os.path.join(nav_dir, "project_map.json"), "w") as f:
         json.dump(project_map, f, indent=2, sort_keys=False)
 
     print(f"Modules with tests: {len(files_by_mod)}")

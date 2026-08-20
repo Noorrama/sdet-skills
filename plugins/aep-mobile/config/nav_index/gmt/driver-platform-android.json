@@ -1,8 +1,9 @@
 {
   "_meta": {
     "generated_by": "extract_nav_index.py",
+    "repo": "gmt",
     "generated_from_repo_sha": "a8c997d414a07560a1a9356c3528a6d364f27a45",
-    "generated_at": "2026-08-12T06:05:47.947419+00:00",
+    "generated_at": "2026-08-17T09:56:48.838571+00:00",
     "module": "driver-platform-android",
     "case_ids_indexed": 49,
     "warning": "deeplinks_literal / deeplinks_enum_ref / case ids are exact regex extractions. page_object_calls_heuristic and steps_gherkin are best-effort navigation aids, NOT a guaranteed-complete or verified-correct step list -- method bodies and Gherkin text are free-form, unlike the structured id/deeplink data."
