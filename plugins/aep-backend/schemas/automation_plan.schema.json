@@ -3,43 +3,113 @@
   "title": "automation_plan",
   "type": "object",
   "additionalProperties": false,
-  "required": ["epic_id", "automation_scenarios"],
+  "required": [
+    "epic_id",
+    "automation_scenarios"
+  ],
   "properties": {
-    "epic_id": { "type": "string" },
+    "epic_id": {
+      "type": "string"
+    },
     "automation_scenarios": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["scenario_id", "method_name", "test_class", "package", "test_layer", "test_data"],
+        "required": [
+          "scenario_id",
+          "method_name",
+          "test_class",
+          "package",
+          "test_layer",
+          "test_data"
+        ],
         "properties": {
-          "scenario_id":          { "type": "string" },
-          "requirement_ref":      { "type": "string", "description": "Source AC/REQ reference, e.g. RFC-78:step-9 / REQ-001 / AC-001. Propagated from sdet_plan.json source_ref." },
-          "description":          { "type": "string" },
-          "is_legacy_regression": { "type": "boolean" },
-          "is_dedup":             { "type": "boolean" },
-          "target_framework":     { "type": "string", "description": "Test framework. e.g. GBT, JUnit5." },
-          "service_name":         { "type": "string" },
-          "module":               { "type": "string" },
-          "package":              { "type": "string", "description": "Fully qualified Java package for the test class." },
-          "test_class":           { "type": "string" },
-          "test_layer":           { "type": "string", "enum": ["component", "integration", "e2e"] },
-          "method_name":          { "type": "string", "description": "Java method name: should[ExpectedOutcome]When[Condition]" },
-          "assertion_class":      { "type": "string" },
-          "endpoint":             { "type": "string", "description": "HTTP method + path, e.g. POST /payment/v1/cards. Empty string for DB/infra-only tests." },
-          "curl_reference":       { "type": "string", "description": "Minimal valid curl using {{FIX-xxx.fieldName}} scoped placeholders." },
+          "scenario_id": {
+            "type": "string"
+          },
+          "requirement_ref": {
+            "type": "string",
+            "description": "Source AC/REQ reference, e.g. RFC-78:step-9 / REQ-001 / AC-001. Propagated from sdet_plan.json source_ref."
+          },
+          "description": {
+            "type": "string"
+          },
+          "is_legacy_regression": {
+            "type": "boolean"
+          },
+          "is_dedup": {
+            "type": "boolean"
+          },
+          "target_framework": {
+            "type": "string",
+            "description": "Test framework. e.g. GBT, JUnit5."
+          },
+          "service_name": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "package": {
+            "type": "string",
+            "description": "Fully qualified Java package for the test class."
+          },
+          "test_class": {
+            "type": "string"
+          },
+          "test_layer": {
+            "type": "string",
+            "enum": [
+              "component",
+              "integration",
+              "e2e"
+            ]
+          },
+          "method_name": {
+            "type": "string",
+            "description": "Java method name: should[ExpectedOutcome]When[Condition]"
+          },
+          "assertion_class": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string",
+            "description": "HTTP method + path, e.g. POST /payment/v1/cards. Empty string for DB/infra-only tests."
+          },
+          "curl_reference": {
+            "type": "string",
+            "description": "Minimal valid curl using {{FIX-xxx.fieldName}} scoped placeholders."
+          },
           "step_descriptions": {
             "type": "array",
             "description": "Propagated verbatim from sdet_plan.json for the matching scenario_id. Drives Given/When/Then @Step annotations in generated test code.",
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["step", "action", "expected_result"],
+              "required": [
+                "step",
+                "action",
+                "expected_result"
+              ],
               "properties": {
-                "step":            { "type": "integer", "minimum": 1 },
-                "action":          { "type": "string" },
-                "curl_reference":  { "type": ["string", "null"], "description": "Step-level curl, if different from scenario-level. null for non-HTTP steps." },
-                "expected_result": { "type": "string" }
+                "step": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "action": {
+                  "type": "string"
+                },
+                "curl_reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Step-level curl, if different from scenario-level. null for non-HTTP steps."
+                },
+                "expected_result": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -50,45 +120,98 @@
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["fixture_id", "description", "required_state"],
+              "required": [
+                "fixture_id",
+                "description",
+                "required_state"
+              ],
               "properties": {
-                "fixture_id":   { "type": "string", "description": "Format: FIX-{FEATURE}-{sequence}" },
-                "description":  { "type": "string" },
+                "fixture_id": {
+                  "type": "string",
+                  "description": "Format: FIX-{FEATURE}-{sequence}"
+                },
+                "description": {
+                  "type": "string"
+                },
                 "required_state": {
                   "type": "object",
                   "description": "TDP provisioning instruction. entity + category drive service dispatch.",
-                  "required": ["entity", "category"],
+                  "required": [
+                    "entity",
+                    "category"
+                  ],
                   "additionalProperties": false,
                   "properties": {
-                    "entity":   { "type": "string", "description": "CUSTOMER | DRIVER | BOOKING | MERCHANT | PAYMENT_INSTRUMENT | DB_INFRA" },
-                    "category": { "type": "string", "description": "Exact TDP catalog category name, e.g. CUSTOMER_WITH_WALLET. Maps to testDataCategory.testDataCategoryName." },
-                    "count":    { "type": "integer", "minimum": 1, "description": "Number of entities to provision. Maps to testDataCategory.count. Omit for DB_INFRA." },
-                    "config":   { "type": "object", "additionalProperties": true, "description": "Extra parameters merged into testDataCategory body, e.g. wallet_status, saved_card_type." }
+                    "entity": {
+                      "type": "string",
+                      "description": "CUSTOMER | DRIVER | BOOKING | MERCHANT | PAYMENT_INSTRUMENT | DB_INFRA"
+                    },
+                    "category": {
+                      "type": "string",
+                      "description": "Exact TDP catalog category name, e.g. CUSTOMER_WITH_WALLET. Maps to testDataCategory.testDataCategoryName."
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "description": "Number of entities to provision. Maps to testDataCategory.count. Omit for DB_INFRA."
+                    },
+                    "config": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "description": "Extra parameters merged into testDataCategory body, e.g. wallet_status, saved_card_type."
+                    }
                   }
                 },
                 "response_fields_used": {
                   "type": "array",
-                  "items": { "type": "string" },
+                  "items": {
+                    "type": "string"
+                  },
                   "description": "Canonical field names the test code calls .get() on. Set to [] by APG. TDG fills after catalog lookup."
                 },
                 "test_data_output": {
-                  "type": ["object", "null"],
-                  "default": null,
-                  "description": "Set to null by APG. TDG writes enrichment: test_data_status, test_data_details, test_buddy_prompt."
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "description": "Written by test-data-identification (additive). One record per scenario using this fixture, shaped as test_data_manifest.schema.json#/definitions/test_data_output. null when the fixture could not be identified. Sibling of required_state per the RFC contract — never nested under an 'output' wrapper.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
                 }
               }
             }
           },
-          "tags":            { "type": "array", "items": { "type": "string" } },
-          "environments":    { "type": "array", "items": { "type": "string" } },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "execution_hints": {
             "type": "object",
             "properties": {
-              "retry_count": { "type": "integer" },
-              "timeout_ms":  { "type": "integer" }
+              "retry_count": {
+                "type": "integer"
+              },
+              "timeout_ms": {
+                "type": "integer"
+              }
             }
           },
-          "jira_ids": { "type": "array", "items": { "type": "string" } }
+          "jira_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     }
