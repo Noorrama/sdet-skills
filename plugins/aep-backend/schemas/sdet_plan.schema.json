@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "sdet_plan",
-  "description": "Backend SDET test plan produced by the sdet-plan-generator skill. Versioned output \u2014 scenarios are never deleted, only deprecated.",
+  "description": "Backend SDET test plan produced by the sdet-plan-generator skill. Versioned output — scenarios are never deleted, only deprecated.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -31,7 +31,7 @@
     },
     "canonical_team_id": {
       "type": "string",
-      "description": "Stable team identifier resolved from team_registry.json. 'unknown' signals a registry miss \u2014 triggers a warning in qa_analysis.md and blocks downstream module path construction."
+      "description": "Stable team identifier resolved from team_registry.json. 'unknown' signals a registry miss — triggers a warning in qa_analysis.md and blocks downstream module path construction."
     },
     "code_module": {
       "type": [
@@ -145,7 +145,7 @@
           },
           "change_reason": {
             "type": "string",
-            "description": "One sentence \u2014 what changed and why. Set by retrigger and review modes."
+            "description": "One sentence — what changed and why. Set by retrigger and review modes."
           },
           "is_delta": {
             "type": "boolean",
@@ -175,7 +175,7 @@
                 "Story"
               ]
             },
-            "description": "BrowserStack TestType \u2014 multi-select. Collect ALL applicable values (additive, not first-match). Serialised as comma-separated in CSV."
+            "description": "BrowserStack TestType — multi-select. Collect ALL applicable values (additive, not first-match). Serialised as comma-separated in CSV."
           },
           "execution_mode": {
             "type": "string",
@@ -263,13 +263,6 @@
               "type": "string"
             }
           },
-          "existing_testcase_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Existing BrowserStack case ids (e.g. TC-302383) this scenario extends, replaces, or re-runs under a new flag state. From regression_context.json only \u2014 never invented. Rendered into the Preconditions block and consumed downstream for @TestInfo."
-          },
           "tags": {
             "type": "array",
             "items": {
@@ -279,7 +272,14 @@
           },
           "scenario_group": {
             "type": "string",
-            "description": "Key shared by scenarios resting on the same Arrange: identical precondition state and triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction \u2014 it applies to Manual scenarios too, where it marks cases a human tester can run back-to-back off one setup. Standalone scenarios get a unique key. Format: {feature_component}-{behaviour}. Downstream consumers decide how to use it."
+            "description": "Key shared by scenarios resting on the same Arrange: identical precondition state and triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction — it applies to Manual scenarios too, where it marks cases a human tester can run back-to-back off one setup. Standalone scenarios get a unique key. Format: {feature_component}-{behaviour}. Downstream consumers decide how to use it."
+          },
+          "existing_testcase_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Existing BrowserStack case ids (e.g. TC-302383) this scenario extends, replaces, or re-runs under a new flag state. From regression_context.json only — never invented. Rendered into the Preconditions block and consumed downstream for @TestInfo."
           }
         }
       }
@@ -323,7 +323,7 @@
         "llm_quality": {
           "type": "object",
           "additionalProperties": false,
-          "description": "LLM generation accuracy \u2014 populated at plan creation; updated after each Review run.",
+          "description": "LLM generation accuracy — populated at plan creation; updated after each Review run.",
           "required": [
             "auto_approved",
             "human_modified",
@@ -334,7 +334,7 @@
           "properties": {
             "auto_approved": {
               "type": "integer",
-              "description": "Scenarios not touched by any review round \u2014 LLM got them right"
+              "description": "Scenarios not touched by any review round — LLM got them right"
             },
             "human_modified": {
               "type": "integer",
@@ -342,11 +342,11 @@
             },
             "human_deprecated": {
               "type": "integer",
-              "description": "Scenarios LLM generated unnecessarily \u2014 duplicate or wrong (deprecated by human)"
+              "description": "Scenarios LLM generated unnecessarily — duplicate or wrong (deprecated by human)"
             },
             "human_added": {
               "type": "integer",
-              "description": "Scenarios LLM missed entirely \u2014 added from scratch by human via Review"
+              "description": "Scenarios LLM missed entirely — added from scratch by human via Review"
             },
             "llm_accuracy_pct": {
               "type": [
@@ -355,7 +355,7 @@
               ],
               "minimum": 0,
               "maximum": 100,
-              "description": "auto_approved / (auto_approved + human_modified + human_deprecated) \u00d7 100. null until first review round completes."
+              "description": "auto_approved / (auto_approved + human_modified + human_deprecated) × 100. null until first review round completes."
             },
             "review_rounds_completed": {
               "type": "integer",

@@ -128,7 +128,7 @@
               "properties": {
                 "fixture_id": {
                   "type": "string",
-                  "description": "Format: {sdet_plan fixture label}-{NN} \u2014 the equivalence-class label read from the scenario's preconditions 'Test data:' line, plus a two-digit instance ordinal, e.g. FX-SG-HOST-OWNER-01. The ordinal disambiguates independently addressable entities in the same state; use count for entities addressed as a set."
+                  "description": "Format: {sdet_plan fixture label}-{NN} — the equivalence-class label read from the scenario's preconditions 'Test data:' line, plus a two-digit instance ordinal, e.g. FX-SG-HOST-OWNER-01. The ordinal disambiguates independently addressable entities in the same state; use count for entities addressed as a set."
                 },
                 "description": {
                   "type": "string"
@@ -209,16 +209,16 @@
               "type": "string"
             }
           },
+          "scenario_group": {
+            "type": "string",
+            "description": "Propagated verbatim from sdet_plan.json. Groups entries into a shared test class and marks scenarios whose test_data repeats the same fixture_id values. Never a merge instruction — one scenario always yields one test method."
+          },
           "existing_testcase_ids": {
             "type": "array",
             "items": {
               "type": "string"
             },
             "description": "Union of existing_testcase_ids across the group's members, propagated verbatim from sdet_plan.json. Empty when regression_context.json was absent at plan time. Never invented here."
-          },
-          "scenario_group": {
-            "type": "string",
-            "description": "Propagated verbatim from sdet_plan.json. Groups entries into a shared test class and marks scenarios whose test_data repeats the same fixture_id values. Never a merge instruction \u2014 one scenario always yields one test method."
           },
           "parameterised_steps": {
             "type": [

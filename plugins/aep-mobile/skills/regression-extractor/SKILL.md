@@ -37,20 +37,25 @@ covering the two merchant apps gmt has no coverage for). Read
 (some modules exceed 3 MB — `nav_index/gmt/driverapp.json` alone is ~3.5 MB,
 roughly 900,000 tokens as plain text) must NEVER be opened with the Read
 tool.** Reading one of the larger files whole would consume most or all of
-the context window on a single lookup. Instead, shell out for a **targeted**
-extraction of just the module/id you need, e.g.:
+the context window on a single lookup.
+
+**Use `scripts/corpus_lookup.py`** for all targeted extractions — it loads the
+large file internally and prints only the matched record:
 ```
-python3 -c "import json; d=json.load(open('${CLAUDE_PLUGIN_ROOT}/config/nav_index/<repo>/<module>.json')); print(json.dumps(d['cases'].get('<case_number>')))"
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/corpus_lookup.py case <repo> <module> <case_number>
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/corpus_lookup.py deeplinks <repo> <module>
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/corpus_lookup.py project-map
 ```
 This costs the same handful of tokens (just the matched record) no matter
-how large the file is on disk. Same rule for `deeplinks.json` — it is
-repo-namespaced (`{"repos": {"gmt": {"modules": {...}}, "gtf": {"modules": {...}}}}`),
-so target `json.load(...)['repos']['<repo>']['modules'].get('<module>')` for
-the one repo+module in scope, never the whole file. TapMind's nav_index is a
-third sibling under the same `nav_index/` root (`nav_index/tapmind/<module>.json`),
-alongside `nav_index/gmt/` and `nav_index/gtf/`; its module→project map lives
-right alongside those files, at `config/nav_index/tapmind/project_map.json`
-(no `deeplinks.json` equivalent) — see the TapMind join step below.
+how large the file is on disk. **Do NOT use inline `python3 -c` one-liners or
+the Read tool** — `corpus_lookup.py` exists precisely to prevent accidental
+whole-file reads that blow the context window.
+
+TapMind's nav_index is a third sibling under the same `nav_index/` root
+(`nav_index/tapmind/<module>.json`), alongside `nav_index/gmt/` and
+`nav_index/gtf/`; its module→project map lives right alongside those files,
+at `config/nav_index/tapmind/project_map.json` (no `deeplinks.json`
+equivalent) — see the TapMind join step below.
 
 ### 1. Match Project and Execute BrowserStack Query (via MCP)
 - **Step 1a — resolve `app_id` to its module set FIRST, across all repos that cover it.** `app_id` (e.g. `gojek-consumer`, `gopay-consumer`) is a different vocabulary from any repo's own module names — they are not 1:1. Read `config/browserstack_project_map.json`'s **`app_id_to_modules`**: each entry has a `modules` array (gmt) and optionally sibling `gtf_modules` / `tapmind_modules` arrays — an app_id can be covered by more than one repo at once, and all present arrays must be resolved and queried, not just the first one found.
@@ -65,15 +70,15 @@ right alongside those files, at `config/nav_index/tapmind/project_map.json`
 - Establish connection to the **BrowserStack MCP Server** (relying on client-configured OAuth or credentials) only to fetch the live test-case inventory for the *resolved* project(s) — not to discover which project it is. Any app_id resolving to more than one project/module (across one or more repos) — query each and merge the results, tagging each `regression_tests[]` entry with the repo+module it came from.
 - **Fetch Folder Hierarchy (Optional):** If a `module_namespace` is provided and its folder id isn't already known from the map, query `listFolders` to find it.
 - **Fetch Test Cases:** Invoke the **`listTestCases`** tool with the resolved `project_identifier` (and folder ID if resolved), passing the extracted `feature_key` and `module_namespace` as filters/tags.
-- **Join to the repo for navigation and step quality.** For each returned case, strip the `C` prefix to get `case_number`, look it up in `config/nav_index/<repo>/<module>.json` (targeted lookup — see Step 0; `<repo>` is `gmt` or `gtf`, matching whichever repo resolved this module in 1a/1b). A match gives accurate `steps`/`navigation` from the repo; no match means the case is manual-only or not yet automated — keep BrowserStack's own steps and flag weak ones.
-- **Join to the TapMind corpus for automation steps (third source repo).** `tapmind-mobile-tests` is the NLP-framework automation repo; its checked-in nav_index is `config/nav_index/tapmind/` — a third sibling directory alongside `nav_index/gmt/` and `nav_index/gtf/` (namespaced per-repo, since its module names — `driverapp`, `gofood`, … — collide with gojek-mobile-tests). Its module→project map lives alongside those files, at `config/nav_index/tapmind/project_map.json`. For each returned case, look its `case_number` up in `config/nav_index/tapmind/<module>.json` with a **targeted** shell read (same rule as Step 0 — never load the file whole):
+- **Join to the repo for navigation and step quality.** For each returned case, strip the `C` prefix to get `case_number`, look it up via `corpus_lookup.py case <repo> <module> <case_number>` (`<repo>` is `gmt` or `gtf`, matching whichever repo resolved this module in 1a/1b). A match gives accurate `steps`/`navigation` from the repo; no match means the case is manual-only or not yet automated — keep BrowserStack's own steps and flag weak ones.
+- **Join to the TapMind corpus for automation steps (third source repo).** `tapmind-mobile-tests` is the NLP-framework automation repo; its checked-in nav_index is `config/nav_index/tapmind/` — a third sibling directory alongside `nav_index/gmt/` and `nav_index/gtf/` (namespaced per-repo, since its module names — `driverapp`, `gofood`, … — collide with gojek-mobile-tests). Its module→project map lives alongside those files, at `config/nav_index/tapmind/project_map.json`. For each returned case, look its `case_number` up via:
   ```
-  python3 -c "import json; d=json.load(open('${CLAUDE_PLUGIN_ROOT}/config/nav_index/tapmind/<module>.json')); print(json.dumps(d['cases'].get('<case_number>')))"
+  python3 ${CLAUDE_PLUGIN_ROOT}/scripts/corpus_lookup.py case tapmind <module> <case_number>
   ```
   A match gives the case's real, repo-verified TapMind step sequence (`tapmind_steps`: ordered `{kind, text}` — `login`/`toggle`/`deeplink`/`network`/`nlp`); copy it **verbatim** into that `regression_tests[]` entry's `tapmind_steps`. This is what the sdet-plan-generator reuses as a scenario's `automation_steps`. No match → omit `tapmind_steps` (many cases have a GMT/Cucumber test but no TapMind port yet — that is normal, never invent one). Note: TapMind also covers **merchant apps** (`gopaymerchant`, `gofoodmerchantapp`) that gmt has as `NO_COVERAGE` — for those app_ids, the TapMind corpus is the primary automation source, so still run this join (querying TapMind's own project ids 168/174 via BrowserStack) even when gmt's project map returned `NO_COVERAGE` and regardless of what gtf's `gtf_modules` entry (if any) turned up.
-- **Extract the module's deeplink dictionary (targeted, never the whole file).** The repo deeplink dictionary is the pipeline's PRIMARY navigation source — the downstream `sdet-plan-generator` uses it at rung 1 of its Navigation Resolution Ladder to reach a *new-feature* screen with a single `Open deeplink` step, before falling through to fragile UI walks. Surface it so the generator can. For each resolved repo+module in scope, shell out for just that module's entries (per Step 0's rule — do **not** Read `deeplinks.json` whole):
+- **Extract the module's deeplink dictionary (targeted, never the whole file).** The repo deeplink dictionary is the pipeline's PRIMARY navigation source — the downstream `sdet-plan-generator` uses it at rung 1 of its Navigation Resolution Ladder to reach a *new-feature* screen with a single `Open deeplink` step, before falling through to fragile UI walks. Surface it so the generator can. For each resolved repo+module in scope:
   ```
-  python3 -c "import json; d=json.load(open('${CLAUDE_PLUGIN_ROOT}/config/deeplinks.json')); m=d['repos'].get('<repo>',{}).get('modules',{}).get('<module>',{}); print(json.dumps({k:(v.get('android') or v.get('raw')) for k,v in m.items()}))"
+  python3 ${CLAUDE_PLUGIN_ROOT}/scripts/corpus_lookup.py deeplinks <repo> <module>
   ```
   Copy the result verbatim into `deeplink_dictionary` keyed by module (`{ "<module>": { "SCREEN_NAME": "<uri>" } }`) — when the same app_id resolves modules from both gmt and gtf, include both modules' dictionaries, keyed separately (do not merge two modules' entries under one key). Flatten each entry to its usable URI (`android`, else `raw`); never edit, complete, or invent a path. Include **all** of the module's entries, not only those matching existing cases — the generator needs the full dictionary to resolve *new* screens the feature introduces (e.g. a benefits page reached by `LOYALTY_REWARDS`) that no existing case covers. Omit `deeplink_dictionary` entirely if `deeplinks.json` is unreadable, and raise a `WORTH_CHECKING` note — never emit an empty object, which reads as "this module has no deeplinks".
 
@@ -118,7 +123,16 @@ write it with a `WORTH_CHECKING` note on `ENVIRONMENT`; never report an unvalida
 ## Guardrails
 - **No Hallucinations:** Only return test cases actually returned by the BrowserStack MCP tool. Never invent, complete, or "reconstruct" a test case, ID, title or step list.
 - **Distinguish zero results from no answer.** A query that ran and matched nothing → `[]` with `extraction_status: COMPLETE`. A query that could not run → `[]` **plus** `extraction_status: LIMITED` and a `NEEDS_ANSWER` note on `ENVIRONMENT`. Never emit a bare `[]` for a failed lookup: downstream that reads as "no existing coverage" and the SDET plan duplicates the entire existing suite.
-- **Connection failure → continue, flagged.** If the BrowserStack MCP server is unreachable or unauthorised, return `[]` with a `NEEDS_ANSWER` note: reason *"BrowserStack MCP unavailable — regression coverage was NOT checked"*, action *"configure the BrowserStack MCP server and re-run, or dedup manually"*.
+- **Connection failure → STOP, do not continue.** If the BrowserStack MCP server is unreachable or unauthorised, **do NOT write `regression_context.json`, do NOT continue generation, and do NOT fall through to "proceed without regression data."** Instead, stop immediately and tell the user:
+  > ⚠️ **BrowserStack MCP is not connected.**
+  >
+  > The regression-extractor requires a live connection to BrowserStack Test Management.
+  > Without it, new test cases will duplicate existing coverage — this is not recoverable
+  > after import.
+  >
+  > **Run `/aep-mobile:setup` to see the setup steps, then re-run.**
+  
+  This is a hard gate, not a soft warning. The risk of duplicating an entire regression suite into TMS is higher than the cost of pausing to connect.
 - **Project mapping failure → continue, flagged.** If a module cannot be resolved to a project via `config/browserstack_project_map.json` (not present in `consumer_super_app.folders`, `separate_projects`, or `gtf_source.separate_projects`, or present with `browserstack_project: null`), return `[]` for that module with a `NEEDS_ANSWER` note naming the repo+module and stating the map has no confirmed project id for it — but still resolve and query the app_id's *other* modules/repos (see Step 1a) rather than failing the whole run. Never guess a `PR-` id and never search all BrowserStack projects to find one.
 - **Never read `deeplinks.json` or a `nav_index/<repo>/<module>.json` file whole.** Always extract the single repo+module/case_number needed via a shell one-liner (Step 0). Some `nav_index` files exceed 3 MB; reading one directly can consume the entire context window for a single lookup.
 - **Secure Credentials:** Never attempt to prompt for, read, or print BrowserStack API tokens. All authorization is handled securely at the client-mcp level.

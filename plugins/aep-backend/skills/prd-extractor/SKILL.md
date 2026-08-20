@@ -17,6 +17,18 @@ The PRD document — path passed as an argument, or the latest PRD MD / Confluen
 ## Model
 Fast tier — Haiku. Escalate to a reasoning model when the PRD has an undecided design fork (option A/B), conflicting defaults, or a long comment thread that changes the body — i.e. exactly the cases QA cares about most.
 
+## Shared skill — provenance (required)
+
+**Before writing or refreshing any `prd_context.json`, read and follow**
+`${CLAUDE_PLUGIN_ROOT}/skills/common/provenance/SKILL.md` (phase-a-provenance) — the same shared skill the rfc-extractor uses. It owns the `provenance` stamp, dated run folders, the staleness check, re-extract, and the context diff. **Do not re-implement those rules here** — defer to it, so provenance logic is not duplicated across extractors.
+
+- **Stamp `provenance` on every write**, with `source_type: "prd"`, `extractor_skill: "prd-extractor"`, `status_at_extract` = the PRD readiness string (verbatim; `null` if the PRD states none), and `finalised_at_extract` = `true` only when that readiness clearly means approved/final, else `false`.
+- **Hash the extracted PRD text** (not the raw PDF/`.docx` binary) with `${CLAUDE_PLUGIN_ROOT}/skills/common/scripts/hash_source.py` and store it as `source_content_hash` (`sha256:…`, or `null` for a URL-only source you cannot fetch — then add a non-blocking `needs_clarification`).
+- **Write into a dated run folder** `qa-artifacts/{feature}/run-YYYY-MM-DD[THHMM]/prd_context.json`; do **not** overwrite a prior run. Set `prior_run` to the previous run path (or `null` on first extract).
+- When the user says the PRD was **updated / finalised** or asks whether the context is still valid: run the **staleness check first** (recompute hash / compare readiness), then re-extract into a **new** run and produce the **context diff** — never patch fields in place on the old JSON.
+
+`provenance` is the single, canonical source-metadata stamp — the source path, revision, hash, timestamp, and extractor version all live inside it (there are no separate flat `source_ref` / `source_document` / `extracted_at` / `extractor_version` fields).
+
 ## Extraction workflow (two passes)
 
 **Pass 1 — Read the whole PRD, extract nothing.** Build the map a tester needs:
@@ -32,8 +44,8 @@ Fast tier — Haiku. Escalate to a reasoning model when the PRD has an undecided
 
 | Section | What to capture | Where it maps |
 |---|---|---|
-| Metadata | Title, PRD id (slug if none), readiness, owner (NOT comment authors), team, source path | `title`, `id`, `readiness`, `owner`, `team`, `source_ref` |
-| Scope | Explicit in-scope and out-of-scope bullets, verbatim | `in_scope[]`, `out_of_scope[]` |
+| Metadata | Title, PRD id (slug if none), readiness, owner (NOT comment authors), team, source path | `title`, `id`, `readiness`, `owner`, `team`, `provenance.source_ref` |
+| Scope | Explicit in-scope and out-of-scope bullets, verbatim, as numbered `{id, item}` entries (1-based, contiguous) — same shape as the rfc-extractor | `in_scope[]`, `out_of_scope[]` |
 | **Personas & prereqs** | **User personas — distinct journeys/states, not teams.** Examples: "Fresh Lead" (new), "Existing User (Resigned)", "Deleted Account". Capture actor states/preconditions that branch the flow. | `personas[]`, `persona_prerequisites[]` |
 | Applicability | Service verticals (Food …) and country gating | `applicable_service_types[]`, `applicable_countries[]` |
 | End-to-end flow | **Multiple flows**: happy path, persona-specific paths, deviation paths (retry, fallback). Ordered steps (actor + action, numbered) showing where paths diverge. Failure/edge outcomes labeled by persona. | `user_flows[]` (name, trigger, steps[], failure_states[] with persona_ref) |
@@ -71,8 +83,8 @@ Fast tier — Haiku. Escalate to a reasoning model when the PRD has an undecided
 
 Root fields (see `schemas/prd_context.schema.json` for the authoritative shape). Required: `title`, `requirements`, `acceptance_criteria`, `needs_clarification` (arrays may be empty only after a genuine check).
 
-- `id`, `title` (required), `priority`, `readiness`, `owner`, `team[]`, `pdg[]`, `milestones[]`, `summary`, `source_ref`
-- `in_scope[]`, `out_of_scope[]`
+- `id`, `title` (required), `priority`, `readiness`, `owner`, `team[]`, `pdg[]`, `milestones[]`, `summary`, `provenance` (shared Phase A stamp — see "Shared skill — provenance"; holds source path/revision/hash/timestamp/extractor version)
+- `in_scope[]`, `out_of_scope[]` — numbered `{id, item}` objects (`id` 1-based, contiguous), matching the rfc-extractor's scope shape
 - **`user_flows[]`** — `name`, `trigger`, `steps[]` (required: `step`=integer, `actor`, `action`), `failure_states[]` (`name`, `outcome`, optional `persona_ref`)
 - `personas[]`, `persona_prerequisites[]`, `applicable_countries[]`, `applicable_service_types[]`, `rollout_plan`
 - `involved_teams[]` — `team`, `role`
