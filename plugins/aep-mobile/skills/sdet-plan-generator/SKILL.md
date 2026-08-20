@@ -73,30 +73,42 @@ what was not covered.
 6. **App agreement.** Every context loaded for the run must carry the same `app`. A mismatch
    means files for different apps were mixed — pick nothing, use the majority value, and raise a
    `NEEDS_ANSWER` note naming the conflicting files and values.
-7. **Team resolution — one team per plan.** Collect distinct `team_name` values across
-   `prd_context.business_requirements[]`. Requirements with no `team_name` are **shared** — they
-   stay in scope for every team's plan.
-   - **One team (or none)** → proceed; no prompt needed. If every requirement has the same
-     `team_name`, or none have one at all, there is nothing to disambiguate.
-   - **Two or more teams** → ask the QA via `AskUserQuestion`: *"PRD contains requirements from
-     N teams: [list]. Which team should this SDET plan cover?"* Options = the distinct team
-     names. Once selected:
-     - Filter `business_requirements[]` to keep only requirements where `team_name` matches the
-       selected team **or** `team_name` is absent (shared). Drop the rest — they belong to the
-       other team's plan run.
-     - Also filter `boundary_conditions[]` — keep only entries whose `req_id` traces to a
-       retained requirement.
-     - Suffix `feature_key` with the team slug (`save_group_go_food_order`) so two teams'
-       deliverables don't collide on import, same pattern as per-app suffixing.
-     - Stamp `team_name` into `feature_metadata`.
+7. **Team & milestone resolution — one team, one milestone per plan.** Collect distinct
+   `team_name` and `milestone` values across `prd_context.business_requirements[]`.
+   Requirements with no `team_name` are **shared** — they stay in scope for every team's plan.
+   Requirements with no `milestone` are **milestone-agnostic** — they stay in scope for every
+   milestone's plan.
+
+   **Detection:**
+   - Count distinct non-null `team_name` values and distinct non-null `milestone` values.
+   - If both have ≤1 distinct value → proceed; no prompt needed.
+   - If either (or both) have >1 distinct value → ask the QA via a single `AskUserQuestion`
+     call. Use one question per dimension that needs disambiguation (≤2 questions):
+     - Team question (if >1 team): *"PRD contains requirements from N teams: [list]. Which
+       team should this SDET plan cover?"* Options = the distinct team names.
+     - Milestone question (if >1 milestone): *"PRD spans N milestones: [list]. Which milestone
+       should this SDET plan cover?"* Options = the distinct milestone values.
+
+   **After selection, apply filters in order:**
+   1. **Team filter** (if a team was selected): keep only requirements where `team_name`
+      matches the selected team **or** `team_name` is absent (shared). Drop the rest.
+   2. **Milestone filter** (if a milestone was selected): from the surviving requirements, keep
+      only those where `milestone` matches the selected milestone **or** `milestone` is absent
+      (milestone-agnostic). Drop the rest.
+   3. **Boundary conditions**: filter `boundary_conditions[]` — keep only entries whose
+      `req_id` traces to a retained requirement.
+   4. **Feature key suffixing**: suffix `feature_key` with the team slug and/or milestone
+      (`save_group_food_m5`) so different runs' deliverables don't collide on import.
+   5. **Stamp** `team_name` and/or `milestone` into `feature_metadata`.
+
    - **RFC cross-check.** After team selection, if `rfc_context` is loaded, compare the RFC's
      scope (`affected_modules`, `affected_services`, or any team-scoped sections) against the
      selected team. If the RFC clearly scopes to a different team, emit a `WORTH_CHECKING` note:
      *"RFC scopes to [X] but selected team is [Y] — confirm the RFC applies to this team's
      plan."* If the RFC covers the selected team (or is team-agnostic), no note needed.
-   - **Headless fallback:** if no user is available to answer, generate for **all teams
-     combined** (no filtering) and add a `WORTH_CHECKING` note: *"PRD has N teams — generating a
-     combined plan; re-run interactively to scope to one team."*
+   - **Headless fallback:** if no user is available to answer, generate for **all teams and
+     milestones combined** (no filtering) and add a `WORTH_CHECKING` note: *"PRD has N teams
+     and/or M milestones — generating a combined plan; re-run interactively to scope."*
 8. **Shared requirements across apps.** When a source document covered several apps, items that
    apply to all of them carry the **same id in every file** (`req_id`, `risk_id`, `flag_key`,
    `endpoint`). Generate scenarios for them normally — they are in scope for this app too — and
@@ -358,6 +370,10 @@ Expand scenarios across:
         `LOYALTY_HOME`). Use the URI **verbatim** — never edit, complete, or invent a path; a screen
         the dictionary does not name is simply not resolved at this rung, fall through to rung 2.
      Found at any of a/b/c → the scenario opens with `Open deeplink "<uri>"`, no UI walk needed.
+     **The URI in the step must include the full app scheme** (`gojek://`, `gojekdriver://`,
+     `gopay://`, etc.) — never emit a bare path like `Open deeplink "/loyalty/catalogue"`.
+     Deep links from source (c) already carry the scheme; deep links from (a) and (b) may be
+     stored as paths — if so, prepend the app's `deeplink_scheme` from `config/<app>.json`.
      Tag the scenario's provenance as hook-resolved and cite the source (plan hook / rfc / repo
      deeplink dictionary); no note required, this is the ideal case. Only when **none** of the three
      names the screen does resolution fall through to rung 2.
@@ -731,7 +747,7 @@ A human-readable Markdown asset automatically generated for engineering leads de
 #### **Required Document Sections & Formatting**:
 
 1. **Meta Header:**
-   - Include clear, bold rows: **Feature Key**, **App**, **Team** (selected team from Preflight step 7, or "All teams" if single/none), **RFC (ID, Title, Status)**, **Analysis Date**, **SDET Plan File**, **Test Cases File**.
+   - Include clear, bold rows: **Feature Key**, **App**, **Team** (selected team from Preflight step 7, or "All teams" if single/none), **Milestone** (selected milestone, or "All milestones" if single/none), **RFC (ID, Title, Status)**, **Analysis Date**, **SDET Plan File**, **Test Cases File**.
 
 2. **Section 0: Selected Test Coverage Categories:**
    - A table mirroring `coverage_categories` with columns: `Category`, `Tier` (`Auto` / `Extra — feature-adjacent` / `Extra — fe_baseline`), `Selected?`, and `Why` (the field that fired, or why it was offered as an extra).
@@ -819,9 +835,13 @@ Flattened CSV strictly matching squad project template headers:
   `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes
   in user-friendly, non-technical language. **For boundary scenarios the assertion derives from
   `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker
-  rather than a guessed outcome.** When multiple actions share one observable outcome, the
-  earlier actions' expected results can be `—` (no assertion at that step) with the combined
-  assertion on the final action's line.
+  rather than a guessed outcome.** Every action step must have a corresponding verification —
+  a tester needs to know what to observe after each action, not just at the end. **Do NOT use
+  `—` (dash) as a placeholder for missing verifications.** If you cannot state what the tester
+  should observe after an action, that is a signal the action step is too granular or should be
+  merged with the next action. A sequence of 2+ consecutive `—` dashes in Expected Result is a
+  defect — restructure the steps so each action has a real observable outcome (e.g. "Verify
+  [screen/element] is visible", "Verify page loads", "Verify navigation succeeds").
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`. **Resolution precedence: (1) `prd.applicable_platforms` (PRD is the scope authority), (2) else `rfc.scope.target_platforms`, (3) else infer from `design`.** One platform → `"Android"`/`"iOS"`; more than one → `"Cross-Platform"`. If PRD and RFC conflict, use PRD and raise it as a `prd_vs_rfc_gap` — never silently prefer one.
 - `Country v2`: MUST be derived from `prd.applicable_countries` (map ISO code → name, e.g. `ID`→`"Indonesia"`, `SG`→`"Singapore"`, `VN`→`"Vietnam"`). Never pick a country the inputs do not list. If `applicable_countries` has one entry, every row uses that country.
