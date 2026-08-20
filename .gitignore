@@ -1,0 +1,7 @@
+# Python bytecode — plugins ship .py helpers (e.g. aep-mobile/scripts/), and
+# running them locally leaves __pycache__ beside the source.
+__pycache__/
+*.py[cod]
+
+# macOS finder metadata
+.DS_Store

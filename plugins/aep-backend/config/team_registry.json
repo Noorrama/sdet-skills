@@ -1,0 +1,518 @@
+{
+  "version": "2.0",
+  "updated_at": "2026-08-18",
+  "_comment": "One entry per test code module. PDG and POD values extracted from .gitlab-ci yml files in gojek-backend-tests. aliases.pdg = literal PDG values from yml. aliases.prd = names a product manager would write in a PRD. aliases.rfc = names an engineer would write in an RFC. Matching is case-insensitive, strips hyphens/underscores/spaces. pods[] is informational metadata — not used for alias matching. package_prefix follows com.gojek.{module} convention — verify with team before first use.",
+  "teams": [
+
+    {
+      "canonical_id": "transport",
+      "display_name": "Transport",
+      "aliases": {
+        "prd": ["Transport", "GoRide", "GoTrip", "Ride", "transport", "2W", "4W", "motorbike", "car"],
+        "rfc": ["Transport", "transport-team", "GoRide Backend", "GoTrip Platform"],
+        "pdg": ["Transport", "Transport PDG", "PDLC-Transport"]
+      },
+      "code": {
+        "module": "transport",
+        "package_prefix": "com.gojek.transport",
+        "regression_id_prefix": "TRANSPORT-"
+      },
+      "pods": ["Transport - 2W", "Transport - 4W", "Transport - SG", "Live Location", "Places", "Express-plus-plus"],
+      "browserstack_project": "transport-backend"
+    },
+
+    {
+      "canonical_id": "cartography",
+      "display_name": "Cartography",
+      "aliases": {
+        "prd": ["Cartography", "Maps", "Live Location", "Location", "Places"],
+        "rfc": ["Cartography", "cartography-team", "Maps Platform"],
+        "pdg": ["Cartography", "Cartography PDG"]
+      },
+      "code": {
+        "module": "cartography",
+        "package_prefix": "com.gojek.cartography",
+        "regression_id_prefix": "CARTO-"
+      },
+      "pods": ["Live Location", "Crowdsourcing"],
+      "browserstack_project": "cartography-backend"
+    },
+
+    {
+      "canonical_id": "marketplace",
+      "display_name": "Marketplace Fulfilment",
+      "aliases": {
+        "prd": ["Marketplace", "Fulfilment", "Matchmaking", "Supply", "Pooling", "marketplace-fulfilment"],
+        "rfc": ["Marketplace", "Marketplace-Fullfilment", "marketplace-team", "Fulfilment Platform"],
+        "pdg": ["Marketplace-Fullfilment", "Marketplace", "Marketplace PDG"]
+      },
+      "code": {
+        "module": "marketplace",
+        "package_prefix": "com.gojek.marketplace",
+        "regression_id_prefix": "MKTPLACE-"
+      },
+      "pods": ["Matchmaking", "Platform", "Pooling", "Supply", "SupplyTrackers", "MP Platform"],
+      "browserstack_project": "marketplace-backend"
+    },
+
+    {
+      "canonical_id": "driver-platform",
+      "display_name": "Driver Platform",
+      "aliases": {
+        "prd": ["Driver Platform", "Driver", "DriverPlatform", "Driver Fulfilment", "Onboarding"],
+        "rfc": ["Marketplace-DriverPlatform", "driver-platform", "Driver Platform", "DP"],
+        "pdg": ["Marketplace-DriverPlatform", "Marketplace - Driver Platform", "Marketplace-DriverPlatform PDG"]
+      },
+      "code": {
+        "module": "driver-platform",
+        "package_prefix": "com.gojek.driverplatform",
+        "regression_id_prefix": "DP-"
+      },
+      "pods": ["DP Overall", "Driver Fulfilment", "Onboarding and Experience", "Payouts"],
+      "browserstack_project": "driver-platform-backend"
+    },
+
+    {
+      "canonical_id": "driver-incentives",
+      "display_name": "Driver Incentives",
+      "aliases": {
+        "prd": ["Driver Incentives", "Incentives", "incentives"],
+        "rfc": ["Incentives", "driver-incentives", "Driver Incentives Platform"],
+        "pdg": ["Marketplace-DriverPlatform"]
+      },
+      "code": {
+        "module": "driver-incentives",
+        "package_prefix": "com.gojek.driverincentives",
+        "regression_id_prefix": "DINC-"
+      },
+      "pods": ["Incentives"],
+      "browserstack_project": "driver-incentives-backend"
+    },
+
+    {
+      "canonical_id": "pricing",
+      "display_name": "Pricing",
+      "aliases": {
+        "prd": ["Pricing", "pricing", "Fare", "fare-calculation"],
+        "rfc": ["Pricing", "pricing-team", "Pricing Platform"],
+        "pdg": ["Marketplace-Fullfilment"]
+      },
+      "code": {
+        "module": "pricing",
+        "package_prefix": "com.gojek.pricing",
+        "regression_id_prefix": "PRICING-"
+      },
+      "pods": ["Pricing", "Platform"],
+      "browserstack_project": "pricing-backend"
+    },
+
+    {
+      "canonical_id": "gofood",
+      "display_name": "GoFood Consumer",
+      "aliases": {
+        "prd": ["GoFood", "Food", "food", "Food Platform", "Food Ordering"],
+        "rfc": ["GoFood", "gofood-team", "Food Consumer", "Food Backend"],
+        "pdg": ["GoFood", "GoFood PDG"]
+      },
+      "code": {
+        "module": "gofood",
+        "package_prefix": "com.gojek.gofood",
+        "regression_id_prefix": "GOFOOD-"
+      },
+      "pods": ["Discovery", "Booking", "foodfulfillment", "Growth", "EXPANSION", "Group Order", "FOOD_FULFILMENT", "Rewards & Promotion"],
+      "browserstack_project": "gofood-backend"
+    },
+
+    {
+      "canonical_id": "courier",
+      "display_name": "GoFood Courier / Delivery",
+      "aliases": {
+        "prd": ["Courier", "Delivery", "Food Delivery", "GoFood Delivery"],
+        "rfc": ["Courier", "courier-team", "Food Delivery Platform"],
+        "pdg": ["GoFood"]
+      },
+      "code": {
+        "module": "courier",
+        "package_prefix": "com.gojek.courier",
+        "regression_id_prefix": "COURIER-"
+      },
+      "pods": ["Courier"],
+      "browserstack_project": "courier-backend"
+    },
+
+    {
+      "canonical_id": "merchant-platform",
+      "display_name": "GoFood Merchant Platform",
+      "aliases": {
+        "prd": ["Merchant Platform", "GoFood Merchant", "MX", "Merchant Experience", "Merchant Onboarding"],
+        "rfc": ["GoFood Merchant", "merchant-platform", "MX Platform", "Merchant Backend"],
+        "pdg": ["GoFood Merchant", "GoFood Merchant PDG"]
+      },
+      "code": {
+        "module": "merchant-platform",
+        "package_prefix": "com.gojek.merchantplatform",
+        "regression_id_prefix": "MX-"
+      },
+      "pods": ["IA - Hedwig Profile", "IA - Hedwig Onboarding", "IA - Hermes", "IA - GoBiz Backend", "IA - Saudagar", "IA - AuthZ Service", "IA - Platform Engg", "MX - Reporting", "MX - Open API (EIM)"],
+      "browserstack_project": "merchant-platform-backend"
+    },
+
+    {
+      "canonical_id": "gomart",
+      "display_name": "GoMart / Quick Commerce",
+      "aliases": {
+        "prd": ["GoMart", "Quick Commerce", "Qcommerce", "Q-Commerce", "Mart"],
+        "rfc": ["GoMart", "gomart-team", "Quick Commerce Backend"],
+        "pdg": ["Quick Commerce", "Quick Commerce PDG"]
+      },
+      "code": {
+        "module": "gomart",
+        "package_prefix": "com.gojek.gomart",
+        "regression_id_prefix": "GOMART-"
+      },
+      "pods": ["GoMart Backend"],
+      "browserstack_project": "gomart-backend"
+    },
+
+    {
+      "canonical_id": "gopay",
+      "display_name": "GoPay Consumer",
+      "aliases": {
+        "prd": ["GoPay", "gopay", "wallet", "Wallet", "GoPay Consumer", "Payments", "Payment"],
+        "rfc": ["GoPay", "gopay-team", "GoPay Consumer", "GoPay Backend"],
+        "pdg": ["GoPay", "GoPay PDG"]
+      },
+      "code": {
+        "module": "gopay",
+        "package_prefix": "com.gojek.gopay",
+        "regression_id_prefix": "GOPAY-"
+      },
+      "pods": ["UserSpends", "UserSpends - Bills&Pulsa", "UserSpends - Strategic Merchant", "UserSpends - Mini App", "MM Payment Financial Management", "MM Credit Platform", "MM Banking Investment", "MM Expense Management", "MM Payment Transfers", "Payments Transfer", "PX BE - QRIS Payments", "PX BE - Payment Integrations", "PCX - Growth Experience", "PCX - Trust & Safety", "DPI BE - AIPE", "Payments Tooling BE - Subscription Service"],
+      "browserstack_project": "gopay-backend"
+    },
+
+    {
+      "canonical_id": "iris",
+      "display_name": "GoPay IRIS",
+      "aliases": {
+        "prd": ["IRIS", "Iris", "iris"],
+        "rfc": ["IRIS", "iris-team", "GoPay IRIS"],
+        "pdg": ["GoPay"]
+      },
+      "code": {
+        "module": "iris",
+        "package_prefix": "com.gojek.iris",
+        "regression_id_prefix": "IRIS-"
+      },
+      "pods": ["IRIS"],
+      "browserstack_project": "iris-backend"
+    },
+
+    {
+      "canonical_id": "payment-core",
+      "display_name": "Payment Core",
+      "aliases": {
+        "prd": ["Payment Core", "payment-core", "Core Payments", "Payment Infrastructure"],
+        "rfc": ["Payment Core", "payment-core-team", "GoPay Payment Core"],
+        "pdg": ["GoPay", "GOPAY", "GoPay PDG"]
+      },
+      "code": {
+        "module": "payment-core",
+        "package_prefix": "com.gojek.paymentcore",
+        "regression_id_prefix": "PAYCORE-"
+      },
+      "pods": ["Payment Core"],
+      "browserstack_project": "payment-core-backend"
+    },
+
+    {
+      "canonical_id": "gopay-merchant",
+      "display_name": "GoPay Merchant Offline",
+      "aliases": {
+        "prd": ["GoPay Merchant", "Merchants Offline", "CMO", "Offline Merchants"],
+        "rfc": ["gopay-merchant", "GoPay Merchant", "Merchant Offline"],
+        "pdg": ["Merchants Offline", "Merchants Offline PDG"]
+      },
+      "code": {
+        "module": "gopay-merchant",
+        "package_prefix": "com.gojek.gopaymerchant",
+        "regression_id_prefix": "GPMERCH-"
+      },
+      "pods": ["CMO"],
+      "browserstack_project": "gopay-merchant-backend"
+    },
+
+    {
+      "canonical_id": "midtrans-core-api",
+      "display_name": "Midtrans Core API (Payment Acceptance)",
+      "aliases": {
+        "prd": ["Midtrans", "midtrans", "PX Merchant Payments", "Payment Acceptance", "CNP"],
+        "rfc": ["Midtrans Core API", "midtrans-core-api", "PX - Merchant Payments"],
+        "pdg": ["PX - Merchant Payments", "PX Merchant Payments PDG"]
+      },
+      "code": {
+        "module": "midtrans-core-api",
+        "package_prefix": "com.gojek.midtrans",
+        "regression_id_prefix": "MTRANS-"
+      },
+      "pods": ["CNP - Dragon", "CNP - ExBin", "CNP - ExPegasus", "CNP - Lestrade", "CNP - Nightingale", "CNP - PanApi", "CNP - Phoenix", "CP - Gayo", "CP - Giftcard Adapter", "CP - PAN API"],
+      "browserstack_project": "midtrans-core-api-backend"
+    },
+
+    {
+      "canonical_id": "midtrans-enterprise",
+      "display_name": "Midtrans Enterprise",
+      "aliases": {
+        "prd": ["Midtrans Enterprise", "Merchant Online", "Enterprise Payments", "Money Management"],
+        "rfc": ["midtrans-enterprise", "Merchant Online", "Merchant Service Online"],
+        "pdg": ["Merchant Online", "Merchant Service Online", "Merchant Online PDG"]
+      },
+      "code": {
+        "module": "midtrans-enterprise",
+        "package_prefix": "com.gojek.midtransenterprise",
+        "regression_id_prefix": "MENT-"
+      },
+      "pods": ["Merchant Enterprise", "CNP - Money_Management", "CNP - Checkout_Solution", "CNP - Operations"],
+      "browserstack_project": "midtrans-enterprise-backend"
+    },
+
+    {
+      "canonical_id": "gopaylater",
+      "display_name": "GoPay Later (BNPL)",
+      "aliases": {
+        "prd": ["GoPay Later", "gopaylater", "BNPL", "Buy Now Pay Later", "Cicilan", "Paylater"],
+        "rfc": ["GoPay Later", "gopaylater-team", "GoPayLater"],
+        "pdg": ["GoFin", "GoFin PDG"]
+      },
+      "code": {
+        "module": "gopaylater",
+        "package_prefix": "com.gojek.gopaylater",
+        "regression_id_prefix": "GPL-"
+      },
+      "pods": ["CL - Cash Loan", "CL - Cicilan", "CL - MAB Cicil", "CL - Akhir Bulan"],
+      "browserstack_project": "gopaylater-backend"
+    },
+
+    {
+      "canonical_id": "clloanplatform",
+      "display_name": "Cash Loan Platform",
+      "aliases": {
+        "prd": ["Cash Loan", "CL Platform", "Loan Platform", "clloanplatform"],
+        "rfc": ["clloanplatform", "Cash Loan Platform", "CL Loan Platform"],
+        "pdg": ["GoFin"]
+      },
+      "code": {
+        "module": "clloanplatform",
+        "package_prefix": "com.gojek.clloanplatform",
+        "regression_id_prefix": "CLLOAN-"
+      },
+      "pods": ["CL - Akhir Bulan"],
+      "browserstack_project": "clloan-backend"
+    },
+
+    {
+      "canonical_id": "gomodal",
+      "display_name": "GoModal (Business Loans)",
+      "aliases": {
+        "prd": ["GoModal", "Modal", "Business Loan", "SME Loan"],
+        "rfc": ["GoModal", "gomodal-team", "Modal Platform"],
+        "pdg": ["GoFin"]
+      },
+      "code": {
+        "module": "gomodal",
+        "package_prefix": "com.gojek.gomodal",
+        "regression_id_prefix": "MODAL-"
+      },
+      "pods": ["ML - GoModal"],
+      "browserstack_project": "gomodal-backend"
+    },
+
+    {
+      "canonical_id": "merchantlending",
+      "display_name": "Merchant Lending",
+      "aliases": {
+        "prd": ["Merchant Lending", "merchantlending", "Merchant Loan"],
+        "rfc": ["merchantlending", "Merchant Lending Platform", "ML Loan Platform"],
+        "pdg": ["GoFin"]
+      },
+      "code": {
+        "module": "merchantlending",
+        "package_prefix": "com.gojek.merchantlending",
+        "regression_id_prefix": "MLEND-"
+      },
+      "pods": ["ML - Loan Platform"],
+      "browserstack_project": "merchantlending-backend"
+    },
+
+    {
+      "canonical_id": "vehicle-financing",
+      "display_name": "Vehicle Financing / GTF Lending",
+      "aliases": {
+        "prd": ["Vehicle Financing", "vehiclefinancing", "Otomotif", "Auto Loan", "GTF Lending"],
+        "rfc": ["vehicle-financing", "Vehicle Financing", "GTF Lending", "LENDING_VEHICLE_FINANCING"],
+        "pdg": ["GoFin", "LENDING_VEHICLE_FINANCING"]
+      },
+      "code": {
+        "module": "vehicle-financing",
+        "package_prefix": "com.gojek.vehiclefinancing",
+        "regression_id_prefix": "VF-"
+      },
+      "pods": ["GTF Lending"],
+      "browserstack_project": "vehicle-financing-backend"
+    },
+
+    {
+      "canonical_id": "go-sure",
+      "display_name": "GoSure (Insurance)",
+      "aliases": {
+        "prd": ["GoSure", "Insurance", "go-sure", "GoInsurance"],
+        "rfc": ["GoSure", "go-sure-team", "Insurance Platform"],
+        "pdg": ["GoFin"]
+      },
+      "code": {
+        "module": "go-sure",
+        "package_prefix": "com.gojek.gosure",
+        "regression_id_prefix": "GOSURE-"
+      },
+      "pods": ["Insurance - Policy Event Orchestrator", "Insurance - Product Catalogue Service", "Insurance - Claims Service", "Insurance - BFF Service"],
+      "browserstack_project": "go-sure-backend"
+    },
+
+    {
+      "canonical_id": "crypto",
+      "display_name": "GoTo Crypto",
+      "aliases": {
+        "prd": ["Crypto", "GTF Crypto", "GoTo Crypto", "crypto"],
+        "rfc": ["Crypto", "crypto-team", "GTF - Crypto"],
+        "pdg": ["GTF - Crypto", "GTF Crypto PDG"]
+      },
+      "code": {
+        "module": "crypto",
+        "package_prefix": "com.gojek.crypto",
+        "regression_id_prefix": "CRYPTO-"
+      },
+      "pods": ["Crypto Backend"],
+      "browserstack_project": "crypto-backend"
+    },
+
+    {
+      "canonical_id": "go-logistics",
+      "display_name": "GoSend / Logistics",
+      "aliases": {
+        "prd": ["GoSend", "Logistics", "CEG", "go-logistics", "Last Mile"],
+        "rfc": ["go-logistics", "Logistics Platform", "GoSend Backend"],
+        "pdg": ["Logistics", "Logistics PDG"]
+      },
+      "code": {
+        "module": "go-logistics",
+        "package_prefix": "com.gojek.gologistics",
+        "regression_id_prefix": "LOG-"
+      },
+      "pods": ["CEG-GoSend", "CEG-Kilat", "CEG-GoBox", "GoShop"],
+      "browserstack_project": "go-logistics-backend"
+    },
+
+    {
+      "canonical_id": "gtl",
+      "display_name": "GoTo Logistics (GTL)",
+      "aliases": {
+        "prd": ["GTL", "GoTo Logistics", "Partner Engagement", "PEG"],
+        "rfc": ["GTL", "gtl-team", "GoTo Logistics"],
+        "pdg": ["GoTo Logistics", "GoTo Logistics PDG"]
+      },
+      "code": {
+        "module": "gtl",
+        "package_prefix": "com.gojek.gtl",
+        "regression_id_prefix": "GTL-"
+      },
+      "pods": ["Partner engagement and growth (PEG)"],
+      "browserstack_project": "gtl-backend"
+    },
+
+    {
+      "canonical_id": "care-platform",
+      "display_name": "Care Platform",
+      "aliases": {
+        "prd": ["Care", "Care Platform", "Gocare", "Customer Care", "Support"],
+        "rfc": ["Care Platform", "care-platform-team", "Gocare"],
+        "pdg": ["Care Platform", "Care Platform PDG"]
+      },
+      "code": {
+        "module": "care-platform",
+        "package_prefix": "com.gojek.careplatform",
+        "regression_id_prefix": "CARE-"
+      },
+      "pods": ["Gocare"],
+      "browserstack_project": "care-platform-backend"
+    },
+
+    {
+      "canonical_id": "helpcenter",
+      "display_name": "Help Center",
+      "aliases": {
+        "prd": ["Help Center", "Help Experience", "HelpCenter", "FAQ"],
+        "rfc": ["helpcenter", "Help Center", "Help Experience"],
+        "pdg": ["Care Platform"]
+      },
+      "code": {
+        "module": "helpcenter",
+        "package_prefix": "com.gojek.helpcenter",
+        "regression_id_prefix": "HELP-"
+      },
+      "pods": ["Help Experience"],
+      "browserstack_project": "helpcenter-backend"
+    },
+
+    {
+      "canonical_id": "icp",
+      "display_name": "ICP / Identity & Communication Platform",
+      "aliases": {
+        "prd": ["ICP", "Identity", "Communication Platform", "Notifications", "Auth"],
+        "rfc": ["ICP", "icp-team", "Identity Platform", "Communication Platform"],
+        "pdg": ["ICP", "Communication Platform", "ICP PDG", "Identity Platform"]
+      },
+      "code": {
+        "module": "icp",
+        "package_prefix": "com.gojek.icp",
+        "regression_id_prefix": "ICP-"
+      },
+      "pods": ["Identity", "Communication Experience"],
+      "browserstack_project": "icp-backend"
+    },
+
+    {
+      "canonical_id": "customer-platforms",
+      "display_name": "Customer Platform",
+      "aliases": {
+        "prd": ["Customer Platform", "CP", "Loyalty", "Argon", "Shield", "Subscription", "Rewards"],
+        "rfc": ["customer-platforms", "Customer Platform", "CP Platform"],
+        "pdg": ["Customer Platform", "Rewards & Promotion", "Customer Platform PDG"]
+      },
+      "code": {
+        "module": "customer-platforms",
+        "package_prefix": "com.gojek.customerplatforms",
+        "regression_id_prefix": "CP-"
+      },
+      "pods": ["CP - Loyalty", "Argon", "Shield", "Rewards & Promotion"],
+      "browserstack_project": "customer-platforms-backend"
+    },
+
+    {
+      "canonical_id": "app-platform",
+      "display_name": "Ads & Promo Platform",
+      "aliases": {
+        "prd": ["App Platform", "Ads", "AdsTech", "PromoTech", "Promo Platform", "DSP", "Demand Side"],
+        "rfc": ["app-platform", "Ads Platform", "Ads and Promo Platform", "AdsTech"],
+        "pdg": ["Ads and Promo Platform", "Ads and Promo Platform PDG"]
+      },
+      "code": {
+        "module": "app-platform",
+        "package_prefix": "com.gojek.appplatform",
+        "regression_id_prefix": "APP-"
+      },
+      "pods": ["AdsTech", "PromoTech", "Demand Side Platform", "Supply"],
+      "browserstack_project": "app-platform-backend"
+    }
+
+  ]
+}

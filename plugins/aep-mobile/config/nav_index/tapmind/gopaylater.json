@@ -1,0 +1,717 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "gopaylater",
+    "case_ids_indexed": 14,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "TC-486981": [
+      {
+        "module": "gopaylater",
+        "title": "Verify successfully see GPL homepage for blocked user",
+        "method": "verifyNormalAccountOnHomePage",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/homepage/HomePage.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8218973858)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Rp' balance label at the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify GoPay Later is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Go to GoPay Later homepage' button if visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gopaystaging://paylater/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Total limit should be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Primary limit & QRIS limit should be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify yellow blocked banner with text 'Your GoPay Later is blocked' is not visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-486982": [
+      {
+        "module": "gopaylater",
+        "title": "Verify successfully see GPL homepage for overdue user",
+        "method": "verifyBlockedAccountOnHomePage",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/homepage/HomePage.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(82244668827)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Rp' balance label at the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify GoPay Later is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Go to GoPay Later homepage' button if visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gopaystaging://paylater/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Total limit should be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Primary limit & QRIS limit should be visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-486984": [
+      {
+        "module": "gopaylater",
+        "title": null,
+        "method": "verifyOverdueAccountOnHomePage",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/homepage/HomePage.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8241397169)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Rp' balance label at the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify GoPay Later is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Go to GoPay Later homepage' button if visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gopaystaging://paylater/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Total limit should be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Primary limit & QRIS limit should be visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-412789": [
+      {
+        "module": "gopaylater",
+        "title": "Validate the GoPayLater entry point for an overdue account user on GoPay Wallet",
+        "method": "verifyEntryPointForClosedAccountUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoPayWalletTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8286151327)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Rp' balance label at the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify GoPay Later is not visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-412794": [
+      {
+        "module": "gopaylater",
+        "title": "Validate the GoPayLater entry point for an blocked account user on GoPay Wallet",
+        "method": "verifyEntryPointForOverdueAccountUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoPayWalletTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8241397169)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Rp' balance label at the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify GoPay Later is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Overdue is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Go to GoPay Later homepage' button if visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gopaystaging://paylater/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Repay button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Total limit should be visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-412792": [
+      {
+        "module": "gopaylater",
+        "title": "Validate the GoPayLater entry point for an normal account user on GoPay Wallet",
+        "method": "verifyEntryPointBlockedAccountUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoPayWalletTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(82244668827)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Rp' balance label at the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify GoPay Later is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Blocked is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Go to GoPay Later homepage' button if visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gopaystaging://paylater/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Your GoPay Later is blocked text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Total limit should be visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-412793": [
+      {
+        "module": "gopaylater",
+        "title": null,
+        "method": "verifyEntryPointForNormalAccountUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoPayWalletTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8218973858)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 'Rp' balance label at the top left"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify GoPay Later is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Limit:Rp is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Go to GoPay Later homepage' button if visible"
+          },
+          {
+            "kind": "deeplink",
+            "text": "gopaystaging://paylater/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Total limit should be visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-445765": [
+      {
+        "module": "gopaylater",
+        "title": "Validate the GoPayLater entry point for an overdue account user on GoTagihan",
+        "method": "verifyEntryPointForClosedAccountUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoTagihanTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8286151327)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on View all"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Others"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on PayLater & Pinjam"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPay Later' header is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Your GoPay Later is deactivated text is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      },
+      {
+        "module": "gopaylater",
+        "title": null,
+        "method": "verifyEntryPointGoTagihanSearchWithClosedUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoTagihanTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8286151327)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on View all"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Others"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type Gopaylater in the search textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until 'GoPay Later' is visible for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'GoPay Later' header is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Your GoPay Later is deactivated text is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-412786": [
+      {
+        "module": "gopaylater",
+        "title": "Verify Gopaylater normal user on GoTagihan entry point",
+        "method": "verifyEntryPointForOverdueAccountUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoTagihanTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8241397169)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on View all"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Others"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on PayLater & Pinjam"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Your dues is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Overdue since 1 Jun is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-412790": [
+      {
+        "module": "gopaylater",
+        "title": "Verify Gopaylater blocked user on GoTagihan entry point",
+        "method": "verifyEntryPointForNormalUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoTagihanTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8218973858)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on View all"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Others"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on PayLater & Pinjam"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Your dues is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-412788": [
+      {
+        "module": "gopaylater",
+        "title": "Verify Gopaylater normal user on GoTagihan Search entry point",
+        "method": "verifyEntryPointForBlockedUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoTagihanTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(82244668827)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on View all"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Others"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on PayLater & Pinjam"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Your dues is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-445763": [
+      {
+        "module": "gopaylater",
+        "title": "Verify Gopaylater blocked user on GoTagihan Search entry point",
+        "method": "verifyEntryPointGoTagihanSearchWithNormalUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoTagihanTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8218973858)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on View all"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Others"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type Gopaylater in the search textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until 'GoPay Later' is visible for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Your dues is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-445762": [
+      {
+        "module": "gopaylater",
+        "title": "Verify Gopaylater overdue user on GoTagihan Search entry point",
+        "method": "verifyEntryPointGoTagihanSearchWithBlockedUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoTagihanTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(82244668827)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on View all"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Others"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type Gopaylater in the search textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until 'GoPay Later' is visible for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Your dues is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-445764": [
+      {
+        "module": "gopaylater",
+        "title": "Verify Gopaylater closed user on GoTagihan Search entry point",
+        "method": "verifyEntryPointGoTagihanSearchWithOverdueUser",
+        "source_file": "gopaylater/src/test/java/com.gopaylater/tests/entrypoint/EntryPointGoTagihanTest.java",
+        "project_id": "PR-178",
+        "suite_id": "39945442",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(8241397169)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on View all"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Others"
+          },
+          {
+            "kind": "nlp",
+            "text": "Type Gopaylater in the search textbox"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait until 'GoPay Later' is visible for 30 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on GoPay Later"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Your dues is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that Overdue since 1 Jun is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

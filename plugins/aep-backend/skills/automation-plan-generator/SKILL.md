@@ -1,6 +1,6 @@
 ---
 name: backend-automation-plan-generator
-description: Generate the automation plan from an approved sdet_plan.json. Outputs automation_plan.json with test class names, package paths, fixture IDs, required state per scenario, and curl references with fixture-scoped placeholders. response_fields_used[] is left empty — populated by test-data-generator after catalog lookup. Structural contract consumed by both test-data-generator and test-code-generator. Requires human review before code generation begins.
+description: Generate the automation plan from an approved sdet_plan.json. Outputs automation_plan.json as a flat list of automation_scenarios — one object per test scenario — with test class, package, method name, fixture IDs, required state, and curl references with fixture-scoped placeholders. response_fields_used[] and test_data_output are left null/empty for TDG to fill. Structural contract consumed by both test-data-generator and test-code-generator. Requires human review before code generation begins.
 ---
 
 # Backend Automation Plan Generator
@@ -11,68 +11,118 @@ Bridge between *what to test* (SDET plan) and *how to implement it* (test code +
 
 | File | Purpose |
 |---|---|
-| `sdet_plan.json` (approved) | Human-reviewed output from sdet-plan-generator |
-| `tasks_context.json` | Package/class naming conventions and component boundaries |
-| `code_change_context.json` | `curl_reference` construction from actual endpoint signatures |
-| `regression_context.json` | Existing class naming patterns for consistency |
+| `sdet_plan.json` (approved) | Human-reviewed output from sdet-plan-generator. Source of scenario_id, source_ref, is_legacy_regression, description, preconditions, test_layer, tags, priority. Also read `canonical_team_id` and `code_module` (root fields) — these are resolved by the team registry and must not be re-derived here. |
+| `tasks_context.json` | Package/class naming conventions, component boundaries, api_contract, service_name, target_framework. |
+| `code_change_context.json` | `curl_reference` construction from actual endpoint signatures. |
+| `regression_context.json` | Existing class naming patterns for consistency. |
 
 ## Model
 Fast tier — Haiku
 
-## Per scenario (where `is_dedup = false`), generate
+## Per scenario (where `is_dedup = false`), generate one object in `automation_scenarios[]`
 
 | Field | Details |
 |---|---|
-| Test class assignment | Based on `test_layer` + feature/component grouping from tasks_context + existing regression naming patterns |
-| Package path | Fully qualified Java package (e.g., `com.gojek.payments.test.component`) |
-| Method name | `should[ExpectedOutcome]When[Condition]` — Java-valid camelCase. Append suffix if collision within class. |
-| `curl_reference` | Minimal valid curl from code_change_context or tasks_context api_contract. Use fixture-scoped placeholders: `{{FIX-xxx.fieldName}}` — e.g. `{{FIX-CARDPAY-001.bearerToken}}`, `{{FIX-CARDPAY-002.savedCardNumber}}`. Placeholder field names are **candidates** — TDG confirms and corrects them against the catalog response schema. |
-| `fixture_ids[]` | Format: `FIX-{feature}-{sequence}`. One entry per independently provisioned entity. Group scenarios sharing the same system state under one fixture_id. A scenario needing customer + driver = two entries. |
+| `scenario_id` | From sdet_plan.json |
+| `requirement_ref` | From sdet_plan.json `source_ref`, e.g. `RFC-78:step-9 / REQ-001 / AC-001` |
+| `description` | From sdet_plan.json `name` |
+| `is_legacy_regression` | From sdet_plan.json |
+| `is_dedup` | `false` — dedup scenarios are skipped entirely |
+| `target_framework` | From tasks_context.json, e.g. `GBT` |
+| `service_name` | From tasks_context.json component field |
+| `module` | **From `sdet_plan.json` root field `code_module`** (resolved by team_registry — use verbatim). If `code_module` is `null` or `"unknown"` in sdet_plan, flag an error and halt: *"code_module is unresolved in sdet_plan.json — add team alias to config/team_registry.json and re-run sdet-plan-generator."* Do not fall back to tasks_context for the module name. |
+| `package` | `{sdet_plan.code_module}.test.{test_layer}.{feature_component}` — substitute `code_module` verbatim; use `tasks_context` for `feature_component` (feature/domain grouping within the module). Example: `transport.test.component.pickup` |
+| `test_class` | Class name based on `test_layer` + feature/component grouping. Group related scenarios — not one class per scenario. e.g. `SaveCardComponentTest`, `SaveCardIntegrationTest`, `CardRepositoryIntegrationTest` |
+| `test_layer` | From sdet_plan.json: `component` \| `integration` \| `e2e` |
+| `method_name` | `should[ExpectedOutcome]When[Condition]` — Java-valid camelCase. Append suffix if collision within class. |
+| `assertion_class` | Derived from test_class, e.g. `SaveCardAssertions`, `CardRepositoryAssertions` |
+| `endpoint` | HTTP method + path from tasks_context api_contract, e.g. `POST /payment/v1/cards`. Empty string for DB/infra-only tests (no HTTP call). |
+| `curl_reference` | Minimal valid curl from code_change_context or tasks_context api_contract. Use fixture-scoped placeholders: `{{FIX-xxx.fieldName}}` — e.g. `{{FIX-CARDPAY-001.bearerToken}}`, `{{FIX-CARDPAY-002.savedCardNumber}}`. Placeholder field names are **candidates** — TDG confirms and corrects them against the catalog response schema. Empty string for DB/infra-only tests. |
+| `step_descriptions[]` | **Propagated verbatim** from sdet_plan.json for the matching `scenario_id`. Copy all steps as-is — do not rewrite or summarise. test-code-generator uses these to build `@Step` annotations and assertions; without them it cannot write correct Given/When/Then. |
+| `test_data[]` | One entry per independently provisioned entity needed by this scenario. See fixture guidance below. |
+| `tags` | From sdet_plan.json tags + priority, e.g. `["negative", "P0"]` |
+| `environments` | From tasks_context.json environments or default `["dev-cluster", "staging-cluster"]` |
+| `execution_hints` | Default `{"retry_count": 2, "timeout_ms": 15000}`. Use `30000` for DB/infra tests, `60000` for performance tests. |
+| `jira_ids` | Empty array `[]` unless tasks_context has JIRA references |
 
-## Fixtures summary — per unique fixture_id, generate
+## test_data[] — per fixture entry in each scenario
 
-Each fixture_id that appears in any method's `fixture_ids[]` must have exactly one entry in `fixtures_summary[]`.
+Each scenario's `test_data[]` contains one entry per independently provisioned entity.
 
 | Field | Details |
 |---|---|
-| `fixture_id` | Matches the ID used in methods |
-| `description` | Human-readable: what entity, what state |
-| `used_by_scenarios[]` | All scenario_ids that reference this fixture |
-| `required_state.entity` | Domain the test data service owns: `CUSTOMER` \| `DRIVER` \| `BOOKING` \| `MERCHANT` \| `PAYMENT_INSTRUMENT` \| `DB_INFRA`. Maps to `testDataEntity` in the service request. Use `DB_INFRA` for Testcontainers / migration fixtures not provisioned by the test data service. |
-| `required_state.category` | Exact category name from the test data service catalog (e.g. `CUSTOMER_WITH_GOPAY`, `DRIVER_4W_ONLINE`). Maps to `testDataCategory.testDataCategoryName`. For `DB_INFRA`: the infra type (e.g. `TESTCONTAINERS_POSTGRESQL`). |
+| `fixture_id` | Format: `FIX-{FEATURE}-{sequence}`. One ID per distinct system state. Scenarios requiring the same precondition state use the same fixture_id (same ID repeated across scenarios). |
+| `description` | Human-readable: what entity, what state — e.g. "Verified customer CX-001 with valid Bearer token; card not previously saved" |
+| `required_state.entity` | Domain the test data service owns: `CUSTOMER` \| `DRIVER` \| `BOOKING` \| `MERCHANT` \| `PAYMENT_INSTRUMENT` \| `DB_INFRA`. Maps to `testDataEntity` in the service request. Use `DB_INFRA` for Testcontainers / migration fixtures. |
+| `required_state.category` | Exact category name from the test data service catalog (e.g. `CUSTOMER_WITH_WALLET`, `CUSTOMER_WITH_SAVED_CARD`). Maps to `testDataCategory.testDataCategoryName`. For `DB_INFRA`: the infra type (e.g. `TESTCONTAINERS_POSTGRESQL`). |
 | `required_state.count` | Number of entities to provision. Maps to `testDataCategory.count`. Default `1`. Omit for `DB_INFRA`. |
-| `required_state.config` | Additional parameters for this category (e.g. `wallet_balance_idr`, `service_area_id`). Merged into the `testDataCategory` request body. |
-| `response_fields_used[]` | Set to `[]`. **Do not populate here.** TDG looks up the TDP catalog response schema for this entity + category and fills in the confirmed field names. |
-| `output` | Set to `null`. TDG writes enrichment here after catalog lookup: `test_data_status`, `test_data_operations[]`, `test_buddy_prompt`. Code generator reads `output.test_data_status` to select the provisioning strategy. |
+| `required_state.config` | Additional parameters for this category (e.g. `wallet_status`, `saved_card_type`). Merged into the `testDataCategory` request body. |
+| `response_fields_used` | Set to `[]`. **Do not populate here.** TDG looks up the TDP catalog response schema and fills confirmed field names. |
+| `test_data_output` | Set to `null`. TDG writes enrichment here: `test_data_status`, `test_data_details.test_data_operations[]`, `test_buddy_prompt`. |
+
+### How to identify fixtures from the full scenario context
+
+Read all four fields of each scenario from sdet_plan.json — not just preconditions:
+
+| Field | What it contributes to fixture identification |
+|---|---|
+| `preconditions[]` | Prerequisite entities that must exist before the test runs — customer, driver, merchant, account |
+| `step_descriptions[].action` | Transactional records that must be set up or operated on — "3 completed bookings", "10 past transactions" |
+| `step_descriptions[].expected_result` | What data must be present to assert against — "returns list of 3 bookings with fare, distance" signals 3 booking records are needed |
+| `name` / `description` | Intent signals — words like "history", "statement", "summary", "list" indicate records are the core test data, not just a precondition |
+
+For each entity identified, ask two questions:
+1. *"Does this need to exist for test setup?"* (customer, driver) → goes into `test_data[]`
+2. *"Does this need to exist to be asserted against?"* (past bookings, transaction history) → also goes into `test_data[]`
+
+Both types need provisioning. The difference shows up in `category` and `count` — not in whether they appear in `test_data[]`.
+
+**Example — history scenario:**
+```
+preconditions:  "Customer CX-001 with valid token", "Driver DRV-001 active",
+                "3 completed bookings exist for CX-001 with DRV-001"
+expected_result: "returns array of 3 bookings with fare, distance, driver_name"
+```
+→ Three fixtures: CUSTOMER (setup), DRIVER (setup), BOOKING count=3 (the actual test data being asserted)
+
+**Example — card save scenario (no transactional records):**
+```
+preconditions:  "Customer CX-001 with wallet, card not previously saved"
+expected_result: "returns 200 with token"
+```
+→ One fixture: CUSTOMER (setup only — no prior records needed)
+
+**Grouping rule:** Same entity + same required state across scenarios → same `fixture_id` (reuse it).
+Different state → new `fixture_id`. DB/infra setup → `entity: DB_INFRA`.
+
+Assign `FIX-{FEATURE_PREFIX}-{sequence}` IDs ordered by first appearance across all scenarios.
 
 ### Single-call boundary rule
 
 One `fixture_id` = one call to the test data service at test runtime.
-- If a scenario needs a customer AND a driver independently → two fixture_ids → two calls.
-- If the test data service has a composite entity (e.g. `BOOKING` that provisions customer + driver + booking state together) → one fixture_id → one call → response includes fields from all sub-entities.
-- Mock stubs (`mock_setup`) are never fixture_ids — they are WireMock/infra setup, not test data service calls.
+- If a scenario needs a customer AND a driver independently → two entries in `test_data[]` → two calls.
+- If the test data service has a composite entity → one entry → one call → response includes all sub-entity fields.
+- Mock stubs (WireMock) are never in `test_data[]` — they are infra setup, not test data service calls.
 
 ## Output → automation_plan.json
 
 Schema root structure:
-- `feature_name`, `plan_version`
-- `test_classes[]` — each with `class_name`, `package`, `test_layer`, `methods[]`
-  - Each method: `method_name`, `scenario_id`, `is_dedup`, `curl_reference`, `fixture_ids[]`, `tags[]`
-- `fixtures_summary[]` — `fixture_id`, `description`, `used_by_scenarios[]`, `required_state{entity, category, count, config}`, `response_fields_used[]`, `output` (null — written by TDG)
+- `epic_id` — from tasks_context epics[0].id
+- `automation_scenarios[]` — flat list, one object per non-dedup scenario, with all fields above
 
 ## Guardrails
-- Group scenarios into test classes by `(test_layer + feature_component)` — not one class per scenario.
-- Skip methods where `is_dedup: true`.
+- Skip scenarios where `is_dedup: true` — do not generate an automation_scenario entry for them.
+- `test_class` groups related scenarios — not one class per scenario. Group by `(test_layer + feature_component)`.
 - If endpoint not in code_change_context, use tasks_context api_contract. If neither has it, flag it.
 - `required_state` must use the structured `{entity, category, count, config}` shape — no prose strings.
-- `response_fields_used` must be `[]` for every fixture — TDG populates this after catalog lookup. Pre-filling it here is a generation error.
-- `output` must be `null` for every fixture — TDG writes to it. Pre-filling it here is a generation error.
+- `response_fields_used` must be `[]` for every fixture — TDG populates after catalog lookup. Pre-filling is a generation error.
+- `test_data_output` must be `null` for every fixture — TDG writes to it. Pre-filling is a generation error.
 - `curl_reference` placeholder field names (e.g. `{{FIX-CARDPAY-001.bearerToken}}`) are candidates derived from context — TDG validates and corrects them.
-- `curl_reference` must use fixture-scoped `{{FIX-xxx.field}}` placeholders — never unscoped `{token}` — so TDG and code-generator can resolve which fixture each field belongs to.
-- Share a `fixture_id` across scenarios requiring identical system state — test data service provisions once and reuses.
+- `curl_reference` must use fixture-scoped `{{FIX-xxx.field}}` placeholders — never unscoped `{token}`.
+- `endpoint` and `curl_reference` must be empty string `""` for DB/infra-only tests (no HTTP call).
 
 ## Validate
 `jsonschema.validate(output, schemas/automation_plan.schema.json)`
 
 ## Log
-N test classes, N methods, N fixtures, N scenarios skipped (dedup).
+N scenarios generated, N skipped (dedup), N unique fixture_ids across all scenarios.

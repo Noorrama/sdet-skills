@@ -1,0 +1,203 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "gomart",
+    "case_ids_indexed": 7,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "5088182": [
+      {
+        "module": "gomart",
+        "title": "Verify that the category listing page displays the correct empty state when no items are available",
+        "method": "verifyGoMartCategoryPageAndRedirectionEN",
+        "source_file": "gomart/src/test/java/io/gojek/gomart/tests/GoMartCategoryPageTest.java",
+        "project_id": "107",
+        "suite_id": "16687",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoMartServiceLocation.GRAHA_RAYA_LATITUDE, GoMartServiceLocation.GRAHA_RAYA_LONGITUDE, \"get a customer from TDP\")"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify there is a text: GO_MART_CATEGORY_PAGE_TITLE_EN displayed at the top of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that multiple category subtitles are visible, such as GO_MART_CATEGORY_AUTOMOTIVE_TITLE_EN and GO_MART_CATEGORY_AUTOMOTIVE_HOUSEWARE_EN."
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify that multiple category options are available for selection, such as GO_MART_HEALTH_CATEGORY_LABEL_EN and GO_MART_TOYS_CATEGORY_LABEL_EN."
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "5254027": [
+      {
+        "module": "gomart",
+        "title": null,
+        "method": "verifyEmptyStateDisplayedWhenCategoryHasNoItems",
+        "source_file": "gomart/src/test/java/io/gojek/gomart/tests/GoMartCategoryPageTest.java",
+        "project_id": "107",
+        "suite_id": "16687",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoMartServiceLocation.GRAHA_RAYA_LATITUDE, GoMartServiceLocation.GRAHA_RAYA_LONGITUDE, \"get a customer from TDP\")"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify there is a text: GO_MART_CATEGORY_PAGE_TITLE_EN displayed at the top of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "\"Click on a category label which have text: GO_MART_HEALTH_CATEGORY_LABEL_EN"
+          },
+          {
+            "kind": "nlp",
+            "text": "\"Click on the category label with text 'GO_MART_HEALTH_CATEGORY_LABEL_EN"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4912247": [
+      {
+        "module": "gomart",
+        "title": "Verify app-to-web banner for tobacco search results with english language search query on Android",
+        "method": "verifyAppToWebRedirectionBannerForTobaccoSearchAndroidWithMixedCase",
+        "source_file": "gomart/src/test/java/io/gojek/gomart/tests/GoMartSearchPageTest.java",
+        "project_id": "107",
+        "suite_id": "16687",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoMartServiceLocation.GRAHA_RAYA_LATITUDE, GoMartServiceLocation.GRAHA_RAYA_LONGITUDE, \"get a customer from TDP\")"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the search bar with the search icon."
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter a tobacco-related search query with mixed letter casing: 'tobaccoQuery'."
+          },
+          {
+            "kind": "nlp",
+            "text": "Select the search suggestion 'tobaccoQuery' from the list."
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4851726": [
+      {
+        "module": "gomart",
+        "title": null,
+        "method": "verifyAppToWebRedirectionBannerForTobaccoSearchAndroidWithEnglishLanguage",
+        "source_file": "gomart/src/test/java/io/gojek/gomart/tests/GoMartSearchPageTest.java",
+        "project_id": "107",
+        "suite_id": "16687",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoMartServiceLocation.GRAHA_RAYA_LATITUDE, GoMartServiceLocation.GRAHA_RAYA_LONGITUDE, \"get a customer from TDP\")"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the search bar with the search icon."
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter a tobacco-related search query with mixed letter casing: 'tobaccoQuery'."
+          },
+          {
+            "kind": "nlp",
+            "text": "Select the search suggestion 'tobaccoQuery' from the list."
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "347154": [
+      {
+        "module": "gomart",
+        "title": null,
+        "method": "verifyGoMartSubMenu",
+        "source_file": "gomart/src/test/java/io/gojek/gomart/tests/GoMartHomePageTest.java",
+        "project_id": "107",
+        "suite_id": "16687",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoMartServiceLocation.GRAHA_RAYA_LATITUDE, GoMartServiceLocation.GRAHA_RAYA_LONGITUDE, \"get a customer from TDP\")"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Moments sub-menu on GoMart Home Page"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "443520": [
+      {
+        "module": "gomart",
+        "title": "Verify GoMart Deals Promo Page Deeplink Redirection Behavior",
+        "method": "verifyGoMartDealsPageRedirection",
+        "source_file": "gomart/src/test/java/io/gojek/gomart/tests/GoMartDealsPageTest.java",
+        "project_id": "107",
+        "suite_id": "16687",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoMartServiceLocation.GRAHA_RAYA_LATITUDE, GoMartServiceLocation.GRAHA_RAYA_LONGITUDE, \"get a customer from TDP\")"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify there is a location selection element (showing address or city) at the top of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "443522": [
+      {
+        "module": "gomart",
+        "title": null,
+        "method": "verifyGoMartDealsPageDeeplinkRedirection",
+        "source_file": "gomart/src/test/java/io/gojek/gomart/tests/GoMartDealsPageTest.java",
+        "project_id": "107",
+        "suite_id": "16687",
+        "country": "ID",
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "mockLocationAndLoginWithTDPQuery(GoMartServiceLocation.GRAHA_RAYA_LATITUDE, GoMartServiceLocation.GRAHA_RAYA_LONGITUDE, \"get a customer from TDP\")"
+          },
+          {
+            "kind": "deeplink",
+            "text": "GO_MART_DEEPLINK_DEALS_PROMOS_PAGE, GO_MART_DEEPLINK_DEALS_PROMOS_PAGE"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify there is a location selection element (showing address or city) at the top of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

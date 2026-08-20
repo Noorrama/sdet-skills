@@ -19,6 +19,7 @@ Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_c
 - **`prd_context.json`**: Business rules, boundary rules, expected UI copy, and `clickstream_events` (telemetry specs).
 - **`design_context.json`**: Screen definitions, UI elements with `screen_name:element_id_name` logical tokens, state variants, and flow matrix.
 - **`rfc_context.json`**: Feature flag mappings, API contracts, error codes, and N-1 fallback rules.
+- **`regression_context.json`**: **Generator-internal, not a QA-supplied file.** Produced by invoking the `regression-extractor` skill from *within* this generator (Preflight step 9), before any scenario is created — never something the QA hands in alongside the other four contexts.
 
 > **Pipeline Alignment & Architecture:** Upstream extractor skills (`prd-extractor`, `design-extractor`, `rfc-extractor`) run independently in isolated silos per stage and **do not communicate with each other**. The `sdet-plan-generator` is the first convergence point in the pipeline. It is responsible for cross-referencing these decoupled contexts to detect drift, mismatches, and gaps.
 
@@ -72,19 +73,87 @@ what was not covered.
 6. **App agreement.** Every context loaded for the run must carry the same `app`. A mismatch
    means files for different apps were mixed — pick nothing, use the majority value, and raise a
    `NEEDS_ANSWER` note naming the conflicting files and values.
-7. **Shared requirements across apps.** When a source document covered several apps, items that
+7. **Team resolution — one team per plan.** Collect distinct `team_name` values across
+   `prd_context.business_requirements[]`. Requirements with no `team_name` are **shared** — they
+   stay in scope for every team's plan.
+   - **One team (or none)** → proceed; no prompt needed. If every requirement has the same
+     `team_name`, or none have one at all, there is nothing to disambiguate.
+   - **Two or more teams** → ask the QA via `AskUserQuestion`: *"PRD contains requirements from
+     N teams: [list]. Which team should this SDET plan cover?"* Options = the distinct team
+     names. Once selected:
+     - Filter `business_requirements[]` to keep only requirements where `team_name` matches the
+       selected team **or** `team_name` is absent (shared). Drop the rest — they belong to the
+       other team's plan run.
+     - Also filter `boundary_conditions[]` — keep only entries whose `req_id` traces to a
+       retained requirement.
+     - Suffix `feature_key` with the team slug (`save_group_go_food_order`) so two teams'
+       deliverables don't collide on import, same pattern as per-app suffixing.
+     - Stamp `team_name` into `feature_metadata`.
+   - **RFC cross-check.** After team selection, if `rfc_context` is loaded, compare the RFC's
+     scope (`affected_modules`, `affected_services`, or any team-scoped sections) against the
+     selected team. If the RFC clearly scopes to a different team, emit a `WORTH_CHECKING` note:
+     *"RFC scopes to [X] but selected team is [Y] — confirm the RFC applies to this team's
+     plan."* If the RFC covers the selected team (or is team-agnostic), no note needed.
+   - **Headless fallback:** if no user is available to answer, generate for **all teams
+     combined** (no filtering) and add a `WORTH_CHECKING` note: *"PRD has N teams — generating a
+     combined plan; re-run interactively to scope to one team."*
+8. **Shared requirements across apps.** When a source document covered several apps, items that
    apply to all of them carry the **same id in every file** (`req_id`, `risk_id`, `flag_key`,
    `endpoint`). Generate scenarios for them normally — they are in scope for this app too — and
    list those ids under a *Shared across apps* note in `<feature_key>_analysis.md`, so the QA
    reviewing both plans knows which scenarios are duplicates rather than distinct coverage.
+9. **Invoke `regression-extractor` as a subagent — before any scenario is created, not after.**
+   Use the `Agent` tool to spawn the regression-extractor in an isolated context. Pass it the
+   resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
+   coverage). The subagent does all BrowserStack MCP querying, nav_index joins, and deeplink
+   extraction, writes `regression_context.json` to disk, and exits. The main generator then
+   reads only the final JSON file — the raw MCP responses and intermediate corpus data never
+   enter the generator's context window. This is critical for token efficiency: a single
+   BrowserStack query can return 30-60K tokens of case data that would otherwise persist in
+   context for the rest of the generation run.
+   Wait for the subagent to complete, then read `regression_context.json` from the working
+   directory. This is an internal call — not something to wait on the QA for.
+   - **BrowserStack MCP unavailable → STOP.** If the regression-extractor reports that
+     BrowserStack MCP is unreachable or unauthorised (no `regression_context.json` written),
+     **do NOT proceed with generation.** Stop and tell the user:
+     *"BrowserStack MCP is not connected. Run `/aep-mobile:setup` for setup steps, then re-run."*
+     Generating without regression dedup risks duplicating the entire existing suite into TMS
+     on CSV import — that is not recoverable, so it is a hard gate.
+   - **`extraction_status: LIMITED` for a non-MCP reason is different — continue.**
+     The two merchant apps have `NO_COVERAGE` in the automation repo (no cases to query) —
+     that is a legitimate zero-result, not a connection failure. The extractor writes
+     `regression_context.json` with `[]` and `COMPLETE`/`LIMITED` with an `FYI` note. That is
+     fine — proceed with zero regression context.
+   - **A schema-invalid or unreadable `regression_context.json` is different** — treat it like
+     any other malformed input context (Preflight step 3): use nothing from it, raise a
+     `NEEDS_ANSWER` note naming the failure, never silently treat malformed as merely absent.
+   - Inherit its `extraction_notes[]` the same way as every other input context (step 4), so a
+     regression case with weak/unverified steps is visible in this plan's own open points, not
+     lost at the boundary.
 
 ## Anti-hallucination rules
 - **Every scenario traces to a real field in a real input context.** No scenario may rest on a
   requirement, screen, element, flag or endpoint that is not present in a supplied context.
 - Never invent `element_id` or `screen_id` values. If a scenario needs an element the design
   context does not carry, that is a `blocking_issues` entry, not a guessed token.
+- **`element_id` / `screen_id` are schema identifiers — this rule does NOT suppress step
+  authoring.** When the design context is DEGRADED or has empty `elements[]`, scenarios still
+  owe granular, action-level `steps[]` drawn from the PRD and RFC. A PRD requirement that
+  describes entering an amount, choosing a split method, and confirming is **three steps**, not
+  one vague line. Write them as human-readable NLP (`Enter the split amount`, `Select "Equal
+  split"`, `Tap the confirm button`) — these are tester actions sourced from the PRD/RFC, not
+  invented `element_id` tokens. Collapsing a multi-action flow into a single high-level line
+  like *"Complete the creation"* is a **step-authoring defect**: it is untestable (a tester
+  cannot execute it without guessing what to do) and it hides the actions the PRD/RFC actually
+  describe. The identifier provenance rule governs `element_id` fields and schema tokens; it
+  never governs the NLP wording of `steps[]`.
 - Never invent a deeplink or test hook. Absent hook → the scenario states the manual
   navigation path and is flagged in testability feedback.
+- **Never assume a screen is "just open."** Reaching every screen a scenario needs — including
+  the login/authenticated starting state — must be resolved through the Navigation Resolution
+  Ladder (Step 2: hook/deep link → `design_context.ui_flow` → `regression_context.navigation` →
+  explicit `[NAVIGATION NOT CONFIRMED]` flag). A scenario whose first step starts mid-flow with no
+  resolution trace behind it is an invented fact, not a stylistic shortcut.
 - A cross-stage contradiction (PRD says one thing, design another) is reported as a gap. Do
   **not** silently resolve it by preferring one source.
 - A required schema field that cannot be satisfied from the inputs is **left absent** with a
@@ -165,6 +234,15 @@ Before scenario expansion, partition all FE-mobile test categories into tiers us
 
 Flow:
 1. **Emit the Coverage Matrix** to the user as a markdown table: `Category | Tier (🔒 Auto / ☐ Extra-adjacent / ☐ Extra-baseline) | Why`. The "Why" cites the exact input field that fired (auto) or the field checked as empty/absent (extra). Reasons are generated from *which field fired*, so they are feature-agnostic.
+   - **Directly under the matrix, print the projected balance** so the skew is visible at
+     selection time rather than after generation: the count of selected POSITIVE-producing
+     categories (`functional`/`positive`, plus the business-flow rule which always fires) vs
+     NON-POSITIVE-producing ones (negative/boundary/permission/interruption/migration/offline
+     + every `fe_baseline` group), and one line naming the risk if extras are ticked heavily —
+     *"selecting all 6 extras would put this suite at ~20% business coverage; Step 4c-mix will
+     force positive regeneration."*
+   - **`functional` / `positive` is never offered as removable**, even under an explicit QA
+     override — it is the suite's baseline, not a discretionary category.
 2. **Confirm via `AskUserQuestion`** (multiSelect), grouped into ≤4 themed questions, ≤4 options each. State the AUTO set as locked coverage; ask the QA which OPTIONAL EXTRAS to add. Each option's description = its auto-reason/rationale.
 3. **Headless / non-interactive fallback:** if no user is available to answer (e.g. CI), skip the prompt and proceed with the **AUTO** set only — never block generation.
 4. **Generate scenarios for `auto_selected ∪ optional_extras_selected`.** Stamp each scenario with `coverage_category` and a `source` (`input_derived` for AUTO/feature_adjacent, `fe_baseline`, or `qa_added`). Record the whole decision in `coverage_categories` (see Output spec) and echo it in `<feature_key>_analysis.md`.
@@ -179,24 +257,273 @@ Flow:
   - A missing context also means its Category Catalog triggers simply cannot fire (no failure) — those categories fall through to the extras tiers.
   - **Absent is not the same as malformed.** A context file that exists but fails its schema gets a `NEEDS_ANSWER` note naming the file and the validation error (Preflight step 3) — never a silent fall-through to "treat as absent", which drops coverage the QA believes they have.
 - **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and emit at least the required scenario(s) before doing anything else. Model-independence depends on this being a mechanical loop:
-  - **For each** `prd.business_requirements[i]` → emit ≥1 scenario whose `requirement_ref` = that `req_id`. (A P0 requirement always keeps ≥1.)
+  - **For each** `prd.business_requirements[i]` → emit ≥1 scenario **per distinct acceptance
+    criterion / stated behaviour** in that requirement, each with `requirement_ref` = that
+    `req_id`. One row per `req_id` is the floor, not the target: a requirement stating three
+    outcomes owes three positive scenarios. Where the requirement names user segments, entry
+    points, or valid states that change the expected outcome, **each gets its own positive
+    row** — these are alternate valid paths, not variants of one row. (A P0 requirement always
+    keeps ≥1.)
+  - **For each end-to-end business flow** → emit ≥1 multi-screen scenario that walks the whole
+    path and asserts the business outcome at its end. A business flow is a path through
+    `design_context.ui_flow[]` from a `flowStartingPoints` entry to a terminal/success screen,
+    or a journey the PRD narrates across more than one requirement. Stamp
+    `coverage_category: functional`, `source: input_derived`, and set `requirement_ref` to the
+    req_ids the flow satisfies (a flow may satisfy several — list them). **`ui_flow` is a
+    source of scenarios here, not only a navigation lookup for the Resolution Ladder** — a plan
+    that consumes `ui_flow` purely as plumbing has skipped this rule. These flows are the
+    backbone of the suite: generate them before any negative, boundary, or interruption
+    expansion.
   - **For each** `prd.boundary_conditions[i]` → emit ≥1 boundary scenario referencing that entry. Do NOT fold a boundary rule into an unrelated happy-path scenario as a substitute — it needs its own row. (This is the rule most often missed: e.g. a screenshot/privacy-mask boundary and a "shown once per customer" ordering boundary are distinct entries, each needing its own scenario.) The scenario's setup/Steps come from `edge_case_description`; its **expected outcome is taken verbatim from `proposed_default`**. If `proposed_default` is empty, still emit the scenario (the edge case must be exercised) but leave its Expected Result as a `NEEDS_ANSWER` open point — never invent the default behaviour.
   - **For each** `rfc.lifecycle_considerations[i]` (if the lifecycle category is selected) → emit ≥1 scenario for that `event`.
   - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario. **Flag record precedence: RFC is authoritative.** When the same flag appears in both, take the RFC `experimentation_matrix[]` record (`flag_key` verbatim + `default_variant` + `variants` + `kill_switch`) as the source of truth; the PRD entry is name-only corroboration. A PRD-only flag (absent from RFC) still gets a toggle scenario from its name **and** a `prd_vs_rfc_gap` note ("flag in PRD, undocumented in RFC — no variants/default"). An RFC-only flag is fine.
   - Every scenario MUST carry a `requirement_ref` (the `req_id` / boundary index / event it satisfies) so Step 4 can audit coverage mechanically.
   - **Clickstream Telemetry Rules:** Clickstream verification is **NOT** a mandatory hard gate for the generator. If `clickstream_events` are explicitly provided/told in the input contexts, then generate $\ge 1$ verification step per event. If they are NOT provided or explicitly mentioned, **do NOT fail validation and do NOT generate telemetry tests.** Instead, simply list it as an Open Question / Clarification inside `<feature_key>_analysis.md` (e.g., *"Are clickstream telemetry events required for this feature?"*).
-- Dedup against existing GMT/NLP tests retrieved from `${CLAUDE_PLUGIN_ROOT}/config/<app>.json` repository paths.
+- **Regression dedup — using `regression_context.json` from Preflight step 9, before writing any scenario:**
+  - For each requirement/boundary/flag about to get a Hard-Coverage scenario, check `regression_context.json.regression_tests[]` for a case whose `title` or `steps` clearly cover the same behaviour.
+  - **Exact match (the existing case already covers this exact behaviour)** → do not create a new scenario. Still emit a row for it (QA needs to see it exists), with `is_legacy_regression: true` and `existing_case_ref` set to that case's `id` (e.g. `C2879733`) — never `is_legacy_regression: true` with no ref; that's a flag nobody can audit or trace back.
+  - **Partial overlap (related but not identical — e.g. the existing case covers the happy path, this requirement needs a boundary variant)** → still create the new scenario (the Hard Coverage Rule requires it), but set `existing_case_ref` to the related case anyway, so the analysis doc shows the relationship instead of two disconnected-looking rows.
+  - **No match** → proceed normally, no `existing_case_ref`.
+  - This never overrides a Hard Coverage Rule (Step 1 above) — every P0 requirement and boundary condition still gets ≥1 row in the plan even if a legacy case already covers it; the point of dedup is to avoid generating a *second, redundant automation target*, not to avoid *documenting* coverage.
 
 ### 2. Scenario Expansion
 Expand scenarios across:
-- **Core**: Happy path, boundary, negative, and contract flows.
+- **Core (generate these first — before any Mobile Extras or FE-Baseline expansion).** This is
+  the centre of gravity of the suite, and it is the part most often under-expanded. Expand, in
+  order:
+  1. **Primary happy path** per `prd.business_requirements[]` acceptance criterion — the
+     feature doing what it exists to do, with valid data, on the intended screen.
+  2. **End-to-end business flows** per the Hard Coverage Rule above — full journeys through
+     `design_context.ui_flow[]` / the PRD's narrated flow, asserting the business outcome at
+     the terminal screen, not just the next screen's render.
+  3. **Alternate valid paths** — every *valid* segment, persona, entry point, tier, or state
+     the PRD names that reaches the same outcome by a different route. These are positive
+     scenarios; do not collapse them into a single row or demote them to negatives.
+  4. **Positive state transitions** — the produced value surviving a legitimate re-entry
+     (re-open the screen, navigate away and back, pull-to-refresh) with the business state
+     intact. This is a positive assertion about persistence, distinct from the
+     process-death/interruption negatives below.
+  5. **Boundary, negative, and contract flows** — the valid-input edges, error copy, and API
+     contract behaviour required by the Hard Coverage Rules.
+  Steps 1–4 must exist before step 5 and the Extras below are expanded. Negative and edge
+  coverage complements the business suite; it never substitutes for it.
 - **Mobile Extras**: Generates mobile-specific scenarios (deep-link navigation, regional variants, feature flag toggles) and applies **Conditional Mobile-Native Interruption Rules** to ensure test suites remain highly focused and are only generated when technically valid. These rules are the `interruption_*` / `local_data_migration` / `permission` detection triggers surfaced in Step 0 — only expand a category the gate selected:
   - **Network Loss / API Timeout**: Inject a poor-network or server-timeout scenario *only* if `rfc_context.json` declares active `api_contract_changes` or `plan_context.json` specifies `observable_states` (API success/failure signals). Skip if the touchpoint screen is entirely static/local.
   - **App Backgrounding & Process Death**: Inject a backgrounding/kill-and-restore state preservation scenario *only* if the screens in `design_context.json` contain interactive elements (inputs, forms, toggles) or view models are active in `plan_context.json`. Skip on purely static/read-only informational screens.
   - **Local Storage & DB Migration**: Inject an N-1 upgrade and schema migration scenario *only* if `rfc_context.json` defines active `local_data_changes` (e.g. SQLite, Room, CoreData, or SharedPrefs modifications).
   - **Runtime Permission Toggles**: Inject parallel Permission Granted vs Permission Denied scenarios *only* if `rfc_context.json` declares new or modified `permissions_required`.
+  - **Platform variance**: Only meaningful when the feature resolves to **more than one** target
+    platform (per the Platform resolution precedence: `prd.applicable_platforms`, else
+    `rfc.scope.target_platforms`, else inferred from design). When it does, generate the variance
+    scenario **only across those resolved platforms**. When the feature resolves to a **single**
+    platform, there is no variance to test — do **not** emit a platform-variance scenario; if the
+    `platform_variance` trigger fired only because `rfc.platform_specific.<os>` documents
+    platform-specific handling for that one platform, generate at most a plain render/behaviour
+    check *on that platform*, never a cross-platform one.
+    - **Never put an off-target platform inside a scenario — not as a step, not as a caution.** A
+      platform the app *supports* (per `config.<app_id>.json`) but the PRD/RFC does **not** scope
+      into this feature (e.g. the RFC scopes `target_platforms: ["android"]` and never mentions
+      iOS) is **out of scope for every scenario**. Do not write a step like *"iOS coverage cannot
+      be scripted…"* or *"verify on iOS"* — a step naming a platform the feature doesn't target is
+      both untestable and not a tester action (same rule as automation-scaffolding: notes never
+      live in `steps[]`). The legitimate concern — "the app ships on iOS but this RFC is
+      Android-only; is iOS a separate effort?" — is surfaced **once**, as an inherited/authored
+      `extraction_notes` entry and an analysis.md open-question row, and nowhere else. The CSV's
+      own `iOS Automation Status v2` / `Android Automation Status v2` columns already encode
+      "doesn't apply" via `N/A`; that is the *only* place an untargeted platform appears in the
+      deliverables.
 - **FE-Baseline Extras**: If the QA selected any `fe_baseline` category in Step 0, expand best-effort hygiene scenarios for it, stamp `source: "fe_baseline"`, and record in analysis.md that expected behavior is not spec-derived and needs PM/dev confirmation.
-- **Navigation Priority**: Prefer test hooks (`method:deeplink` or `hook_id`) over full UI walks.
+- **Navigation Resolution Ladder (mandatory — run per scenario, before writing `steps[]`).**
+  A scenario's `steps[]` is the *only* place reachability lives in this schema (there is no
+  separate `navigation` field on `scenario_list` items, unlike the standalone
+  `scenario.schema.json`). That means every step sequence must be self-contained: never open a
+  scenario mid-flow as if arriving at its screen were free. Resolve reachability in this order,
+  stopping at the first rung that produces a concrete, sourced answer:
+
+  1. **Test hook / deep link — check all three deep-link sources, in this order.** A deep link is
+     the ideal rung: one `Open deeplink "<uri>"` step replaces a whole tap chain. Three sources
+     carry them; the target screen is resolved by the **first** that names it:
+     a. `plan_context.json` test hooks (`method: deeplink` / `hook_id`) — the primary source of
+        *test* hooks, when an impl plan was supplied.
+     b. `rfc.navigation_changes[].deep_link` — a non-null deep link whose destination screen
+        matches (a deep link the RFC itself introduces for the new feature).
+     c. **`regression_context.deeplink_dictionary`** — the repo's extracted deeplink dictionary
+        (`{ module: { SCREEN: "<uri>" } }`), surfaced by the regression-extractor from the
+        automation repo's own deeplink constants. **This is the primary navigation mechanism in the
+        corpus and resolves most screens** (the repo uses deep links far more than UI walks), so it
+        must be checked before falling through to the UI-walk rungs below — a screen with a real
+        repo deeplink is *not* `[NAVIGATION NOT CONFIRMED]`. Match the scenario's target screen to a
+        dictionary key by meaning (e.g. a "Manfaat & Pencapaian Anda" / benefits-rewards screen →
+        `LOYALTY_REWARDS = "gojekdriver://loyalty/rewards"`; a "Loyalty Home / Level Saya" screen →
+        `LOYALTY_HOME`). Use the URI **verbatim** — never edit, complete, or invent a path; a screen
+        the dictionary does not name is simply not resolved at this rung, fall through to rung 2.
+     Found at any of a/b/c → the scenario opens with `Open deeplink "<uri>"`, no UI walk needed.
+     Tag the scenario's provenance as hook-resolved and cite the source (plan hook / rfc / repo
+     deeplink dictionary); no note required, this is the ideal case. Only when **none** of the three
+     names the screen does resolution fall through to rung 2.
+  2. **Design's own resolved flow (`design_context.ui_flow[]`).** If design_context has real
+     screens (not an empty/failed extraction), search `ui_flow[]` for a path from a reachable
+     entry screen (a `flowStartingPoints` entry, or a screen already resolved by an earlier rung)
+     to this scenario's target `screen_id`. Prefer `confidence: "EXPLICIT"` edges. Turn each edge
+     into a step using the trigger element's `label` (never its raw `element_id` — e.g. `Tap
+     "8 level Program Apresiasi Mitra"`, not `Tap PROFILE_PAGE.pam_entry_btn`). A path that only
+     reaches an intermediate screen is a partial answer — carry it forward and let rung 3 supply
+     the missing segment (see *Reconciling two sources* below).
+  3. **Regression corpus navigation (`regression_context.json`).** Search
+     `regression_tests[].navigation` for a case reaching the same screen (or a close-enough
+     ancestor to bridge a rung-2 partial path), preferring `nav_source: "existing_test"`
+     (repo-confirmed) over `"figma"` over `"needs_answer"` (never usable — that value means the
+     regression-extractor itself couldn't resolve it, so it cannot resolve it for you either).
+
+     **Normalize, don't transcribe.** `regression_tests[].navigation`/`.steps` are repo Gherkin or
+     BrowserStack prose written for an automation engineer, not for a manual tester — copying them
+     into `steps[]` unedited is the single most common quality defect in this skill's output. Before
+     a regression-sourced line becomes a scenario step:
+     - **Resolve Scenario Outline placeholders — from a source, never a guess.** A step like
+       `"Driver Login to <Vehicle Type> as a <Driver Account> through backdoor"` is a Cucumber
+       Examples-table template, not literal text — the angle brackets are unbound variables, not
+       something a tester can act on. Substituting a value here follows the same anti-hallucination
+       rule as everything else in this skill: only use a value a source actually states —
+       the case's own Examples table (if fetched), an explicit PRD/RFC statement (e.g. PAM-06's
+       `"SDF, Kilat, or Box service type"`), or a fact directly observed elsewhere in the corpus
+       (e.g. a BrowserStack case's own `DriverType` custom field listing which types it already
+       covers). If nothing sources a concrete value, do **not** invent one (a "2-wheeler" or
+       "pilot-city" default with no source behind it is exactly the fabrication this skill's
+       provenance rule forbids) — instead generalize the wording to what the step actually needs
+       (`"Log in as a driver using the test backdoor login"`) and add an `extraction_notes` entry
+       (`follow_up: WORTH_CHECKING` or `NEEDS_ANSWER` depending on how much it blocks the scenario)
+       naming the unresolved placeholder. Whichever path you take, record it in the scenario's
+       `test_data`/`preconditions_metadata` so it stays traceable. A literal `<...>` token
+       surviving into a manual-facing step is a defect, not a faithful quote — it means the
+       normalization step was skipped.
+     - **Drop pure test-harness scaffolding.** Lines with no on-screen tester action (`"Given Test
+       case info for AEP DASHBOARD"`, `"turn off Spotlight and LeakCanary"`, feature-toggle setup
+       lines) describe automation rigging, not something a manual tester does on the device — they
+       belong in `preconditions_metadata` (and the CSV `Preconditions` column), never in `steps[]`.
+     - **Translate automation-harness vocabulary into what a tester actually does.** Repo steps name
+       mechanisms that exist only inside the harness — a login *backdoor* or bypass, a seeded
+       session, a stubbed response, an internal UI codename (`"tap on profile icon konmari"`), a
+       page-object or Fragment/ViewController class name. A manual tester can neither see nor
+       perform any of them. The test is one question: **could a person holding the device do this,
+       using only what is on screen?** If not, it is automation vocabulary and must be converted —
+       never passed through, and never merely deleted. Convert by *intent*:
+       - The mechanism **substitutes for a real user action** (backdoor/bypass login, injected
+         session) → write the real action that reaches the same state: `"Driver Login to <X>
+         through backdoor"` → `"Launch the app and log in with a test driver account"`. Dropping
+         the line instead would strand the scenario mid-flow — the ladder still owes an arrival path.
+       - The mechanism **has no user-facing counterpart** (harness plumbing, flag/state injection,
+         fixture seeding) → it is a precondition, not a step; move it per the bullet above.
+       - An **internal codename or code identifier** (`konmari`, a `*Fragment.kt`, a page-object
+         method) → name the element as it appears on screen (`"Tap the profile icon"`).
+       This governs **assertions as much as actions**: a manual step cannot verify *"the API
+       returns null"* or *"`show_claimed_once_banner` is true"* — only what the screen shows in
+       that case. Reframe backend-shaped expectations into their observable UI outcome; the
+       endpoint/field detail stays in the scenario's contract metadata and the analysis doc, where
+       it is useful, rather than in a step no tester can execute. Where a scenario genuinely needs
+       a backend condition forced (an error state, a timeout), write the **tester-executable**
+       instruction — *"using a proxy tool, force `<endpoint>` to return 500, then …"* — not a bare
+       *"simulate an API failure"*, which names an outcome without an action.
+     - **Rephrase into declarative NLP**, the same style rung 2 already uses (`Tap "Daftar Program
+       Affiliate"`, never a raw element id): third-person test-script prose (`"driver tap on
+       profile icon konmari"`) becomes a clean imperative tester action (`Tap the profile icon`).
+       Preserve the screens/order/meaning exactly — normalizing wording is not a license to change
+       the path or drop a real step.
+     Cite the source case id (e.g. `C5542964`) in the scenario's `test_data[].source_refs` so the
+     now-normalized path is still auditable back to the repo-confirmed original.
+     - **Cross-case corroboration for login/session preambles.** The most common reachability gap
+       isn't the target screen, it's getting to an authenticated starting state at all. If
+       `plan_context` has no login/state-injection hook, look for a leading step-subsequence
+       shared identically across **3 or more independent** `regression_tests[].navigation`
+       entries for this app (e.g. a repeated "login via backdoor → skip walkthrough → dismiss
+       vehicle card → tap profile icon" prefix). A sequence corroborated across that many
+       independent cases is the app's standard entry preamble, not a one-off guess — reuse it
+       (normalized per the rule above) for any scenario needing a logged-in starting point.
+  4. **Reconciling two sources.** When both rung 2 (design) and rung 3 (regression) produce a
+     path to the same screen: if they agree (same screens/actions, or one is a superset of the
+     other) use the more complete one — this is corroboration, not a conflict, and needs no note.
+     If they genuinely disagree (different entry banners, different login mechanism, different
+     screen order) **do not silently pick one.** Emit the design-derived path as the primary
+     steps, add one inline flag line noting the regression-derived alternative and where it
+     diverges, and add an `extraction_notes` entry (`follow_up: NEEDS_ANSWER`) naming the specific
+     conflicting screens/elements from both sources. Merging them into a single path neither
+     source actually states is inventing a fact.
+  5. **Nothing resolves.** No plan/RFC/repo-dictionary deep link (all three rung-1 sources
+     checked), no usable design `ui_flow` edge, and either no regression match or only
+     `nav_source: "needs_answer"`. Do **not** write a plausible-sounding step like "Open the X page"
+     — that is the exact failure mode this ladder exists to prevent. Instead the scenario's steps
+     open with exactly one line:
+     `[NAVIGATION NOT CONFIRMED] Manually navigate to <screen_id> — no deeplink (plan, RFC, or repo
+     dictionary), design flow, or regression precedent was found.` The destination-screen
+     verification steps still follow
+     normally below it. Add a `testability_feedback.missing_hooks` entry naming the exact screen
+     and what was checked, plus a matching `extraction_notes` entry (`follow_up: NEEDS_ANSWER`).
+     The scenario still counts as covered for the Step 4 audit — the requirement is exercised —
+     but the gap stays visible instead of being papered over with an assumed arrival.
+
+  This ladder is feature-agnostic by construction: it never depends on this being a loyalty
+  feature, a payments flow, or any specific app — it only depends on which of `plan_context`,
+  `rfc.navigation_changes`, `regression_context.deeplink_dictionary`, `design_context.ui_flow`,
+  and `regression_context.navigation` actually resolved something, the same fields every run of
+  this generator already has (or explicitly lacks) by Preflight.
+
+- **`automation_steps[]` — a consolidated action + verification sequence for code generation.**
+  Placed **immediately after `steps[]`** in the scenario object. Unlike the CSV (where `Steps` =
+  pure actions and `Expected Result` = pure verifications, kept apart for manual testers),
+  `automation_steps` **interleaves actions and their verifications in execution order** — this is
+  what the downstream code-gen stage needs to produce a runnable test method. Each action is
+  immediately followed by its corresponding verification(s), forming a single linear sequence:
+  ```
+  "automation_steps": [
+    "Open deeplink \"gojek://food/group-order\"",
+    "Verify \"Group Order\" screen is visible",
+    "Tap \"Invite Friends\"",
+    "Verify share sheet is displayed",
+    "Enter \"CODE123\" into \"Referral Code\"",
+    "Tap \"Apply\"",
+    "Verify \"Code applied successfully\" toast is visible"
+  ]
+  ```
+  This is *not* a full runnable automation script — the downstream **code-gen stage** fills in the
+  exact constants, credential tokens, toggle names, and setup scaffolding. The generator's job
+  here is to hand code-gen a clean, ordered sequence of what-to-do and what-to-check in the right
+  dialect. So:
+  - **Merge `steps[]` (actions) and `expected_result` (verifications) into one ordered list.**
+    After each action step, insert its corresponding verification(s) from `expected_result`.
+    An action with no verification (`—` in expected result) has no verify line after it.
+  - **One action or verification per line — split every compound step.** No line may contain two
+    actions. Split a step at a top-level " and " / " then " that joins **distinct actions**, and
+    inherit the first fragment's leading verb into a verbless second fragment: "Skip the
+    walkthrough and tooltip prompts" → "Skip the walkthrough" + "Skip the tooltip prompts";
+    "Verify the red card marks the end month and the green card marks the start month" → two
+    "Verify …" lines. Applies to **all** steps — but do **not** split where the connector is not
+    a real action boundary:
+    - inside parentheses, or a comma-list ("monthly, yearly, and special tiers"), or an Oxford
+      ", and "/", then ";
+    - when the word **before** the connector is a preposition/article — "up to **and** including
+      2028", "for X **and** Y" — the "and" is mid-phrase, not two actions;
+    - when the left side is a bare shared verb (<2 words) whose object comes after the second verb
+      — "Uninstall **and** reinstall the app" stays one line (splitting would strand "Uninstall").
+  - **Use these TapMind helper calls verbatim, nothing invented; everything else is plain NLP text
+    (no `runStep(...)` wrapper — code-gen adds that):**
+    - a login / "launch + log in" step → `loginToDriver(<account>)` (or the app's login helper —
+      `loginWithRegisteredMerchant(...)`, etc.); the placeholder account is fine, code-gen resolves
+      the real credential constant.
+    - a step that explicitly opens a deep link → `openDeeplink("<uri from the step>")`.
+    - a step that explicitly sets/toggles a flag → `setDriverToggle(<flag_key>, <true|false>)`
+      (flag key verbatim from the step).
+    - **every other action or assertion → the plain step text itself** (`Tap the profile icon`,
+      `Verify 'Pusat bantuan' is visible`) — NOT wrapped in `runStep("...")`. The runStep ceremony,
+      exact constants, and any setup are the code-gen stage's job; here we only hand it clean,
+      single-action NLP lines in the right dialect.
+  - The exact toggle constants, credential constants, and any setup the code-gen stage needs are
+    **explicitly out of scope here** — never fabricate them. If a scenario maps to an existing case
+    that already has a real TapMind test (`regression_context.regression_tests[].tapmind_steps`),
+    prefer copying that verbatim over restyling, and cite the case id.
+  - **Nothing to automate** (out-of-scope/placeholder scenario) → `automation_steps: []`.
+  Add **one** `extraction_notes` entry (`follow_up: WORTH_CHECKING`) stating automation_steps are a
+  consolidated action+verification sequence in TapMind dialect and the code-gen stage owns exact
+  constants/setup. `automation_steps` is **JSON-only** — not a CSV column (the CSV keeps actions
+  in `Steps` and verifications in `Expected Result` as separate columns for manual testers).
 
 ### 3. Gap Analysis & Alignment Engine
 As the single integration point, the generator must actively compute the following cross-stage gaps:
@@ -210,7 +537,11 @@ As the single integration point, the generator must actively compute the followi
 This gate is what makes coverage model-independent: it does not rely on the model "remembering" to be thorough — it mechanically re-checks the generated scenario set against the inputs and forces a fix before output. Run it every time, in both interactive and headless modes.
 
 **4a. Build the required-coverage checklist** directly from the inputs (this is a deterministic list, not a judgment):
-- every `prd.business_requirements[].req_id`
+- every `prd.business_requirements[].req_id`, **plus each distinct acceptance criterion inside
+  it** (by index, so a 3-criterion requirement contributes 3 checklist items, not 1)
+- every **end-to-end business flow**: each `design_context.ui_flow[]` path from a
+  `flowStartingPoints` entry to a terminal/success screen, and each journey the PRD narrates
+  across multiple requirements
 - every `prd.boundary_conditions[]` entry (by index + `req_id` + `edge_case_description`)
 - every `rfc.lifecycle_considerations[].event` (if lifecycle selected)
 - every flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if flag category selected)
@@ -220,13 +551,53 @@ This gate is what makes coverage model-independent: it does not rely on the mode
 
 **4c. If any checklist item has zero covering scenarios → the plan is INCOMPLETE.** Do not write the output files yet. Generate the missing scenario(s), then re-run 4b. Repeat until every item is covered. A boundary rule "covered" only by being mentioned inside an unrelated scenario does NOT count — it needs a scenario whose `requirement_ref` names it.
 
+**4c-nav. Navigation audit (mechanical, not from memory).** For every scenario in `scenario_list`,
+confirm its `steps[]` opens with one of: a deep-link open (from a plan hook, `rfc.navigation_changes`,
+**or `regression_context.deeplink_dictionary`**), a navigation chain traceable to
+`design_context.ui_flow` or `regression_context.navigation` (per the Navigation Resolution
+Ladder, Step 2), or an explicit `[NAVIGATION NOT CONFIRMED]` line. **Before accepting a
+`[NAVIGATION NOT CONFIRMED]` line, re-check `regression_context.deeplink_dictionary` for a key
+matching the target screen — an unresolved flag on a screen the repo dictionary actually names is a
+defect, not a valid outcome** (this is the exact miss the deeplink rung exists to prevent). A
+scenario whose first step assumes arrival at a screen (e.g. "Open the X page" with nothing before
+it) with none of the above behind it is likewise a defect — fix it (resolve the ladder properly, or
+replace the assumed step with the unresolved-flag line) before writing any output file. This check
+is what would have caught steps starting cold at a destination screen with no login/navigation path
+before it; it must run on every pass, not just when something looks off.
+
+**4c-mix. Coverage-balance audit (mechanical, runs on every pass).** The checklist audit above
+proves every input item has *a* scenario; it cannot see that the suite is 3 happy paths and 25
+negatives. This step does.
+
+Classify every scenario in `scenario_list` into exactly one bucket:
+- **POSITIVE** — `coverage_category: functional`/`positive`, end-to-end business flows,
+  alternate valid paths, and positive state-transition scenarios (Step 2 Core items 1–4).
+- **NON-POSITIVE** — negative/error, boundary, permission-denied, interruption (network,
+  lifecycle, OS), local-data migration, offline, and every `source: fe_baseline` scenario.
+
+Compute `positive_pct = POSITIVE / (POSITIVE + NON_POSITIVE)`.
+
+**If `positive_pct < 50%` the plan is UNBALANCED — do not write any output file.** Return to
+Step 2 Core and generate the missing business coverage (re-read `prd.business_requirements[]`
+for un-expanded acceptance criteria and `design_context.ui_flow[]` for un-walked journeys),
+then re-run 4b and 4c-mix. **Never satisfy the ratio by deleting negative scenarios** — the
+negatives are Hard-Coverage-mandated and removing one drops real coverage; the only legal fix
+is adding the positive scenarios that were missed.
+
+If a genuine second pass still cannot reach 50% because the inputs really do describe a
+mostly-edge-case feature, write the files, record `action_taken: "under_target — inputs
+describe N requirements against M boundary/error entries"` in the balance block, and raise a
+`WORTH_CHECKING` note. That is an escape hatch for a real input shape, not a way to skip the
+regeneration pass — it is only legal *after* a documented retry.
+
 **4d. Emit the audit result** into the SDET plan as a `coverage_audit` object and echo it as a table in `<feature_key>_analysis.md`:
 ```
 "coverage_audit": {
-  "required": { "business_requirements": [...], "boundary_conditions": [...], "lifecycle_events": [...], "feature_flags": [...], "clickstream_events": [...] },
+  "required": { "business_requirements": [...], "business_flows": [...], "boundary_conditions": [...], "lifecycle_events": [...], "feature_flags": [...], "clickstream_events": [...] },
   "covered": { "<checklist_item>": ["<scenario title>", ...], ... },
   "gaps_closed_in_this_pass": ["<item that was missing and got a new scenario>", ...],
-  "still_blocked": [ { "item": "...", "reason": "expected behavior undefined (e.g. OQ-open)" } ]
+  "still_blocked": [ { "item": "...", "reason": "expected behavior undefined (e.g. OQ-open)" } ],
+  "balance": { "positive": 0, "non_positive": 0, "positive_pct": 0.0, "action_taken": "balanced | regenerated_positives | under_target — <reason>" }
 }
 ```
 An item may legitimately remain uncovered ONLY if its expected behavior is undefined in every input (e.g. an OPEN open-question). In that case it goes in `still_blocked` with the reason — it is never silently dropped.
@@ -274,9 +645,76 @@ from the structured upstream fields — **not** flattened to tag strings:
   (`"KYCed GoPay user"` + prereq `"confirmed Date of Birth"` → `{ "kyc_status": "VERIFIED",
   "gopay_active": true, "date_of_birth": "CONFIRMED" }`). Restate the source in schema vocabulary;
   never invent an attribute the source doesn't state.
+- **Fold in the feature's stated baseline facts, not only the boundary/persona-specific ones.**
+  `country` (from `prd.applicable_countries`, or the specific country this fixture targets),
+  `driver_type`/service-type cohort (`prd...target_personas[].prerequisites`, e.g. `"SDF, Kilat,
+  or Box service type"`), and any other flat fact the PRD/RFC states for *this* fixture belong in
+  `required_state` whenever the source names them — even when the fixture's distinguishing trait
+  is a `dynamic_conditions` entry. A fixture for "driver mid-way through a yearly eligibility
+  period" still states `country`/cohort if the source does; the dynamic condition explains *when*,
+  it doesn't excuse omitting *what else is known*. `required_state: {}` should be rare — it means
+  the source genuinely stated no static fact at all for this fixture, not merely that the one
+  interesting condition happens to be dynamic.
+- **Unstated variant dimension → fan out one fixture per variant; never collapse it to a guess.**
+  A *variant dimension* is any attribute that partitions the entity population into groups the
+  feature could behave differently for, and which the source docs left **unrestricted**: a driver
+  app's vehicle type (2W/4W) or service type, a consumer app's payment instrument, user tier,
+  account type, or subscription state. This is deliberately app- and domain-agnostic — the rule is
+  about *an unrestricted partition*, never about a hardcoded list of dimensions.
+
+  Resolve each dimension in this order:
+  1. **PRD/RFC restricts it** → one fixture, that value in `required_state`, done. (`"Driver
+     cohort: SDF, Kilat, or Box service type"` → `{"service_type": "SDF|Kilat|Box"}`.) A stated
+     restriction is never widened.
+  2. **Unrestricted, and a source enumerates the real values** → **emit one fixture per value.**
+     Each gets its own stable `fixture_id` suffixed by the variant, carries the dimension inside
+     `required_state`, and keeps the rest of the base fixture's state identical. This is the case
+     the QA is usually owed two rows of data for and silently gets one.
+
+     **The dimension's name, its `required_state` key, its `fixture_id` suffix, and its values all
+     come from the enumerating source's own vocabulary — never from this rule's examples.** The
+     examples below are illustrative of the *shape*, not a template to copy. Read what the source
+     actually enumerated and mirror that:
+     - A driver feature whose cases are tagged `DriverType: ["IDBike","IDCar"]` → two fixtures
+       `…-2w` / `…-4w` with `{"vehicle_type": "2W"}` / `{"vehicle_type": "4W"}`.
+     - A consumer feature whose cases are tagged `PaymentInstrument: ["GoPay","Card","PayLater"]`
+       → three fixtures `…-gopay` / `…-card` / `…-paylater` with
+       `{"payment_instrument": "GoPay"}` etc. — **there is no `vehicle_type` here; a consumer plan
+       that never saw a vehicle dimension must never grow one.**
+     - A merchant app with `NO_COVERAGE` (no regression corpus) enumerates nothing at rung 2a → it
+       does not fan out on an invented dimension; it falls to 2b/2c or to case 3 below.
+     Enumeration sources, in priority order — all *observed*, never a list you compose yourself:
+     a. `regression_context.observed_variant_dimensions` / `regression_tests[].variant_dimensions`
+        — the variants this app's **existing coverage actually splits on** (`DriverType:
+        ["IDBike","IDCar"]` for one app, `PaymentInstrument: [...]` or `UserTier: [...]` for
+        another — whatever *that* app's cases carry). Strongest evidence: real cases already run
+        every way. Whatever key appears here is the dimension; do not translate it into a term from
+        these examples.
+     b. `config/<app_id>.json`, when it enumerates the dimension.
+     c. An explicit enumeration elsewhere in the PRD/RFC — an impact/estimate table listing the
+        segments, a rollout table naming cohorts — even where the requirement text itself is silent.
+     Cite the enumeration's origin in every fanned-out fixture's `source_refs`, and add **one**
+     `extraction_notes` entry per dimension (`follow_up: WORTH_CHECKING`) recording the assumption:
+     *"PRD/RFC does not restrict <dimension>; fixtures fanned out across <values> observed in
+     <source>. Confirm the feature behaves identically across them, or state the restriction."*
+     That note is what makes this an auditable assumption rather than a silent invention.
+  3. **Unrestricted and nothing enumerates it** → a single fixture that simply omits the dimension,
+     plus a `WORTH_CHECKING` note naming the unresolved dimension. Never fabricate a plausible
+     default (`"2-wheeler"`, `"credit card"`) to fill the gap — that is the provenance rule's
+     exact failure mode, and it silently narrows coverage to a variant nobody chose.
+
+  **Bound the fan-out — vary one dimension at a time, not the cartesian product.** With two
+  unrestricted dimensions of 2 and 3 values, emit the base fixture plus one fixture per *additional*
+  value of each dimension (`1 + 1 + 2 = 4`), holding the other dimensions at the base value — not
+  all 6 combinations. Take the full product **only** when the PRD/RFC states the dimensions
+  interact. If a single dimension enumerates more than ~4 values, fan out only to the values the
+  regression corpus actually exercises and note the remainder as uncovered, so a broad enum cannot
+  detonate the test-data ask.
 - `type_signals` carries the short labels that used to be `test_data_tags`
   (`["kyc_verified_user","birthday_d_day"]`). They summarise; `required_state` is the source of
-  truth. Keep both.
+  truth. Keep both. When fixtures are fanned out across a variant, the variant belongs in every
+  copy's signals too — named after the actual dimension, e.g. `[...,"vehicle_2w"]` for a driver
+  app or `[...,"payment_gopay"]` for a consumer one — so downstream can group them.
 - **Conditions that are not static entity attributes** — a birthday-on-D-day, an N-th
   transaction, any clock- or relationship-dependent need — go in `dynamic_conditions` with the
   right `kind` (`TEMPORAL` / `RELATIONAL` / `SELECTION`), **not** in `required_state`. Forcing
@@ -293,12 +731,17 @@ A human-readable Markdown asset automatically generated for engineering leads de
 #### **Required Document Sections & Formatting**:
 
 1. **Meta Header:**
-   - Include clear, bold rows: **Feature Key**, **App**, **RFC (ID, Title, Status)**, **Analysis Date**, **SDET Plan File**, **Test Cases File**.
+   - Include clear, bold rows: **Feature Key**, **App**, **Team** (selected team from Preflight step 7, or "All teams" if single/none), **RFC (ID, Title, Status)**, **Analysis Date**, **SDET Plan File**, **Test Cases File**.
 
 2. **Section 0: Selected Test Coverage Categories:**
    - A table mirroring `coverage_categories` with columns: `Category`, `Tier` (`Auto` / `Extra — feature-adjacent` / `Extra — fe_baseline`), `Selected?`, and `Why` (the field that fired, or why it was offered as an extra).
    - Note explicitly which extras were QA-added and that `fe_baseline` scenarios are hygiene, not spec-backed.
    - Immediately after the category table, render the **Coverage Audit table** from `coverage_audit`: one row per required checklist item (`Item`, `Type`, `Covered By` (scenario titles), `Status` = Covered / Blocked-with-reason). This is the reviewer-facing proof that every requirement and boundary rule has a scenario.
+   - Immediately after the Coverage Audit table, render a one-row **Coverage Balance** line from
+     `coverage_audit.balance`: `Positive (business/use-case) | Non-positive (negative, boundary,
+     hygiene) | Positive % | Action taken`. If `action_taken` is `under_target`, state the reason
+     in plain words directly beneath it, so a reviewer sees the tilt without opening the JSON.
+   - Immediately after that, if any scenario in this plan carries `existing_case_ref`, render a **Regression Coverage table**: `Scenario` (title), `Existing Case` (the BrowserStack id), `Relationship` (`Duplicate — not re-created` / `Related — new variant still generated`). If `regression_context.json` itself was unavailable this run (Preflight step 9), say so in one line instead of an empty table — e.g. *"Regression check did not run this pass: <reason from the note>."*
 
 3. **Section 1: Missing Input Context:**
    - If any input context (like `plan_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).
@@ -335,12 +778,50 @@ Flattened CSV strictly matching squad project template headers:
 **Column Value Directives**:
 - `Title`: Concise scenario description.
 - `State`: `"Active"`
-- `Priority`: `"P0"`, `"P1"`, or `"P2"`
+- `Priority`: `"P0"`, `"P1"`, or `"P2"` — **derived from business criticality, not from how
+  exotic the scenario is.** Map mechanically:
+  - `P0` — end-to-end business flows, primary happy paths, and any scenario whose
+    `requirement_ref` names a P0 requirement. The core use case is always P0.
+  - `P1` — alternate valid paths, positive state transitions, boundary conditions with a
+    stated `proposed_default`, and documented error/contract behaviour.
+  - `P2` — `source: fe_baseline` hygiene, interruption scenarios (network/lifecycle/OS), and
+    boundary conditions whose expected outcome is still an open point.
+  A hygiene or interruption scenario is never P0; a core business flow is never below P0.
 - `Type of Test Case`: `"Regression"` or `"Sanity"`
 - `Automation Status`: By default, set to `"Manual"` (representing not-automated) for newly generated test cases. Set to `"Automated"` only if matched with an existing automated test case.
-- `Preconditions`: Multiline string with environment, locale, deep links, and active feature flags, **using a new line break (`\n`) after each statement/line.** Any feature-flag name written here MUST be copied verbatim from `rfc.experimentation_matrix[].flag_key` / `prd.feature_flags[]` — never paraphrase or append suffixes (e.g. do not turn `birthday_feature_litmus` into `birthday_feature_litmus_content`). When a flag is in both, use the RFC record (`flag_key` + `default_variant`); PRD is name-only corroboration.
-- `Steps`: Numbered sequential actions inside double quotes with line breaks (`\n`). **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g., `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`, `3. Tap "Lanjut"`). Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`). Must include telemetry emission checks.
-- `Expected Result`: Numbered sequential assertions matching the numbered steps in the `Steps` column 1-to-1, inside double quotes with line breaks (`\n`) after each statement. **Write assertions using clean, declarative NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`, `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes in user-friendly, non-technical language. **For boundary scenarios the assertion derives from `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker rather than a guessed outcome.**
+- `Preconditions`: Multiline string, **using a new line break (`\n`) after each statement/line.** Render, in this order, only the lines that actually apply:
+  1. One line per `scenario.test_data[]` fixture, using its `description` (plus any `required_state` facts that change setup, e.g. `"Driver who joined Gojek before 2017"`, `"Driver cohort: SDF, Kilat, or Box"`) — a manual tester needs to know *which account/state to use* before environment plumbing. This is the line most often dropped; a `Preconditions` cell with only environment/locale and no fixture description has lost information the JSON already carries.
+  2. `country` / `driver_type` if the scenario carries them and they narrow the setup (a scenario scoped to one cohort or country should say so here, not only in the CSV's own `Country v2` column).
+  3. Environment and locale.
+  4. Target entry deep link, if any.
+  5. Active feature flags — copied verbatim from `rfc.experimentation_matrix[].flag_key` / `prd.feature_flags[]`, never paraphrased or suffixed (e.g. do not turn `birthday_feature_litmus` into `birthday_feature_litmus_content`). When a flag is in both, use the RFC record (`flag_key` + `default_variant`); PRD is name-only corroboration.
+  A scenario with `test_data: []` and no country/flag/deeplink simply omits those lines — never pad `Preconditions` with a fixed template when the scenario has nothing to say for a given line.
+- `Steps`: Numbered sequential **actions only** inside double quotes with line breaks (`\n`).
+  **Write steps using clean, action-oriented, declarative NLP-style commands** (e.g.,
+  `1. Open deeplink "gopay://affiliate/welcome"`, `2. Enter "CODE123" into "Referral Code"`,
+  `3. Tap "Lanjut"`). **No "Verify" / "Assert" / "Check" lines in this column** — all
+  verifications belong in `Expected Result`. A step is something the tester *does* on the
+  device (tap, scroll, enter, open, navigate, wait); an assertion is something they *observe*
+  after doing it. Mixing them makes the CSV unusable for both manual testers (who read Steps
+  as a to-do list) and automation (which needs actions separated from assertions).
+  Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write
+  `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`).
+  This column is a direct 1-to-1 join of `scenario.steps[]`. A `steps[]` entry still carrying
+  a Gherkin placeholder (`<Vehicle Type>`), third-person test-script phrasing, or a pure
+  automation-scaffolding line (no on-screen tester action) is a defect to fix at the source.
+  **A single high-level line that collapses a multi-action flow (e.g. "Complete the split bill
+  creation") is equally a defect — each discrete tester action must be its own numbered step.**
+- `Expected Result`: Numbered sequential assertions inside double quotes with line breaks
+  (`\n`) after each statement. **ALL verifications live here, not in Steps.** Each assertion
+  corresponds to the action step at the same number — after step 3 (an action), expected
+  result 3 states what the tester should observe. **Write assertions using clean, declarative
+  NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`,
+  `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes
+  in user-friendly, non-technical language. **For boundary scenarios the assertion derives from
+  `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker
+  rather than a guessed outcome.** When multiple actions share one observable outcome, the
+  earlier actions' expected results can be `—` (no assertion at that step) with the combined
+  assertion on the final action's line.
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`. **Resolution precedence: (1) `prd.applicable_platforms` (PRD is the scope authority), (2) else `rfc.scope.target_platforms`, (3) else infer from `design`.** One platform → `"Android"`/`"iOS"`; more than one → `"Cross-Platform"`. If PRD and RFC conflict, use PRD and raise it as a `prd_vs_rfc_gap` — never silently prefer one.
 - `Country v2`: MUST be derived from `prd.applicable_countries` (map ISO code → name, e.g. `ID`→`"Indonesia"`, `SG`→`"Singapore"`, `VN`→`"Vietnam"`). Never pick a country the inputs do not list. If `applicable_countries` has one entry, every row uses that country.
@@ -405,7 +886,71 @@ The skill supports a two-way synchronization flow to allow human QA to review, r
      - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `mapped_user_flow`, `test_data`, `unmapped_extractor_data`, `clickstream_events`, `coverage_category`, `source`, `requirement_ref`, the top-level `coverage_categories` / `coverage_audit` blocks, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
      - **Re-run the Step 4 Coverage Self-Audit** after merging and refresh the `coverage_audit` block, so QA-added/removed rows keep the coverage proof accurate.
      - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>_SDET_plan.json` to reflect the synchronization event.
-   - **Then emit the automation plan.** After the merge, run the *Automation-Plan-Generator emission* below — the CSV feedback is precisely the trigger to (re)produce `<feature_key>_automation_plan_generator.json` for the downstream Test-Data-Generation stage.
+   - **Then upload to BrowserStack and emit the automation plan.** After the merge, run the
+     *BrowserStack Upload & Case-ID Resolution* step below, then the *Automation-Plan-Generator
+     emission* — the CSV feedback is precisely the trigger to (re)produce
+     `<feature_key>_automation_plan_generator.json` with real BrowserStack case IDs for the
+     downstream Test-Data-Generation stage.
+
+---
+
+## BrowserStack Upload & Case-ID Resolution
+
+**SYNC mode only.** This step runs only when the user provides a modified CSV (SYNC mode trigger).
+It does NOT run during GENERATE mode — generation produces the CSV for the first time; there is
+nothing to upload yet.
+
+After the SYNC merge completes, upload the finalised test cases to BrowserStack Test Management
+and stamp the returned case IDs back into `<feature_key>_SDET_plan.json` before emitting the
+automation plan.
+
+### 1. Resolve Upload Target (project + folder)
+
+Use the first source that resolves — do not search all BrowserStack projects:
+
+1. **`regression_context.json` exists** → read `browserstack_project` (e.g. `PR-176`) and
+   `resolved_folders` (the folder IDs the extractor already queried). Use the first
+   `resolved_folders[]` entry as the upload folder.
+2. **No `regression_context.json`** → read
+   `/Users/adarsh/.claude/plugins/cache/aep/aep-mobile/0.8.4/config/browserstack_project_map.json` and resolve
+   the project from `app_id` → module → `consumer_super_app.folders` or `separate_projects`,
+   same logic as the regression-extractor's Step 1b.
+3. **Feature subfolder** — look for a folder matching `feature_key` under the resolved project
+   (use `listFolders`). If found → use it. If not → create it via `createProjectOrFolder` with
+   the `feature_key` as the folder name.
+4. **Project unresolvable** (module not in the map, or `browserstack_project: null`) → ask the
+   user for the BrowserStack project identifier. Do not guess a `PR-` id.
+
+### 2. Upload Test Cases
+
+Use the BrowserStack MCP tool `createTestCasesFromFile` with the finalised
+`<feature_key>_test_cases.csv` and the resolved project + folder.
+
+- **BrowserStack MCP unavailable at upload time → do not block.** The SYNC and automation-plan
+  emission still complete. Add a `WORTH_CHECKING` note:
+  *"BrowserStack upload skipped — MCP unavailable. Run `/aep-mobile:setup`, then re-run SYNC
+  to upload and stamp case IDs."*
+  Scenarios that already carry a `browserstack_case_id` from regression context keep it;
+  new scenarios simply omit the field (never set it to `null`).
+
+### 3. Stamp Case IDs
+
+`createTestCasesFromFile` returns the created case identifiers (e.g. `TC-XXXXXX`). Map each
+returned ID back to its scenario by matching on `csv_title_association` (the title column is the
+join key between the CSV rows and the returned results).
+
+- Write `browserstack_case_id` into each matched scenario in `<feature_key>_SDET_plan.json`.
+- Existing regression cases already carry a `browserstack_case_id` from
+  `regression_context.json` (e.g. `C2879733`) — **keep the original ID**, do not overwrite.
+  Only stamp new IDs onto scenarios that don't already have one.
+- Scenarios with no BS ID (upload failed or not applicable) simply **omit** the field — never
+  set it to `null`.
+- Update `<feature_key>_SDET_plan.json`'s `updated_at` timestamp.
+
+### 4. Summary
+
+Print a one-line summary: *"Uploaded N test cases to BrowserStack project PR-XXX / folder
+<feature_key>. M existing cases kept their original IDs."*
 
 ---
 
@@ -419,10 +964,11 @@ fixtures only exist in `<feature_key>_SDET_plan.json`. Order of operations: SYNC
 JSON first (above), then emit from that merged JSON. The JSON is the single source of truth; the
 CSV only carried the QA's column edits.
 
-**Filter.** Include a scenario **only if its post-sync `execution_mode` is `Automatable`.** Manual
-scenarios stay in the SDET plan and are omitted from the automation plan. (For a purely backend
-consumer you may additionally scope to `execution_scope` ∈ {`BACKEND_ONLY`, `END_TO_END`}; state
-it if you do.)
+**Filter.** Include a scenario **only if its post-sync `execution_mode` matches `Automatable`
+(case-insensitive — `automatable`, `AUTOMATABLE`, `Automatable` all qualify).** Manual scenarios
+stay in the SDET plan and are omitted from the automation plan. (For a purely backend consumer
+you may additionally scope to `execution_scope` ∈ {`BACKEND_ONLY`, `END_TO_END`}; state it if
+you do.)
 
 **Field mapping** (SDET scenario → automation_scenario):
 - `scenario_id` — assign `SC-001`, `SC-002`… in scenario order; **reuse the same id on
@@ -436,6 +982,11 @@ it if you do.)
   re-derive `required_state` here; it was already assembled at generation time. Emit the
   identification INPUT only — never add `test_data_output`, that is the test-data stage's job.
 - `epic_id` — the EPIC/Jira id from `feature_metadata` if present, else `feature_key`.
+- `browserstack_case_id` — the real BrowserStack case identifier. For regression cases this is
+  the existing ID from `regression_context.json` (e.g. `C2879733`); for newly uploaded cases
+  this is the `TC-XXXXXX` returned by `createTestCasesFromFile`. Carry verbatim from the
+  scenario's `browserstack_case_id` field. **Omit entirely** when the scenario has no BS ID —
+  never emit `null`.
 
 **Backend-only fields** (`service_name`, `package`, `test_class`, `assertion_class`, `endpoint`,
 `curl_reference`) — a mobile SDET plan does not carry these. **Never fabricate them.** Emit them
@@ -450,46 +1001,10 @@ other output: on failure, still write it, record the validator error, and say so
 
 ## Appendix: Category Catalog
 
-The auto/extra partition is computed **solely** from the presence/values of schema fields across the supplied contexts — it is feature-independent. For each category: evaluate its trigger; if it fires → `auto_selected` (with the field as `reason`); if it does not → `optional_extras.feature_adjacent`. Universal hygiene categories with no schema trigger live in `optional_extras.fe_baseline`, gated by an applicability predicate.
-
-### A. Detection Rules (AUTO when the field fires)
-
-| Category | AUTO when |
-|---|---|
-| `functional` / `positive` | `prd.business_requirements[]` non-empty **or** `design.screens[]` non-empty |
-| `negative_error` | `prd.boundary_conditions[]` has invalid/edge entries **or** any `rfc.api_contract_changes[].error_codes` |
-| `boundary` | `prd.boundary_conditions[]` non-empty |
-| `permission` | `rfc.permissions_required[]` non-empty **or** any design element's `validations_and_edge_cases` mentions a permission |
-| `interruption_network` | `rfc.api_contract_changes[]` non-empty **or** `plan.observable_states` present **or** `rfc.offline_behavior.offline_capable`/`sync_strategy` **or** a network/remote-asset `architectural_risk` |
-| `interruption_lifecycle` (background/process-death) | `rfc.lifecycle_considerations[]` non-empty **or** design has interactive elements (input/toggle/form/carousel) **or** `plan` active view-models |
-| `local_data_migration` (N-1) | `rfc.local_data_changes[]` with non-null `migration_version`/`migration_strategy` **or** `rfc.compatibility_mandates[]` non-empty |
-| `feature_flag_killswitch` | `rfc.experimentation_matrix[]` **or** `prd.feature_flags[]` **or** `plan.feature_flags` non-empty |
-| `deep_link_nav` | `plan` test hook `method:deeplink` **or** any `rfc.navigation_changes[].deep_link` non-null |
-| `telemetry_clickstream` | `prd.clickstream_events[]` **or** `rfc.cross_cutting_concerns.observability.clickstream_events[]` non-empty |
-| `localization_regional` | `prd.applicable_countries.length > 1` **or** multiple locales / localized copy in design |
-| `platform_variance` | `prd.applicable_platforms.length > 1` **or** `rfc.platform_specific.android`/`.ios` non-null **or** `rfc.scope.target_platforms.length > 1` |
-| `theming_darkmode` | design theme-state variants **or** an `open_question` matching theme/dark-mode |
-| `accessibility` | `rfc.accessibility_impacts[]` non-empty |
-| `non_functional_perf` | `rfc.cross_cutting_concerns.performance` has any non-null target/impact |
-| `offline` | `rfc.offline_behavior.offline_capable == true` **or** a `sync_strategy` present |
-
-> A category whose trigger does NOT fire → `optional_extras.feature_adjacent` (rationale = the field checked was empty/absent). A missing context file simply means its triggers cannot fire — no failure.
-
-### B. FE-Baseline Extras Library (`fe_baseline` pool; offer only when the predicate matches)
-
-| Group | Categories | Offer only if… |
-|---|---|---|
-| `session_auth` | `multi_device_concurrent_login`, `forced_signout_mid_flow`, `session_expiry`, `logout_during_flow` | feature needs auth/identity (design uses login/AuthSDK, or `prd.target_personas` require an account) |
-| `app_upgrade` | `n_minus_1_upgrade`, `fresh_vs_upgrade`, `uninstall_reinstall`, `data_migration` | app ships incrementally (always true for the 5 GoTo apps) |
-| `device_env` | `rotation`, `split_screen`, `font_scaling`, `low_storage`, `low_battery`, `system_locale_tz_change` | screens not locked-portrait in `config.<app>.json` |
-| `os_interruptions` | `incoming_call`, `notification_shade`, `background_foreground`, `permission_revoked_runtime`, `network_flip` | any interactive/networked screen |
-| `nav_gesture` | `hardware_back`, `deeplink_tamper`, `up_navigation`, `restore_after_death` | any multi-screen flow |
-| `privacy_security` | `screenshot_screenrecord`, `background_snapshot_mask`, `clipboard_exposure`, `log_leakage` | UI shows sensitive data (`rfc…data_sensitivity`, balance/PII) |
-| `a11y_baseline` | `screenreader_traversal`, `contrast`, `touch_target` | any interactive screen |
-| `l10n_baseline` | `rtl`, `string_truncation`, `number_date_currency` | `config.<app>.json` supports the relevant locale surface |
-| `resilience` | `double_tap_debounce`, `offline_cold_start`, `empty_error_states` | any networked/stateful screen |
-
-> When a `fe_baseline` extra is selected, generate best-effort hygiene scenarios, stamp `source: "fe_baseline"`, and note in `analysis.md` that expected behavior is not spec-derived and needs PM/dev confirmation.
+**Read `category_catalog.md`** (in this skill's directory) when you reach Step 0
+(Test-Category Selection Gate). It contains the detection rules table (Section A)
+and the FE-Baseline extras library (Section B). Do NOT read it at skill load —
+only when Step 0 needs it.
 
 ---
 
@@ -497,8 +1012,20 @@ The auto/extra partition is computed **solely** from the presence/values of sche
 - **Strict Determinism**: Do not extrapolate, infer, or hallucinate missing requirements. Map inputs directly to schemas without adding unmentioned fields or assumptions.
 - **No Fabricated Values (provenance rule)**: Every concrete identifier in the output — feature-flag keys, Litmus/experiment release IDs, deep-link URIs, clickstream event names, API paths, error codes, permission names — MUST be traceable to a specific input field. If a value is not present in any provided context, write `TBD — not in context` (or omit the field / use `null` where the schema allows) and record it as an Open Question in `<feature_key>_analysis.md`. Never invent a plausible-looking value (e.g. a UUID release ID or an event name like `birthday_animation_viewed`) to fill a gap. Clickstream event names in particular come ONLY from a non-empty `clickstream_events` array; if that array is empty, do not name events (per the Telemetry Rules).
 - **Category Gate**: AUTO-SELECTED categories (signal-derived) are the mandatory baseline and are always covered; only OPTIONAL EXTRAS are QA-discretionary. Generate for `auto_selected ∪ optional_extras_selected`. The P0 and boundary Hard Coverage Rules override the gate and are always covered.
-- **Coverage Audit is blocking**: The Step 4 Coverage Self-Audit Gate MUST pass (every checklist item either `covered` or in `still_blocked` with a reason) before any output file is written. Coverage is a mechanical property of the inputs, not a model judgment — two different models must produce the same `required` checklist and the same covered/blocked partition, even if scenario wording differs.
+- **Coverage Audit is blocking**: The Step 4 Coverage Self-Audit Gate MUST pass (every checklist item either `covered` or in `still_blocked` with a reason) — **including the 4c-mix balance audit** — before any output file is written. Coverage is a mechanical property of the inputs, not a model judgment — two different models must produce the same `required` checklist and the same covered/blocked partition, even if scenario wording differs.
+- **Business-flow primacy**: the suite's centre of gravity is what the feature is *for*. Core
+  business/use-case scenarios — happy paths, end-to-end journeys, alternate valid paths — are
+  generated first and form the majority of the suite. Negative, boundary, interruption and
+  hygiene scenarios are **complementary**: they are mandatory where the Hard Coverage Rules
+  require them, but they must never dominate. Enforced mechanically by Step 4c-mix's balance
+  audit, not left to model judgment. Never rebalance by deleting negative coverage — the only
+  legal fix is generating the business coverage that was missed.
 - **Baseline Determinism**: `fe_baseline` scenarios are curated hygiene, NOT input-derived requirements — stamp `source: "fe_baseline"` and note in `analysis.md` that expected behavior needs PM/dev confirmation. Never present them as spec-backed requirements.
 - **Contract Adherence**: Fail explicitly if *all* context files are missing or if essential keys within provided contexts are missing. However, do NOT fail if individual files (like `plan_context.json` or `rfc_context.json`) are absent; instead, proceed with the inputs that are provided, noting the missing contexts in `<feature_key>_analysis.md`.
 - **Format Precision**: Outputs must strictly conform to `sdet_plan.schema.json` and the 15-column squad CSV schema without altering column headers or ordering.
 - **Frontend Focus**: Test cases/scenarios must be generated *exclusively* for Frontend (FE) context (e.g., client-side UI, mobile views, offline transitions, local error copy, and client-side telemetry verifications). Do not generate backend-only validation or server-side test cases.
+- **Navigation Resolution**: every scenario's `steps[]` must reach its screen (including the
+  logged-in starting state) through a traceable path — a test hook/deep link, a
+  `design_context.ui_flow` walk, or `regression_context.navigation` — or an explicit
+  `[NAVIGATION NOT CONFIRMED]` flag when none resolves. Never an assumed or invented arrival.
+  Enforced mechanically by Step 4's navigation audit (4c-nav), not left to memory.

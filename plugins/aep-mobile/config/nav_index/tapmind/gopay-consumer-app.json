@@ -1,0 +1,1469 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "gopay-consumer-app",
+    "case_ids_indexed": 20,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "368476": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify user can access International Transfer country selection screen",
+        "method": "testInternationalTransferPageIsDisplayed",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/transfers/InternationalTransferTest.java",
+        "project_id": "190",
+        "suite_id": "19547",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"TRANSFER_GOPAY_WALLET_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Free Transfer' Button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Transfer' in title header"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down until 'International transfer' is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'International transfer' Button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'International transfer' in title header"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4527556": [
+      {
+        "module": "gopay-consumer-app",
+        "title": null,
+        "method": "testMPMStaticQR",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/paymentscore/MPMIDTests.java",
+        "project_id": "139",
+        "suite_id": "13467",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"GOPAY_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap QRIS on Home Screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "\"Perform Camera Injection with image url mediaUrl"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 Seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Amount '1'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Review payment button on payment summary screen'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Payment details on payment summary screen'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pay Button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 second"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4527557": [
+      {
+        "module": "gopay-consumer-app",
+        "title": null,
+        "method": "testMPMDynamicQR",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/paymentscore/MPMIDTests.java",
+        "project_id": "139",
+        "suite_id": "13467",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"GPS_USER_3.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap QRIS on Home Screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "\"Perform Camera Injection with image url mediaUrl"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Payment details on payment summary screen'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pay Button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for Enter your PIN screen to be visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 second"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "4527555": [
+      {
+        "module": "gopay-consumer-app",
+        "title": null,
+        "method": "testMPMDynamicQROnUs",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/paymentscore/MPMIDTests.java",
+        "project_id": "139",
+        "suite_id": "13467",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"GPS_USER_2.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap QRIS on Home Screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "\"Perform Camera Injection with image url mediaUrl"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap Payment details on payment summary screen'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Pay Button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 second"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "81955163": [
+      {
+        "module": "gopay-consumer-app",
+        "title": null,
+        "method": "testInsuranceHomePageIsDisplayed",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/HomePageTests.java",
+        "project_id": "3031149",
+        "suite_id": "37350008",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Protection at 1k' button on GoPay Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380703": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify user can see Why this Insurance is necessary section in Pre-Purchase page for Cancer Insurance",
+        "method": "verifyHeroTitlePrePurchasePageCancerInsurance",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/PrePurchaseTests.java",
+        "project_id": "3031149",
+        "suite_id": "373500018",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Affordable protection for cancer diseases' title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Avoid big expenses for cancer treatment.' description is correct"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380711": [
+      {
+        "module": "gopay-consumer-app",
+        "title": null,
+        "method": "verifyWhyThisInsuranceNecessaryPrePurchasePageCancerInsurance",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/PrePurchaseTests.java",
+        "project_id": "3031149",
+        "suite_id": "373500018",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Affordable protection for cancer diseases' title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen Pre Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Cancer is a growing health threat' title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Thousands of lives are lost to cancer in Indonesia each year.' description is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Cases are rising' title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify '390k new cancer cases are diagnosed annually, and numbers keep climbing.' description is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Medical costs are increasing' title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Health expenses in Indonesia are projected to rise by 13.6%.' description is correct"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380704": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify user can see How to claim insurance section in Pre-Purchase page for Cancer Insurance",
+        "method": "verifyHowThisProductWorksPrePurchasePageCancerInsurance",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/PrePurchaseTests.java",
+        "project_id": "3031149",
+        "suite_id": "373500018",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Affordable protection for cancer diseases' title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen Pre Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'How this product works' section title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Once you purchase this insurance and complete the 90-days waiting period,' description is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'The price is determined by your age, gender, and smoking habits' description is correct"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380706": [
+      {
+        "module": "gopay-consumer-app",
+        "title": null,
+        "method": "verifyHowToClaimInsurancePrePurchasePageCancerInsurance",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/PrePurchaseTests.java",
+        "project_id": "3031149",
+        "suite_id": "373500018",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen Pre Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen Pre Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'How to claim insurance' title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'To claim the Cash Benefit,' description is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Prepare the Required Documents:' description is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Visit the Website:' description is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Select your policy:' description is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen Pre Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Choose Your Benefits: Select the benefits you want to claim, and you will be directed to the claim form page.' description is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Fill in the Details:' description is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Submit Your Claim:' description is correct"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380707": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify user back to Asuransi Home Page from Pre-Purchase page for Cancer Insurance",
+        "method": "verifyHelpPageInPrePurchasePageCancerInsurance",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/PrePurchaseTests.java",
+        "project_id": "3031149",
+        "suite_id": "373500018",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Affordable protection for cancer diseases' title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Help' button on Pre-Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Help' title is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380708": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify user can see benefit Rp100.000.000 in Pre-Purchase page for Cancer Insurance",
+        "method": "verifyBackToHomePageFromPurchasePageCancerInsurance",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/PrePurchaseTests.java",
+        "project_id": "3031149",
+        "suite_id": "373500018",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Affordable protection for cancer diseases' title is correct"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Back' button on Pre-Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Cancer insurance' title is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380709": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify user collapse the information in Pre-Purchase page for Cancer Insurance",
+        "method": "verifyBenefitAmountInPurchasePageCancerInsurance",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/PrePurchaseTests.java",
+        "project_id": "3031149",
+        "suite_id": "373500018",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify benefit 'Rp100.000.000' amount is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380710": [
+      {
+        "module": "gopay-consumer-app",
+        "title": null,
+        "method": "verifyCollapseButtonInPurchasePageCancerInsurance",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/PrePurchaseTests.java",
+        "project_id": "3031149",
+        "suite_id": "373500018",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen Pre Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on collapse icon of 'How this product works' title"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380312": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify Expand Button In Health Declaration page for Cancer Insurance",
+        "method": "verifyHealthDeclarationTitleInHealthDeclarationPage",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/HealthDeclarationTests.java",
+        "project_id": "3031149",
+        "suite_id": "37350020",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Buy insurance now' button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Buy insurance now' button in Pre Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Health Declaration' title is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380721": [
+      {
+        "module": "gopay-consumer-app",
+        "title": null,
+        "method": "verifyExpandButtonInHealthDeclarationPage",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/HealthDeclarationTests.java",
+        "project_id": "3031149",
+        "suite_id": "37350020",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Buy insurance now' button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Buy insurance now' button in Pre Purchase page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Health Declaration' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on down arrow button of 'I don't have any relatives with cancer' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'None of my parents or siblings has been diagnosed' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on down arrow button of 'I have no abnormal physical changes' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'In the past 6 months' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on down arrow button of 'My medical tests are normal' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'In the past 2 years,' text is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on down arrow button of 'I do not have any specific diseases' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'I have never had cancer, carcinoma in situ' text is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380730": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify content on modal popup cannot register for Cancer Insurance",
+        "method": "verifyHealthDeclarationTitleContents",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/HealthDeclarationTests.java",
+        "project_id": "3031149",
+        "suite_id": "37350020",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Buy insurance now' CTA button is visible in Pre Purchase Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Buy insurance now' CTA button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Health Declaration' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'I hereby declare that I:' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'I do not have any specific diseases' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'My medical tests are normal' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'I have no abnormal physical changes' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'I don't have any relatives with cancer' title is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-382019": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify user can close the modal popup cannot register for Cancer Insurance",
+        "method": "verifyCannotRegisterModalContents",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/HealthDeclarationTests.java",
+        "project_id": "3031149",
+        "suite_id": "37350020",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Buy insurance now' CTA button is visible in Pre Purchase Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Buy insurance now' CTA button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Health Declaration' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'I have one of the conditions above' hyperlink is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'I have one of the conditions above' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Couldn\u2019t register to insurance' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'We can\u2019t cover specific diseases mentioned in the health declaration page.' description is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380733": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify user can confirm the modal popup cannot register for Cancer Insurance",
+        "method": "verifyUserCanCloseCannotRegisterModal",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/HealthDeclarationTests.java",
+        "project_id": "3031149",
+        "suite_id": "37350020",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Buy insurance now' CTA button is visible in Pre Purchase Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Buy insurance now' CTA button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Health Declaration' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'I have one of the conditions above' hyperlink is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'I have one of the conditions above' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Couldn\u2019t register to insurance' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'X' icon"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'I have one of the conditions above' hyperlink is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380735": [
+      {
+        "module": "gopay-consumer-app",
+        "title": "Verify user can tap on checkbox of Health Declaration for Cancer Insurance",
+        "method": "verifyUserCanConfirmCannotRegisterModal",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/HealthDeclarationTests.java",
+        "project_id": "3031149",
+        "suite_id": "37350020",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Buy insurance now' CTA button is visible in Pre Purchase Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Buy insurance now' CTA button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Health Declaration' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'I have one of the conditions above' hyperlink is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'I have one of the conditions above' text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Couldn\u2019t register to insurance' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Got it' CTA button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Recommended options for you' title is visible"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "TC-380738": [
+      {
+        "module": "gopay-consumer-app",
+        "title": null,
+        "method": "verifyUserCanTapTheCheckbox",
+        "source_file": "gopay-consumer-app/src/test/java/com/gopay/tests/moneymanagement/insurance/Cancer/HealthDeclarationTests.java",
+        "project_id": "3031149",
+        "suite_id": "37350020",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginWith(getConfig().getString(\"INSURANCE_USER.phone\"))"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '1' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '2' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on '3' button number if 'Enter your PIN' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Open deeplink gopaystaging://insurance-platform/home"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Scroll down on App screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Cancer insurance' title on Insurance Home Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Buy insurance now' CTA button is visible in Pre Purchase Page"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap 'Buy insurance now' CTA button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify 'Health Declaration' title is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on checkbox of 'I do not have any specific diseases' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on checkbox of 'My medical tests are normal' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on checkbox of 'I have no abnormal physical changes' title"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on checkbox of 'I don't have any relatives with cancer' title"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

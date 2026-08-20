@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "team_registry",
+  "description": "Organisation-level mapping between team names across PRD, RFC, code repo, and dashboard. Maintained once; read by sdet-plan-generator and automation-plan-generator. Prevents name drift from causing wrong module paths or regression mismatches.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "teams"],
+  "properties": {
+    "version":    { "type": "string" },
+    "updated_at": { "type": "string", "format": "date" },
+    "_comment":   { "type": "string", "description": "Human-readable notes about this file." },
+    "teams": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["canonical_id", "display_name", "aliases", "code"],
+        "properties": {
+          "canonical_id": {
+            "type": "string",
+            "description": "Stable lowercase slug used in sdet_plan.json and automation_plan.json. Never changes even if team renames."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Human-readable name shown in qa_analysis.md and reports."
+          },
+          "aliases": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "All known name variants per system. Matching is case-insensitive and strips hyphens/spaces.",
+            "required": ["prd", "rfc", "pdg"],
+            "properties": {
+              "prd": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Values seen in prd_context.team[], prd_context.involved_teams[].team, prd_context.pdg[]"
+              },
+              "rfc": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Values seen in rfc_context.team_ownership[].team"
+              },
+              "pdg": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Values seen in BrowserStack project names and dashboard PDG labels"
+              }
+            }
+          },
+          "code": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["module", "package_prefix", "regression_id_prefix"],
+            "properties": {
+              "module": {
+                "type": "string",
+                "description": "Exact module directory name in the test code repo. Used by automation-plan-generator for package path construction."
+              },
+              "package_prefix": {
+                "type": "string",
+                "description": "Root Java package for this team's test classes, e.g. com.gojek.transport.test"
+              },
+              "regression_id_prefix": {
+                "type": "string",
+                "description": "Prefix used to filter regression_context.json entries for this team, e.g. TRANSPORT- or PAY-"
+              }
+            }
+          },
+          "browserstack_project": {
+            "type": "string",
+            "description": "Exact BrowserStack project name. Written into team_ownership[].browserstack_project in rfc_context and used for CSV routing."
+          },
+          "pods": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Informational only — POD names within this module as they appear in GitLab CI yml files. Not used for alias matching; useful for understanding which sub-team owns a given feature area."
+          }
+        }
+      }
+    }
+  }
+}

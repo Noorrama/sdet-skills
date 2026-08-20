@@ -1,0 +1,961 @@
+{
+  "_meta": {
+    "generated_by": "extract_tapmind_nav_index.py",
+    "source_repo": "tapmind-mobile-tests",
+    "generated_from_repo_sha": "90535dcec44f1e9c4a4082b2b131adcf4ff891b0",
+    "generated_at": "2026-08-13T08:54:55.256921+00:00",
+    "module": "communication-platform",
+    "case_ids_indexed": 16,
+    "warning": "tapmind_steps is a best-effort, order-preserving capture of runStep()/openDeeplink()/login*/toggle/controlNetwork calls from a free-form Java method body -- NOT a verified, complete script. project_id/suite_id resolved from module constants where possible."
+  },
+  "cases": {
+    "3305938": [
+      {
+        "module": "communication-platform",
+        "title": "Verify Mic button is not visible",
+        "method": "verifyVoiceNoteIconD2C",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/VoiceNoteTest.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Get me a fresh customer from TDP"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get me a GoRide booking with a driver found state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on 'Chat' tab"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Chat Header text is present"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify image view element where the content description is 'Send a voice note'"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3305937": [
+      {
+        "module": "communication-platform",
+        "title": null,
+        "method": "verifyMicButtonIsNotVisible",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/VoiceNoteTest.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "nlp",
+            "text": "Get me a fresh customer from TDP"
+          },
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get me a GoRide booking with a driver found state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Chat Header text is present]"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text input field button to open keyboard"
+          },
+          {
+            "kind": "nlp",
+            "text": "Enter 'Text from automation' text in the input field"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Send button icon is present.]"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "655425": [
+      {
+        "module": "communication-platform",
+        "title": "Verify if transaction summary is opened after tapping on order pill for completed goride order",
+        "method": "verifyAOSIsDisplayedAfterTappingOnOrderPillForOnGoingGoRideOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a GoRide booking with a driver found state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Active text"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text goride"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657445": [
+      {
+        "module": "communication-platform",
+        "title": "Verify if AOS is opened after tapping on order pill for ongoing gocar order",
+        "method": "verifyTransactionSummaryIsDisplayedAfterTappingOnOrderPillForCompletedOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a completed goride booking)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text goride"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657448": [
+      {
+        "module": "communication-platform",
+        "title": "Verify if Transaction summary is opened after tapping on order pill for completed gocar order",
+        "method": "verifyGoCarOrderPillForOngoingOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a GoCar booking with driver found state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gocar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657449": [
+      {
+        "module": "communication-platform",
+        "title": "Verify if gofood AOS is opened after tapping on order pill for ongoing gofood order",
+        "method": "verifyGoCarOrderPillForCompletedOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a Completed GoCar booking)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gocar'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657451": [
+      {
+        "module": "communication-platform",
+        "title": "Verify if Transaction summary is opened after tapping on order pill for completed gofood order",
+        "method": "verifyGoFoodOrderPillForOngoingOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get me a food booking in merchant accepted and driver assigned state)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gofood'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657452": [
+      {
+        "module": "communication-platform",
+        "title": "Verify AOS is displayed after clicking on order pill for gobox small open truck",
+        "method": "verifyGoFoodOrderPillForCompletedOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get me a food booking in completed state)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gofood'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657500": [
+      {
+        "module": "communication-platform",
+        "title": "Verify transaction screen is displayed after clicking on order pill for gobox small open truck",
+        "method": "verifyGoBoxSmallOpenTruckOrderPillForOnGoingOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gobox'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657501": [
+      {
+        "module": "communication-platform",
+        "title": null,
+        "method": "verifyGoBoxSmallOpenTruckOrderPillForCompletedOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gobox'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657504": [
+      {
+        "module": "communication-platform",
+        "title": "Verify transaction summary screen is displayed after clicking on order pill for gobox large open truck",
+        "method": "verifyGoBoxLargeOpenTruckOrderPillForOnGoingOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gobox'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657505": [
+      {
+        "module": "communication-platform",
+        "title": null,
+        "method": "verifyGoBoxLargeOpenTruckOrderPillForCompletedOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen()"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gobox'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657480": [
+      {
+        "module": "communication-platform",
+        "title": null,
+        "method": "verifyGoSendSPMDOrderPillForOnGoingOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gosend'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657481": [
+      {
+        "module": "communication-platform",
+        "title": null,
+        "method": "verifyGoSendSPMDOrderPillForCompletedOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Get a customer)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 15 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Share All'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text containing 'Allow Full'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on the 1st 'Driver' button on chat list"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 2 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on text 'gosend'"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "657488": [
+      {
+        "module": "communication-platform",
+        "title": null,
+        "method": "verifyGoShopOrderPillForOnGoingOrder",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/OrderPillTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "loginAndNavigateToHomeScreen(Login as a customer with GoPay balance)"
+          },
+          {
+            "kind": "login",
+            "text": "loginDriver(driverContext)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ],
+    "3305894": [
+      {
+        "module": "communication-platform",
+        "title": null,
+        "method": "verifyDriverChatIsNotVisibleAfterOrderCancellation",
+        "source_file": "communication-platform/src/test/java/io/gojek/comms/tests/Chat/D2C/FlakyInternetTests.java",
+        "project_id": "107",
+        "suite_id": "16256",
+        "country": null,
+        "tapmind_steps": [
+          {
+            "kind": "login",
+            "text": "performBackdoorLogin(Return a GoRide booking with a driver found state from TDP)"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 3 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Continue button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Orders tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on On-going order card"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify driver allocated screen is shown"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 5 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Swipe up screen 5 times"
+          },
+          {
+            "kind": "nlp",
+            "text": "Verify Cancel booking button is visible"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on Cancel booking button"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on I've waited for too long"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on button next to Go back button at the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Wait for 10 seconds"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on chat tab on the bottom of the screen"
+          },
+          {
+            "kind": "nlp",
+            "text": "Tap on accessibility id Aloha.BottomNavigation.BarButton.3"
+          }
+        ],
+        "framework": "TAPMIND_NLP"
+      }
+    ]
+  }
+}

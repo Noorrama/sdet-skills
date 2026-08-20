@@ -1,534 +1,945 @@
 {
-  "feature_name": "Save Payment-Method API (EPIC-1122)",
-  "plan_version": "v2",
-  "test_classes": [
+  "epic_id": "EPIC-1122",
+  "automation_scenarios": [
     {
-      "class_name": "SaveCardComponentTest",
+      "scenario_id": "SC-EPIC1122-001",
+      "requirement_ref": "RFC-78:step-9 / REQ-001 / AC-001",
+      "description": "Valid card saved successfully — returns 200 with non-null token",
+      "is_legacy_regression": true,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "SaveCardIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldReturn200WithTokenWhenValidCardSavedForFirstTime",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\",\"holderName\":\"Test User\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["happy_path", "flag_on", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-002",
+      "requirement_ref": "RFC-78:step-2 / REQ-002 / AC-002",
+      "description": "Missing cardNumber returns 400 MISSING_FIELD with field=cardNumber",
+      "is_legacy_regression": true,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
       "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
       "test_layer": "component",
-      "methods": [
+      "method_name": "shouldReturn400MissingFieldCardNumberWhenCardNumberOmitted",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
         {
-          "method_name": "shouldReturn400MissingFieldCardNumberWhenCardNumberOmitted",
-          "scenario_id": "SC-EPIC1122-002",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn400MissingFieldExpiryMonthWhenExpiryMonthOmitted",
-          "scenario_id": "SC-EPIC1122-003",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn400MissingFieldExpiryYearWhenExpiryYearOmitted",
-          "scenario_id": "SC-EPIC1122-004",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn400MissingFieldCvvWhenCvvOmitted",
-          "scenario_id": "SC-EPIC1122-005",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn400InvalidExpiryWhenExpiryYearIsPastYear",
-          "scenario_id": "SC-EPIC1122-006",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2024,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn400InvalidExpiryWhenCurrentYearWithPastMonth",
-          "scenario_id": "SC-EPIC1122-007",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":3,\"expiryYear\":2026,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn200WhenCardNumberHas13DigitsAndPassesLuhn",
-          "scenario_id": "SC-EPIC1122-013",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4222222222222\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "boundary",
-            "P1"
-          ]
-        },
-        {
-          "method_name": "shouldReturn200WhenCardNumberHas19Digits",
-          "scenario_id": "SC-EPIC1122-014",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"6703444444444444449\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"1234\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "boundary",
-            "P1"
-          ]
-        },
-        {
-          "method_name": "shouldReturn200WhenCardExpiresInCurrentMonthAndYear",
-          "scenario_id": "SC-EPIC1122-015",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":8,\"expiryYear\":2026,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "boundary",
-            "P1"
-          ]
-        },
-        {
-          "method_name": "shouldReturn400MissingFieldCardNumberWhenCardNumberFailsLuhnCheck",
-          "scenario_id": "SC-EPIC1122-021",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"1234567890123456\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "negative",
-            "boundary",
-            "P1"
-          ]
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
         }
-      ]
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
     },
     {
-      "class_name": "SaveCardIntegrationTest",
-      "package": "com.gojek.wallet.test.integration",
-      "test_layer": "integration",
-      "methods": [
+      "scenario_id": "SC-EPIC1122-003",
+      "requirement_ref": "RFC-78:step-2 / REQ-002",
+      "description": "Missing expiryMonth returns 400 MISSING_FIELD with field=expiryMonth",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn400MissingFieldExpiryMonthWhenExpiryMonthOmitted",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
         {
-          "method_name": "shouldReturn200WithTokenWhenValidCardSavedForFirstTime",
-          "scenario_id": "SC-EPIC1122-001",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\",\"holderName\":\"Test User\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "happy_path",
-            "flag_on",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn409DuplicateCardWhenSameCardAlreadySavedForCustomer",
-          "scenario_id": "SC-EPIC1122-008",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-002.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"{{FIX-CARDPAY-002.savedCardNumber}}\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-002"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn503ServiceUnavailableWhenVaultReturns503AndWriteNoDbRow",
-          "scenario_id": "SC-EPIC1122-009",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-003.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-003"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn404WhenFeatureFlagPaymentCardSaveEnabledIsOff",
-          "scenario_id": "SC-EPIC1122-010",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-005.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-005"
-          ],
-          "tags": [
-            "flag_off",
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn409OnConcurrentDuplicateSaveEnforcedByDbUniqueConstraint",
-          "scenario_id": "SC-EPIC1122-011",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldNeverWriteRawCardNumberOrCvvToApplicationLogsAtAnyLevel",
-          "scenario_id": "SC-EPIC1122-012",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "security",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturn503ServiceUnavailableWhenVaultCallExceeds5000msTimeoutAndWriteNoDbRow",
-          "scenario_id": "SC-EPIC1122-016",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-004.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-004"
-          ],
-          "tags": [
-            "negative",
-            "P0"
-          ]
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
         }
-      ]
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
     },
     {
-      "class_name": "CardRepositoryIntegrationTest",
-      "package": "com.gojek.wallet.test.integration",
-      "test_layer": "integration",
-      "methods": [
+      "scenario_id": "SC-EPIC1122-004",
+      "requirement_ref": "RFC-78:step-2 / REQ-002",
+      "description": "Missing expiryYear returns 400 MISSING_FIELD with field=expiryYear",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn400MissingFieldExpiryYearWhenExpiryYearOmitted",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"cvv\":\"123\"}'",
+      "test_data": [
         {
-          "method_name": "shouldCreatePaymentCardsTableWithAllColumnsAndUniqueConstraintAfterV001Migration",
-          "scenario_id": "SC-EPIC1122-017",
-          "is_dedup": false,
-          "curl_reference": "",
-          "fixture_ids": [
-            "FIX-CARDPAY-006"
-          ],
-          "tags": [
-            "db",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldPersistPaymentCardEntityAndReturnAutoGeneratedUuid",
-          "scenario_id": "SC-EPIC1122-018",
-          "is_dedup": false,
-          "curl_reference": "",
-          "fixture_ids": [
-            "FIX-CARDPAY-006"
-          ],
-          "tags": [
-            "db",
-            "P0"
-          ]
-        },
-        {
-          "method_name": "shouldReturnTrueFromExistsByCustomerIdAndFingerprintWhenRowExists",
-          "scenario_id": "SC-EPIC1122-019",
-          "is_dedup": false,
-          "curl_reference": "",
-          "fixture_ids": [
-            "FIX-CARDPAY-006"
-          ],
-          "tags": [
-            "db",
-            "P1"
-          ]
-        },
-        {
-          "method_name": "shouldReturnFalseFromExistsByCustomerIdAndFingerprintWhenNoRowExists",
-          "scenario_id": "SC-EPIC1122-020",
-          "is_dedup": false,
-          "curl_reference": "",
-          "fixture_ids": [
-            "FIX-CARDPAY-006"
-          ],
-          "tags": [
-            "db",
-            "P1"
-          ]
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
         }
-      ]
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
     },
     {
-      "class_name": "SaveCardPerformanceTest",
-      "package": "com.gojek.wallet.test.integration",
-      "test_layer": "integration",
-      "methods": [
+      "scenario_id": "SC-EPIC1122-005",
+      "requirement_ref": "RFC-78:step-2 / REQ-002",
+      "description": "Missing cvv returns 400 MISSING_FIELD with field=cvv",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn400MissingFieldCvvWhenCvvOmitted",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028}'",
+      "test_data": [
         {
-          "method_name": "shouldCompleteFullPipelineWithinP95LatencyOf300msUnderNormalLoad",
-          "scenario_id": "SC-EPIC1122-022",
-          "is_dedup": false,
-          "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
-          "fixture_ids": [
-            "FIX-CARDPAY-001"
-          ],
-          "tags": [
-            "P1"
-          ]
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
         }
-      ]
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-006",
+      "requirement_ref": "RFC-78:step-4 / REQ-004 / AC-004",
+      "description": "Card with expiryYear before current year returns 400 INVALID_EXPIRY",
+      "is_legacy_regression": true,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn400InvalidExpiryWhenExpiryYearIsPastYear",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2024,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-007",
+      "requirement_ref": "RFC-78:step-4 / REQ-004 / AC-005",
+      "description": "Card with expiryYear=currentYear and expiryMonth before current month returns 400 INVALID_EXPIRY",
+      "is_legacy_regression": true,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn400InvalidExpiryWhenCurrentYearWithPastMonth",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":3,\"expiryYear\":2026,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-008",
+      "requirement_ref": "RFC-78:step-6 / REQ-003 / AC-003",
+      "description": "Duplicate card for same customer returns 409 DUPLICATE_CARD",
+      "is_legacy_regression": true,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "SaveCardIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldReturn409DuplicateCardWhenSameCardAlreadySavedForCustomer",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-002.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"{{FIX-CARDPAY-002.savedCardNumber}}\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-002",
+          "description": "Customer CX-001 with one card already persisted: card 4111111111111111 saved, fingerprint=SHA256('CX-001:4111111111111111') row exists in payment_cards",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_SAVED_CARD",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "saved_card_type": "VISA", "saved_card_number": "4111111111111111" }
+          },
+          "response_fields_used": ["customerId", "bearerToken", "savedCardNumber", "savedCardFingerprint"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_SAVED_CARD",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET", "SAVE_CARD"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_SAVED_CARD. Config: wallet_status=ACTIVE, saved_card_type=VISA, saved_card_number=4111111111111111. Count=1."
+          }
+        }
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-009",
+      "requirement_ref": "RFC-78:step-7 / NFR-003",
+      "description": "Vault service returns 503 — API returns 503 SERVICE_UNAVAILABLE with no DB row written",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "SaveCardIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldReturn503ServiceUnavailableWhenVaultReturns503AndWriteNoDbRow",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-003.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-003",
+          "description": "Customer with active wallet; vault-service stubbed to return HTTP 503 for all POST /vault/v1/tokenise requests",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-010",
+      "requirement_ref": "RFC-78:step-1 / RFC-78:feature-flags",
+      "description": "Feature flag payment.card_save.enabled=OFF returns 404 without processing payload",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "SaveCardIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldReturn404WhenFeatureFlagPaymentCardSaveEnabledIsOff",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-005.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-005",
+          "description": "Customer with active wallet; feature flag payment.card_save.enabled set to OFF in Spring test context",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["flag_off", "negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-011",
+      "requirement_ref": "RFC-78:edge-concurrent / RFC-78:risk-areas",
+      "description": "Concurrent duplicate save race condition — exactly one succeeds with 200, other returns 409",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "SaveCardIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldReturn409OnConcurrentDuplicateSaveEnforcedByDbUniqueConstraint",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-012",
+      "requirement_ref": "REQ-005 / NFR-002 / AC-006",
+      "description": "Raw cardNumber and cvv values never appear in application logs at any log level",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "SaveCardIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldNeverWriteRawCardNumberOrCvvToApplicationLogsAtAnyLevel",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["security", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-013",
+      "requirement_ref": "RFC-78:edge-boundary / RFC-78:step-3",
+      "description": "Minimum-length 13-digit Luhn-valid card number is accepted",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn200WhenCardNumberHas13DigitsAndPassesLuhn",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4222222222222\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["boundary", "P1"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-014",
+      "requirement_ref": "RFC-78:edge-boundary / RFC-78:step-3",
+      "description": "Maximum-length 19-digit card number is accepted",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn200WhenCardNumberHas19Digits",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"6703444444444444449\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"1234\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["boundary", "P1"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-015",
+      "requirement_ref": "RFC-78:edge-boundary / RFC-78:step-4",
+      "description": "Card expiring in current month and year is valid and accepted",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn200WhenCardExpiresInCurrentMonthAndYear",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":8,\"expiryYear\":2026,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["boundary", "P1"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-016",
+      "requirement_ref": "RFC-78:timeout / RFC-78:step-7 / NFR-003",
+      "description": "Vault call timeout after 5000ms returns 503 SERVICE_UNAVAILABLE with no DB row written",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "SaveCardIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldReturn503ServiceUnavailableWhenVaultCallExceeds5000msTimeoutAndWriteNoDbRow",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-004.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-004",
+          "description": "Customer with active wallet; vault-service stubbed with 6000ms fixed delay on POST /vault/v1/tokenise (exceeds 5000ms VaultClient timeout)",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["negative", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-017",
+      "requirement_ref": "STORY-1233:AC-1 / RFC-78:db-schema",
+      "description": "Flyway migration V001 creates payment_cards table with correct schema and unique constraint",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "CardRepositoryIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldCreatePaymentCardsTableWithAllColumnsAndUniqueConstraintAfterV001Migration",
+      "assertion_class": "CardRepositoryAssertions",
+      "endpoint": "",
+      "curl_reference": "",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-006",
+          "description": "Testcontainers PostgreSQL 15 with Flyway V001 migration applied; empty payment_cards table; Spring Data JPA context loaded",
+          "required_state": {
+            "entity": "DB_INFRA",
+            "category": "TESTCONTAINERS_POSTGRESQL",
+            "config": {
+              "flyway_migration": "V001__create_payment_cards.sql",
+              "table": "payment_cards",
+              "initial_state": "empty",
+              "transaction_rollback_after_each_test": true
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": {
+            "test_data_status": "TDP_COMPLETE_FALLBACK",
+            "test_data_details": {
+              "tdp_test_data_category": "TESTCONTAINERS_POSTGRESQL",
+              "test_data_operations": ["SPIN_UP_CONTAINER", "RUN_FLYWAY_MIGRATION"]
+            },
+            "test_buddy_prompt": null
+          }
+        }
+      ],
+      "tags": ["db", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 30000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-018",
+      "requirement_ref": "STORY-1233:AC-3",
+      "description": "CardRepository#save persists PaymentCard entity and returns auto-generated UUID id",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "CardRepositoryIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldPersistPaymentCardEntityAndReturnAutoGeneratedUuid",
+      "assertion_class": "CardRepositoryAssertions",
+      "endpoint": "",
+      "curl_reference": "",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-006",
+          "description": "Testcontainers PostgreSQL 15 with Flyway V001 migration applied; empty payment_cards table; Spring Data JPA context loaded",
+          "required_state": {
+            "entity": "DB_INFRA",
+            "category": "TESTCONTAINERS_POSTGRESQL",
+            "config": {
+              "flyway_migration": "V001__create_payment_cards.sql",
+              "table": "payment_cards",
+              "initial_state": "empty",
+              "transaction_rollback_after_each_test": true
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": {
+            "test_data_status": "TDP_COMPLETE_FALLBACK",
+            "test_data_details": {
+              "tdp_test_data_category": "TESTCONTAINERS_POSTGRESQL",
+              "test_data_operations": ["SPIN_UP_CONTAINER", "RUN_FLYWAY_MIGRATION"]
+            },
+            "test_buddy_prompt": null
+          }
+        }
+      ],
+      "tags": ["db", "P0"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 30000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-019",
+      "requirement_ref": "STORY-1233:AC-4",
+      "description": "CardRepository#existsByCustomerIdAndFingerprint returns true when fingerprint exists",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "CardRepositoryIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldReturnTrueFromExistsByCustomerIdAndFingerprintWhenRowExists",
+      "assertion_class": "CardRepositoryAssertions",
+      "endpoint": "",
+      "curl_reference": "",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-006",
+          "description": "Testcontainers PostgreSQL 15 with Flyway V001 migration applied; empty payment_cards table; Spring Data JPA context loaded",
+          "required_state": {
+            "entity": "DB_INFRA",
+            "category": "TESTCONTAINERS_POSTGRESQL",
+            "config": {
+              "flyway_migration": "V001__create_payment_cards.sql",
+              "table": "payment_cards",
+              "initial_state": "empty",
+              "transaction_rollback_after_each_test": true
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": {
+            "test_data_status": "TDP_COMPLETE_FALLBACK",
+            "test_data_details": {
+              "tdp_test_data_category": "TESTCONTAINERS_POSTGRESQL",
+              "test_data_operations": ["SPIN_UP_CONTAINER", "RUN_FLYWAY_MIGRATION"]
+            },
+            "test_buddy_prompt": null
+          }
+        }
+      ],
+      "tags": ["db", "P1"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 30000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-020",
+      "requirement_ref": "STORY-1233:AC-5",
+      "description": "CardRepository#existsByCustomerIdAndFingerprint returns false when fingerprint not found",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "CardRepositoryIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldReturnFalseFromExistsByCustomerIdAndFingerprintWhenNoRowExists",
+      "assertion_class": "CardRepositoryAssertions",
+      "endpoint": "",
+      "curl_reference": "",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-006",
+          "description": "Testcontainers PostgreSQL 15 with Flyway V001 migration applied; empty payment_cards table; Spring Data JPA context loaded",
+          "required_state": {
+            "entity": "DB_INFRA",
+            "category": "TESTCONTAINERS_POSTGRESQL",
+            "config": {
+              "flyway_migration": "V001__create_payment_cards.sql",
+              "table": "payment_cards",
+              "initial_state": "empty",
+              "transaction_rollback_after_each_test": true
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": {
+            "test_data_status": "TDP_COMPLETE_FALLBACK",
+            "test_data_details": {
+              "tdp_test_data_category": "TESTCONTAINERS_POSTGRESQL",
+              "test_data_operations": ["SPIN_UP_CONTAINER", "RUN_FLYWAY_MIGRATION"]
+            },
+            "test_buddy_prompt": null
+          }
+        }
+      ],
+      "tags": ["db", "P1"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 30000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-021",
+      "requirement_ref": "RFC-78:step-3",
+      "description": "Card number failing Luhn algorithm returns 400 MISSING_FIELD",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.component",
+      "test_class": "SaveCardComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn400MissingFieldCardNumberWhenCardNumberFailsLuhnCheck",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"1234567890123456\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["negative", "boundary", "P1"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 15000 },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-EPIC1122-022",
+      "requirement_ref": "NFR-001",
+      "description": "Full request pipeline completes within p95 latency of 300ms under normal staging load",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "wallet-service",
+      "module": "wallet-service",
+      "package": "com.gojek.wallet.test.integration",
+      "test_class": "SaveCardPerformanceTest",
+      "test_layer": "integration",
+      "method_name": "shouldCompleteFullPipelineWithinP95LatencyOf300msUnderNormalLoad",
+      "assertion_class": "SaveCardAssertions",
+      "endpoint": "POST /payment/v1/cards",
+      "curl_reference": "curl -X POST http://localhost:8080/payment/v1/cards -H 'Authorization: Bearer {{FIX-CARDPAY-001.bearerToken}}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"4111111111111111\",\"expiryMonth\":12,\"expiryYear\":2028,\"cvv\":\"123\"}'",
+      "test_data": [
+        {
+          "fixture_id": "FIX-CARDPAY-001",
+          "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_WALLET",
+            "count": 1,
+            "config": { "wallet_status": "ACTIVE", "card_already_saved": false }
+          },
+          "response_fields_used": ["customerId", "bearerToken"],
+          "test_data_output": {
+            "test_data_status": "TDP_SUPPORTED",
+            "test_data_details": {
+              "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
+              "test_data_operations": ["CREATE_CUSTOMER", "ACTIVATE_WALLET"]
+            },
+            "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
+          }
+        }
+      ],
+      "tags": ["P1"],
+      "environments": ["dev-cluster", "staging-cluster"],
+      "execution_hints": { "retry_count": 2, "timeout_ms": 60000 },
+      "jira_ids": []
     }
-  ],
-  "fixtures_summary": [
-    {
-      "fixture_id": "FIX-CARDPAY-001",
-      "description": "Verified customer CX-001 with valid Bearer token; card 4111111111111111 not previously saved in payment_cards; feature flag payment.card_save.enabled=ON",
-      "used_by_scenarios": [
-        "SC-EPIC1122-001",
-        "SC-EPIC1122-002",
-        "SC-EPIC1122-003",
-        "SC-EPIC1122-004",
-        "SC-EPIC1122-005",
-        "SC-EPIC1122-006",
-        "SC-EPIC1122-007",
-        "SC-EPIC1122-011",
-        "SC-EPIC1122-012",
-        "SC-EPIC1122-013",
-        "SC-EPIC1122-014",
-        "SC-EPIC1122-015",
-        "SC-EPIC1122-021",
-        "SC-EPIC1122-022"
-      ],
-      "required_state": {
-        "entity": "CUSTOMER",
-        "category": "CUSTOMER_WITH_WALLET",
-        "count": 1,
-        "config": {
-          "wallet_status": "ACTIVE",
-          "card_already_saved": false
-        }
-      },
-      "response_fields_used": [
-        "customerId",
-        "bearerToken"
-      ],
-      "output": {
-        "test_data_status": "TDP_SUPPORTED",
-        "test_data_details": {
-          "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-          "test_data_operations": [
-            "CREATE_CUSTOMER",
-            "ACTIVATE_WALLET"
-          ]
-        },
-        "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-      }
-    },
-    {
-      "fixture_id": "FIX-CARDPAY-002",
-      "description": "Customer CX-001 with one card already persisted: card 4111111111111111 saved, fingerprint=SHA256('CX-001:4111111111111111') row exists in payment_cards",
-      "used_by_scenarios": [
-        "SC-EPIC1122-008"
-      ],
-      "required_state": {
-        "entity": "CUSTOMER",
-        "category": "CUSTOMER_WITH_SAVED_CARD",
-        "count": 1,
-        "config": {
-          "wallet_status": "ACTIVE",
-          "saved_card_type": "VISA",
-          "saved_card_number": "4111111111111111"
-        }
-      },
-      "response_fields_used": [
-        "customerId",
-        "bearerToken",
-        "savedCardNumber",
-        "savedCardFingerprint"
-      ],
-      "output": {
-        "test_data_status": "TDP_SUPPORTED",
-        "test_data_details": {
-          "tdp_test_data_category": "CUSTOMER_WITH_SAVED_CARD",
-          "test_data_operations": [
-            "CREATE_CUSTOMER",
-            "ACTIVATE_WALLET",
-            "SAVE_CARD"
-          ]
-        },
-        "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_SAVED_CARD. Config: wallet_status=ACTIVE, saved_card_type=VISA, saved_card_number=4111111111111111. Count=1."
-      }
-    },
-    {
-      "fixture_id": "FIX-CARDPAY-003",
-      "description": "Customer with active wallet; vault-service stubbed to return HTTP 503 for all POST /vault/v1/tokenise requests",
-      "used_by_scenarios": [
-        "SC-EPIC1122-009"
-      ],
-      "required_state": {
-        "entity": "CUSTOMER",
-        "category": "CUSTOMER_WITH_WALLET",
-        "count": 1,
-        "config": {
-          "wallet_status": "ACTIVE",
-          "card_already_saved": false
-        }
-      },
-      "response_fields_used": [
-        "customerId",
-        "bearerToken"
-      ],
-      "output": {
-        "test_data_status": "TDP_SUPPORTED",
-        "test_data_details": {
-          "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-          "test_data_operations": [
-            "CREATE_CUSTOMER",
-            "ACTIVATE_WALLET"
-          ]
-        },
-        "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-      }
-    },
-    {
-      "fixture_id": "FIX-CARDPAY-004",
-      "description": "Customer with active wallet; vault-service stubbed with 6000ms fixed delay on POST /vault/v1/tokenise (exceeds 5000ms VaultClient timeout)",
-      "used_by_scenarios": [
-        "SC-EPIC1122-016"
-      ],
-      "required_state": {
-        "entity": "CUSTOMER",
-        "category": "CUSTOMER_WITH_WALLET",
-        "count": 1,
-        "config": {
-          "wallet_status": "ACTIVE",
-          "card_already_saved": false
-        }
-      },
-      "response_fields_used": [
-        "customerId",
-        "bearerToken"
-      ],
-      "output": {
-        "test_data_status": "TDP_SUPPORTED",
-        "test_data_details": {
-          "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-          "test_data_operations": [
-            "CREATE_CUSTOMER",
-            "ACTIVATE_WALLET"
-          ]
-        },
-        "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-      }
-    },
-    {
-      "fixture_id": "FIX-CARDPAY-005",
-      "description": "Customer with active wallet; feature flag payment.card_save.enabled set to OFF in Spring test context",
-      "used_by_scenarios": [
-        "SC-EPIC1122-010"
-      ],
-      "required_state": {
-        "entity": "CUSTOMER",
-        "category": "CUSTOMER_WITH_WALLET",
-        "count": 1,
-        "config": {
-          "wallet_status": "ACTIVE",
-          "card_already_saved": false
-        }
-      },
-      "response_fields_used": [
-        "bearerToken"
-      ],
-      "output": {
-        "test_data_status": "TDP_SUPPORTED",
-        "test_data_details": {
-          "tdp_test_data_category": "CUSTOMER_WITH_WALLET",
-          "test_data_operations": [
-            "CREATE_CUSTOMER",
-            "ACTIVATE_WALLET"
-          ]
-        },
-        "test_buddy_prompt": "Provision a CUSTOMER entity with category CUSTOMER_WITH_WALLET. Config: wallet_status=ACTIVE, card_already_saved=false. Count=1."
-      }
-    },
-    {
-      "fixture_id": "FIX-CARDPAY-006",
-      "description": "Testcontainers PostgreSQL 15 with Flyway V001 migration applied; empty payment_cards table; Spring Data JPA context loaded",
-      "used_by_scenarios": [
-        "SC-EPIC1122-017",
-        "SC-EPIC1122-018",
-        "SC-EPIC1122-019",
-        "SC-EPIC1122-020"
-      ],
-      "required_state": {
-        "entity": "DB_INFRA",
-        "category": "TESTCONTAINERS_POSTGRESQL",
-        "config": {
-          "flyway_migration": "V001__create_payment_cards.sql",
-          "table": "payment_cards",
-          "initial_state": "empty",
-          "transaction_rollback_after_each_test": true
-        }
-      },
-      "response_fields_used": [],
-      "output": {
-        "test_data_status": "TDP_COMPLETE_FALLBACK",
-        "test_data_details": {
-          "tdp_test_data_category": "TESTCONTAINERS_POSTGRESQL",
-          "test_data_operations": [
-            "SPIN_UP_CONTAINER",
-            "RUN_FLYWAY_MIGRATION"
-          ]
-        },
-        "test_buddy_prompt": null
-      }
-    }
-  ],
-  "dedup_report": {
-    "total_scenarios_in_sdet_plan": 22,
-    "skipped_is_dedup_true": 0,
-    "methods_generated": 22,
-    "test_classes_generated": 4,
-    "fixtures_generated": 6
-  }
+  ]
 }
