@@ -40,31 +40,19 @@
       "type": "array",
       "description": "Delivery milestones/dates stated in the PRD. Empty when unstated."
     },
-    "source_document": {
-      "type": ["string", "null"],
-      "description": "Path or URL of the PRD the context was extracted from (alias of source_ref)."
-    },
-    "extracted_at": {
-      "type": ["string", "null"],
-      "description": "ISO-8601 timestamp of the extraction run."
-    },
-    "extractor_version": {
-      "type": ["string", "null"],
-      "description": "Version of the prd-extractor skill that produced this file."
-    },
     "summary": {
       "type": ["string", "null"],
       "description": "One-paragraph plain-language statement of the feature intent."
     },
     "in_scope": {
       "type": "array",
-      "description": "Explicit in-scope items from the PRD Scope section.",
-      "items": { "type": "string" }
+      "description": "Explicit in-scope items from the PRD Scope section, as numbered {id, item} entries (id is 1-based, contiguous) so each item is referenceable downstream — same shape as the rfc-extractor's in_scope.",
+      "items": { "$ref": "#/definitions/ScopeItem" }
     },
     "out_of_scope": {
       "type": "array",
-      "description": "Explicit exclusions — as important as in-scope; the SDET plan uses this to SUPPRESS scenario generation. Record even when it conflicts with a later section (flag that conflict in needs_clarification / open_decisions).",
-      "items": { "type": "string" }
+      "description": "Explicit exclusions — as important as in-scope; the SDET plan uses this to SUPPRESS scenario generation. Record even when it conflicts with a later section (flag that conflict in needs_clarification / open_decisions). Numbered {id, item} entries, same shape as the rfc-extractor's out_of_scope.",
+      "items": { "$ref": "#/definitions/ScopeItem" }
     },
     "user_flows": {
       "type": "array",
@@ -366,9 +354,39 @@
         }
       }
     },
-    "source_ref": {
-      "type": ["string", "null"],
-      "description": "Path or URL of the source PRD."
+    "provenance": {
+      "anyOf": [{ "$ref": "#/definitions/Provenance" }, { "type": "null" }],
+      "description": "Source revision + content hash stamped on every extract per the shared phase-a-provenance skill. Same Provenance shape as the rfc-extractor (source_type='prd', extractor_skill='prd-extractor'). Powers staleness detection, re-extract, and context diff."
+    }
+  },
+  "definitions": {
+    "ScopeItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "item"],
+      "description": "A numbered in-scope / out-of-scope entry, referenceable by number downstream. Same shape as the rfc-extractor's ScopeItem.",
+      "properties": {
+        "id": { "type": "integer", "description": "1-based, contiguous" },
+        "item": { "type": "string" }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Shared Phase A provenance stamp — kept in sync by hand with the identical definition in rfc_context.schema.json.",
+      "required": ["source_ref", "source_type", "extracted_at", "extractor_skill"],
+      "properties": {
+        "source_ref": { "type": "string" },
+        "source_type": { "type": "string", "enum": ["prd", "rfc"] },
+        "source_revision": { "type": ["string", "null"] },
+        "source_content_hash": { "type": ["string", "null"], "description": "sha256:<hex> or null" },
+        "extracted_at": { "type": "string", "description": "UTC ISO-8601" },
+        "extractor_skill": { "type": "string", "enum": ["prd-extractor", "rfc-extractor"] },
+        "extractor_skill_version": { "type": ["string", "null"] },
+        "status_at_extract": { "type": ["string", "null"] },
+        "finalised_at_extract": { "type": "boolean" },
+        "prior_run": { "type": ["string", "null"] }
+      }
     }
   }
 }
