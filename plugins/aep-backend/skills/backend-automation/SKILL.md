@@ -38,6 +38,38 @@ idea under a different name. Do not assume any specific class, base, or conventi
 because it exists in a module you've seen before. Confirm it exists **in the target module**
 before using it.
 
+## ...but a few things DO hold repo-wide — and they are compiler-enforced
+
+The rule above is about *architecture* (Endpoint/Client/Controller shapes), which genuinely varies
+per module. It is **not** a licence to skip the small set of invariants that hold everywhere they
+apply. The most important one:
+
+> **Every test method in the 32 modules that use it carries `@TestInfo`, with all four of
+> `projectId`, `suiteId`, `testCaseIds`, `owner` populated — omitting any one is a compile error.**
+
+`com.gojek.TestInfo` comes from the external `com.gojek:common-integrations` JAR (not in-repo
+source, so you cannot read its definition from the tree). It is `@Target(METHOD)`, so it goes on
+the test method, never the class. A full scan of 29,363 usages found exactly two attribute-set
+combinations and zero structural deviation.
+
+**The values, however, are per-module** — there is no repo-wide `SuiteConstants`. `gofood`,
+`marketplace` and `driver-platform` read from their own `config/TestRailConfig`; `scp` uses
+`SuiteConstant` (singular); `transport` deliberately passes `projectId=""`/`suiteId=""`; seven
+modules use raw string literals; and 10 modules — including **`payment-core`**, which does not have
+the JAR on its classpath at all — must **not** have `@TestInfo` added.
+
+**A second invariant, equally silent when missed:** `@Test(groups = …)` is present on 40,055 of
+40,606 `@Test` annotations, and every Gradle task selects tests by group
+(`includeGroups System.getProperty('tag','NONE')`). A test whose group isn't selected **never runs,
+without failing**. The group constant class is per-module too (`GoFoodCategories`,
+`MarketplaceCategories`, `TransportCategories`, `constants.Groups`, `testutils.TestGroup`, …).
+
+**Before writing any `@Test` method, read
+[`references/test-annotation-rules.md`](references/test-annotation-rules.md).** It carries the
+decompiled annotation contract, the per-module `projectId`/`suiteId`/`owner` table, the
+`testCaseIds` placeholder convention, the gopay groups silent-skip trap, and a pre-flight
+checklist. Guessing these produces either a build failure or a test that silently never runs.
+
 ## Do NOT assume — verified counterexamples
 
 Every one of these has been directly disproven somewhere in this repo. Treat them as "check
@@ -45,7 +77,7 @@ first," not "safe defaults":
 
 | Assumption | Why it's wrong | Verified counterexample |
 |---|---|---|
-| A universal `IServiceEndpoint` exists to implement | It's external (not in-repo source) in most modules, but 5+ modules maintain their own local copy under a different package | `payment-core` has its own `com.paymentcore.backendtests.core.template.HttpServiceEndpoint`; `gopay`, `iris`, `crypto`, `vehicle-financing` each have their own too |
+| There is no shared endpoint convention at all | Overcorrection. There **is** a dominant convention — it just isn't declared in this repo, which is why grepping for `interface IServiceEndpoint` makes the repo look convention-less. `restidioms.security.core.template.IServiceEndpoint` ships in the external `com.gojek.aep-backend-core:core` jar and is imported **3,037** times. Only **one** module declares its own type by that name: `gopay` (1,426 imports of its fork). Other outliers clone it under a *different* name — `payment-core` and `iris` both define a local `HttpServiceEndpoint`. So: check whether your module is mainstream (use the jar) or an outlier (use its local clone) — don't assume either | Mainstream: `customer-platforms` — 0 own declarations, 249 jar imports, 246 implementors. Outliers: `gopay` (own `IServiceEndpoint`), `payment-core`/`iris` (own `HttpServiceEndpoint`) |
 | Every module has a universal `BaseClient` every Client extends | Often only a minority of Clients use it | In `driver-platform`, only 5 of ~48 client classes extend `clients.BaseClient` — the rest call `RequestHandler` directly |
 | Every module depends on `gojek-commons` | 8 modules opt out entirely | `cartography`, `crypto`, `data-platform`, `midtrans-core-api`, `iris`, `payment-core`, `ep-web-platform`, `vehicle-financing` have no `gojek-commons` dependency |
 | Every module uses the same authentication | Auth varies per-domain even within one module | `payment-core` uses none/Basic-header-literal/API-key/HMAC-SHA512-signing/mTLS depending on the sub-domain being called |
@@ -90,6 +122,10 @@ Step 11 — Follow the nearest proven sibling file's exact convention (Lombok an
 Step 12 — Add validations matching what the module actually verifies for similar endpoints (see
           "Determining validation strategy"). Don't add DB/Kafka checks the module doesn't
           actually use for this kind of call, and don't skip them if siblings do.
+Step 12a— Annotate the test method per references/test-annotation-rules.md: `@Test` then
+          `@TestInfo` then the signature, all four @TestInfo attributes populated from THIS
+          module's constants holder, and `@Test` groups that satisfy the module's filtering
+          listener. Skip @TestInfo only for the 10 modules listed there that don't use it.
 Step 13 — Never invent: TestRail case IDs, hostnames, credentials/tokens, error codes/messages,
           or customer/merchant/order test-data IDs. If you don't have a real one, insert an
           obviously-marked placeholder and tell the user what they need to supply.
@@ -120,17 +156,21 @@ and do not load a module skill for a module it doesn't cover.
 
 | Module | Skill to load | One-line reason it has its own skill |
 |---|---|---|
-| `go-logistics` | `go-logistics-api-test-writer` | TMS/GoKilat/GoSend/GoBox/GoShop layering, TMS gateway-prefix quirk, dead Kotlin scaffold |
+| `go-logistics` | `go-logistics-api-test-writer` | TMS/GoKilat/GoSend/GoBox/GoShop layering, TMS gateway-prefix quirk, Kotlin scaffold abandoned since 2021 (Java is the living convention) |
 | `gopay` | `gopay-api-test-writer` | Two coexisting paradigms (REST/miniapp vs gRPC/OMS); also see `gopay/.gitlab/skills/qa-intern/` for its own domain playbooks (payment flows, OMS state machine) — read those too when working in `paymentTooling/**` |
 | `gofood` | `gofood-api-test-writer` | In-progress Controller/Client/Endpoint migration alongside legacy `*ClientWrapper`s; narrow-but-real gRPC surface for OpenAPI/web-order |
 | `driver-platform` | `driver-platform-api-test-writer` | No universal BaseClient; header-spoofed driver auth (not a real login helper); disabled Kafka assertions |
 | `transport` | `transport-api-test-writer` | Flow-controller orchestration layer; `TransportController` god-object; 4-year-stale README |
 | `payment-core` | `payment-core-api-test-writer` | Standalone module (no `gojek-commons`); per-sub-domain auth (Basic/API-key/HMAC/mTLS); settlement domain data conventions |
 | `scp` | `scp-api-test-writer` | Looks gRPC-heavy (62 `.proto` files) but is 100% dead scaffolding — real tests are plain REST identity/login |
+| `marketplace` | `marketplace-api-test-writer` | 21 test bases routed by feature area; `EndPoint`/`testName=` conventions inverted vs gofood; `ConfigManager` mutates service configs from the DataProvider row |
+| `midtrans-core-api` | `midtrans-core-api-test-writer` | Endpoints are **enum constants**, not classes; no client layer; static-imported `@TestInfo` values; hardcoded card/credential literals to avoid copying |
+| `customer-platforms` | `customer-platforms-api-test-writer` | Umbrella module with four coexisting sub-conventions needing a routing step; on the mainstream jar `IServiceEndpoint` path; `countryName` via `TestCountry` constant |
+| `iris` | `iris-api-test-writer` | Local `HttpServiceEndpoint` clone + local `Param`/`RequestBody`/`RequestHandler`; **no controller layer** (helpers instead); ~50/50 HTTP/gRPC; 9-line base class; `TC-`-prefixed case ids |
 
 **Modules with no dedicated skill yet** (not because they're unimportant — because they haven't
-been deep-analyzed): `marketplace`, `midtrans-core-api`, `customer-platforms`, `icp`,
-`driver-incentives`, `midtrans-enterprise`, `iris`, `care-platform`, `courier`, `helpcenter`,
+been deep-analyzed): `icp`,
+`driver-incentives`, `midtrans-enterprise`, `care-platform`, `courier`, `helpcenter`,
 `app-platform`, `gopaylater`, `ticket-arbitration`, `go-sure`, `pricing`, `clloanplatform`, `gtl`,
 `merchantlending`, `gomodal`, `gomart`, `gopay-merchant`, `gojek-e2e`, `merchant-platform`,
 `ep-web-platform`, `vehicle-financing`, `core`, `data-generator`, `fleet-portal-backend`. If asked
@@ -287,6 +327,10 @@ Before reporting the task done:
 
 ## Other resources referenced by this skill (read when relevant, not by default)
 
+- `references/test-annotation-rules.md` — **read this before writing any `@Test` method.** The
+  decompiled `@TestInfo` contract, the per-module `projectId`/`suiteId`/`owner` constants table for
+  all 32 modules that use it, the 10 modules that must not, `testCaseIds` placeholder convention,
+  the gopay groups silent-skip trap, and the `description=`/`testName=` inversion.
 - `REPO_TEST_AUTOMATION_ANALYSIS.md` (repo root) — the full evidence trail behind every claim in
   this file, including a structural fingerprint table for every module and 11 fully-traced
   end-to-end examples across 6 modules.

@@ -166,3 +166,75 @@ rather than a flat sequence of bare method calls with no step boundaries.
   passing example.
 - Nothing else was found to be clearly dead in this module during analysis — flag anything else
   you find as a new observation rather than assuming it's safe to imitate.
+
+## Test-method contract (mandatory — verified)
+
+Read `backend-automation/references/test-annotation-rules.md` first — then note that **the headline
+rule there does not apply to this module.**
+
+### ⚠️ payment-core does NOT use `@TestInfo` — do not add it
+
+`payment-core` has **zero** `@TestInfo` usages across 48 test files and 311 `@Test` methods. Its
+`build.gradle` declares **neither `gojek-commons` nor the `common-integrations` jar**, so
+`com.gojek.TestInfo` **is not on the classpath**: adding the import is a **compile error**, not a
+style deviation. Same for `@Ownership`.
+
+This is the one module with a skill where "every test needs `@TestInfo`" is actively wrong.
+
+### ⚠️ `@Test(groups = …)` is what actually matters here
+
+CI selects tests **only** by group. A generated test with no wired group **never runs**. Groups come
+from **`constants.Groups`** — this class was missing from earlier versions of this skill entirely.
+
+```java
+@Test(groups = {Groups.<GROUP>}, dataProvider = "…")
+public void someTest(...) {
+```
+
+### Base class
+
+`testBase.TestBase` (`payment-core/src/test/java/testBase/TestBase.java:17`) —
+`@Listeners(BasicTestListener.class)` and **`implements IHookable`** (not a plain class; the
+`IHookable` hook is how it wraps test invocation).
+
+### Response DTOs — the compile-blocking correction
+
+**56 of 65 response DTOs `extends com.paymentcore.backendtests.apis.commons.BaseHttpResponse`**
+(`.../apis/commons/BaseHttpResponse.java:8`). Earlier versions of this skill never named this class
+while still telling you not to forget the `.setHttpStatusCode(...)` stamp — following that literally
+produces code that **does not compile**, because the stamp is inherited from `BaseHttpResponse`.
+
+Annotation set: **`@Data` (122 files)** vs `@Getter` (22 files) across `payment-core/src`.
+Earlier guidance said `@Builder`/`@Getter` was the convention; `@Data` dominates by ~5.5x.
+
+### Local framework — payment-core clones the convention, shares nothing
+
+| Concern | payment-core reality |
+|---|---|
+| Endpoint contract | **own** `com.paymentcore.backendtests.core.template.HttpServiceEndpoint` (75+ importers). **Zero** references to `IServiceEndpoint` or `restidioms.*` |
+| Client base | **no `BaseClient` of any kind**. Each of the 7 domain clients owns a `RequestHandler` field; the de facto base is `.../utils/RequestHandler.java:25` |
+| Response base | own `BaseHttpResponse` (above) |
+| `gojek-commons` | **not a dependency** — no `project(...)` deps at all |
+
+Use fully-qualified real package names from the table above. Earlier versions of this skill used
+shorthand package names that do not exist and will not compile.
+
+### Assertions
+
+**`SoftAssert` appears in only 3 files here** (vs 103 in go-logistics). Hard asserts are the norm —
+do not inject `SoftAssert` by default; match the sibling test.
+
+### Corrections to earlier guidance
+
+- **`SignatureHelper` is exchange-only** (2 files total) — *not* used by `caa`/`card`/`paa`/
+  `mpadapter`/`rhea`. Earlier guidance sent authors down a signing path for five domains that do
+  not sign.
+- **`BigDecimal`/`HALF_UP` is not a module convention** — it exists in 2 files and is
+  Plutus-balance-specific.
+- There is a **`src/gatling/java` source set** in this module, previously undocumented.
+
+### Compile check
+
+```
+./gradlew :payment-core:compileTestJava
+```

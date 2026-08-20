@@ -1,5 +1,24 @@
 # Copy-Paste Templates — Legacy/Proven Java Pattern
 
+> ## ⚠️ Verified-signature corrections (read before copying any snippet below)
+>
+> Three constructs in earlier versions of this file **do not compile** against the real module.
+> Verified against `go-logistics/src` on the current branch:
+>
+> | Snippet used below | Reality |
+> |---|---|
+> | `import com.gojek.Ownership;` | **Does not exist** (0 hits repo-wide). Real: `import utilities.Ownership;` (41 real imports). |
+> | `<Feature>Controller(ConsumerHeaders headers)` | **No controller takes `ConsumerHeaders`** (0 hits). Real constructor shapes: `(String cToken, Language cLocale, Country country)`, `(CountryAndLanguage countryAndLanguage)`, `(ConsumerContext consumerContext)`. |
+> | `new CountryAndLanguage(Country.X)` | Single-arg ctor does not exist. Real: `new CountryAndLanguage(Country.INDONESIA, false)` or `new CountryAndLanguage(Country.fromCountryCode("id"), false)`. |
+>
+> Also note `new ConsumerHeaders(...)` has **zero** usages in `go-logistics/src/test` — the
+> `ConsumerHeaders`-threading shape shown below is not how this module's tests actually build
+> requests. **Open the nearest sibling test in your vertical and copy its real constructor call**
+> rather than trusting the skeletons here. The layer *structure* below is accurate; several of the
+> exact signatures are not.
+
+
+
 These are generalized from real code in the repo (with feature-specific business logic stripped
 out and names replaced by `<Feature>` placeholders) — this is the pattern to default to for any
 new endpoint in TMS, GoKilat/store, GoSend consumer, or GoBox, and is also safe for GoShop unless
@@ -293,8 +312,9 @@ public class <Feature>BaseTest extends GologisticBaseHelper {
 // src/test/java/<vertical>/<feature>/<Feature>Tests.java
 package <vertical>.<feature>;
 
-import com.gojek.Ownership;
+import utilities.Ownership;   // NOT com.gojek.Ownership — that package does not exist
 import com.gojek.TestInfo;
+import constants.SuiteConstants;   // projectId/suiteId constants live here
 import common.constants.test.TestGroups;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -309,13 +329,14 @@ public class <Feature>Tests extends <Feature>BaseTest {
         dataProvider = "create<Feature>",
         retryAnalyzer = RetryAnalyzer.class // only if genuinely flaky/timing-sensitive
     )
-    @TestInfo(projectId = "<PROJECT_ID>", suiteId = "<SUITE_ID>", owner = "<owner>", testCaseIds = {"<REAL_TESTRAIL_ID_OR_TODO>"})
+    @TestInfo(projectId = SuiteConstants.<AREA>_PROJECT_ID, suiteId = SuiteConstants.<AREA>_BACKEND,
+              owner = "first.last@gojek.com", testCaseIds = {"<REAL_TESTRAIL_ID_OR_EMPTY>"})
     @Ownership(author = GojekEngineer.<SOME_ENGINEER>)
     public void verify<Feature>ForCase(<Feature>Case testCase) {
         Reporter.log("<b>Verifying <Feature>: " + testCase.getCase_description() + "</b>");
 
         Consumer consumer = provideConsumer();
-        ConsumerHeaders headers = new ConsumerHeaders(consumer.getToken(), new CountryAndLanguage(Country.INDONESIA));
+        ConsumerHeaders headers = new ConsumerHeaders(consumer.getToken(), new CountryAndLanguage(Country.INDONESIA, false));
         <Feature>Controller controller = new <Feature>Controller(headers);
 
         SoftAssert softAssert = new SoftAssert();
@@ -333,11 +354,12 @@ public class <Feature>Tests extends <Feature>BaseTest {
 
     // Pure negative, no data provider — mirrors e.g. ShipmentTests.verifyCancellationInvalidShipment
     @Test(groups = {TestGroups.<SOME_EXISTING_OR_NEW_GROUP>})
-    @TestInfo(projectId = "<PROJECT_ID>", suiteId = "<SUITE_ID>", owner = "<owner>", testCaseIds = {"<REAL_TESTRAIL_ID_OR_TODO>"})
+    @TestInfo(projectId = SuiteConstants.<AREA>_PROJECT_ID, suiteId = SuiteConstants.<AREA>_BACKEND,
+              owner = "first.last@gojek.com", testCaseIds = {"<REAL_TESTRAIL_ID_OR_EMPTY>"})
     @Ownership(author = GojekEngineer.<SOME_ENGINEER>)
     public void verify<Feature>WithInvalidId() {
         Consumer consumer = provideConsumer();
-        ConsumerHeaders headers = new ConsumerHeaders(consumer.getToken(), new CountryAndLanguage(Country.INDONESIA));
+        ConsumerHeaders headers = new ConsumerHeaders(consumer.getToken(), new CountryAndLanguage(Country.INDONESIA, false));
         <Feature>Controller controller = new <Feature>Controller(headers);
 
         <Feature>ErrorResponseDTO response = controller.create<Feature>Error("invalid-id-1234", null);

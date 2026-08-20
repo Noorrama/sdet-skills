@@ -1,21 +1,32 @@
-# The "Modern" Kotlin Pattern (GoShop scaffold) — Use With Caution
+# The GoShop Kotlin scaffold — ABANDONED, do not use as a template
 
-`go-logistics/Refactoring.md` describes a target convention (`IAPIResponse`,
-`processAPIRequest`, `deserializeKt`, no assertions in controllers). The **only** place that
-target convention is fully, consistently implemented is a Kotlin scaffold under
-`src/main/kotlin/goShop/{clients,controllers,endpoints}/**` (plus the shared `common/` Kotlin
-utilities). **As of this research pass, no test class anywhere in the repo calls into this
-scaffold** — every real GoShop `@Test` (`src/test/java/goShop/*.java`) calls the *legacy* Java
-`controller.GoShopController` / `clients.goShop.GoShopClient` / `endpoint.goShop.*` classes,
-which happen to live in same-named-but-different packages. The Kotlin tree compiles and looks
-production-ready, but it is unexercised — treat it as a design reference, not a battle-tested
-path, until you've actually run a test through it.
+> **Correction (verified from git history).** An earlier version of this file called this the
+> "modern" pattern and treated `go-logistics/Refactoring.md` as current direction. That framing was
+> wrong, and it was wrong in the most misleading direction: this is not new-and-unproven code, it is
+> **the oldest code in the module, abandoned five years ago.**
 
-**When to use this file instead of `templates.md`**: only when the user explicitly asks for the
-Refactoring.md-style rewrite, or you're extending GoShop's Kotlin layer specifically (adding a
-new endpoint/client/controller method alongside the existing ones in
-`src/main/kotlin/goShop/**`). For every other vertical (TMS, GoKilat/store, GoSend consumer,
-GoBox), and for GoShop unless told otherwise, use the proven Java pattern in `templates.md`.
+Verified with `git log`:
+
+| Fact | Evidence |
+|---|---|
+| Kotlin `goShop` scaffold created | **2021-07-26** (`GSH-1584`), last real change **2021-09-23** |
+| Its only touch since | **2024-12-02**, and it was a *revert* |
+| `go-logistics/Refactoring.md` | **one single commit, 2021-03-11** — never followed up |
+| Java `src/main/java` + `src/test/java` | active through **2026-07-09** |
+
+So the Java pattern is not "legacy waiting to be replaced" — it is the living convention, five
+years of continuous work after the Kotlin experiment stopped. The Kotlin tree compiles and looks
+production-ready, and **no test class anywhere in the repo calls into it**: every real GoShop
+`@Test` (`src/test/java/goShop/*.java`) calls the Java `controller.GoShopController` /
+`clients.goShop.GoShopClient` / `endpoint.goShop.*` classes, which live in same-named-but-different
+packages.
+
+**When to use this file:** essentially never for new work. Only if the user explicitly asks to
+extend the GoShop Kotlin layer itself, having been told it is unexercised. For every vertical —
+TMS, GoKilat/store, GoSend consumer, GoBox, **and GoShop** — use the Java pattern in
+`templates.md`.
+
+**Do not** cite `Refactoring.md` as the module's direction. It is a 2021 one-off.
 
 ## The core abstractions (defined externally, in `aep-backend-core`, not in this repo)
 

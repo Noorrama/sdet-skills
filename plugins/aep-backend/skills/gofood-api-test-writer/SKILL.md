@@ -144,3 +144,111 @@ match that shape rather than introducing a Controller where none exists for that
 - The `utils.IGrpcServiceEndpoint` / `restidioms...IGrpcServiceEndpoint` duplication is an
   unfinished migration, not a deliberate two-tier design — don't "pick a side" and refactor
   unrelated files; just match whichever the specific endpoint you're touching already uses.
+
+## Test-method contract (mandatory — verified counts over `gofood/src/test/java`)
+
+Read `backend-automation/references/test-annotation-rules.md` for the annotation contract itself.
+This section is the gofood-specific instantiation of it. Every number below is a measured count.
+
+### Base class
+
+`extends base.GoFoodTestBase` — 280 of the `extends` sites in `tests/`. It `implements ITest`, is
+`@Getter @Setter`, and pre-instantiates **~60 controller and `*RequestBodyBuilder` fields** in
+`@BeforeClass setUpBeforeClass()`. **Do not `new` a controller in a gofood test** — inherit it.
+
+Exception: if your feature already has a domain base test class, chain to it instead of jumping
+straight to the root (real chain: `MealPlanTests → MerchantCatalogTests →
+MerchantCatalogInternalTests → GoFoodTestBase`). Other domain bases: `SearchTestBase` (12),
+`MarkdownBaseTest` (9).
+
+### The annotation block
+
+```java
+@Test(groups = {GoFoodCategories.<GROUP>}, description = "<human-readable intent>")
+@TestInfo(projectId = TestRailConfig.<PROJECT>, suiteId = TestRailConfig.<SUITE>,
+          testCaseIds = {"<real id>"}, owner = "first.last@gojek.com")
+public void verifySomething() {
+```
+
+- `groups` is **mandatory** (2267 uses, always present) and must reference a constant from
+  `src/test/java/utils/GoFoodCategories.java` — never a raw string. Groups feed
+  `includeGroups systemProperties["tag"]` in `gofood/build.gradle:141`, so a wrong/missing group
+  means the test never runs in CI. Common values: `DISCOVERY` (307),
+  `MODERATOR_REGRESSION` (132), `GOFOOD_EXPANSION_OPENAPI_TENCENT` (117),
+  `MARKDOWN_REGRESSION` (107), `GOURMET_REGRESSION` (92), `MODERATOR_SMOKE` (80),
+  `GOFOOD_GROUP_ORDER` (40).
+- Use **`description =`** (592) — **not** `testName =` (52). This is inverted in `marketplace`; do
+  not carry that habit across.
+- **`retryAnalyzer` is never used in gofood (0 occurrences).** Retries belong in the controller via
+  Failsafe. Do not add one.
+- Also available: `enabled =` (371), `dataProvider =` (285), `dataProviderClass =` (147),
+  `priority =` (43), `dependsOnMethods =` (18).
+
+### `@TestInfo` values — from `src/main/java/config/TestRailConfig.java`
+
+gofood has **no `SuiteConstants`** and **no `OWNER_*` constants** — `owner` is a quoted
+`"first.last@gojek.com"` literal (2021 uses). Pairing rule:
+
+| Feature area | `projectId` | typical `suiteId` |
+|---|---|---|
+| consumer / booking / discovery | `GO_FOOD_PROJECT_ID` (1599) | `GOFOOD_GROWTH`, `DISCOVERY`, `BOOKING_HAGGLER`, `BOOKING_WAITER`, `GROUP_ORDER` |
+| merchant portal (gourmet, moderator, onboarder, fmoi, godfather) | `GOFOOD_MERCHANT_PROJECT_ID` (473) | `MERCHANT_EXCELLENCE_MODERATOR`, `MERCHANT_EXCELLENCE_GOURMET` |
+| OpenAPI / web-order | `GO_FOOD_PROJECT_ID` | `OPEN_API` (349) |
+
+Several suite constants are empty strings in source (`OPEN_API`, `DISCOVERY`,
+`MERCHANT_EXCELLENCE_*`) — that is expected; still reference the named constant, not `""`.
+
+### Method naming — follow the surrounding package, both styles are live
+
+- merchant-content family: `snake_case` (`cru_menu_group`, `create_and_deactivate_meal_plan`)
+- consumer family: `lowerCamelCase` `verify…`/`create…` (`verifySuccessListGroupOrders`,
+  `createGOFailureForClosedResto`)
+
+### Assertions
+
+| style | files | when |
+|---|---|---|
+| hard `org.testng.Assert` | 339 | **default** |
+| Google Truth `assertThat` | 71 | local convention inside `tests/content/**` only |
+| `SoftAssert` | 20 | rare; `protected SoftAssert softAssert` exists on the base, re-created per method |
+
+### Body shape (AAA, no comment banners)
+
+1. **Arrange** — read ids/tokens off inherited ThreadLocals (`customer_aep.get().getUserId()`,
+   `.getBearerToken()`) or `poolingUtility.getTDPCustomer(...)`; build the payload with the
+   inherited `<Domain>RequestBodyBuilder`.
+2. **Act** — one inherited-controller call.
+3. **Assert** — `Assert.assertEquals(...)` on business fields, or a static
+   `<Response>.assert<X>(response)`.
+4. **Cleanup** — inline at method end (e.g. `groupOrderController.leaveGroupOrder(...)`), on top of
+   the base class `@AfterMethod`.
+
+### Pooled test data
+
+`@FoodTestDataManager(...)` is an **annotation** (`gofood/src/main/java/testdata/FoodTestDataManager.java:10`
+— `public @interface`), not a manager class. `GoFoodTestBase.setUpBeforeMethod(Method)` reads it
+reflectively to lease a pooled customer/driver into `customer_aep` / `driver_aep`, and
+`@AfterMethod` releases them. Add it when your test needs a real pooled consumer.
+
+There is **no class named `RequestBodyBuilder`** — only per-domain
+`requestbodybuilders/<domain>/<Domain>RequestBodyBuilder.java` (static methods).
+
+### Secrets and TLS — two patterns not to imitate
+
+1. **`gofood/.run/gofood-sample-test-run-using-local-jar.run.xml` is git-tracked and carries
+   `FORTKNOX_TOKEN` and `REPORT_PORTAL_API_TOKEN` env entries.** Do not add tokens to `.run/` files,
+   and do not copy that file as a template for a new run configuration. Read secrets from the
+   environment or Fortknox at runtime:
+   `// TODO: Securely load this value from an environment variable or secrets vault. Do not hardcode.`
+   If you notice a committed token while working, report its **path only** to the user so it can be
+   rotated — never quote the value.
+2. **`GoFoodTestBase` calls `relaxedHTTPSValidation()`, which disables TLS verification JVM-wide** for
+   every test that extends it (~280 classes). That is existing behaviour you inherit; do not add
+   further `relaxedHTTPSValidation()` calls, and never rely on it for a new host — fix the trust
+   store instead.
+
+### Compile check
+
+```
+./gradlew :gofood:compileTestJava
+```

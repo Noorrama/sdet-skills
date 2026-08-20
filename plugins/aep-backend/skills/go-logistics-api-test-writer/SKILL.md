@@ -10,7 +10,7 @@ description: >-
   IServiceEndpoint, ConsumerHeaders, GologisticBaseHelper, TMSClient, IAPIResponse,
   processAPIRequest, or asks to follow the TMS/GoKilat/GoSend/GoShop test pattern. This skill
   knows the layered convention (Endpoint -> DTOs -> Client -> Controller -> Assertions -> TestNG
-  test) actually proven across this module's 1100+ existing test files, including where it
+  test) actually proven across this module's 703 existing `@Test` methods, including where it
   diverges from the module's own (unfinished, largely unused) Kotlin "modern" rewrite, and
   should be consulted before writing any new Java/Kotlin file here.
 ---
@@ -19,14 +19,14 @@ description: >-
 
 **Prerequisite:** read `.claude/skills/backend-automation/SKILL.md` first (or `.cursor/skills/backend-automation/SKILL.md` — same file) if you haven't already this task. It defines the common module-identification, local-framework-discovery, search-before-create, never-invent-data, and compile-check workflow. This file only covers what's specific to go-logistics on top of that.
 
-`go-logistics` is a large (1,100+ Java files, ~100 Kotlin files), TestNG/Gradle backend API test
+`go-logistics` is a large (991 main Java files, 142 test files, ~100 abandoned Kotlin files), TestNG/Gradle backend API test
 module covering five product verticals for Gojek Logistics: **TMS** (trip/route/shipment
 management), **GoKilat / consignor / store** (partner store bookings, pricing, driver tipping),
 **GoSend consumer** (consumer bookings, serviceability, saved addresses), **GoBox**, and
 **GoShop**. It has grown organically over years, so each vertical has its own base-test-class
 chain and its own corner of the DTO/endpoint/client tree, but they all share the same underlying
 call-chain contract and the same TestNG/assertion/test-data idioms. Match what you write to
-those idioms — that's what keeps a new test indistinguishable from the other ~1,000 already
+those idioms — that's what keeps a new test indistinguishable from the other 703 `@Test` methods already
 there.
 
 **Read `references/architecture.md` before touching an unfamiliar vertical** — it has the full
@@ -50,7 +50,7 @@ Kotlin layer**. Every real GoShop test still calls the older `controller.GoShopC
 - The **proven, dominant, safe-by-default pattern across all five verticals** — including
   GoShop — is: Java `IServiceEndpoint` endpoint class + Java Client (often `extends BaseClient`)
   + Java Controller (deserializes the response into a typed DTO) + Java TestNG test. This is
-  what ~1,000 existing tests do and what CI actually exercises. **Default to this** unless told
+  what the 703 existing `@Test` methods do and what CI actually exercises. **Default to this** unless told
   otherwise.
 - One piece of the "modern" direction *is* already live and worth adopting even in new legacy-
   style code: have your **Client** method call `requestHandler.processAPIRequest(endpoint)` and
@@ -242,3 +242,68 @@ names/annotations match the sample response exactly. For the compile-check and r
 summary steps, see the common skill — the go-logistics-specific Gradle commands are:
 `./gradlew :go-logistics:runTests -Dtag=<TestGroups constant> -Denv=integration -Dcountry=<id|vn|th>`
 or `./gradlew :go-logistics:singleTest -DtestName=<name> --tests "<FQCN>"`.
+
+## Test-method contract (mandatory — verified)
+
+Read `backend-automation/references/test-annotation-rules.md` first.
+
+### Real module size (corrected)
+
+991 main Java files, **142 test files, 74 containing `@Test`, 703 `@Test` methods**. Earlier
+versions of this skill said "1,100+ test files / ~1,000 tests" — that conflated main sources with
+tests. Calibrate your expectations accordingly.
+
+### Base class
+
+`extends helpers.GologisticBaseHelper` — **44 of ~90** `extends` sites in `src/test`. Then
+`BaseHelper` (9), `TMSBaseTest` (5), `ShipmentBaseTest` (4), `GoSendBaseHelper` (4).
+
+### The annotation block
+
+```java
+@Test(groups = {TestGroups.<GROUP>}, description = "…")
+@TestInfo(projectId = SuiteConstants.<AREA>_PROJECT_ID, suiteId = SuiteConstants.<AREA>_BACKEND,
+          testCaseIds = {"<real id>"}, owner = "first.last@gojek.com")
+@Ownership(...)            // used in part of the module — match the sibling file
+public void verifySomething() {
+```
+
+`projectId`/`suiteId` come from **`constants.SuiteConstants`** (`src/test/java/constants/SuiteConstants.java`):
+`CEG_PROJECT_ID` (198), `TMS_PROJECT_ID` (56), `PEG_PROJECT_ID` (51), `GTL_LPS_PROJECT_ID` (24);
+suites `CEG_GOSEND_BACKEND_MAIN_SUITE_ID` (132), `TMS_BACKEND` (56), `PEG_BACKEND` (49),
+`CEG_GOSHOP_BACKEND_SUITE_ID` (30). **Never raw string literals** — an earlier template in this
+skill taught that and it was wrong.
+
+`owner` has two competing forms here: quoted email literal (306) and `GojekEngineer.*_EMAIL` (33).
+Prefer the quoted literal to match the majority, unless the sibling file uses the constant.
+
+`countryName` — go-logistics uses the bare string literal `"indonesia"` when it sets it at all
+(18 sites). `customer-platforms` uses a constant for the same attribute; do not cross them.
+
+**Gotcha:** `TestGroups` constant *names* do not match their tag strings. Always reference the
+constant, and check its value before assuming what `-Dtag` will select.
+
+### Framework facts (corrected)
+
+- `IServiceEndpoint` is **not** in this repo — 148 `implements IServiceEndpoint` files in
+  `src/main` bind to `restidioms.security.core.template.IServiceEndpoint` inside the external
+  `com.gojek.aep-backend-core:core:4.13.1` jar (pinned at `build.gradle:226`).
+- `BaseClient` is `core.BaseClient` from that **same external jar** (26 importers), not from
+  `gojek-commons` (1 importer). `extends BaseClient` covers **27 of 35** client files — it is
+  **dominant, not legacy**.
+- `processAPIRequest`/`IAPIResponse` is already the established convention at **174 vs 12**
+  occurrences (~94%), not an aspiration to adopt.
+- **`SoftAssert` is used in 103 files here** — the highest in the repo (scp: 0, payment-core: 3).
+  Do not carry this habit into those modules.
+
+### Undocumented sixth test area
+
+`src/test/java/workflows/` — 15 files, the 4th largest test package. Earlier versions of this
+skill's decision tree could not route to it. If your cURL is a multi-step orchestration rather than
+a single endpoint, look there for the sibling pattern.
+
+### Compile check
+
+```
+./gradlew :go-logistics:compileTestJava
+```

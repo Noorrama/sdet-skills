@@ -119,3 +119,73 @@ the goto-auth host.
 - `scp/src/main/proto/**` and `scp/src/main/java/generatedCode/**` — dead gRPC scaffolding (one
   commit, 2023, zero consumers). This is the canonical repo-wide example of "don't assume a module
   with lots of `.proto` files is gRPC-heavy" from the common skill.
+
+## Test-method contract (mandatory — verified)
+
+Read `backend-automation/references/test-annotation-rules.md` first.
+
+### Real module size (corrected)
+
+**22** test classes (not 24), 18 files carrying `@TestInfo`. Most recent activity **2026-03-24** —
+earlier versions of this skill said 2025-08-12 and therefore missed the entire 2025-10 → 2026-03
+refactor wave. Re-read the sibling files rather than trusting older descriptions.
+
+### The annotation block
+
+```java
+@Test(groups = {TestGroup.<GROUP>}, dataProvider = "…")
+@TestInfo(projectId = SuiteConstant.SCP_PROJECT, suiteId = SuiteConstant.SCP_BACKEND,
+          testCaseIds = {"<real id>"}, owner = "first.last@gojek.com")
+public void someTest(String testName, ...) {
+```
+
+- **The constants class is `constant.SuiteConstant` — SINGULAR.** Not `SuiteConstants`. 87 usages of
+  `SuiteConstant.SCP_PROJECT` + `SuiteConstant.SCP_BACKEND`. (Two stragglers use the raw literal
+  `"194"`; don't copy those.)
+- **Groups come from `testutils.TestGroup`** — never named in earlier versions of this skill. CI
+  selects tests **only** by group, so a test with no wired group silently never runs.
+- `owner` is a quoted email literal (89 uses).
+
+### ⚠️ Two silent-failure traps unique to scp
+
+1. **The data-provider dispatch is a `switch (method.getName())`.** Providers branch on the calling
+   test method's name. If your new test method's name is not added to that switch, it receives no
+   data and **silently does not execute**.
+2. **The first data column must be `String testName`** — 49 methods rely on it. Omit it and the
+   report/execution wiring breaks.
+
+Both were absent from earlier versions of this skill.
+
+### Data providers — all 11 are scp-local
+
+Earlier guidance claimed `LoginDataProvider` / `AccountListDataProvider` / `CvsDataProvider` "also
+exist in `gojek-commons`". **They do not.** All 11 providers are scp-local. `gojek-commons`'
+provider directory holds exactly one file, `AuthHeaderGenerator.java`.
+
+### Base class and framework
+
+- `tests.SCPBaseTest` (`scp/src/test/java/tests/SCPBaseTest.java`) — the module's **only** local
+  base class.
+- **scp defines no endpoint class at all** (0 matches for `implements *Endpoint` in `scp/src`). It
+  borrows `gojek-commons` endpoints under `entities/goAuth/**`, and its client is `gojek-commons`'
+  `clients/goauth/LoginClient.java`, which extends no `BaseClient`. Host resolution goes through
+  `gojek-commons` `utils/AuthBaseClient.java`.
+- `IServiceEndpoint` is **not** in `gojek-commons` — it is in the external jar (declared exactly
+  once in the whole repo, inside `gopay`).
+- `scp` **does** depend on `gojek-commons` (`scp/build.gradle:132-134`), plus `customer-platforms`
+  and `icp`.
+
+### Assertions
+
+**`SoftAssert` is used in 0 files here** (vs 103 in go-logistics). Do not inject it.
+
+### Still true: the gRPC scaffolding is dead
+
+The 62 `.proto` files and gRPC build setup remain entirely unexercised. The real tests are plain
+REST identity/login.
+
+### Compile check
+
+```
+./gradlew :scp:compileTestJava
+```

@@ -166,3 +166,96 @@ Eyeball import correctness and that every abstract method from `IServiceEndpoint
 is implemented. For the compile-check command and the reused-vs-created summary, see the common
 skill (`./gradlew :gopay:compileTestJava`). Real customer/test-data provisioning if `CustomerGroup`
 needs a new enum value lives outside this repo — flag it, don't invent a value.
+
+## Test-method contract (mandatory — verified counts over `gopay/src/test/java`)
+
+Read `backend-automation/references/test-annotation-rules.md` first. This section is gopay's
+instantiation of it.
+
+### ⚠️ The silent-skip trap — read this before anything else
+
+`gopay/src/main/java/com/gopay/backendtests/listeners/TestFilterListener.java:29`:
+
+```java
+if (groups.contains(tag) && groups.contains(System.getProperty("country"))) {
+```
+
+**A gopay `@Test` must carry BOTH a `Categories.*` value AND a `Countries.*` value.** Miss either
+and the test **silently never executes** under `-Dtag=… -Dcountry=…` — it does not fail, it does
+not error, it simply never runs and nobody notices. This is the single most costly mistake to make
+in this module.
+
+```java
+@Test(description = "…", groups = {Categories.REGRESSION_CREDIT_PLATFORM,
+                                   Categories.LENDING_PLATFORM_SERVICE,
+                                   Countries.ID})            // <- Countries.* is NOT optional
+```
+
+### Base class
+
+`extends testBase.TestBase` (`src/test/java/testBase/TestBase.java`, `@Listeners(GopayTestListener.class)`).
+It provides inherited `customerHelper`, `goPayCustomerPool`, `countryConfig`, `testDataGenerator`,
+`retryPolicy`, `client`, `prop` via `@BeforeSuite`.
+
+The `paymentexperience` sub-tree uses a different base:
+`userJourneyTests/paymentexperience/merchantgateway/BaseTest.java`, which supplies `step(String)`,
+`setTestName(String)` and `retryTestUntilValidated(...)`. Pick by sub-tree, not by default.
+
+> **Do not replicate `TestBase.java:52-64`.** `logoutCustomers` contains a hardcoded
+> `X-ClientSecret` string literal committed to the repo. Never copy that pattern; load secrets via
+> `GopaySecretUtils` (Fortknox) instead.
+
+### The annotation block
+
+```java
+@Test(description = "<intent>", groups = {Categories.<CAT>, …, Countries.<CC>})
+@TestInfo(projectId = SuiteConstants.GOPAY_PROJECT_ID,
+          suiteId = SuiteConstants.<AREA>_PROJECT_ID,
+          testCaseIds = {"TC-728535"}, owner = <Area>OwnerEmail.<NAME>)
+public void verifySomething() {
+```
+
+- `@Test` first, then `@TestInfo`, then the signature.
+- **`suiteId` takes a constant whose name ends `_PROJECT_ID`.** This looks wrong and is correct —
+  the constant *names* say PROJECT_ID but the *values* are TestRail suite ids (thousands of usages,
+  e.g. `suiteId = SuiteConstants.MM_CREDIT_PLATFORM_PROJECT_ID`). Do not "fix" it; copy the
+  neighbouring package.
+- `owner` comes from a per-domain email-constant class — `MoneyManagementOwnerEmail`,
+  `UserSpendOwnerEmail`, `PaymentConsumerExperienceOwnerEmail`, `PXOwnerEmails`. Pick the one
+  matching your sub-tree.
+- `testCaseIds` in gopay commonly carries the `TC-` prefix (`{"TC-728535"}`) or a bare numeric
+  (`{"4376145"}`), and `{""}` is an accepted placeholder (650 occurrences) when you have no id yet.
+- Constants holders: `constants.SuiteConstants` (dominant) and `CXSuiteConstants` for the CX area.
+
+### Naming
+
+- Endpoint classes: **`*Endpoint`** (1030) not `*EndPoint` (279).
+- Test classes: **`*Tests`** (1153) not `*Test` (285).
+- Test methods: `verify…`.
+
+### Structure and assertions
+
+- Dependencies are constructed with `new` in **`@BeforeClass`** (1246 uses vs 227 `@BeforeMethod`).
+- Hard `org.testng.Assert` dominates (1262 files). Reusable checks go in an
+  `assertions/<area>/<X>Assertions` class instantiated as a test field.
+- Auth: `customerHelper.getCustomer(CustomerGroup.X).getBearerToken()`. Never inline a token.
+
+### Retry is INVERTED in gopay — you opt OUT, not in
+
+Unlike every other module (where `retryAnalyzer` is opt-in and mostly unused), gopay retries by
+default and you **disable** it explicitly:
+
+```java
+@Test(groups = {…}, dataProvider = "…", retryAnalyzer = NoRetryAnalyzer.class)
+```
+
+`com.gopay.backendtests.utils.Retry.NoRetryAnalyzer` exists solely to switch retry off — use it for
+non-idempotent flows (payments that would double-charge on replay). Note the default-on mechanism is
+matched by a fragile string-literal comparison, so a renamed analyzer class silently changes
+behaviour.
+
+### Compile check
+
+```
+./gradlew :gopay:compileTestJava
+```

@@ -145,3 +145,123 @@ than calling the more specific controller/client directly.
   the specific feature area you're extending already uses it.
 - Commented-out DB-log assertions in `GopayCoinsPaymentTests` and similar files — inert, not a
   template to restore without checking why it was disabled.
+
+## Test-method contract (mandatory — verified counts over `transport/src/test/java`)
+
+Read `backend-automation/references/test-annotation-rules.md` first. **transport has the strictest
+and most unusual annotation contract in the repo** — five method-level annotations, two of them
+validated at runtime and two with attributes that are compile-mandatory. Do not carry any other
+module's test shape here.
+
+### The five-annotation stack — this is the module's signature
+
+```java
+@Test(groups = {TransportCategories.X, TransportCategories.Y},
+      dataProvider = "transportFlowsGenerator",
+      dataProviderClass = TransportFlowsDataProvider.class)
+@TestData(journeyType = JourneyType.…, customerType = CustomerType.…)
+@FilterBy(features = {@Feature(featureType = FeatureType.…, featureStatus = Toggle.ENABLED,
+                              bookingType = BookingType.NORMAL)},
+          languages = {Language.ENGLISH},
+          paymentOptions = {PaymentOption.CASH})
+@TestInfo(testCaseIds = {"…"}, owner = GojekEngineer.<NAME>_EMAIL, projectId = "", suiteId = "")
+@Ownership(testCaseId = "…", author = GojekEngineer.<NAME>, ownerSquad = GojekSquad.<SQUAD>)
+@Sampling(byCountry = true)
+public void someTest(TransportFlowsDataProviderRow transportFlow) { … }
+```
+
+Measured counts: `@TestInfo` 2301, `@Ownership` 2300, `@FilterBy` 1862, `@TestData` 1858,
+`@Sampling` 1369. **Class-level annotations: none** (only `@Slf4j` on some classes).
+
+Definitions live in `transport/src/main/java/dataProviders/annotations/`.
+
+### Three hard enforcement points
+
+1. **Runtime validation.** `TransportFlowsDataProvider.java:81` calls
+   `this.testMethodHelper.validateMandatoryTestMethodAnnotations(method)`. Omitting `@TestData` or
+   `@FilterBy` on a `transportFlowsGenerator` test **throws at runtime**.
+2. **`@FilterBy.languages()` and `@FilterBy.paymentOptions()` have no defaults** — omitting either
+   is a **compile error**. `features()`, `countries()`, `platforms()` do have defaults.
+3. **`@Ownership.testCaseId()` has no default** — also compile-mandatory.
+
+### `@TestInfo` in transport — always empty project/suite
+
+```java
+@TestInfo(testCaseIds = {"2824416","4594314"}, owner = GojekEngineer.TONY_BASIL_EMAIL,
+          projectId = "", suiteId = "")
+```
+
+- **`projectId=""` and `suiteId=""` always.** Confirmed across all 319 files (2,221 sites). There is
+  **no `TestRailConfig` in this module**. Populating them is the deviation, not the norm.
+- Attribute order is `testCaseIds, owner, projectId, suiteId` here — not the repo-typical order.
+- `owner` = one of 46 `GojekEngineer.<NAME>_EMAIL` **String** constants
+  (`constants/domainmodel/test/GojekEngineer.java`).
+- `countryName()` is never set.
+
+### You must set the owner TWICE, in two different forms
+
+The same file declares both String constants and a richer **enum** of the same name:
+
+```java
+@TestInfo(owner = GojekEngineer.TONY_BASIL_EMAIL, …)          // String constant
+@Ownership(author = GojekEngineer.TONY_BASIL, ownerSquad = GojekSquad.…)  // enum constant
+```
+
+`@TestInfo` takes the `_EMAIL` String; `@Ownership.author` takes the bare enum (which carries name,
+Slack handle, role and quotas via `EngineerBuilder`). Getting these two crossed will not compile.
+
+### `@Test` attributes
+
+```
+groups            always present, from utils.TransportCategories
+dataProvider / dataProviderClass   always paired for flow tests
+description      1009
+enabled           690   <- heavily used to park tests per-environment
+priority          130
+invocationCount     2
+retryAnalyzer       1   <- essentially never inline
+dependsOnMethods    0   <- never
+```
+
+Retry comes from `listeners.AnnotationTransformer` + `listeners.RetryAnalyzer` (registered in
+`build.gradle`) and from `BaseApiEndPoint.call()` itself. Do not add an inline `retryAnalyzer`.
+
+Groups come from **one single class**, `transport/src/main/java/utils/TransportCategories.java`
+(contrast: driver-platform has 38 per-service files), organised in comment blocks naming the owning
+PIC. Naming is `<AREA>_SMOKE` / `<AREA>_REGRESSION` plus cross-cutting tags
+(`CLOUD_MIGRATION_TRANSPORT_TESTS`, `SG_NEW_LITE_APP_SMOKE`, `PANDA`). **Tests normally list 3-5
+groups** so one method serves smoke + regression + migration suites.
+
+### You usually write NO data provider
+
+**94% of transport tests use the single reflective provider `transportFlowsGenerator`.** You do not
+hand-write `Object[][]` rows — you *declare your data needs* through `@TestData` / `@FilterBy` /
+`@Sampling` and receive a `TransportFlowsDataProviderRow` parameter. Writing a local
+`@DataProvider` is the exception, not the default.
+
+`@Debug(dataproviderIndex = …, serviceTypes = {…})` exists to pin one row locally — **local dev
+only, never commit it.**
+
+### Assertions live ON the response DTO
+
+There is **no `assertions/` package** in transport. Response DTOs carry their own assertion methods:
+
+```java
+response.assertBookingCreatedSuccess();
+```
+
+When you add a response DTO, add its assertion methods to the DTO itself, extending
+`entities.BaseResponse`. Do not create an external assertions class.
+
+### Base class — a `@Delegate` god object
+
+`TransportTestBase extends TransportController`, and `TransportController` aggregates ~35
+controllers via Lombok `@Delegate`. Consequently tests call controller methods **bare**, with no
+receiver. This is the documented pattern but the module's own comments flag parts of it as risky —
+see the architecture section above before adding new methods to it.
+
+### Compile check
+
+```
+./gradlew :transport:compileTestJava
+```

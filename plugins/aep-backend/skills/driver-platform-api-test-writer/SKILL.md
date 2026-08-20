@@ -139,3 +139,124 @@ Tests mirror this under `src/test/java/tests/<service>/{componentTests,e2eTest}`
   what's actually live.
 - Commented-out `ActiveBookingsLogKafkaAssertions` calls in `tests/activebooking/*` — infrastructure
   exists, validation is currently inert.
+
+## Test-method contract (mandatory — verified counts over `driver-platform/src/test/java`)
+
+Read `backend-automation/references/test-annotation-rules.md` for the annotation contract itself.
+This section is the driver-platform-specific instantiation. Every number below is measured.
+
+### Base class — always a per-service base, never nothing
+
+**Every test class extends a per-service `*TestBase`/`*BaseTests`**, which itself usually extends
+`tests.DriverPlatformTestBase`. Measured `extends` counts:
+
+| Base | uses |
+|---|---|
+| `DriverServiceBaseTests` | 62 |
+| `BffServiceTestBase` | 38 |
+| `RakamServiceTestBase` | 35 |
+| `PassbookServiceTestBase` | 33 |
+| `SwadayaFinanceTestBase` | 31 |
+| `HogwartsTestBase` | 31 |
+| `SelfOnboardingTestBase` | 22 |
+| `SwadayaTestBase` | 19 |
+| `DriverPlatformTestBase` (root) | 16 |
+| `VesusServiceTestBase` / `DriverServiceTestBase` | 14 |
+
+The root (`tests/DriverPlatformTestBase.java`) provides `scenarioContext`,
+`dpDriverServiceController`, `driverServiceController`, `driverTestDataHelper` via
+`@BeforeClass setup()`, and closes DB connections in `@AfterSuite`.
+
+Per-service bases add their own controllers/helpers as `protected` fields initialised inline, and
+several `implements ITest` with a `@BeforeMethod beforeMethod(Method, Object[], ITestContext)` that
+builds the reported test name from **data-provider column 0**. That is why column 0 is a
+`String testName` (see below) — if you omit it the report shows bare method names.
+
+### Class-level annotations: normally NONE
+
+No `@Listeners`, no `@Ownership`, no `@TestData` — 0 files use `@Ownership`/`@TestData`/`@FilterBy`/
+`@Sampling` (those are **transport-only**). `@BeforeClass` appears in only 4 test files;
+`@BeforeMethod` in 80, nearly all base classes.
+
+### The annotation block
+
+```java
+@TestInfo(projectId = TestRailConfig.DRIVER_PLATFORM_PROJECT_ID,
+          suiteId = TestRailConfig.DRIVER_PAYOUT_TEST_SUITE_ID,
+          testCaseIds = {"<real id>"}, owner = TestRailConfig.OWNER_<NAME>)
+@Test(groups = {<Service>TestCategories.<GROUP>}, description = "<usually the method name>",
+      dataProvider = "<methodName>", dataProviderClass = <Service>DataProvider.class)
+public void getV1SomethingSomething(String testName, ...) {
+```
+
+Newest code puts **`@TestInfo` first, then `@Test`** (`@Test` first is also common — either is
+accepted here).
+
+- `groups` **always present** (1396) and always from `src/test/java/utils/<Service>TestCategories.java`
+  (38 such files) — never a raw string.
+- `description` near-always present (1167), and by convention is **literally the test-method name**.
+- `dataProvider` + `dataProviderClass` are **always paired** (~1100 uses).
+- `enabled = false` (171) is the module's way of parking flaky/blocked tests.
+- `priority` (67) occasionally.
+- **`retryAnalyzer` is never used inline (0)** — retry comes from `utilities.RetryListener` +
+  `utilities.RetryAnalyzer` wired at the Gradle/suite level, and from Failsafe `RetryPolicy` inside
+  controllers/assertions. **`dependsOnMethods` (0) and `invocationCount` (0) are never used.**
+
+### `@TestInfo` values — `src/main/java/config/TestRailConfig.java`
+
+- `projectId` is **always** `TestRailConfig.DRIVER_PLATFORM_PROJECT_ID`. No exceptions worth copying.
+- `suiteId` picks the feature area: `DRIVER_PAYOUT_TEST_SUITE_ID` (482, dominant),
+  `DRIVER_ONBOARDING_TEST_SUITE_ID` (117), `DRIVER_PLATFORM_TEST_SUITE_ID` (111),
+  `DRIVER_SENTINEL_TEST_SUITE_ID` (6).
+- **`owner` MUST be one of the 19 `TestRailConfig.OWNER_*` constants — never a raw email literal.**
+  This is stricter than `gofood`/`marketplace`, which use quoted literals. If the right person has
+  no constant, add one to `TestRailConfig` rather than inlining a string.
+- `countryName()` is never set in this module.
+- `testCaseIds` is always an array; `{""}` appears 8 times for un-triaged tests.
+
+### Assertions — the test does NOT assert fields
+
+**Assertions live in a dedicated test-side class**: `src/test/java/assertions/<Service>Assertions.java`
+(32 root files + 5 sub-packages). A test method calls one or more
+`<service>Assertions.verifyXxx(...)` and asserts nothing itself (an occasional `Assert.assertFalse`
+for a loop-local guard is tolerated).
+
+Inside those assertion classes the canonical shape is a **soft/hard mix**: a `SoftAssert` for the
+field-by-field body checks plus hard `Assert.*` for structural preconditions, with a
+`RetryUtil().getRetryPolicyForAssertionError(delay, count)` Failsafe policy as a class field for
+eventually-consistent checks.
+
+If you add a new endpoint, add its `verify<Endpoint><Case>Response(...)` method to the existing
+`<Service>Assertions` class — do not start asserting inline in the test.
+
+### Data providers
+
+- Location: **`src/test/java/dataProvider/`** — singular, lowercase `d`.
+- One class per service: `<Service>DataProvider.java` (more common) or `<Service>DataProviders.java`.
+  Two large services also have per-endpoint files under `dataProvider/DriverService/` (18 files)
+  and `dataProvider/QuiverService/`.
+- No base class, no class-level annotations.
+- `@DataProvider(name = "<exactTestMethodName>")`, add `parallel = true` when rows are independent.
+- Return type **`Object[][]`** (dominant). Typed row objects only in the goAgent sub-framework and
+  `SwadayaDataProviderRow`.
+- **Column 0 is a `String testName`** in SCREAMING_SNAKE (e.g. `"DEDUCTION_HISTORY_SUCCESS_ID_ID"`),
+  consumed by the base class `beforeMethod` for report naming.
+
+### Method naming & AAA
+
+- BFF/swadaya style: **method name == data-provider name == `description` value**
+  (`getV1SwadayaFinanceProgramsSubscriptionsDeductionsPagination`).
+- driverservice style: `verify` prefix (`verifyPostV3InternalDriver`).
+- Negative/variant suffixes in use: `...ErrorFlows`, `...Pagination`, `...Timezone`,
+  `...SuccessResponse`.
+- **Arrange** `XxxRequestBuilder.build(...)` + setters for the varying field →
+  **Act** one `controller.<method>(request, expectedStatus)` →
+  **Assert** one or more `<service>Assertions.verifyXxx(...)`.
+- Cross-service verification (call the upstream service to derive expected values) is idiomatic
+  here, not a smell.
+
+### Compile check
+
+```
+./gradlew :driver-platform:compileTestJava
+```
