@@ -220,7 +220,65 @@ Run in order. Blocked areas must not produce scenarios.
 | `prd_context.needs_clarification[blocking: true]` | Same as above — deferred placeholder per item; `reason` field → note in placeholder description; surface in qa_analysis.md |
 | `prd_context.acceptance_criteria[verifiable: false]` | Generate scenario but mark `provisional: true`; note in qa_analysis.md that assertion cannot be deterministic until clarified by product/design |
 
+## Scenario granularity — apply BEFORE the per-source rules below
+
+Everything in "Scenario generation rules" is a **multiplier**: a dozen separate rules each saying "one scenario per X". Left unchecked they yield roughly one assertion per scenario, which inflates the plan, multiplies test-data provisioning calls at runtime, and does not match how backend tests are actually written in `gojek-backend-tests`.
+
+Apply this rule first. It bounds every rule that follows.
+
+### The unit of a scenario is one Arrange — not one assertion
+
+**Group into ONE scenario every check that shares the same precondition state and the same triggering call.**
+**Split into separate scenarios only when the precondition differs** — never when only the assertion differs.
+
+| Situation | Correct treatment |
+|---|---|
+| Endpoint response gains 4 new fields | ONE scenario, 4 steps — not 4 scenarios |
+| Worker must stop for COMPLETED, CANCELLED and DELETED | ONE scenario, 3 steps — same arrange, three data rows |
+| Skip rule fires when a field is absent OR empty | ONE scenario, 2 steps |
+| Caller is ACTIVE vs caller is PENDING | TWO scenarios — the precondition differs |
+| 400 bad_request vs 404 not_found | TWO scenarios — different request state |
+| flag ON vs flag OFF | TWO scenarios — the precondition differs |
+
+Target step counts by layer — a single global band mis-fits validation gates:
+
+| Layer | Target steps | Typical shape |
+|---|---|---|
+| component | 3–4 | act, assert the response, assert no side effect |
+| integration | 4–6 | act, assert the response, assert persisted state, assert enqueued jobs or downstream effect |
+| e2e | 4–8 | one step per hop across the chain |
+
+A 1-step scenario is almost always under-grouped. A scenario needing more than 3 distinct `fixture_ids` is over-grouped — split it.
+
+### Why the Arrange boundary specifically
+
+Per-scenario flake risk rises with the number of fixtures and async waits the scenario needs; total suite flake is that summed over scenarios. Grouping assertions that need **no additional fixture** strictly lowers total flake. Grouping beyond that point starts adding fixtures per scenario and stops helping — a scenario provisioning six entities fails if any one of the six flakes. The Arrange boundary is therefore a genuine minimum, not a style preference.
+
+Backend has no equivalent of the frontend's `login → deeplink → navigate` preamble, so grouping here is justified by provisioning cost and flake, not by execution time.
+
+### Async boundaries get grouped harder
+
+Scenarios that cross Kafka → consumer → Redis → downstream-read each need their own polling window, and each window is an independent flake source. Write **one** scenario that walks the full async chain with explicit waits, and have the remaining scenarios seed the downstream state directly and assert the read path synchronously. Do not give every async assertion its own wait.
+
+### Never share a fixture that a scenario mutates
+
+If a scenario mutates fixture state (adds a member, attaches an entity, changes status), that fixture must not be reused by other scenarios expecting the pre-mutation state. Reusing a mutated fixture creates order-dependence — the classic "passes alone, fails in suite" flake. Give mutating scenarios their own `fixture_ids`.
+
+### Prefer stubs over provisioned data for failure paths
+
+Downstream-failure scenarios (timeout, 5xx, unreachable dependency) should be driven by request-level stubs, not by provisioned entities. Stubs are deterministic and cost no runtime provisioning call. List only the fixtures the scenario genuinely needs in `fixture_ids`.
+
+### Scenarios are BrowserStack test cases, not Java test methods
+
+These are two different granularities and must not be conflated. In `gojek-backend-tests` a single test method carries a mean of **2.26** BrowserStack case ids via `@TestInfo(testCaseIds={...})` (max observed 17), a mean of **5.1** assertions, and **89%** of methods drive permutations through a TestNG `dataProvider` rather than duplicated methods.
+
+Set `scenario_group` on every scenario, keyed by its Arrange — the same precondition state and triggering call. This records a test-design fact that downstream tooling needs but cannot reliably re-derive from prose preconditions, and it is what stops `automation-plan-generator` emitting one test method per scenario.
+
+Do not size the plan to the method count. Scenarios may legitimately outnumber test methods; the ratio depends on how many natural permutation axes the feature has (service type, payment method, country). A feature with no such axis will sit near 1:1 and that is correct.
+
 ## Scenario generation rules
+
+> Every rule below is subject to **Scenario granularity** above. Where a rule says "one scenario per X", it means one scenario per X **unless** two or more X share the same precondition and trigger — in which case they become steps of a single scenario.
 
 ### RFC validation_sequence — business logic (A)
 
@@ -230,6 +288,10 @@ For each step:
 - **Boundary** — quantitative constraints in `constraint` field (min/max/edge) → `tags: ["boundary"]`
 
 Use `tasks_context.test_layer` for the story that implements this step — never infer test_layer from `validation_sequence[].layer`.
+
+**Assert the short-circuit, not just the rejection.** `validation_sequence` is ordered, and the `layer` field (`controller` → `service` → `gateway`) records where each gate sits. The ordering is itself a contract: a cheap local gate must reject before an expensive remote one runs. "Returns 422" does not prove that; "returns 422 **and the gateway was never invoked**" does.
+
+For each failure scenario on step *N*, where any later step *M > N* involves an external call, add an assertion that step *M*'s dependency was **not** called. Without it a reordered implementation — one that calls the dependency first and validates afterwards — passes every test while doing an unnecessary remote call on every rejected request, and leaking existence information about ids the caller has no right to probe.
 
 ### RFC flows — end-to-end scenario paths
 
@@ -365,6 +427,132 @@ For each flag:
 - New error mapping → negative scenario
 - All Pass 2 scenarios: `is_delta: true`
 
+## Completeness sweeps — run AFTER the per-source rules, BEFORE the granularity check
+
+The rules above generate from what the documents **state**. These four sweeps generate from what documents systematically **omit**. An RFC records the rules it intends; it does not record that a job can run twice, that an array can be empty, or that a condition has an inverse. Those gaps are structural, not accidental, so they need mechanical sweeps rather than careful reading.
+
+**These sweeps must not re-inflate the plan.** Each finding folds into an existing scenario as an extra step wherever it shares that scenario's Arrange. Only create a new scenario when the check genuinely needs a different precondition — which, for the concurrency sweep, it usually does.
+
+### Sweep 1 — Repeat, concurrent and out-of-order execution
+
+Trigger on the **existence of a retry, an async job, or a write path reachable by more than one actor** — never on a `delivery_guarantee` or `retry_dlq` field being populated. Those fields are usually null, and their absence is not evidence that redelivery cannot happen; at-least-once is the safe default assumption.
+
+| Structure in the RFC | Required scenario |
+|---|---|
+| Any enqueued job or worker | Job runs twice → assert the effect happened exactly once |
+| Any documented retry (`the job retry re-runs it`) | Retry after partial success → assert no duplicate entity is created |
+| Any Kafka consumer | Duplicate message delivered → assert the write is idempotent |
+| Any endpoint that creates or attaches a singleton | Two concurrent calls → assert exactly one wins and the loser gets the documented error |
+| Any request that a client may resend (booking, checkout, submit) | Same request sent twice → assert one downstream effect |
+| Any job whose trigger fires from more than one path | Two triggers converge → assert one outcome, not two |
+| **Any endpoint documented as returning a retryable error** (502, timeout, any 5xx) | Failure then retry → assert the retry succeeds cleanly and the failed attempt left no partial state |
+
+Three distinct shapes live here and are easy to conflate. Generate each one that applies:
+
+| Shape | Sequence | Asserts |
+|---|---|---|
+| Duplicate submission | success, success | one downstream effect |
+| Retry after failure | failure, success | clean success, no residue from the failed attempt |
+| Concurrent double-run | two in parallel | the lock or upsert holds; exactly one winner |
+
+A synchronous endpoint that can return 502 needs the retry-after-failure case just as much as an async job does — the concept is not specific to workers. Where an operation is both retried and concurrently reachable, generate the sequential and concurrent cases separately.
+
+### Sweep 2 — Cardinality boundaries on every collection
+
+For each array or collection field in a contract request, response, or stored payload, generate the **empty, one, and at-limit** cases. Do not wait for `boundary_values[]` to name them — documents state numeric thresholds and almost never state that a list can be empty or hold exactly one element.
+
+Split the sweep by side, because the two sides have different yield and different enumeration units.
+
+**Read side — enumerate per collection, once.**
+
+| Collection | Cases |
+|---|---|
+| Request array (`user_ids`, `participants`, `members`) | empty array · single element |
+| Response array | empty · single |
+| Stored collection (map, list) | zero entries · one entry |
+
+Zero and one are the highest-yield cases: an empty array frequently reaches a downstream call it should have short-circuited, and a single-element collection frequently exposes logic written for the plural case.
+
+**Write side — enumerate per `(collection × mutating operation)`, not per collection.**
+
+For each collection, list **every endpoint or job that mutates it**, and generate at-limit and over-limit for each mutator independently. A collection with three write paths needs three at-limit scenarios, because the behaviour differs by path: reaching the limit, and acting when already at the limit, are different states and often different code.
+
+| Step | Action |
+|---|---|
+| 1 | List every collection in the contracts and stored payloads |
+| 2 | For each, list every operation that adds to it — endpoint, worker, consumer |
+| 3 | For each `(collection, mutator)` pair, generate: mutate to reach the limit exactly · mutate when already at the limit |
+
+Reading a full collection is rarely where a bug lives; writing to one at its boundary almost always is. A single at-limit scenario covering only the read path does **not** discharge this sweep.
+
+### Sweep 3 — Assert the negative of every conditional
+
+For each rule of the form *"X happens when C"*, generate the **NOT-C** case asserting X does **not** happen. The per-source rules cover the positive branch; the inverse is what catches a condition that was implemented as always-true.
+
+Apply the same to design decisions recorded as out of scope. Distinguish two kinds of `out_of_scope` entry:
+- **Scope exclusion** ("Manage Participant is not in M5") → generate nothing, per the blocking gates.
+- **Design decision** ("we do not persist this in the Waiter DB", "at most one social group per session", "MPS carries only the id") → **assert the absence**. These are deliberate constraints that a future change can silently violate, and nothing else in the plan protects them.
+
+### Sweep 4 — Contract request-field validation
+
+For each contract with a documented `request_body` or query parameters, generate validation coverage the error table does not enumerate:
+- each `required: true` field omitted → assert rejection, not a 5xx
+- a field present with the wrong type or an out-of-enum value
+- assert what the response must **not** contain, where the contract says a field is deliberately absent (e.g. a detail response that omits the member roster)
+- **each optional parameter whose alternate value is never exercised in the documented flows** → generate the non-default case
+
+The last rule is scoped deliberately. An optional field the happy paths already exercise both ways needs nothing. The target is a parameter the RFC only ever shows at one value — a query flag documented solely as `=true`, an enum with one usage — because the other branch has no coverage anywhere and nobody notices it is missing.
+
+### Sweep 5 — Dependency degradation
+
+For every dependency the feature runs through, assert what the user-facing surface does when that dependency is unavailable, and that upstream state stays correct.
+
+**Enumerate the dependency set from the union of three fields — never from `cross_service_dependencies[]` alone.** That field routinely lists only the named external services and omits infrastructure, so a feature whose critical path runs through a queue or a cache will have no degradation coverage for the hop most likely to break.
+
+| Source field | Contributes |
+|---|---|
+| `service_level_changes[]` | every service the feature touches, including internal ones |
+| `protocols_used[]` | REST, gRPC, Kafka, Redis, DB-direct — each is a failure domain |
+| `contracts.other[]` | workers, caches, direct-DB mechanisms and scheduled jobs |
+| `cross_service_dependencies[]` | the documented `failure_behavior`, where one is stated |
+
+For each dependency in the union, generate one scenario asserting:
+- what the user-facing surface renders or returns while the dependency is down
+- that upstream state written before the failure remains correct and is not rolled back or corrupted
+- that the surface recovers once the dependency returns, where recovery is expected
+
+Where `cross_service_dependencies[].failure_behavior` states the expected behaviour, assert it. Where it does not, assert the surface degrades without erroring and record the undefined expectation as a gap — do not skip the scenario because the behaviour is unstated.
+
+### Coverage ledger — mandatory before writing output
+
+Two of these gap classes come from rules that already exist but were skipped, not from missing rules. Enumeration catches those; careful reading does not. Build an explicit ledger and refuse to write output while any row is unmapped:
+
+| Source item | Every instance must map to ≥1 scenario |
+|---|---|
+| `rfc.validation_sequence[]` | each step |
+| `rfc.error_codes[]` | each code |
+| `rfc.business_logic[]` | each rule id |
+| `rfc.contracts.*[]` | each endpoint, topic and mechanism |
+| `rfc.contracts.*.request_body[required: true]` | each field (Sweep 4) |
+| `rfc.in_scope[]` | each item |
+| `rfc.out_of_scope[]` classified as a design decision | each item (Sweep 3) |
+| `rfc.open_questions[]` | each question with a testable surface |
+| `prd.acceptance_criteria[]` | each AC, or an explicit no-backend-surface note |
+| `prd.user_flows[].failure_states[]` | **each failure state** |
+| `prd.boundary_values[]` and `boundary_conditions[]` | each entry |
+| `prd.risk_areas[]` | each `High` or `Blocking` risk |
+| Every async job, retry and multi-actor write path | Sweep 1 |
+| Every collection field in a contract | Sweep 2, read side |
+| Every `(collection × mutating operation)` pair | Sweep 2, write side |
+| Every `(endpoint × documented retryable error)` pair | Sweep 1, retry-after-failure |
+| Every `(dependency × user-facing surface)` pair, from the three-field union | Sweep 5 |
+| Every optional parameter with an unexercised alternate value | Sweep 4 |
+| Every `(ordered validation step × later external call)` pair | short-circuit assertion |
+
+Record the ledger's unmapped rows in `qa_analysis.md` with a reason for each. An item with no backend surface is a legitimate reason; being overlooked is not.
+
+**The ledger is the backstop, not the sweeps.** The sweeps are prose heuristics and their triggers have repeatedly turned out narrower than the concept they describe — a collection sweep that fired once instead of per write path, a repeat-execution sweep that reached async jobs but not synchronous endpoints, a failure sweep that read only `cross_service_dependencies[]`. The ledger does not depend on the prose being worded correctly: it enumerates cross-products mechanically and refuses to write output while a cell is unjustified. When a sweep and the ledger disagree, the ledger wins. When a new class of miss is found, add a ledger row for it before rewording the sweep.
+
 ## Ownership note — sdet_plan.json is authoritative for preconditions
 
 Once `sdet_plan.json` is written and approved by a human:
@@ -392,9 +580,11 @@ Schema root:
   - `test_type: string[]` — BrowserStack TestType. **Multi-select array** — collect all applicable values (see CSV section). Minimum one entry; never null or empty.
   - `execution_mode: Automatable|Manual` — BrowserStack Execution Mode. `Manual` for scenarios tagged `deferred` or `underspecified`; `Automatable` for all others.
   - `markets: array` — Countries this scenario applies to. Values: `Indonesia` | `Singapore`. Derived from `tasks_context.environments`; default `["Indonesia", "Singapore"]` when not specified.
-  - `type_of_test: functional|performance` — BrowserStack Type of Test Case. `performance` when tags contain `load`, `nfr`, `concurrency`, or `reliability`; otherwise `functional`.
-  - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`
+  - `type_of_test: functional|performance` — BrowserStack Type of Test Case. `performance` **only** when tags contain `load` or `nfr` — i.e. the scenario measures a throughput or latency target. Everything else is `functional`, including `reliability` and `concurrency` scenarios: a timeout, retry-exhaustion, circuit-breaker or race-condition test asserts *functional* behaviour under adverse conditions, it does not measure performance.
+  - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`. Target 4–6 steps per scenario (see Scenario granularity). Every `expected_result` is a concrete assertion phrased as `Verify …`; `action` is imperative. Steps and expected results are 1:1.
   - `preconditions[]`, `fixture_ids[]`
+  - `scenario_group: string` — key shared by scenarios that rest on the **same Arrange**: the same precondition state and the same triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction — it applies equally to `Manual` scenarios, where it tells a human tester which cases can be executed back-to-back off one setup. A scenario with no sibling gets its own unique key. Format: `{feature_component}-{behaviour}`, e.g. `chatextension-terminal-status`. Downstream consumers decide what to do with the grouping; see `automation-plan-generator` for how it maps to test methods.
+  - `existing_testcase_ids: string[]` — BrowserStack case ids (e.g. `TC-302383`) that this scenario extends, replaces, or re-runs under a new flag state. Populated from `regression_context.json` when present; empty otherwise. Rendered into the `Preconditions` block as `Existing regression case:` and consumed downstream for `@TestInfo(testCaseIds={...})`. Do **not** invent ids — leave empty when `regression_context.json` is absent.
   - `tags[]` — `happy_path|negative|boundary|flag_on|flag_off|e2e|load|concurrency|security|reliability|compliance|nfr|deferred|underspecified|provisional`
   - `human_corrected: boolean` — `false` at generation time. Set to `true` in Review mode when the scenario is modified or deprecated by human feedback. Never reset to false. For scenarios with `generated_by_mode: "review"`, this is implicitly `true` (the scenario is itself a human addition) but the field is still set explicitly.
   - `human_correction_types: string[]` — empty at generation. Appended per review round with the type of correction applied: `"field_change"` (one or more fields corrected), `"deprecated"` (LLM generated an incorrect/duplicate scenario), `"missed_scenario"` (LLM failed to generate this; set on review-added scenarios). Multiple rounds may push multiple entries.
@@ -423,6 +613,10 @@ Human-readable summary for SDET + PM review gate:
 - Open questions surfaced as deferred scenarios
 - Provenance staleness warning if applicable
 - LLM generation quality (after first Review run): auto-approved count, human-modified, human-deprecated, human-added, accuracy %
+- **Granularity check** — mean steps per scenario, count of 1-step scenarios, scenarios exceeding 3 fixtures, and the `scenario_group`-to-scenario ratio (see Log). Call out explicitly if the plan drifted toward one-assertion-per-scenario.
+- **Market assumption** — which market(s) were set and on what basis, flagged for confirmation whenever they were inferred rather than read from `tasks_context.environments`.
+- **Coverage ledger** — the full table with every unmapped row and its stated reason. This is the section a reviewer scans to find what the plan does not cover, so unmapped rows belong here in full rather than summarised.
+- **Completeness sweep results** — how many scenarios or steps each of the four sweeps contributed. A sweep contributing zero is a signal it was skipped, not that the feature had nothing to find.
 
 ### Human Review section (below `---`, written once, never regenerated)
 
@@ -471,7 +665,30 @@ Flat CSV for BrowserStack upload via BrowserStack MCP after human approval. Colu
 | `Backend Automation Status` | Constant `Not Automated` | Initial upload value — updated to `Automated` after test-code-generator merges code |
 | `Country v2` | `markets[]` joined | e.g. `Indonesia, Singapore`. Determines which country Automation Status cells are active |
 | `TestType` | `test_type` | See derivation below |
-| `Type of Test Case` | `type_of_test` | `functional` or `performance` |
+| `Type of Test Case` | `type_of_test` | `functional` or `performance`. See derivation below — `reliability` and `concurrency` are functional, not performance. |
+| `Preconditions` | `preconditions[]` | Rendered as the templated block below. **Required** — a Manual scenario with no preconditions is not executable by a human tester. |
+| `Steps` | `step_descriptions[].action` | Newline-joined and numbered `1.`, `2.`, `3.` … |
+| `Expected Result` | `step_descriptions[].expected_result` | Newline-joined and numbered to **exactly match** the Steps numbering — step *n* maps to expected result *n*. Each line starts with `Verify …`. |
+
+> **Steps and Expected Result must have identical line counts.** This 1:1 numbering is the house convention across existing GoFood and Transport test cases; a mismatch makes the case unexecutable and is a generation error.
+
+### `Preconditions` block format
+
+Render `preconditions[]` as a newline-separated block. The first four lines are mandatory on every scenario:
+
+```
+Test data: <what must be provisioned, referencing fixture_ids>
+Country: <Indonesia | Singapore>
+Entry point: <endpoint or trigger under test>
+<feature_flag_name>: is_enabled = <true | false>
+```
+
+Then, when applicable:
+```
+Existing regression case: <TC-xxxxxx from existing_testcase_ids>
+```
+
+**Every scenario pins feature-flag state explicitly, including scenarios that are not themselves flag tests.** Scenarios covering pre-existing BAU behaviour declare the new feature's flag as `is_enabled = false (default)` — that is how the plan proves the feature does not break existing behaviour.
 
 ### Internal tracking columns (appended after BrowserStack columns)
 
@@ -521,9 +738,25 @@ Read from `tasks_context.environments` per story. Map environment names to Brows
 |---|---|
 | `id`, `id-*`, `staging-id`, `prod-id` | `Indonesia` |
 | `sg`, `sg-*`, `staging-sg`, `prod-sg` | `Singapore` |
-| `dev-cluster`, `staging-cluster` (no country suffix) | `Indonesia, Singapore` (default both) |
+| `dev-cluster`, `staging-cluster` (no country suffix) | Cannot be inferred — see below |
 
-If no environments field or mapping is ambiguous → default `Indonesia, Singapore`.
+**Do not default to both markets.** `Country v2` decides which per-country Automation Status cells are active in BrowserStack, so listing a market the feature does not ship to creates permanently-unfilled cells and overstates scope.
+
+When `tasks_context.environments` is absent or carries no country suffix, resolve in this order:
+1. A market named in `prd_context` (title, `rollout_plan`, or scope text) — e.g. a PRD titled `[M5][GO]` or naming an Indonesia-only launch.
+2. The market used by the team's existing test cases for this surface, if `regression_context.json` is present.
+3. Fall back to `["Indonesia"]` — the default market for GoTo backend services.
+
+In cases 2 and 3, record the assumption in `qa_analysis.md` and ask the human reviewer to confirm before the BrowserStack upload. Only set both markets when a source explicitly says the feature ships to both.
+
+### `Type of Test Case` derivation
+
+| Condition | Value |
+|---|---|
+| tags contain `load` or `nfr` | `performance` |
+| All other scenarios — including `reliability`, `concurrency`, `security`, `compliance` | `functional` |
+
+`reliability` and `concurrency` describe *what adverse condition* the scenario sets up, not that it measures a performance target. A retry-exhaustion or lost-update test is functional. Only a scenario asserting a throughput or latency number is `performance`.
 
 ## Pass 2 rules
 
@@ -649,3 +882,29 @@ This preserves the full audit trail in the same file the human is reading. The L
 ## Log
 
 Total scenarios, RFC coverage %, gaps count, blocked gaps count, provisional count, delta count (Pass 2/Re-trigger).
+
+Also log the granularity metrics, so drift back to one-assertion-per-scenario is visible:
+- mean `step_descriptions` per scenario — **expect 4–6**; below 3 means the granularity rule was not applied
+- count of 1-step scenarios — expect near zero
+- count of scenarios with more than 3 `fixture_ids` — expect zero
+- distinct `scenario_group` values vs total scenarios — report it, do **not** tune the plan to hit a number. The ratio is a property of the feature, not of plan quality: it rises only when the feature has natural permutation axes (service type, payment method, country) that let sibling scenarios share one Arrange. `gojek-backend-tests` averages 2.26 case-ids per test method largely on the strength of such matrices; a feature without one will sit near 1.2:1 and that is the correct answer. Investigate only a ratio of exactly 1.0 across the whole plan, which usually means `scenario_group` was assigned arbitrarily rather than derived from the Arrange.
+- total `fixture_ids` references across automatable scenarios — the runtime provisioning-call count, and the dominant flake driver
+
+### Self-check before writing output
+
+Reject and regroup if any of these hold:
+- mean steps per scenario < 3
+- more than 20% of scenarios have exactly 1 step
+- `scenario_group` is missing on any scenario, or every scenario has a unique one (it was not derived from the Arrange)
+- the coverage ledger has an unmapped row with no stated reason
+- any async job, retry or multi-actor write path has no repeat-execution scenario (Sweep 1)
+- any endpoint with a documented retryable error has no retry-after-failure scenario (Sweep 1)
+- any contract collection field has no empty-case scenario (Sweep 2, read side)
+- any `(collection × mutating operation)` pair has no at-limit scenario (Sweep 2, write side)
+- any `prd.user_flows[].failure_states[]` entry has no covering scenario
+- any `out_of_scope` design decision has no absence assertion (Sweep 3)
+- any optional parameter with an unexercised alternate value has no non-default scenario (Sweep 4)
+- any dependency in the three-field union has no degradation scenario (Sweep 5)
+- any ordered validation step followed by an external call lacks a dependency-not-invoked assertion
+- any two scenarios share a fixture set, a trigger, and a precondition but differ only in which field they assert — those must be merged
+- `Steps` and `Expected Result` line counts differ for any scenario
