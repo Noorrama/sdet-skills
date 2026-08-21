@@ -11,18 +11,30 @@
     "connectors_to_decision": 0,
     "note_connectors": 2,
     "caption_endpoints": 0,
+    "label_frames_resolved": 0,
+    "connector_direction_flipped": 0,
     "decision_nodes": 0,
     "contracted_edges": 0,
     "lane_entry_inferred": 0,
     "unlabelled_branches": 0,
+    "reactions_with_destination": 0,
+    "reactions_without_destination": 0,
+    "reactions_destination_outside_export": 0,
     "non_descriptive_names": 0,
+    "screen_id_from_banner": 0,
     "unreachable_screens": 0,
     "notes_total": 2,
     "notes_attached_by_connector": 2,
     "notes_attached_by_geometry": 0,
     "notes_unattached": 0,
-    "label_frames_resolved": 0,
-    "screen_id_from_banner": 0
+    "state_labels_attached": 0,
+    "arrow_bound_labels": 0,
+    "label_attach_conflicts": 0,
+    "group_box_clusters": 0,
+    "fingerprint_merged_frames": 0
   },
-  "screen_renames": []
+  "screen_renames": [],
+  "group_box_merges": [],
+  "fingerprint_merges": [],
+  "unclassified_states": []
 }

@@ -37,6 +37,18 @@ NOTE_BUCKETS = (
     "notes_unattached",
 )
 
+# v2-export counters (state labels, group boxes, fingerprints). Zero on a v1
+# export, but always PRESENT — an absent key and a zero look identical.
+V2_COUNTERS = (
+    "state_labels_attached",
+    "arrow_bound_labels",
+    "label_attach_conflicts",
+    "group_box_clusters",
+    "fingerprint_merged_frames",
+    "section_entry_inferred",
+    "ambiguous_collapses",
+)
+
 # Fields describing intent rather than structure. A board carries them only when
 # a designer wrote one down, so an empty one is never a BLOCKING gap.
 INTENT_FIELDS = (
@@ -109,7 +121,7 @@ def check(
 
         # 4. Every counter present, including zeroes. An absent key and a zero
         # look identical to a reader, which is how a broken run passes review.
-        missing = [b for b in CONSERVED_BUCKETS + NOTE_BUCKETS if b not in compliance]
+        missing = [b for b in CONSERVED_BUCKETS + NOTE_BUCKETS + V2_COUNTERS if b not in compliance]
         if missing:
             failures.append(
                 f"convention_compliance missing {len(missing)} counter(s): {', '.join(missing[:6])} "
@@ -163,6 +175,12 @@ def check(
 
     # 9. Referential integrity: ids must resolve.
     known = {s.get("screen_id") for s in screens}
+    for i, entry in enumerate((report or {}).get("unclassified_states") or []):
+        if entry.get("screen_id") not in known:
+            failures.append(
+                f"report unclassified_states[{i}].screen_id {entry.get('screen_id')!r} is not a "
+                f"screen_id in this file — the sidecar and the context disagree"
+            )
     for element in (e for s in screens for e in (s.get("elements") or [])):
         eid = element.get("element_id", "")
         if not ELEMENT_ID.match(eid):
@@ -179,6 +197,16 @@ def check(
                 f"ui_flow[{i}] is a self-loop on {edge.get('from_screen_id')!r} — an intra-screen "
                 f"connector is a state change, not navigation"
             )
+
+    # 10. No duplicate edges. N state frames prototyping the same jump must
+    # dedupe to one edge; duplicates silently inflate downstream scenario counts.
+    edge_keys = [(e.get("from_screen_id"), e.get("to_screen_id"), e.get("condition")) for e in flow]
+    dupes = sorted({k for k in edge_keys if edge_keys.count(k) > 1})
+    for k in dupes[:5]:
+        failures.append(
+            f"ui_flow has {edge_keys.count(k)} identical edges {k[0]!r} -> {k[1]!r} "
+            f"(condition {k[2]!r}) — the extractor dedupes these; duplicates mean a hand edit"
+        )
 
     return failures, skipped
 
