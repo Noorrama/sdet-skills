@@ -85,20 +85,32 @@ Output shape after generate:
 }
 ```
 
-### G.3 Verify the full list, then run one-by-one
+### G.3 Verify one prompt at a time, then run one-by-one
 
-**Verify (batch):** call `tapmind_verify_prompt` with the whole list:
+**Verify (sequential):** the exposed `tapmind_verify_prompt` MCP tool takes a **single**
+`prompt` string per call — it always wraps it as a one-element list before forwarding to the
+backend, even though the backend's own `/v1/runs/verifyPrompt` endpoint accepts a batch
+`prompts[]`. Until a batch overload is exposed on the tool, call it once per prompt, in list
+order:
 
 ```json
 {
-  "prompts": ["…", "…"],
+  "prompt": "<prompts[i]>",
   "productGroup": "<module>",
   "targetServiceId": "<service_name>",
   "dryRunLlm": true
 }
 ```
 
-Apply suggested rewrites → update `prompts[]` → re-verify until clean or `NEEDS_REVIEW`.
+Apply that call's `corrected_test_prompt` / `corrected_verify_prompt` → update `prompts[i]` →
+re-verify that prompt until clean or flag `NEEDS_REVIEW` (response `status:
+"NEEDS_CLARIFICATION"` + `clarifying_question`). The response's `declared_bindings` also lists
+the `${memory.x}` keys the planner actually resolved for that step — cross-check against your
+own memory-key tracking (§4) rather than assuming.
+
+> If a batch overload (`prompts: string[]`) is ever exposed on the MCP tool, prefer it — one
+> call per scenario's full list lets the planner see the whole sequence + memory names at once,
+> which catches cross-step issues that one-at-a-time verification can't.
 
 **Execute (sequential):** `tapmind_run_nlp_command` **one prompt at a time**. Reuse the `conversationId` returned by step 1 on steps 2…N (a new chat without that id loses memory).
 

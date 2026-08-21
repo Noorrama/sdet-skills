@@ -15,7 +15,7 @@ automation_plan.json
  2. Generate prompts[] for every step (grammar in SKILL.md §§2–10)
         │
         ▼
- 3. Batch verify — tapmind_verify_prompt({ prompts, productGroup, targetServiceId, dryRunLlm })
+ 3. Sequential verify — tapmind_verify_prompt({ prompt, productGroup, targetServiceId, dryRunLlm }), one call per prompt
         │  rewrites → update prompts[] → re-verify
         ▼
  4. Sequential execute — tapmind_run_nlp_command one prompt at a time
@@ -64,22 +64,28 @@ Walk prompts in order. Only reference `${memory.x}` if an earlier prompt has `sa
 
 Never inline tokens/secrets into prompts. `saveMemory` from env / fixture first (§7).
 
-## 3. Verify (batch)
+## 3. Verify (sequential — one prompt per call)
+
+The exposed `tapmind_verify_prompt` MCP tool takes a single `prompt` string, not a list —
+it always wraps it as a one-element list before calling the backend, even though the
+backend's own `/v1/runs/verifyPrompt` endpoint accepts a batch `prompts[]`. Call once per
+prompt, in list order:
 
 ```json
 {
-  "prompts": ["prompt 1", "prompt 2"],
+  "prompt": "<prompts[i]>",
   "productGroup": "<module>",
   "targetServiceId": "<service_name>",
   "dryRunLlm": true
 }
 ```
 
-- One call per scenario with the **full** list (planner sees sequence + memory names).
-- Apply LLM/suggested rewrites into `correctedSteps` (`change: "reworded"`).
+- Apply that call's `corrected_test_prompt` / `corrected_verify_prompt` into `correctedSteps` (`change: "reworded"`).
+- `status: "NEEDS_CLARIFICATION"` + `clarifying_question` in the response → flag `NEEDS_REVIEW`, don't guess.
 - Re-ingest curls via `tapmind_ingest_curl` when verify shows no matching operation.
 
-If the MCP wrapper only accepts a single `prompt` string, call once per item **in list order** and merge results — prefer the real list API when available.
+If a batch overload (`prompts: string[]`) is ever exposed on the MCP tool, prefer it — one
+call per scenario's full list lets the planner see the whole sequence + memory names at once.
 
 ## 4. Execute (sequential)
 
@@ -166,7 +172,7 @@ Report skill (separate) can render PAM-style `trace.json` / `report.html` from e
 ## 6. Definition of done (per scenario)
 
 - [ ] `prompts[]` length matches runnable steps (non-NEEDS_REVIEW)
-- [ ] Batch verify clean or residual flags documented
+- [ ] Verify pass (per-prompt calls) clean or residual flags documented
 - [ ] If executed: one shared `conversationId`; memory refs resolve
 - [ ] `@Test` description matches scenario intent
 - [ ] `@TestInfo` only contains real suite IDs (or explicit empties)

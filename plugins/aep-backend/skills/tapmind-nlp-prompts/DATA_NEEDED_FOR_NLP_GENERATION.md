@@ -48,7 +48,7 @@ Never invent BrowserStack/TestRail IDs. Empty owner → `owner = ""`.
 
 | Phase | Tool | Shape |
 |---|---|---|
-| Verify | `tapmind_verify_prompt` | **full** `prompts: string[]` per scenario |
+| Verify | `tapmind_verify_prompt` | **one** `prompt` string per call, looped in list order (backend `/v1/runs/verifyPrompt` supports a `prompts[]` batch; exposed tool doesn't yet) |
 | Execute | `tapmind_run_nlp_command` | **one** command per call; reuse `conversationId` |
 | Ingest | `tapmind_ingest_curl` | when verify finds no matching API |
 | Side-check | `postgres_query` / `redis_get` / `invoke` | infra expected_results |
