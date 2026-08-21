@@ -39,6 +39,55 @@ If both `code_change_context.json` and `doc_change_context.json` are present (no
 
 Set `generation_mode` in the sdet_plan.json root to the detected mode: `pass1` | `pass2` | `retrigger` | `review`.
 
+## Stage 1 — Upstream Service Check / DoR gate (ALWAYS FIRST; on pass, continue to Pass 1)
+
+Run before anything else — before reading the files for content, before the team-scope
+question, before any generation. Collect every failure — do not stop at the first — so the
+rejection report is complete and one round trip fixes everything.
+
+### DoR checks
+
+1. **Presence** — all 4 context files (`prd_context.json`, `rfc_context.json`,
+   `tasks_context.json`, `regression_context.json`) exist in the run directory.
+2. **Valid JSON / schema-valid** — each file loads as JSON and matches its upstream
+   extractor's output contract (verify only; no transformation, no merging, no re-emission).
+3. **PRD has at least one `acceptance_criteria` entry** — without ACs, no scenarios can be
+   derived.
+4. **Regression file present even if empty** — empty coverage arrays are fine and expected;
+   the **file's** absence is not, because legacy-regression status then cannot be determined
+   for any scenario.
+5. **Regression entries matchable** — every `automated_tests[]`/`manual_tests[]` entry has a
+   `requirement_ref` or an `api_endpoint`. An entry with neither cannot be matched to a
+   generated scenario — skip that entry for dedup purposes and report it; reject the run only
+   when no usable entry remains.
+
+### On reject — STOP
+
+Any file missing/unparseable/schema-invalid, or zero PRD ACs: write `validation_report.json`
+to the run directory and **stop — do not enter any generation mode**. No team question, no
+scenarios, no other output files. Each failure names the file, the failed check, and the
+owning extractor stage so the fix is routed to the right PIC and only the failing extractor
+is re-run — not the whole batch.
+
+```json
+{
+  "status": "REJECT",
+  "failures": [
+    { "file": "prd_context.json", "check": "min_acceptance_criteria", "detail": "0 ACs found", "owner_stage": "prd-extractor" }
+  ]
+}
+```
+
+### On pass — continue
+
+Note observations worth carrying into generation (blocking open decisions, draft contracts,
+empty coverage arrays, skipped regression entries) and continue into the detected mode,
+starting with team resolution and the scope confirmation gate below.
+
+**Degrade, do not reject** for everything inside a present-and-valid file — blocking
+`open_decisions[]` / `needs_clarification[]` / `extraction_gaps[]` entries block *their own
+area* via the Blocking gates section, never the run.
+
 ## Reads
 
 | File | Read for |
@@ -133,15 +182,23 @@ The PRD and RFC name these teams. Which scope should this plan cover?
   ICP                      icp                   icp                   ICP-         icp-backend
   GoPay                    gopay                 gopay                 GOPAY-       gopay-backend
 
-  1. One team  — generate only scenarios owned by the team you name
-  2. All teams — generate the full set, each scenario tagged with its owning team
-  3. Primary + foreign-tagged — generate for the primary team, and tag the
+  1. One team        — generate only scenarios owned by the team you name
+  2. Multiple teams  — name any subset (multi-select); generate only scenarios
+     owned by the selected teams, each tagged with its owning team
+  3. All teams (e2e) — generate the full set, each scenario tagged with its owning team
+  4. Primary + foreign-tagged — generate for the primary team, and tag the
      scenarios whose system under test belongs to another team
 ```
 
-Do not guess the answer and do not proceed on the first match. The choice changes which module the code lands in, which regression suite the scenarios are counted against, and which BrowserStack project receives the upload — three routings a wrong guess silently corrupts.
+**The selection is multi-select** — the SDET may pick one team, any subset of teams, or all
+teams (e2e). Do not guess the answer and do not proceed on the first match. The choice changes
+which module the code lands in, which regression suite the scenarios are counted against, and
+which BrowserStack project receives the upload — three routings a wrong guess silently corrupts.
 
-Record the answer and the full resolved set in `qa_analysis.md`, including the teams the human excluded, so the decision is auditable.
+Record the answer and the full resolved set in `qa_analysis.md`, including the teams the human
+excluded, so the decision is auditable. When multiple teams are selected, the checklist,
+coverage ledger and audit run against the selected subset; items owned by unselected teams are
+listed in the excluded-by-scope table, never silently dropped.
 
 **If a candidate does not resolve**, list it as unresolved in the same prompt rather than dropping it. An unmatched team name usually means a missing registry alias, not an irrelevant team.
 
