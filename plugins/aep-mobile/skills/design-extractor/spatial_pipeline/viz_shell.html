@@ -1,0 +1,285 @@
+<meta charset="utf-8">
+<title>Group Order Flow Map</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* dark-first: bare :root carries the complete dark palette */
+  :root {
+    --bg: #14161f; --panel: #1d2130; --panel-2: #232840; --line: #343a55;
+    --ink: #e8eaf2; --ink-dim: #9aa1bd; --ink-faint: #6b7292;
+    --tile: #eef0f6; --tile-ink: #232840; --tile-line: #b9bed2;
+    --nav: #5aa7ff; --variant: #f0a832; --unres: #ff6470; --ok: #3fd0a4;
+    --banner: #2f9e63; --banner-ink: #dff7ea; --caption: #c9a0e8;
+    --sub: #4a5378; --sel: #5aa7ff;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f2f3f7; --panel: #ffffff; --panel-2: #e9ebf3; --line: #d4d8e6;
+      --ink: #23263a; --ink-dim: #5b6280; --ink-faint: #8d93ad;
+      --tile: #ffffff; --tile-ink: #23263a; --tile-line: #9aa1bd;
+      --nav: #1d6fd8; --variant: #b97a10; --unres: #d43a4a; --ok: #14805f;
+      --banner: #1e7a4a; --banner-ink: #eafff3; --caption: #8a4fc0;
+      --sub: #aab1cc; --sel: #1d6fd8;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f2f3f7; --panel: #ffffff; --panel-2: #e9ebf3; --line: #d4d8e6;
+    --ink: #23263a; --ink-dim: #5b6280; --ink-faint: #8d93ad;
+    --tile: #ffffff; --tile-ink: #23263a; --tile-line: #9aa1bd;
+    --nav: #1d6fd8; --variant: #b97a10; --unres: #d43a4a; --ok: #14805f;
+    --banner: #1e7a4a; --banner-ink: #eafff3; --caption: #8a4fc0;
+    --sub: #aab1cc; --sel: #1d6fd8;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.45 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    display: flex; flex-direction: column;
+  }
+  header {
+    padding: 14px 20px 10px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 17px; font-weight: 600; margin: 0; }
+  header .meta { color: var(--ink-dim); font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+  main { flex: 1; display: flex; min-height: 0; }
+  #side {
+    width: 296px; flex: none; border-right: 1px solid var(--line);
+    overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .statgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+  .stat b { display: block; font-size: 20px; font-weight: 600; font-family: "IBM Plex Mono", monospace; }
+  .stat span { font-size: 11px; color: var(--ink-dim); letter-spacing: .04em; text-transform: uppercase; }
+  .stat.ok b { color: var(--ok); } .stat.bad b { color: var(--unres); }
+  nav#groups { display: flex; flex-direction: column; gap: 4px; }
+  nav#groups button {
+    text-align: left; background: var(--panel); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px;
+    font: inherit; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px;
+  }
+  nav#groups button:hover { border-color: var(--ink-faint); }
+  nav#groups button.on { border-color: var(--sel); background: var(--panel-2); }
+  nav#groups button:focus-visible { outline: 2px solid var(--sel); outline-offset: 1px; }
+  nav#groups .cnt { color: var(--ink-dim); font-family: "IBM Plex Mono", monospace; font-size: 12px; flex: none; }
+  .legend { font-size: 12px; color: var(--ink-dim); display: flex; flex-direction: column; gap: 5px; }
+  .legend .sw { display: inline-block; width: 22px; height: 0; border-top: 3px solid; margin-right: 7px; vertical-align: middle; border-radius: 2px; }
+  #canvasWrap { flex: 1; position: relative; min-width: 0; }
+  #board { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+  #board.panning { cursor: grabbing; }
+  #tip {
+    position: absolute; pointer-events: none; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px;
+    font-size: 12px; max-width: 340px; display: none; z-index: 5;
+    box-shadow: 0 4px 18px rgba(0,0,0,.35);
+  }
+  #tip .mono { font-family: "IBM Plex Mono", monospace; color: var(--ink-dim); font-size: 11px; }
+  #hint { position: absolute; right: 14px; top: 10px; font-size: 11px; color: var(--ink-faint); }
+  #unres {
+    border-top: 1px solid var(--line); max-height: 200px; overflow: auto;
+    background: var(--panel);
+  }
+  #unres summary { padding: 8px 20px; cursor: pointer; font-size: 13px; color: var(--ink-dim); }
+  #unres table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  #unres th, #unres td { text-align: left; padding: 4px 12px; border-top: 1px solid var(--line); max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #unres th { color: var(--ink-dim); font-weight: 500; position: sticky; top: 0; background: var(--panel); }
+  #unres td.mono { font-family: "IBM Plex Mono", monospace; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<header>
+  <h1>Group Order Flow Map</h1>
+  <span class="meta" id="metaLine"></span>
+</header>
+<main>
+  <div id="side">
+    <div class="statgrid" id="stats"></div>
+    <div class="legend">
+      <div><span class="sw" style="border-color:var(--nav)"></span>navigation edge (connector)</div>
+      <div><span class="sw" style="border-color:var(--variant); border-top-style:dashed"></span>variant link (dashed box)</div>
+      <div><span class="sw" style="border-color:var(--banner)"></span>swim-lane banner</div>
+      <div><span class="sw" style="border-color:var(--caption)"></span>row caption / note</div>
+      <div><span class="sw" style="border-color:var(--sub); border-top-style:dotted"></span>sub-section (blue box)</div>
+    </div>
+    <nav id="groups" aria-label="Board groups"></nav>
+  </div>
+  <div id="canvasWrap">
+    <svg id="board" role="img" aria-label="Board replica with flow edges"></svg>
+    <div id="hint">drag to pan · wheel to zoom · hover for detail</div>
+    <div id="tip"></div>
+  </div>
+</main>
+<details id="unres">
+  <summary>Unresolved connectors (<span id="unresCount"></span>) — annotations &amp; open questions, reported not guessed</summary>
+  <table>
+    <thead><tr><th>connector</th><th>reason</th><th>start</th><th>end</th><th>label</th></tr></thead>
+    <tbody id="unresBody"></tbody>
+  </table>
+</details>
+<script id="DATA" type="application/json">__DATA__</script>
+<script>
+const D = JSON.parse(document.getElementById('DATA').textContent);
+const svg = document.getElementById('board');
+const tip = document.getElementById('tip');
+const NS = 'http://www.w3.org/2000/svg';
+const [SW, SH] = D.screen_size;
+
+document.getElementById('metaLine').textContent =
+  `${D.groups.length} groups · ${D.edges.length} resolved edges · calibrated screen ${SW}×${SH}`;
+
+const st = D.stats;
+document.getElementById('stats').innerHTML = `
+  <div class="stat"><b>${st.connectors_total}</b><span>connectors</span></div>
+  <div class="stat ok"><b>${st.edges_resolved}</b><span>edges resolved</span></div>
+  <div class="stat bad"><b>${D.unresolved.length}</b><span>conn. unresolved</span></div>
+  <div class="stat"><b>${st.labelled_conditions}</b><span>labelled conditions</span></div>`;
+
+const ub = document.getElementById('unresBody');
+document.getElementById('unresCount').textContent = D.unresolved.length;
+for (const u of D.unresolved) {
+  const tr = document.createElement('tr');
+  const cells = [u.id, u.reason, u.start, u.end, u.cond];
+  cells.forEach((c, i) => {
+    const td = document.createElement('td');
+    if (i === 0) td.className = 'mono';
+    td.textContent = c || '—';
+    td.title = c || '';
+    tr.appendChild(td);
+  });
+  ub.appendChild(tr);
+}
+
+let cur = null, vb = null;
+const nav = document.getElementById('groups');
+D.groups.filter(g => g.screens > 0).forEach((g, i) => {
+  const b = document.createElement('button');
+  const edgeN = D.edges.filter(e => e.g === g.id || e.g2 === g.id).length;
+  b.innerHTML = `<span>${g.name}</span><span class="cnt">${g.screens}s·${edgeN}e</span>`;
+  b.onclick = () => { select(g, b); };
+  nav.appendChild(b);
+  if (i === 0) select(g, b);
+});
+
+function select(g, btn) {
+  cur = g;
+  [...nav.children].forEach(x => x.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  const pad = SW * 1.2;
+  vb = { x: g.x - pad, y: g.y - pad, w: g.w + pad * 2, h: g.h + pad * 2 };
+  draw();
+}
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(e);
+  return e;
+}
+
+function draw() {
+  svg.innerHTML = '';
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const defs = el('defs', {});
+  for (const [id, col] of [['aNav', 'var(--nav)'], ['aVar', 'var(--variant)']]) {
+    const m = el('marker', { id, viewBox: '0 0 10 10', refX: 9, refY: 5,
+      markerWidth: 4.2, markerHeight: 4.2, orient: 'auto-start-reverse' }, defs);
+    el('path', { d: 'M0 0L10 5L0 10z', fill: col }, m);
+  }
+  const g = cur;
+  const fs = SW * 0.12, fsSmall = SW * 0.095;
+  // group frame
+  el('rect', { x: g.x, y: g.y, width: g.w, height: g.h, rx: SW * 0.1,
+    fill: 'none', stroke: 'var(--line)', 'stroke-width': SW * 0.02 });
+  const layer = { box: el('g', {}), item: el('g', {}), edge: el('g', {}), txt: el('g', {}) };
+
+  for (const it of g.items) {
+    if (it.k === 'SUBSECTION') {
+      el('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: SW * 0.06,
+        fill: 'var(--panel-2)', 'fill-opacity': .45, stroke: 'var(--sub)',
+        'stroke-width': SW * 0.018, 'stroke-dasharray': `${SW * .06} ${SW * .05}` }, layer.box);
+      if (it.t) txt(it.x + SW * .08, it.y + fs * 1.2, it.t, fs, 'var(--ink-dim)', layer.box);
+    } else if (it.k === 'VBOX') {
+      el('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: SW * 0.04,
+        fill: 'none', stroke: 'var(--variant)', 'stroke-width': SW * 0.02,
+        'stroke-dasharray': `${SW * .05} ${SW * .04}` }, layer.box);
+    } else if (it.k === 'BANNER') {
+      el('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: it.h / 2,
+        fill: 'var(--banner)', 'fill-opacity': .9 }, layer.item);
+      txt(it.x + it.h * .6, it.y + it.h * .68, it.t, Math.min(it.h * .5, fs * 1.5),
+          'var(--banner-ink)', layer.txt);
+    } else if (it.k === 'CAPTION') {
+      txt(it.x, it.y + fsSmall, it.t.replace(/\n/g, ' '), fsSmall, 'var(--caption)', layer.txt,
+          it.w * 1.6);
+    } else if (it.k === 'SCREEN') {
+      const r = el('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: SW * 0.05,
+        fill: 'var(--tile)', stroke: 'var(--tile-line)', 'stroke-width': SW * 0.012 }, layer.item);
+      hover(r, () => `<b>${esc(it.t)}</b><br><span class="mono">frame “${esc(it.n)}” · ${it.id}</span>`);
+      txt(it.x + SW * .05, it.y - fs * .45, it.t, fs, 'var(--ink)', layer.txt, it.w * 2.2);
+    }
+  }
+
+  for (const e of D.edges) {
+    if (e.g !== g.id && e.g2 !== g.id) continue;
+    const variant = e.rel === 'VARIANT_LINK';
+    const col = variant ? 'var(--variant)' : 'var(--nav)';
+    const mx = (e.x1 + e.x2) / 2, dy = Math.abs(e.y1 - e.y2);
+    const bend = (e.y1 === e.y2 ? -SH * .35 : 0);
+    const p = el('path', {
+      d: `M${e.x1} ${e.y1} Q ${mx} ${(e.y1 + e.y2) / 2 + bend - dy * 0.12} ${e.x2} ${e.y2}`,
+      fill: 'none', stroke: col, 'stroke-width': 1.8,
+      'vector-effect': 'non-scaling-stroke',
+      'stroke-opacity': .9, 'marker-end': `url(#${variant ? 'aVar' : 'aNav'})`,
+      'stroke-dasharray': variant ? '7 5' : 'none',
+    }, layer.edge);
+    hover(p, () => `<b>${esc(e.fl)}</b> → <b>${esc(e.tl)}</b>` +
+      (e.cond ? `<br>condition: “${esc(e.cond)}”` : '') +
+      `<br><span class="mono">${esc(e.via)} · ${esc(e.cid)}${e.g !== e.g2 && e.g2 ? ' · cross-group' : ''}</span>`);
+    if (e.cond) {
+      txt(mx, (e.y1 + e.y2) / 2 + bend * .55 - fs * .3, e.cond, fs, col, layer.txt, SW * 4);
+    }
+  }
+}
+
+function txt(x, y, s, size, fill, parent, maxW) {
+  const t = el('text', { x, y, 'font-size': size, fill,
+    'font-family': '"IBM Plex Sans", sans-serif' }, parent);
+  t.textContent = s;
+  if (maxW) { t.setAttribute('textLength', ''); /* let it run; clipped visually is fine */ }
+  return t;
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function hover(node, html) {
+  node.addEventListener('pointerenter', ev => { tip.innerHTML = html(); tip.style.display = 'block'; move(ev); });
+  node.addEventListener('pointermove', move);
+  node.addEventListener('pointerleave', () => { tip.style.display = 'none'; });
+}
+function move(ev) {
+  const r = svg.parentElement.getBoundingClientRect();
+  tip.style.left = Math.min(ev.clientX - r.left + 14, r.width - 350) + 'px';
+  tip.style.top = (ev.clientY - r.top + 14) + 'px';
+}
+
+// pan / zoom
+let drag = null;
+svg.addEventListener('pointerdown', ev => {
+  drag = { x: ev.clientX, y: ev.clientY, vb: { ...vb } };
+  svg.classList.add('panning'); svg.setPointerCapture(ev.pointerId);
+});
+svg.addEventListener('pointermove', ev => {
+  if (!drag) return;
+  const r = svg.getBoundingClientRect();
+  vb.x = drag.vb.x - (ev.clientX - drag.x) * vb.w / r.width;
+  vb.y = drag.vb.y - (ev.clientY - drag.y) * vb.h / r.height;
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+});
+svg.addEventListener('pointerup', ev => { drag = null; svg.classList.remove('panning'); });
+svg.addEventListener('wheel', ev => {
+  ev.preventDefault();
+  const r = svg.getBoundingClientRect();
+  const px = vb.x + (ev.clientX - r.left) / r.width * vb.w;
+  const py = vb.y + (ev.clientY - r.top) / r.height * vb.h;
+  const f = ev.deltaY > 0 ? 1.18 : 1 / 1.18;
+  vb = { x: px - (px - vb.x) * f, y: py - (py - vb.y) * f, w: vb.w * f, h: vb.h * f };
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+}, { passive: false });
+</script>
