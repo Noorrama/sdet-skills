@@ -182,23 +182,15 @@ The PRD and RFC name these teams. Which scope should this plan cover?
   ICP                      icp                   icp                   ICP-         icp-backend
   GoPay                    gopay                 gopay                 GOPAY-       gopay-backend
 
-  1. One team        — generate only scenarios owned by the team you name
-  2. Multiple teams  — name any subset (multi-select); generate only scenarios
-     owned by the selected teams, each tagged with its owning team
-  3. All teams (e2e) — generate the full set, each scenario tagged with its owning team
-  4. Primary + foreign-tagged — generate for the primary team, and tag the
+  1. One team  — generate only scenarios owned by the team you name
+  2. All teams — generate the full set, each scenario tagged with its owning team
+  3. Primary + foreign-tagged — generate for the primary team, and tag the
      scenarios whose system under test belongs to another team
 ```
 
-**The selection is multi-select** — the SDET may pick one team, any subset of teams, or all
-teams (e2e). Do not guess the answer and do not proceed on the first match. The choice changes
-which module the code lands in, which regression suite the scenarios are counted against, and
-which BrowserStack project receives the upload — three routings a wrong guess silently corrupts.
+Do not guess the answer and do not proceed on the first match. The choice changes which module the code lands in, which regression suite the scenarios are counted against, and which BrowserStack project receives the upload — three routings a wrong guess silently corrupts.
 
-Record the answer and the full resolved set in `qa_analysis.md`, including the teams the human
-excluded, so the decision is auditable. When multiple teams are selected, the checklist,
-coverage ledger and audit run against the selected subset; items owned by unselected teams are
-listed in the excluded-by-scope table, never silently dropped.
+Record the answer and the full resolved set in `qa_analysis.md`, including the teams the human excluded, so the decision is auditable.
 
 **If a candidate does not resolve**, list it as unresolved in the same prompt rather than dropping it. An unmatched team name usually means a missing registry alias, not an irrelevant team.
 
