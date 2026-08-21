@@ -1,0 +1,548 @@
+{
+  "epic_id": "EPIC-1122",
+  "automation_scenarios": [
+    {
+      "scenario_id": "SC-001",
+      "requirement_ref": "AC-001",
+      "description": "Happy path \u2014 valid card saves and returns token",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "driver-platform",
+      "module": "driver-platform",
+      "package": "com.gojek.wallet.controller",
+      "test_class": "PaymentControllerTest",
+      "assertion_class": "PaymentAssertions",
+      "endpoint": "GET %s/driver/bff/v1/campaigns/mitra-juara",
+      "curl_reference": "curl -X POST https://wallet-service.staging/payment/v1/cards -H 'Authorization: Bearer {{fixture-user-verified.token}}' -H 'Content-Type: application/json' -d '{\"card_number\": \"{{fixture-card-visa-valid.number}}\", \"expiry_month\": \"12\", \"expiry_year\": \"2027\", \"cvv\": \"{{fixture-card-visa-valid.cvv}}\"}' ",
+      "test_data": [
+        {
+          "fixture_id": "fixture-user-verified",
+          "description": "User account in ACTIVE status with a linked wallet",
+          "required_state": {
+            "account_status": "ACTIVE",
+            "wallet_linked": true
+          }
+        },
+        {
+          "fixture_id": "fixture-card-visa-valid",
+          "description": "A valid Visa card not previously saved by this user",
+          "required_state": {
+            "card_type": "VISA",
+            "is_expired": false,
+            "already_saved": false
+          }
+        }
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
+      "jira_ids": [],
+      "scenario_gbt_context": {
+        "endpoint_file": "driver-platform/src/main/java/entities/bff/endpoint/GetDriverCampaignsMitraJuaraEndpoint.java",
+        "upstream_files": [
+          {
+            "files": [
+              "driver-platform/src/main/java/helper/bff/BffOnboardingHelper.java",
+              "driver-platform/src/main/java/helper/bff/BffSelfOnboardingHelper.java",
+              "driver-platform/src/main/java/helper/bff/DriverSubscriptionHelper.java"
+            ],
+            "role": "helper"
+          },
+          {
+            "files": [
+              "driver-platform/src/main/java/controller/BffServiceController.java"
+            ],
+            "role": "controller"
+          },
+          {
+            "files": [
+              "driver-platform/src/main/java/helper/testData/driver/mutators/DriverSubscriptionMutator.java"
+            ],
+            "role": "test data / constants"
+          },
+          {
+            "files": [
+              "driver-platform/src/main/java/client/BffServiceClient.java"
+            ],
+            "role": "client"
+          }
+        ],
+        "downstream_files": [
+          {
+            "files": [
+              "driver-platform/src/main/java/entities/bff/endpoint/GetV1SwadayaFinanceProgramsSubscriptionsSummaryEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetDriverEligibleVoucherBffEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetDriverSubscriptionOnboardingEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetPortalConfigsEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetDriverSubscriptionRegisteredSubscriptionsEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetDriverSubscriptionSubscriptionDetailsEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetV1SwadayaFinanceProgramsSubscriptionsEntryPointEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetV1SwadayaVouchersEntryPointEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetV1SwadayaFinanceProgramsDetailsEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetFeedbackKopdarQuestionsEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetDriverSubscriptionPaymentDetailsEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetV1SwadayaFinanceProgramsSubscriptionsInactiveEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetV1SwadayaFinanceProgramsSubscriptionsDetailEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/PostBffDriverIssuanceApiEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/PostV1SwadayaFinanceProgramsSubscriptionsUnsubscribeEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetBookingOrderDetailEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetDriverCouncilByFormIdEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetDriverSubscriptionLandingEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetV1SwadayaFinanceProgramsSubscriptionsUnsubscribeReasonsEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/PostDriverSubscriptionSubscribeEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/PostDriverSubscriptionUnsubscribeEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetV1SwadayaFinanceProgramsSubscriptionsActiveEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetV1SwadayaFinanceProgramsSubscriptionsDeductionsEndpoint.java",
+              "driver-platform/src/main/java/entities/bff/endpoint/GetDriverSubscriptionEligibleSubscriptionsEndpoint.java"
+            ],
+            "role": "endpoint definition"
+          },
+          {
+            "files": [
+              "driver-platform/src/main/java/properties/DriverPlatformPropertiesInternal.java"
+            ],
+            "role": "properties / config"
+          },
+          {
+            "files": [
+              "driver-platform/src/main/java/entities/bff/request/GetDriverCampaignsMitraJuaraRequest.java",
+              "driver-platform/src/main/java/entities/common/MongoDBConnectionDetails.java"
+            ],
+            "role": "request / response model"
+          }
+        ],
+        "test_methods_calling_endpoint": [],
+        "test_data_providers": [],
+        "test_assertions": []
+      }
+    },
+    {
+      "scenario_id": "SC-002",
+      "requirement_ref": "AC-003",
+      "description": "Duplicate card returns 409 CONFLICT",
+      "is_legacy_regression": true,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "transport",
+      "module": "transport",
+      "package": "com.gojek.wallet.controller",
+      "test_class": "PaymentControllerTest",
+      "assertion_class": "PaymentAssertions",
+      "endpoint": "GET /v1/places/search",
+      "curl_reference": "curl -X POST https://wallet-service.staging/payment/v1/cards -H 'Authorization: Bearer {{fixture-user-verified.token}}' -H 'Content-Type: application/json' -d '{\"card_number\": \"{{fixture-card-already-saved.number}}\", \"expiry_month\": \"12\", \"expiry_year\": \"2027\", \"cvv\": \"{{fixture-card-already-saved.cvv}}\"}' ",
+      "test_data": [
+        {
+          "fixture_id": "fixture-user-verified",
+          "description": "User account in ACTIVE status with a linked wallet",
+          "required_state": {
+            "account_status": "ACTIVE",
+            "wallet_linked": true
+          }
+        },
+        {
+          "fixture_id": "fixture-card-already-saved",
+          "description": "A card that has already been tokenized for this user",
+          "required_state": {
+            "card_type": "VISA",
+            "is_expired": false,
+            "already_saved": true
+          }
+        }
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
+      "jira_ids": [],
+      "scenario_gbt_context": {
+        "endpoint_file": "transport/src/main/java/restidioms/serviceEndpoints/pickupExperience/panda/v1PlacesSearch/V1PlacesSearchEndpoint.java",
+        "upstream_files": [
+          {
+            "files": [
+              "transport/src/test/java/tests/testutils/FoodTestHelper.java",
+              "transport/src/test/java/tests/testutils/GoFoodOrderHelper.java"
+            ],
+            "role": "helper"
+          },
+          {
+            "files": [
+              "transport/src/main/java/testData/customers/customers/RSCustomerPool.java"
+            ],
+            "role": "test data / constants"
+          },
+          {
+            "files": [
+              "transport/src/main/java/builders/state_builders/MultimodalStateBuilder.java"
+            ],
+            "role": "builder"
+          },
+          {
+            "files": [
+              "transport/src/main/java/controllers/TransportController.java",
+              "transport/src/main/java/controllers/UtilityController.java",
+              "transport/src/main/java/controllers/apiControllers/PickupApiController.java",
+              "transport/src/main/java/controllers/flowControllers/BookingFlowController.java",
+              "transport/src/main/java/controllers/flowControllers/BookingFlowV1Controller.java",
+              "transport/src/main/java/controllers/gotransit/MultimodalApiController.java"
+            ],
+            "role": "controller"
+          },
+          {
+            "files": [
+              "transport/src/main/java/clients/pickupExperience/panda/PandaClient.java"
+            ],
+            "role": "client"
+          },
+          {
+            "files": [
+              "transport/src/test/java/tests/regression/cartography/panda/V1UserPlacesTests.java",
+              "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+              "transport/src/test/java/tests/regression/cartography/panda/V1SuggestionDefaultTests.java",
+              "transport/src/test/java/tests/regression/cartography/savedaddress/CreateRequestTest.java"
+            ],
+            "role": "test"
+          }
+        ],
+        "downstream_files": [
+          {
+            "files": [
+              "transport/src/main/java/utils/TransportTestHelper.java",
+              "transport/src/main/java/restidioms/serviceEndpoints/pickupExperience/panda/v1PlacesSearch/v1PlacesSearchHelper.java"
+            ],
+            "role": "helper"
+          },
+          {
+            "files": [
+              "transport/src/main/java/restidioms/BaseApiEndPoint.java",
+              "transport/src/main/java/statemanager/TestCaseErrorTracker.java",
+              "transport/src/main/java/statemanager/TestCaseEffortEstimate.java",
+              "transport/src/main/java/statemanager/TestCaseApiTracker.java",
+              "transport/src/main/java/restidioms/domainmodel/test/ApiModel.java",
+              "transport/src/main/java/restidioms/domainmodel/test/ApiExecutionTrackerMetadata.java"
+            ],
+            "role": "other"
+          },
+          {
+            "files": [
+              "transport/src/main/java/restidioms/ApiRequest.java",
+              "transport/src/main/java/restidioms/serviceEndpoints/pickupExperience/panda/v1PlacesSearch/v1PlacesSearchResponse.java"
+            ],
+            "role": "request / response model"
+          },
+          {
+            "files": [
+              "transport/src/main/java/properties/TransportProperties.java"
+            ],
+            "role": "properties / config"
+          }
+        ],
+        "test_methods_calling_endpoint": [
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1UserPlacesTests.java",
+            "test_method": "verifyBookingWithGateShownInHistoricalPlacesForFoodSearch"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1UserPlacesTests.java",
+            "test_method": "verifyGateSavedAddressIsShownInSavedPlaces"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyShowingSynonymPartialMatch"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyShowingSynonymExactMatch"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyShowingPoiInsideAOIAndNormalAoiInSearchResults"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyShowingPOIinsideAOIForPickup"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyShowingPOIinsideAOIForDropoff"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyWhenRequestParamIsInvalid"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPopularTagNotShownOnTiePopularityFor4wPickup"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPopularTagNotShownOnTiePopularityFor2wPickup"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByNameForDropoffSavedAddressGate"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyWhenRequestParamAndHeaderIsMissing"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyShowingPOIinsideAOIBelowMinimumAppVer"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByNameForPickupSavedAddressGate"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPopularTagShownForHighestPopularity4wPickup"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByLabelForPickupSavedAddressGate"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByLabelForDropoffSavedAddressAoi"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByLabelForPickupSavedAddressAoi"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchWithNearestTag"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByNameForPickupSavedAddressAoi"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPopularTagShownForHighestPopularity2wPickup"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchWithMostPopularTag"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByNameForDropoffSavedAddressAoi"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByAddressForDropoffSavedAddressAoi"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByAddressForPickupSavedAddressAoi"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByAddressForPickupSavedAddressGate"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchForPickup"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyAllowedSTinSearchResultGates"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByLabelForDropoffSavedAddressGate"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchForDropoff"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyShowingSynonymFuzzyMatch"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyHighlightingTextBasedOnKeyword"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyHighlightingTextForAOISavedAddressLabel"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchInPickupWhenPlaceHasGoogleHistoryForNoAOIReplacement"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchWhenPlaceHasHistory"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchInDropoffWhenPlaceHasGoogleHistory"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchInDropoffWhenPlaceHasGooglePOIHistory"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyApiPlacesSearchByAddressForDropoffSavedAddressGate"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchInPickupWhenPlaceHasGoogleHistoryForAOIReplacement"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyHighlightingTextForGateSavedAddressLabel"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchInDropoffWhenPlaceHasGoogleHistoryForNoAOIReplacement"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchInPickupWhenPlaceHasGooglePOIHistoryFarAway"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchInPickupWhenPlaceHasGooglePOIHistoryNearAway"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java",
+            "test_method": "verifyPlaceSearchWithRedzonePlace"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1SuggestionDefaultTests.java",
+            "test_method": "verifySuggestionDefaultWithHistoricalGooglePoiAndPegasusGateAfterFoodBooking"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1SuggestionDefaultTests.java",
+            "test_method": "verifySuggestionDefaultWithHistoricalGateAfterFoodBooking"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1SuggestionDefaultTests.java",
+            "test_method": "verifySuggestionDefaultWithSavedGateAfterFoodBooking"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/savedaddress/CreateRequestTest.java",
+            "test_method": "CustomerCannotSaveAGateTwice"
+          },
+          {
+            "test_file": "transport/src/test/java/tests/regression/cartography/savedaddress/CreateRequestTest.java",
+            "test_method": "CustomerSuccessfullySavedGate"
+          }
+        ],
+        "test_data_providers": [
+          {
+            "data_providers": [
+              {
+                "class": "TransportFlowsDataProvider",
+                "method": "getTransportFlowsGenerator",
+                "provider_name": "transportFlowsGenerator"
+              }
+            ],
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1UserPlacesTests.java"
+          },
+          {
+            "data_providers": [
+              {
+                "class": "TransportFlowsDataProvider",
+                "method": "getTransportFlowsGenerator",
+                "provider_name": "transportFlowsGenerator"
+              }
+            ],
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java"
+          },
+          {
+            "data_providers": [
+              {
+                "class": "TransportFlowsDataProvider",
+                "method": "getTransportFlowsGenerator",
+                "provider_name": "transportFlowsGenerator"
+              }
+            ],
+            "test_file": "transport/src/test/java/tests/regression/cartography/savedaddress/CreateRequestTest.java"
+          }
+        ],
+        "test_assertions": [
+          {
+            "assertions": [
+              {
+                "class": "Fields",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/bookingExperience/rideService/savedAddress/createRequest/CartoPartnerSavedAddressResponse.java"
+              },
+              {
+                "class": "Fields",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/bookingExperience/rideService/savedAddress/createRequest/SavedAddressResponse.java"
+              }
+            ],
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1UserPlacesTests.java"
+          },
+          {
+            "assertions": [
+              {
+                "class": "Fields",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/bookingExperience/rideService/savedAddress/createRequest/CartoPartnerSavedAddressResponse.java"
+              },
+              {
+                "class": "Fields",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/bookingExperience/rideService/savedAddress/createRequest/SavedAddressResponse.java"
+              },
+              {
+                "class": "CartoPartnerV1PlacesSearchCommonAssertion",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/pickupExperience/panda/cartoPartnerV1PlacesSearch/CartoPartnerV1PlacesSearchCommonAssertion.java"
+              },
+              {
+                "class": "BookingFlowController",
+                "file": "transport/src/main/java/controllers/flowControllers/BookingFlowController.java"
+              }
+            ],
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1PlacesSearchTests.java"
+          },
+          {
+            "assertions": [
+              {
+                "class": "Fields",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/bookingExperience/rideService/savedAddress/createRequest/CartoPartnerSavedAddressResponse.java"
+              },
+              {
+                "class": "Fields",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/bookingExperience/rideService/savedAddress/createRequest/SavedAddressResponse.java"
+              }
+            ],
+            "test_file": "transport/src/test/java/tests/regression/cartography/panda/V1SuggestionDefaultTests.java"
+          },
+          {
+            "assertions": [
+              {
+                "class": "Fields",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/bookingExperience/rideService/savedAddress/createRequest/CartoPartnerSavedAddressResponse.java"
+              },
+              {
+                "class": "Fields",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/bookingExperience/rideService/savedAddress/createRequest/SavedAddressResponse.java"
+              },
+              {
+                "class": "CartoPartnerV1PlacesSearchCommonAssertion",
+                "file": "transport/src/main/java/restidioms/serviceEndpoints/pickupExperience/panda/cartoPartnerV1PlacesSearch/CartoPartnerV1PlacesSearchCommonAssertion.java"
+              }
+            ],
+            "test_file": "transport/src/test/java/tests/regression/cartography/savedaddress/CreateRequestTest.java"
+          }
+        ]
+      }
+    }
+  ]
+}

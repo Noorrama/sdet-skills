@@ -171,9 +171,9 @@ A per-scenario failure never aborts the run — every other scenario is still en
 
 From stderr (`N enriched, N errored, N total` + any `note:` fallback lines), summarise per scenario: matched `endpoint_file`, count of `test_methods_calling_endpoint`, and any `error` verbatim. Point at the output path; do not paste whole file lists.
 
-## Output
+## Output → automation_plan.json
 
-`scenario_gbt_context` on each scenario, six keys on success:
+Append `scenario_gbt_context` on each scenario six keys on success:
 
 | Key | Meaning |
 |---|---|
