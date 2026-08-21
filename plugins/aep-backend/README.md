@@ -10,12 +10,13 @@ aep-backend/
   schemas/                         ← JSON Schema validators for every context/output
     prd_context · rfc_context · tasks_context · regression_context
     code_change_context · doc_change_context
-    sdet_plan · automation_plan · test_data_requests · validation_report
-  skills/                          ← 12 SKILL.md files
+    sdet_plan · automation_plan · test_data_manifest · test_data_requests · validation_report
+  skills/                          ← 13 SKILL.md files
     prd-extractor · rfc-extractor · tasks-extractor · regression-extractor
     code-change-extractor · doc-delta-extractor
     sdet-plan-generator · dedup-generator · automation-plan-generator
-    test-data-generator · test-code-generator · test-code-validator
+    test-data-identification · test-data-generator
+    test-code-generator · test-code-validator
   examples/                        ← worked examples per feature
 ```
 
@@ -63,14 +64,14 @@ POST-BUILD (Epic reaches QA Ready)
         │
         ├──────────────────────────────────────┐
         ▼                                      ▼
-  test-data-generator              dedup-generator [method mode]
-  → test_data_requests.json               ↓
-    (TDP / TestBuddy)           test-code-generator
-                                → GBT Java + TapMind NLP steps
-                                        ↓
-                                test-code-validator
-                                → validation_report.json
-                                        │
+  test-data-identification         dedup-generator [method mode]
+  → test_data_manifest.json               ↓
+  → enriched automation_plan.json  test-code-generator
+    (test_data_output per fixture) → GBT Java + TapMind NLP steps
+        ▼                                   ↓
+  test-data-generator              test-code-validator
+  → test_data_requests.json        → validation_report.json
+    (TDP / TestBuddy)                      │
                                  ── HUMAN REVIEW (SDET) → raises MR ──
 ```
 
@@ -89,14 +90,34 @@ POST-BUILD (Epic reaches QA Ready)
 - **RFC (A) on validation sequence** — RFC owns the complete ordered sequence + WHY; Tasks own per-component slices.
 - **Dedup has two distinct modes** — scenario-level (after sdet-plan-generator) and method-level (in code lane after automation-plan-generator). Same skill, different inputs and scopes.
 - **Parallel code lanes** — test-data-generator and test-code-generator run in parallel after automation plan approval; fixtures resolved at execution time (Phase B CI), not embedded in code.
+- **Identify before provision** — test-data-identification is a pure planning step (catalog lookups only, nothing created). Splitting it from provisioning means a data gap surfaces at the automation-plan review gate instead of as a test failure at execution time, and re-identification is cheap when the plan changes.
 - **Re-trigger path** — upstream doc changes go through doc-delta-extractor + human feedback confirmation before sdet-plan-generator re-runs; does not re-run full extractors.
 
 ## Model tiers
 - Reasoning (Opus): **sdet-plan-generator** only (~1/Epic).
-- Fast (Haiku / Composer 2.5): extractors, automation-plan-generator, test-data-generator, test-code-generator, test-code-validator, dedup-generator.
+- Fast (Haiku / Composer 2.5): extractors, automation-plan-generator, test-data-identification, test-data-generator, test-code-generator, test-code-validator, dedup-generator.
 
 ## Test data (TDP / TestBuddy)
-`test-data-generator` produces fixture requests consumed by TDP / TestBuddy at Phase B CI execution time.
+
+The test-data-generation stage has two halves — **identify**, then **provision**:
+
+| Stage | Skill | Output | When |
+|---|---|---|---|
+| Identify | `test-data-identification` | `test_data_manifest.json` + `automation_plan.json` enriched with `test_data_output` per fixture | Right after the automation plan is approved |
+| Provision | `test-data-generator` (→ `test-data-provision`) | `test_data_requests.json` / live entities via TestBuddy | Code-generation or Phase B CI execution time |
+
+Identification decides, per fixture: Test Data Domain → real TDP category → the ordered operation
+sequence closing the gap → `test_data_status` (`TDP_SUPPORTED` · `TDP_HYBRID_FALLBACK` ·
+`TDP_OPERATION_FALLBACK` · `TDP_COMPLETE_FALLBACK`) → the TestBuddy prompt. It never provisions and
+never invents a category or operation name — both come from the TestBuddy MCP catalog tools
+(`TestDataAgent_get_supported_category`, `TestDataAgent_generate_testbuddy_prompt`; a
+`get_supported_operations` counterpart is not shipped yet, so operations fall back to the live
+`<Domain>Agent_*` tool inventory). The category matcher always returns its nearest match and never
+reports a no-match, so the skill validates every returned category against the fixture's own signals
+and rejects the uncorroborated ones instead of trusting them. Domain
+definitions live in `skills/test-data-identification/references/test_data_domains.md`; adding a
+domain is a file edit, not a skill change.
+
 Fixtures are referenced by `fixture_id` in test code — never hardcoded entity IDs. Secrets from vault only.
 
 ## Validation
@@ -120,7 +141,7 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 2. Click **Add plugin source** and paste the skills repo Git URL
 3. Claude Desktop reads `marketplace.json` and lists available plugins
 4. Click **Install** next to `aep-backend`
-5. All 12 skills are immediately available
+5. All 13 skills are immediately available
 ![alt text](<Screenshot 2026-07-30 at 11.51.25 AM.png>)
 
 
@@ -139,6 +160,7 @@ Skills auto-trigger based on their description. You can also invoke them explici
 /backend-regression-extractor
 /backend-sdet-plan-generator
 /backend-automation-plan-generator
+/backend-test-data-identification
 /backend-test-data-generator
 /backend-test-code-generator
 /backend-test-code-validator
@@ -171,7 +193,8 @@ Or naturally in conversation:
 5. Approved → automation-plan-generator → SDET reviews automation plan
 
 6. Parallel:
-   → test-data-generator (TDP fixtures)
+   → test-data-identification (domain + TDP category + operations per fixture)
+     → test-data-generator / test-data-provision (TDP fixtures)
    → dedup-generator + test-code-generator (GBT Java)
 
 7. test-code-validator → SDET reviews code → raises MR

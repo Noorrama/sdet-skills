@@ -1,6 +1,6 @@
 ---
 name: mobile-design-extractor
-description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, element IDs (logical), interactions, states, ui_flow, deep links, and project-level ambiguity tracking. Input is a JSON export from the "Export Design Raw JSON" Figma plugin (connectors, prototype reactions, variants, Dev Mode annotations). Collapses loading/scroll/error/locale variants into screen-level states instead of fragmenting them into separate screens, applies the design team's five flow-authoring conventions with recorded fallbacks, and reports unresolved navigation or content in blocking_issues rather than inventing it. App-agnostic; the frontend-primary stage. Its element IDs are the logical half of the locator mapping.
+description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, element IDs (logical), interactions, states, ui_flow, deep links, and project-level ambiguity tracking. Input is a JSON export from the "Export Design Raw JSON" Figma plugin (connectors, prototype reactions, variants, Dev Mode annotations, and — format v2 — geometry, label chips, dashed group boxes, hand-drawn arrows). Collapses loading/scroll/error/locale variants into screen-level states instead of fragmenting them into separate screens, applies the design team's six flow-authoring conventions with recorded fallbacks, and reports unresolved navigation or content in blocking_issues rather than inventing it. App-agnostic; the frontend-primary stage. Its element IDs are the logical half of the locator mapping.
 ---
 
 # Mobile Design Extractor (all 5 GoTo apps)
@@ -157,7 +157,9 @@ fields; there are no others. Read this before mapping anything.
   "scope": "page" | "selection",             // "page" = whole active page; "selection" = picked layers only
   "file": { "name": "<Figma file name>", "page": "<Figma page name>" },
   "export": {
-    "maxDepth": 15,                          // walk depth cap
+    "formatVersion": 2,                      // absent = v1 (no geometry, no board shapes). 2 adds
+                                             // geometry, connector caps, board-level shapes, dashed, rotation
+    "maxDepth": 30,                          // walk depth cap (v1 exports were cut at 15)
     "nodeCount": 1842,                       // nodes kept (after hidden/decorative pruning)
     "truncatedCount": 3,                     // nodes whose children the cap dropped — 0 = nothing cut
     "truncatedNodes": [ { "id": "12:34", "name": "Icon Grid", "type": "INSTANCE" } ]  // ≤20 samples
@@ -183,8 +185,13 @@ key means no kept children (all pruned, or the depth cap hit).
   "connectorLineType": "ELBOWED"|"STRAIGHT",                    // CONNECTOR only
   "connectorStartStrokeCap": "NONE"|"ARROW_LINES"|"ARROW_EQUILATERAL"|"TRIANGLE_FILLED"|...,
   "connectorEndStrokeCap":   "NONE"|"ARROW_LINES"|...,          // no arrowhead => a tether, not a flow
-  "x": 1204, "y": 880, "width": 390, "height": 844,  // FRAME/INSTANCE/COMPONENT/COMPONENT_SET/SECTION/GROUP/TEXT only,
+  "x": 1204, "y": 880, "width": 390, "height": 844,  // FRAME/INSTANCE/COMPONENT/COMPONENT_SET/SECTION/GROUP/TEXT/
+                                                     // STICKY/SHAPE_WITH_TEXT and kept board shapes (RECTANGLE/LINE/…),
                                                      // integers, PARENT-RELATIVE
+  "rotation": -45,                    // v2, LINE/VECTOR only, non-zero only — picks which bbox
+                                      // diagonal a hand-drawn arrow occupies
+  "dashed": true,                     // v2, only when dashPattern is non-empty — a dashed board
+                                      // rectangle is a group box clustering the state frames inside it
   "componentPropertyDefinitions": {    // COMPONENT_SET / COMPONENT — the declared state surface
     "State": { "type": "VARIANT", "defaultValue": "Default", "variantOptions": ["Default","Error","Loading"] },
     "Label#12:3": { "type": "TEXT", "defaultValue": "Approve" }
@@ -283,9 +290,9 @@ exactly the "tap prototype with no destination" case standard #2 exists to preve
 | Dropped | Consequence for you |
 | :--- | :--- |
 | Hidden layers (`visible: false`), whole subtree | A designed-but-hidden state is invisible here. Never infer one. |
-| Decorative leaf shapes with no `reactions` / `annotations` — `VECTOR`, `RECTANGLE`, `ELLIPSE`, `POLYGON`, `BOOLEAN_OPERATION`, `LINE`, `STAR` | Icons and backing shapes are gone. One that survives is **signal, not noise**: it is tappable, annotated, or a connector points at it. |
-| Styling, colour, fonts, effects | No aesthetic reasoning is possible, and none is needed. |
-| Children below `export.maxDepth` (15) | Reported in `export.truncatedCount` / `truncatedNodes`, never silent. |
+| Decorative leaf shapes **inside frames** with no `reactions` / `annotations` — `VECTOR`, `RECTANGLE`, `ELLIPSE`, `POLYGON`, `BOOLEAN_OPERATION`, `LINE`, `STAR` | Icons and backing shapes are gone. One that survives is **signal, not noise**: it is tappable, annotated, a connector points at it — or (v2) it sits at **board level** (ancestors all PAGE/CANVAS/SECTION/GROUP), where the same types are convention carriers: dashed group boxes, label bars, hand-drawn arrow lines. |
+| Styling, colour, fonts, effects | No aesthetic reasoning is possible, and none is needed. The single exception is the v2 `dashed` bit — one boolean, kept because it separates a group box from a label bar. |
+| Children below `export.maxDepth` (30; v1 exports were cut at 15) | Reported in `export.truncatedCount` / `truncatedNodes`, never silent. |
 | Every empty `[]` / `{}` at any depth | Absence = "none", not "unknown". |
 
 **Kept, and load-bearing: `x` / `y` / `width` / `height`** on every layout-bearing type. This is the
@@ -310,11 +317,14 @@ kind of section. Treating them all as screens is what produces phantom screens a
 
 > **The script does this classification.** The table below documents *what it decides and why*, so a
 > reviewer can audit a `node_class` / `classified_by` value or adjust a threshold. You do not run it
-> by hand. The classes are, in priority order:
+> by hand. Bare board-level `TEXT` nodes classify by the same rules — a question with ≥2 outgoing
+> connectors is a `DECISION` ('Gopay Plus or not?' written as naked text), anything else
+> text-bearing is a `CAPTION` — so a decision or state chip needs no frame around it to be read.
+> The classes are, in priority order:
 
 | Class | Test |
 | :--- | :--- |
-| `NOTE` | Name matches an annotation-component name — default `Notes`, `Note`, `Annotation`, `Comment`, `tooltip*`, matched case-insensitively with `*` as a prefix wildcard — **or** its subtree holds a `TEXT` whose copy starts `Note` / `Context`. |
+| `NOTE` | Name matches an annotation-component name — default `Notes`, `Note`, `Annotation`, `Comment`, `Info`, `tooltip*`, matched case-insensitively with `*` as a prefix wildcard — **or** its subtree holds a `TEXT` whose copy starts `Note` / `Context`. **Never fires on a device-sized frame**: annotation names are generic words that can name a real screen, and an annotation component is never screen-sized (geometry-less exports keep the old name-only read). |
 | `DECISION` | Small (see *Size*), text-bearing, its text ends in `?`, **and** it has ≥2 outgoing connectors. All three conditions — a small question with one exit is a caption, not a branch. |
 | `CAPTION` / `LANE_BANNER` | Small, text-only, and a sibling of at least one node classified `SCREEN`. It labels the group it sits in. |
 | `SCREEN` | Device-sized (see *Size*). This is the only class that gets a `screen_id`. |
@@ -363,6 +373,21 @@ An endpoint that resolves to the same `screen_id` at both ends is **intra-screen
 transition or an annotation, not navigation. Count it in the sidecar's `connectors_intra_screen`
 and do not emit an edge — but never let it silently vanish into the unresolved bucket.
 
+**Two more clustering signals collapse frames a shared base name cannot (v2 exports, script
+behaviour).** Both run before `frame_to_screen` is built, same as banner renames, so no element or
+edge ever references a screen_id that later disappears:
+
+- **Dashed group box.** A dashed board-level shape drawn around ≥2 sibling screen frames is the
+  design convention for "these are states of one screen" — the frames merge whatever their names.
+  A box whose screens carry **two or more different proper names** is a conflict, not a merge:
+  it lands in `blocking_issues` and `label_attach_conflicts`, never a guessed winner. Each merge
+  is recorded in the sidecar's `group_box_merges[]` and counted in `group_box_clusters`.
+- **Component fingerprint (fallback, recorded).** Sibling frames that are ALL default-named
+  (`Frame 2117130859` …) and share ≥80% of their component-instance names (≥3 components each)
+  merge as state frames of one screen. Deliberately narrow: **properly named screens never merge
+  by fingerprint** — Login and Register legitimately share components. Every merge is a
+  `DEGRADED` gap plus a sidecar `fingerprint_merges[]` entry, so it can be audited and challenged.
+
 **Component names come from the defaults; the app config only overrides them.** The names above are
 the built-in defaults, and **an app config that says nothing about `design_components` is the normal
 case** — apply the defaults, silently. Read
@@ -383,7 +408,7 @@ case** — apply the defaults, silently. Read
 ---
 
 ## Design conventions — how the design team writes flows
-The design team has standardised on the five conventions below. Each has a **read** (the compliant
+The design team has standardised on the six conventions below. Each has a **read** (the compliant
 case), a **fallback** (the inference you may make when it was not followed — always within reason,
 always recorded), and a **flag** (when even the fallback is not defensible).
 
@@ -424,6 +449,14 @@ the sidecar `design_context.report.json` so the design team gets one actionable 
   - **Self-loop guard.** If the resolved entry screen is the same screen the connector started
     from, the resolution is wrong by construction — drop the edge and flag it. A lane you enter
     from outside never resolves back to the caller.
+- **Fallback — destination is (or sits inside) a `SECTION` with no board-node ancestor.** Some
+  teams draw the arrow into a section rather than at a screen — the lane-banner semantic expressed
+  with an explicit container. The destination is the section's **entry screen**: topmost-then-
+  leftmost `SCREEN` among the section's direct children (the only siblings whose coordinates are
+  comparable); a section with no direct screen defers to the next section out. Emit
+  `edge_source: "CONNECTOR_INFERRED"`, `confidence: "INFERRED"`, counted in
+  `section_entry_inferred`. Same self-loop guard: an entry resolving back to the source screen is
+  flagged, never emitted.
 - **Fallback — destination is a `DECISION`.** See *Contraction* below.
 - **Flag.** Either endpoint is floating (`position`, no `endpointNodeId`); or the destination
   resolves into the *same* screen frame as the source (an intra-screen connector is an annotation,
@@ -468,6 +501,7 @@ Read every `reactions[]` entry on every node.
 | `NODE` + `navigation: "NAVIGATE"` | real navigation | `ui_flow` edge, `navigation_kind: "NAVIGATE"` |
 | `NODE` + `"OVERLAY"` | dialog / bottom sheet | fold into the **source** screen's `screen_states` (see *Screen vs. state*), `navigation_kind: "OVERLAY"`; own `screen_id` only when ≥2 screens open it |
 | `NODE` + `"SWAP"` / `"CHANGE_TO"` | variant / state change | **not** a `ui_flow` edge, and not recorded anywhere — a variant swap is presentation, and nothing downstream consumes element-level states |
+| `NODE` with a destination **outside this export** | link into a library component | counted in `reactions_destination_outside_export`, never an edge — the destination cannot be resolved from here. On a measured board **all 29** destination-bearing links were of this kind, so prototyping contributed no navigation at all |
 | `NODE` + `"SCROLL_TO"` | intra-screen scroll | **not** a `ui_flow` edge |
 | `BACK` | return to caller | edge with `navigation_kind: "BACK"` **only if** exactly one caller exists in `ui_flow`; otherwise flag |
 | `CLOSE` | dismiss overlay | closes the overlay state; no new screen |
@@ -544,31 +578,64 @@ Read every `reactions[]` entry on every node.
 - **Flag.** A `NOTE` node outside every screen, with no connector and no near neighbour → it belongs
   to nothing → `blocking_issues`, quoting the first ~100 characters so the designer can find it.
 
-### Label frames — a state written above the frame it describes
-Designers often wrap a state in a **label frame**: a narrow strip sitting directly above the frame it
-describes, holding one line of text (*"Not eligible to become upliner yet"*). The strip keeps Figma's
-default name, so a connector landing on it reads as a gibberish-named non-screen node.
+### The arrowhead defines direction, not the order the line was drawn
+Figma lets a connector's arrowhead be flipped independently of which end was drawn first, so
+`connectorStart` is **not** reliably the source. On a real board 2 of 47 connectors point backwards,
+and reading them as drawn produced two **silently reversed** flow edges — a wrong edge is worse than
+a missing one, because nothing downstream can tell.
+
+The script reads `connectorStartStrokeCap` / `connectorEndStrokeCap`:
+
+| end cap | start cap | direction | stamped |
+| :--- | :--- | :--- | :--- |
+| arrow | not arrow | as drawn | (nothing — the ordinary case) |
+| not arrow | arrow | **swapped** | `edge_direction_source: ARROWHEAD_REVERSED` |
+| arrow | arrow | as drawn, bidirectional | `AMBIGUOUS` |
+| neither | neither | as drawn, undirected | `UNDIRECTED` |
+
+`connector_direction_flipped` in the sidecar counts the swaps. Non-zero is worth raising with
+design: the line reads backwards on the board even though the extraction is now correct.
+
+### 6. States drawn as separate frames are labelled beside the frame
+Designers rarely use Figma variants for QA-facing states — variants are invisible on the board. The
+convention instead: **one frame per state, with the state named by a label chip or bar sitting
+directly above the frame** (*"Empty State"*, *"Loading"*, *"Not eligible to become upliner yet"*),
+optionally clustered by a dashed box, optionally bound by a hand-drawn arrow. The chips keep Figma's
+default names; the text inside them carries everything.
 
 Two caption shapes, and the difference is width:
 
 | Shape | Size | Means |
 | :--- | :--- | :--- |
-| **State label** | ≈ the screen's width (360×37) | names the state of the **one** screen directly below |
+| **State label** | ≤ the screen's width (360×37) | names the state of the **one** screen directly below |
 | **Lane / section banner** | ≫ any screen (1416×64) | heads a **band** of screens |
 
-**The script resolves these; it is a fallback, not a sweep.** It runs only when a connector has
-already failed to resolve and its destination has a non-descriptive name, and it requires all five
-of: text-only content (≤4 nodes), height under 150, not banner-width, **exactly one** column-aligned
-screen 0-120px below (≥80% horizontal overlap), and that screen being properly named. Anything less
-certain stays unresolved.
+- **Read (v2 exports — the script sweeps these proactively, on every board).** Evidence order per
+  label, strongest first:
+  1. **Arrow-bound** — a board-level LINE whose endpoints touch the label on one end and a screen
+     frame on the other. Explicit binding; counted in `arrow_bound_labels`.
+  2. **Column-aligned** — exactly **one** screen 0-120px below the label with ≥80% horizontal
+     overlap. Counted in `state_labels_attached`.
+  Either way the label's text joins that screen's `screen_states`, and its normalised kind joins
+  `state_kinds`. Candidates are CAPTION-classified frames and board-level TEXT nodes; anything
+  wider than 1.5× the screens beside it is a lane banner, not a state label.
+- **Read (dashed group box).** A dashed board shape around ≥2 sibling screen frames merges them
+  into one screen — see *Collapsed screens* above.
+- **Fallback (v1 exports, connector-triggered).** On an export with geometry but no proactive
+  sweep result, the old path still runs: when a connector fails to resolve and its destination is a
+  gibberish-named text strip, the strip is tested as a label of the one properly-named screen below
+  it (`label_frames_resolved`). Measured on a real board it accepted the two genuine label frames
+  and rejected an external-file pointer and a decision box.
+- **Fallback (fingerprint).** Default-named sibling frames sharing a component skeleton merge as
+  states of one screen — recorded as a `DEGRADED` gap, see *Collapsed screens*.
+- **Flag.** A label aligning with **2+ screens**, or a dashed box surrounding screens with 2+
+  distinct proper names → `label_attach_conflicts` + a `blocking_issues` entry naming the label
+  text and candidate screens. Never guessed. A label aligning with zero screens is silence — most
+  captions are just captions.
 
-Measured on a real board the test accepted the two genuine label frames and rejected an
-external-file pointer and the decision box — both scored **zero** aligned screens, so the fallback
-cannot reach a branch label even in principle.
-
-**What this means for design:** a label frame is genuinely useful — it is how the extractor learns a
-state name it could not otherwise see. Drawing the connector to the screen frame itself (standard #1)
-is still better, because then nothing has to be inferred.
+**What this means for design:** the chip row above state frames is genuinely machine-readable now.
+Drawing the connector to the screen frame itself (standard #1) is still better for *navigation*,
+but for naming states, a chip per frame plus a dashed box around the set is the compliant pattern.
 
 ### Convention compliance is reported, not enforced
 A non-compliant export still produces a full `design_context`. Falling back is the default
@@ -636,8 +703,8 @@ does not silently fail — it fails at code-gen, months later, as a test that ca
 | `design_source` | `exportedAt`, `scope`, `file.*`, `export.*` — copied verbatim for provenance |
 | `screens[].screen_id` / `screen_name` | `SCREEN`-classified board node's `name` (standard #3) |
 | `screens[].source_ref` | screen frame `id` |
-| `screens[].screen_states` | frame-name state qualifiers, `componentPropertyDefinitions.*.variantOptions`, `variantProperties` across sibling frames, and `OVERLAY` destinations folded in |
-| `screens[].state_kinds` | the canonical enum those states normalise to (`ERROR`, `LOADING`, `OFFLINE`, `DARK_THEME`, `LOCALE_VARIANT`, …) — this is what makes downstream category triggers deterministic |
+| `screens[].screen_states` | frame-name state qualifiers, `componentPropertyDefinitions.*.variantOptions`, `variantProperties` across sibling frames, `OVERLAY` destinations folded in, and (v2) label chips attached by the proactive sweep / arrow binding / group-box absorption (standard #6) |
+| `screens[].state_kinds` | the canonical enum those states normalise to (`ERROR`, `LOADING`, `OFFLINE`, `DARK_THEME`, `LOCALE_VARIANT`, …) — this is what makes downstream category triggers deterministic. Texts the keyword table cannot map land in the sidecar's `unclassified_states[]` for the post-run normalisation pass |
 | `screens[].deep_link` | a `URL` action whose url starts with the config `deeplink_scheme`, or a `Note`/`Context` note that states one. Optional — see *Optional enrichment* |
 | `screens[].entry_point` / `flow_name` | the PAGE node's `flowStartingPoints[]` — `nodeId` matches the screen frame |
 | `screens[].screen_notes` | note connectors and in-frame `Note` / `Context` text (standard #5) |
@@ -650,7 +717,7 @@ does not silently fail — it fails at code-gen, months later, as a test that ca
 | `elements[].validations_and_edge_cases` | prose `annotations[].label` / `labelMarkdown`, and note connectors landing on the element |
 | `ui_flow[]` | `CONNECTOR` nodes (standard #1) + `reactions[]` (standard #2), deduped. On a contracted branch `condition` is **composed** — `<decision question> — <value>` — with the parts also exposed as `decision_question` / `decision_value` / `decision_node_id` |
 | `project_context.blocking_issues` | every **Flag** case above |
-| `design_context.report.json` (sidecar) | the tallies from the five standards, plus the classifier counts (`decision_nodes`, `caption_endpoints`, `label_frames_resolved`, `contracted_edges`, `lane_entry_inferred`, `screen_id_from_banner`) — **not** inside `design_context.json` |
+| `design_context.report.json` (sidecar) | the tallies from the six standards, plus the classifier counts (`decision_nodes`, `caption_endpoints`, `label_frames_resolved`, `contracted_edges`, `lane_entry_inferred`, `screen_id_from_banner`, and the v2 set: `state_labels_attached`, `arrow_bound_labels`, `label_attach_conflicts`, `group_box_clusters`, `fingerprint_merged_frames`), the audit lists (`screen_renames`, `group_box_merges`, `fingerprint_merges`) and `unclassified_states[]` — **not** inside `design_context.json` |
 
 ---
 
@@ -664,6 +731,9 @@ This was not true before. The same skill on Haiku, executing the passes in prose
 where the script produces 13, and reported zero gaps while dropping 41 of 47 connectors. If you ever
 find yourself counting connectors or walking ancestors by hand, stop — the script exists so that
 never happens.
+
+The *State normalisation* pass is fast-tier-safe by construction: closed vocabulary, one
+`unclassified_states` entry at a time, no traversal, "leave it" a legal answer.
 
 Escalate to a reasoning tier only for genuinely semantic calls: an app split that the page names
 don't settle, or a note whose wording needs judgement to place.
@@ -687,7 +757,7 @@ frame size** — never from how a frame *looks*. Do **not** create a new `screen
   as a `screen_states` entry on that screen and document the open/close trigger under the opening
   element's `interactions` instead.
 
-Three mechanical signals decide it, in this order:
+Five mechanical signals decide it, in this order:
 1. **Same base name after stripping the state qualifier** (standard #3) → one screen, the qualifiers
    are `screen_states`. `Approve Disbursement`, `Approve Disbursement — Error`,
    `Approve Disbursement — Loading` are **one** screen with three states.
@@ -696,6 +766,10 @@ Three mechanical signals decide it, in this order:
 3. **`navigation: "OVERLAY"`** → a state of the screen that opens it, **unless** ≥2 distinct screens
    have an `OVERLAY` reaction targeting the same frame — then it is a shared destination and gets its
    own `screen_id`, referenced from every caller.
+4. **Dashed group box around sibling frames** (v2, standard #6) → states of one screen, whatever
+   their names — unless ≥2 distinct proper names sit inside the box, which is a flagged conflict.
+5. **Shared component fingerprint across default-named siblings** (v2, fallback) → states of one
+   screen, always recorded as a `DEGRADED` gap. Never applied to properly named frames.
 
 Only start a new `screen_id` when the frame is a genuinely different destination (distinct base name
 *and* distinct purpose/route), including a component that is reused as its own destination from
@@ -704,6 +778,12 @@ one `screen_id` and reference it from every caller's `ui_flow` entry — never d
 
 A frame you cannot place under any of the three signals is **not** silently promoted to a screen:
 emit it as a screen, and record a `blocking_issues` entry saying the screen-vs-state call is unresolved.
+
+The reverse doubt is flagged too, by the script: a collapse (≥2 frames) where **no** qualifier reads
+as a state — `dialog / refund-confirm` + `dialog / confirm-recreate` under a generic `dialog` — may
+be distinct screens sharing a lazy base name. It stays collapsed (splitting would fabricate
+screen_ids nothing references), is counted in `ambiguous_collapses`, and lands in `blocking_issues`
+for design to confirm. Scroll/pagination/typing qualifiers count as states and are never flagged.
 
 ## Extract — run the script, then fill the semantic fields
 
@@ -728,12 +808,14 @@ loop back to design, and the checker needs it.
 Run it **once per app in scope** (see *Output files*), with that app's config and `--app` id.
 
 ### What the script returns, already correct
-`screens[]` (collapsed, with `source_refs`, `screen_states`, `state_kinds`, `entry_point`,
-`node_class`, `classified_by`), `elements[]` (filtered to connector triggers and interactive layers,
-with `element_id` built from the config's `role_vocabulary`), `ui_flow[]` (with `navigation_kind`,
-`edge_source`, `confidence`, `source_ref`, `trigger_element_id` where known),
-`project_context.blocking_issues` and `design_source` — plus the sidecar `design_context.report.json`
-carrying the convention tallies and the conservation proof.
+`screens[]` (collapsed — by name, group box and fingerprint — with `source_refs`, `screen_states`
+including swept label chips, `state_kinds`, `entry_point`, `node_class`, `classified_by`),
+`elements[]` (filtered to connector triggers and interactive layers, with `element_id` built from
+the config's `role_vocabulary`), `ui_flow[]` (with `navigation_kind`, `edge_source`, `confidence`,
+`source_ref`, `trigger_element_id` where known), `project_context.blocking_issues` and
+`design_source` — plus the sidecar `design_context.report.json` carrying the convention tallies,
+the conservation proof, the merge audit lists (`screen_renames`, `group_box_merges`,
+`fingerprint_merges`) and `unclassified_states[]` (input to the *State normalisation* pass).
 
 `--report` prints a one-line summary to stderr. **Read it and repeat it in your reply** — it is how
 the QA sees coverage without opening the JSON.
@@ -750,9 +832,35 @@ The script leaves these empty because they need judgement, not traversal:
 | `visual_analysis_scratchpad` | 2-3 sentences on what the board contains — screen count, how flows are drawn, what is missing |
 | `screens[].deep_link` | Only if a `URL` action or a note states one (see *Optional enrichment*) |
 | `elements[].label` | Refine the script's raw first-text into the visible copy a tester would read |
+| `screens[].state_kinds` | Normalise the sidecar's `unclassified_states[]` into the enum — see *State normalisation* below. The only structural field the model may touch, and only additively |
 | `extraction_gaps[]` | One entry per real gap, with `severity` and a concrete `action` |
 | `extraction_status` | `OK` only when `extraction_gaps` is empty |
 | `project_context.overall_ambiguity_rating` | `HIGH` if any screen or trigger was unresolved; `MEDIUM` if flows resolved through inference; `LOW` if every edge is `EXPLICIT` |
+
+### State normalisation — the one model pass over the sidecar
+The script's keyword table maps English state words (`error`, `loading`, `empty` …). Everything it
+cannot map — Indonesian copy (*"Gagal memuat konten"*), feature-specific validation labels (*"Code
+incorrect / not found"*, *"Not eligible to become upliner yet"*), designer shorthand (*"Filled
+State"*) — lands in the sidecar's `unclassified_states[]` as `{screen_id, state_text}`. For each
+entry, in order:
+
+1. **Map by meaning** into the `state_kinds` enum: `LOADING`, `EMPTY`, `ERROR`, `SUCCESS`,
+   `OFFLINE`, `DISABLED`, `PERMISSION_DENIED`, `DARK_THEME`, `LIGHT_THEME`, `LOCALE_VARIANT`,
+   `RTL`, `DEFAULT`. Any language. A validation-failure label **is** an `ERROR` state — *"Kode
+   tidak ditemukan"* → `ERROR`; *"Filled State"* → `DEFAULT`. This is normalisation of a value the
+   board states, and it is required — refusing it is a false open point.
+2. **Apply additively.** Add the mapped kind to that screen's `state_kinds` (dedupe, keep sorted).
+   **Never** remove or reword the verbatim text in `screen_states` — the specific label is what
+   becomes a distinct test case downstream; two different error labels stay two states.
+3. **Remove `OTHER`** from a screen's `state_kinds` only when **every** `unclassified_states` entry
+   for that screen was mapped. Any entry left unmapped → `OTHER` stays.
+4. **No fit → leave it.** Do not stretch the enum; the text stays in `screen_states`, `OTHER`
+   stays in `state_kinds`, and no gap is raised — an exotic state is content, not a defect.
+5. **Record the mappings** in one `INFO` gap on `screens[].state_kinds` listing each
+   `state_text → KIND`, so the normalisation is auditable (same rule as every synonym mapping).
+
+Closed vocabulary, one entry at a time, no traversal — safe at the fast tier. Everything else in
+`screens`, `ui_flow` and the sidecar is still the script's output, copied through untouched.
 
 **Turn the script's numbers into gaps.** A non-zero `connectors_unresolvable`,
 `non_descriptive_names` or `unreachable_screens` is a gap the QA must see — the script counts them
@@ -786,7 +894,9 @@ and say so in your reply.
 - **Never hand-compute what the script reports.** Screens, elements, `ui_flow` and
   the sidecar's tallies are the script's output, copied through untouched. Adding an edge you
   reasoned out, or adjusting a count so the buckets look tidier, breaks the one property that makes
-  this skill model-independent.
+  this skill model-independent. The **single sanctioned exception** is the *State normalisation*
+  pass: additive edits to `screens[].state_kinds` driven by the sidecar's `unclassified_states[]`,
+  each mapping recorded in an `INFO` gap. Nothing else in the structural output is yours to edit.
 - Output design_context.json concisely — only functional elements that matter for test automation.
 
 ## Guardrails
@@ -833,6 +943,7 @@ while doing so. Every check in the script is one the schema cannot express or a 
 | gaps vs `extraction_status` | an `INCOMPLETE` run that reports nothing |
 | dropped fields absent | `purpose` / `states_represented` creeping back |
 | ids resolve, no self-loops | dangling references, and intra-screen connectors emitted as navigation |
+| v2 counters present, `unclassified_states` ids resolve | a hand-written compliance block, and a sidecar naming screens the context does not have |
 
 **If it fails, fix the cause — never the output.** Editing the JSON to satisfy the checker
 reintroduces exactly the silent-wrongness it exists to catch. If `jsonschema` is missing it says so;

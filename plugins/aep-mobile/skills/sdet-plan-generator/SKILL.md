@@ -293,9 +293,21 @@ Flow:
   - **Clickstream Telemetry Rules:** Clickstream verification is **NOT** a mandatory hard gate for the generator. If `clickstream_events` are explicitly provided/told in the input contexts, then generate $\ge 1$ verification step per event. If they are NOT provided or explicitly mentioned, **do NOT fail validation and do NOT generate telemetry tests.** Instead, simply list it as an Open Question / Clarification inside `<feature_key>_analysis.md` (e.g., *"Are clickstream telemetry events required for this feature?"*).
 - **Regression dedup — using `regression_context.json` from Preflight step 9, before writing any scenario:**
   - For each requirement/boundary/flag about to get a Hard-Coverage scenario, check `regression_context.json.regression_tests[]` for a case whose `title` or `steps` clearly cover the same behaviour.
-  - **Exact match (the existing case already covers this exact behaviour)** → do not create a new scenario. Still emit a row for it (QA needs to see it exists), with `is_legacy_regression: true` and `existing_case_ref` set to that case's `id` (e.g. `C2879733`) — never `is_legacy_regression: true` with no ref; that's a flag nobody can audit or trace back.
-  - **Partial overlap (related but not identical — e.g. the existing case covers the happy path, this requirement needs a boundary variant)** → still create the new scenario (the Hard Coverage Rule requires it), but set `existing_case_ref` to the related case anyway, so the analysis doc shows the relationship instead of two disconnected-looking rows.
-  - **No match** → proceed normally, no `existing_case_ref`.
+  - **Exact match (the existing case already covers this exact behaviour)** → do not create a new scenario. Still emit a row for it (QA needs to see it exists), with `is_legacy_regression: true` and `existing_case_ref` set to that case's `id` (e.g. `TC-302383`) — never `is_legacy_regression: true` with no ref; that's a flag nobody can audit or trace back.
+  - **Directly impacted (the new feature modifies a screen/flow that the existing case tests)** →
+    still create the new scenario (the Hard Coverage Rule requires it), but set
+    `existing_case_ref` to the related case AND `is_legacy_regression: true`. This tells the
+    QA: "this existing case needs re-testing because the new feature changed its screen."
+  - **No match** → proceed normally, `is_legacy_regression: false`, no `existing_case_ref`.
+  - **Indirectly impacted cases** — regression cases that share a screen with the new feature
+    but whose specific flow is not modified (e.g. a deadline nudge test on the same Shared Cart
+    page where Save Group adds a Chat section). These do NOT get `is_legacy_regression: true`
+    and are NOT emitted as scenarios. Instead, list them in `<feature_key>_analysis.md` under
+    a dedicated **Indirectly Impacted Regression Cases** table (case number + title only) so the
+    QA knows to include them in the regression run. Identify them by comparing
+    `regression_context.regression_tests[].title` / `steps` against the screens and flows the
+    new feature touches — if a regression case operates on a screen that the new feature adds
+    UI to, it is indirectly impacted.
   - This never overrides a Hard Coverage Rule (Step 1 above) — every P0 requirement and boundary condition still gets ≥1 row in the plan even if a legacy case already covers it; the point of dedup is to avoid generating a *second, redundant automation target*, not to avoid *documenting* coverage.
 
 ### 2. Scenario Expansion
@@ -758,6 +770,12 @@ A human-readable Markdown asset automatically generated for engineering leads de
      hygiene) | Positive % | Action taken`. If `action_taken` is `under_target`, state the reason
      in plain words directly beneath it, so a reviewer sees the tilt without opening the JSON.
    - Immediately after that, if any scenario in this plan carries `existing_case_ref`, render a **Regression Coverage table**: `Scenario` (title), `Existing Case` (the BrowserStack id), `Relationship` (`Duplicate — not re-created` / `Related — new variant still generated`). If `regression_context.json` itself was unavailable this run (Preflight step 9), say so in one line instead of an empty table — e.g. *"Regression check did not run this pass: <reason from the note>."*
+   - Immediately after the Regression Coverage table, render an **Indirectly Impacted Regression
+     Cases** table: `Case ID` | `Title`. These are regression cases that operate on screens the
+     new feature modifies but whose specific flow is NOT directly changed — they need re-testing
+     in the regression run but do NOT get `is_legacy_regression: true` in the SDET plan. List
+     case number and title only — no steps, no detailed analysis. If there are none, omit the
+     section entirely (do not render an empty table).
 
 3. **Section 1: Missing Input Context:**
    - If any input context (like `plan_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).
@@ -848,6 +866,9 @@ Flattened CSV strictly matching squad project template headers:
 - `Android Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is iOS-only). Set to `"Automated"` only if matched with an existing automated Android case.
 - `iOS Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is Android-only). Set to `"Automated"` only if matched with an existing automated iOS case.
 - `TestType`: always the literal `"Story"` for every row. Do NOT substitute `"FCT"`, `"Non-FCT"`, or any other value.
+- `Existing Case Ref`: the `existing_case_ref` value from the JSON (e.g. `TC-302383`), or empty
+  if none. Surfaces which scenarios are linked to existing regression cases so the QA can see
+  the relationship directly in the CSV without opening the JSON.
 
 > **Enum validation (run as part of the Step 4 gate):** before writing the CSV, verify every row's `State` / `Priority` / `Type of Test Case` / `Execution Mode` / `Platform` / `TestType` / `Country v2` holds only a value allowed above; reject and fix any other value.
 

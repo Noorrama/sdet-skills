@@ -1,31 +1,201 @@
 ---
 name: backend-tapmind-nlp-prompts
 description: >-
-  Reference for writing or fixing real TapMind NLP test-step prompts —
-  `TapMind.runStep(...)` / `TapMind.assertStep(...)` calls against the
-  com.tapmind.sdk.TapMind client SDK. Use only when the user is explicitly
-  writing/debugging a TapMind prompt, or mentions TapMind, runStep,
-  assertStep, bind_select, "entry where", verify-only steps, or a TapMind
-  prompt that isn't parsing/asserting as expected. This is the actual
+  Write, fix, or generate real TapMind NLP test-step prompts —
+  `TapMind.runStep(...)` / `TapMind.assertStep(...)` — and convert
+  automation_plan scenarios into suite-ready Java tests with @Test /
+  @TestInfo. Use when the user is writing/debugging a TapMind prompt,
+  mentions TapMind / runStep / assertStep / bind_select / "entry where" /
+  verify-only steps, OR when given automation_plan.json (or sdet_plan
+  step_descriptions) to generate prompts, batch-verify them, run steps
+  via MCP, and emit corrected suite test methods. This is the actual
   TapMind SDK grammar — not the Allure `@Step("Given/When/Then ...")`
-  descriptive-label convention used by backend-test-code-generator /
-  backend-test-code-validator, which is a separate, unrelated convention
-  despite the similar name. Not a general test-writing or API-scaffolding
-  skill.
+  labels used by backend-test-code-generator.
 ---
 
 # TapMind NLP Prompt Writing
 
 This is the **single canonical guide** for writing `TapMind.runStep(...)` prompts against the
-real TapMind control-plane SDK. It assumes no prior knowledge of TapMind or its backend — if
-you can write a plain English sentence, you can write a TapMind prompt.
+real TapMind control-plane SDK, and for **generating suite-ready tests** from
+`automation_plan.json`.
 
 > **Not the same thing as `backend-test-code-generator`'s "TapMind NLP conventions".** That
 > skill's `@Step("Given/When/Then ...")` annotations are Allure reporting labels on
-> traditionally-written Java (typed POJOs, `assertThat(...)`, `tdpClient.resolve(...)`) — they
-> never call the real `TapMind.runStep(...)` SDK method. This skill documents the actual SDK
-> grammar. If you're trying to make generated GBT test code actually invoke TapMind, that's a
-> separate, not-yet-done integration — not covered here.
+> traditionally-written Java — they never call the real `TapMind.runStep(...)` SDK. This skill
+> documents the actual SDK grammar and the generation → verify → run → suite-convert pipeline.
+
+## Modes
+
+| Mode | When | Output |
+|---|---|---|
+| **Reference** | Hand-writing / debugging one prompt | Corrected prompt string(s) using §§0–10 |
+| **Generate** | Given `automation_plan.json` (preferred) or `sdet_plan` steps | Ordered `prompts[]` per `scenario_id` |
+| **Verify + run** | After generate, using backend MCP TapMind tools | Corrected `prompts[]` + per-step verdicts |
+| **Suite convert** | After prompts are verified (and optionally run) | Java method with `@Test` / `@TestInfo` + `runStep`/`assertStep` lines |
+
+Pipeline detail: `GENERATION.md` in this skill folder. Grammar for each prompt type: §§2–10 below.
+
+---
+
+## G. Generation mode — automation suite → TapMind test
+
+### G.1 Inputs (prefer `automation_plan.json`)
+
+Per `automation_scenarios[]` entry, read:
+
+| Need | Field |
+|---|---|
+| Identity | `scenario_id`, `description`, `requirement_ref` |
+| Class / method | `package`, `test_class`, `method_name`, `test_layer` |
+| Pinning | `module` (PDG), `service_name` |
+| API | `endpoint`, scenario-level `curl_reference` (prefer over step curl — FIX-scoped) |
+| Steps | `step_descriptions[]` → `step`, `action`, `expected_result`, optional `curl_reference` |
+| Fixtures | `test_data[].fixture_id`, `required_state`, later `response_fields_used` |
+| Modifiers | `tags[]`, `execution_hints`, `is_dedup` |
+| Suite meta (when present in plan/context) | `groups`, `test_info` / `countryName`, `projectId`, `suiteId`, `testCaseIds`, `owner` |
+
+Skip when `is_dedup: true` or tags include `deferred` / `skip` / `manual`.
+
+If suite meta is missing, leave `@TestInfo` fields as empty strings / empty arrays — do **not** invent BrowserStack/TestRail IDs.
+
+### G.2 Generate all prompts first (no MCP)
+
+For each scenario, emit an ordered `prompts[]` (one string per step) using the grammar in §§2–10:
+
+1. Prefer scenario-level `curl_reference` + `test_data` for placeholders (`{{FIX-xxx.field}}` → `${memory.<field>}` after fixture bind).
+2. Classify each step (generic — not domain-specific):
+   - non-empty curl → §3.1 API action `| verify: …`
+   - Redis/Kafka/DB verbs + no curl → §3.5
+   - re-check same HTTP resource, no new curl → §3.4 verify-only
+   - wait/poll or e2e+reliability wait → §3.2 (must include fetch)
+   - stub/queue/log inspect with no TapMind grammar → omit from runnable prompts; flag `NEEDS_REVIEW`
+3. First-touch vs repeat-touch by resource + step order (§3.4).
+4. Track memory keys across the list — never invent `${memory.x}` not saved earlier.
+5. Unknown scalar vs array shape → flag; do not guess `save $.path` vs `entry where`.
+
+Output shape after generate:
+
+```json
+{
+  "scenario_id": "SC-…",
+  "pdg": "<module>",
+  "target_service_id": "<service_name>",
+  "prompts": ["…", "…"],
+  "flags": []
+}
+```
+
+### G.3 Verify one prompt at a time, then run one-by-one
+
+**Verify (sequential):** the exposed `tapmind_verify_prompt` MCP tool takes a **single**
+`prompt` string per call — it always wraps it as a one-element list before forwarding to the
+backend, even though the backend's own `/v1/runs/verifyPrompt` endpoint accepts a batch
+`prompts[]`. Until a batch overload is exposed on the tool, call it once per prompt, in list
+order:
+
+```json
+{
+  "prompt": "<prompts[i]>",
+  "productGroup": "<module>",
+  "targetServiceId": "<service_name>",
+  "dryRunLlm": true
+}
+```
+
+Apply that call's `corrected_test_prompt` / `corrected_verify_prompt` → update `prompts[i]` →
+re-verify that prompt until clean or flag `NEEDS_REVIEW` (response `status:
+"NEEDS_CLARIFICATION"` + `clarifying_question`). The response's `declared_bindings` also lists
+the `${memory.x}` keys the planner actually resolved for that step — cross-check against your
+own memory-key tracking (§4) rather than assuming.
+
+> If a batch overload (`prompts: string[]`) is ever exposed on the MCP tool, prefer it — one
+> call per scenario's full list lets the planner see the whole sequence + memory names at once,
+> which catches cross-step issues that one-at-a-time verification can't.
+
+**Execute (sequential):** `tapmind_run_nlp_command` **one prompt at a time**. Reuse the `conversationId` returned by step 1 on steps 2…N (a new chat without that id loses memory).
+
+Record corrections as `correctedSteps[]`: `{ n, text, change: "reworded"|"inserted", was, why }`.
+
+### G.4 Suite convert — `@Test` / `@TestInfo` + step lines
+
+After prompts are finalized (verified, and optionally executed), convert into a suite method.
+
+**Annotation contract** (emit exactly this shape; fill from plan/suite meta):
+
+```java
+@Test(description = "<scenario description>", groups = {"<group>"})
+@TestInfo(countryName = "<COUNTRY>", projectId = "<PROJECT>", suiteId = "<SUITE>", testCaseIds = {"<ID>"}, owner = "<email-or-empty>")
+```
+
+Example (from a validated suite scenario):
+
+```java
+@Test(description = "PAM 8 Levels catalogue presents monthly, yearly and special recognition (8 levels), not only monthly performance", groups = {"driverTest"})
+@TestInfo(countryName = "INDONESIA", projectId = "MARKETPLACE_DRIVER_PLATFORM", suiteId = "DRIVER_APP_FRONTEND", testCaseIds = {"C5542965"}, owner = "")
+```
+
+**Field mapping**
+
+| Annotation | Source |
+|---|---|
+| `@Test.description` | `description` (fallback: scenario name / `requirement_ref`) |
+| `@Test.groups` | suite `groups` if present; else derive from `tags` / `test_layer` (e.g. `"driverTest"`, `"P0"`) — never invent product suite names |
+| `@TestInfo.countryName` | suite / tasks context |
+| `@TestInfo.projectId` | suite / tasks context |
+| `@TestInfo.suiteId` | suite / tasks context |
+| `@TestInfo.testCaseIds` | suite / BrowserStack / TestRail IDs when known; else `{}` |
+| `@TestInfo.owner` | suite owner or `""` |
+| method name | `method_name` |
+| class / package | `test_class`, `package` |
+
+**Method body conversion** (from finalized `prompts[]` + any MCP run corrections):
+
+| Prompt role | Java line |
+|---|---|
+| Action / poll / tool | `TapMind.runStep("<prompt>");` or with pdg/service/polling overloads (§3.2, §3.6) |
+| Final assertion focus | `TapMind.assertStep("<prompt>", "<failure message>");` when a custom message helps |
+| Setup (secrets / fixtures) | `saveMemory(...)` / TDP resolve **before** prompts that need `${memory.*}` |
+| Inserted guards from run | Extra `runStep(...)` lines with `kind: guard` in the ledger |
+
+Also emit machine form for reports / downstream generators (`tapmindTest`):
+
+```json
+{
+  "className": "<test_class>",
+  "methodName": "<method_name>",
+  "package": "<package>",
+  "description": "<@Test description>",
+  "groups": ["\"<group>\""],
+  "testInfo": {
+    "countryName": "…",
+    "projectId": "…",
+    "suiteId": "…",
+    "testCaseIds": ["…"],
+    "owner": ""
+  },
+  "source": {
+    "kind": "automation_plan",
+    "scenarioRef": "<scenario_id>",
+    "requirementRef": "<requirement_ref>"
+  },
+  "lines": [
+    { "code": "TapMind.runStep(\"…\");", "kind": "step", "fromStep": 1 }
+  ]
+}
+```
+
+### G.5 Output contract (generation mode)
+
+Return per scenario (not free-form prose):
+
+1. `prompts[]` — ordered NLP strings (post-verify if MCP was used)
+2. `correctedSteps[]` — if any rewrites/inserts
+3. `tapmindTest` — suite metadata + convertible `lines[]`
+4. Optional Java snippet: annotations + method signature + body lines
+
+Consumers (`test-code-generator`, report skill) drop `lines[]` into the method body mechanically.
+
+---
 
 ## 0. What TapMind actually does (30-second version)
 

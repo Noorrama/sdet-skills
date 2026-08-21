@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from collections import Counter, defaultdict
@@ -47,6 +48,33 @@ BANNER_WIDTH_RATIO = 0.8
 # with 595 fabricated conditions, because lane/section containers act as hubs.
 MAX_HOP_FANOUT = 4
 
+# Label-chip attachment: a chip labels the one screen directly below it in the
+# same column. Same numbers the connector-fallback path has always used.
+LABEL_MAX_GAP = 120
+LABEL_MIN_OVERLAP = 0.8
+
+# A hand-drawn arrow endpoint counts as touching a node when it lands inside
+# the node's box padded by this much — arrows are sketched, not snapped.
+ARROW_HIT_RADIUS = 40
+# Longer than this is a section divider, not an arrow (measured: real boards
+# carry 2800-3200px rule lines between sections).
+ARROW_MAX_LENGTH = 600
+
+# Group-box candidates. COMPONENT_SET is deliberately absent: Figma draws every
+# component set with its own dashed border (measured: 4 of 4 dashed nodes on a
+# real board were component sets), and that is Figma chrome, not a designer
+# grouping. Variants inside a set already collapse via variantProperties.
+GROUP_BOX_TYPES = frozenset({"RECTANGLE", "FRAME", "GROUP"})
+
+# Fingerprint clustering (v2 exports, gibberish-named sibling frames only):
+# frames sharing >= this Jaccard of component-instance names, each carrying at
+# least FINGERPRINT_MIN_COMPONENTS, are state frames of one screen.
+FINGERPRINT_JACCARD = 0.8
+FINGERPRINT_MIN_COMPONENTS = 3
+
+# Containment slack for dashed group boxes — boxes are drawn by eye.
+GROUP_BOX_SLACK = 4
+
 STRUCTURAL_TYPES = frozenset({"PAGE", "CANVAS", "SECTION", "GROUP"})
 BOARD_TYPES = frozenset({"FRAME", "COMPONENT", "INSTANCE"})
 
@@ -63,10 +91,14 @@ COMPLIANCE_KEYS = (
     "note_connectors",
     "caption_endpoints",
     "label_frames_resolved",
+    "connector_direction_flipped",
     "decision_nodes",
     "contracted_edges",
     "lane_entry_inferred",
     "unlabelled_branches",
+    "reactions_with_destination",
+    "reactions_without_destination",
+    "reactions_destination_outside_export",
     "non_descriptive_names",
     "screen_id_from_banner",
     "unreachable_screens",
@@ -74,6 +106,19 @@ COMPLIANCE_KEYS = (
     "notes_attached_by_connector",
     "notes_attached_by_geometry",
     "notes_unattached",
+    # v2-export conventions: states drawn as separate frames under label chips,
+    # dashed group boxes, hand-drawn arrows. All zero on a v1 export.
+    "state_labels_attached",
+    "arrow_bound_labels",
+    "label_attach_conflicts",
+    "group_box_clusters",
+    "fingerprint_merged_frames",
+    # Connectors drawn into a SECTION (a team's variant of the lane-banner
+    # semantic) resolved to the section's entry screen.
+    "section_entry_inferred",
+    # Collapsed screens whose qualifiers do not read as states — flagged as
+    # screen-vs-state unresolved instead of being trusted silently.
+    "ambiguous_collapses",
 )
 
 # The buckets every connector must land in exactly once.
@@ -86,7 +131,7 @@ CONSERVED_BUCKETS = (
     "note_connectors",
 )
 
-DEFAULT_ANNOTATION_COMPONENTS = ["Notes", "Note", "Annotation", "Comment", "tooltip*"]
+DEFAULT_ANNOTATION_COMPONENTS = ["Notes", "Note", "Annotation", "Comment", "Info", "tooltip*"]
 
 # The annotation component ships a heading layer; it is chrome, not content, and
 # repeating it on every screen would drown the actual note.
@@ -116,6 +161,8 @@ NON_DESCRIPTIVE = re.compile(r"^(frame|group|rectangle|component|ellipse|vector)
 QUALIFIER_SPLIT = re.compile(r"\s+[—–-]\s+|\s*/\s*")
 
 STATE_KIND_PATTERNS: tuple[tuple[str, str], ...] = (
+    ("default", "DEFAULT"),
+    ("filled", "DEFAULT"),
     ("error", "ERROR"),
     ("loading", "LOADING"),
     ("empty", "EMPTY"),
@@ -128,6 +175,14 @@ STATE_KIND_PATTERNS: tuple[tuple[str, str], ...] = (
     ("rtl", "RTL"),
 )
 LOCALE_TOKENS = frozenset({"en", "id", "th", "vn", "sg", "ph"})
+
+# Qualifier words that read as a state VARIANT even though they map to no
+# canonical state_kind (scroll position, pagination, keyboard up). Used only to
+# suppress the ambiguous-collapse flag — the guardrail says these are states.
+STATEISH_HINTS = ("scroll", "pagination", "typing", "keyboard", "skeleton", "expanded", "collapsed")
+# A qualifier phrased as a condition ("when amount saved is low", "if KYC is
+# rejected") is a conditional content variant — a state by construction.
+CONDITION_PREFIXES = ("when ", "if ", "with ", "without ", "after ", "before ")
 
 
 class Board:
@@ -148,7 +203,7 @@ class Board:
         self._descendants: dict[str, int] = {}
         self._out_degree = Counter()
         for conn in self.connectors:
-            start = endpoint_id(conn, "connectorStart")
+            start, _, _ = connector_endpoints(conn)
             if start:
                 self._out_degree[start] += 1
 
@@ -194,16 +249,19 @@ class Board:
 
     # --- classification ---
 
-    def _is_board_node(self, node: dict) -> bool:
-        """Top-level object on the flow board: only structural nodes above it."""
-        if node.get("type") not in BOARD_TYPES:
-            return False
+    def board_level(self, node: dict) -> bool:
+        """Only structural nodes (PAGE/CANVAS/SECTION/GROUP) above it — a flow-
+        board object of any type, never something inside a screen."""
         parent_id = self.parent.get(node["id"])
         while parent_id:
             if self.nodes[parent_id].get("type") not in STRUCTURAL_TYPES:
                 return False
             parent_id = self.parent.get(parent_id)
         return True
+
+    def _is_board_node(self, node: dict) -> bool:
+        """Top-level object on the flow board: only structural nodes above it."""
+        return node.get("type") in BOARD_TYPES and self.board_level(node)
 
     def _is_annotation_name(self, name: str | None) -> bool:
         lowered = (name or "").strip().lower()
@@ -234,14 +292,22 @@ class Board:
                 continue
             node_id = node["id"]
 
-            if self._is_annotation_name(node.get("name")) or any(
-                self._is_annotation_name(self.nodes[a].get("name"))
-                for a in self.ancestors(node_id)[1:]
+            # NOTE by name — but never for a device-sized frame: annotation
+            # names are generic words ('Info', 'Notes') that can legitimately
+            # name a real screen, and an annotation component is never
+            # screen-sized. Geometry-less exports keep the old name-only read.
+            sized_geometry = self._screen_sized(node)
+            if sized_geometry is not True and (
+                self._is_annotation_name(node.get("name"))
+                or any(
+                    self._is_annotation_name(self.nodes[a].get("name"))
+                    for a in self.ancestors(node_id)[1:]
+                )
             ):
                 self.node_class[node_id] = "NOTE"
                 continue
 
-            sized = self._screen_sized(node)
+            sized = sized_geometry
             if sized is None:
                 sized = self.descendants(node_id) >= DESCENDANT_SCREEN_MIN
             if sized:
@@ -256,6 +322,22 @@ class Board:
             else:
                 self.node_class[node_id] = "UNKNOWN"
 
+        # Bare board-level TEXT carries the same roles a caption frame does —
+        # measured: five decision questions ('Gopay Plus or not?') written as
+        # naked TEXT with three connectors each, all previously dying in the
+        # no-board-ancestor bucket. A question with fan-out is a DECISION;
+        # anything else text-bearing is a CAPTION (state chips, labels).
+        for node in self.nodes.values():
+            if node.get("type") != "TEXT" or node["id"] in self.node_class:
+                continue
+            text = (node.get("characters") or "").strip()
+            if not text or not self.board_level(node):
+                continue
+            if text.endswith("?") and self._outgoing(node["id"]) >= 2:
+                self.node_class[node["id"]] = "DECISION"
+            else:
+                self.node_class[node["id"]] = "CAPTION"
+
 
 def endpoint_id(connector: dict, key: str) -> str | None:
     """A floating endpoint carries `position` and no id — nothing to resolve."""
@@ -265,6 +347,36 @@ def endpoint_id(connector: dict, key: str) -> str | None:
         if isinstance(target, str):
             return target
     return None
+
+
+# Caps that read as an arrowhead. CIRCLE_FILLED / DIAMOND_FILLED / NONE are
+# decorative source dots, not direction.
+ARROW_CAPS = frozenset({"ARROW_LINES", "ARROW_EQUILATERAL", "TRIANGLE_FILLED"})
+
+
+def connector_endpoints(connector: dict) -> tuple[str | None, str | None, str]:
+    """(source, target, direction_source), with the arrowhead honoured.
+
+    Figma lets a designer flip a connector's arrowhead independently of the
+    direction the line was drawn, so connectorStart is NOT reliably the source.
+    Measured on a real board: 2 of 47 connectors point backwards, which produced
+    two silently reversed flow edges — worse than missing ones, because nothing
+    downstream can tell.
+    """
+    start = endpoint_id(connector, "connectorStart")
+    end = endpoint_id(connector, "connectorEnd")
+    start_arrow = connector.get("connectorStartStrokeCap") in ARROW_CAPS
+    end_arrow = connector.get("connectorEndStrokeCap") in ARROW_CAPS
+
+    if end_arrow and not start_arrow:
+        return start, end, "ARROWHEAD"
+    if start_arrow and not end_arrow:
+        # The line was drawn end -> start; the arrow says the flow runs the
+        # other way. Trust the arrow.
+        return end, start, "ARROWHEAD_REVERSED"
+    if start_arrow and end_arrow:
+        return start, end, "AMBIGUOUS"
+    return start, end, "UNDIRECTED"
 
 
 def connector_label(connector: dict) -> str:
@@ -364,6 +476,13 @@ class Extractor:
         self.screen_renames: list[dict[str, str]] = []
         self._rename_from_banners()
 
+        # Cluster merges also happen before frame_to_screen, for the same reason.
+        # Order is evidence strength: an explicit dashed box beats a fingerprint.
+        self.group_box_merges: list[dict[str, Any]] = []
+        self.fingerprint_merges: list[dict[str, Any]] = []
+        self._merge_group_boxes()
+        self._merge_fingerprints()
+
         # EVERY collapsed frame maps to the screen. Resolving against only the
         # representative is what silently drops flows drawn from other states.
         self.frame_to_screen = {
@@ -433,6 +552,162 @@ class Extractor:
             )
             self.counts["screen_id_from_banner"] += 1
 
+    # --- clustering (v2 exports) ---
+
+    def _frame_gid(self) -> dict[str, str]:
+        return {frame: gid for gid, frames in self.groups.items() for frame in frames}
+
+    def _gid_is_descriptive(self, gid: str) -> bool:
+        """A group counts as properly named when a banner named it, or its
+        top-left frame's own base name is not a Figma default."""
+        if gid in self.screen_names:
+            return True
+        frames = self.groups[gid]
+        representative = min(
+            frames, key=lambda i: (self.board.nodes[i].get("y", 0), self.board.nodes[i].get("x", 0))
+        )
+        return not is_non_descriptive(split_name(self.board.nodes[representative].get("name"))[1])
+
+    def _absorb(self, target: str, absorbed: str) -> None:
+        """Fold one screen group into another, keeping absorbed descriptive base
+        names as state texts so no authored words are lost."""
+        for frame in self.groups[absorbed]:
+            _, base, _ = split_name(self.board.nodes[frame].get("name"))
+            if base and not is_non_descriptive(base) and split_name(base)[0] != target:
+                self._record_state(target, base)
+        self.groups[target].extend(self.groups.pop(absorbed))
+
+    def _merge_group_boxes(self) -> None:
+        """A dashed board-level shape drawn around >=2 sibling screen frames is
+        the design convention for 'these are states of one screen'. Merge them.
+
+        Only same-parent containment — coordinates are parent-relative, so a box
+        and the frames it surrounds are comparable only as siblings. A box whose
+        screens carry two or more DIFFERENT proper names is a conflict, not a
+        merge: report it, never guess which name wins.
+        """
+        board = self.board
+        boxes = [
+            n
+            for n in board.nodes.values()
+            if n.get("dashed")
+            and n.get("type") in GROUP_BOX_TYPES
+            and board.board_level(n)
+            and all(k in n for k in ("x", "y", "width", "height"))
+        ]
+        boxes.sort(key=lambda n: (n.get("y", 0), n.get("x", 0), n["id"]))
+
+        for box in boxes:
+            frame_gid = self._frame_gid()
+            if box["id"] in frame_gid:
+                continue  # a dashed screen frame is a screen, not a group box
+            parent_id = board.parent.get(box["id"])
+            if not parent_id:
+                continue
+            contained = [
+                c
+                for c in board.nodes[parent_id].get("children", [])
+                if c["id"] in frame_gid
+                and all(k in c for k in ("x", "y", "width", "height"))
+                and c["x"] >= box["x"] - GROUP_BOX_SLACK
+                and c["y"] >= box["y"] - GROUP_BOX_SLACK
+                and c["x"] + c["width"] <= box["x"] + box["width"] + GROUP_BOX_SLACK
+                and c["y"] + c["height"] <= box["y"] + box["height"] + GROUP_BOX_SLACK
+            ]
+            if len(contained) < 2:
+                continue
+            gids = list(dict.fromkeys(frame_gid[c["id"]] for c in contained))
+            if len(gids) < 2:
+                continue  # box confirms a collapse the names already made
+
+            proper = [g for g in gids if self._gid_is_descriptive(g)]
+            if len(proper) > 1:
+                self.counts["label_attach_conflicts"] += 1
+                self.blocking_issues.append(
+                    f"Dashed group box {box['id']} surrounds screens with distinct names "
+                    f"({', '.join(proper[:4])}) — screen-vs-state unresolved, not merged."
+                )
+                continue
+            target = proper[0] if proper else gids[0]
+            for gid in gids:
+                if gid != target:
+                    self._absorb(target, gid)
+            self.counts["group_box_clusters"] += 1
+            self.group_box_merges.append(
+                {
+                    "box_node_id": box["id"],
+                    "into": target,
+                    "absorbed": [g for g in gids if g != target],
+                    "frames": len(contained),
+                }
+            )
+
+    def _fingerprint(self, frame_id: str) -> frozenset[str]:
+        """Component-instance names in the subtree — the frame's structural
+        skeleton, stable across state variants that names cannot cluster."""
+        names: set[str] = set()
+        budget = 500
+
+        def walk(node: dict) -> None:
+            nonlocal budget
+            if budget <= 0:
+                return
+            budget -= 1
+            if node.get("type") in ("INSTANCE", "COMPONENT") and node.get("name"):
+                names.add(node["name"])
+            for child in node.get("children", []):
+                walk(child)
+
+        walk(self.board.nodes[frame_id])
+        return frozenset(names)
+
+    def _merge_fingerprints(self) -> None:
+        """Last-resort clustering for gibberish-named sibling frames — the board
+        that groups states with nothing but layout (no shared base name, no
+        dashed box). Deliberately narrow: properly named screens NEVER merge by
+        fingerprint (Login and Register legitimately share components), and every
+        merge is recorded so it can be audited and challenged.
+        """
+        board = self.board
+        by_parent: dict[str, list[str]] = defaultdict(list)
+        for frame, gid in self._frame_gid().items():
+            if self._gid_is_descriptive(gid):
+                continue
+            parent_id = board.parent.get(frame)
+            if parent_id:
+                by_parent[parent_id].append(frame)
+
+        for parent_id in sorted(by_parent):
+            frames = sorted(
+                by_parent[parent_id],
+                key=lambda i: (board.nodes[i].get("y", 0), board.nodes[i].get("x", 0), i),
+            )
+            if len(frames) < 2:
+                continue
+            prints = {f: self._fingerprint(f) for f in frames}
+            for i, a in enumerate(frames):
+                for b in frames[i + 1 :]:
+                    frame_gid = self._frame_gid()
+                    gid_a, gid_b = frame_gid[a], frame_gid[b]
+                    if gid_a == gid_b:
+                        continue
+                    fa, fb = prints[a], prints[b]
+                    if len(fa) < FINGERPRINT_MIN_COMPONENTS or len(fb) < FINGERPRINT_MIN_COMPONENTS:
+                        continue
+                    union = len(fa | fb)
+                    if union == 0 or len(fa & fb) / union < FINGERPRINT_JACCARD:
+                        continue
+                    self.counts["fingerprint_merged_frames"] += len(self.groups[gid_b])
+                    self.fingerprint_merges.append(
+                        {
+                            "into": gid_a,
+                            "absorbed": gid_b,
+                            "shared_components": sorted(fa & fb)[:8],
+                            "jaccard": round(len(fa & fb) / union, 2),
+                        }
+                    )
+                    self._absorb(gid_a, gid_b)
+
     # --- resolution ---
 
     def resolve(self, node_id: str | None) -> tuple[str | None, str | None]:
@@ -481,6 +756,31 @@ class Extractor:
             return None
         band.sort(key=lambda c: (c["y"], c["x"]))
         return band[0]["id"]
+
+    def section_entry(self, node_id: str) -> str | None:
+        """Entry screen of the innermost SECTION enclosing (or being) this node.
+
+        Some teams draw a flow arrow into a section rather than at a screen —
+        the same 'enters this group' semantic as a lane banner, expressed with
+        an explicit container. The entry is the topmost-then-leftmost screen
+        among the section's DIRECT children (the only siblings whose
+        coordinates are comparable); a section holding no direct screen defers
+        to the next section out.
+        """
+        board = self.board
+        for ancestor in board.ancestors(node_id):
+            node = board.nodes.get(ancestor, {})
+            if node.get("type") != "SECTION":
+                continue
+            screens = [
+                c
+                for c in node.get("children", [])
+                if c["id"] in self.frame_to_screen and "x" in c and "y" in c
+            ]
+            if screens:
+                screens.sort(key=lambda c: (c["y"], c["x"]))
+                return screens[0]["id"]
+        return None
 
     def label_frame_target(self, node_id: str) -> tuple[str, str] | None:
         """Is this gibberish-named strip the label of exactly one screen below it?
@@ -554,6 +854,134 @@ class Extractor:
     def _record_state(self, screen_id: str, text: str) -> None:
         self.label_states.setdefault(screen_id, []).append(text)
 
+    # --- proactive state labels (v2 exports) ---
+
+    def _arrow_bindings(self) -> dict[str, str]:
+        """candidate_node_id -> screen frame id, for every hand-drawn LINE whose
+        endpoints touch a small labelling node on one end and a screen frame on
+        the other. An explicit arrow beats column alignment.
+
+        LINE only: its geometry is unambiguous (origin + length + rotation).
+        Freeform VECTOR arrows stay out until they earn their complexity.
+        """
+        board = self.board
+        out: dict[str, str] = {}
+        for node in sorted(board.nodes.values(), key=lambda n: n["id"]):
+            if node.get("type") != "LINE" or not board.board_level(node):
+                continue
+            if not all(k in node for k in ("x", "y", "width")):
+                continue
+            if node["width"] > ARROW_MAX_LENGTH:
+                continue  # a page-wide rule line between sections, not an arrow
+            theta = math.radians(node.get("rotation") or 0)
+            ends = [
+                (node["x"], node["y"]),
+                (node["x"] + node["width"] * math.cos(theta), node["y"] - node["width"] * math.sin(theta)),
+            ]
+            parent_id = board.parent.get(node["id"])
+            if not parent_id:
+                continue
+            siblings = [
+                c
+                for c in board.nodes[parent_id].get("children", [])
+                if c["id"] != node["id"] and all(k in c for k in ("x", "y", "width", "height"))
+            ]
+
+            def hit(point: tuple[float, float]) -> dict | None:
+                inside = [
+                    c
+                    for c in siblings
+                    if c["x"] - ARROW_HIT_RADIUS <= point[0] <= c["x"] + c["width"] + ARROW_HIT_RADIUS
+                    and c["y"] - ARROW_HIT_RADIUS <= point[1] <= c["y"] + c["height"] + ARROW_HIT_RADIUS
+                ]
+                if not inside:
+                    return None
+                # Smallest node wins: the label chip, not the screen behind it.
+                return min(inside, key=lambda c: (c["width"] * c["height"], c["id"]))
+
+            hits = [hit(p) for p in ends]
+            screens = [h for h in hits if h and h["id"] in self.frame_to_screen]
+            labels = [h for h in hits if h and h["id"] not in self.frame_to_screen]
+            if len(screens) == 1 and len(labels) == 1:
+                out[labels[0]["id"]] = screens[0]["id"]
+        return out
+
+    def sweep_state_labels(self) -> None:
+        """States drawn as separate frames under label chips — the convention the
+        attached boards actually use, with no connector anywhere near the chip.
+
+        Proactive: runs on every v2 board, not only when a connector resolution
+        has already failed (that fallback still exists for v1 exports). Evidence
+        order per chip: an arrow binding, else exactly one column-aligned screen
+        below. Two or more aligned screens is a conflict — reported, never
+        guessed. Zero is silence: most captions are just captions.
+        """
+        board = self.board
+        # Board-level TEXT is classified too (CAPTION or DECISION), so the
+        # CAPTION class alone covers every chip shape — and a DECISION question
+        # can never be swept up as a state label.
+        candidates = [nid for nid, cls in board.node_class.items() if cls == "CAPTION"]
+        arrows = self._arrow_bindings()
+
+        for cid in sorted(
+            dict.fromkeys(candidates),
+            key=lambda i: (board.nodes[i].get("y", 0), board.nodes[i].get("x", 0), i),
+        ):
+            node = board.nodes[cid]
+            if not all(k in node for k in ("x", "y", "width", "height")):
+                continue
+            text = (board.texts(cid, 1) or [""])[0].strip()
+            if not text:
+                continue
+
+            if cid in arrows:
+                self._record_state(self.frame_to_screen[arrows[cid]], text)
+                self.counts["arrow_bound_labels"] += 1
+                self.counts["state_labels_attached"] += 1
+                continue
+
+            if (node.get("height") or 0) >= BANNER_MAX_HEIGHT:
+                continue
+            parent_id = board.parent.get(cid)
+            if not parent_id:
+                continue
+            screens = [
+                c
+                for c in board.nodes[parent_id].get("children", [])
+                if c["id"] in self.frame_to_screen
+                and all(k in c for k in ("x", "y", "width", "height"))
+            ]
+            if not screens:
+                continue
+            # Wider than any screen beside it = a lane banner, not a state label.
+            if node["width"] > 1.5 * max(c["width"] for c in screens):
+                continue
+
+            aligned = []
+            for candidate in screens:
+                overlap = min(node["x"] + node["width"], candidate["x"] + candidate["width"]) - max(
+                    node["x"], candidate["x"]
+                )
+                gap = candidate["y"] - (node["y"] + node["height"])
+                if (
+                    overlap >= LABEL_MIN_OVERLAP * min(node["width"], candidate["width"])
+                    and 0 <= gap <= LABEL_MAX_GAP
+                ):
+                    aligned.append((gap, candidate["id"], candidate))
+
+            if len(aligned) == 1:
+                self._record_state(self.frame_to_screen[aligned[0][2]["id"]], text)
+                self.counts["state_labels_attached"] += 1
+            elif len(aligned) > 1:
+                self.counts["label_attach_conflicts"] += 1
+                names = ", ".join(
+                    self.frame_to_screen[a[2]["id"]] for a in sorted(aligned)[:4]
+                )
+                self.blocking_issues.append(
+                    f"Label {text!r} ({cid}) aligns with {len(aligned)} screens ({names}) — "
+                    f"which one it names is ambiguous; move it over one frame or draw an arrow."
+                )
+
     # --- flow ---
 
     def build_flow(self) -> list[dict]:
@@ -562,7 +990,7 @@ class Extractor:
 
         outgoing: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
         for conn in board.connectors:
-            start, end = endpoint_id(conn, "connectorStart"), endpoint_id(conn, "connectorEnd")
+            start, end, _ = connector_endpoints(conn)
             if start and end:
                 anchor, _ = self.resolve(start)
                 outgoing[anchor or start].append((end, connector_label(conn), conn["id"]))
@@ -574,8 +1002,9 @@ class Extractor:
 
         edges: list[dict] = []
         for conn in board.connectors:
-            start = endpoint_id(conn, "connectorStart")
-            end = endpoint_id(conn, "connectorEnd")
+            start, end, direction_source = connector_endpoints(conn)
+            if direction_source == "ARROWHEAD_REVERSED":
+                self.counts["connector_direction_flipped"] += 1
             label = connector_label(conn)
 
             if not start or not end:
@@ -613,7 +1042,10 @@ class Extractor:
                     self.counts["connectors_intra_screen"] += 1
                     continue
                 self.counts["connectors_resolved_to_screen"] += 1
-                edges.append(self._edge(src, dst, label, "CONNECTOR", "EXPLICIT", conn["id"]))
+                edge = self._edge(src, dst, label, "CONNECTOR", "EXPLICIT", conn["id"])
+                if direction_source != "ARROWHEAD":
+                    edge["edge_direction_source"] = direction_source
+                edges.append(edge)
                 continue
 
             if dst_kind == "DECISION":
@@ -662,9 +1094,24 @@ class Extractor:
                 )
                 continue
 
+            # Fallback — the destination is (or sits inside) a SECTION with no
+            # board-node ancestor: an arrow drawn into a group of screens.
+            # Resolve to the section's entry screen, same semantic as a lane.
+            entry = self.section_entry(end)
+            target = self.frame_to_screen.get(entry) if entry else None
+            if target and target != src:
+                self.counts["connectors_inferred_to_screen"] += 1
+                self.counts["section_entry_inferred"] += 1
+                edges.append(
+                    self._edge(src, target, label, "CONNECTOR_INFERRED", "INFERRED", conn["id"])
+                )
+                continue
+
             self.counts["connectors_unresolvable"] += 1
             self.blocking_issues.append(
-                f"Connector {conn['id']} from {src} ends on a node with no board ancestor."
+                f"Connector {conn['id']} from {src} ends on a node with no board ancestor"
+                + (" (resolves back to its own screen via the enclosing section)" if target else "")
+                + "."
             )
 
         return self._dedupe(edges)
@@ -748,12 +1195,30 @@ class Extractor:
         board = self.board
         triggers: dict[str, list[str]] = defaultdict(list)
         for conn in board.connectors:
-            start = endpoint_id(conn, "connectorStart")
+            start, _, _ = connector_endpoints(conn)
             if not start or start not in board.nodes:
                 continue
             screen, kind = self.resolve(start)
             if kind == "SCREEN":
                 triggers[screen].append(start)
+
+        # Interactive layers: a node carrying a tap-family prototype reaction is
+        # an element a tester touches, even when the prototype's destination is
+        # null or outside the export (measured: a board with 0 connectors and
+        # 171 reactions otherwise produces 0 elements). Connector triggers stay
+        # first; the screen frame itself is never its own element.
+        for node_id in sorted(board.nodes):
+            node = board.nodes[node_id]
+            if node_id in self.frame_to_screen:
+                continue
+            if not any(
+                (reaction.get("trigger") or {}).get("type") in self.TAP_TRIGGERS
+                for reaction in node.get("reactions") or []
+            ):
+                continue
+            screen, kind = self.resolve(node_id)
+            if kind == "SCREEN":
+                triggers[screen].append(node_id)
 
         entry_points = {
             fsp.get("nodeId")
@@ -786,6 +1251,27 @@ class Extractor:
                 self.blocking_issues.append(
                     f"Screen {screen_id} comes from a frame literally named {base!r} — no stable "
                     f"screen_id can be derived (standard #3)."
+                )
+
+            # A collapse is trusted when its qualifiers read as states. When
+            # NONE of them do ('refund-confirm', 'confirm-recreate' under a
+            # generic 'dialog'), the frames may be different destinations
+            # sharing a lazy base name — flag it, keep the collapse (splitting
+            # would fabricate screen_ids nothing else references).
+            non_default = [q for q in qualifiers if q != "Default"]
+            if (
+                len(frames) >= 2
+                and len(non_default) >= 2
+                and all(state_kind(q) == "OTHER" for q in non_default)
+                and not any(h in q.lower() for q in non_default for h in STATEISH_HINTS)
+                and not any(q.lower().startswith(p) for q in non_default for p in CONDITION_PREFIXES)
+            ):
+                self.counts["ambiguous_collapses"] += 1
+                self.blocking_issues.append(
+                    f"Screen {screen_id} collapses {len(frames)} frames, but none of its "
+                    f"qualifiers ({', '.join(non_default[:4])}) read as states — these may be "
+                    f"distinct screens sharing a generic base name; confirm with design "
+                    f"(screen-vs-state unresolved)."
                 )
 
             screens.append(
@@ -865,7 +1351,20 @@ class Extractor:
                         f"fronts no distinct destination screen, unresolved."
                     )
             else:
-                entry["action"] = f"Connector {connector_id} has no resolvable destination."
+                # Same section-entry fallback the flow layer applies, so the two
+                # halves of the file agree about where this connector goes.
+                resolved = self.section_entry(end) if end else None
+                screen = self.frame_to_screen.get(resolved) if resolved else None
+                if screen == owning_screen:
+                    screen = None
+                if screen:
+                    entry["destination_screen_id"] = screen
+                    entry["action"] = (
+                        f"Points into a section via connector {connector_id} — "
+                        f"destination screen {screen} inferred from the section's entry."
+                    )
+                else:
+                    entry["action"] = f"Connector {connector_id} has no resolvable destination."
 
             out.append(entry)
         return out
@@ -894,6 +1393,68 @@ class Extractor:
                 }
             )
         return elements
+
+    # --- prototype reactions ---
+
+    TAP_TRIGGERS = frozenset({"ON_CLICK", "ON_PRESS", "ON_DRAG", "ON_KEY_DOWN"})
+
+    def build_reactions(self) -> list[dict]:
+        """Prototype links. Counted always, emitted only when they go somewhere.
+
+        On a real board every resolvable destination pointed OUTSIDE the export
+        (component variants living in a library) and the rest were null, so this
+        yields no edges — but the counts are the finding. Without this pass a
+        reader cannot tell 'no prototype links' from 'never examined'.
+        """
+        board = self.board
+        edges: list[dict] = []
+        for node in board.nodes.values():
+            for reaction in node.get("reactions") or []:
+                trigger = (reaction.get("trigger") or {}).get("type")
+                actions = reaction.get("actions") or (
+                    [reaction["action"]] if reaction.get("action") else []
+                )
+                for action in actions:
+                    if action.get("type") != "NODE":
+                        continue
+                    destination = action.get("destinationId")
+                    if not destination:
+                        if trigger in self.TAP_TRIGGERS:
+                            self.counts["reactions_without_destination"] += 1
+                        continue
+                    self.counts["reactions_with_destination"] += 1
+                    if destination not in board.nodes:
+                        # Usually a component variant living in a library. Counted
+                        # regardless of navigation type: it is a fact about the
+                        # destination, not about what the link meant to do.
+                        self.counts["reactions_destination_outside_export"] += 1
+                        continue
+                    if action.get("navigation") not in (None, "NAVIGATE", "OVERLAY"):
+                        continue      # SWAP / CHANGE_TO / SCROLL_TO are state, not navigation
+                    source, source_kind = self.resolve(node["id"])
+                    target, target_kind = self.resolve(destination)
+                    if source_kind != "SCREEN" or target_kind != "SCREEN" or source == target:
+                        continue
+                    edges.append(
+                        self._edge(
+                            source, target, "", "PROTOTYPE_REACTION", "EXPLICIT", node["id"]
+                        )
+                    )
+        return edges
+
+    def count_unlabelled_branches(self) -> None:
+        """A trigger with 2+ exits and nothing to tell them apart (standard #4)."""
+        outgoing: dict[str, list[str]] = defaultdict(list)
+        for conn in self.board.connectors:
+            start, end, _ = connector_endpoints(conn)
+            if not start or not end:
+                continue
+            source, kind = self.resolve(start)
+            if kind == "SCREEN":
+                outgoing[start].append(connector_label(conn))
+        for labels in outgoing.values():
+            if len(labels) >= 2 and len({l for l in labels if l}) < 2:
+                self.counts["unlabelled_branches"] += 1
 
     # --- notes ---
 
@@ -1036,10 +1597,21 @@ def build(export: dict, app: str | None, config: dict) -> tuple[dict, Extractor]
     board = Board(export, components)
     extractor = Extractor(board, app, vocabulary)
 
+    # Proactive label sweep first: label-recovered states must exist before
+    # build_screens reads label_states. Purely additive to connector accounting.
+    extractor.sweep_state_labels()
     flow = extractor.build_flow()
     screens = extractor.build_screens()
     extractor.check_conservation()
 
+    flow.extend(extractor.build_reactions())
+    # Dedupe again across the two edge sources: a board that prototypes the
+    # same jump on N state frames of one collapsed screen yields N identical
+    # reaction edges (measured: 32 of 36 edges on a real board, with the same
+    # from/to pair up to 6 times). Connector edges come first, so when both
+    # sources state the same jump the richer CONNECTOR edge wins.
+    flow = extractor._dedupe(flow)
+    extractor.count_unlabelled_branches()
     unattached_notes = extractor.attach_notes(screens)
     extractor.counts["decision_nodes"] = sum(
         1 for cls in board.node_class.values() if cls == "DECISION"
@@ -1104,6 +1676,23 @@ def build(export: dict, app: str | None, config: dict) -> tuple[dict, Extractor]
                 ),
             }
         )
+    if counts["fingerprint_merged_frames"]:
+        gaps.append(
+            {
+                "field": "screens[].source_refs",
+                "severity": "DEGRADED",
+                "reason": (
+                    f"{counts['fingerprint_merged_frames']} default-named frame(s) were collapsed "
+                    f"into sibling screens because they share the same component skeleton "
+                    f"(see fingerprint_merges in the report sidecar) — structural inference, not "
+                    f"an authored grouping."
+                ),
+                "action": (
+                    "Confirm each merge with design; a shared base name or a dashed group box "
+                    "would make the grouping explicit."
+                ),
+            }
+        )
     if counts["non_descriptive_names"]:
         gaps.append(
             {
@@ -1126,6 +1715,27 @@ def build(export: dict, app: str | None, config: dict) -> tuple[dict, Extractor]
                     f"reaches them — either dead design or a missing connector."
                 ),
                 "action": "Confirm with design whether each is still in scope.",
+            }
+        )
+    if counts["reactions_with_destination"] and not any(
+        e["edge_source"] == "PROTOTYPE_REACTION" for e in flow
+    ):
+        gaps.append(
+            {
+                "field": "ui_flow",
+                "severity": "INFO",
+                "reason": (
+                    f"{counts['reactions_with_destination']} prototype link(s) name a destination, "
+                    f"of which {counts['reactions_destination_outside_export']} point outside this "
+                    f"export (typically component variants in a library); a further "
+                    f"{counts['reactions_without_destination']} tap trigger(s) name no destination "
+                    f"at all. No navigation could be taken from prototyping — every flow here comes "
+                    f"from a drawn connector."
+                ),
+                "action": (
+                    "None required if connectors carry the flow. To use prototyping instead, point "
+                    "the links at frames inside this page (standard #2)."
+                ),
             }
         )
     if export.get("export", {}).get("truncatedCount"):
@@ -1170,10 +1780,23 @@ def build(export: dict, app: str | None, config: dict) -> tuple[dict, Extractor]
     # Tallies live beside the context, not inside it: they are feedback about how
     # the board was authored, while design_context is consumed for screens,
     # elements and flow. The conservation proof travels with them.
+    # States whose text maps to no canonical state_kind ("Filled State",
+    # Indonesian copy, feature-specific validation labels). The one job left for
+    # a model afterwards: normalise each into the state_kinds enum, or leave it.
+    unclassified_states = [
+        {"screen_id": s["screen_id"], "state_text": q}
+        for s in screens
+        for q in s["screen_states"]
+        if state_kind(q) == "OTHER"
+    ]
+
     report = {
         "generated_at": export.get("exportedAt", ""),
         "convention_compliance": {k: int(extractor.counts[k]) for k in COMPLIANCE_KEYS},
         "screen_renames": extractor.screen_renames,
+        "group_box_merges": extractor.group_box_merges,
+        "fingerprint_merges": extractor.fingerprint_merges,
+        "unclassified_states": unclassified_states,
     }
     if app:
         report["app"] = app
@@ -1235,6 +1858,10 @@ def main() -> int:
             f"intra {counts['connectors_intra_screen']}, "
             f"unresolved {counts['connectors_unresolvable']}] | "
             f"blockers {len(doc['project_context']['blocking_issues'])} | "
+            f"state labels {counts['state_labels_attached']} "
+            f"(arrow {counts['arrow_bound_labels']}, conflicts {counts['label_attach_conflicts']}) | "
+            f"clusters [box {counts['group_box_clusters']}, "
+            f"fingerprint {counts['fingerprint_merged_frames']} frames] | "
             f"geometry {'yes' if extractor.board.has_geometry else 'NO (descendant-count fallback)'}",
             file=sys.stderr,
         )

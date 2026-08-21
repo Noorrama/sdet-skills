@@ -4,38 +4,150 @@
   "description": "Design-process feedback and the extraction's own conservation proof. Kept out of design_context.json because that file is consumed for screens, elements and flow, while these are tallies about how the board was authored. Written as <design_context>.report.json. Downstream: sdet-plan-generator renders the Design Convention Compliance table from it, and check_design_context.py verifies conservation against it — an absent sidecar makes those checks report SKIPPED, never silently pass.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["convention_compliance"],
+  "required": [
+    "convention_compliance"
+  ],
   "properties": {
-    "generated_at": { "type": "string", "description": "ISO-8601 timestamp of the extraction run." },
-    "design_context_file": { "type": "string", "description": "Name of the design_context this report describes, so a stray sidecar cannot be paired with the wrong context." },
-    "app": { "type": "string" },
+    "generated_at": {
+      "type": "string",
+      "description": "ISO-8601 timestamp of the extraction run."
+    },
+    "design_context_file": {
+      "type": "string",
+      "description": "Name of the design_context this report describes, so a stray sidecar cannot be paired with the wrong context."
+    },
+    "app": {
+      "type": "string"
+    },
     "convention_compliance": {
       "type": "object",
       "description": "Tallies of how well the export follows the design team's flow-authoring conventions — the feedback loop back to design. connectors_total must equal the sum of the six connector buckets; a shortfall means connectors were dropped silently, which is the failure this block exists to make impossible.",
       "additionalProperties": false,
       "properties": {
-        "connectors_total": { "type": "integer", "description": "Every CONNECTOR node in the export." },
-        "connectors_resolved_to_screen": { "type": "integer", "description": "Both endpoints resolved to screens (standard #1 followed)." },
-        "connectors_inferred_to_screen": { "type": "integer", "description": "Destination was an element, a lane caption or a label frame; the screen was inferred." },
-        "connectors_unresolvable": { "type": "integer", "description": "Floating endpoint, orphaned node id, or a destination with no board-node ancestor. Each is also a blocking_issues entry." },
-        "connectors_intra_screen": { "type": "integer", "description": "Both endpoints inside the same screen (including two state-frames of one screen) — a state transition or annotation, not navigation." },
-        "connectors_to_decision": { "type": "integer", "description": "Connectors terminating on a DECISION box. Each is consumed by contraction, which emits one edge per labelled exit — so this is its own bucket, not part of connectors_resolved_to_screen." },
-        "note_connectors": { "type": "integer", "description": "Either endpoint (or an ancestor of it) is an annotation component or Note/Context text." },
-        "caption_endpoints": { "type": "integer", "description": "Connectors landing on a CAPTION / LANE_BANNER rather than a screen." },
-        "label_frames_resolved": { "type": "integer", "description": "Connectors rescued by the label-frame fallback: the destination was a gibberish-named strip that proved to be the label of exactly one column-aligned screen below it. Fires only on a resolution failure, never as a sweep." },
-        "decision_nodes": { "type": "integer", "description": "Board nodes classified DECISION — a small question box with 2+ outgoing connectors." },
-        "contracted_edges": { "type": "integer", "description": "Edges emitted by collapsing a decision box (edge_source CONNECTOR_CONTRACTED). Far above connectors_total means contraction escaped its one-hop / fan-out bounds and is manufacturing flows." },
-        "lane_entry_inferred": { "type": "integer", "description": "Edges whose destination is a lane's entry screen picked by reading order rather than stated." },
-        "reactions_with_destination": { "type": "integer", "description": "Tap-family reactions naming a destination (standard #2 followed)." },
-        "reactions_without_destination": { "type": "integer", "description": "Tap trigger with a null/absent destination (standard #2 not followed)." },
-        "unlabelled_branches": { "type": "integer", "description": "A trigger element with 2+ outgoing connectors and no labels to discriminate them (standard #4 not followed)." },
-        "non_descriptive_names": { "type": "integer", "description": "Screens still named Frame 427, Group 12 etc after the banner-rename fallback ran (standard #3 not followed)." },
-        "screen_id_from_banner": { "type": "integer", "description": "Screens whose gibberish name was replaced by the text of the section banner above them. Each rename moves a join key, so each is also a DEGRADED gap in design_context." },
-        "unreachable_screens": { "type": "integer", "description": "Screens in no ui_flow edge and no flowStartingPoints entry." },
-        "notes_total": { "type": "integer", "description": "NOTE-classified board nodes found. The three notes_* buckets must sum to this; a shortfall means note text was dropped silently." },
-        "notes_attached_by_connector": { "type": "integer", "description": "Notes routed by an explicit connector to the screen or element they describe (standard #5 followed)." },
-        "notes_attached_by_geometry": { "type": "integer", "description": "Notes with no connector, attached to the screen containing them or nearest within the same parent. Inferred, not drawn." },
-        "notes_unattached": { "type": "integer", "description": "Notes belonging to no screen — outside every frame and with no connector. Reported as one INFO gap, never a blocker." }
+        "connectors_total": {
+          "type": "integer",
+          "description": "Every CONNECTOR node in the export."
+        },
+        "connectors_resolved_to_screen": {
+          "type": "integer",
+          "description": "Both endpoints resolved to screens (standard #1 followed)."
+        },
+        "connectors_inferred_to_screen": {
+          "type": "integer",
+          "description": "Destination was an element, a lane caption or a label frame; the screen was inferred."
+        },
+        "connectors_unresolvable": {
+          "type": "integer",
+          "description": "Floating endpoint, orphaned node id, or a destination with no board-node ancestor. Each is also a blocking_issues entry."
+        },
+        "connectors_intra_screen": {
+          "type": "integer",
+          "description": "Both endpoints inside the same screen (including two state-frames of one screen) — a state transition or annotation, not navigation."
+        },
+        "connectors_to_decision": {
+          "type": "integer",
+          "description": "Connectors terminating on a DECISION box. Each is consumed by contraction, which emits one edge per labelled exit — so this is its own bucket, not part of connectors_resolved_to_screen."
+        },
+        "note_connectors": {
+          "type": "integer",
+          "description": "Either endpoint (or an ancestor of it) is an annotation component or Note/Context text."
+        },
+        "caption_endpoints": {
+          "type": "integer",
+          "description": "Connectors landing on a CAPTION / LANE_BANNER rather than a screen."
+        },
+        "label_frames_resolved": {
+          "type": "integer",
+          "description": "Connectors rescued by the label-frame fallback: the destination was a gibberish-named strip that proved to be the label of exactly one column-aligned screen below it. Fires only on a resolution failure, never as a sweep."
+        },
+        "connector_direction_flipped": {
+          "type": "integer",
+          "description": "Connectors whose arrowhead points at connectorStart, meaning the flow runs opposite to the direction the line was drawn. The edge is emitted in the arrowhead's direction and stamped edge_direction_source: ARROWHEAD_REVERSED. Non-zero is worth telling design: the line reads backwards on the board."
+        },
+        "decision_nodes": {
+          "type": "integer",
+          "description": "Board nodes classified DECISION — a small question box with 2+ outgoing connectors."
+        },
+        "contracted_edges": {
+          "type": "integer",
+          "description": "Edges emitted by collapsing a decision box (edge_source CONNECTOR_CONTRACTED). Far above connectors_total means contraction escaped its one-hop / fan-out bounds and is manufacturing flows."
+        },
+        "lane_entry_inferred": {
+          "type": "integer",
+          "description": "Edges whose destination is a lane's entry screen picked by reading order rather than stated."
+        },
+        "reactions_with_destination": {
+          "type": "integer",
+          "description": "Prototype NODE actions naming a destination, whatever the navigation type."
+        },
+        "reactions_destination_outside_export": {
+          "type": "integer",
+          "description": "Of those, the ones whose destination is not in this export — usually a component variant in a library, so the link cannot be followed from here."
+        },
+        "reactions_without_destination": {
+          "type": "integer",
+          "description": "Tap-family triggers (ON_CLICK / ON_PRESS / ON_DRAG / ON_KEY_DOWN) with a null or absent destination (standard #2 not followed). Non-tap triggers such as AFTER_TIMEOUT are excluded — a timeout without a destination is not the same authoring mistake."
+        },
+        "unlabelled_branches": {
+          "type": "integer",
+          "description": "A trigger element with 2+ outgoing connectors and no labels to discriminate them (standard #4 not followed)."
+        },
+        "non_descriptive_names": {
+          "type": "integer",
+          "description": "Screens still named Frame 427, Group 12 etc after the banner-rename fallback ran (standard #3 not followed)."
+        },
+        "screen_id_from_banner": {
+          "type": "integer",
+          "description": "Screens whose gibberish name was replaced by the text of the section banner above them. Each rename moves a join key, so each is also a DEGRADED gap in design_context."
+        },
+        "unreachable_screens": {
+          "type": "integer",
+          "description": "Screens in no ui_flow edge and no flowStartingPoints entry."
+        },
+        "notes_total": {
+          "type": "integer",
+          "description": "NOTE-classified board nodes found. The three notes_* buckets must sum to this; a shortfall means note text was dropped silently."
+        },
+        "notes_attached_by_connector": {
+          "type": "integer",
+          "description": "Notes routed by an explicit connector to the screen or element they describe (standard #5 followed)."
+        },
+        "notes_attached_by_geometry": {
+          "type": "integer",
+          "description": "Notes with no connector, attached to the screen containing them or nearest within the same parent. Inferred, not drawn."
+        },
+        "notes_unattached": {
+          "type": "integer",
+          "description": "Notes belonging to no screen — outside every frame and with no connector. Reported as one INFO gap, never a blocker."
+        },
+        "state_labels_attached": {
+          "type": "integer",
+          "description": "Label chips/bars proactively attached to the screen they name (v2 exports): states drawn as separate frames under a label, recovered without any connector. Includes arrow_bound_labels."
+        },
+        "arrow_bound_labels": {
+          "type": "integer",
+          "description": "Of state_labels_attached, those bound by a hand-drawn LINE arrow from label to screen — explicit binding, stronger than column alignment."
+        },
+        "label_attach_conflicts": {
+          "type": "integer",
+          "description": "Labels aligning with 2+ screens, or dashed group boxes surrounding screens with distinct proper names. Each is a blocking_issues entry; never guessed."
+        },
+        "group_box_clusters": {
+          "type": "integer",
+          "description": "Dashed board-level boxes that merged >=2 sibling screen groups into one screen (v2 exports). Details in group_box_merges."
+        },
+        "fingerprint_merged_frames": {
+          "type": "integer",
+          "description": "Default-named frames collapsed into sibling screens by shared component skeleton (Jaccard >= 0.8). Structural inference — every merge is also a DEGRADED extraction gap. Details in fingerprint_merges."
+        },
+        "section_entry_inferred": {
+          "type": "integer",
+          "description": "Connectors drawn into a SECTION (no board-node ancestor) resolved to that section's entry screen — the lane-banner semantic expressed with an explicit container. Part of connectors_inferred_to_screen."
+        },
+        "ambiguous_collapses": {
+          "type": "integer",
+          "description": "Collapsed screens (>=2 frames) where no qualifier reads as a state — possibly distinct screens sharing a generic base name. Each is a blocking_issues entry; the collapse is kept, never silently split."
+        }
       }
     },
     "screen_renames": {
@@ -45,11 +157,100 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "from": { "type": "string" },
-          "to": { "type": "string" },
-          "banner_text": { "type": "string" },
-          "banner_node_id": { "type": "string" },
-          "screen_source_ref": { "type": "string" }
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "banner_text": {
+            "type": "string"
+          },
+          "banner_node_id": {
+            "type": "string"
+          },
+          "screen_source_ref": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "group_box_merges": {
+      "type": "array",
+      "description": "Audit trail for every dashed-group-box merge: which box, which screen ids were absorbed into which.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "box_node_id",
+          "into",
+          "absorbed"
+        ],
+        "properties": {
+          "box_node_id": {
+            "type": "string"
+          },
+          "into": {
+            "type": "string"
+          },
+          "absorbed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "frames": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "fingerprint_merges": {
+      "type": "array",
+      "description": "Audit trail for every fingerprint merge of default-named sibling frames — auditable and challengeable, unlike a silent collapse.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "into",
+          "absorbed"
+        ],
+        "properties": {
+          "into": {
+            "type": "string"
+          },
+          "absorbed": {
+            "type": "string"
+          },
+          "shared_components": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "jaccard": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "unclassified_states": {
+      "type": "array",
+      "description": "screen_states entries whose text maps to no canonical state_kind (feature-specific labels, non-English copy). The post-run model pass normalises each into the state_kinds enum or leaves it, with the source text kept verbatim in screen_states.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "screen_id",
+          "state_text"
+        ],
+        "properties": {
+          "screen_id": {
+            "type": "string"
+          },
+          "state_text": {
+            "type": "string"
+          }
         }
       }
     }

@@ -71,8 +71,12 @@
           "markets",
           "type_of_test",
           "human_corrected",
+<<<<<<< HEAD
           "human_correction_types",
           "owning_team"
+=======
+          "human_correction_types"
+>>>>>>> origin
         ],
         "properties": {
           "scenario_id": {
@@ -281,6 +285,7 @@
               "type": "string"
             },
             "description": "Existing BrowserStack case ids (e.g. TC-302383) this scenario extends, replaces, or re-runs under a new flag state. From regression_context.json only — never invented. Rendered into the Preconditions block and consumed downstream for @TestInfo."
+<<<<<<< HEAD
           },
           "owning_team": {
             "type": "string",
@@ -293,6 +298,8 @@
             ],
             "default": null,
             "description": "BrowserStack's own test-case id, assigned when this scenario is uploaded via the BrowserStack MCP. null until the upload runs — always emit the key so downstream readers never infer state from absence. Written back into the plan by the sync, never authored by the generator. DISTINCT from existing_testcase_ids[], which holds ids of cases that already existed BEFORE this plan (sourced from regression_context.json); this field is the id THIS scenario received."
+=======
+>>>>>>> origin
           }
         }
       }
@@ -380,6 +387,7 @@
     },
     "dedup_report": {
       "type": "object"
+<<<<<<< HEAD
     },
     "teams_in_scope": {
       "type": "array",
@@ -467,6 +475,8 @@
           "description": "Scenarios still carrying null — e.g. those owned by a team whose project was not the upload target"
         }
       }
+=======
+>>>>>>> origin
     }
   }
 }
