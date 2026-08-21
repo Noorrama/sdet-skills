@@ -75,9 +75,11 @@ PRD/RFC fields use free-form team names (`"Transport"`, `"GoTrip"`, `"payments-t
 | `prd_context.involved_teams[].team` | `"Backend"`, `"Frontend"`, `"Product"` | **Functional roles** — NOT a team identity. These tell you *which discipline* implements each requirement. Used only to filter requirements for scenario generation (this backend skill processes requirements where `team == "Backend"`). Never use for registry lookup. |
 | `rfc_context.team_ownership[].team` | `"Transport"` | **RFC owning team** — fallback when `prd_context.team` is absent or null. |
 
-### Resolution algorithm — priority order
+### Resolution algorithm
 
-Execute the steps in order; stop at the first successful match.
+Run the matching steps below over **every** candidate and keep **every** distinct registry entry that matches — do not stop at the first hit. The candidate order still matters, but only to decide which match becomes the **primary** team: the first successful match is the primary, the rest are additional teams in scope.
+
+Feeding the resolved set to the confirmation gate in *Multi-team features* below is mandatory whenever more than one entry matches.
 
 **Step 1 — Read candidate names:**
 
@@ -107,19 +109,77 @@ For each `(alias_type, source_path, raw_name)` in candidates:
 
 ### Fallback behaviour
 
-If no registry entry matches the PRD/RFC team name:
+If **no** candidate matches any registry entry:
 - Write `canonical_team_id: "unknown"`, `code_module: null` in `sdet_plan.json`
 - Add to `qa_analysis.md` generated section:
   > ⚠️ **Team resolution warning:** Team name `"{raw_name}"` from PRD/RFC not found in `team_registry.json`. Downstream code generation and regression lookup will not work correctly. Add an entry or alias to `config/team_registry.json` before raising the MR.
 
+If **some** candidates match and others do not, do not silently drop the unmatched ones. Carry each into `teams_in_scope[]` with `canonical_id: "unknown"`, `included: false` and the raw name that failed, and list it in the confirmation gate alongside the resolved teams. An unmatched name is far more often a missing registry alias than an irrelevant team, and the human at the gate is the person who can tell the difference.
+
+### Multi-team features — resolve every team, then confirm scope with the human
+
+A PRD or RFC routinely names several teams. `prd_context.team` is an **array**, `rfc_context.team_ownership[]` has one entry per owning group, and `rfc_context.service_level_changes[]` lists services that often span them. Resolving only the first candidate and discarding the rest is a silent data loss: the dropped teams appear nowhere in the plan, nowhere in `qa_analysis.md`, and the reviewer cannot tell a choice was made.
+
+**Resolve every candidate, not just the first.** Run the matching algorithm over each entry in `prd_context.team[]`, `prd_context.pdg[]` and `rfc_context.team_ownership[]`, and keep every distinct registry entry that matches.
+
+**Then stop and ask the human before generating any scenario.** Present the resolved set with what each one routes to, and offer three choices:
+
+```
+The PRD and RFC name these teams. Which scope should this plan cover?
+
+  Team (as written)        canonical_id          code module           regression   BrowserStack
+  Food                     gofood                gofood                GOFOOD-      gofood-backend
+  CP                       customer-platforms    customer-platforms    CP-          customer-platforms-backend
+  ICP                      icp                   icp                   ICP-         icp-backend
+  GoPay                    gopay                 gopay                 GOPAY-       gopay-backend
+
+  1. One team  — generate only scenarios owned by the team you name
+  2. All teams — generate the full set, each scenario tagged with its owning team
+  3. Primary + foreign-tagged — generate for the primary team, and tag the
+     scenarios whose system under test belongs to another team
+```
+
+Do not guess the answer and do not proceed on the first match. The choice changes which module the code lands in, which regression suite the scenarios are counted against, and which BrowserStack project receives the upload — three routings a wrong guess silently corrupts.
+
+Record the answer and the full resolved set in `qa_analysis.md`, including the teams the human excluded, so the decision is auditable.
+
+**If a candidate does not resolve**, list it as unresolved in the same prompt rather than dropping it. An unmatched team name usually means a missing registry alias, not an irrelevant team.
+
+### `owning_team` — per-scenario ownership
+
+The plan has one primary team, but individual scenarios may test a service another team owns. Set `owning_team` on every scenario.
+
+**Derivation — use the entry point, not the dependency.** Ownership follows the surface the scenario drives, not every service the flow touches.
+
+| The scenario drives... | Owner | Generate it? |
+|---|---|---|
+| Our endpoint, their service stubbed | primary | yes |
+| Our endpoint or worker, reaching into their live service | primary | yes — an integration flow crossing a team boundary is still ours |
+| Our surface degrading when their service is down | primary | yes — the assertion is about our degradation |
+| **Their endpoint directly, in isolation** | that team | **no — do not generate** |
+
+The last row is the only exclusion, and it is narrow: a **component-layer** scenario whose entry point is another team's endpoint is that team's unit to test, not ours. Everything else — including integration and e2e flows that traverse their service — belongs to the primary team, because the primary team's behaviour is what fails when the test fails.
+
+The practical test is the entry point in `step_descriptions[].curl_reference`. If the first call goes to our host, the scenario is ours regardless of how many of their services it reaches afterwards. If the first call goes to their host and the layer is `component`, it is theirs.
+
+**Do not silently drop the excluded ones.** Record each in `qa_analysis.md` with its `owning_team`, the surface it would have tested, and why it was excluded, so the owning team can pick it up. A dropped scenario that leaves no trace is indistinguishable from a coverage gap.
+
+A dependency being *involved* does not transfer ownership. Expect the excluded set to be a small minority; a plan where most scenarios are foreign-owned usually means the primary team was resolved wrongly.
+
+Build the service-to-team mapping from `rfc_context.team_ownership[].scope_ref` cross-referenced with `rfc_context.service_level_changes[].service`, and **present it at the same confirmation gate** — it is inference over prose and the human should correct it before it routes anything.
+
+Default `owning_team` to the primary `canonical_team_id`. Set it explicitly on every scenario, including primary-owned ones, so a downstream reader never has to infer it from absence.
+
 ### What resolution populates in `sdet_plan.json`
 
-| Root field | Source |
+| Field | Source |
 |---|---|
-| `canonical_team_id` | `team_registry.teams[matched].canonical_id` |
-| `code_module` | `team_registry.teams[matched].code.module` |
+| `canonical_team_id` (root) | the **primary** team's `canonical_id` — the team that owns the plan and its review gate |
+| `code_module` (root) | the primary team's `code.module` |
+| `teams_in_scope[]` (root) | every resolved team: `canonical_id`, `code_module`, `regression_id_prefix`, `browserstack_project`, the raw name it matched, and whether the human included it |
+| `owning_team` (per scenario) | the `canonical_id` owning that scenario's system under test |
 
-> **`code_module` is the contract field.** `automation-plan-generator` reads it from `sdet_plan.json` to build Java package paths. It does not re-read `tasks_context` or `prd_context` for the module name.
+> **`code_module` is still the contract field for the primary team**, but it is no longer sufficient on its own. `automation-plan-generator` must resolve the module per scenario from `owning_team` via the registry, falling back to the root `code_module` when `owning_team` equals the primary. Uploading a foreign-owned scenario to the primary team's BrowserStack project puts it in the wrong suite and bills it to the wrong team's coverage.
 
 ## Ownership contract — A = authoritative (wins conflicts), C = contributes
 
@@ -584,6 +644,7 @@ Schema root:
   - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`. Target 4–6 steps per scenario (see Scenario granularity). Every `expected_result` is a concrete assertion phrased as `Verify …`; `action` is imperative. Steps and expected results are 1:1.
   - `preconditions[]`, `fixture_ids[]`
   - `scenario_group: string` — key shared by scenarios that rest on the **same Arrange**: the same precondition state and the same triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction — it applies equally to `Manual` scenarios, where it tells a human tester which cases can be executed back-to-back off one setup. A scenario with no sibling gets its own unique key. Format: `{feature_component}-{behaviour}`, e.g. `chatextension-terminal-status`. Downstream consumers decide what to do with the grouping; see `automation-plan-generator` for how it maps to test methods.
+  - `browserstack_test_id: string | null` — BrowserStack's own id for this scenario, assigned when the plan is uploaded through the BrowserStack MCP. **Emit `null` at generation time and never author a value.** The sync writes it back after upload, which is what makes the plan round-trippable: re-running Review or Pass 2 can then update the existing case instead of creating a duplicate. Do not confuse it with `existing_testcase_ids[]` — that names cases which existed *before* this plan; this names the case *this* scenario became.
   - `existing_testcase_ids: string[]` — BrowserStack case ids (e.g. `TC-302383`) that this scenario extends, replaces, or re-runs under a new flag state. Populated from `regression_context.json` when present; empty otherwise. Rendered into the `Preconditions` block as `Existing regression case:` and consumed downstream for `@TestInfo(testCaseIds={...})`. Do **not** invent ids — leave empty when `regression_context.json` is absent.
   - `tags[]` — `happy_path|negative|boundary|flag_on|flag_off|e2e|load|concurrency|security|reliability|compliance|nfr|deferred|underspecified|provisional`
   - `human_corrected: boolean` — `false` at generation time. Set to `true` in Review mode when the scenario is modified or deprecated by human feedback. Never reset to false. For scenarios with `generated_by_mode: "review"`, this is implicitly `true` (the scenario is itself a human addition) but the field is still set explicitly.
@@ -615,6 +676,8 @@ Human-readable summary for SDET + PM review gate:
 - LLM generation quality (after first Review run): auto-approved count, human-modified, human-deprecated, human-added, accuracy %
 - **Granularity check** — mean steps per scenario, count of 1-step scenarios, scenarios exceeding 3 fixtures, and the `scenario_group`-to-scenario ratio (see Log). Call out explicitly if the plan drifted toward one-assertion-per-scenario.
 - **Market assumption** — which market(s) were set and on what basis, flagged for confirmation whenever they were inferred rather than read from `tasks_context.environments`.
+- **BrowserStack sync** — after a sync has run, how many scenarios carry a `browserstack_test_id` and how many are still null, with the project they landed in. Before the first sync, state plainly that none are tracked yet.
+- **Team scope** — the full `teams_in_scope[]` table with each team's module, regression prefix and BrowserStack project, which team is primary, the scope the human confirmed at the gate, and an **excluded-by-scope table** naming every scenario dropped for team reasons with its `owning_team`, entry point and what it covered. An excluded scenario that leaves no trace here is indistinguishable from a coverage gap.
 - **Coverage ledger** — the full table with every unmapped row and its stated reason. This is the section a reviewer scans to find what the plan does not cover, so unmapped rows belong here in full rather than summarised.
 - **Completeness sweep results** — how many scenarios or steps each of the four sweeps contributed. A sweep contributing zero is a signal it was skipped, not that the feature had nothing to find.
 
@@ -702,6 +765,8 @@ Existing regression case: <TC-xxxxxx from existing_testcase_ids>
 | `tags` | `tags[]` joined | Pipe-separated for filtering |
 | `human_corrected` | `human_corrected` | `true` if any review round modified or deprecated this scenario — LLM accuracy signal |
 | `human_correction_types` | `human_correction_types[]` joined | Pipe-separated: `field_change`, `deprecated`, `missed_scenario` |
+| `owning_team` | `owning_team` | Which team's module and BrowserStack project this scenario routes to |
+| `browserstack_test_id` | `browserstack_test_id` | Empty on the upload CSV — BrowserStack assigns it. Populated only when the CSV is re-exported after a sync, so a reviewer can see what is already tracked. |
 
 ### `TestType` derivation — additive multi-select (collect **all** that apply)
 
@@ -896,6 +961,10 @@ Reject and regroup if any of these hold:
 - mean steps per scenario < 3
 - more than 20% of scenarios have exactly 1 step
 - `scenario_group` is missing on any scenario, or every scenario has a unique one (it was not derived from the Arrange)
+- `owning_team` is missing on any scenario, or names a `canonical_id` absent from `teams_in_scope[]`
+- more than one registry entry matched and the scope confirmation gate was not run
+- a scenario was excluded for team scope without a corresponding entry in the `qa_analysis.md` excluded-by-scope table
+- `teams_in_scope[]` omits a team named in `prd_context.team[]`, `prd_context.pdg[]` or `rfc_context.team_ownership[]`, whether it resolved or not
 - the coverage ledger has an unmapped row with no stated reason
 - any async job, retry or multi-actor write path has no repeat-execution scenario (Sweep 1)
 - any endpoint with a documented retryable error has no retry-after-failure scenario (Sweep 1)
