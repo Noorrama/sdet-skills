@@ -1,1729 +1,3658 @@
 {
-  "app": "gopay-merchant",
-  "design_source": {
-    "file_name": "GoPay Affiliate",
-    "page_name": "     ↪ Main Flow: Iteration 3",
-    "scope": "page",
-    "exported_at": "2026-08-21T04:33:09.598Z",
-    "max_depth": 30,
-    "node_count": 9977,
-    "truncated_count": 0,
-    "has_geometry": true
+ "extraction_status": "INCOMPLETE",
+ "extraction_gaps": [
+  {
+   "field": "ui_flow",
+   "reason": "5 connectors attach to whole sections with no per-screen position in the export.",
+   "action": "Re-attach these connectors to specific frames in Figma, or confirm they are section-level notes.",
+   "severity": "DEGRADED"
   },
-  "extraction_status": "INCOMPLETE",
-  "extraction_gaps": [
-    {
-      "field": "ui_flow",
-      "severity": "BLOCKING",
-      "reason": "12 of 47 connectors end on a caption, a label strip or a node with no board ancestor, so no destination screen could be resolved. See project_context.blocking_issues for the specific connectors.",
-      "action": "Redraw those connectors so they terminate on the destination FRAME rather than on its label (standard #1)."
-    },
-    {
-      "field": "screens[].screen_id",
-      "severity": "DEGRADED",
-      "reason": "5 screen(s) derive from default Figma frame names such as 'Frame', so their screen_id carries no meaning and is unstable.",
-      "action": "Rename those frames to describe the screen (standard #3)."
-    },
-    {
-      "field": "ui_flow",
-      "severity": "INFO",
-      "reason": "19 screen(s) are in the design but no connector reaches them — either dead design or a missing connector.",
-      "action": "Confirm with design whether each is still in scope."
-    },
-    {
-      "field": "ui_flow",
-      "severity": "INFO",
-      "reason": "29 prototype link(s) name a destination, of which 29 point outside this export (typically component variants in a library); a further 56 tap trigger(s) name no destination at all. No navigation could be taken from prototyping — every flow here comes from a drawn connector.",
-      "action": "None required if connectors carry the flow. To use prototyping instead, point the links at frames inside this page (standard #2)."
-    }
-  ],
-  "visual_analysis_scratchpad": "",
-  "project_context": {
-    "overall_ambiguity_rating": "MEDIUM",
-    "blocking_issues": [
-      "Connector 1997:32350 starts on a DECISION — no source screen.",
-      "Connector 1997:32347 starts on a DECISION — no source screen.",
-      "Connector 4570:17381 from LINK_GOPAY_SCREEN ends on caption 'SEE MORE IN \\u20281KYC FIGMA', which fronts no screen — destination unstated (standard #1).",
-      "Connector 4570:17391 from CONFIRM_ACCOUNT ends on caption 'SEE MORE IN \\u20281KYC FIGMA', which fronts no screen — destination unstated (standard #1).",
-      "Connector 2001:28031 starts on a node with no board ancestor — no source screen.",
-      "Connector 2001:28205 starts on a node with no board ancestor — no source screen.",
-      "Connector 2482:14826 starts on a CAPTION — no source screen.",
-      "Connector 4570:17376 starts on a CAPTION — no source screen.",
-      "Connector 2269:62987 from RIWAYAT_KOMISI ends on a node with no board ancestor (resolves back to its own screen via the enclosing section).",
-      "Connector 2269:63010 starts on a node with no board ancestor — no source screen.",
-      "Connector 2269:63011 from RIWAYAT_KOMISI ends on a node with no board ancestor (resolves back to its own screen via the enclosing section).",
-      "Connector 2269:63012 from RIWAYAT_KOMISI ends on a node with no board ancestor (resolves back to its own screen via the enclosing section).",
-      "Screen FRAME comes from a frame literally named 'Frame' — no stable screen_id can be derived (standard #3).",
-      "Screen FRAME_2117130857 comes from a frame literally named 'Frame 2117130857' — no stable screen_id can be derived (standard #3).",
-      "Screen FRAME_2117130924 comes from a frame literally named 'Frame 2117130924' — no stable screen_id can be derived (standard #3).",
-      "Screen FRAME_2117130928 comes from a frame literally named 'Frame 2117130928' — no stable screen_id can be derived (standard #3).",
-      "Screen FRAME_2117130931 comes from a frame literally named 'Frame 2117130931' — no stable screen_id can be derived (standard #3).",
-      "Screen NATIVE_MONTH_PICKER collapses 2 frames, but none of its qualifiers (Native OS Month Picker, Native Month Picker) read as states — these may be distinct screens sharing a generic base name; confirm with design (screen-vs-state unresolved).",
-      "Screen OVERLAY collapses 8 frames, but none of its qualifiers (For Level 1, For Level 2) read as states — these may be distinct screens sharing a generic base name; confirm with design (screen-vs-state unresolved).",
-      "Screen COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED appears in the design but no connector reaches it.",
-      "Screen DEAD_END_SCREEN appears in the design but no connector reaches it.",
-      "Screen DETAIL_KOMISI_PAGE appears in the design but no connector reaches it.",
-      "Screen FRAME_2117130857 appears in the design but no connector reaches it.",
-      "Screen FRAME_2117130924 appears in the design but no connector reaches it.",
-      "Screen FRAME_2117130928 appears in the design but no connector reaches it.",
-      "Screen HERO_IMAGE appears in the design but no connector reaches it.",
-      "Screen HOME_PERINTIS appears in the design but no connector reaches it.",
-      "Screen LEVEL_1 appears in the design but no connector reaches it.",
-      "Screen LEVEL_2 appears in the design but no connector reaches it.",
-      "Screen LOADING appears in the design but no connector reaches it.",
-      "Screen NO_INTERNET appears in the design but no connector reaches it.",
-      "Screen QRIS_SUSPENDED appears in the design but no connector reaches it.",
-      "Screen REFRESH_ERROR appears in the design but no connector reaches it.",
-      "Screen SHARE_TRAY appears in the design but no connector reaches it.",
-      "Screen SHARE_TRAY_IOS appears in the design but no connector reaches it.",
-      "Screen SKEMA_KOMISI appears in the design but no connector reaches it.",
-      "Screen SUCCESS_SCREEN appears in the design but no connector reaches it.",
-      "Screen TIPS_TRICKS appears in the design but no connector reaches it."
-    ]
+  {
+   "field": "ui_flow",
+   "reason": "All 179 prototype-reaction destinations point outside this export (component-library wiring); connectors are the only flow source on this board.",
+   "action": "None — informational.",
+   "severity": "INFO"
   },
-  "screens": [
+  {
+   "field": "screens",
+   "reason": "Screens with non-descriptive ids (default layer names, no label chip): FRAME, FRAME_2117130600, FRAME_2117130771, FRAME_2117130857, FRAME_2117130875, FRAME_2117130883, FRAME_2117130928, FRAME_2117130931",
+   "action": "Name the frame or add a screen label chip in Figma.",
+   "severity": "INFO"
+  },
+  {
+   "field": "screens",
+   "reason": "1 board nodes excluded: pasted reference screenshots without label chips and unlabeled loose draft clusters.",
+   "action": "Label them with screen chips if they are real screens.",
+   "severity": "INFO"
+  }
+ ],
+ "app": "gopay-merchant",
+ "design_source": {
+  "file_name": "GoPay Affiliate",
+  "page_name": "     ↪ Main Flow: Iteration 3",
+  "scope": "page",
+  "exported_at": "2026-08-21T04:33:09.598Z",
+  "max_depth": 30,
+  "node_count": 9977,
+  "truncated_count": 0,
+  "has_geometry": true,
+  "truncated_nodes": []
+ },
+ "visual_analysis_scratchpad": "Spatial-first read: 11 board groups, 47 screens after collapsing 92 frames (calibrated device frame 360x822). Swim lanes: persona bands (Large banners), flow clusters (Medium banners), row captions as cart-state lanes; scenario sub-sections read as preconditions. 20 navigation edges from 47 connectors; prototype reactions all point outside the export.",
+ "project_context": {
+  "overall_ambiguity_rating": "MEDIUM",
+  "blocking_issues": []
+ },
+ "screens": [
+  {
+   "screen_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE",
+   "screen_name": "Commission Details | Weekly | Status Done",
+   "source_ref": "2482:15226",
+   "source_refs": [
+    "2482:15226"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
     {
-      "screen_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE",
-      "screen_name": "Commission Details | Weekly | Status Done",
-      "source_ref": "2001:24045",
-      "source_refs": [
-        "2001:24045",
-        "2269:63013",
-        "2482:15226"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Disbursed"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE.navigation_24_ic_back_label",
-          "source_ref": "I2001:24087;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE.detail_pencairan_label",
+     "source_ref": "2482:15230",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Detail pencairan",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "screen_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED",
-      "screen_name": "Commission Details | Weekly | Status Scheduled",
-      "source_ref": "2001:24089",
-      "source_refs": [
-        "2001:24089",
-        "2482:15405",
-        "2444:14131",
-        "2269:63057"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Scheduled",
-        "Loading",
-        "Error"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "ERROR",
-        "LOADING",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED.navigation_24_ic_back_label",
-          "source_ref": "I2001:24131;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE.status_selesai_label",
+     "source_ref": "2482:15232",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Status Selesai",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "screen_id": "CONFIRM_ACCOUNT",
-      "screen_name": "Confirm account",
-      "source_ref": "1997:31939",
-      "source_refs": [
-        "1997:31939",
-        "1997:32055",
-        "1997:31997",
-        "1997:32229",
-        "1997:32287",
-        "2571:19061",
-        "2300:66727",
-        "4535:21369",
-        "1997:32171",
-        "1997:32113",
-        "4535:19397"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "ID",
-        "EN",
-        "Scroll View",
-        "If name is really long",
-        "Not eligible to become upliner yet",
-        "Code incorrect / not found"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "LOCALE_VARIANT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "CONFIRM_ACCOUNT.lanjut_btn",
-          "source_ref": "4950:17542",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "Lanjut",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "1997:32356",
-              "destination_node_id": "1997:32285",
-              "destination_screen_id": "CONFIRM_ACCOUNT",
-              "action": "Changes state within CONFIRM_ACCOUNT (to frame 'button/primary') via connector 1997:32356 — same screen, no navigation."
-            },
-            {
-              "trigger": "onTap",
-              "connector_id": "4613:17401",
-              "destination_node_id": "1997:32369",
-              "action": "Points at caption 'Code incorrect / not found' via connector 4613:17401 — fronts no distinct destination screen, unresolved."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.na_ad_dh_label",
-          "source_ref": "2300:66883",
-          "type": "TEXT",
-          "role": "LABEL",
-          "label": "Na**** Ad**** Dh*********",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "Masking Logic:\nReveal first 2 characters of every word name. \nMax two lines. \nIf more than two lines, truncate."
-          ]
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.button_brand_btn",
-          "source_ref": "4950:17761",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2571:19056",
-              "destination_node_id": "1997:32367",
-              "action": "Points at caption 'General (As-Is)' via connector 2571:19056 — fronts no distinct destination screen, unresolved."
-            },
-            {
-              "trigger": "onTap",
-              "connector_id": "2571:16081",
-              "destination_node_id": "1997:32346",
-              "action": "Enters decision 'Does user have GoPay+?' via connector 2571:16081."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.saya_menyetujui_ketentuan_layanan_pemberitahuan_label",
-          "source_ref": "1997:31993",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "Saya menyetujui Ketentuan Layanan & Pemberitahuan Privasi.",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.selection_control_check_box_toggle",
-          "source_ref": "1997:31994",
-          "type": "INSTANCE",
-          "role": "TOGGLE",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.saya_menyetujui_ketentuan_layanan_kebijakan_label",
-          "source_ref": "1997:32282",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "Saya menyetujui Ketentuan Layanan & Kebijakan Privasi.",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.button_primary_btn",
-          "source_ref": "1997:32285",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.saya_sudah_membaca_dan_setuju_label",
-          "source_ref": "4535:19451",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "Saya sudah membaca dan setuju dengan Syarat & Ketentuan & Kebijakan Privasi.",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.08_08_label",
-          "source_ref": "I2297:40651;48:163600",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "08:08",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.multimedia_24_ic_close_pip_label",
-          "source_ref": "I2571:19202;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.navigation_24_ic_back_label",
-          "source_ref": "I4559:17606;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "CONFIRM_ACCOUNT.spinner_label",
-          "source_ref": "I4950:17761;1:2256;1:1305;10358:225141",
-          "type": "ELLIPSE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE.id_pencairan_0000001_label",
+     "source_ref": "2482:15233",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "ID pencairan 00000012345",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "screen_id": "DEAD_END_SCREEN",
-      "screen_name": "Dead-End-Screen",
-      "source_ref": "4776:17512",
-      "source_refs": [
-        "4776:17512"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "If KYC is rejected"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [],
-      "screen_notes": ""
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE.ditambahkan_ke_label",
+     "source_ref": "2482:15235",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ditambahkan ke",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "screen_id": "DETAIL_KOMISI_PAGE",
-      "screen_name": "Detail Komisi Page",
-      "source_ref": "2482:15269",
-      "source_refs": [
-        "2482:15269"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [],
-      "screen_notes": ""
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE.gopay_label",
+     "source_ref": "2482:15237",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "GoPay",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "screen_id": "DOWNLINERS",
-      "screen_name": "Downliners",
-      "source_ref": "2237:60661",
-      "source_refs": [
-        "2237:60661",
-        "2001:36364",
-        "2001:36450",
-        "2269:61747",
-        "2237:60846",
-        "2097:23738",
-        "2097:24022",
-        "2001:28118",
-        "2237:39380",
-        "2237:39491"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Filled",
-        "Empty",
-        "Page Loading",
-        "Empty (No Downliners)"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "EMPTY",
-        "LOADING"
-      ],
-      "elements": [
-        {
-          "element_id": "DOWNLINERS.toggle_button_icon_btn",
-          "source_ref": "2237:60667",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2269:61446",
-              "destination_node_id": "2237:60846",
-              "destination_screen_id": "DOWNLINERS",
-              "action": "Changes state within DOWNLINERS (to frame 'Downliners') via connector 2269:61446 — same screen, no navigation."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "DOWNLINERS.akumulasi_pendapatan_dari_tim_label",
-          "source_ref": "2237:60670",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "Akumulasi pendapatan dari tim:",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2269:62233",
-              "destination_node_id": "2269:67971",
-              "destination_screen_id": "NATIVE_MONTH_PICKER",
-              "action": "Navigates to NATIVE_MONTH_PICKER via connector 2269:62233."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "DOWNLINERS.gimana_caranya_ajak_teman_btn",
-          "source_ref": "2269:62026",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "Gimana caranya ajak teman?",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2001:36490",
-              "destination_node_id": "2001:27264",
-              "destination_screen_id": "OVERLAY",
-              "action": "Navigates to OVERLAY via connector 2001:36490."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "DOWNLINERS.pilih_tanggal_tab",
-          "source_ref": "2001:36463",
-          "type": "INSTANCE",
-          "role": "TAB",
-          "label": "Pilih tanggal",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2001:37371",
-              "destination_node_id": "2001:37106",
-              "destination_screen_id": "SHARE_TRAY_ANDROID",
-              "action": "Navigates to SHARE_TRAY_ANDROID via connector 2001:37371."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "DOWNLINERS.navigation_24_ic_back_label",
-          "source_ref": "I2001:28202;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": "\"Total: 10\" \nRefers to people in my team REGARDLESS if they are generating commissions in that month or not.\n\nSort by: \nhighest Spiker Delivered\n\nWhat to show?\nOnly show downliners who ARE peforming (not 0). Hide remaining.\nIf none are performing: show min. 3 users, based on most recent recruit.\nApply this same logic to Home widget\n\nSort default based on...\n\nKalo chips tanggalnya berubah, bawahnya jg berubah\n\ntpi list bawah nunjukin SEMUA timnya, atau hanya yg produktif aja di waktu itu?\n\nassuming their team keeps growing, harusnya kalo mencet 6 bulan terakhir"
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE.payment_method_label",
+     "source_ref": "2482:15238",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "method",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "screen_id": "FRAME",
-      "screen_name": "Frame",
-      "source_ref": "4559:18436",
-      "source_refs": [
-        "4559:18436"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [
-        {
-          "element_id": "FRAME.take_e_ktp_photo_btn",
-          "source_ref": "4559:18445",
-          "type": "FRAME",
-          "role": "BUTTON",
-          "label": "Take e-KTP Photo",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "FRAME.default_gopay_spot_hero_take_label",
-          "source_ref": "4559:18473",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "FRAME.i_have_my_e_ktp_btn",
-          "source_ref": "4559:18514",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "I have my e-KTP ready",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "FRAME.left_side_label",
-          "source_ref": "I4559:18454;319:52887;211:579;1967:3193",
-          "type": "GROUP",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "FRAME.status_icons_label",
-          "source_ref": "I4559:18454;319:52887;211:579;2951:4499",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE.no_akun_67890_label",
+     "source_ref": "2482:15239",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "No. akun ******67890",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "screen_id": "FRAME_2117130857",
-      "screen_name": "Frame 2117130857",
-      "source_ref": "2001:26717",
-      "source_refs": [
-        "2001:26717"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [
-        {
-          "element_id": "FRAME_2117130857.multimedia_24_ic_close_pip_label",
-          "source_ref": "I2001:27002;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "FRAME_2117130924",
-      "screen_name": "Frame 2117130924",
-      "source_ref": "2571:16086",
-      "source_refs": [
-        "2571:16086"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Scroll View"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "FRAME_2117130924.08_08_label",
-          "source_ref": "2571:16947",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "08:08",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "FRAME_2117130924.multimedia_24_ic_close_pip_label",
-          "source_ref": "I2571:19026;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "FRAME_2117130928",
-      "screen_name": "Frame 2117130928",
-      "source_ref": "2588:17100",
-      "source_refs": [
-        "2588:17100"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [
-        {
-          "element_id": "FRAME_2117130928.multimedia_24_ic_close_pip_label",
-          "source_ref": "I2588:17289;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "FRAME_2117130931",
-      "screen_name": "Frame 2117130931",
-      "source_ref": "3959:42581",
-      "source_refs": [
-        "3959:42581"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [
-        {
-          "element_id": "FRAME_2117130931.tips_cara_jualan_label",
-          "source_ref": "3959:42596",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "Tips Cara Jualan",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "3959:42867",
-              "destination_node_id": "3959:42543",
-              "destination_screen_id": "OVERLAY",
-              "action": "Navigates to OVERLAY via connector 3959:42867."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "FRAME_2117130931.multimedia_24_ic_close_pip_label",
-          "source_ref": "I3959:42602;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "HERO_IMAGE",
-      "screen_name": "Hero Image",
-      "source_ref": "2482:14499",
-      "source_refs": [
-        "2482:14499"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "HOME_PERINTIS",
-      "screen_name": "Home | Perintis",
-      "source_ref": "2001:22870",
-      "source_refs": [
-        "2001:22870",
-        "2001:23154",
-        "2255:67352",
-        "2080:18469",
-        "2097:21081"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Empty State",
-        "Default State"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "EMPTY"
-      ],
-      "elements": [
-        {
-          "element_id": "HOME_PERINTIS.level_1_perintis_label",
-          "source_ref": "4530:18883",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "Level 1: PERINTIS",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "Cair setiap hari Rabu di minggu berikutnya."
-          ]
-        },
-        {
-          "element_id": "HOME_PERINTIS.performa_minggu_ini_input",
-          "source_ref": "2097:21960",
-          "type": "INSTANCE",
-          "role": "INPUT",
-          "label": "Performa Minggu Ini",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "Spiker yang telah dipakai bertransaksi 15 hari dalam sebulan.",
-            "If Spiker Delivered reached 30/Week = \nDisplay max number at 30\nThis info will be in T&C"
-          ]
-        },
-        {
-          "element_id": "HOME_PERINTIS.level_saya_label",
-          "source_ref": "2001:39714",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "Level Saya",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "Show motivational copy at 50% onwards (aka 10 and above)"
-          ]
-        },
-        {
-          "element_id": "HOME_PERINTIS.riwayat_btn",
-          "source_ref": "2255:67386",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "Riwayat",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "Only Riwayat button can be directed to actual page\n\nTool tip buttons can still be revealed.\n\nEverything else, show the suspended dialog."
-          ]
-        }
-      ],
-      "screen_notes": "Only appears when Spiker Dipesan = 0\n\nJumlah Spiker produktif dari rekrutan anggota tim Anda"
-    },
-    {
-      "screen_id": "LEVEL_1",
-      "screen_name": "Level 1",
-      "source_ref": "2001:28247",
-      "source_refs": [
-        "2001:28247"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [
-        {
-          "element_id": "LEVEL_1.multimedia_24_ic_close_pip_label",
-          "source_ref": "I2001:28532;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": "“Ayo tinggal x lagi” \nOnly appears when..."
-    },
-    {
-      "screen_id": "LEVEL_2",
-      "screen_name": "Level 2",
-      "source_ref": "2001:28535",
-      "source_refs": [
-        "2001:28535"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [
-        {
-          "element_id": "LEVEL_2.multimedia_24_ic_close_pip_label",
-          "source_ref": "I2001:28864;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "LINK_GOPAY_SCREEN",
-      "screen_name": "Link GoPay screen",
-      "source_ref": "4559:19051",
-      "source_refs": [
-        "4559:19051"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [
-        {
-          "element_id": "LINK_GOPAY_SCREEN.hubungkan_dengan_gopay_plus_btn",
-          "source_ref": "4559:19093",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "Hubungkan dengan GoPay Plus",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "4570:17381",
-              "destination_node_id": "4559:19221",
-              "action": "Points at caption 'SEE MORE IN \\u20281KYC FIGMA' via connector 4570:17381 — fronts no distinct destination screen, unresolved."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "LINK_GOPAY_SCREEN.selectioncontrolcheckbox_toggle",
-          "source_ref": "4559:19091",
-          "type": "INSTANCE",
-          "role": "TOGGLE",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "LOADING",
-      "screen_name": "Loading",
-      "source_ref": "2300:65186",
-      "source_refs": [
-        "2300:65186",
-        "2314:63199",
-        "2300:63643"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Scroll View with Filter Applied",
-        "Scroll View",
-        "Scroll View with Pagination Load"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "LOADING.navigation_24_ic_back_label",
-          "source_ref": "I2300:63970;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "MERCHANT_PERFORMANCE",
-      "screen_name": "Merchant Performance",
-      "source_ref": "2001:28871",
-      "source_refs": [
-        "2001:28871",
-        "2300:64232",
-        "2300:62612",
-        "2300:66062",
-        "3978:43368",
-        "3965:43004"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Initial Page Loader",
-        "Empty State"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "EMPTY",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "MERCHANT_PERFORMANCE.navigation_24_ic_back_label",
-          "source_ref": "I2001:28959;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "NATIVE_MONTH_PICKER",
-      "screen_name": "Native Month Picker",
-      "source_ref": "2269:67971",
-      "source_refs": [
-        "2269:67971",
-        "2001:23438"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Native OS Month Picker",
-        "Native Month Picker"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "NATIVE_MONTH_PICKER.image_29_label",
-          "source_ref": "2269:66683",
-          "type": "RECTANGLE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2269:67335",
-              "destination_node_id": "2001:23915",
-              "destination_screen_id": "RIWAYAT_KOMISI",
-              "action": "Navigates to RIWAYAT_KOMISI via connector 2269:67335."
-            }
-          ],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "NO_INTERNET",
-      "screen_name": "no-internet",
-      "source_ref": "5053:19295",
-      "source_refs": [
-        "5053:19295"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "OVERLAY",
-      "screen_name": "Overlay",
-      "source_ref": "2001:28993",
-      "source_refs": [
-        "2001:28993",
-        "3959:42338",
-        "4613:17406",
-        "2300:66912",
-        "2001:28961",
-        "2001:25920",
-        "2001:25143",
-        "2001:27259"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "For Level 1",
-        "For Level 2"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "OVERLAY.terapkan_btn",
-          "source_ref": "4950:17905",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "Terapkan",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2300:65927",
-              "destination_node_id": "2300:64232",
-              "destination_screen_id": "MERCHANT_PERFORMANCE",
-              "action": "Navigates to MERCHANT_PERFORMANCE via connector 2300:65927."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "OVERLAY.merchant_terbaru_default_label",
-          "source_ref": "2001:28973",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "Merchant Terbaru (Default)",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "OVERLAY.semua_merchant_default_label",
-          "source_ref": "2001:28984",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "Semua Merchant (Default)",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "OVERLAY.selection_control_radio_toggle",
-          "source_ref": "I2001:28974;564:3682;2560:4324",
-          "type": "INSTANCE",
-          "role": "TOGGLE",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": "⭐\n‘Oke’ dismisses the dialog, re-calls API\n\n⭐\n‘Coba lagi’ automatically dismisses the dialog and retries calling the API\n\nSort by: \nhighest Spiker Delivered\n\nWhat to show?\nOnly show downliners who ARE peforming (not 0). Hide remaining.\nIf NONE are performing: show min. 3 users, based on most recent recruit."
-    },
-    {
-      "screen_id": "QRIS_SUSPENDED",
-      "screen_name": "qris-suspended",
-      "source_ref": "2255:67285",
-      "source_refs": [
-        "2255:67285"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "REFRESH_ERROR",
-      "screen_name": "refresh-error",
-      "source_ref": "5053:19284",
-      "source_refs": [
-        "5053:19284"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "RIWAYAT_KOMISI",
-      "screen_name": "Riwayat Komisi",
-      "source_ref": "2001:37108",
-      "source_refs": [
-        "2001:37108",
-        "2269:67342",
-        "2001:23440",
-        "2269:62243",
-        "2269:62556",
-        "2001:23915",
-        "2269:66953",
-        "2269:62380",
-        "2269:62834",
-        "2269:62724",
-        "2269:62347",
-        "2269:62490"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Scroll View with Pagination Load",
-        "Last 3 Months",
-        "Loading",
-        "If No Activity",
-        "Custom Date"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "LOADING",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "RIWAYAT_KOMISI.16_apr_2026_label",
-          "source_ref": "2001:23508",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "16 Apr 2026",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2001:24088",
-              "destination_node_id": "2001:24045",
-              "destination_screen_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE",
-              "action": "Navigates to COMMISSION_DETAILS_WEEKLY_STATUS_DONE via connector 2001:24088."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "RIWAYAT_KOMISI.mei_2026_btn",
-          "source_ref": "4813:19214",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "Mei 2026",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "Month picker is part of Sticky header"
-          ]
-        },
-        {
-          "element_id": "RIWAYAT_KOMISI.multimedia_40_ic_loading_label",
-          "source_ref": "2269:67901",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "If loading"
-          ]
-        },
-        {
-          "element_id": "RIWAYAT_KOMISI.pilih_tanggal_tab",
-          "source_ref": "2269:62570",
-          "type": "INSTANCE",
-          "role": "TAB",
-          "label": "Pilih tanggal",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2269:62987",
-              "destination_node_id": "2269:62240",
-              "action": "Connector 2269:62987 has no resolvable destination."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "RIWAYAT_KOMISI.5_feb_26_5_mar_label",
-          "source_ref": "2269:62406",
-          "type": "TEXT",
-          "role": "LABEL",
-          "label": "5 Feb 26 - 5 Mar 26",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2269:62989",
-              "destination_node_id": "2269:62242",
-              "destination_screen_id": "SHARE_TRAY_ANDROID",
-              "action": "Navigates to SHARE_TRAY_ANDROID via connector 2269:62989."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "RIWAYAT_KOMISI.navigation_24_ic_back_label",
-          "source_ref": "I2001:23442;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": "“Akan Datang” section:\nonly appears under “current month”\nNominal= exclude from Akumulasi Pendapatan IF it’s for next month.\n\n“Akan Datang” section:\nonly appears under “1 Bulan” filter selection.\n\nSticky Header\n\nPagination:\nLoads every 10"
-    },
-    {
-      "screen_id": "SHARE_TRAY",
-      "screen_name": "Share Tray",
-      "source_ref": "2001:27008",
-      "source_refs": [
-        "2001:27008"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "SHARE_TRAY_ANDROID",
-      "screen_name": "Share Tray | Android",
-      "source_ref": "2001:27063",
-      "source_refs": [
-        "2001:27063",
-        "2001:27069",
-        "2001:37106",
-        "2269:62241"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Custom Date"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "SHARE_TRAY_ANDROID.ok_label",
-          "source_ref": "2269:62242",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "OK",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2269:62988",
-              "destination_node_id": "2269:62380",
-              "destination_screen_id": "RIWAYAT_KOMISI",
-              "action": "Navigates to RIWAYAT_KOMISI via connector 2269:62988."
-            }
-          ],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "SHARE_TRAY_IOS",
-      "screen_name": "Share Tray | iOS",
-      "source_ref": "2001:27015",
-      "source_refs": [
-        "2001:27015"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "SKEMA_KOMISI",
-      "screen_name": "Skema Komisi",
-      "source_ref": "2001:24802",
-      "source_refs": [
-        "2001:24802"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Scroll View"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "SKEMA_KOMISI.level_1_perintis_tab",
-          "source_ref": "2001:25125",
-          "type": "FRAME",
-          "role": "TAB",
-          "label": "Level 1: Perintis",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "Tab is sticky after user scrolls down beyond “Cara dapat komisi:”"
-          ]
-        },
-        {
-          "element_id": "SKEMA_KOMISI.level_2_panutan_label",
-          "source_ref": "2001:24900",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "Level 2: Panutan",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "SKEMA_KOMISI.navigation_24_ic_back_label",
-          "source_ref": "I2001:24872;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "SKEMA_KOMISI_PERINTIS",
-      "screen_name": "Skema Komisi | Perintis",
-      "source_ref": "2001:24143",
-      "source_refs": [
-        "2001:24143",
-        "2001:24477"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Default"
-      ],
-      "state_kinds": [
-        "DEFAULT"
-      ],
-      "elements": [
-        {
-          "element_id": "SKEMA_KOMISI_PERINTIS.bagaimana_caranya_label",
-          "source_ref": "2001:24630",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "Bagaimana caranya?",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2001:25915",
-              "destination_node_id": "2001:25148",
-              "destination_screen_id": "OVERLAY",
-              "action": "Navigates to OVERLAY via connector 2001:25915."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "SKEMA_KOMISI_PERINTIS.level_2_panutan_label",
-          "source_ref": "2001:24240",
-          "type": "FRAME",
-          "role": "LABEL",
-          "label": "Level 2: Panutan",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "SKEMA_KOMISI_PERINTIS.navigation_24_ic_back_label",
-          "source_ref": "I2001:24212;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "SUCCESS_SCREEN",
-      "screen_name": "success-screen",
-      "source_ref": "4732:43801",
-      "source_refs": [
-        "4732:43801"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "If KYC is still in progress"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "SUCCESS_SCREEN.08_08_label",
-          "source_ref": "4732:43925",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "08:08",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "Back to Welcome Page"
-          ]
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "TECHNICAL_ERROR",
-      "screen_name": "technical error",
-      "source_ref": "5055:17994",
-      "source_refs": [
-        "5055:17994",
-        "5055:17857"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "General (As-Is)"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "TIPS_TRICKS",
-      "screen_name": "Tips & Tricks",
-      "source_ref": "2001:28996",
-      "source_refs": [
-        "2001:28996"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": false,
-      "screen_states": [
-        "Tips jualan"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "OTHER"
-      ],
-      "elements": [
-        {
-          "element_id": "TIPS_TRICKS.navigation_24_ic_back_label",
-          "source_ref": "I2001:29001;1335:27681;1394:28489;79:5156;79:4353",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
-    },
-    {
-      "screen_id": "WELCOME_PAGE",
-      "screen_name": "Welcome Page",
-      "source_ref": "2001:38107",
-      "source_refs": [
-        "2001:38107",
-        "2571:14710",
-        "1997:30262"
-      ],
-      "node_class": "SCREEN",
-      "classified_by": "GEOMETRY",
-      "entry_point": true,
-      "screen_states": [
-        "Loading"
-      ],
-      "state_kinds": [
-        "DEFAULT",
-        "LOADING"
-      ],
-      "elements": [
-        {
-          "element_id": "WELCOME_PAGE.daftar_program_affiliate_btn",
-          "source_ref": "2001:38963",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "Daftar Program Affiliate",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "2571:16075",
-              "destination_node_id": "2571:14712",
-              "destination_screen_id": "WELCOME_PAGE",
-              "action": "Changes state within WELCOME_PAGE (to frame 'Group 3127659') via connector 2571:16075 — same screen, no navigation."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "WELCOME_PAGE.gma_asset_gopay_affiliate_tool_label",
-          "source_ref": "2272:40743",
-          "type": "RECTANGLE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": [
-            "KV asset from Marketing"
-          ]
-        },
-        {
-          "element_id": "WELCOME_PAGE.button_brand_btn",
-          "source_ref": "2571:15567",
-          "type": "INSTANCE",
-          "role": "BUTTON",
-          "label": "",
-          "interactions": [
-            {
-              "trigger": "onTap",
-              "connector_id": "4570:17396",
-              "destination_node_id": "1997:31939",
-              "destination_screen_id": "CONFIRM_ACCOUNT",
-              "action": "Navigates to CONFIRM_ACCOUNT via connector 4570:17396."
-            }
-          ],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "WELCOME_PAGE.08_08_label",
-          "source_ref": "I1997:30327;48:163600",
-          "type": "INSTANCE",
-          "role": "LABEL",
-          "label": "08:08",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        },
-        {
-          "element_id": "WELCOME_PAGE.spinner_label",
-          "source_ref": "I2571:15567;1:2172;1:1265;3161:427034",
-          "type": "ELLIPSE",
-          "role": "LABEL",
-          "label": "",
-          "interactions": [],
-          "validations_and_edge_cases": []
-        }
-      ],
-      "screen_notes": ""
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE.nama_pemilik_p_label",
+     "source_ref": "2482:15240",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Nama pemilik P******* O*******",
+     "interactions": [],
+     "validations_and_edge_cases": []
     }
-  ],
-  "ui_flow": [
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi — Pagination: loads incrementally (every 10 items)"
+  },
+  {
+   "screen_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED",
+   "screen_name": "Commission Details | Weekly | Status Scheduled",
+   "source_ref": "2001:24089",
+   "source_refs": [
+    "2001:24089",
+    "2482:15405",
+    "2444:14131"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Riwayat Komisi — Scheduled",
+    "Riwayat Komisi — Loading",
+    "Riwayat Komisi — Error"
+   ],
+   "state_kinds": [
+    "ERROR",
+    "LOADING",
+    "OTHER"
+   ],
+   "elements": [
     {
-      "from_screen_id": "CONFIRM_ACCOUNT",
-      "to_screen_id": "TECHNICAL_ERROR",
-      "condition": "If NOT successful",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR_INFERRED",
-      "confidence": "INFERRED",
-      "source_ref": "2571:19056"
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED.withdrawal_details_title_label",
+     "source_ref": "2001:24093",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Detail pencairan",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "from_screen_id": "WELCOME_PAGE",
-      "to_screen_id": "CONFIRM_ACCOUNT",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "4570:17396"
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED.withdrawal_destination_label",
+     "source_ref": "2001:24098",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ditambahkan ke",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "from_screen_id": "CONFIRM_ACCOUNT",
-      "to_screen_id": "FRAME",
-      "condition": "Does user have GoPay+? — NO",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR_CONTRACTED",
-      "confidence": "INFERRED",
-      "source_ref": "1997:32350",
-      "decision_node_id": "1997:32345",
-      "decision_question": "Does user have GoPay+?",
-      "decision_value": "NO"
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED.withdrawal_method_label",
+     "source_ref": "2001:24100",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "GoPay",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "from_screen_id": "CONFIRM_ACCOUNT",
-      "to_screen_id": "LINK_GOPAY_SCREEN",
-      "condition": "Does user have GoPay+? — YES",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR_CONTRACTED",
-      "confidence": "INFERRED",
-      "source_ref": "1997:32347",
-      "decision_node_id": "1997:32345",
-      "decision_question": "Does user have GoPay+?",
-      "decision_value": "YES"
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED.received_spiker_commission_line_label",
+     "source_ref": "2482:14916",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Komisi Spiker Diterima",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "from_screen_id": "NATIVE_MONTH_PICKER",
-      "to_screen_id": "RIWAYAT_KOMISI",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "2269:67335"
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED.received_spiker_calculation_label",
+     "source_ref": "2482:14917",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "52 x Rp25.000",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "from_screen_id": "RIWAYAT_KOMISI",
-      "to_screen_id": "COMMISSION_DETAILS_WEEKLY_STATUS_DONE",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "2001:24088"
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED.received_spiker_amount_label",
+     "source_ref": "2482:14918",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Rp780.000",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "from_screen_id": "SKEMA_KOMISI_PERINTIS",
-      "to_screen_id": "OVERLAY",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "2001:25915"
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED.total_commission_label",
+     "source_ref": "2482:14932",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Total",
+     "interactions": [],
+     "validations_and_edge_cases": []
     },
     {
-      "from_screen_id": "OVERLAY",
-      "to_screen_id": "MERCHANT_PERFORMANCE",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "2300:65927",
-      "edge_direction_source": "ARROWHEAD_REVERSED"
-    },
-    {
-      "from_screen_id": "DOWNLINERS",
-      "to_screen_id": "NATIVE_MONTH_PICKER",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "2269:62233"
-    },
-    {
-      "from_screen_id": "DOWNLINERS",
-      "to_screen_id": "OVERLAY",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "2001:36490"
-    },
-    {
-      "from_screen_id": "FRAME_2117130931",
-      "to_screen_id": "OVERLAY",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "3959:42867",
-      "edge_direction_source": "ARROWHEAD_REVERSED"
-    },
-    {
-      "from_screen_id": "DOWNLINERS",
-      "to_screen_id": "SHARE_TRAY_ANDROID",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "2001:37371"
-    },
-    {
-      "from_screen_id": "SHARE_TRAY_ANDROID",
-      "to_screen_id": "RIWAYAT_KOMISI",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "2269:62988"
-    },
-    {
-      "from_screen_id": "RIWAYAT_KOMISI",
-      "to_screen_id": "SHARE_TRAY_ANDROID",
-      "condition": "",
-      "navigation_kind": "NAVIGATE",
-      "edge_source": "CONNECTOR",
-      "confidence": "EXPLICIT",
-      "source_ref": "2269:62989"
+     "element_id": "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED.total_commission_amount_label",
+     "source_ref": "2482:14934",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Rp523.000",
+     "interactions": [],
+     "validations_and_edge_cases": []
     }
-  ]
+   ],
+   "screen_notes": "Lane(s): HOME DASHBOARD | LEVEL 2"
+  },
+  {
+   "screen_id": "CONFIRM_ACCOUNT",
+   "screen_name": "Confirm account",
+   "source_ref": "1997:31939",
+   "source_refs": [
+    "1997:31939",
+    "1997:32055",
+    "1997:31997",
+    "1997:32229",
+    "1997:32287",
+    "1997:32171",
+    "1997:32113"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Not eligible to become upliner yet",
+    "Code incorrect / not found"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "CONFIRM_ACCOUNT.button_brand_btn",
+     "source_ref": "4950:17761",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Button-Brand",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to GENERAL_AS_IS when If NOT successful (connector 2571:19056)",
+       "connector_id": "2571:19056",
+       "destination_node_id": "5055:17994",
+       "destination_screen_id": "GENERAL_AS_IS"
+      },
+      {
+       "trigger": "tap",
+       "action": "Navigates to FRAME when Does user have GoPay+? — NO (connector 1997:32350)",
+       "connector_id": "1997:32350",
+       "destination_node_id": "4559:18436",
+       "destination_screen_id": "FRAME"
+      },
+      {
+       "trigger": "tap",
+       "action": "Navigates to LINK_GOPAY_SCREEN when Does user have GoPay+? — YES (connector 1997:32347)",
+       "connector_id": "1997:32347",
+       "destination_node_id": "4559:19051",
+       "destination_screen_id": "LINK_GOPAY_SCREEN"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT.mentor_code_input",
+     "source_ref": "1997:31971",
+     "type": "INSTANCE",
+     "role": "INPUT",
+     "label": "Masukkan kode",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Accepts mentor affiliate code (e.g., MARSELA1194)",
+      "Only valid during signup flow, cannot be entered later"
+     ]
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT.tos_agreement_checkbox_toggle",
+     "source_ref": "1997:31994",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "Saya menyetujui Ketentuan Layanan & Pemberitahuan Privasi",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Must be checked to enable continue button",
+      "Toggles enabled/disabled state of Lanjut button"
+     ]
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT.continue_activation_btn",
+     "source_ref": "4950:17542",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Lanjut",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Submits account confirmation form",
+      "Only enabled when TOS checkbox is checked",
+      "Validates mentor code if provided"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): Affiliate Activation — Merchant account info (GoPay number, ID name) must be verified before proceeding — Mentor code is optional but validates if provided — TOS agreement is mandatory to proceed"
+  },
+  {
+   "screen_id": "CONFIRM_ACCOUNT_EN",
+   "screen_name": "Confirm account / EN",
+   "source_ref": "4535:19397",
+   "source_refs": [
+    "4535:19397"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "CONFIRM_ACCOUNT_EN.3_langkah_buat_aktifin_program_gopay_aff_label",
+     "source_ref": "4535:21136",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "3 langkah buat aktifin program GoPay Affiliate",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT_EN.ecert_will_be_issued_by_digisign_psre_su_label",
+     "source_ref": "4535:21274",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "e-Cert will be issued by Digisign (PSrE supervised by Komdig",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT_EN.selection_controlcheck_box_toggle",
+     "source_ref": "4535:19452",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "selection_control/check_box",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT_EN.saya_sudah_membaca_dan_setuju_dengan_sya_label",
+     "source_ref": "4535:19453",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Saya sudah membaca dan setuju dengan Syarat & Ketentuan & Ke",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT_EN.lanjut_btn",
+     "source_ref": "4535:19454",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Lanjut",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": ""
+  },
+  {
+   "screen_id": "CONFIRM_ACCOUNT_ID",
+   "screen_name": "Confirm account / ID",
+   "source_ref": "4535:21369",
+   "source_refs": [
+    "4535:21369"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "CONFIRM_ACCOUNT_ID.lanjut_btn",
+     "source_ref": "4535:21662",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Lanjut",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to SEE_MORE_IN_1KYC_FIGMA (connector 4570:17391)",
+       "connector_id": "4570:17391",
+       "destination_node_id": "4559:17871",
+       "destination_screen_id": "SEE_MORE_IN_1KYC_FIGMA"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT_ID.activation_steps_title_label",
+     "source_ref": "4535:21912",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "3 langkah buat mengaktifkan program GoPay Affiliate",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT_ID.tnc_agreement_label",
+     "source_ref": "4535:21661",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Saya sudah membaca dan setuju dengan Syarat & Ketentuan & Ke",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "CONFIRM_ACCOUNT_ID.tnc_agreement_checkbox_toggle",
+     "source_ref": "4535:21660",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "Agreement checkbox",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): 1KYC  |  NON-Progressive Flow (Screens are only for reference, not owned by MSME Team)"
+  },
+  {
+   "screen_id": "DEFAULT_STATE",
+   "screen_name": "Default State",
+   "source_ref": "2001:23154",
+   "source_refs": [
+    "2001:23154"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "HOME DASHBOARD"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "DEFAULT_STATE.ajak_merchant_pakai_gopay_spiker_dan_dap_label",
+     "source_ref": "2001:23164",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ajak merchant pakai GoPay Spiker dan dapatkan komisi minggua",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "DEFAULT_STATE.level_1_perintis_komisi_mingg_ctrl",
+     "source_ref": "4530:18883",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Level 1: PERINTIS Komisi minggu ini: Rp150.000 20 Apr – 26 Apr 26",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "DEFAULT_STATE.tips_cara_jualan_merchant_saya_ctrl",
+     "source_ref": "3869:42719",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Tips Cara Jualan Merchant Saya Skema Komisi Gabung Grup WA",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "DEFAULT_STATE.performa_minggu_ini_6_spiker_d_ctrl",
+     "source_ref": "2097:21960",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Performa Minggu Ini 6 Spiker Dipesan 4 Spiker Diterima @Rp25.000",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "DEFAULT_STATE.level_display_label",
+     "source_ref": "I2001:39714;2001:39486",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Level Saya",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "DEFAULT_STATE.level_1_perintis_label",
+     "source_ref": "I2001:39714;2001:39489",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Level 1: PERINTIS",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "DEFAULT_STATE.20_gopay_spiker_diterima_label",
+     "source_ref": "I2001:39714;2001:39497",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "20 GoPay Spiker Diterima",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "DEFAULT_STATE.ayo_tinggal_6_lagi_label",
+     "source_ref": "I2001:39714;2001:39506",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ayo, tinggal 6 lagi!",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi — Display limit: max value capped at 30"
+  },
+  {
+   "screen_id": "DISBURSED",
+   "screen_name": "Disbursed",
+   "source_ref": "2001:24045",
+   "source_refs": [
+    "2001:24045",
+    "2269:63013"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Riwayat Komisi"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "DISBURSED.disbursement_status_label",
+     "source_ref": "2001:24051",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Status Selesai",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Shows completion status of fund transfer",
+      "Indicates funds successfully received"
+     ]
+    },
+    {
+     "element_id": "DISBURSED.disbursement_id_label",
+     "source_ref": "2001:24052",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "ID pencairan 00000012345",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Unique identifier for tracking specific disbursement"
+     ]
+    },
+    {
+     "element_id": "DISBURSED.disbursement_method_label",
+     "source_ref": "2001:24056",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "GoPay",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Shows destination payment method",
+      "Confirms funds added to GoPay account"
+     ]
+    },
+    {
+     "element_id": "DISBURSED.account_number_masked_label",
+     "source_ref": "2001:24058",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "No. akun ******67890",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Partially masked account number for privacy",
+      "Shows last 5 digits"
+     ]
+    },
+    {
+     "element_id": "DISBURSED.account_owner_name_masked_label",
+     "source_ref": "2001:24059",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Nama pemilik P******* O*******",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Account owner name masked for privacy"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): HOME DASHBOARD | LEVEL 2 | Riwayat Komisi — Pagination loads every 10 disbursements"
+  },
+  {
+   "screen_id": "DOWNLINERS",
+   "screen_name": "Downliners",
+   "source_ref": "2237:60661",
+   "source_refs": [
+    "2237:60661",
+    "2237:60846",
+    "2269:61747",
+    "2097:23738",
+    "2097:24022",
+    "2001:28118",
+    "2237:39380",
+    "2237:39491"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "My Downliners",
+    "My Downliners — Page Loading",
+    "My Downliners — Empty (No Downliners)"
+   ],
+   "state_kinds": [
+    "EMPTY",
+    "LOADING"
+   ],
+   "elements": [
+    {
+     "element_id": "DOWNLINERS.akumulasi_pendapatan_dari_tim_rp120_000__btn",
+     "source_ref": "2237:60670",
+     "type": "FRAME",
+     "role": "BUTTON",
+     "label": "Akumulasi pendapatan dari tim: Rp120.000 1 Apr - 31 Apr 2026",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to NATIVE_OS_MONTH_PICKER when My Downliners (connector 2269:62233)",
+       "connector_id": "2269:62233",
+       "destination_node_id": "2269:67971",
+       "destination_screen_id": "NATIVE_OS_MONTH_PICKER"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "DOWNLINERS.gimana_caranya_ajak_teman_btn",
+     "source_ref": "2269:62026",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Gimana caranya ajak teman?",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to OVERLAY when My Downliners (connector 2001:36490)",
+       "connector_id": "2001:36490",
+       "destination_node_id": "2001:27259",
+       "destination_screen_id": "OVERLAY"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "DOWNLINERS.month_filter_btn",
+     "source_ref": "4813:19190",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Apr 2026",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Opens month picker for downliner history",
+      "Updates team performance data below"
+     ]
+    },
+    {
+     "element_id": "DOWNLINERS.filter_duration_1month_btn",
+     "source_ref": "2097:23748",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "1 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Active secondary state when selected",
+      "Shows downliner activity for last month"
+     ]
+    },
+    {
+     "element_id": "DOWNLINERS.filter_duration_3months_btn",
+     "source_ref": "2097:23749",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "3 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Active primary state variant",
+      "Shows downliner activity for last 3 months"
+     ]
+    },
+    {
+     "element_id": "DOWNLINERS.filter_duration_6months_btn",
+     "source_ref": "2097:23752",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "6 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Default state variant",
+      "Shows downliner activity for last 6 months"
+     ]
+    },
+    {
+     "element_id": "DOWNLINERS.filter_custom_date_btn",
+     "source_ref": "2097:23753",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Pilih tanggal",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Opens custom date range picker"
+     ]
+    },
+    {
+     "element_id": "DOWNLINERS.accumulated_earnings_downliners_label",
+     "source_ref": "2097:23763",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Rp120.000",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Total earnings from downliners for selected period",
+      "Updates when date filter changes"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): My Downliners — Only shows downliners generating commissions in selected period; if none performing, shows minimum 3 users by most recent activity — Total count includes all team members regardless of commission generation — Sort by highest Spiker Delivered first"
+  },
+  {
+   "screen_id": "EMPTY",
+   "screen_name": "Empty",
+   "source_ref": "2001:36450",
+   "source_refs": [
+    "2001:36450"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "EMPTY.pilih_tanggal_btn",
+     "source_ref": "2001:36463",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Pilih tanggal",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to SHARE_TRAY_ANDROID (connector 2001:37371)",
+       "connector_id": "2001:37371",
+       "destination_node_id": "2001:37106",
+       "destination_screen_id": "SHARE_TRAY_ANDROID"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "EMPTY.filter_one_month_btn",
+     "source_ref": "2001:36458",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "1 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Content updates when chip selection changes"
+     ]
+    },
+    {
+     "element_id": "EMPTY.filter_three_months_btn",
+     "source_ref": "2001:36459",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "3 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Content updates when chip selection changes"
+     ]
+    },
+    {
+     "element_id": "EMPTY.filter_six_months_btn",
+     "source_ref": "2001:36462",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "6 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Content updates when chip selection changes"
+     ]
+    },
+    {
+     "element_id": "EMPTY.accumulation_title_label",
+     "source_ref": "2001:36472",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Akumulasi Pendapatan dari Downliner:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "EMPTY.accumulated_amount_label",
+     "source_ref": "2001:36473",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Rp0",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "EMPTY.team_section_title_label",
+     "source_ref": "2001:36478",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Tim saya:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "EMPTY.team_member_count_label",
+     "source_ref": "2001:36479",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Total Anggota: 0",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "EMPTY.invite_friend_cta_btn",
+     "source_ref": "2001:36483",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Gimana caranya ajak teman?",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): My Downliners — Content updates when date chip selection changes — Show 6-month default period if team is growing"
+  },
+  {
+   "screen_id": "EMPTY_STATE",
+   "screen_name": "Empty State",
+   "source_ref": "2001:22870",
+   "source_refs": [
+    "2001:22870",
+    "2300:66062"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "HOME DASHBOARD",
+    "Merchant Saya"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "EMPTY_STATE.commission_widget_level_label",
+     "source_ref": "4530:18823",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Level 1: PERINTIS",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Displays current affiliate level",
+      "Widget shows weekly commission earned and date range"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): Level 2 | Riwayat Komisi — Empty state only shows for Merchant Saya when total merchants = 0 — Level widget visible in all states"
+  },
+  {
+   "screen_id": "FILLED",
+   "screen_name": "Filled",
+   "source_ref": "2001:36364",
+   "source_refs": [
+    "2001:36364"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "FILLED.info_box_container",
+     "source_ref": "2001:36390",
+     "type": "INSTANCE",
+     "role": "CONTAINER",
+     "label": "Pantau performa downliner Anda! Maksimalkan cuan dan dapatkan +Rp15.000 untuk se",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FILLED.filter_one_month_toggle",
+     "source_ref": "2015:31006",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "1 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FILLED.filter_three_months_toggle",
+     "source_ref": "2015:31005",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "3 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FILLED.filter_six_months_toggle",
+     "source_ref": "2015:31009",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "6 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FILLED.filter_custom_date_toggle",
+     "source_ref": "2015:31010",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "Pilih tanggal",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FILLED.total_accumulated_label",
+     "source_ref": "2001:36386",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Akumulasi Pendapatan dari Downliner:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FILLED.monetary_value_label",
+     "source_ref": "2001:36387",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Rp120.000",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FILLED.tim_saya_label",
+     "source_ref": "2237:39376",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Tim saya:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): My Downliners"
+  },
+  {
+   "screen_id": "FRAME",
+   "screen_name": "Frame",
+   "source_ref": "4559:18436",
+   "source_refs": [
+    "4559:18436"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "FRAME.upgrade_title_label",
+     "source_ref": "4559:18470",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Upgrade to GoPay Plus",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME.kyc_instruction_label",
+     "source_ref": "4559:18472",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Take your e-KTP & selfie",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME.step_ektp_photo_label",
+     "source_ref": "4559:18481",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Take an e-KTP photo",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME.step_selfie_label",
+     "source_ref": "4559:18499",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Take a selfie",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME.ektp_photo_button_btn",
+     "source_ref": "4559:18447",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Take e-KTP Photo",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME.ektp_ready_button_btn",
+     "source_ref": "4559:18514",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "I have my e-KTP ready",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME.bank_supervision_label",
+     "source_ref": "4559:18441",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Supervised by Bank Indonesia",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME.foreigner_question_label",
+     "source_ref": "4559:18449",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Are you a foreigner?",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): 1KYC  |  NON-Progressive Flow (Screens are only for reference, not owned by MSME Team)"
+  },
+  {
+   "screen_id": "FRAME_2117130600",
+   "screen_name": "Frame 2117130600",
+   "source_ref": "2482:15269",
+   "source_refs": [
+    "2482:15269"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "FRAME_2117130600.detail_pencairan_label",
+     "source_ref": "2482:15271",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Detail pencairan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130600.status_terjadwal_label",
+     "source_ref": "2482:15273",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Status Terjadwal",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130600.ditambahkan_ke_label",
+     "source_ref": "2482:15276",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ditambahkan ke",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130600.gopay_label",
+     "source_ref": "2482:15278",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "GoPay",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130600.payment_method_label",
+     "source_ref": "2482:15279",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "method",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130600.no_akun_67890_label",
+     "source_ref": "2482:15280",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "No. akun ******67890",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130600.nama_pemilik_p_label",
+     "source_ref": "2482:15281",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Nama pemilik P******* O*******",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130600.waktu_pencairan_16_a_label",
+     "source_ref": "2482:15282",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Waktu pencairan 16 Apr 2026\n09:00 WIB",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi"
+  },
+  {
+   "screen_id": "FRAME_2117130771",
+   "screen_name": "Frame 2117130771",
+   "source_ref": "2001:27008",
+   "source_refs": [
+    "2001:27008"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Share Tray"
+   ],
+   "state_kinds": [
+    "DEFAULT"
+   ],
+   "elements": [
+    {
+     "element_id": "FRAME_2117130771.merchant_name_label",
+     "source_ref": "2001:27011",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Merchant Name",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130771.spiker_share_message_label",
+     "source_ref": "2001:27014",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Dengar notifikasi pembayaran masuk pakai GoPay Spiker, juala",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "share template includes affiliate code placeholder {{affiliate_code}}"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi"
+  },
+  {
+   "screen_id": "FRAME_2117130857",
+   "screen_name": "Frame 2117130857",
+   "source_ref": "2001:26717",
+   "source_refs": [
+    "2001:26717"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "HOME DASHBOARD"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "FRAME_2117130857.ajak_teman_dapatkan_komisi_label",
+     "source_ref": "2001:26727",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ajak teman & dapatkan komisi:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130857.gabung_gopay_merchant_dan_beli_gopay_spi_label",
+     "source_ref": "2001:26728",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Gabung GoPay Merchant dan beli GoPay Spiker",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130857.riwayat_btn",
+     "source_ref": "2001:26753",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Riwayat",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130857.bagikan_kode_afiliator_anda_label",
+     "source_ref": "2001:26755",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Bagikan Kode Afiliator Anda!",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130857.marsela1145_label",
+     "source_ref": "2001:26757",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "MARSELA1145",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130857.tips_cara_jualan_merchant_saya_ctrl",
+     "source_ref": "3869:42795",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Tips Cara Jualan Merchant Saya Skema Komisi Gabung Grup WA",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130857.performa_minggu_ini_ctrl",
+     "source_ref": "2297:41764",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Performa Minggu Ini",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130857.level_section_container",
+     "source_ref": "2486:16008",
+     "type": "INSTANCE",
+     "role": "CONTAINER",
+     "label": "Level saya: Level 1: PERINTIS",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi — Display limit: max value capped at 30"
+  },
+  {
+   "screen_id": "FRAME_2117130875",
+   "screen_name": "Frame 2117130875",
+   "source_ref": "2001:28535",
+   "source_refs": [
+    "2001:28535"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Level Saya"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "FRAME_2117130875.ajak_teman_dapatkan_komisi_label",
+     "source_ref": "2001:28545",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ajak teman & dapatkan komisi:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130875.gabung_gopay_merchant_dan_beli_gopay_spi_label",
+     "source_ref": "2001:28546",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Gabung GoPay Merchant dan beli GoPay Spiker",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130875.riwayat_btn",
+     "source_ref": "2001:28571",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Riwayat",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130875.bagikan_kode_afiliator_anda_label",
+     "source_ref": "2001:28573",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Bagikan Kode Afiliator Anda!",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130875.marsela1145_label",
+     "source_ref": "2001:28575",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "MARSELA1145",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130875.tips_cara_jualan_label",
+     "source_ref": "2001:28587",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Tips Cara Jualan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130875.merchant_saya_label",
+     "source_ref": "2001:28621",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Merchant Saya",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130875.skema_komisi_label",
+     "source_ref": "2001:28655",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Skema Komisi",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Level 2"
+  },
+  {
+   "screen_id": "FRAME_2117130883",
+   "screen_name": "Frame 2117130883",
+   "source_ref": "2001:28247",
+   "source_refs": [
+    "2001:28247"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Level Saya"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "FRAME_2117130883.ajak_teman_dapatkan_komisi_label",
+     "source_ref": "2001:28257",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ajak teman & dapatkan komisi:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130883.gabung_gopay_merchant_dan_beli_gopay_spi_label",
+     "source_ref": "2001:28258",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Gabung GoPay Merchant dan beli GoPay Spiker",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130883.riwayat_btn",
+     "source_ref": "2001:28283",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Riwayat",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130883.bagikan_kode_afiliator_anda_label",
+     "source_ref": "2001:28285",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Bagikan Kode Afiliator Anda!",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130883.marsela1145_label",
+     "source_ref": "2001:28287",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "MARSELA1145",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130883.tips_cara_jualan_label",
+     "source_ref": "2001:28299",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Tips Cara Jualan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130883.merchant_saya_label",
+     "source_ref": "2001:28333",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Merchant Saya",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130883.skema_komisi_label",
+     "source_ref": "2001:28367",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Skema Komisi",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Merchant Saya"
+  },
+  {
+   "screen_id": "FRAME_2117130928",
+   "screen_name": "Frame 2117130928",
+   "source_ref": "2588:17100",
+   "source_refs": [
+    "2588:17100"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "HOME DASHBOARD"
+   ],
+   "state_kinds": [
+    "DEFAULT"
+   ],
+   "elements": [
+    {
+     "element_id": "FRAME_2117130928.commission_invite_label",
+     "source_ref": "2588:17110",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ajak teman & dapatkan komisi:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130928.merchant_onboarding_label",
+     "source_ref": "2588:17111",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Gabung GoPay Merchant dan beli GoPay Spiker",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130928.commission_widget_container",
+     "source_ref": "2588:18042",
+     "type": "INSTANCE",
+     "role": "CONTAINER",
+     "label": "Komisi Widget",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "may show loading state",
+      "may show error state with message 'Gagal memuat konten Sepertinya ada gangguan. Coba muat ulang lagi ya.'"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi — Lane context: Riwayat Komisi"
+  },
+  {
+   "screen_id": "FRAME_2117130931",
+   "screen_name": "Frame 2117130931",
+   "source_ref": "3959:42581",
+   "source_refs": [
+    "3959:42581"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Join Whatsapp Group"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "FRAME_2117130931.tips_cara_jualan_merchant_saya_skema_kom_btn",
+     "source_ref": "3959:42596",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Tips Cara Jualan Merchant Saya Skema Komisi Gabung Grup WA",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to OVERLAY when Join Whatsapp Group (connector 3959:42867)",
+       "connector_id": "3959:42867",
+       "destination_node_id": "3959:42338",
+       "destination_screen_id": "OVERLAY"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130931.commission_invite_title_label",
+     "source_ref": "3959:42591",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ajak teman & dapatkan komisi:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130931.merchant_signup_instruction_label",
+     "source_ref": "3959:42592",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Gabung GoPay Merchant dan beli GoPay Spiker",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130931.weekly_commission_widget_container",
+     "source_ref": "3959:42595",
+     "type": "INSTANCE",
+     "role": "CONTAINER",
+     "label": "Komisi minggu ini",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130931.weekly_performance_section_label",
+     "source_ref": "3959:42597",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Performa Minggu Ini",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "FRAME_2117130931.affiliate_level_info_label",
+     "source_ref": "3959:42598",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Level saya: Level 1: PERINTIS",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): HOME DASHBOARD | LEVEL 2"
+  },
+  {
+   "screen_id": "GENERAL_AS_IS",
+   "screen_name": "General (As-Is)",
+   "source_ref": "5055:17994",
+   "source_refs": [
+    "5055:17994"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "GENERAL_AS_IS.error_title_label",
+     "source_ref": "5055:18002",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ada sedikit masalah",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "GENERAL_AS_IS.error_description_label",
+     "source_ref": "5055:18003",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Mohon tunggu sebentar, lalu coba lagi, ya.",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "GENERAL_AS_IS.error_dismiss_button_btn",
+     "source_ref": "5055:18004",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Oke",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Affiliate Activation"
+  },
+  {
+   "screen_id": "HERO_IMAGE",
+   "screen_name": "Hero Image",
+   "source_ref": "2482:14499",
+   "source_refs": [
+    "2482:14499"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "HERO_IMAGE.hero_heading_label",
+     "source_ref": "2482:14567",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Dapatkan penghasilan tambahan dengan menjadi",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HERO_IMAGE.hero_subtitle_label",
+     "source_ref": "2482:14568",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "GoPay Affiliate",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HERO_IMAGE.commission_label",
+     "source_ref": "2482:14574",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Komisi hingga",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HERO_IMAGE.earnings_example_label",
+     "source_ref": "2482:14584",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "4.5jt per bulan!",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": ""
+  },
+  {
+   "screen_id": "HOME_PERINTIS",
+   "screen_name": "Home | Perintis",
+   "source_ref": "2080:18469",
+   "source_refs": [
+    "2080:18469",
+    "2097:21081",
+    "2255:67352"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "HOME DASHBOARD — Empty State",
+    "HOME DASHBOARD — Default State",
+    "SUSPENDED ACC"
+   ],
+   "state_kinds": [
+    "DEFAULT",
+    "EMPTY",
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "HOME_PERINTIS.merchant_invite_headline_label",
+     "source_ref": "2080:18478",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ajak merchant pakai GoPay Spiker dan dapatkan komisi minggua",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HOME_PERINTIS.commission_widget_container",
+     "source_ref": "3521:15926",
+     "type": "INSTANCE",
+     "role": "CONTAINER",
+     "label": "Komisi Widget",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HOME_PERINTIS.performance_section_title_label",
+     "source_ref": "I2097:22238;2097:21827",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Performa Minggu Ini",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HOME_PERINTIS.spiker_ordered_stat_label",
+     "source_ref": "I2097:22238;2097:21835",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Spiker Dipesan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HOME_PERINTIS.spiker_received_stat_label",
+     "source_ref": "I2097:22238;2097:21840",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Spiker Diterima",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HOME_PERINTIS.spiker_productive_stat_label",
+     "source_ref": "I2097:22238;2097:21852",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Spiker Produktif",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HOME_PERINTIS.view_team_performance_button_btn",
+     "source_ref": "I2080:18722;2001:27187",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Lihat Performa Tim Saya",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "HOME_PERINTIS.affiliate_level_status_label",
+     "source_ref": "I2080:18722;2001:27160",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Level 2: PANUTAN",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): HOME DASHBOARD | LEVEL 2 | My Downliners — Spiker Produktif = used 15+ days in month — Spiker Produktif count from team recruits only — Show motivational messaging when at 50%+ progress — Only Riwayat button navigates; others show suspended dialog"
+  },
+  {
+   "screen_id": "IF_KYC_IS_REJECTED",
+   "screen_name": "If KYC is rejected",
+   "source_ref": "4776:17512",
+   "source_refs": [
+    "4776:17512"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "IF_KYC_IS_REJECTED.kyc_rejection_title_label",
+     "source_ref": "4776:17632",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Aktivasi GoPay Affiliate tidak dapat dilanjutkan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "IF_KYC_IS_REJECTED.kyc_rejection_description_label",
+     "source_ref": "4776:17634",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Proses verifikasi gagal. Silakan lakukan verifikasi ulang.",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "IF_KYC_IS_REJECTED.retry_verification_btn",
+     "source_ref": "4776:17669",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Coba verifikasi ulang",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": ""
+  },
+  {
+   "screen_id": "IF_KYC_IS_STILL_IN_PROGRESS",
+   "screen_name": "If KYC is still in progress",
+   "source_ref": "4732:43801",
+   "source_refs": [
+    "4732:43801"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "IF_KYC_IS_STILL_IN_PROGRESS.kyc_processing_title_label",
+     "source_ref": "4732:43921",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Aktivasi GoPay Affiliate sedang diproses",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "IF_KYC_IS_STILL_IN_PROGRESS.kyc_processing_description_label",
+     "source_ref": "4732:43923",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Silakan cek lagi halaman ini secara berkala untuk mengetahui",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "IF_KYC_IS_STILL_IN_PROGRESS.check_status_btn",
+     "source_ref": "4732:43936",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Cek ulang status",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "note indicates back-to-welcome-page navigation available"
+  },
+  {
+   "screen_id": "INITIAL_PAGE_LOADER",
+   "screen_name": "Initial Page Loader",
+   "source_ref": "2300:62612",
+   "source_refs": [
+    "2300:62612"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Merchant Saya"
+   ],
+   "state_kinds": [
+    "DEFAULT"
+   ],
+   "elements": [
+    {
+     "element_id": "INITIAL_PAGE_LOADER.filter_toggle_btn",
+     "source_ref": "2952:16015",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Filter",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "INITIAL_PAGE_LOADER.info_prompt_container",
+     "source_ref": "2300:62701",
+     "type": "INSTANCE",
+     "role": "CONTAINER",
+     "label": "Pantau aktivitas merchant Anda! Pastikan merchant Anda menerima dan tetap menggu",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "infobox with title variant"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): Level 2"
+  },
+  {
+   "screen_id": "LAST_3_MONTHS",
+   "screen_name": "Last 3 Months",
+   "source_ref": "2269:62556",
+   "source_refs": [
+    "2269:62556"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "LAST_3_MONTHS.filter_one_month_toggle",
+     "source_ref": "2269:62565",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "1 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Visibility depends on filter state"
+     ]
+    },
+    {
+     "element_id": "LAST_3_MONTHS.filter_three_months_toggle",
+     "source_ref": "2269:62566",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "3 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Visibility depends on filter state"
+     ]
+    },
+    {
+     "element_id": "LAST_3_MONTHS.filter_six_months_toggle",
+     "source_ref": "2269:62569",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "6 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Visibility depends on filter state"
+     ]
+    },
+    {
+     "element_id": "LAST_3_MONTHS.filter_custom_date_toggle",
+     "source_ref": "2269:62570",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "Pilih tanggal",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Visibility depends on filter state"
+     ]
+    },
+    {
+     "element_id": "LAST_3_MONTHS.total_accumulated_label",
+     "source_ref": "2269:62579",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Akumulasi Pendapatan:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "LAST_3_MONTHS.monetary_value_label",
+     "source_ref": "2269:62580",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Rp750.000",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "LAST_3_MONTHS.1_feb_31_apr_2026_label",
+     "source_ref": "2269:62583",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "1 Feb - 31 Apr 2026",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "LAST_3_MONTHS.april_2026_label",
+     "source_ref": "2269:62613",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "April 2026",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi — Conditional: appears onlyunder “1 Bulan” filter selection — Sticky header on scroll"
+  },
+  {
+   "screen_id": "LINK_GOPAY_SCREEN",
+   "screen_name": "Link GoPay screen",
+   "source_ref": "4559:19051",
+   "source_refs": [
+    "4559:19051"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "LINK_GOPAY_SCREEN.hubungkan_dengan_gopay_plus_btn",
+     "source_ref": "4559:19093",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Hubungkan dengan GoPay Plus",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to SEE_MORE_IN_1KYC_FIGMA (connector 4570:17381)",
+       "connector_id": "4570:17381",
+       "destination_node_id": "4559:19220",
+       "destination_screen_id": "SEE_MORE_IN_1KYC_FIGMA"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "LINK_GOPAY_SCREEN.gopay_plus_tos_agreement_toggle",
+     "source_ref": "4559:19091",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "Saya setuju dengan Syarat & Ketentuan dan Kebijakan Privasi GoPay Plus",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Must be checked to enable connect button",
+      "Toggles enabled/disabled state of link button"
+     ]
+    },
+    {
+     "element_id": "LINK_GOPAY_SCREEN.link_gopay_plus_button_btn",
+     "source_ref": "4559:19093",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Hubungkan dengan GoPay Plus",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Links account to GoPay Plus",
+      "Only enabled when TOS checkbox is checked",
+      "Required for certain features"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): 1KYC   |  Progressive Flow (Screens are only for reference, not owned by MSME Team) — Data verification required per OJK regulations — e-Certificate issued by Digisign (PSrE)"
+  },
+  {
+   "screen_id": "LOADING",
+   "screen_name": "Loading",
+   "source_ref": "2571:14710",
+   "source_refs": [
+    "2571:14710",
+    "2269:62724"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "LOADING.button_brand_btn",
+     "source_ref": "2571:15567",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Button-Brand",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to CONFIRM_ACCOUNT (connector 4570:17396)",
+       "connector_id": "4570:17396",
+       "destination_node_id": "1997:31939",
+       "destination_screen_id": "CONFIRM_ACCOUNT"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "LOADING.signup_cta_btn",
+     "source_ref": "2571:14804",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Daftar jadi GoPay Affiliate",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Primary call-to-action to begin signup flow",
+      "Navigates to activation screen"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi"
+  },
+  {
+   "screen_id": "MERCHANT_PERFORMANCE",
+   "screen_name": "Merchant Performance",
+   "source_ref": "2001:28871",
+   "source_refs": [
+    "2001:28871",
+    "2300:64232",
+    "3978:43368",
+    "3965:43004"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Merchant Saya",
+    "Toko Sentosa Gemilang Namanya Panjang Banget..."
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "MERCHANT_PERFORMANCE.merchant_filter_btn",
+     "source_ref": "3978:43569",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Filter",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Opens filter panel for merchant status",
+      "Allows filtering by Spiker status (Dipesan/Diterima/Produktif)"
+     ]
+    },
+    {
+     "element_id": "MERCHANT_PERFORMANCE.merchant_spiker_status_label",
+     "source_ref": "3978:43592",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Spiker Dipesan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Status tag on merchant rows",
+      "Indicates Spiker ordered but not yet accepted"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): Merchant Saya — Shows only merchants with active Spiker status — Supports filter and sort operations"
+  },
+  {
+   "screen_id": "NATIVE_MONTH_PICKER",
+   "screen_name": "Native Month Picker",
+   "source_ref": "2001:23438",
+   "source_refs": [
+    "2001:23438"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Riwayat Komisi"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "NATIVE_MONTH_PICKER.image_29_btn",
+     "source_ref": "2269:66683",
+     "type": "RECTANGLE",
+     "role": "BUTTON",
+     "label": "image 29",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to RIWAYAT_KOMISI when Riwayat Komisi (connector 2269:67335)",
+       "connector_id": "2269:67335",
+       "destination_node_id": "2001:23915",
+       "destination_screen_id": "RIWAYAT_KOMISI"
+      }
+     ],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi — Akan Datang section appears only under current month — Exclude next month amounts from total accumulation"
+  },
+  {
+   "screen_id": "NATIVE_OS_MONTH_PICKER",
+   "screen_name": "Native OS Month Picker",
+   "source_ref": "2269:67971",
+   "source_refs": [
+    "2269:67971"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "My Downliners"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [],
+   "screen_notes": "Lane(s): My Downliners — Count includes all team members regardless of commission status — Sort by highest Spiker Delivered — Show performing downliners; if none performing, show top 3 by performance"
+  },
+  {
+   "screen_id": "NO_INTERNET",
+   "screen_name": "no-internet",
+   "source_ref": "5053:19295",
+   "source_refs": [
+    "5053:19295"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "General Error Relaod States"
+   ],
+   "state_kinds": [
+    "ERROR",
+    "OFFLINE"
+   ],
+   "elements": [
+    {
+     "element_id": "NO_INTERNET.error_title_label",
+     "source_ref": "5053:19303",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Yah, internetnya mati...",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "NO_INTERNET.error_description_label",
+     "source_ref": "5053:19304",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Cek koneksi WiFi atau kuota internet Anda dan coba lagi, ya.",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "NO_INTERNET.error_acknowledge_btn",
+     "source_ref": "5053:19305",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Oke",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): My Downliners"
+  },
+  {
+   "screen_id": "OVERLAY",
+   "screen_name": "Overlay",
+   "source_ref": "3959:42338",
+   "source_refs": [
+    "3959:42338",
+    "2001:28961",
+    "2001:28993",
+    "2001:27259",
+    "2001:25920",
+    "2001:25143",
+    "4613:17406",
+    "2300:66912"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Join Whatsapp Group",
+    "Merchant Saya",
+    "Level Saya",
+    "Skema Komisi — For Level 1",
+    "Skema Komisi — For Level 2",
+    "General Error Relaod States"
+   ],
+   "state_kinds": [
+    "ERROR"
+   ],
+   "elements": [
+    {
+     "element_id": "OVERLAY.terapkan_btn",
+     "source_ref": "4950:17905",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Terapkan",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to MERCHANT_PERFORMANCE when Merchant Saya (connector 2300:65927)",
+       "connector_id": "2300:65927",
+       "destination_node_id": "2300:64232",
+       "destination_screen_id": "MERCHANT_PERFORMANCE"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "OVERLAY.whatsapp_confirm_cta_btn",
+     "source_ref": "4950:17814",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Ya, lanjut",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Confirms joining WhatsApp group",
+      "Navigates to WhatsApp or shows confirmation dialog"
+     ]
+    },
+    {
+     "element_id": "OVERLAY.modal_back_action_btn",
+     "source_ref": "4950:17807",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Kembali",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Dismisses current overlay/modal",
+      "Returns to previous screen"
+     ]
+    },
+    {
+     "element_id": "OVERLAY.apply_filter_btn",
+     "source_ref": "4950:17905",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Terapkan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Applies selected merchant filters and sort",
+      "Closes filter panel"
+     ]
+    },
+    {
+     "element_id": "OVERLAY.cancel_filter_btn",
+     "source_ref": "4950:17904",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Batal",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Cancels filter changes",
+      "Closes panel without applying"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): HOME DASHBOARD | LEVEL 2 | Level 2 | Merchant Saya | My Downliners"
+  },
+  {
+   "screen_id": "QRIS_SUSPENDED",
+   "screen_name": "qris-suspended",
+   "source_ref": "2255:67285",
+   "source_refs": [
+    "2255:67285"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "SUSPENDED ACC"
+   ],
+   "state_kinds": [
+    "PERMISSION_DENIED"
+   ],
+   "elements": [
+    {
+     "element_id": "QRIS_SUSPENDED.suspension_title_label",
+     "source_ref": "2255:67293",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Akun Anda dinonaktifkan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "QRIS_SUSPENDED.suspension_description_label",
+     "source_ref": "2255:67294",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Anda tidak dapat melanjutkan aktivitas sebagai GoPay Affilia",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): My Downliners — only Riwayat button can navigate to actual page; other interface elements show suspended dialog"
+  },
+  {
+   "screen_id": "REFRESH_ERROR",
+   "screen_name": "refresh-error",
+   "source_ref": "5053:19284",
+   "source_refs": [
+    "5053:19284"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "General Error Relaod States"
+   ],
+   "state_kinds": [
+    "ERROR"
+   ],
+   "elements": [
+    {
+     "element_id": "REFRESH_ERROR.refresh_error_title_label",
+     "source_ref": "5053:19292",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Gagal memuat ulang",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "REFRESH_ERROR.refresh_error_description_label",
+     "source_ref": "5053:19293",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Mohon tunggu sebentar, lalu coba lagi, ya.",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "REFRESH_ERROR.error_acknowledge_btn",
+     "source_ref": "5053:19294",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Oke",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): My Downliners"
+  },
+  {
+   "screen_id": "RIWAYAT_KOMISI",
+   "screen_name": "Riwayat Komisi",
+   "source_ref": "2001:23440",
+   "source_refs": [
+    "2001:23440",
+    "2001:23915",
+    "2269:66953",
+    "2269:62243",
+    "2269:62380",
+    "2269:62347",
+    "2269:62490",
+    "2001:37108"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Riwayat Komisi",
+    "Riwayat Komisi — Loading",
+    "Riwayat Komisi — If No Activity"
+   ],
+   "state_kinds": [
+    "LOADING"
+   ],
+   "elements": [
+    {
+     "element_id": "RIWAYAT_KOMISI.16_apr_2026_rp30_000_6258_btn",
+     "source_ref": "2001:23508",
+     "type": "FRAME",
+     "role": "BUTTON",
+     "label": "16 Apr 2026 Rp30.000 ** 6258",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to DISBURSED when Riwayat Komisi (connector 2001:24088)",
+       "connector_id": "2001:24088",
+       "destination_node_id": "2001:24045",
+       "destination_screen_id": "DISBURSED"
+      },
+      {
+       "trigger": "tap",
+       "action": "Navigates to DISBURSED (connector 2269:63056)",
+       "connector_id": "2269:63056",
+       "destination_node_id": "2269:63013",
+       "destination_screen_id": "DISBURSED"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "RIWAYAT_KOMISI.5_feb_26_5_mar_26_label",
+     "source_ref": "2269:62406",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "5 Feb 26 - 5 Mar 26",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to SHARE_TRAY_ANDROID (connector 2269:62989)",
+       "connector_id": "2269:62989",
+       "destination_node_id": "2269:62241",
+       "destination_screen_id": "SHARE_TRAY_ANDROID"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "RIWAYAT_KOMISI.month_filter_btn",
+     "source_ref": "4813:19079",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Apr 2026",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Opens month picker for date range selection",
+      "Default shows current month"
+     ]
+    },
+    {
+     "element_id": "RIWAYAT_KOMISI.filter_duration_1month_btn",
+     "source_ref": "2269:62252",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "1 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Active by default (Last 1 Month)",
+      "Toggles commission history to 1-month view"
+     ]
+    },
+    {
+     "element_id": "RIWAYAT_KOMISI.filter_duration_3months_btn",
+     "source_ref": "2269:62254",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "3 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Alternative filter option",
+      "Toggles commission history to 3-month view"
+     ]
+    },
+    {
+     "element_id": "RIWAYAT_KOMISI.filter_duration_6months_btn",
+     "source_ref": "2269:62256",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "6 bulan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Alternative filter option",
+      "Toggles commission history to 6-month view"
+     ]
+    },
+    {
+     "element_id": "RIWAYAT_KOMISI.filter_custom_date_btn",
+     "source_ref": "2269:62257",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Pilih tanggal",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Opens custom date picker",
+      "Allows selection of arbitrary date range"
+     ]
+    },
+    {
+     "element_id": "RIWAYAT_KOMISI.accumulated_earnings_label",
+     "source_ref": "2001:23464",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Rp500.000",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Total commission amount for selected period",
+      "Excludes future items (Akan Datang) from total"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): My Downliners | Riwayat Komisi — Default filter is Last 1 Month — 'Akan Datang' section only appears under current month, excluded from Akumulasi Pendapatan calculation — Sticky header maintains filter controls while scrolling"
+  },
+  {
+   "screen_id": "SCHEDULED",
+   "screen_name": "Scheduled",
+   "source_ref": "2269:63057",
+   "source_refs": [
+    "2269:63057"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "SCHEDULED.detail_pencairan_label",
+     "source_ref": "2269:63061",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Detail pencairan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCHEDULED.status_terjadwal_label",
+     "source_ref": "2269:63063",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Status Terjadwal",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCHEDULED.ditambahkan_ke_label",
+     "source_ref": "2269:63066",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ditambahkan ke",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCHEDULED.gopay_label",
+     "source_ref": "2269:63068",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "GoPay",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCHEDULED.payment_method_label",
+     "source_ref": "2269:63069",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "method",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCHEDULED.no_akun_67890_label",
+     "source_ref": "2269:63070",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "No. akun ******67890",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCHEDULED.nama_pemilik_p_label",
+     "source_ref": "2269:63071",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Nama pemilik P******* O*******",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCHEDULED.waktu_pencairan_16_a_label",
+     "source_ref": "2269:63072",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Waktu pencairan 16 Apr 2026\n09:00 WIB",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi"
+  },
+  {
+   "screen_id": "SCROLL_VIEW",
+   "screen_name": "Scroll View",
+   "source_ref": "2571:16086",
+   "source_refs": [
+    "2571:16086",
+    "2314:63199",
+    "2001:24802",
+    "2571:19061"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Riwayat Komisi",
+    "Skema Komisi"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "SCROLL_VIEW.commission_history_navbar_label",
+     "source_ref": "2314:63761",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Riwayat komisi",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW.accumulated_income_title_label",
+     "source_ref": "2314:63775",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Akumulasi Pendapatan:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW.accumulated_income_amount_label",
+     "source_ref": "2314:63776",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Rp500.000",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW.commission_scheme_navbar_label",
+     "source_ref": "2001:24872",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Skema Komisi",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW.affiliate_program_title_label",
+     "source_ref": "2001:24877",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Program GoPay Affiliate",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW.earn_instruction_title_label",
+     "source_ref": "2001:24888",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Cara dapat komisi:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW.weekly_commission_feature_label",
+     "source_ref": "2001:24907",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Komisi mingguan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW.productive_spiker_commission_label",
+     "source_ref": "2001:24921",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Komisi Spiker Produktif",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Affiliate Activation | Level 2 | Riwayat Komisi — Tab navigation remains sticky while scrolling"
+  },
+  {
+   "screen_id": "SCROLL_VIEW_WITH_FILTER_APPLIED",
+   "screen_name": "Scroll View with Filter Applied",
+   "source_ref": "2300:65186",
+   "source_refs": [
+    "2300:65186"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Merchant Saya"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.total_accumulated_label",
+     "source_ref": "2300:65190",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Total Merchant: 4",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.filter_urutkan_toggle",
+     "source_ref": "2300:65195",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "Filter & Urutkan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.status_display_label",
+     "source_ref": "3998:44769",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Toko Sentosa Gemilang Namanya Panjang Banget...",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.jl_iskandarsyah_ehrfiejhriuhev_address_i_label",
+     "source_ref": "3998:44776",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Jl. Iskandarsyah ehrfiejhriuhev address info max 3 lines",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.status_tag_label",
+     "source_ref": "3998:44781",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Spiker Dipesan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.jl_iskandarsyah_ehrfiejhriuhev_address_m_label",
+     "source_ref": "3998:44663",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Jl. Iskandarsyah ehrfiejhriuhev address max 3 lines",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.total_merchant_count_label",
+     "source_ref": "2300:65190",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Total Merchant: 4",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.filter_sort_toggle_btn",
+     "source_ref": "2300:65195",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Filter & Urutkan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.filter_label",
+     "source_ref": "2300:65521",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Filter:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.filter_chip_spiker_dipesan_toggle",
+     "source_ref": "2300:65522",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "Spiker dipesan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.filter_chip_sort_az_toggle",
+     "source_ref": "2300:65523",
+     "type": "INSTANCE",
+     "role": "TOGGLE",
+     "label": "Urutan A-Z",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.merchant_row_name_label",
+     "source_ref": "3998:44769",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Toko Sentosa Gemilang Namanya Panjang Banget...",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.merchant_row_address_label",
+     "source_ref": "3998:44776",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Jl. Iskandarsyah ehrfiejhriuhev address info max 3 lines",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_FILTER_APPLIED.merchant_row_status_tag_label",
+     "source_ref": "3998:44781",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Spiker Dipesan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Merchant Saya"
+  },
+  {
+   "screen_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD",
+   "screen_name": "Scroll View with Pagination Load",
+   "source_ref": "2300:63643",
+   "source_refs": [
+    "2300:63643",
+    "2269:67342",
+    "2269:62834"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Merchant Saya",
+    "My Downliners"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD.merchant_count_label",
+     "source_ref": "2300:63866",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Total Merchant: 4",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD.filter_sort_button_btn",
+     "source_ref": "2300:63871",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Filter & Urutkan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD.merchant_name_label",
+     "source_ref": "3998:45035",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Toko Sentosa Gemilang Namanya Panjang Banget...",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD.merchant_status_tag_label",
+     "source_ref": "3998:45047",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Spiker Dipesan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD.team_section_title_label",
+     "source_ref": "2269:67757",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Tim saya di bulan Apr 2026",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD.team_count_label",
+     "source_ref": "2269:67758",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Total: 10",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD.commission_earned_label",
+     "source_ref": "2269:67775",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Komisi yang saya dapat:",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD.commission_earned_amount_label",
+     "source_ref": "2269:67776",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Rp75.000",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Level 2 | My Downliners | Riwayat Komisi — Month picker in sticky header — Pagination loads 10 items per page — Akan Datang section appears only with 1 Bulan filter"
+  },
+  {
+   "screen_id": "SEE_MORE_IN_1KYC_FIGMA",
+   "screen_name": "SEE MORE IN  1KYC FIGMA",
+   "source_ref": "4559:19220",
+   "source_refs": [
+    "4559:19220"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [],
+   "screen_notes": ""
+  },
+  {
+   "screen_id": "SHARE_TRAY_ANDROID",
+   "screen_name": "Share Tray | Android",
+   "source_ref": "2001:27063",
+   "source_refs": [
+    "2001:27063",
+    "2001:27069",
+    "2269:62241",
+    "2001:37106"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Share Tray"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "SHARE_TRAY_ANDROID.date_time_picker_android_btn",
+     "source_ref": "2269:62242",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "date_time_picker/android",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to RIWAYAT_KOMISI (connector 2269:62988)",
+       "connector_id": "2269:62988",
+       "destination_node_id": "2269:62380",
+       "destination_screen_id": "RIWAYAT_KOMISI"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SHARE_TRAY_ANDROID.date_picker_ok_btn",
+     "source_ref": "I2269:62242;36:11896",
+     "type": "TEXT",
+     "role": "BUTTON",
+     "label": "OK",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Confirms selection within the Custom Date picker flow (note: Custom Date)"
+     ]
+    },
+    {
+     "element_id": "SHARE_TRAY_ANDROID.date_picker_cancel_btn",
+     "source_ref": "I2269:62242;36:11899",
+     "type": "TEXT",
+     "role": "BUTTON",
+     "label": "CANCEL",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Dismisses the Custom Date picker without applying a new date (note: Custom Date)"
+     ]
+    },
+    {
+     "element_id": "SHARE_TRAY_ANDROID.select_date_label",
+     "source_ref": "I2269:62242;36:11981",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Select Date",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Header for the Custom Date picker (note: Custom Date)"
+     ]
+    },
+    {
+     "element_id": "SHARE_TRAY_ANDROID.calendar_month_year_label",
+     "source_ref": "I2269:62242;36:11962",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "April 2026",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Reflects the calendar month/year in scope for Custom Date selection"
+     ]
+    },
+    {
+     "element_id": "SHARE_TRAY_ANDROID.selected_date_display_label",
+     "source_ref": "I2269:62242;36:11980",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Mon, Apr 18",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Shows the currently selected custom date"
+     ]
+    },
+    {
+     "element_id": "SHARE_TRAY_ANDROID.share_message_qris_promo_label",
+     "source_ref": "2001:27068",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Sekarang bisa bikin QRIS GRATIS di GoPay Merchant! Daftarnya",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Static promo copy distinct from the affiliate share copy template"
+     ]
+    },
+    {
+     "element_id": "SHARE_TRAY_ANDROID.share_message_spiker_promo_label",
+     "source_ref": "2001:27074",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Dengar notifikasi pembayaran masuk pakai GoPay Spiker, juala",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Matches the share copy template body which embeds the {{affiliate_code}} placeholder that must be substituted with a real affiliate code before sharing"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): My Downliners | Riwayat Komisi — Custom Date option must allow OK/CANCEL confirmation and cancellation of a picked date — Share copy template placeholder {{affiliate_code}} must be resolved to an actual code before the share sheet is dispatched"
+  },
+  {
+   "screen_id": "SHARE_TRAY_IOS",
+   "screen_name": "Share Tray | iOS",
+   "source_ref": "2001:27015",
+   "source_refs": [
+    "2001:27015"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Share Tray"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "SHARE_TRAY_IOS.dengar_notifikasi_pembayaran_label",
+     "source_ref": "2001:27023",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Dengar notifikasi pembayaran",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SHARE_TRAY_IOS.httpsgjkidgopayspiker_label",
+     "source_ref": "2001:27024",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "https://gjk.id/gopay-spiker",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SHARE_TRAY_IOS.sandy_wilder_cheng_ctrl",
+     "source_ref": "2001:27027",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Sandy Wilder Cheng",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SHARE_TRAY_IOS.kevin_leong_ctrl",
+     "source_ref": "2001:27028",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Kevin Leong",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SHARE_TRAY_IOS.sandy_and_kevin_ctrl",
+     "source_ref": "2001:27029",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Sandy and Kevin",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SHARE_TRAY_IOS.juliana_mejia_ctrl",
+     "source_ref": "2001:27030",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Juliana Mejia",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SHARE_TRAY_IOS.greg_apodaca_ctrl",
+     "source_ref": "2001:27031",
+     "type": "INSTANCE",
+     "role": "OTHER",
+     "label": "Greg Apodaca",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SHARE_TRAY_IOS.airdrop_label",
+     "source_ref": "2001:27034",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "AirDrop",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi"
+  },
+  {
+   "screen_id": "SKEMA_KOMISI_PERINTIS",
+   "screen_name": "Skema Komisi | Perintis",
+   "source_ref": "2001:24143",
+   "source_refs": [
+    "2001:24143",
+    "2001:24477"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "Skema Komisi"
+   ],
+   "state_kinds": [
+    "OTHER"
+   ],
+   "elements": [
+    {
+     "element_id": "SKEMA_KOMISI_PERINTIS.bagaimana_caranya_btn",
+     "source_ref": "2001:24630",
+     "type": "FRAME",
+     "role": "BUTTON",
+     "label": "Bagaimana caranya?",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to OVERLAY when Skema Komisi (connector 2001:25915)",
+       "connector_id": "2001:25915",
+       "destination_node_id": "2001:25143",
+       "destination_screen_id": "OVERLAY"
+      },
+      {
+       "trigger": "tap",
+       "action": "Navigates to OVERLAY when Skema Komisi (connector 2001:26714)",
+       "connector_id": "2001:26714",
+       "destination_node_id": "2001:25920",
+       "destination_screen_id": "OVERLAY"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "SKEMA_KOMISI_PERINTIS.how_to_earn_help_btn",
+     "source_ref": "2001:24290",
+     "type": "TEXT",
+     "role": "BUTTON",
+     "label": "Bagaimana caranya?",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Opens help modal explaining commission calculation",
+      "Appears next to Level 1 section"
+     ]
+    },
+    {
+     "element_id": "SKEMA_KOMISI_PERINTIS.level_1_title_label",
+     "source_ref": "2001:24233",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Level 1: Perintis",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Indicates current or reference level tier"
+     ]
+    },
+    {
+     "element_id": "SKEMA_KOMISI_PERINTIS.level_2_title_label",
+     "source_ref": "2001:24243",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Level 2: Panutan",
+     "interactions": [],
+     "validations_and_edge_cases": [
+      "Indicates next tier to upgrade to",
+      "Shows additional commission features available at higher level"
+     ]
+    }
+   ],
+   "screen_notes": "Lane(s): Level 2 — Level 1 commission: Rp25.000 per accepted Spiker — Level 1 bonus: Rp40.000 per 2 accepted Spiker — Level 2 includes additional commission from productive team members"
+  },
+  {
+   "screen_id": "TECHNICAL_ERROR",
+   "screen_name": "technical error",
+   "source_ref": "5055:17857",
+   "source_refs": [
+    "5055:17857"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "TECHNICAL_ERROR.error_title_label",
+     "source_ref": "5055:17865",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ada sedikit masalah",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "TECHNICAL_ERROR.error_description_label",
+     "source_ref": "5055:17866",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Mohon tunggu sebentar, lalu coba lagi, ya.",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "TECHNICAL_ERROR.error_acknowledge_btn",
+     "source_ref": "5055:17867",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Oke",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): My Downliners"
+  },
+  {
+   "screen_id": "TIPS_TRICKS",
+   "screen_name": "Tips & Tricks",
+   "source_ref": "2001:28996",
+   "source_refs": [
+    "2001:28996"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [
+    "TIps Jualan"
+   ],
+   "state_kinds": [
+    "DEFAULT"
+   ],
+   "elements": [
+    {
+     "element_id": "TIPS_TRICKS.tips_header_label",
+     "source_ref": "2001:29001",
+     "type": "INSTANCE",
+     "role": "LABEL",
+     "label": "Tips Cara Jualan",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": "Lane(s): Riwayat Komisi"
+  },
+  {
+   "screen_id": "WELCOME_PAGE",
+   "screen_name": "Welcome Page",
+   "source_ref": "2001:38107",
+   "source_refs": [
+    "2001:38107"
+   ],
+   "node_class": "SCREEN",
+   "classified_by": "GEOMETRY",
+   "screen_states": [],
+   "elements": [
+    {
+     "element_id": "WELCOME_PAGE.daftar_program_affiliate_btn",
+     "source_ref": "2001:38963",
+     "type": "INSTANCE",
+     "role": "BUTTON",
+     "label": "Daftar Program Affiliate",
+     "interactions": [
+      {
+       "trigger": "tap",
+       "action": "Navigates to LOADING (connector 2571:16075)",
+       "connector_id": "2571:16075",
+       "destination_node_id": "2571:14710",
+       "destination_screen_id": "LOADING"
+      }
+     ],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "WELCOME_PAGE.intro_headline_label",
+     "source_ref": "2001:38176",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Dapatkan penghasilan tambahan dengan menjadi",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "WELCOME_PAGE.affiliate_program_name_label",
+     "source_ref": "2001:38177",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "GoPay Affiliate",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "WELCOME_PAGE.intro_description_label",
+     "source_ref": "2001:38178",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Ajak merchant mulai gunakan GoPay Spiker, dan dapatkan komis",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "WELCOME_PAGE.faq_what_is_spiker_label",
+     "source_ref": "2001:38204",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Apa itu GoPay Spiker?",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "WELCOME_PAGE.faq_how_to_earn_label",
+     "source_ref": "2001:38215",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Gimana caranya dapat cuan?",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "WELCOME_PAGE.benefit_instant_signup_label",
+     "source_ref": "2001:38945",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Langsung daftar",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "WELCOME_PAGE.benefit_instant_invite_merchant_label",
+     "source_ref": "2001:38948",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Langsung ajak merchant",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    },
+    {
+     "element_id": "WELCOME_PAGE.benefit_instant_commission_label",
+     "source_ref": "2001:38951",
+     "type": "TEXT",
+     "role": "LABEL",
+     "label": "Langsung dapat komisi!",
+     "interactions": [],
+     "validations_and_edge_cases": []
+    }
+   ],
+   "screen_notes": ""
+  }
+ ],
+ "ui_flow": [
+  {
+   "from_screen_id": "WELCOME_PAGE",
+   "to_screen_id": "LOADING",
+   "condition": "",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2571:16075",
+   "trigger_element_id": "WELCOME_PAGE.daftar_program_affiliate_btn"
+  },
+  {
+   "from_screen_id": "CONFIRM_ACCOUNT",
+   "to_screen_id": "GENERAL_AS_IS",
+   "condition": "If NOT successful",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2571:19056",
+   "trigger_element_id": "CONFIRM_ACCOUNT.button_brand_btn"
+  },
+  {
+   "from_screen_id": "LOADING",
+   "to_screen_id": "CONFIRM_ACCOUNT",
+   "condition": "",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "4570:17396",
+   "trigger_element_id": "LOADING.button_brand_btn"
+  },
+  {
+   "from_screen_id": "LINK_GOPAY_SCREEN",
+   "to_screen_id": "SEE_MORE_IN_1KYC_FIGMA",
+   "condition": "",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "4570:17381",
+   "trigger_element_id": "LINK_GOPAY_SCREEN.hubungkan_dengan_gopay_plus_btn"
+  },
+  {
+   "from_screen_id": "CONFIRM_ACCOUNT_ID",
+   "to_screen_id": "SEE_MORE_IN_1KYC_FIGMA",
+   "condition": "",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "4570:17391",
+   "trigger_element_id": "CONFIRM_ACCOUNT_ID.lanjut_btn"
+  },
+  {
+   "from_screen_id": "NATIVE_MONTH_PICKER",
+   "to_screen_id": "RIWAYAT_KOMISI",
+   "condition": "Riwayat Komisi",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2269:67335",
+   "trigger_element_id": "NATIVE_MONTH_PICKER.image_29_btn"
+  },
+  {
+   "from_screen_id": "RIWAYAT_KOMISI",
+   "to_screen_id": "DISBURSED",
+   "condition": "Riwayat Komisi",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2001:24088",
+   "trigger_element_id": "RIWAYAT_KOMISI.16_apr_2026_rp30_000_6258_btn"
+  },
+  {
+   "from_screen_id": "SKEMA_KOMISI_PERINTIS",
+   "to_screen_id": "OVERLAY",
+   "condition": "Skema Komisi",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2001:25915",
+   "trigger_element_id": "SKEMA_KOMISI_PERINTIS.bagaimana_caranya_btn"
+  },
+  {
+   "from_screen_id": "SKEMA_KOMISI_PERINTIS",
+   "to_screen_id": "OVERLAY",
+   "condition": "Skema Komisi",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2001:26714",
+   "trigger_element_id": "SKEMA_KOMISI_PERINTIS.bagaimana_caranya_btn"
+  },
+  {
+   "from_screen_id": "OVERLAY",
+   "to_screen_id": "MERCHANT_PERFORMANCE",
+   "condition": "Merchant Saya",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2300:65927",
+   "edge_direction_source": "ARROWHEAD_REVERSED",
+   "trigger_element_id": "OVERLAY.terapkan_btn"
+  },
+  {
+   "from_screen_id": "DOWNLINERS",
+   "to_screen_id": "NATIVE_OS_MONTH_PICKER",
+   "condition": "My Downliners",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2269:62233",
+   "trigger_element_id": "DOWNLINERS.akumulasi_pendapatan_dari_tim_rp120_000__btn"
+  },
+  {
+   "from_screen_id": "DOWNLINERS",
+   "to_screen_id": "OVERLAY",
+   "condition": "My Downliners",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2001:36490",
+   "trigger_element_id": "DOWNLINERS.gimana_caranya_ajak_teman_btn"
+  },
+  {
+   "from_screen_id": "FRAME_2117130931",
+   "to_screen_id": "OVERLAY",
+   "condition": "Join Whatsapp Group",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "3959:42867",
+   "edge_direction_source": "ARROWHEAD_REVERSED",
+   "trigger_element_id": "FRAME_2117130931.tips_cara_jualan_merchant_saya_skema_kom_btn"
+  },
+  {
+   "from_screen_id": "SEE_MORE_IN_1KYC_FIGMA",
+   "to_screen_id": "EMPTY_STATE",
+   "condition": "",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2482:14826"
+  },
+  {
+   "from_screen_id": "EMPTY",
+   "to_screen_id": "SHARE_TRAY_ANDROID",
+   "condition": "",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2001:37371",
+   "trigger_element_id": "EMPTY.pilih_tanggal_btn"
+  },
+  {
+   "from_screen_id": "SHARE_TRAY_ANDROID",
+   "to_screen_id": "RIWAYAT_KOMISI",
+   "condition": "",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2269:62988",
+   "trigger_element_id": "SHARE_TRAY_ANDROID.date_time_picker_android_btn"
+  },
+  {
+   "from_screen_id": "RIWAYAT_KOMISI",
+   "to_screen_id": "SHARE_TRAY_ANDROID",
+   "condition": "",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2269:62989",
+   "trigger_element_id": "RIWAYAT_KOMISI.5_feb_26_5_mar_26_label"
+  },
+  {
+   "from_screen_id": "RIWAYAT_KOMISI",
+   "to_screen_id": "DISBURSED",
+   "condition": "",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR",
+   "confidence": "EXPLICIT",
+   "source_ref": "2269:63056",
+   "trigger_element_id": "RIWAYAT_KOMISI.16_apr_2026_rp30_000_6258_btn"
+  },
+  {
+   "from_screen_id": "CONFIRM_ACCOUNT",
+   "to_screen_id": "FRAME",
+   "condition": "Does user have GoPay+? — NO",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR_CONTRACTED",
+   "confidence": "EXPLICIT",
+   "source_ref": "1997:32350",
+   "decision_question": "Does user have GoPay+?",
+   "decision_value": "NO",
+   "decision_node_id": "1997:32345",
+   "trigger_element_id": "CONFIRM_ACCOUNT.button_brand_btn"
+  },
+  {
+   "from_screen_id": "CONFIRM_ACCOUNT",
+   "to_screen_id": "LINK_GOPAY_SCREEN",
+   "condition": "Does user have GoPay+? — YES",
+   "navigation_kind": "NAVIGATE",
+   "edge_source": "CONNECTOR_CONTRACTED",
+   "confidence": "EXPLICIT",
+   "source_ref": "1997:32347",
+   "decision_question": "Does user have GoPay+?",
+   "decision_value": "YES",
+   "decision_node_id": "1997:32345",
+   "trigger_element_id": "CONFIRM_ACCOUNT.button_brand_btn"
+  }
+ ]
 }
