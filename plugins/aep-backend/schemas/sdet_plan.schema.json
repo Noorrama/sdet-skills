@@ -71,7 +71,8 @@
           "markets",
           "type_of_test",
           "human_corrected",
-          "human_correction_types"
+          "human_correction_types",
+          "owning_team"
         ],
         "properties": {
           "scenario_id": {
@@ -280,6 +281,18 @@
               "type": "string"
             },
             "description": "Existing BrowserStack case ids (e.g. TC-302383) this scenario extends, replaces, or re-runs under a new flag state. From regression_context.json only — never invented. Rendered into the Preconditions block and consumed downstream for @TestInfo."
+          },
+          "owning_team": {
+            "type": "string",
+            "description": "canonical_id of the team owning this scenario's SYSTEM UNDER TEST — the service whose contract the assertions are about, not the team whose feature triggered the work. Defaults to the primary canonical_team_id and is set explicitly on every scenario. automation-plan-generator resolves the code module and BrowserStack project from this, not from the root code_module."
+          },
+          "browserstack_test_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "BrowserStack's own test-case id, assigned when this scenario is uploaded via the BrowserStack MCP. null until the upload runs — always emit the key so downstream readers never infer state from absence. Written back into the plan by the sync, never authored by the generator. DISTINCT from existing_testcase_ids[], which holds ids of cases that already existed BEFORE this plan (sourced from regression_context.json); this field is the id THIS scenario received."
           }
         }
       }
@@ -367,6 +380,93 @@
     },
     "dedup_report": {
       "type": "object"
+    },
+    "teams_in_scope": {
+      "type": "array",
+      "description": "Every team resolved from prd_context.team[], prd_context.pdg[] and rfc_context.team_ownership[], with what each routes to. Records the teams the human excluded as well as those included, so the scope decision is auditable. The primary team also appears here.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "canonical_id",
+          "raw_name",
+          "included"
+        ],
+        "properties": {
+          "canonical_id": {
+            "type": "string"
+          },
+          "raw_name": {
+            "type": "string",
+            "description": "The team name as written in the PRD or RFC that matched this entry"
+          },
+          "matched_via": {
+            "type": "string",
+            "description": "Which candidate path matched, e.g. prd.team[0], rfc.team_ownership[2]"
+          },
+          "code_module": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "regression_id_prefix": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "browserstack_project": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "is_primary": {
+            "type": "boolean",
+            "description": "true for the team that owns the plan and its review gate"
+          },
+          "included": {
+            "type": "boolean",
+            "description": "Whether the human included this team in the generated scope"
+          }
+        }
+      }
+    },
+    "browserstack_sync": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "description": "Record of the last BrowserStack MCP upload. null until the first sync. Written by the sync, not the generator.",
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "BrowserStack project the scenarios were uploaded to — should match the registry browserstack_project for the owning team"
+        },
+        "suite_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "synced_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "synced_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Scenarios that received a browserstack_test_id in this sync"
+        },
+        "unsynced_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Scenarios still carrying null — e.g. those owned by a team whose project was not the upload target"
+        }
+      }
     }
   }
 }

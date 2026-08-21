@@ -11,7 +11,7 @@ Bridge between *what to test* (SDET plan) and *how to implement it* (test code +
 
 | File | Purpose |
 |---|---|
-| `sdet_plan.json` (approved) | Human-reviewed output from sdet-plan-generator, and the **only** source for test-data requirements. Source of `scenario_id`, `source_ref`, `is_legacy_regression`, `description`, `preconditions`, `step_descriptions`, `test_layer`, `tags`, `priority`, plus `scenario_group` (drives grouping), `execution_mode` (drives selection) and `existing_testcase_ids` (propagated verbatim). Also read `canonical_team_id` and `code_module` (root fields) — resolved by the team registry, never re-derived here. |
+| `sdet_plan.json` (approved) | Human-reviewed output from sdet-plan-generator, and the **only** source for test-data requirements. Source of `scenario_id`, `source_ref`, `is_legacy_regression`, `description`, `preconditions`, `step_descriptions`, `test_layer`, `tags`, `priority`, plus `scenario_group` (drives grouping), `execution_mode` (drives selection), `owning_team` (drives module and BrowserStack routing per scenario) and `existing_testcase_ids` (propagated verbatim). Also read `canonical_team_id`, `code_module` and `teams_in_scope[]` (root fields) — resolved by the team registry, never re-derived here. |
 | `tasks_context.json` | Package/class naming conventions, component boundaries, api_contract, service_name, target_framework. |
 | `code_change_context.json` | `curl_reference` construction from actual endpoint signatures. |
 | `regression_context.json` | Existing class naming patterns for consistency. |
@@ -55,6 +55,7 @@ Do **not** emit a per-entry list of peer scenarios. The repeated `fixture_id` al
 |---|---|
 | `scenario_id` | From sdet_plan.json, one-to-one |
 | `scenario_group` | Propagated verbatim from sdet_plan.json — drives test-class grouping and shared setup, never merging |
+| `browserstack_test_id` | Propagated from sdet_plan; `null` until a sync has run. Together with `existing_testcase_ids[]` this forms the test-case id list on the generated method's tracking annotation. |
 | `existing_testcase_ids[]` | Propagated **verbatim** from sdet_plan.json. Empty when `regression_context.json` was absent at plan time. **Never invent ids.** |
 | `parameterised_steps` | See the data-driven section below. `null` for most scenarios. |
 | `requirement_ref` | From sdet_plan.json `source_ref`, e.g. `RFC-78:step-9 / REQ-001 / AC-001` |
@@ -63,8 +64,9 @@ Do **not** emit a per-entry list of peer scenarios. The repeated `fixture_id` al
 | `is_dedup` | `false` — dedup scenarios are skipped entirely |
 | `target_framework` | From tasks_context.json, e.g. `GBT` |
 | `service_name` | From tasks_context.json component field |
-| `module` | **From `sdet_plan.json` root field `code_module`** (resolved by team_registry — use verbatim). If `code_module` is `null` or `"unknown"` in sdet_plan, flag an error and halt: *"code_module is unresolved in sdet_plan.json — add team alias to config/team_registry.json and re-run sdet-plan-generator."* Do not fall back to tasks_context for the module name. |
-| `package` | `{sdet_plan.code_module}.test.{test_layer}.{feature_component}` — substitute `code_module` verbatim; use `tasks_context` for `feature_component` (feature/domain grouping within the module). Example: `transport.test.component.pickup` |
+| `owning_team` | Propagated verbatim from sdet_plan. Determines this entry's module, package and BrowserStack project. |
+| `module` | **Resolve from the registry entry for this entry's `owning_team`** — that equals the plan's root `code_module` only when `owning_team` is the primary team. A scenario testing another team's service must land in that team's module, not the primary's. If `owning_team` or the resolved module is `null` or `"unknown"`, flag an error and halt: *"code_module is unresolved in sdet_plan.json — add team alias to config/team_registry.json and re-run sdet-plan-generator."* Do not fall back to tasks_context for the module name. |
+| `package` | `{resolved module}.test.{test_layer}.{feature_component}` — the module resolved above from `owning_team`, not the plan's root `code_module`; use `tasks_context` for `feature_component`. Example: `transport.test.component.pickup` |
 | `test_class` | Class name based on `test_layer` + feature/component grouping. Group related scenarios — not one class per scenario. e.g. `SaveCardComponentTest`, `SaveCardIntegrationTest`, `CardRepositoryIntegrationTest` |
 | `test_layer` | From sdet_plan.json: `component` \| `integration` \| `e2e` |
 | `method_name` | `should[ExpectedOutcome]When[Condition]` — Java-valid camelCase. Append suffix if collision within class. |

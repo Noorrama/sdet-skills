@@ -22,7 +22,8 @@
           "test_class",
           "package",
           "test_layer",
-          "test_data"
+          "test_data",
+          "owning_team"
         ],
         "properties": {
           "scenario_id": {
@@ -49,7 +50,8 @@
             "type": "string"
           },
           "module": {
-            "type": "string"
+            "type": "string",
+            "description": "Test code module directory. Resolve from the registry entry for this entry's owning_team; that equals the plan's root code_module only when owning_team is the primary team. If owning_team is null or unknown, halt: \"owning_team unresolved — add a team alias to config/team_registry.json and re-run sdet-plan-generator.\""
           },
           "package": {
             "type": "string",
@@ -282,7 +284,54 @@
                 "description": "false at generation. Detection is inference and produces false positives on progressions; a human confirms at the review gate."
               }
             }
+          },
+          "owning_team": {
+            "type": "string",
+            "description": "Propagated from sdet_plan. Determines this entry's module, package and BrowserStack project — resolve them from the registry entry for this team, not from the plan's root code_module."
+          },
+          "browserstack_test_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "Propagated from sdet_plan at generation time and refreshed by a later sync. Feeds the test-case id list on the generated method's tracking annotation, alongside existing_testcase_ids."
           }
+        }
+      }
+    },
+    "browserstack_sync": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "description": "Record of the last BrowserStack MCP upload. null until the first sync. Written by the sync, not the generator.",
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "BrowserStack project the scenarios were uploaded to — should match the registry browserstack_project for the owning team"
+        },
+        "suite_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "synced_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "synced_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Scenarios that received a browserstack_test_id in this sync"
+        },
+        "unsynced_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Scenarios still carrying null — e.g. those owned by a team whose project was not the upload target"
         }
       }
     }
