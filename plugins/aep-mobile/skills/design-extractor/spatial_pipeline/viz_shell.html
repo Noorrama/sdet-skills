@@ -99,6 +99,7 @@
       <div><span class="sw" style="border-color:var(--banner)"></span>swim-lane banner</div>
       <div><span class="sw" style="border-color:var(--caption)"></span>row caption / note</div>
       <div><span class="sw" style="border-color:var(--sub); border-top-style:dotted"></span>sub-section (blue box)</div>
+      <div id="legEntry" style="display:none"><span class="sw" style="border-color:var(--ok)"></span>▶ entry screen (flow start)</div>
     </div>
     <nav id="groups" aria-label="Board groups"></nav>
   </div>
@@ -124,7 +125,9 @@ const NS = 'http://www.w3.org/2000/svg';
 const [SW, SH] = D.screen_size;
 
 document.getElementById('metaLine').textContent =
-  `${D.groups.length} groups · ${D.edges.length} resolved edges · calibrated screen ${SW}×${SH}`;
+  `${D.groups.length} groups · ${D.edges.length} resolved edges · calibrated screen ${SW}×${SH}` +
+  (D.entry_screens ? ` · ${D.entry_screens} entry screen${D.entry_screens > 1 ? 's' : ''} (${D.entry_frames} frames marked ▶)` : '');
+if (D.entry_frames) document.getElementById('legEntry').style.display = '';
 
 const st = D.stats;
 document.getElementById('stats').innerHTML = `
@@ -153,7 +156,9 @@ const nav = document.getElementById('groups');
 D.groups.filter(g => g.screens > 0).forEach((g, i) => {
   const b = document.createElement('button');
   const edgeN = D.edges.filter(e => e.g === g.id || e.g2 === g.id).length;
-  b.innerHTML = `<span>${g.name}</span><span class="cnt">${g.screens}s·${edgeN}e</span>`;
+  const hasEntry = g.items.some(it => it.k === 'SCREEN' && it.e);
+  b.innerHTML = `<span>${hasEntry ? '<span style="color:var(--ok)">▶</span> ' : ''}${g.name}</span>` +
+    `<span class="cnt">${g.screens}s·${edgeN}e</span>`;
   b.onclick = () => { select(g, b); };
   nav.appendChild(b);
   if (i === 0) select(g, b);
@@ -210,10 +215,23 @@ function draw() {
       txt(it.x, it.y + fsSmall, it.t.replace(/\n/g, ' '), fsSmall, 'var(--caption)', layer.txt,
           it.w * 1.6);
     } else if (it.k === 'SCREEN') {
+      const isEntry = !!it.e;
       const r = el('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: SW * 0.05,
-        fill: 'var(--tile)', stroke: 'var(--tile-line)', 'stroke-width': SW * 0.012 }, layer.item);
-      hover(r, () => `<b>${esc(it.t)}</b><br><span class="mono">frame “${esc(it.n)}” · ${it.id}</span>`);
-      txt(it.x + SW * .05, it.y - fs * .45, it.t, fs, 'var(--ink)', layer.txt, it.w * 2.2);
+        fill: 'var(--tile)', stroke: isEntry ? 'var(--ok)' : 'var(--tile-line)',
+        'stroke-width': isEntry ? SW * 0.035 : SW * 0.012 }, layer.item);
+      hover(r, () => `<b>${esc(it.t)}</b><br><span class="mono">frame “${esc(it.n)}” · ${it.id}</span>` +
+        (isEntry ? `<br><span style="color:var(--ok)">▶ ENTRY → ${esc(it.es || '')} — ${it.e === 'L' ? 'explicit label' : 'inferred from topology'}${it.ec ? ` · “${esc(it.ec)}”` : ''}</span>` : ''));
+      if (isEntry) {
+        const br = fs * 1.05;
+        el('circle', { cx: it.x, cy: it.y, r: br,
+          fill: 'var(--ok)' }, layer.item);
+        const play = el('text', { x: it.x, y: it.y + br * .42, 'font-size': br * 1.15,
+          fill: 'var(--banner-ink)', 'text-anchor': 'middle',
+          'font-family': '"IBM Plex Sans", sans-serif' }, layer.item);
+        play.textContent = '▶';
+      }
+      txt(it.x + SW * .05, it.y - fs * .45, (isEntry ? '▶ ' : '') + it.t, fs,
+          isEntry ? 'var(--ok)' : 'var(--ink)', layer.txt, it.w * 2.2);
     }
   }
 

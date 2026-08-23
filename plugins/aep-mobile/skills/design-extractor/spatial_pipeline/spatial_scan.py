@@ -449,8 +449,12 @@ def analyze(path):
                         'chip_title': title, 'chip_status': status,
                         'band': deep_text(band_of[s['id']]['node'], 100)
                                 if s['id'] in band_of else '',
+                        'band_id': band_of[s['id']]['id']
+                                   if s['id'] in band_of else None,
                         'cluster': deep_text(cluster_of[s['id']]['node'], 100)
                                    if s['id'] in cluster_of else '',
+                        'cluster_id': cluster_of[s['id']]['id']
+                                      if s['id'] in cluster_of else None,
                         'row_caption': ' / '.join(
                             c.get('text', '').replace('\n', ' ')
                             for c in row_caps.get(i, [])),

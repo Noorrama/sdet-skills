@@ -8,7 +8,13 @@ screen gets a packet holding ONLY what the LLM may cite:
 
   candidates[]  - layers inside the screen's frames an element may bind to
                   (id, name, type, text, component variants); element source_ref
-                  MUST come from this list
+                  MUST come from this list. Candidates repeating the same
+                  (name, type, text) across a screen's state-variant frames are
+                  collapsed to the first instance (instance_count says how
+                  many), and each carries a deterministic suggested_purpose
+                  derived from its own text/name, uniquified within the screen
+                  - the enrichment model should copy it unless it has a clearly
+                  more specific name
   notes[]       - caption/annotation texts spatially adjacent to the screen's
                   frames (within one screen-width), verbatim
   states, existing elements, edges touching the screen
@@ -17,9 +23,37 @@ Output: phase_b_packets.jsonl (one packet per screen, flow-relevant first).
 """
 
 import json
+import re
 import sys
 
 import spatial_scan as sp
+
+
+def lower_snake(s):
+    s = re.sub(r'[^0-9A-Za-z]+', '_', s).strip('_')
+    return re.sub(r'_+', '_', s).lower()
+
+
+def dedupe_and_suggest(cands):
+    """Collapse candidates repeating the same (name, type, text) — the same
+    control drawn again in another state-variant frame — and stamp each
+    survivor with a deterministic, screen-unique suggested_purpose derived
+    from its own text/name. Keeps input order, so output is reproducible."""
+    out, by_key, taken = [], {}, {}
+    for c in cands:
+        key = (c.get('name', ''), c['type'], c.get('text', ''))
+        if key in by_key:
+            by_key[key]['instance_count'] = \
+                by_key[key].get('instance_count', 1) + 1
+            continue
+        base = lower_snake(c.get('text') or c.get('name') or '')[:36]
+        if base:
+            n = taken.get(base, 0) + 1
+            taken[base] = n
+            c['suggested_purpose'] = base if n == 1 else f'{base}_{n}'
+        by_key[key] = c
+        out.append(c)
+    return out
 
 
 def candidates_for(frame, screen_h, cap=40):
@@ -97,6 +131,7 @@ def main(export_path, context_path, out_path):
                 if c['id'] not in seen_ids:
                     seen_ids.add(c['id'])
                     cands.append(c)
+        cands = dedupe_and_suggest(cands)
         packets.append({
             'screen_id': s['screen_id'], 'screen_name': s['screen_name'],
             'screen_states': s['screen_states'], 'state_kinds': s['state_kinds'],

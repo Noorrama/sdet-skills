@@ -36,6 +36,12 @@ SCHEMA_PATH = os.path.join(PLUGIN_ROOT, 'schemas', 'design_context.schema.json')
 
 STATUS_WORDS = {'new screen', 'changes', 'existing', 'updated', 'removed'}
 
+# Explicit entry-point signal on a screen label chip (or section title):
+# "MPS - Entry point", "1st time experience", "start here". Closed regex —
+# matching is deterministic, never judgment.
+ENTRY_RE = re.compile(
+    r'\bentry\s*point\b|\b(?:1st|first)\s*time\b|\bstart\s*here\b', re.I)
+
 
 def upper_snake(s):
     s = re.sub(r'[^0-9A-Za-z]+', '_', s).strip('_')
@@ -209,11 +215,13 @@ def build(path, app=None):
 
     # ---- proto-screens: consecutive same-frame-name run inside one column
     protos = []
+    pos_frame = {}          # frame id -> (y, x), board reading order
     for g in world['groups']:
         for r in g['rows']:
             for col in r['columns']:
                 run = []
                 for s in col:
+                    pos_frame[s['id']] = (s['y'], s['x'])
                     if run and s['name'] == run[-1]['name']:
                         run.append(s)
                     else:
@@ -402,10 +410,170 @@ def build(path, app=None):
         })
         edge['trigger_element_id'] = element_id
 
+    # ---- entry points (deterministic; the reserved ENTRY pseudo-node is
+    # emitted only here — the enrichment pass may never create or touch it)
+    FAR = (float('inf'), float('inf'))
+    pos_sid = {}
+    for sid, scr in screens_out.items():
+        ps = [pos_frame[f] for f in scr['source_refs'] if f in pos_frame]
+        pos_sid[sid] = min(ps) if ps else FAR
+
+    chip_of = world['chip_of']
+    explicit = {}           # sid -> {'conditions': set, 'evidence': [node ids]}
+
+    def add_explicit(sid, condition, evidence):
+        ident = screens_out[sid]['screen_name']
+        q = condition
+        if q.lower().startswith(ident.lower()):
+            q = q[len(ident):].lstrip(' -–—/').strip() or condition
+        d = explicit.setdefault(sid, {'conditions': set(), 'evidence': []})
+        d['conditions'].add(q)
+        d['evidence'].append(evidence)
+
+    # signal 1a: an entry qualifier on any screen label chip
+    for fid, sid in frame_to_sid.items():
+        for ch in chip_of.get(fid, []):
+            title, _ = sp.chip_struct(ch['node'])
+            if title and ENTRY_RE.search(title):
+                add_explicit(sid, title, ch['id'])
+    # signal 1b: a flow-cluster / persona banner whose text is an entry marker
+    # names the flow it hangs over; the flow starts at that cluster's top-left
+    # screen (board reading order)
+    banner_frames = defaultdict(list)   # banner id -> [(pos, fid, text)]
+    for fid, sid in frame_to_sid.items():
+        m = meta.get(fid) or {}
+        for bid, text in ((m.get('cluster_id'), m.get('cluster')),
+                          (m.get('band_id'), m.get('band'))):
+            if bid and text and ENTRY_RE.search(text):
+                banner_frames[bid].append(
+                    (pos_frame.get(fid, (float('inf'),) * 2), fid, text))
+    for bid in sorted(banner_frames):
+        pos, fid, text = min(banner_frames[bid])
+        add_explicit(frame_to_sid[fid], text, bid)
+    # prototype flow starting points: the current export plugin does not emit
+    # them; read them anyway so a future plugin version upgrades this for free
+    fsp_sources = [page] + [n for n, *_ in sp.walk_abs(page)]
+    for n in fsp_sources:
+        for p in (n.get('flowStartingPoints') or []):
+            nid = p.get('nodeId') or p.get('node_id')
+            if nid in frame_to_sid:
+                sid = frame_to_sid[nid]
+                d = explicit.setdefault(sid, {'conditions': set(),
+                                              'evidence': []})
+                if p.get('name'):
+                    d['conditions'].add(p['name'])
+                d['evidence'].append(nid)
+
+    indeg, outadj = defaultdict(int), defaultdict(list)
+    for ed in ui_flow:
+        outadj[ed['from_screen_id']].append(ed)
+        indeg[ed['to_screen_id']] += 1
+
+    def forward_reach(sid):
+        seen, stack = {sid}, [sid]
+        while stack:
+            for ed in outadj[stack.pop()]:
+                t = ed['to_screen_id']
+                if t not in seen:
+                    seen.add(t)
+                    stack.append(t)
+        return len(seen) - 1
+
+    roots = sorted((s for s in outadj if indeg[s] == 0),
+                   key=lambda s: (-forward_reach(s), pos_sid.get(s, FAR), s))
+
+    entry_edges, entry_blocking = [], []
+    for sid in sorted(explicit, key=lambda s: (pos_sid.get(s, FAR), s)):
+        d = explicit[sid]
+        entry_edges.append({
+            'from_screen_id': 'ENTRY', 'to_screen_id': sid,
+            'condition': ' / '.join(sorted(d['conditions'])),
+            'navigation_kind': 'ENTRY', 'edge_source': 'ENTRY_LABEL',
+            'confidence': 'EXPLICIT', 'source_ref': sorted(d['evidence'])[0]})
+        if not outadj.get(sid):
+            entry_blocking.append(
+                f"Screen {sid} is labelled an entry point (node "
+                f"{sorted(d['evidence'])[0]}) but has no outgoing flow edges — "
+                f"confirm the label, or connect the flow it starts.")
+    if not explicit and roots:
+        # no explicit label anywhere: best global root, plus the best root of
+        # each persona band the global one does not cover
+        chosen = {roots[0]}
+        for s in roots:
+            for band in screens_out[s].get('_bands', ()):
+                if not any(band in screens_out[c].get('_bands', ())
+                           for c in chosen):
+                    chosen.add(s)
+        for sid in sorted(chosen, key=lambda s: (pos_sid.get(s, FAR), s)):
+            entry_edges.append({
+                'from_screen_id': 'ENTRY', 'to_screen_id': sid,
+                'condition': '', 'navigation_kind': 'ENTRY',
+                'edge_source': 'ENTRY_TOPOLOGY', 'confidence': 'INFERRED',
+                'source_ref': screens_out[sid]['source_ref']})
+
+    # ---- ui_flow ordering: breadth-first from ENTRY, orphan components last.
+    # Purely presentational — deterministic tie-breaks keep the byte-for-byte
+    # reproducibility guarantee (target board position, condition, source_ref).
+    def order_ui_flow(entries, edges):
+        from collections import deque
+        by_from = defaultdict(list)
+        for ed in edges:
+            by_from[ed['from_screen_id']].append(ed)
+        for lst in by_from.values():
+            lst.sort(key=lambda ed: (pos_sid.get(ed['to_screen_id'], FAR),
+                                     ed.get('condition', ''),
+                                     ed.get('source_ref', '')))
+        ordered, emitted, visited, q = [], set(), set(), deque()
+        for ee in entries:
+            ordered.append(ee)
+            if ee['to_screen_id'] not in visited:
+                visited.add(ee['to_screen_id'])
+                q.append(ee['to_screen_id'])
+
+        def bfs():
+            while q:
+                s = q.popleft()
+                for ed in by_from.get(s, []):
+                    if id(ed) in emitted:
+                        continue
+                    emitted.add(id(ed))
+                    ordered.append(ed)
+                    t = ed['to_screen_id']
+                    if t not in visited:
+                        visited.add(t)
+                        q.append(t)
+        bfs()
+        while True:                       # components no entry reaches
+            remaining = [ed for ed in edges if id(ed) not in emitted]
+            if not remaining:
+                break
+            rem_from = {ed['from_screen_id'] for ed in remaining}
+            rem_in = defaultdict(int)
+            for ed in remaining:
+                rem_in[ed['to_screen_id']] += 1
+            starts = [s for s in rem_from if rem_in[s] == 0] or list(rem_from)
+            start = min(starts, key=lambda s: (pos_sid.get(s, FAR), s))
+            visited.add(start)
+            q.append(start)
+            bfs()
+        return ordered
+
+    ui_flow = order_ui_flow(entry_edges, ui_flow)
+
     # ---- ambiguity + gaps
     blocking, gaps = [], []
+    blocking.extend(entry_blocking)
     if cfg_gap:
         gaps.append(cfg_gap)
+    if not explicit:
+        gaps.append({'field': 'ui_flow',
+                     'reason': 'No explicit entry-point label on the board; '
+                               'entry edges are inferred from graph topology '
+                               '(edge_source ENTRY_TOPOLOGY).',
+                     'action': "Add an 'Entry point' qualifier to the entry "
+                               "screen's label chip in Figma to make the "
+                               'starting point explicit.',
+                     'severity': 'INFO'})
     for u in unresolved:
         if u.get('condition'):
             blocking.append(
@@ -506,8 +674,11 @@ def build(path, app=None):
             f"(calibrated device frame {screen_w}x{screen_h}). Swim lanes: persona "
             f"bands (Large banners), flow clusters (Medium banners), row captions "
             f"as cart-state lanes; scenario sub-sections read as preconditions. "
-            f"{len(ui_flow)} navigation edges from {len(conns)} connectors; "
-            f"prototype reactions all point outside the export.",
+            f"{len(ui_flow) - len(entry_edges)} navigation edges from "
+            f"{len(conns)} connectors, plus {len(entry_edges)} ENTRY edge(s) "
+            f"({'explicit label' if explicit else 'topology-inferred'}); "
+            f"ui_flow ordered breadth-first from ENTRY. "
+            f"Prototype reactions all point outside the export.",
         'project_context': {
             'overall_ambiguity_rating': rating,
             'blocking_issues': blocking,
@@ -523,11 +694,20 @@ def build(path, app=None):
         'merges': {k: v for k, v in merges.items() if len(v) > 1},
         'state_transitions': state_transitions,
         'variant_links': variant_links,
+        'entry_points': [
+            {'screen_id': ee['to_screen_id'], 'kind': ee['edge_source'],
+             'condition': ee['condition'], 'evidence': ee['source_ref'],
+             'reaches_screens': forward_reach(ee['to_screen_id'])}
+            for ee in entry_edges],
+        'entry_candidates': [
+            {'screen_id': s, 'out_degree': len(outadj[s]),
+             'reaches_screens': forward_reach(s)} for s in roots],
         'ambiguous_collapses': ambiguous_collapses,
         'excluded_nodes': [dict(id=i, reason=r, name=n) for i, r, n in excluded],
         'unresolved_connectors': unresolved,
         'counters': {
             'connectors_total': len(conns),
+            'entry_points': len(entry_edges),
             'edges_emitted': len(ui_flow),
             'state_transition_connectors': len(state_transitions),
             'variant_link_connectors': len(variant_links),
