@@ -14,21 +14,36 @@ Bridge between *what to test* (SDET plan) and *how to implement it* (test code +
 | `sdet_plan.json` (approved) | Human-reviewed output from sdet-plan-generator, and the **only** source for test-data requirements. Source of `scenario_id`, `source_ref`, `is_legacy_regression`, `description`, `preconditions`, `step_descriptions`, `test_layer`, `tags`, `priority`, plus `scenario_group` (drives grouping), `execution_mode` (drives selection), `owning_team` (drives module and BrowserStack routing per scenario) and `existing_testcase_ids` (propagated verbatim). Also read `canonical_team_id`, `code_module` and `teams_in_scope[]` (root fields) — resolved by the team registry, never re-derived here. |
 | `tasks_context.json` | Package/class naming conventions, component boundaries, api_contract, service_name, target_framework. |
 | `code_change_context.json` | `curl_reference` construction from actual endpoint signatures. |
-| `regression_context.json` | Existing class naming patterns for consistency. |
+| `regression_context.json` (the resolver's `scope.json`) | Existing class naming patterns for consistency, and `resolvedServices[].testGroups` / `.testClasses` for the `regression_selection` block. Class-level only — it cannot locate a method, so `existing_test_ref` must come from the SDET plan, never be derived here. |
 
 ## Model
 Fast tier — Haiku
 
+## Approval gate — check before reading anything else
+
+**Halt unless `sdet_plan.status == "approved"`.** Surface: *"sdet_plan.json is not approved (status: {value}). A human must review the plan and its qa_analysis.md, then set status to 'approved' before the automation plan can be generated."*
+
+This skill has always described its input as "sdet_plan.json (approved)" without anything enforcing it. The field makes that real. Generating from a draft plan means locking in test classes, fixtures and method names from scenarios nobody has signed off — and every one of those decisions cascades into generated code.
+
+Also check staleness: if `sdet_plan.updated_at` is later than `sdet_plan.approved_at`, the plan changed after approval. Halt and say so rather than proceeding on an approval that predates the content.
+
+The automation plan this skill writes carries its own `status` (plan root), and the same rule applies one stage down: **always write `draft`**, never `approved`. `test-code-generator` gates on it before writing any code.
+
 ## Selection — decide what becomes a test method before filling any field
 
-**Skip these scenarios entirely. Neither produces a test method:**
+**Skip these scenarios entirely. None produces a new test method:**
 
 | Condition | Why |
 |---|---|
 | `is_dedup: true` | Already covered by an existing regression test |
+| `regression_action: "reuse"` | An existing case already covers this exact behaviour. The scenario exists so reviewers can see the coverage; there is nothing to build. |
 | `execution_mode: "Manual"` | Tagged `deferred` or `underspecified` — blocked on an open decision or an unfinalised contract. A method here would assert behaviour nobody has defined yet. |
 
 Report both counts in the log. A plan where a fifth of scenarios are Manual is normal for a feature built on a draft RFC, not an error.
+
+**`regression_action: "modify"` produces an EDIT, not a new method.** Emit an entry, but carry `existing_test_ref` through verbatim — `class`, `method`, `file_path` and `change_required`. `test-code-generator` must modify that existing method rather than author a new one; a new method alongside the old leaves the insufficient assertion in place, which is the failure this disposition exists to prevent. Do not invent a `method_name` for these — the name already exists.
+
+Propagate `regression_selection` to the plan root unchanged. It is the signoff run: the existing groups and classes CI executes alongside the new tests.
 
 **Emit exactly one `automation_scenarios[]` object per surviving scenario.** One scenario, one test method, one result. Never merge scenarios into a shared method.
 
@@ -68,7 +83,7 @@ Do **not** emit a per-entry list of peer scenarios. The repeated `fixture_id` al
 | `module` | **Resolve from the registry entry for this entry's `owning_team`** — that equals the plan's root `code_module` only when `owning_team` is the primary team. A scenario testing another team's service must land in that team's module, not the primary's. If `owning_team` or the resolved module is `null` or `"unknown"`, flag an error and halt: *"code_module is unresolved in sdet_plan.json — add team alias to config/team_registry.json and re-run sdet-plan-generator."* Do not fall back to tasks_context for the module name. |
 | `package` | `{resolved module}.test.{test_layer}.{feature_component}` — the module resolved above from `owning_team`, not the plan's root `code_module`; use `tasks_context` for `feature_component`. Example: `transport.test.component.pickup` |
 | `test_class` | Class name based on `test_layer` + feature/component grouping. Group related scenarios — not one class per scenario. e.g. `SaveCardComponentTest`, `SaveCardIntegrationTest`, `CardRepositoryIntegrationTest` |
-| `test_layer` | From sdet_plan.json: `component` \| `integration` \| `e2e` |
+| `test_layer` | Copied **verbatim** from `sdet_plan.json`: `component` \| `integration` \| `e2e`. Never recomputed here, and never adjusted to suit a tidier `package` or `test_class` — it originates in `tasks_context`, which another team owns. If a value looks wrong for the scenario, flag it in the run notes and still propagate it unchanged. |
 | `method_name` | `should[ExpectedOutcome]When[Condition]` — Java-valid camelCase. Append suffix if collision within class. |
 | `assertion_class` | Derived from test_class, e.g. `SaveCardAssertions`, `CardRepositoryAssertions` |
 | `endpoint` | HTTP method + path from tasks_context api_contract, e.g. `POST /payment/v1/cards`. Empty string for DB/infra-only tests (no HTTP call). |
@@ -215,8 +230,13 @@ One `fixture_id` = one call to the test data service at test runtime.
 
 ## Output → automation_plan.json
 
+> **Emit every field explicitly, including nulls and defaults.** JSON Schema `default:` injects nothing — an unwritten field is an absent field.
+
 Schema root structure:
 - `epic_id` — from tasks_context epics[0].id
+- `status: "draft"` — always `draft`; never approve your own output. With `approved_by: null`, `approved_at: null`.
+- `regression_selection` — propagated unchanged from `sdet_plan`.
+- `browserstack_sync: null` — written only by the sync.
 - `automation_scenarios[]` — flat list, one object per non-dedup scenario, with all fields above
 
 ## Guardrails

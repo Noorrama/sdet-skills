@@ -51,7 +51,7 @@
           },
           "module": {
             "type": "string",
-            "description": "Test code module directory. Resolve from the registry entry for this entry's owning_team; that equals the plan's root code_module only when owning_team is the primary team. If owning_team is null or unknown, halt: \"owning_team unresolved — add a team alias to config/team_registry.json and re-run sdet-plan-generator.\""
+            "description": "Test code module directory. Resolve from the registry entry for this entry's owning_team; that equals the plan's root code_module only when owning_team is the primary team. If owning_team is null or unknown, halt: \"owning_team unresolved \u2014 add a team alias to config/team_registry.json and re-run sdet-plan-generator.\""
           },
           "package": {
             "type": "string",
@@ -66,7 +66,8 @@
               "component",
               "integration",
               "e2e"
-            ]
+            ],
+            "description": "Copied verbatim from sdet_plan.json, which takes it from tasks_context (owned by the planning team). Never re-derived in this skill. Drives `package` and `test_class`, so it must stay traceable to its source."
           },
           "method_name": {
             "type": "string",
@@ -130,7 +131,7 @@
               "properties": {
                 "fixture_id": {
                   "type": "string",
-                  "description": "Format: {sdet_plan fixture label}-{NN} — the equivalence-class label read from the scenario's preconditions 'Test data:' line, plus a two-digit instance ordinal, e.g. FX-SG-HOST-OWNER-01. The ordinal disambiguates independently addressable entities in the same state; use count for entities addressed as a set."
+                  "description": "Format: {sdet_plan fixture label}-{NN} \u2014 the equivalence-class label read from the scenario's preconditions 'Test data:' line, plus a two-digit instance ordinal, e.g. FX-SG-HOST-OWNER-01. The ordinal disambiguates independently addressable entities in the same state; use count for entities addressed as a set."
                 },
                 "description": {
                   "type": "string"
@@ -177,7 +178,7 @@
                     "null"
                   ],
                   "default": null,
-                  "description": "Set to null by APG. Written by test-data-identification: one test_data_output record per scenario using this fixture (test_data_status, test_data_details, test_buddy_prompt, match_confidence, identification_notes), shaped as test_data_manifest.schema.json#/definitions/test_data_output. Array per the RFC contract, and a sibling of required_state — never nested under an 'output' wrapper.",
+                  "description": "Set to null by APG. Written by test-data-identification: one test_data_output record per scenario using this fixture (test_data_status, test_data_details, test_buddy_prompt, match_confidence, identification_notes), shaped as test_data_manifest.schema.json#/definitions/test_data_output. Array per the RFC contract, and a sibling of required_state \u2014 never nested under an 'output' wrapper.",
                   "items": {
                     "type": "object",
                     "additionalProperties": true
@@ -217,7 +218,7 @@
           },
           "scenario_group": {
             "type": "string",
-            "description": "Propagated verbatim from sdet_plan.json. Groups entries into a shared test class and marks scenarios whose test_data repeats the same fixture_id values. Never a merge instruction — one scenario always yields one test method."
+            "description": "Propagated verbatim from sdet_plan.json. Groups entries into a shared test class and marks scenarios whose test_data repeats the same fixture_id values. Never a merge instruction \u2014 one scenario always yields one test method."
           },
           "existing_testcase_ids": {
             "type": "array",
@@ -291,7 +292,7 @@
           },
           "owning_team": {
             "type": "string",
-            "description": "Propagated from sdet_plan. Determines this entry's module, package and BrowserStack project — resolve them from the registry entry for this team, not from the plan's root code_module."
+            "description": "Propagated from sdet_plan. Determines this entry's module, package and BrowserStack project \u2014 resolve them from the registry entry for this team, not from the plan's root code_module."
           },
           "browserstack_test_id": {
             "type": [
@@ -300,6 +301,59 @@
             ],
             "default": null,
             "description": "Propagated from sdet_plan at generation time and refreshed by a later sync. Feeds the test-case id list on the generated method's tracking annotation, alongside existing_testcase_ids."
+          },
+          "existing_case_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The single BrowserStack case id this scenario duplicates or directly impacts, verbatim (e.g. 'TC-329330' or 'C3260998'). Set whenever is_legacy_regression is true because of a real match \u2014 is_legacy_regression true with no ref is a bare flag nobody can audit or trace back. Omit when the scenario is genuinely new. Use existing_testcase_ids[] when a scenario maps to several cases."
+          },
+          "regression_action": {
+            "type": "string",
+            "enum": [
+              "none",
+              "reuse",
+              "modify"
+            ],
+            "default": "none",
+            "description": "What this scenario implies for existing automated coverage. 'none' = net-new; generate a new test method. 'reuse' = an existing case already covers this exact behaviour; emit the row so reviewers can see it exists, but generate no code. 'modify' = an existing test covers this surface and must be EDITED because the change alters what it should assert. 'modify' is the disposition most easily missed on backend: a response POJO that tolerates unknown fields lets the existing test keep PASSING after a field is added, while silently covering less \u2014 nobody re-runs their way to noticing that."
+          },
+          "existing_test_ref": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "default": null,
+            "additionalProperties": false,
+            "description": "Repo location of the existing automated test this scenario reuses or modifies, copied from regression_context.regression_tests[].test_ref. REQUIRED when regression_action is 'modify' \u2014 an edit instruction cannot be emitted against a case id alone.",
+            "required": [
+              "class",
+              "method"
+            ],
+            "properties": {
+              "class": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              },
+              "file_path": {
+                "type": "string"
+              },
+              "case_numbers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Numeric case ids this method implements, from @TestInfo(testCaseIds={...})."
+              },
+              "change_required": {
+                "type": "string",
+                "description": "What must change in the existing test and why. REQUIRED when regression_action is 'modify'. Name the assertion that becomes insufficient, not merely that the test is affected."
+              }
+            }
           }
         }
       }
@@ -315,7 +369,7 @@
       "properties": {
         "project": {
           "type": "string",
-          "description": "BrowserStack project the scenarios were uploaded to — should match the registry browserstack_project for the owning team"
+          "description": "BrowserStack project the scenarios were uploaded to \u2014 should match the registry browserstack_project for the owning team"
         },
         "suite_id": {
           "type": [
@@ -335,9 +389,69 @@
         "unsynced_count": {
           "type": "integer",
           "minimum": 0,
-          "description": "Scenarios still carrying null — e.g. those owned by a team whose project was not the upload target"
+          "description": "Scenarios still carrying null \u2014 e.g. those owned by a team whose project was not the upload target"
         }
       }
+    },
+    "regression_selection": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "description": "The executable signoff selection: existing suites CI runs alongside the new tests. Copied from regression_context.regression_selection. Holds the 'reuse' population in bulk so the plan does not carry one no-op row per already-covered case.",
+      "properties": {
+        "test_groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "test_classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "case_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_review",
+        "changes_requested",
+        "approved"
+      ],
+      "default": "draft",
+      "description": "Human approval gate for this plan as a whole. The GENERATOR always writes 'draft' and must never write 'approved' \u2014 only a person sets that, after reading the plan and its analysis document. 'in_review' = a reviewer has picked it up. 'changes_requested' = feedback was written into the qa_analysis.md Feedback block and a Review-mode run is pending. 'approved' = cleared to flow downstream. ANY run that changes scenario content \u2014 pass2, retrigger, review \u2014 resets this to 'draft'. An approval attaches to the content that was read, not to the filename. NOTE: a per-scenario field named `status` also exists with enum 'active' | 'deprecated' \u2014 that is scenario lifecycle, not plan approval. They sit at different levels (plan root vs scenarios[]) so they never collide in JSON, but read the path carefully."
+    },
+    "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "Who approved. Set alongside status='approved'; null otherwise."
+    },
+    "approved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "default": null,
+      "description": "When approval was given. Set alongside status='approved'; null otherwise. If updated_at is later than this, the plan changed after approval and the approval is stale."
     }
   }
 }
