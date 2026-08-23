@@ -30,14 +30,17 @@ script exists so that never happens.
 **Never stop, never guess.** Anything unresolvable becomes an `extraction_gaps` entry and the run
 continues — a partial, honestly labelled output beats no output. Inventing a value is forbidden.
 
-1. **Environment** — `python3 -c "import jsonschema"`. Missing → run continues (phase_a prints a
-   schema-check warning instead of validating); add a `DEGRADED` gap on `ENVIRONMENT` advising
-   `pip install jsonschema` (or run `aep-mobile:setup`).
-2. **Input** — the Figma export JSON parses and its envelope says `export.formatVersion: 2` with
-   geometry. `formatVersion` 1 / no geometry → the spatial pipeline cannot run; emit a `DEGRADED`
-   context with empty screens, a `BLOCKING` gap ("re-export with plugin ≥0.5.0"), and stop the
-   pipeline there. Non-zero `truncatedCount` → `DEGRADED` gap listing `truncatedNodes`.
-3. **App set — how many apps does this export cover?** Never assume one. Check `file.name`,
+1. **Mechanical checks — one script, never hand-written.** Run
+   `python3 spatial_pipeline/preflight.py <export.json> [--app <app_id>]`. It performs EVERY
+   mechanical preflight check in one deterministic pass — jsonschema availability, export parse,
+   `formatVersion: 2` + geometry, `truncatedCount`, app config readability, schema readability —
+   and prints a JSON verdict with ready-made `extraction_gaps` entries to copy into the context,
+   plus the raw app-set evidence (file name/page, top-level sections, bracket prefixes, known app
+   ids) for step 2. **Never write ad-hoc code to inspect the export envelope** — that is exactly
+   the failure mode this script removes. `status: BLOCKED` (formatVersion 1 / no geometry) →
+   emit a `DEGRADED` context with empty screens carrying the script's `BLOCKING` gap and stop
+   the pipeline there; `DEGRADED` entries → copy the gaps and continue.
+2. **App set — how many apps does this export cover?** Never assume one. Check `file.name`,
    `file.page`, top-level SECTION names, frame-name prefixes (`[GoPay] …`), or the user naming
    them. Map to: `gojek-consumer`, `gojek-driver`, `gofood-merchant`, `gopay-consumer`,
    `gopay-merchant`.
@@ -50,11 +53,11 @@ continues — a partial, honestly labelled output beats no output. Inventing a v
    - None resolvable → one file, `app` absent, `BLOCKING` note on `app`. Never guess from visual
      style; a dark-themed frame is not proof of an app.
    Report the decision in your reply before extracting.
-4. **Config** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json` supplies
+3. **Config** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json` supplies
    `naming_convention.role_vocabulary` (the `_btn/_input/…` suffixes phase_a and the merge use).
    Unreadable → scripts fall back to their built-in default vocabulary; add a `DEGRADED` gap
    warning IDs are unverified against the app convention.
-5. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`. The scripts locate it
+4. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`. The scripts locate it
    relative to the plugin root automatically; unreadable → `DEGRADED` gap, same install action as
    other skills (`claude plugin update aep-mobile@aep`).
 
@@ -118,7 +121,12 @@ refine bindings and wording, not to argue flags away.
   closed-vocabulary language work and runs on Haiku agents.
 - **Escalate to Sonnet** only for screens listed in `escalations.json` (step 5), or for the two
   preflight judgment calls a fast tier shouldn't make alone: an app split the page names don't
-  settle, and wording of user-facing blocking issues when the source notes conflict.
+  settle, and wording of user-facing blocking issues when the source notes conflict. Keep
+  escalation prompts minimal — one screen packet plus the contract, nothing else — so the Sonnet
+  spend stays proportional to the judgment actually needed.
+- **HARD CAP: Sonnet.** No agent in this skill may ever run on a tier above Sonnet (no Opus, no
+  Fable) — not for escalations, not for retries, not under any pressure. If Sonnet cannot settle
+  a question, the answer is a `blocking_issues` entry for a human, never a bigger model.
 - **Never escalate to redo structure.** If the structure looks wrong, the fix is a script fix or
   a Figma fix — re-running a bigger model over the same export must produce the same skeleton by
   construction.
