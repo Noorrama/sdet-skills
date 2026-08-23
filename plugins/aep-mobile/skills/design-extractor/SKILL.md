@@ -20,7 +20,9 @@ script exists so that never happens.
 | script | role |
 | :--- | :--- |
 | `phase_a.py` | THE extractor: spatial analysis → collapse → skeleton `design_context.json` + `phase_a.report.json`, schema-validated |
+| `preflight.py` | ALL mechanical preflight checks in one deterministic pass — never hand-write these |
 | `phase_b_packets.py` | one grounded packet per screen for the enrichment pass |
+| `phase_b_autobind.py` | deterministic element auto-bind (zero tokens) + light packets for the notes-only LLM pass |
 | `phase_b_merge.py` | applies enrichment under the no-invention contract, writes `escalations.json`, re-validates |
 | `spatial_scan.py`, `connector_resolve.py` | libraries used by the above; each also runs standalone as a diagnostic |
 | `viz_export.py` + `viz_shell.html` | optional: board-replica HTML for human side-by-side verification against Figma |
@@ -85,20 +87,40 @@ python3 phase_a.py <export.json> --app <app_id> --out <workdir>
 python3 phase_b_packets.py <export.json> <workdir>/design_context.json <workdir>/phase_b_packets.jsonl
 ```
 
-**3. Phase B enrichment — fast tier.** Split the packets into batches of ~14 lines and run one
-enrichment agent per batch **on Haiku** (`Agent` tool, `model: "haiku"`, parallel). Each agent
-receives the contract from the `phase_b_merge.py` docstring verbatim plus its batch file path,
-and writes `phase_b_out_<n>.jsonl`. The contract is mechanical by construction — bind candidates,
-copy note text, closed role/state enums, "omit" always legal — which is what makes the fast tier
-a safe claim. Never do the enrichment inline in your own context: agents keep the packets out of
-the main window and the merge validates them anyway.
+**3. Phase B — light mode (the default).** Element binding is deterministic; only note
+interpretation needs a model.
 
 ```bash
-# 4. merge under the no-invention contract; writes escalations.json
-cat phase_b_out_*.jsonl > phase_b_out.jsonl
+# 3a. auto-bind elements from the packets (zero tokens, instant) and emit the
+#     light packets for the notes-only pass
+python3 phase_b_autobind.py <workdir>/phase_b_packets.jsonl \
+        <workdir>/autobind_out.jsonl <workdir>/phase_b_light.jsonl
+
+# 3b. merge the auto-bound elements (same contract, same validator)
 python3 phase_b_merge.py <workdir>/design_context.json <workdir>/phase_b_packets.jsonl \
-        phase_b_out.jsonl <workdir>/design_context.enriched.json
+        <workdir>/autobind_out.jsonl <workdir>/design_context.autobound.json
 ```
+
+Then run the **notes-only LLM pass** over `phase_b_light.jsonl` (screens with notes, OTHER
+state kinds, or ambiguity flags — typically half the screens at ~6% of the full packet bytes):
+split into batches of ~21 lines, one **Haiku** agent per batch, in parallel. Each agent outputs
+per screen ONLY `state_kind_map`, `screen_validations` (note-traced, never invented), and
+`ambiguity` — no `elements`, no `element_updates`; instruct it so explicitly. Never do this
+inline in your own context.
+
+```bash
+# 4. merge the light outputs; writes escalations.json
+cat light_out_*.jsonl > light_out.jsonl
+python3 phase_b_merge.py <workdir>/design_context.autobound.json \
+        <workdir>/phase_b_packets.jsonl light_out.jsonl \
+        <workdir>/design_context.enriched.json
+```
+
+**Full mode (opt-in, only when the user asks for maximum element curation):** instead of 3a/3b,
+run one Haiku agent per ~14-packet batch of the FULL packets with the contract from the
+`phase_b_merge.py` docstring verbatim — the model then also selects/refines elements. Costs
+roughly 10x the light-mode tokens for modestly better decoration filtering; the merge's
+auto-repair makes light mode's naming just as safe.
 
 **5. Escalation pass — stronger model, only when earned.** `phase_b_merge.py` writes
 `escalations.json`: one entry per screen that needs judgment beyond the fast tier —
