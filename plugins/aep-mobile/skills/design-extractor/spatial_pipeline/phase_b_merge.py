@@ -22,11 +22,18 @@ Enrichment input (phase_b_out.jsonl, one JSON object per screen):
   }],
   "state_kind_map": {"<state>": "<KIND>"},# only states currently OTHER
   "screen_validations": ["..."],          # appended to screen_notes
-  "ambiguity": {"rating": "LOW|MEDIUM|HIGH", "reason": "..."}   # optional
+  "ambiguity": {"rating": "LOW|MEDIUM|HIGH", "reason": "..."}   # optional;
+                                          # an OBJECT, never a boolean. HIGH
+                                          # requires a non-empty reason (it
+                                          # becomes a blocking issue a PM
+                                          # must be able to answer)
 }
 
 Rules enforced here, not trusted from the model:
   - screens and ui_flow are immutable
+  - every model-supplied field is type-checked; a malformed field (wrong
+    JSON shape) is rejected with a reason — rejections feed escalations —
+    and the merge continues instead of crashing
   - a new element's source_ref must appear in the packet candidate list
   - element_id built HERE from screen_id + purpose + role suffix
   - state_kind_map may only upgrade OTHER states, to enum values only
@@ -120,6 +127,9 @@ def main(context_path, packets_path, enrich_path, out_path):
             if not line:
                 continue
             e = json.loads(line)
+            if not isinstance(e, dict):
+                rejected.append((None, 'enrichment line not an object'))
+                continue
             sid = e.get('screen_id')
             scr = screens.get(sid)
             pkt = packets.get(sid)
@@ -130,8 +140,16 @@ def main(context_path, packets_path, enrich_path, out_path):
             existing = {el['element_id']: el.get('source_ref')
                         for el in scr['elements']}
 
-            for ne in e.get('elements', []):
-                ref = ne.get('source_ref') or ''
+            elems = e.get('elements', [])
+            if not isinstance(elems, list):
+                rejected.append((sid, 'elements not a list'))
+                elems = []
+            for ne in elems:
+                if not isinstance(ne, dict):
+                    rejected.append((sid, 'element entry not an object'))
+                    continue
+                ref = ne.get('source_ref')
+                ref = ref if isinstance(ref, str) else ''
                 if ref not in cand_ids:
                     # truncated-id repair: unique substring match snaps to
                     # the real candidate; ambiguous/absent still rejects
@@ -145,8 +163,8 @@ def main(context_path, packets_path, enrich_path, out_path):
                                               'not a packet candidate'))
                         continue
                 role = ne.get('role', 'OTHER')
-                if role not in ROLE_SUFFIX:
-                    rejected.append((sid, f'bad role {role}'))
+                if not isinstance(role, str) or role not in ROLE_SUFFIX:
+                    rejected.append((sid, f'bad role {role!r}'))
                     continue
                 cand = next(c for c in pkt['candidates'] if c['id'] == ref)
                 suffix = ROLE_SUFFIX[role]
@@ -155,7 +173,9 @@ def main(context_path, packets_path, enrich_path, out_path):
                     return p if p.endswith(suffix.lstrip('_')) \
                         else f'{p}{suffix}'
 
-                purpose = lower_snake(ne.get('purpose', ''))[:40]
+                purpose = ne.get('purpose', '')
+                purpose = lower_snake(
+                    purpose if isinstance(purpose, str) else '')[:40]
                 repaired = False
                 if GENERIC_PURPOSE.fullmatch(purpose):
                     better = derived_purpose(cand)
@@ -180,15 +200,19 @@ def main(context_path, packets_path, enrich_path, out_path):
                             continue      # same candidate under either name
                         rejected.append((sid, f'duplicate element_id {eid}'))
                         continue
+                label = ne.get('label')
+                vecs = ne.get('validations_and_edge_cases', [])
+                if not isinstance(vecs, list):
+                    vecs = []
                 scr['elements'].append({
                     'element_id': eid, 'source_ref': ref,
                     'type': cand['type'], 'role': role,
-                    'label': (ne.get('label') or cand.get('text')
-                              or cand['name'])[:80],
+                    'label': ((label if isinstance(label, str) else None)
+                              or cand.get('text') or cand['name'])[:80],
                     'states_represented': [],
                     'interactions': [],
                     'validations_and_edge_cases':
-                        [v[:300] for v in ne.get('validations_and_edge_cases', [])][:6],
+                        [v[:300] for v in vecs if isinstance(v, str)][:6],
                 })
                 existing[eid] = ref
                 if repaired:
@@ -196,22 +220,39 @@ def main(context_path, packets_path, enrich_path, out_path):
                 else:
                     applied['elements'] += 1
 
-            for up in e.get('element_updates', []):
+            ups = e.get('element_updates', [])
+            if not isinstance(ups, list):
+                rejected.append((sid, 'element_updates not a list'))
+                ups = []
+            for up in ups:
+                if not isinstance(up, dict):
+                    rejected.append((sid, 'element_update entry not an object'))
+                    continue
                 el = next((x for x in scr['elements']
                            if x['element_id'] == up.get('element_id')), None)
                 if not el:
                     rejected.append((sid, f"update for unknown {up.get('element_id')}"))
                     continue
-                if up.get('label'):
+                if isinstance(up.get('label'), str) and up['label']:
                     el['label'] = up['label'][:80]
-                if up.get('role') in ROLE_SUFFIX:
+                if isinstance(up.get('role'), str) and up['role'] in ROLE_SUFFIX:
                     el['role'] = up['role']
-                for v in up.get('validations_and_edge_cases', [])[:6]:
-                    if v not in el['validations_and_edge_cases']:
+                uvecs = up.get('validations_and_edge_cases', [])
+                if not isinstance(uvecs, list):
+                    uvecs = []
+                for v in uvecs[:6]:
+                    if isinstance(v, str) \
+                       and v not in el['validations_and_edge_cases']:
                         el['validations_and_edge_cases'].append(v[:300])
                 applied['updates'] += 1
 
             km = e.get('state_kind_map', {})
+            if not isinstance(km, dict):
+                rejected.append((sid, 'state_kind_map not an object'))
+                km = {}
+            if any(not isinstance(v, str) for v in km.values()):
+                rejected.append((sid, 'state_kind values must be strings'))
+                km = {k: v for k, v in km.items() if isinstance(v, str)}
             if km:
                 kinds = []
                 for st in scr['screen_states']:
@@ -228,20 +269,45 @@ def main(context_path, packets_path, enrich_path, out_path):
                 applied['kinds'] += 1
 
             sv = e.get('screen_validations', [])
+            if not isinstance(sv, list):
+                rejected.append((sid, 'screen_validations not a list'))
+                sv = []
+            sv = [v for v in sv if isinstance(v, str)]
             if sv:
                 extra = ' — '.join(v[:300] for v in sv[:5])
                 scr['screen_notes'] = (scr['screen_notes'] + ' — ' + extra).strip(' —')
                 applied['validations'] += 1
 
             amb = e.get('ambiguity')
-            if amb and amb.get('rating') in ('LOW', 'MEDIUM', 'HIGH'):
-                applied['ambiguity'] += 1
-                if amb['rating'] == 'HIGH':
-                    context['project_context']['blocking_issues'].append(
-                        f"{sid}: {amb.get('reason', 'high ambiguity')[:200]}")
-                    escalations.append({'screen_id': sid,
-                                        'reason': 'HIGH ambiguity: '
-                                                  + amb.get('reason', '')[:200]})
+            if amb is False:
+                amb = None    # explicit "no ambiguity" — harmless, accept
+            if amb is not None and not isinstance(amb, dict):
+                # a bare boolean/string here once crashed the merge; malformed
+                # ambiguity is a contract violation like any other — reject it
+                # (rejections feed escalations) and keep merging
+                rejected.append((sid, 'ambiguity must be an object: '
+                                      '{"rating": "LOW|MEDIUM|HIGH", '
+                                      '"reason": "..."}'))
+                amb = None
+            if amb:
+                rating = amb.get('rating')
+                reason = amb.get('reason')
+                reason = reason.strip() if isinstance(reason, str) else ''
+                if rating not in ('LOW', 'MEDIUM', 'HIGH'):
+                    rejected.append((sid, f'ambiguity rating {rating!r} '
+                                          'not LOW/MEDIUM/HIGH'))
+                elif rating == 'HIGH' and not reason:
+                    # HIGH becomes a blocking issue a PM must answer; without
+                    # a reason there is no question to answer
+                    rejected.append((sid, 'HIGH ambiguity requires a reason'))
+                else:
+                    applied['ambiguity'] += 1
+                    if rating == 'HIGH':
+                        context['project_context']['blocking_issues'].append(
+                            f"{sid}: {reason[:200]}")
+                        escalations.append({'screen_id': sid,
+                                            'reason': 'HIGH ambiguity: '
+                                                      + reason[:200]})
 
     # escalation list: HIGH-ambiguity screens, ambiguous phase-A collapses,
     # and screens whose enrichment the contract rejected — the only screens a

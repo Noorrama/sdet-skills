@@ -104,9 +104,24 @@ python3 phase_b_merge.py <workdir>/design_context.json <workdir>/phase_b_packets
 Then run the **notes-only LLM pass** over `phase_b_light.jsonl` (screens with notes, OTHER
 state kinds, or ambiguity flags — typically half the screens at ~6% of the full packet bytes):
 split into batches of ~21 lines, one **Haiku** agent per batch, in parallel. Each agent outputs
-per screen ONLY `state_kind_map`, `screen_validations` (note-traced, never invented), and
-`ambiguity` — no `elements`, no `element_updates`; instruct it so explicitly. Never do this
-inline in your own context.
+one JSON object per screen in EXACTLY this shape — paste this block into every agent prompt
+verbatim; it is the merge contract, and any other shape (a boolean `ambiguity`, a string list,
+anything improvised) is rejected by `phase_b_merge.py` and burns a pointless escalation:
+
+```json
+{"screen_id": "<copied from the packet>",
+ "state_kind_map": {"<state name>": "DEFAULT|LOADING|EMPTY|ERROR|SUCCESS|OFFLINE|DISABLED|PERMISSION_DENIED|DARK_THEME|LIGHT_THEME|LOCALE_VARIANT|RTL|OTHER"},
+ "screen_validations": ["<one sentence, traced to a note — never invented>"],
+ "ambiguity": {"rating": "LOW|MEDIUM|HIGH", "reason": "<one concrete sentence naming the conflict>"}}
+```
+
+`ambiguity` is optional and is an OBJECT, never a boolean. Instruct agents to rate against the
+consequence: HIGH means a design-team question is required — it puts the screen in
+`blocking_issues` and `escalations.json`, and requires a non-empty reason a PM can answer.
+Conflicting notes that are per-lane/persona variants (host vs member) are MEDIUM at most;
+states with no note evidence are simply unannotated, not ambiguous — omit the field. No
+`elements`, no `element_updates`; instruct agents so explicitly. Never do this pass inline in
+your own context.
 
 ```bash
 # 4. merge the light outputs; writes escalations.json
