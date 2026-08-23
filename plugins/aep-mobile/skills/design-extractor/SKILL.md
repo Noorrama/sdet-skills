@@ -138,6 +138,29 @@ refine bindings and wording, not to argue flags away.
   element-in-screen → chip label → variant box → small-section entry (≤8 screens only — a bigger
   section carries no per-screen information and resolving it fabricates an edge); everything else
   lands in the report as unresolved-with-reason.
+- **Entry points**: `ui_flow` starts with edges from the reserved `ENTRY` pseudo-node
+  (statechart initial-state pattern). Explicit signals win — an "Entry point"/"1st time"
+  qualifier on a screen label chip or a flow-cluster banner, or a prototype flow starting
+  point (`edge_source: ENTRY_LABEL`, `confidence: EXPLICIT`, `source_ref` = the chip/banner
+  node id). Only when the board carries no explicit signal does topology infer them: the
+  zero-in-degree root with the widest forward reach, plus per-persona-band coverage
+  (`ENTRY_TOPOLOGY`, `INFERRED`, plus an INFO gap advising an explicit chip). All root
+  candidates with reach counts land in `phase_a.report.json` (`entry_candidates`). `ENTRY`
+  is never a screen, never a `to_screen_id`, and Phase B may never create or touch it —
+  `context_checks.py` enforces all three.
+- **ui_flow ordering**: breadth-first from `ENTRY` — entry edges first, then each reached
+  screen's out-edges wave by wave (ties broken by target board position, condition,
+  source_ref), then components unreachable from any entry, appended per component by board
+  position. Purely presentational, byte-reproducible; no consumer may read semantics into
+  array position.
+- **Enrichment naming**: packets dedupe candidates repeating identical (name, type, text)
+  across a screen's state-variant frames and stamp each survivor with a deterministic,
+  screen-unique `suggested_purpose` derived from its own text. The merge auto-repairs the
+  fast tier's naming mistakes deterministically — generic purposes (`element_container`,
+  ...) are re-derived from the candidate's own text, colliding ids get a source_ref-derived
+  suffix, truncated source_refs snap to their unique candidate — and counts the repairs as
+  `auto_repaired` in its report. Escalations therefore mean genuine ambiguity, not cleanup;
+  do not re-run the fast tier to fix names.
 - **Honesty**: reference screenshots without chips, unlabeled draft clusters, external
   prototype-reaction destinations, and ambiguous collapses are reported, never guessed at.
 

@@ -13,6 +13,11 @@ import sys
 
 ELEMENT_ID = re.compile(r'^[A-Z0-9_]+\.[a-z0-9_]+(\.[a-z0-9_]+)?$')
 
+# Reserved ui_flow pseudo-node (statechart initial-state pattern): valid only
+# as from_screen_id, only with an ENTRY_* edge_source, never a real screen.
+ENTRY_NODE = 'ENTRY'
+ENTRY_SOURCES = {'ENTRY_LABEL', 'ENTRY_TOPOLOGY'}
+
 
 def check(context):
     """Returns a list of failure strings; empty = clean."""
@@ -23,6 +28,9 @@ def check(context):
     if len(ids) != len(id_set):
         dup = sorted({i for i in ids if ids.count(i) > 1})
         fails.append(f'duplicate screen_id: {dup}')
+    if ENTRY_NODE in id_set:
+        fails.append(f'{ENTRY_NODE} is a reserved ui_flow pseudo-node and '
+                     f'may not be a screen_id')
 
     seen_refs = {}
     for s in screens:
@@ -54,9 +62,21 @@ def check(context):
     edge_keys = set()
     for e in context.get('ui_flow', []):
         fr, to = e['from_screen_id'], e['to_screen_id']
-        for sid in (fr, to):
-            if sid not in id_set:
-                fails.append(f'ui_flow references unknown screen {sid}')
+        if to == ENTRY_NODE:
+            fails.append(f'{ENTRY_NODE} may never be a to_screen_id')
+        if fr == ENTRY_NODE:
+            if e.get('edge_source') not in ENTRY_SOURCES:
+                fails.append(f'edge from {ENTRY_NODE} to {to} must carry '
+                             f'edge_source ENTRY_LABEL or ENTRY_TOPOLOGY')
+            if to not in id_set:
+                fails.append(f'ui_flow references unknown screen {to}')
+        else:
+            if e.get('edge_source') in ENTRY_SOURCES:
+                fails.append(f'edge {fr}->{to} uses an ENTRY_* edge_source '
+                             f'but does not start at {ENTRY_NODE}')
+            for sid in (fr, to):
+                if sid not in id_set:
+                    fails.append(f'ui_flow references unknown screen {sid}')
         if fr == to:
             fails.append(f'ui_flow self-loop on {fr}')
         trig = e.get('trigger_element_id')

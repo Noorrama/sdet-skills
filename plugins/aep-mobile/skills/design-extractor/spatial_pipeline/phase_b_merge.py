@@ -7,7 +7,11 @@ Enrichment input (phase_b_out.jsonl, one JSON object per screen):
   "screen_id": "...",                     # must exist in the skeleton
   "elements": [{                          # NEW elements only
      "source_ref": "...",                 # MUST be a packet candidate id
-     "purpose": "add_to_cart",            # lower_snake, no suffix
+     "purpose": "add_to_cart",            # lower_snake, no suffix; copy the
+                                          # candidate's suggested_purpose
+                                          # unless you have a clearly more
+                                          # specific name — NEVER a generic
+                                          # like element_container
      "role": "BUTTON|INPUT|LABEL|TOGGLE|TAB|LIST|IMAGE|LINK|DROPDOWN|SLIDER|CAROUSEL|CONTAINER|OTHER",
      "label": "...",
      "validations_and_edge_cases": ["..."]
@@ -26,6 +30,29 @@ Rules enforced here, not trusted from the model:
   - a new element's source_ref must appear in the packet candidate list
   - element_id built HERE from screen_id + purpose + role suffix
   - state_kind_map may only upgrade OTHER states, to enum values only
+
+Collision handling (deterministic, no model call): when a proposed purpose+role
+collides with an element_id already on the screen, this is a naming problem,
+not a semantic one, so it is repaired here rather than dropped or escalated.
+  - same source_ref already owns that element_id -> harmless re-proposal
+    (e.g. Phase A's own connector-trigger scan got there first), skip quietly
+  - different source_ref wants the same slot -> re-derive the purpose from
+    that candidate's OWN text/name (almost always more distinctive than
+    whatever generic purpose the model picked) instead of the model's value;
+    if that still collides, append a short deterministic suffix from the
+    source_ref itself. Always terminates, always the same output for the
+    same input. Counted separately (applied['auto_repaired']) so the merge
+    report stays honest about what the model authored vs what the script
+    recovered. The source_ref suffix is unique per candidate, so every
+    distinct candidate always lands a slot; REJECTED duplicates remain only
+    for true re-proposals of a slot another candidate owns under every name.
+The same re-derivation runs, without waiting for a collision, when the model's
+purpose is a generic placeholder (element_container, element_label, ...): the
+candidate's own text is a better name by construction.
+Source_ref repair (deterministic): a model sometimes truncates an instance
+node id ('12054:76356' for 'I12054:76356;1085:7511'). When the given ref is
+not a candidate but is a substring of EXACTLY ONE candidate id, it snaps to
+that candidate; an ambiguous or absent match still rejects.
 """
 
 import json
@@ -52,6 +79,28 @@ def lower_snake(s):
     return re.sub(r'_+', '_', s).lower() or 'element'
 
 
+# a purpose that names the widget kind instead of what it is FOR — carries no
+# information beyond the role suffix, and collides across candidates
+GENERIC_PURPOSE = re.compile(
+    r'^(element|item|control|component|frame|group|content|section|region|'
+    r'text|label|button|btn|container|img|image|icon|link|list|input|toggle|'
+    r'title|value|option|card|cell|row)'
+    r'(_(container|label|img|image|icon|btn|button|link|list|toggle|input|'
+    r'ctrl|element|item|text|title|value|option|card|cell|row))?$')
+
+
+def derived_purpose(cand):
+    """Purpose from the candidate's own export text/name — never invented."""
+    if cand.get('suggested_purpose'):
+        return cand['suggested_purpose'][:40]
+    src = (cand.get('text') or cand.get('name') or '').strip()
+    return lower_snake(src)[:40] if src else ''
+
+
+def ref_suffix(source_ref):
+    return re.sub(r'[^0-9a-z]', '', source_ref.lower())[-6:]
+
+
 def main(context_path, packets_path, enrich_path, out_path):
     context = json.load(open(context_path))
     screens = {s['screen_id']: s for s in context['screens']}
@@ -62,7 +111,8 @@ def main(context_path, packets_path, enrich_path, out_path):
             packets[p['screen_id']] = p
 
     rejected, applied = [], {'elements': 0, 'updates': 0, 'kinds': 0,
-                             'validations': 0, 'ambiguity': 0}
+                             'validations': 0, 'ambiguity': 0,
+                             'auto_repaired': 0}
     escalations = []
     with open(enrich_path) as f:
         for line in f:
@@ -77,28 +127,61 @@ def main(context_path, packets_path, enrich_path, out_path):
                 rejected.append((sid, 'UNKNOWN_SCREEN'))
                 continue
             cand_ids = {c['id'] for c in pkt['candidates']}
-            existing = {el['element_id'] for el in scr['elements']}
+            existing = {el['element_id']: el.get('source_ref')
+                        for el in scr['elements']}
 
             for ne in e.get('elements', []):
-                if ne.get('source_ref') not in cand_ids:
-                    rejected.append((sid, f"element source_ref {ne.get('source_ref')} "
-                                          "not a packet candidate"))
-                    continue
+                ref = ne.get('source_ref') or ''
+                if ref not in cand_ids:
+                    # truncated-id repair: unique substring match snaps to
+                    # the real candidate; ambiguous/absent still rejects
+                    hits = [c for c in cand_ids if len(ref) >= 6 and ref in c]
+                    if len(hits) == 1:
+                        ref = hits[0]
+                        applied['auto_repaired'] += 1
+                    else:
+                        rejected.append((sid, f'element source_ref '
+                                              f'{ne.get("source_ref")} '
+                                              'not a packet candidate'))
+                        continue
                 role = ne.get('role', 'OTHER')
                 if role not in ROLE_SUFFIX:
                     rejected.append((sid, f'bad role {role}'))
                     continue
-                purpose = lower_snake(ne.get('purpose', ''))[:40]
+                cand = next(c for c in pkt['candidates'] if c['id'] == ref)
                 suffix = ROLE_SUFFIX[role]
-                if not purpose.endswith(suffix.lstrip('_')):
-                    purpose += suffix
-                eid = f'{sid}.{purpose}'
+
+                def with_suffix(p):
+                    return p if p.endswith(suffix.lstrip('_')) \
+                        else f'{p}{suffix}'
+
+                purpose = lower_snake(ne.get('purpose', ''))[:40]
+                repaired = False
+                if GENERIC_PURPOSE.fullmatch(purpose):
+                    better = derived_purpose(cand)
+                    if better and not GENERIC_PURPOSE.fullmatch(better):
+                        purpose, repaired = better, True
+                eid = f'{sid}.{with_suffix(purpose)}'
                 if eid in existing:
-                    rejected.append((sid, f'duplicate element_id {eid}'))
-                    continue
-                cand = next(c for c in pkt['candidates'] if c['id'] == ne['source_ref'])
+                    if existing[eid] == ref:
+                        continue          # harmless re-proposal, skip quietly
+                    better = derived_purpose(cand)
+                    if better:
+                        eid = f'{sid}.{with_suffix(better)}'
+                        repaired = True
+                    if eid in existing and existing[eid] != ref:
+                        # last resort: source_ref-derived suffix — unique per
+                        # candidate, so this always lands a free slot
+                        eid = f'{sid}.' + with_suffix(
+                            f'{purpose[:26]}_{ref_suffix(ref)}')
+                        repaired = True
+                    if eid in existing:
+                        if existing[eid] == ref:
+                            continue      # same candidate under either name
+                        rejected.append((sid, f'duplicate element_id {eid}'))
+                        continue
                 scr['elements'].append({
-                    'element_id': eid, 'source_ref': ne['source_ref'],
+                    'element_id': eid, 'source_ref': ref,
                     'type': cand['type'], 'role': role,
                     'label': (ne.get('label') or cand.get('text')
                               or cand['name'])[:80],
@@ -107,8 +190,11 @@ def main(context_path, packets_path, enrich_path, out_path):
                     'validations_and_edge_cases':
                         [v[:300] for v in ne.get('validations_and_edge_cases', [])][:6],
                 })
-                existing.add(eid)
-                applied['elements'] += 1
+                existing[eid] = ref
+                if repaired:
+                    applied['auto_repaired'] += 1
+                else:
+                    applied['elements'] += 1
 
             for up in e.get('element_updates', []):
                 el = next((x for x in scr['elements']
