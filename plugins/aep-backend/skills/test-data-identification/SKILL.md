@@ -26,7 +26,7 @@ here, no create/mutate tool is called. It reads catalogs and writes a plan.
 | `references/sequence/sequence.md` | **Operation authority** — every Consumer/Driver function as an ordered call sequence, plus the composite booking flow. Use it for sequencing instead of inferring order. |
 | `references/test_data_domains.md` | Domain vocabulary for the domains with no bundle yet (MERCHANT, VOUCHER, PAYMENT_INSTRUMENT, BOOKING, LOCATION) + cross-domain disambiguation |
 | TestBuddy MCP → `TestDataAgent_get_supported_category` | Best-match TDP category for a domain + signal set, plus `candidates[]` and a ready-made `TDP_Request`. Returns a nearest match always — see the validation gate. |
-| TestBuddy MCP → `get_supported_operations` | The supported-operation catalog per domain. **Not yet shipped** — until it is, fall back to the live `<Domain>Agent_*` tool inventory. |
+| TestBuddy MCP → `TestDataAgent_get_supported_operation` | Operation catalog for a domain + signal set. Federates TestBuddy's own `<Domain>Agent_*` tools and Pertamax features; returns names, `operationSupported`, and descriptions. Prefer a TestBuddy/TDP tool, fall back to Pertamax. |
 | TestBuddy MCP → `TestDataAgent_generate_testbuddy_prompt` | Turns a resolved category into the prompt TestBuddy will execute |
 
 If the plan carries fixtures inline as per-scenario `test_data[]` (the RFC's illustrative shape)
@@ -87,7 +87,7 @@ singular `category` and the lowercase `testbuddy`; the RFC's spellings do not re
 | # | Call | Send | Get back | Writes |
 |---|---|---|---|---|
 | 1 | `TestDataAgent_get_supported_category` | `test_data_domain` (required), `test_data_type_signals[]`, `description` (fallback signal source) | `tdp_test_data_category` (single best match), `candidates[]`, `TDP_Request`, `TDP_Payload` | `test_data_details.tdp_test_data_category` — **only after the validation gate below** |
-| 2 | *(not yet shipped)* `get_supported_operations` | The domains of the signals the category does **not** cover — primary domain **plus** any neighbour domain a leftover signal belongs to | Supported operation names + each one's input contract | `test_data_details.test_data_operations[]` — verbatim names, ordered by the sequencing rules |
+| 2 | `TestDataAgent_get_supported_operation` | The domains of the signals the category does **not** cover — primary domain **plus** any neighbour domain a leftover signal belongs to | Supported operation names with `operationSupported` and descriptions | `test_data_details.test_data_operations[]` — verbatim names, ordered by the sequencing rules |
 | 3 | `TestDataAgent_generate_testbuddy_prompt` | The resolved category + assembled record | The executable TestBuddy prompt | `test_buddy_prompt` |
 
 - Calls 1 and 2 are **read-only catalog lookups** — they identify what TDP can serve; they neither reserve nor create anything. Note that *provisioning* tools in the same server (`DriverAgent_get_driver_data`, `CustomerAgent_get_customer_data`, …) allocate from the shared TDP pool — never call those here.
@@ -119,7 +119,7 @@ you infer. Accept only when:
 | **Every** token in the returned name is corroborated, not just one — driver names are composite (`DRIVER__<COUNTRY>__<TYPE>`) | `["Bike","ID"]` → `DRIVER__ID__BIKE` — both segments accounted for | `["Bike"]` → `DRIVER__ID__CAR_ECONOMY_SHIELD` — `CAR`, `ECONOMY`, `SHIELD` all unsupported |
 
 On reject, set `tdp_test_data_category: null`, record the returned value and the top few
-`candidates[]` in `identification_notes` so the reviewer can see what the matcher proposed, and let
+`candidates[]` as an `identification_steps` entry so the reviewer can see what the matcher proposed, and let
 the decision table place the fixture in `TDP_OPERATION_FALLBACK` or `TDP_NOT_SUPPORTED`. Set
 `match_confidence: low` on every accepted-but-unanimous-signal case so it still reaches review.
 
@@ -174,7 +174,7 @@ Three things in the bundles override the skill's generic behaviour:
 Never assign a domain from the `fixture_id` name, from the plan's `required_state.entity` alone, or
 from memory. `required_state.entity` is a **candidate to confirm against the knowledge** — when the
 description describes state the knowledge assigns to a different domain, the knowledge wins and the
-disagreement goes in `identification_notes`. The same two inputs (description + required_state),
+disagreement is recorded as an `identification_steps` entry. The same two inputs (description + required_state),
 read through the same knowledge, then produce `test_data_type_signals[]`.
 
 
@@ -190,7 +190,7 @@ read through the same knowledge, then produce `test_data_type_signals[]`.
 | `test_data_status` | Decision table below. |
 | `test_buddy_prompt` | `TestDataAgent_generate_testbuddy_prompt` on the resolved category — TestBuddy owns the wording, this skill does not compose it by hand. `null` for `TDP_NOT_SUPPORTED` or a rejected category. |
 | `test_data_details.tdp_request` | `TDP_Request` from call 1, carried through verbatim. `null` when the category is rejected. Provisioning prefers this over the prose prompt. |
-| `identification_notes` | Free text for the reviewer: the category the matcher proposed and the top `candidates[]` when the validation gate rejects it. |
+| `identification_steps[]` | **Ordered list of short sentences** — what the agent actually did for this fixture, one entry per action, in the order taken. Not free-form prose and not a summary. |
 | `match_confidence` | `high` / `medium` / `low` for the domain + category match. `low` routes the fixture to human review before provisioning. |
 
 ### `required_state.category` is a candidate, not an answer
@@ -244,6 +244,30 @@ Check the emitted list against `sequence/sequence.md` before writing the record:
 operation chain would violate a sequence documented there, the signal order is wrong, not the
 sequence.
 
+### `identification_steps[]` — what the agent did, per fixture
+
+One short sentence per action, in the order taken. A reviewer should be able to explain a wrong
+category or a missing operation from this list alone, without opening `run_log.json`:
+
+```json
+"identification_steps": [
+  "Read references/index.md and customer/index.md; confirmed domain CUSTOMER from description + required_state.",
+  "Extracted signals in dependency order: Customer, Wallet recharge, GoPay payment, Ride booking.",
+  "get_supported_category returned CUSTOMER_WITH_GO_PAY out of 15 candidates.",
+  "Accepted the category: GO_PAY corroborated by the 'Active wallet' signal; isEnabled true.",
+  "Plan proposed CUSTOMER_WITH_WALLET_RECHARGE, which the catalog does not contain — substituted the returned category.",
+  "Decomposed into 3 capabilities: acquire Customer, Wallet recharge, Ride booking.",
+  "Resolved Wallet recharge to CustomerAgent_recharge_customer_gopay (TestBuddy preferred over Pertamax handle_gopay_wallet_topup).",
+  "Concluded TDP_HYBRID_FALLBACK: category covers the entity, operations close the rest."
+]
+```
+
+Rules:
+- **Every step the agent took**, including the ones that changed nothing — a rejected category, a retried lookup, a capability that found no operation. Silence about a step reads as "it never happened".
+- **State what was decided and why**, not just what was called. `"Rejected CUSTOMER_WITH_GO_PAY_COINS: isEnabled false in the knowledge"` is useful; `"called get_supported_category"` is not.
+- **Name the disagreements**: the plan's proposed category vs the catalog's, the alternatives not chained, the tier a tool came from.
+- It is **per fixture**, so a fixture used by 14 scenarios repeats the same list across its 14 records. `run_log.json` remains the run-level trail with timings; this is the record-level explanation.
+
 ### Status decision table
 
 | TDP category match | Gap-closing operations | `test_data_status` | `test_data_operations` |
@@ -268,7 +292,7 @@ descriptions, and the examples below.
 - **Lookup before mutate** — `IDENTIFY_*` / `FETCH_*` precede `ASSIGN_*` / `ADD_*` / `UPDATE_*` when the mutation needs an ID the lookup returns.
 - **Create before associate** — `CREATE_CREDIT_CARD` → `ADD_CREDIT_CARD_TO_USER`.
 - **One operation per unmet signal** — no operation for state the category already provides.
-- **`operationInput` is sourced, never invented** — values come from `required_state` / `required_state.config`, from a preceding operation's output, or from the fixture description. If a needed input is unknown, emit the key with `null` and flag the fixture for review rather than fabricating an ID.
+- **Operation *inputs* are not this stage's output.** Identification names the operation and its source; the argument values belong to provisioning, which knows the runtime IDs (a customer id only exists after the customer is fetched). Do not emit an `operationInput` object.
 ### Operation provenance — required per operation
 
 Every operation carries where it comes from, so provisioning knows which client to call:
@@ -280,7 +304,6 @@ Every operation carries where it comes from, so provisioning knows which client 
 | `operationMcpTool` | The exact MCP tool/feature that performs it (e.g. `CustomerAgent_recharge_customer_gopay`, `handle_set_gopay_pin`). `null` when unresolved. |
 | `operationMcpToolDescription` | The tool's own description, carried through verbatim so reviewers and provisioning see its contract without re-querying |
 | `operationSupported` | `true` only when `operationMcpTool` resolves to a tool that exists |
-| `operationInput` | Inputs sourced from `required_state` / config / a preceding operation's output |
 
 - **`operationSupported: true` only when the operation actually exists** — in `get_supported_operations` once shipped, else in the live `<Domain>Agent_*` tool inventory. If a required step is missing from the catalog, the fixture becomes `TDP_NOT_SUPPORTED` with `test_data_operations: []`, and the missing names go to `unidentified_fixtures[].missing_operations` so the gap is actionable for the TDP team.
 
@@ -363,10 +386,10 @@ stays absent from identification output entirely.
 ## Guardrails
 - **TestBuddy unreachable aborts the run** (see Preflight) — never express an infrastructure failure as a data verdict, and never emit partial output. Knowledge gaps degrade instead: continue, cap confidence at `medium`, and record the gap in `run_log.json`. Degradation must always be visible.
 - **Never invent a category name.** It must be verbatim from `TestDataAgent_get_supported_category`. If the catalog is unreachable, stop and report `CATALOG_UNAVAILABLE` — do not guess a plausible name.
-- **Never accept a category the signals do not corroborate.** The matcher has no no-match answer; an unvalidated category is a silent mis-provision. Reject, null the category, keep the proposal in `identification_notes`.
+- **Never accept a category the signals do not corroborate.** The matcher has no no-match answer; an unvalidated category is a silent mis-provision. Reject, null the category, and record the proposal as an `identification_steps` entry.
 - **Never invent an operation name.** It must be verbatim from `get_supported_operations` or the live `<Domain>Agent_*` inventory. A needed capability with no tool is a `missing_operations` entry, never an operation.
 - **Never invent identifiers or values** — polygon IDs, customer IDs, service-area IDs come from `required_state` / `config` / a preceding operation's output.
-- **No secrets or PII anywhere** — signals, `operationInput` and prompts carry categories and states only. Never a real card number, token, phone number or account number. Sensitive states are described, not populated.
+- **No secrets or PII anywhere** — signals and prompts carry categories and states only. Never a real card number, token, phone number or account number. Sensitive states are described, not populated.
 - **Identification only** — call no create, mutate, lease or recharge tool. Provisioning is `test-data-provision`.
 - Skip fixtures with `required_state.entity: DB_INFRA` — Testcontainers / migration fixtures are not TDP-served. Count them as `skipped_db_infra`.
 - One record per `(scenario_id, fixture_id)`; the same fixture reused across scenarios produces one record per scenario, all under that fixture's single `output`.
