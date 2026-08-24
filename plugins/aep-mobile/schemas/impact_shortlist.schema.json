@@ -1,0 +1,262 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "impact_shortlist",
+  "description": "Post-build impact shortlist. Narrows the pre-build regression candidate pool (regression_context.json + the approved SDET_PLAN's existing_case_ref links) down to the test cases the merged code actually impacts. The deterministic tier is pure evidence matching (shortlist_join.py) against the real change surface (change_context.json / dev_manifest.json); the fuzzy tier is judged directly by the calling agent from each candidate's title/steps against the change scope — no external scoring service. Sidecar file; a compact roll-up is appended to the SDET_PLAN under the top-level key 'impact_shortlist'. Automation binding (which exact GMT/TapMind method to invoke) is out of scope for this skill.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "generated_at",
+    "extraction_status",
+    "feature_metadata",
+    "inputs",
+    "change_surface",
+    "selection_summary",
+    "shortlisted_tests"
+  ],
+  "properties": {
+    "contract_version": { "type": "string", "const": "1.0.0" },
+    "generated_at": { "type": "string", "format": "date-time" },
+
+    "extraction_status": {
+      "type": "string",
+      "enum": ["COMPLETE", "PARTIAL", "LIMITED"],
+      "description": "COMPLETE only when both the deterministic join ran and every review_queue candidate was actually judged (not skipped) and extraction_notes is empty."
+    },
+    "extraction_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "reason", "action", "follow_up"],
+        "properties": {
+          "field": { "type": "string" },
+          "reason": { "type": "string" },
+          "action": { "type": "string" },
+          "follow_up": { "type": "string", "enum": ["NEEDS_ANSWER", "WORTH_CHECKING", "RESOLVED"] }
+        }
+      }
+    },
+
+    "feature_metadata": {
+      "type": "object",
+      "required": ["feature_key", "app"],
+      "properties": {
+        "feature_key": { "type": "string" },
+        "epic_ref": { "type": "string" },
+        "app": { "type": "string", "description": "app_id, e.g. gopay-consumer" },
+        "platform": { "type": "string" },
+        "module_namespace": { "type": "string" }
+      }
+    },
+
+    "inputs": {
+      "type": "object",
+      "description": "Provenance of every artefact this shortlist was derived from. Absent/stale inputs are the single biggest cause of a wrong shortlist, so they are recorded, not assumed.",
+      "required": ["sdet_plan"],
+      "properties": {
+        "sdet_plan": { "$ref": "#/definitions/input_ref" },
+        "regression_context": { "$ref": "#/definitions/input_ref" },
+        "change_context": { "$ref": "#/definitions/input_ref" },
+        "dev_manifest": { "$ref": "#/definitions/input_ref" }
+      }
+    },
+
+    "change_surface": {
+      "type": "object",
+      "description": "What the merged code actually touched — the evidence base for every deterministic reason_code below. Sourced from change_context.json (preferred), else dev_manifest.json, else the GitLab MR changes API.",
+      "required": ["source", "merge_requests", "changed_files"],
+      "properties": {
+        "source": { "type": "string", "enum": ["change_context", "dev_manifest", "gitlab_mr_diff"] },
+        "merge_requests": { "type": "array", "items": { "type": "string" } },
+        "changed_files": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Repo-relative paths, deduped union across MRs. Kept for audit/traceability; this skill does not do file-level test mapping itself (that needs a real path->test index, e.g. SmartScope's Lumos mapping, out of scope here)."
+        },
+        "changed_modules": { "type": "array", "items": { "type": "string" } },
+        "changed_screens": { "type": "array", "items": { "type": "string" } },
+        "changed_element_ids": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["element_id", "change_type"],
+            "properties": {
+              "element_id": { "type": "string" },
+              "change_type": { "type": "string", "enum": ["added", "modified", "removed"] }
+            }
+          },
+          "description": "modified/removed elements are the highest-signal entries here: an existing automated test bound to that locator breaks outright."
+        },
+        "flags": { "type": "array", "items": { "type": "string" } },
+        "api_endpoints": { "type": "array", "items": { "type": "string" } },
+        "cr_risks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "area": { "type": "string" },
+              "suggested_test": { "type": "string" }
+            }
+          }
+        },
+        "id_compliance_status": { "type": "string", "enum": ["PASS", "FAIL", "NOT_RUN"] }
+      }
+    },
+
+    "selection_summary": {
+      "type": "object",
+      "required": ["candidate_pool_size", "shortlisted_count", "reduction_pct"],
+      "properties": {
+        "candidate_pool_size": { "type": "integer", "description": "Pre-build regression candidates considered (regression_context.regression_tests + plan scenarios carrying existing_case_ref)." },
+        "shortlisted_count": { "type": "integer" },
+        "deselected_count": { "type": "integer" },
+        "must_run_count": { "type": "integer", "description": "Deterministic-evidence tier — never demoted or trimmed by the agent." },
+        "should_run_count": { "type": "integer", "description": "Agent judged relevant from title/steps against the change scope, no deterministic hit." },
+        "optional_count": { "type": "integer", "description": "Agent judged plausibly relevant but weak; surfaced for a human to opt into." },
+        "reduction_pct": { "type": "number", "description": "100 * (1 - shortlisted_count / candidate_pool_size)." },
+        "estimated_runtime_sec": { "type": ["number", "null"], "description": "Only fill if a real per-test duration source is available. Never estimated." }
+      }
+    },
+
+    "shortlisted_tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["test_id", "run_tier", "reason_codes", "evidence", "execution_target", "source"],
+        "properties": {
+          "test_id": { "type": "string", "description": "BrowserStack case id as regression_context/plan reported it verbatim, e.g. C2879733." },
+          "case_number": { "type": "string", "description": "Numeric case number (no prefix) — the ID-space bridge to the C<digits> ids the automation repos tag." },
+          "browserstack_id": { "type": "string" },
+          "title": { "type": "string" },
+          "run_tier": {
+            "type": "string",
+            "enum": ["MUST_RUN", "SHOULD_RUN", "OPTIONAL"],
+            "description": "MUST_RUN = deterministic evidence, set by shortlist_join.py, never overridden. SHOULD_RUN/OPTIONAL = the agent's own judgment call from review_queue, made by reading the candidate's title/steps against change_surface and the SDET_PLAN's scope_summary — no scoring formula."
+          },
+          "reason_codes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "MODULE_TOUCHED",
+                "LOCATOR_CHANGED",
+                "SCREEN_TOUCHED",
+                "FLAG_TOUCHED",
+                "API_CONTRACT_CHANGED",
+                "CR_RISK",
+                "FILE_PATH_TOUCHED",
+                "AGENT_JUDGED_RELEVANT"
+              ],
+              "description": "Deterministic codes are set by shortlist_join.py (MODULE/SCREEN/LOCATOR/FLAG/API/CR_RISK/FILE_PATH_TOUCHED). AGENT_JUDGED_RELEVANT is the only code the agent itself may add, for a SHOULD_RUN/OPTIONAL pick out of review_queue — always paired with a one-sentence rationale in `explanation`. PLAN_SCENARIO_LINK is traceability only, not a reason code."
+            }
+          },
+          "evidence": {
+            "type": "object",
+            "description": "The concrete artefacts behind reason_codes. Every deterministic reason_code must be backed by at least one entry here — an unbacked reason code is a hallucination. AGENT_JUDGED_RELEVANT has no evidence object; its backing is `explanation`.",
+            "properties": {
+              "changed_modules": { "type": "array", "items": { "type": "string" } },
+              "screens": { "type": "array", "items": { "type": "string" } },
+              "element_ids": { "type": "array", "items": { "type": "string" } },
+              "flags": { "type": "array", "items": { "type": "string" } },
+              "api_endpoints": { "type": "array", "items": { "type": "string" } },
+              "cr_risk_ids": { "type": "array", "items": { "type": "string" } },
+              "path_tokens": { "type": "array", "items": { "type": "string" }, "description": "Repo path tokens from changed_files that matched the candidate haystack (MR-bootstrap / gitlab_mr_diff)." }
+            }
+          },
+          "explanation": { "type": "string", "description": "Required when a reason_code is AGENT_JUDGED_RELEVANT: the one-sentence reason the agent picked it out of review_queue. Optional otherwise." },
+          "execution_target": {
+            "type": "string",
+            "enum": ["GMT_JAVA", "TAPMIND_NLP", "MANUAL", "UNKNOWN_AUTOMATED"],
+            "description": "Best-effort hint from the SDET_PLAN link / regression_context.tapmind_steps presence / is_automated flag — NOT a resolved automation binding (no test_class/method_name here; that lookup is out of scope for this skill)."
+          },
+          "priority": { "type": "string" },
+          "source_module": { "type": "string" },
+          "plan_scenario_refs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "csv_title_association of SDET_PLAN scenarios this case is linked to (via existing_case_ref)."
+          },
+          "source": {
+            "type": "string",
+            "enum": ["regression_pool", "plan_scenario", "plan_legacy"]
+          }
+        }
+      }
+    },
+
+    "deselected_tests": {
+      "type": "array",
+      "description": "Pre-build candidates deliberately NOT run, with why. Bounded to the candidate pool — never the whole corpus. This is the audit trail that makes skipping a test defensible.",
+      "items": {
+        "type": "object",
+        "required": ["test_id", "reason_code"],
+        "properties": {
+          "test_id": { "type": "string" },
+          "case_number": { "type": "string" },
+          "title": { "type": "string" },
+          "reason_code": {
+            "type": "string",
+            "enum": ["NO_IMPACT_SIGNAL", "OUT_OF_PLATFORM_SCOPE", "NOT_ACTIVE"],
+            "description": "NO_IMPACT_SIGNAL = agent read title/steps against the change surface and found no plausible link. Set only after real judgment, never as a default."
+          },
+          "explanation": { "type": "string" }
+        }
+      }
+    },
+
+    "unresolved_ids": {
+      "type": "array",
+      "description": "Candidates that could not be joined at all (e.g. no title in either source). NEVER silently dropped — an unjoined id is an untested change, not an unimpacted one.",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "reason"],
+        "properties": {
+          "id": { "type": "string" },
+          "source": { "type": "string", "enum": ["regression_context", "sdet_plan"] },
+          "reason": { "type": "string", "enum": ["MALFORMED_ID", "AMBIGUOUS_CASE_NUMBER"] }
+        }
+      }
+    },
+
+    "run_buckets": {
+      "type": "object",
+      "description": "Roll-up of shortlisted test_ids by execution_target hint — a starting point for whoever wires the actual pipeline call, not a resolved dispatch table.",
+      "properties": {
+        "GMT_JAVA": { "type": "array", "items": { "type": "string" } },
+        "TAPMIND_NLP": { "type": "array", "items": { "type": "string" } },
+        "MANUAL": { "type": "array", "items": { "type": "string" } },
+        "UNKNOWN_AUTOMATED": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "new_scenarios_to_run": {
+      "type": "array",
+      "description": "SDET_PLAN scenarios with no existing_case_ref — brand-new coverage for this feature. Always run; impact analysis cannot deselect a test that has no execution history. Listed here so the run set is complete, not to re-plan them.",
+      "items": {
+        "type": "object",
+        "required": ["csv_title_association", "priority_tier"],
+        "properties": {
+          "csv_title_association": { "type": "string" },
+          "requirement_ref": { "type": "string" },
+          "priority_tier": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "target_execution_framework": { "type": "string", "enum": ["TAPMIND_NLP", "GMT_JAVA"] }
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "input_ref": {
+      "type": "object",
+      "required": ["path", "present"],
+      "properties": {
+        "path": { "type": "string" },
+        "present": { "type": "boolean" },
+        "generated_at": { "type": ["string", "null"] },
+        "contract_version": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

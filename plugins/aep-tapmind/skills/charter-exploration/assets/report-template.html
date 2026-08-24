@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TapMind Charter Exploration</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --ink:#e6e9ef; --dim:#9aa3b2; --faint:#6b7280;
+    --hi:#f2555a; --med:#f0a53e; --lo:#5aa9f2; --ok:#3ecf8e; --cold:#7c5cff;
+    --accent:#6ea8fe;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#f6f7f9; --panel:#fff; --panel2:#f0f2f5; --line:#dde1e8;
+           --ink:#15181e; --dim:#5b6472; --faint:#8b93a1; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:14px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
+  h2{font-size:17px;margin:36px 0 12px;letter-spacing:-.01em}
+  .sub{color:var(--dim);margin:0 0 22px}
+  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
+  a{color:var(--accent)}
+
+  .banner{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--med);
+          border-radius:8px;padding:10px 14px;margin:0 0 20px;color:var(--dim)}
+  .banner b{color:var(--ink)}
+
+  .brief{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:8px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+  .stat .k{color:var(--faint);font-size:11px;text-transform:uppercase;letter-spacing:.07em}
+  .stat .v{font-size:20px;font-weight:600;margin-top:3px}
+  .stat .v small{font-size:12px;font-weight:400;color:var(--dim)}
+
+  .sevrow{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
+  .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);
+        background:var(--panel);border-radius:999px;padding:4px 11px;font-size:12px}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .d-high{background:var(--hi)} .d-medium{background:var(--med)} .d-low{background:var(--lo)}
+  .d-ok{background:var(--ok)} .d-cold{background:var(--cold)}
+
+  table{width:100%;border-collapse:collapse;background:var(--panel);
+        border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .scroll{overflow-x:auto;border-radius:8px}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel2);color:var(--dim);font-size:11px;text-transform:uppercase;
+     letter-spacing:.06em;font-weight:600;white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .tc{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:4px;
+      padding:1px 6px;margin:1px 3px 1px 0;font-size:11px;font-family:ui-monospace,monospace;color:var(--dim)}
+  .zero{color:var(--faint)}
+
+  details.ch{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:10px}
+  details.ch[open]{border-color:var(--accent)}
+  summary{cursor:pointer;padding:13px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+          list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";color:var(--faint);font-size:11px}
+  details[open] summary::before{content:"▾"}
+  .cid{font-family:ui-monospace,monospace;font-size:12px;color:var(--dim)}
+  .carea{font-weight:600}
+  .spacer{flex:1}
+  .tag{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+  .v-PASSED{color:var(--ok);border-color:var(--ok)}
+  .v-PARTIAL{color:var(--med);border-color:var(--med)}
+  .v-FAILED{color:var(--hi);border-color:var(--hi)}
+  .v-pending{color:var(--faint)}
+  .body{padding:2px 16px 18px;border-top:1px solid var(--line)}
+  .mission{border-left:3px solid var(--accent);background:var(--panel2);padding:10px 14px;
+           margin:14px 0;border-radius:0 6px 6px 0;font-style:italic}
+  .kv{margin:12px 0}
+  .kv .k{color:var(--faint);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:720px){.two{grid-template-columns:1fr}}
+  ul.tight{margin:4px 0;padding-left:18px} ul.tight li{margin:2px 0}
+
+  .journey{display:flex;gap:0;align-items:stretch;overflow-x:auto;padding:10px 0 4px}
+  .jn{flex:0 0 auto;background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+      padding:7px 10px;font-size:12px;max-width:150px}
+  .jn .lbl{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .jn .mt{color:var(--faint);font-size:10px}
+  .jn.popup{border-color:var(--med)} .jn.deadend{border-color:var(--hi)}
+  .jn.has-f{box-shadow:inset 0 -2px 0 var(--hi)}
+  .je{flex:0 0 auto;align-self:center;padding:0 7px;color:var(--faint);font-size:11px;white-space:nowrap}
+  .je.blocked,.je.crashed{color:var(--hi)} .je.unexpected,.je.retry{color:var(--med)}
+  .je.explore{opacity:.5}
+
+  .f{border:1px solid var(--line);border-left-width:3px;border-radius:6px;padding:10px 13px;margin:8px 0;
+     background:var(--panel2)}
+  .f.high{border-left-color:var(--hi)} .f.medium{border-left-color:var(--med)} .f.low{border-left-color:var(--lo)}
+  .f .ft{font-weight:600}
+  .f .fm{color:var(--faint);font-size:11px;margin-top:2px}
+  .f .fd{color:var(--dim);margin-top:5px}
+  .f .fe{font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);background:var(--panel);
+         border:1px solid var(--line);border-radius:4px;padding:6px 8px;margin-top:6px;
+         white-space:pre-wrap;word-break:break-word}
+
+  .nc{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 16px 14px}
+  .nc h3{font-size:13px;margin:14px 0 6px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+  .empty{color:var(--faint);font-style:italic;padding:8px 0}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--faint);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script type="application/json" id="report">
+{"run":{"project":"PR-0","scopeLabel":"sample","chartersDerived":0,"chartersApproved":0,"chartersRun":0,"chartersPending":0,"findingsBySeverity":{"high":0,"medium":0,"low":0},"findingsTotal":0,"stability":{"crash":0,"anr":0,"hang":0},"stabilityTotal":0,"undiagnosedStability":[],"stepsUsed":0,"stepsBudget":0,"complete":false},"charters":[],"coverageMatrix":[],"findings":[],"notCovered":{"dropped":[],"timeboxed":[],"aborted":[],"notRun":[],"coldAreas":[]},"coverageGaps":[]}
+</script>
+
+<script>
+const R = JSON.parse(document.getElementById('report').textContent);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const SEV = ['high','medium','low'];
+
+function stat(k, v, sub){
+  return `<div class="stat"><div class="k">${esc(k)}</div><div class="v">${esc(v)}${
+    sub ? ` <small>${esc(sub)}</small>` : ''}</div></div>`;
+}
+
+function briefHTML(){
+  const r = R.run, f = r.findingsBySeverity || {};
+  const st = Object.assign({crash:0, anr:0, hang:0}, r.stability || {});
+  const folders = (r.folders || []).map(x => x.name).join(', ') || '—';
+  const cost = r.costUsd != null
+    ? `$${r.costUsd.toFixed(2)}${r.costEstimated ? ' (est)' : ''}` : '—';
+  return `
+    <h1>Charter exploration${r.scopeLabel ? ' — ' + esc(r.scopeLabel) : ''}</h1>
+    <p class="sub"><code>${esc(r.project || '?')}</code>${
+      r.projectName ? ' · ' + esc(r.projectName) : ''} · ${esc(folders)}${
+      r.runMode ? ' · ' + esc(r.runMode) : ''}${
+      (r.themes && r.themes.length) ? ' · ' + esc(r.themes.join(' + ')) : ''}</p>
+    ${!r.complete ? `<div class="banner"><b>Run in progress.</b> ${r.chartersRun} of ${
+      r.chartersApproved} charters done, ${r.chartersPending} pending. This report is
+      regenerated after each charter — reload to see the latest.</div>` : ''}
+    <div class="brief">
+      ${stat('Source cases', r.casesIngested ?? '—')}
+      ${stat('Charters', `${r.chartersRun}/${r.chartersApproved}`, `of ${r.chartersDerived} derived`)}
+      ${stat('Findings', r.findingsTotal ?? 0)}
+      ${stat('Crashes / ANRs', st.crash + st.anr + st.hang,
+             (st.crash + st.anr + st.hang) ? `${st.crash} crash · ${st.anr} ANR · ${st.hang} hang` : 'none seen')}
+      ${stat('Steps', `${r.stepsUsed}`, `/ ${r.stepsBudget} budget`)}
+      ${stat('Cost', cost)}
+    </div>
+    <div class="sevrow">
+      ${SEV.map(s => `<span class="pill"><i class="dot d-${s}"></i>${
+        f[s] || 0} ${s}</span>`).join('')}
+      ${(R.notCovered.coldAreas || []).length
+        ? `<span class="pill"><i class="dot d-cold"></i>${R.notCovered.coldAreas.length} cold area${
+            R.notCovered.coldAreas.length > 1 ? 's' : ''}</span>` : ''}
+    </div>`;
+}
+
+function matrixHTML(){
+  if (!R.coverageMatrix.length) return '';
+  return `
+    <h2>Coverage matrix</h2>
+    <p class="sub">Each area, the charters that targeted it, and the BrowserStack cases those
+    charters trace back to. A <i>cold</i> row means nothing actually exercised that area — it is
+    not evidence the area is healthy.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Area</th><th>Charters</th><th>Source cases</th>
+        <th class="num">Screens</th><th class="num">High</th><th class="num">Med</th>
+        <th class="num">Low</th></tr></thead>
+      <tbody>${R.coverageMatrix.map(m => `
+        <tr>
+          <td>${esc(m.area)}${m.cold ? ' <span class="tag" style="color:var(--cold);border-color:var(--cold)">cold</span>' : ''}</td>
+          <td class="mono">${m.charterIds.map(id =>
+              `<span class="tc"${m.ranCharterIds.includes(id) ? '' : ' style="opacity:.45"'}>${esc(id)}</span>`).join('')}</td>
+          <td>${m.sourceTestCaseIds.map(t => `<span class="tc">${esc(t)}</span>`).join('') || '<span class="zero">—</span>'}</td>
+          <td class="num">${m.nodesExplored || '<span class="zero">0</span>'}</td>
+          ${SEV.map(s => `<td class="num">${m.severity[s] || '<span class="zero">0</span>'}</td>`).join('')}
+        </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+
+function journeyHTML(c){
+  if (!c.nodes.length) return '';
+  const byId = Object.fromEntries(c.nodes.map(n => [n.id, n]));
+  const parts = [];
+  const first = c.edges.length ? byId[c.edges[0].from] : c.nodes[0];
+  const node = n => n ? `<div class="jn ${esc(n.kind || 'screen')}${
+      (n.findings || []).length ? ' has-f' : ''}"><div class="lbl">${esc(n.label || n.id)}</div>
+      <div class="mt">${(n.visits || []).length || 1}×${
+      (n.findings || []).length ? ` · ${n.findings.length}⚑` : ''}</div></div>` : '';
+  if (first) parts.push(node(first));
+  for (const e of c.edges){
+    parts.push(`<div class="je ${esc(e.outcome)} ${esc(e.phase || '')}" title="${
+      esc(e.action || '')}">→<br><span style="font-size:9px">${esc(e.outcome)}</span></div>`);
+    parts.push(node(byId[e.to]));
+  }
+  return `<div class="kv"><div class="k">Journey</div><div class="journey">${parts.join('')}</div></div>`;
+}
+
+function findingHTML(f){
+  return `<div class="f ${esc(f.severity)}">
+    <div class="ft">${esc(f.title)}</div>
+    <div class="fm">${esc(f.severity)} · ${esc(f.type || '—')} · ${esc(f.confidence || '?')} confidence ·
+      source ${esc(f.source || '?')}${f.node ? ' · ' + esc(f.node) : ''}${
+      f.step != null ? ' · step ' + f.step : ''}${f.kbRef ? ' · ' + esc(f.kbRef) : ''}</div>
+    ${f.detail ? `<div class="fd">${esc(f.detail)}</div>` : ''}
+    ${f.evidence ? `<div class="fe">${esc(f.evidence)}</div>` : ''}</div>`;
+}
+
+function list(items){
+  return items && items.length
+    ? `<ul class="tight">${items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`
+    : '<div class="zero">—</div>';
+}
+
+function charterHTML(c){
+  const ran = ['done','timeboxed','aborted'].includes(c.status);
+  const v = c.verdict || (c.status === 'dropped' ? 'dropped' : 'pending');
+  const vcls = c.verdict ? 'v-' + c.verdict : 'v-pending';
+  const sev = SEV.map(s => c.findings.filter(f => f.severity === s).length);
+  const recipe = c.dataNeeds && typeof c.dataNeeds === 'object' ? c.dataNeeds.recipe : c.dataNeeds;
+  return `<details class="ch"${sev[0] ? ' open' : ''}>
+    <summary>
+      <span class="cid">${esc(c.id)}</span>
+      <span class="carea">${esc(c.area)}</span>
+      <span class="tag">${esc(c.priority)}</span>
+      ${c.focusArea ? `<span class="tag">${esc(c.focusArea)}</span>` : ''}
+      ${c.executedBy === 'manual'
+        ? `<span class="tag" title="Run by a human tester${c.tester ? ': ' + esc(c.tester) : ''}">manual</span>` : ''}
+      <span class="spacer"></span>
+      ${sev.some(Boolean) ? SEV.map((s,i) => sev[i]
+        ? `<span class="pill"><i class="dot d-${s}"></i>${sev[i]}</span>` : '').join('') : ''}
+      <span class="tag ${vcls}">${esc(v)}</span>
+    </summary>
+    <div class="body">
+      <div class="mission">${esc(c.mission)}</div>
+      ${c.traceError ? `<div class="banner"><b>Trace unavailable.</b> ${esc(c.traceError)} —
+        findings from this charter are missing below.</div>` : ''}
+      ${c.verdictReason ? `<div class="kv"><div class="k">Verdict</div>${esc(c.verdictReason)}</div>` : ''}
+      <div class="two">
+        <div>
+          <div class="kv"><div class="k">Why this charter</div>${esc(c.rationale)}</div>
+          <div class="kv"><div class="k">Traces to</div>${
+            c.sourceTestCaseIds.map(t => `<span class="tc">${esc(t)}</span>`).join('')}</div>
+          <div class="kv"><div class="k">Test data</div><code>${esc(recipe || '—')}</code></div>
+          <div class="kv"><div class="k">Probes the charter asked for</div>${list(c.probes)}</div>
+          <div class="kv"><div class="k">Preconditions</div>${list(c.preconditions)}</div>
+        </div>
+        <div>
+          <div class="kv"><div class="k">Risk areas</div>${list(c.riskAreas)}</div>
+          <div class="kv"><div class="k">Out of scope</div>${list(c.outOfScope)}</div>
+          <div class="kv"><div class="k">Asked for vs actually explored</div>
+            ${ran ? `${c.stepsUsed} of ${c.timebox.steps} budgeted steps ·
+              ${c.nodes.length} screen${c.nodes.length === 1 ? '' : 's'}
+              ${c.stepsUsed >= c.timebox.steps
+                ? '<br><b style="color:var(--med)">Hit its timebox</b> — the charter was cut short, so its area is only partly covered.'
+                : ''}`
+              : '<span class="zero">not run</span>'}</div>
+          ${c.device ? `<div class="kv"><div class="k">Device</div>${esc(c.device)}${
+            c.app ? '<br>' + esc(c.app) : ''}</div>` : ''}
+        </div>
+      </div>
+      ${journeyHTML(c)}
+      ${c.findings.length
+        ? `<div class="kv"><div class="k">Findings</div>${c.findings.map(findingHTML).join('')}</div>`
+        : (ran ? '<div class="kv"><div class="k">Findings</div><div class="zero">None recorded.</div></div>' : '')}
+      ${c.reportPath ? `<div class="kv"><a href="${esc(c.reportPath)}">Open this charter's full
+        exploration report (journey graph, screenshots, page sources) →</a></div>` : ''}
+    </div>
+  </details>`;
+}
+
+function notCoveredHTML(){
+  const n = R.notCovered;
+  const gaps = R.coverageGaps || [];
+  const undx = (R.run.undiagnosedStability) || [];
+  const any = n.dropped.length || n.timeboxed.length || n.aborted.length ||
+              n.notRun.length || n.coldAreas.length || gaps.length || undx.length;
+  const sec = (title, body) => `<h3>${title}</h3>${body}`;
+  return `
+    <h2>Not covered</h2>
+    <p class="sub">What this run did <i>not</i> establish. A report that only lists what it did
+    is half a report.</p>
+    <div class="nc">
+      ${!any ? '<div class="empty">Every approved charter ran to completion and no area was left cold.</div>' : ''}
+      ${n.dropped.length ? sec('Dropped at the approval gate',
+        `<ul class="tight">${n.dropped.map(d =>
+          `<li><span class="cid">${esc(d.id)}</span> ${esc(d.area)} — ${esc(d.mission)}</li>`).join('')}</ul>`) : ''}
+      ${n.timeboxed.length ? sec('Hit their timebox mid-charter',
+        `<ul class="tight">${n.timeboxed.map(d =>
+          `<li><span class="cid">${esc(d.id)}</span> ${esc(d.area)} — stopped at ${d.stepsUsed}/${
+            d.stepsBudget} steps${d.verdictReason ? '. ' + esc(d.verdictReason) : ''}</li>`).join('')}</ul>`) : ''}
+      ${n.aborted.length ? sec('Aborted',
+        `<ul class="tight">${n.aborted.map(d =>
+          `<li><span class="cid">${esc(d.id)}</span> ${esc(d.area)} — ${esc(d.reason || 'no reason recorded')}</li>`).join('')}</ul>`) : ''}
+      ${n.notRun.length ? sec('Approved but not yet run',
+        `<ul class="tight">${n.notRun.map(d =>
+          `<li><span class="cid">${esc(d.id)}</span> ${esc(d.area)}</li>`).join('')}</ul>`) : ''}
+      ${n.coldAreas.length ? sec('Cold areas',
+        `<p style="color:var(--dim);margin:4px 0">Charters targeted these areas but nothing was
+         actually explored in them — treat as unknown, not as passing.</p>
+         <ul class="tight">${n.coldAreas.map(a => `<li>${esc(a)}</li>`).join('')}</ul>`) : ''}
+      ${gaps.length ? sec('Checks this target could not run',
+        `<p style="color:var(--dim);margin:4px 0">Structural gaps, not omissions — e.g. no
+         bounds-bearing page source on iOS or BrowserStack means the deterministic UI lint never
+         ran. An area with no findings here is <b>unmeasured</b>, not clean.</p>
+         <ul class="tight">${gaps.map(g =>
+          `<li><span class="cid">${esc(g.charterId)}</span> ${esc(g.area)} — ${esc(g.gap)}</li>`).join('')}</ul>`) : ''}
+      ${undx.length ? sec('Crashes detected but not diagnosed',
+        `<p style="color:var(--dim);margin:4px 0">These are <b>real</b> stability findings — the
+         app died or hung. The target simply cannot produce a stack trace, so they can't be
+         triaged from this report alone; pull logs from the device or BrowserStack session.</p>
+         <ul class="tight">${undx.map(u =>
+          `<li><span class="cid">${esc(u.charterId)}</span> ${esc(u.type)}${
+            u.deviceKind ? ' on ' + esc(u.deviceKind) : ''}</li>`).join('')}</ul>`) : ''}
+    </div>`;
+}
+
+document.getElementById('app').innerHTML =
+  briefHTML() + matrixHTML() +
+  '<h2>Charters</h2>' + (R.charters.map(charterHTML).join('') ||
+    '<div class="empty">No charters.</div>') +
+  notCoveredHTML() +
+  `<footer>Generated by <code>aep-tapmind:charter-exploration</code>${
+    R.run.createdAt ? ' · ' + esc(R.run.createdAt) : ''}. Each charter was executed as a bounded
+    run of <code>goal-driven-exploration</code>.</footer>`;
+</script>
+</body>
+</html>

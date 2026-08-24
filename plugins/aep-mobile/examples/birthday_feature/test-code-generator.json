@@ -1,0 +1,161 @@
+{
+  "contract_version": "1.0.0",
+  "feature_key": "birthday_feature",
+  "app": "gopay-consumer",
+  "platform": "cross-platform",
+  "framework": "flutter",
+  "target": "tapmind-nlp",
+  "test_repo": "Tapmind",
+  "module_path": "tapmind-mobile-tests/com/gopay/birthday",
+  "package": "com.gopay.tapmind.tests.generated",
+  "base_class": "BaseTest",
+  "generated_at": "2026-07-24T11:40:00Z",
+  "source_refs": {
+    "sdet_plan_ref": "artifact://sdet-plan/birthday_feature_sdet_plan.json",
+    "change_context_ref": "artifact://change-context/birthday_feature.json"
+  },
+  "tests": [
+    {
+      "scenario_id": "SC-001",
+      "title": "Birthday Genie card appears at position 1 and tap fires clickstream",
+      "op": "CREATE", "priority": "P0",
+      "class_name": "BirthdayGenieCardTests", "test_method": "cardAppearsAndTapFiresEvent",
+      "artifact_ref": "generated/birthday/BirthdayGenieCardTests.java",
+      "screens_covered": ["HOMESCREEN"],
+      "traceability": { "requirement_id": "BR-001", "story_id": "AURA-STORY-01", "jira_task_ids": ["AURA-201"], "browserstack_suite_id": "5501", "browserstack_test_case_id": null, "test_info_annotation": "@TestInfo(suiteId=\"5501\", testCaseId=\"<created-at-run>\")" },
+      "setup": { "mock_location": { "lat": -6.2088, "lng": 106.8456 }, "backdoor_login": "KYC-verified user with DOB=today from TDP" },
+      "given_strategy": "nav_macro", "deep_link": null, "nav_macro_fallback": "navigateToHomeScreen()",
+      "nl_steps": [
+        "runStep(\"Launch GoPay as a KYC-verified user whose birthday is today\")",
+        "runStep(\"Open the home screen and scroll to the Business Genie carousel\")",
+        "assertStep(\"Verify a birthday Genie card is at position 1 showing 'Happy birthday' and 'Click for surprise'\")",
+        "runStep(\"Tap the birthday Genie card\")",
+        "assertStep(\"Verify the birthday_genie_card_tap analytics event fires\")"
+      ],
+      "assertions_from": "sdet_plan:SC-001",
+      "analytics_assertions": [{ "event_name": "birthday_genie_card_tap", "required_attributes": {} }],
+      "locators_used": ["HOMESCREEN.TAP_BIRTHDAY_CARD", "HOMESCREEN.birthday_card_headline"],
+      "data_binding": { "data_need_id": "kyc_verified_user+birthday_d_day+no_card_selected", "status": "RESOLVED", "provider": "tdp", "fixture_ref": "tdp://user/kyc-verified?dob=today&card_state=none", "provision_via": "tdp_reserved_account" },
+      "flags_required": ["birthday_feature_litmus_content=enabled"], "waits": "dynamic", "teardown": true,
+      "validation": { "mode": "generated", "result": "PASS", "device": "pending-device-run", "steps_validated": 0, "steps_repaired": 0 }
+    },
+    {
+      "scenario_id": "SC-002",
+      "title": "Celebration animation plays and exit CTA is visible",
+      "op": "CREATE", "priority": "P0",
+      "class_name": "BirthdayAnimationTests", "test_method": "animationPlaysWithExitCta",
+      "artifact_ref": "generated/birthday/BirthdayAnimationTests.java",
+      "screens_covered": ["HOMESCREEN", "LOTTIE_ANIMATION", "HAPPY_BIRTHDAY"],
+      "traceability": { "requirement_id": "BR-002", "story_id": "AURA-STORY-02", "jira_task_ids": ["AURA-201"], "browserstack_suite_id": "5501", "browserstack_test_case_id": null, "test_info_annotation": "@TestInfo(suiteId=\"5501\", testCaseId=\"<created-at-run>\")" },
+      "setup": { "mock_location": { "lat": -6.2088, "lng": 106.8456 }, "backdoor_login": "KYC-verified user with DOB=today from TDP" },
+      "given_strategy": "nav_macro", "deep_link": null, "nav_macro_fallback": "navigateToBirthdayFlowViaGenieCard()",
+      "nl_steps": [
+        "runStep(\"Launch GoPay as a KYC-verified user whose birthday is today\")",
+        "runStep(\"Tap the birthday Genie card on the home carousel\")",
+        "assertStep(\"Verify the full-screen celebration animation plays\")",
+        "assertStep(\"Verify the skip/exit CTA is visible\")",
+        "assertStep(\"Verify the birthday_animation_viewed analytics event fires\")",
+        "runStep(\"Wait until the animation completes\")",
+        "assertStep(\"Verify the screen advances to the blow candle screen\")"
+      ],
+      "assertions_from": "sdet_plan:SC-002",
+      "analytics_assertions": [
+        { "event_name": "birthday_genie_card_tap", "required_attributes": {} },
+        { "event_name": "birthday_animation_viewed", "required_attributes": {} }
+      ],
+      "locators_used": ["HOMESCREEN.TAP_BIRTHDAY_CARD", "LOTTIE_ANIMATION.TAP_SKIP_BTN", "LOTTIE_ANIMATION.TIMEOUT_COMPLETE"],
+      "data_binding": { "data_need_id": "kyc_verified_user+birthday_d_day+no_card_selected", "status": "RESOLVED", "provider": "tdp", "fixture_ref": "tdp://user/kyc-verified?dob=today&card_state=none", "provision_via": "tdp_reserved_account" },
+      "flags_required": ["birthday_feature_litmus_content=enabled"], "waits": "dynamic", "teardown": true,
+      "validation": { "mode": "generated", "result": "PASS", "device": "pending-device-run", "steps_validated": 0, "steps_repaired": 0 }
+    },
+    {
+      "scenario_id": "SC-003",
+      "title": "First-time card selection: 10 cards visible and a card can be selected",
+      "op": "CREATE", "priority": "P0",
+      "class_name": "BirthdayCardSelectionTests", "test_method": "firstTimeCardSelection",
+      "artifact_ref": "generated/birthday/BirthdayCardSelectionTests.java",
+      "screens_covered": ["HAPPY_BIRTHDAY", "BIRTHDAY_RESULT"],
+      "traceability": { "requirement_id": "BR-004", "story_id": "AURA-STORY-04", "jira_task_ids": ["AURA-203"], "browserstack_suite_id": "5501", "browserstack_test_case_id": null, "test_info_annotation": "@TestInfo(suiteId=\"5501\", testCaseId=\"<created-at-run>\")" },
+      "setup": { "mock_location": { "lat": -6.2088, "lng": 106.8456 }, "backdoor_login": "KYC-verified user with DOB=today, no card selected, from TDP" },
+      "given_strategy": "nav_macro", "deep_link": null, "nav_macro_fallback": "navigateToBirthdayFlowViaGenieCard()",
+      "nl_steps": [
+        "runStep(\"Launch GoPay as a KYC-verified birthday user with no card previously selected\")",
+        "runStep(\"Reach the birthday flow via the birthday Genie card\")",
+        "runStep(\"Wait for the celebration animation to complete\")",
+        "runStep(\"Tap 'Tap to blow the candle'\")",
+        "assertStep(\"Verify the card gallery shows 10 birthday cards\")",
+        "runStep(\"Swipe through the gallery and tap the card select button\")",
+        "assertStep(\"Verify the birthday_candle_tapped and birthday_card_selected analytics events fire\")",
+        "assertStep(\"Verify the screen advances to the result/share state\")"
+      ],
+      "assertions_from": "sdet_plan:SC-003",
+      "analytics_assertions": [
+        { "event_name": "birthday_candle_tapped", "required_attributes": {} },
+        { "event_name": "birthday_card_selected", "required_attributes": {} }
+      ],
+      "locators_used": ["HAPPY_BIRTHDAY.TAP_CANDLE_BTN", "BIRTHDAY_RESULT.SWIPE_CARD_CAROUSEL", "BIRTHDAY_RESULT.card_select_btn"],
+      "data_binding": { "data_need_id": "kyc_verified_user+birthday_d_day+no_card_selected", "status": "RESOLVED", "provider": "tdp", "fixture_ref": "tdp://user/kyc-verified?dob=today&card_state=none", "provision_via": "tdp_reserved_account" },
+      "flags_required": ["birthday_feature_litmus_content=enabled"], "waits": "dynamic", "teardown": true,
+      "validation": { "mode": "generated", "result": "PASS", "device": "pending-device-run", "steps_validated": 0, "steps_repaired": 0 }
+    },
+    {
+      "scenario_id": "SC-004",
+      "title": "Re-trigger flow skips card selection and shows previously selected card",
+      "op": "CREATE", "priority": "P0",
+      "class_name": "BirthdayRetriggerTests", "test_method": "retriggerShowsSelectedCard",
+      "artifact_ref": "generated/birthday/BirthdayRetriggerTests.java",
+      "screens_covered": ["HAPPY_BIRTHDAY", "BIRTHDAY_RESULT"],
+      "traceability": { "requirement_id": "BR-005", "story_id": "AURA-STORY-05", "jira_task_ids": ["AURA-203"], "browserstack_suite_id": "5501", "browserstack_test_case_id": null, "test_info_annotation": "@TestInfo(suiteId=\"5501\", testCaseId=\"<created-at-run>\")" },
+      "setup": { "mock_location": { "lat": -6.2088, "lng": 106.8456 }, "backdoor_login": "KYC-verified user with DOB=today, card already selected, from TDP" },
+      "given_strategy": "nav_macro", "deep_link": null, "nav_macro_fallback": "navigateToBirthdayFlowViaGenieCard()",
+      "nl_steps": [
+        "runStep(\"Launch GoPay as a KYC-verified birthday user who already selected a card\")",
+        "runStep(\"Reach the birthday flow via the birthday Genie card\")",
+        "runStep(\"Wait for the celebration animation to complete\")",
+        "runStep(\"Tap 'Tap to blow the candle'\")",
+        "assertStep(\"Verify the card selection gallery is skipped\")",
+        "assertStep(\"Verify the previously selected card is shown on the result screen\")",
+        "assertStep(\"Verify the birthday_retrigger_tapped analytics event fires\")"
+      ],
+      "assertions_from": "sdet_plan:SC-004",
+      "analytics_assertions": [{ "event_name": "birthday_retrigger_tapped", "required_attributes": {} }],
+      "locators_used": ["HAPPY_BIRTHDAY.TAP_CANDLE_BTN", "BIRTHDAY_RESULT.SWIPE_CARD_CAROUSEL"],
+      "data_binding": { "data_need_id": "kyc_verified_user+birthday_d_day+card_selected", "status": "RESOLVED", "provider": "tdp", "fixture_ref": "tdp://user/kyc-verified?dob=today&card_state=selected", "provision_via": "tdp_reserved_account" },
+      "flags_required": ["birthday_feature_litmus_content=enabled"], "waits": "dynamic", "teardown": true,
+      "validation": { "mode": "generated", "result": "PASS", "device": "pending-device-run", "steps_validated": 0, "steps_repaired": 0 }
+    },
+    {
+      "scenario_id": "SC-005",
+      "title": "Kill switch: Litmus disabled hides birthday feature",
+      "op": "CREATE", "priority": "P0",
+      "class_name": "BirthdayKillSwitchTests", "test_method": "litmusDisabledHidesFeature",
+      "artifact_ref": "generated/birthday/BirthdayKillSwitchTests.java",
+      "screens_covered": ["HOMESCREEN"],
+      "traceability": { "requirement_id": "FE-BIRTHDAY-001", "story_id": "AURA-STORY-01", "jira_task_ids": ["AURA-201"], "browserstack_suite_id": "5501", "browserstack_test_case_id": null, "test_info_annotation": "@TestInfo(suiteId=\"5501\", testCaseId=\"<created-at-run>\")" },
+      "setup": { "mock_location": { "lat": -6.2088, "lng": 106.8456 }, "backdoor_login": "KYC-verified user with DOB=today from TDP" },
+      "given_strategy": "nav_macro", "deep_link": null, "nav_macro_fallback": "navigateToHomeScreen()",
+      "nl_steps": [
+        "runStep(\"Set the Litmus flag birthday_feature_litmus_content to disabled\")",
+        "runStep(\"Launch GoPay as a KYC-verified user whose birthday is today\")",
+        "runStep(\"Open the home screen and scroll the Business Genie carousel\")",
+        "assertStep(\"Verify no birthday Genie card appears\")",
+        "assertStep(\"Verify the birthday flow is not accessible and no crash occurs\")"
+      ],
+      "assertions_from": "sdet_plan:SC-005",
+      "analytics_assertions": [],
+      "locators_used": ["HOMESCREEN.TAP_BIRTHDAY_CARD"],
+      "data_binding": { "data_need_id": "kyc_verified_user+birthday_d_day+litmus_disabled", "status": "RESOLVED", "provider": "tdp", "fixture_ref": "tdp://user/kyc-verified?dob=today", "provision_via": "tdp_reserved_account" },
+      "flags_required": ["birthday_feature_litmus_content=disabled"], "waits": "dynamic", "teardown": true,
+      "validation": { "mode": "generated", "result": "PASS", "device": "pending-device-run", "steps_validated": 0, "steps_repaired": 0 }
+    }
+  ],
+  "deferred": [
+    { "scenario_id": "SC-BR-002-EXIT", "reason": "NO_NAV_ROUTE", "detail": "BR-002 exit-CTA destination is undefined in Figma (ON_CLICK null); cannot assert a defined landing screen until dev confirms." },
+    { "scenario_id": "SC-BR-006-PN", "reason": "MANUAL_ONLY", "detail": "BR-006 push-notification delivery is automatable:false; PN deeplink is null and BE-triggered." },
+    { "scenario_id": "SC-RISK-002-COLDLAUNCH", "reason": "MANUAL_ONLY", "detail": "Litmus cold-launch staleness is automatable:false; requires multi-day app-close simulation." },
+    { "scenario_id": "SC-BR-007-WHATSAPP", "reason": "MANUAL_ONLY", "detail": "WhatsApp share leaves the app; automatable:false and message copy is TBD." },
+    { "scenario_id": "SC-BR-007-INSTA", "reason": "MANUAL_ONLY", "detail": "Instagram Stories share leaves the app; automatable:false." },
+    { "scenario_id": "SC-BC-001-WINDOW", "reason": "MANUAL_ONLY", "detail": "24h window boundary is automatable:false; requires real-clock time manipulation." }
+  ],
+  "summary": { "created": 5, "updated": 0, "skipped_legacy": 0, "deferred": 6, "unmapped_data_need": 0, "validated_on_device": 0, "needs_review": 0 }
+}

@@ -35,6 +35,11 @@ PRE-BUILD (parallel with implementation)
         ▼
 POST-BUILD (dev shares the build)
   code-change-extractor → change_context.json        (real per-platform locators, API, CR edges)
+        │
+  impact-shortlister    → impact_shortlist.json       (which existing regression cases the merged
+        │                                            code actually impacts — deterministic evidence
+        │                                            match + one agent judgment pass, no scoring
+        │                                            service; roll-up appended to sdet_plan.impact_shortlist)
         ▼
   test-code-generator   → TapMind NLP steps (primary) + GMT coded (where needed), both Android & iOS
                           (test data wired via test-data-provisioner → TestBuddy)

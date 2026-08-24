@@ -1,0 +1,650 @@
+{
+  "contract_version": "1.0.0",
+  "generated_at": "2026-08-24T08:31:23+00:00",
+  "extraction_status": "COMPLETE",
+  "extraction_notes": [],
+  "feature_metadata": {
+    "feature_key": "save-group-for-group-orders",
+    "epic_ref": "save-group-for-group-orders",
+    "app": "gojek-consumer",
+    "platform": "cross-platform",
+    "module_namespace": "gofood-group-order"
+  },
+  "inputs": {
+    "sdet_plan": {
+      "path": "/Users/ashishsharma/Repos/skills/plugins/aep-mobile/examples/save_group_feature/save_group_for_group_orders_sdet_plan.json",
+      "present": true
+    },
+    "regression_context": {
+      "path": "/Users/ashishsharma/Repos/skills/plugins/aep-mobile/examples/save_group_feature/regression_context.json",
+      "present": true
+    },
+    "change_context": {
+      "path": "/Users/ashishsharma/Repos/skills/plugins/aep-mobile/examples/save_group_feature/change_context.bootstrap.json",
+      "present": true
+    }
+  },
+  "change_surface": {
+    "source": "gitlab_mr_diff",
+    "merge_requests": [
+      "!54280",
+      "!54308",
+      "!54317",
+      "!54169",
+      "!54196",
+      "!54170",
+      "!54222",
+      "!54232",
+      "!54311"
+    ],
+    "changed_files": [
+      "gofood/food-features/food-dishes/food-dishes-shared-domain/src/main/java/com/gojek/food/dishes/shared/domain/dish/usecase/grouporder/DefaultWriteRemoteGroupOrderCartToLocalCartUseCase.kt",
+      "gofood/food-features/food-dishes/food-dishes-shared-domain/src/test/java/com/gojek/food/dishes/shared/domain/dish/usecase/grouporder/GroupOrderTestData.kt",
+      "gofood/food-features/food-fbon/food-fbon-shared-domain/src/main/java/com/gojek/food/fbon/shared/domain/model/OrderV3Model.kt",
+      "gofood/food-features/food-fbon/food-fbon/build.gradle",
+      "gofood/food-features/food-fbon/food-fbon/src/main/java/com/gojek/food/fbon/activeorderscreen/ui/PostBookingScreenNotchCardParentContainerV2.kt",
+      "gofood/food-features/food-fbon/food-fbon/src/main/java/com/gojek/food/fbon/activeorderscreen/ui/widgets/SocialGroupCreatedWidget.kt",
+      "gofood/food-features/food-fbon/food-fbon/src/main/java/com/gojek/food/fbon/data/mapper/OrderResponseMapper.kt",
+      "gofood/food-features/food-fbon/food-fbon/src/main/java/com/gojek/food/fbon/domain/transformers/impl/OrderBookingDataTransformer.kt",
+      "gofood/food-features/food-fbon/food-fbon/src/main/java/com/gojek/food/fbon/domain/transformers/impl/SocialGroupDetailsTransformer.kt",
+      "gofood/food-features/food-fbon/food-fbon/src/test/java/com/gojek/food/fbon/domain/transformers/impl/OrderBookingDataTransformerTest.kt",
+      "gofood/food-features/food-fbon/food-fbon/src/test/java/com/gojek/food/fbon/domain/transformers/impl/SocialGroupDetailsTransformerTest.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/api/GroupOrderApi.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/mapper/GroupOrderDetailResponseMapper.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/mapper/GroupOrderParticipantResponseMapper.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/model/AddUsersToSocialGroupRequest.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/model/AddUsersToSocialGroupResponse.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/model/GroupOrderDetailResponse.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/model/GroupOrderParticipantResponse.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/model/SocialGroupResponse.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/remote/GroupOrderNetworkDataSource.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/data/repository/DefaultGroupOrderSharedActionsRepository.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/domain/model/AddUsersToSocialGroupDomainModel.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/domain/model/GroupOrderDetailDomainModel.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/domain/model/GroupOrderParticipantDomainModel.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/main/java/com/gojek/food/grouporder/shared/domain/repository/GroupOrderSharedActionsRepository.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/test/java/com/gojek/food/grouporder/shared/data/mappers/GroupOrderParticipantResponseMapperTest.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/test/java/com/gojek/food/grouporder/shared/data/remote/GroupOrderNetworkDataSourceTest.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/test/java/com/gojek/food/grouporder/shared/data/repository/DefaultGroupOrderSharedActionsRepositoryTest.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-domain/src/test/java/com/gojek/food/grouporder/shared/testdata/GroupOrderTestData.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-ui/src/main/java/com/gojek/food/grouporder/grouporderui/GroupOrderBadge.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-ui/src/main/java/com/gojek/food/grouporder/grouporderui/GroupShareTray.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-ui/src/main/java/com/gojek/food/grouporder/grouporderui/savegroup/SaveGroupRowState.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-ui/src/main/java/com/gojek/food/grouporder/grouporderui/savegroup/SaveGroupSection.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-ui/src/main/java/com/gojek/food/grouporder/grouporderui/socialgroup/SocialGroupCard.kt",
+      "gofood/food-features/food-grouporder/food-grouporder-shared-ui/src/main/java/com/gojek/food/grouporder/grouporderui/socialgroup/SocialGroupCardUiModel.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/di/GroupOrderDomainModule.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/domain/usecase/AddMemberToSocialGroupUseCase.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartAction.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartActionProcessor.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartEffect.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartIntent.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartPresentationMapper.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartResult.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartViewModel.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartViewState.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/sharedcart/GFDGroupOrderSharedCartActivity.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/sharedcart/compose/GFDGroupOrderSharedCartScreen.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/sharedcart/compose/GroupOrderCartContainer.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/main/java/com/gojek/food/grouporder/ui/sharedcart/compose/SharedCartBottomBar.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/test/java/com/gojek/food/grouporder/domain/usecase/AddMemberToSocialGroupUseCaseTest.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/test/java/com/gojek/food/grouporder/ui/presentation/DefaultGroupOrderSharedCartActionProcessorTest.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/test/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartPresentationMapperTest.kt",
+      "gofood/food-features/food-grouporder/food-grouporder/src/test/java/com/gojek/food/grouporder/ui/presentation/GroupOrderSharedCartViewModelTest.kt",
+      "gofood/food-libraries/food-libs-cart/src/main/java/com/gojek/food/libs/cart/model/Cart.kt",
+      "gofood/food-libraries/food-libs-config/src/main/java/com/gojek/food/libs/config/v2/configs/grouporder/GroupOrderConfig.kt",
+      "gofood/food-libraries/food-libs-config/src/main/java/com/gojek/food/libs/config/v2/configs/grouporder/GroupOrderConstants.kt",
+      "gofood/food-libraries/food-libs-config/src/test/java/com/gojek/food/libs/config/v2/configs/grouporder/GroupOrderConfigTest.kt",
+      "gofood/food-libraries/food-libs-network/src/main/java/com/gojek/food/libs/network/response/OrderResponseData.kt",
+      "gofood/food-shared/food-shared-domain/src/main/java/com/gojek/food/shared/domain/fbon/model/OrderDomainData.kt"
+    ],
+    "changed_modules": [
+      "gofood-group-order"
+    ],
+    "changed_screens": [
+      "GROUP_ORDER_LANDING",
+      "SHARED_CART",
+      "SHARE_TRAY",
+      "GROUP_ORDER_LANDING_PAGE",
+      "INVITE_FRIENDS"
+    ],
+    "changed_element_ids": [],
+    "flags": [
+      "isSaveGroupEnabled",
+      "release_food_go_save_group"
+    ],
+    "api_endpoints": [
+      "/gofood/meal-scheduler/v1/group-order-sessions",
+      "/gofood/meal-scheduler/v1/group-order-sessions/{id}/invite",
+      "/gofood/meal-scheduler/v1/group-order-sessions/{id} (session/courier response)",
+      "/gofood/meal-scheduler/v1/group-order-sessions/{id}/invite-social-group-members"
+    ],
+    "cr_risks": [],
+    "id_compliance_status": "NOT_RUN"
+  },
+  "selection_summary": {
+    "candidate_pool_size": 3,
+    "shortlisted_count": 3,
+    "deselected_count": 0,
+    "must_run_count": 3,
+    "should_run_count": 0,
+    "optional_count": 0,
+    "reduction_pct": 0.0
+  },
+  "shortlisted_tests": [
+    {
+      "test_id": "TC-302383",
+      "case_number": "302383",
+      "browserstack_id": "TC-302383",
+      "title": "Landing page shows 'Groups you can invite' when host has Social Groups",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "FILE_PATH_TOUCHED",
+        "MODULE_TOUCHED",
+        "SCREEN_TOUCHED"
+      ],
+      "evidence": {
+        "changed_modules": [
+          "gofood-group-order"
+        ],
+        "screens": [
+          "GROUP_ORDER_LANDING",
+          "GROUP_ORDER_LANDING_PAGE"
+        ],
+        "path_tokens": [
+          "gofood"
+        ]
+      },
+      "execution_target": "TAPMIND_NLP",
+      "priority": "P0",
+      "source_module": "gofood-group-order",
+      "plan_scenario_refs": [
+        "Landing page shows 'Groups you can invite' when host has Social Groups"
+      ],
+      "source": "plan_legacy"
+    },
+    {
+      "test_id": "TC-302484",
+      "case_number": "302484",
+      "browserstack_id": "TC-302484",
+      "title": "Share Tray from landing (pre-GO) shows only Social Groups list, bottom CTR hidden",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "FILE_PATH_TOUCHED",
+        "MODULE_TOUCHED",
+        "SCREEN_TOUCHED"
+      ],
+      "evidence": {
+        "changed_modules": [
+          "gofood-group-order"
+        ],
+        "screens": [
+          "SHARE_TRAY"
+        ],
+        "path_tokens": [
+          "gofood"
+        ]
+      },
+      "execution_target": "TAPMIND_NLP",
+      "priority": "P1",
+      "source_module": "gofood-group-order",
+      "plan_scenario_refs": [
+        "BAU empty Share Tray for users without Social Groups / members"
+      ],
+      "source": "plan_legacy"
+    },
+    {
+      "test_id": "TC-302761",
+      "case_number": "302761",
+      "browserstack_id": "TC-302761",
+      "title": "Shared Cart without a linked Social Group shows three-dots 'Remove from Group Order' for host only",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "FILE_PATH_TOUCHED",
+        "MODULE_TOUCHED",
+        "SCREEN_TOUCHED"
+      ],
+      "evidence": {
+        "changed_modules": [
+          "gofood-group-order"
+        ],
+        "screens": [
+          "SHARED_CART"
+        ],
+        "path_tokens": [
+          "cart",
+          "gofood"
+        ]
+      },
+      "execution_target": "TAPMIND_NLP",
+      "priority": "P0",
+      "source_module": "gofood-group-order",
+      "plan_scenario_refs": [
+        "Shared Cart without a linked Social Group shows three-dots 'Remove from Group Order' for host only"
+      ],
+      "source": "plan_legacy"
+    }
+  ],
+  "deselected_tests": [],
+  "unresolved_ids": [],
+  "run_buckets": {
+    "GMT_JAVA": [],
+    "TAPMIND_NLP": [
+      "TC-302383",
+      "TC-302484",
+      "TC-302761"
+    ],
+    "MANUAL": [],
+    "UNKNOWN_AUTOMATED": []
+  },
+  "new_scenarios_to_run": [
+    {
+      "csv_title_association": "Landing page shows 'Invite from Previous Purchase' when host has no saved group but has history",
+      "requirement_ref": "GO-LP-01",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Select a saved group with <=7 members auto-selects all and shows 'Selected' state",
+      "requirement_ref": "GO-LP-02",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Select a saved group with >7 members opens the Invitation tray with first 7 selected",
+      "requirement_ref": "GO-LP-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Landing shows max 3 saved groups sorted by recency with single selection",
+      "requirement_ref": "GO-LP-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Create group order sends invitations and history members auto-join with 'Joining in...'",
+      "requirement_ref": "GO-LP-03",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Host who selected a group before creating GO is routed directly to MPS, skipping the Share Tray",
+      "requirement_ref": "GO-LP-04",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Share Tray with a group already selected shows selected group info and 'Send Invitation'",
+      "requirement_ref": "GO-ST-03",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Shared Cart with a linked Social Group shows chat section and group thumbnails",
+      "requirement_ref": "GO-SC-02",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Shared Cart contextual menu differs by role for group vs outside participants",
+      "requirement_ref": "GO-SC-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Any group participant can invite a new member who auto-joins the Social Group",
+      "requirement_ref": "GO-SC-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Outside-group participant sees a BAU Shared Cart with no group chat, thumbnail or three-dots",
+      "requirement_ref": "GO-SC-03",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Post-booking with no matching group creates a new Social Group",
+      "requirement_ref": "GO-CK-01",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Post-booking with an exact matching group reuses the existing group",
+      "requirement_ref": "GO-CK-01",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "AOS shows the Group Chat entry point for group participants (new auto-created and existing)",
+      "requirement_ref": "GO-AOS-01",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "AOS hides the floating chat for participants not part of the Social Group",
+      "requirement_ref": "GO-AOS-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "'Save Group' CTA on AOS routes to Group Creation when no saved list exists",
+      "requirement_ref": "GO-AOS-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "'Save Group' CTA on AOS routes to Group Management when a saved list exists",
+      "requirement_ref": "GO-AOS-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Chat Extension pre-booking static card shows status and role-based CTA",
+      "requirement_ref": "GO-CE-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Custom invitation trays appear in landing, MPS and Shared Cart for the host only",
+      "requirement_ref": "GO-INV-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Invitation page Confirm / Cancel / Dismiss return to landing with the correct state",
+      "requirement_ref": "GO-INV-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Member selection page shows all members alphabetically with first 7 selected",
+      "requirement_ref": "GO-MC-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Create and edit a saved group with required and optional inputs",
+      "requirement_ref": "GO-GCP-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Manage saved groups: add member, remove member and delete group with confirmation",
+      "requirement_ref": "GO-GMP-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Transactional group chat window is order-scoped with no free text and no add/remove",
+      "requirement_ref": "GO-GC-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Save Group entry point in Gojek order history routes by saved-group availability",
+      "requirement_ref": "GO-HIS-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "End-to-end: host creates a GO from a saved group through to AOS with group chat",
+      "requirement_ref": "GO-LP-03",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "End-to-end: invited member auto-joins the shared cart and reaches checkout",
+      "requirement_ref": "GO-LP-03",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Navigate between AOS and the Group Chat and back",
+      "requirement_ref": "GO-AOS-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] User has no Social Group",
+      "requirement_ref": "BC-RULE-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] User has a Social Group",
+      "requirement_ref": "BC-RULE-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Host selected a Social Group before creating GO",
+      "requirement_ref": "BC-RULE-03",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Host did NOT select a Social Group before creating GO",
+      "requirement_ref": "BC-RULE-04",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Host taps 'Invite Friends' after a Social Group is already selected",
+      "requirement_ref": "BC-RULE-05",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Any Social Group participant invites a new member",
+      "requirement_ref": "BC-RULE-06",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Post-booking: no group selected AND no exact match",
+      "requirement_ref": "BC-RULE-07",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Post-booking: no group selected AND different member composition",
+      "requirement_ref": "BC-RULE-08",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Post-booking: no group selected AND all members exact-match an existing group",
+      "requirement_ref": "BC-RULE-09",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Post-booking: multiple matching groups found",
+      "requirement_ref": "BC-RULE-10",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Host selected a group upfront (superset/subset/subset+new)",
+      "requirement_ref": "BC-RULE-11",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] 2nd-time GO with 100% same members and same host",
+      "requirement_ref": "BC-EDGE-01",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] 2nd-time GO, same host, +1 new member",
+      "requirement_ref": "BC-EDGE-02",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Member added to cart but never pays (drops before checkout)",
+      "requirement_ref": "BC-EDGE-04",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Member removed mid-cart",
+      "requirement_ref": "BC-EDGE-05",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Same friend group, multiple concurrent orders same day",
+      "requirement_ref": "BC-EDGE-08",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Invite sent to a large group (10-12) but only 3 check out",
+      "requirement_ref": "BC-EDGE-09",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Group selection threshold <=7 vs >7 members",
+      "requirement_ref": "BC-EDGE-10",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Manage Participant capability in Food's share tray (M5)",
+      "requirement_ref": "BC-SCOPE-01",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Same members but host rotates to a different person",
+      "requirement_ref": "BC-EDGE-03",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Host cancels the order after the group chat already exists",
+      "requirement_ref": "BC-EDGE-06",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] 30-day chat expiry: same group reorders on day 31",
+      "requirement_ref": "BC-EDGE-07",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "is_enabled flag OFF leaves existing Group Order behaviour untouched (BAU)",
+      "requirement_ref": "is_enabled",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "is_enabled flag ON surfaces the Save Group experience",
+      "requirement_ref": "is_enabled",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "is_chat_extension_disabled kill switch (default true) hides new chat extensions",
+      "requirement_ref": "is_chat_extension_disabled",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Shared Cart deeplink opens the correct group order session",
+      "requirement_ref": "GO-SC-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Group chat deeplink to an expired/deleted group shows an explicit error state",
+      "requirement_ref": "GO-GC-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Attaching a second Social Group to a session that already has one is rejected",
+      "requirement_ref": "GO-CK-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Async group creation: AOS loads without social_group, chat entry appears after refresh",
+      "requirement_ref": "RISK-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Session/invite API timeout shows graceful error, not a crash",
+      "requirement_ref": "RISK-02",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Invite request never sends both invite_social_group_id and invite_history_group_ids",
+      "requirement_ref": "RISK-06",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Backgrounding AOS then returning refreshes group state and shows the chat entry",
+      "requirement_ref": "BACKGROUND_FOREGROUND",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Process death on the Group Creation page preserves entered group name",
+      "requirement_ref": "GO-GCP-01",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "N-1 client without Save Group code continues on the existing invite flow",
+      "requirement_ref": "rfc.compatibility_mandates",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Upgrade N-1 to N parses additive BCS social_group fields; old client ignores unknown fields",
+      "requirement_ref": "rfc.compatibility_mandates",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Save Group UI renders and behaves consistently on Android and iOS (KMP parity)",
+      "requirement_ref": "GO-LP-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "'Send Invitation' on the selected-group Share Tray delivers the invite to the group chat",
+      "requirement_ref": "GO-ST-03",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Host 'Add to group' on an outside participant adds them to the Social Group",
+      "requirement_ref": "GO-SC-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "GO already linked to a Social Group ignores auto-creation and reuses the group",
+      "requirement_ref": "GO-CK-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Randomize generates a group name and icon on the Group Creation page",
+      "requirement_ref": "GO-GCP-01",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    }
+  ]
+}
