@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Emit viz_data.json: board replica (groups, screens, chips, banners, boxes)
-+ resolved flow edges, for the HTML verification artifact.
++ resolved flow edges, for the HTML verification artifact. With --html it also
+writes the finished self-contained page (viz_shell.html + the data inlined),
+which is the form a human actually reviews.
 
 Optionally takes the finished design_context.json as a 4th argument: its
 ENTRY pseudo-node edges then mark the entry screens' frames in the replica
@@ -53,7 +55,20 @@ def entry_marks(context_path, chip_label, frame_scope):
     return marks, len(by_sid)
 
 
-def main(path, edges_path, out_path, context_path=None):
+def write_html(viz_data, out_html):
+    """Inline viz_data into viz_shell.html -> one self-contained review page."""
+    import os
+    shell = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         'viz_shell.html')
+    with open(shell) as f:
+        html = f.read()
+    with open(out_html, 'w') as f:
+        f.write(html.replace('__DATA__',
+                             json.dumps(viz_data, ensure_ascii=False)))
+    return out_html
+
+
+def main(path, edges_path, out_path, context_path=None, html_path=None):
     d = sp.load(path)
     page = d['nodes'][0]
     boards = sp.collect_board_nodes(page)
@@ -190,15 +205,24 @@ def main(path, edges_path, out_path, context_path=None):
            'entry_frames': entry_frames, 'entry_screens': entry_screens}
     with open(out_path, 'w') as f:
         json.dump(out, f, ensure_ascii=False)
+    if html_path:
+        write_html(out, html_path)
+        print(f"wrote {html_path}")
     print(f"groups={len(out_groups)} edges={len(edges)} "
           f"unresolved={len(unresolved)} entry_screens={entry_screens} "
           f"entry_frames={entry_frames} bytes={len(json.dumps(out))}")
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    html = None
+    if '--html' in sys.argv:
+        i = sys.argv.index('--html')
+        html = sys.argv[i + 1]
+        args = [a for a in args if a != html]
+    if len(args) < 2:
         sys.exit('usage: viz_export.py <export.json> <flow_edges.json> '
-                 '[viz_data.json] [design_context.json]')
-    main(sys.argv[1], sys.argv[2],
-         sys.argv[3] if len(sys.argv) > 3 else 'viz_data.json',
-         sys.argv[4] if len(sys.argv) > 4 else None)
+                 '[viz_data.json] [design_context.json] [--html flow_map.html]')
+    main(args[0], args[1],
+         args[2] if len(args) > 2 else 'viz_data.json',
+         args[3] if len(args) > 3 else None, html)

@@ -20,12 +20,14 @@ script exists so that never happens.
 | script | role |
 | :--- | :--- |
 | `phase_a.py` | THE extractor: spatial analysis → collapse → skeleton `design_context.json` + `phase_a.report.json`, schema-validated |
+| `screen_identity.py` | the identity rule: does one frame NAME mean one screen? control-set comparison + chip/context evidence, plus spec-material exclusion |
+| `identity_audit.py` | read-only audit of identity contests across boards; `--check-labels` replays the design team's ground-truth same/different calls (`identity_labels.json`) as a regression gate |
 | `preflight.py` | ALL mechanical preflight checks in one deterministic pass — never hand-write these |
 | `phase_b_packets.py` | one grounded packet per screen for the enrichment pass |
 | `phase_b_autobind.py` | deterministic element auto-bind (zero tokens) + light packets for the notes-only LLM pass |
 | `phase_b_merge.py` | applies enrichment under the no-invention contract, writes `escalations.json`, re-validates |
 | `spatial_scan.py`, `connector_resolve.py` | libraries used by the above; each also runs standalone as a diagnostic |
-| `viz_export.py` + `viz_shell.html` | optional: board-replica HTML for human side-by-side verification against Figma |
+| `viz_export.py` + `viz_shell.html` | REQUIRED final step: board-replica review page (`--html`) for human side-by-side verification against Figma |
 
 ## Preflight — resolve, or record and continue
 
@@ -152,6 +154,22 @@ refine bindings and wording, not to argue flags away.
 `design_context.json` (or `design_context.<app_id>.json`), confirm the merge printed
 `schema: VALID`, and summarize: screens, edges, elements, blocking issues, escalations run.
 
+**7. Review page — always, never optional.** A `design_context.json` nobody can check against
+the board is not a finished deliverable: the collapse and identity decisions are only verifiable
+side by side with Figma. Always produce the page and always hand the user its path (publish it as
+an Artifact when the user wants a link):
+
+```bash
+python3 connector_resolve.py <export.json> <workdir>/flow_edges.json
+python3 viz_export.py <export.json> <workdir>/flow_edges.json <workdir>/viz_data.json \
+        <workdir>/design_context.json --html <workdir>/flow_map.html
+```
+
+`flow_map.html` is self-contained (the shell with the data inlined) — no server, no assets. It
+draws every group, screen, chip, banner and resolved edge in board coordinates, marks entry
+screens (explicit label vs inferred topology), and lists the unresolved connectors, which is the
+fastest way for a reviewer to spot a fabricated or missing edge. One page per app in scope.
+
 ## Model policy
 
 - **Default tier: Haiku.** Structure comes from scripts; Phase B batch enrichment is
@@ -179,6 +197,23 @@ refine bindings and wording, not to argue flags away.
   single-frame proto → chip title; chip `Type` (New screen/Changes/Existing) is change-status
   metadata, never a state; scenario sub-sections become state prefixes and edge conditions, never
   screens; self-loops after collapse are state transitions in the report, never `ui_flow`.
+- **Screen identity** (`screen_identity.py`, validated against the design team's own
+  same/different calls in `identity_labels.json`): one frame NAME is not always one screen —
+  teams reuse "Landing"/"MPS"/"Dialog" across flows. Frames of one base identity are compared by
+  CONTROL SET (visible text of their interactive layers, digits normalised because "30%" vs
+  "60%" is data, not identity); a strong match merges transitively, weaker agreement merges on
+  the cluster average. Only a frame with its own non-state chip seeds a screen — unlabelled and
+  state-labelled frames attach to their best match, and on a board where nobody chipped anything
+  the flow context seeds instead (one context = one screen, still mergeable by controls). Splits
+  land in the report as `identity_splits[]` with their evidence; new ids are named from the
+  group's own chip, else its flow context, else a control it uniquely has. Whole-frame text and
+  component-name similarity were both measured and rejected: text scores 0.70 between screens
+  the team calls different (shared chrome), component names score 1.00 between unrelated dialogs
+  (shared design system).
+- **Spec material is excluded, not collapsed**: frames under a group/band/section named for
+  specs, annotations, redlines, guidelines, or assets document a screen instead of being one
+  (design-team call), so they leave `screens[]` and `ui_flow` and appear in `excluded_nodes` as
+  `SPEC_MATERIAL`. Connectors that touched them become unresolved rather than silent.
 - **Connector resolution**: arrowhead = direction (never draw order); endpoints resolve via
   element-in-screen → chip label → variant box → small-section entry (≤8 screens only — a bigger
   section carries no per-screen information and resolving it fabricates an edge); everything else
@@ -226,9 +261,16 @@ refine bindings and wording, not to argue flags away.
   both run `context_checks.py` (screen/element/edge referential integrity, the checks the JSON
   schema cannot express) and exit non-zero on failure. That is the gate, not a manual checklist.
   Standalone: `python3 context_checks.py <design_context.json>`.
+- Identity regression: `python3 identity_audit.py --check-labels` replays the design team's
+  labelled frame pairs through the real splitter and must print `7/7 labels reproduced`. When a
+  design team settles a new same/different question, add the pair to `identity_labels.json` — that
+  gate is what keeps the identity rule honest across board dialects.
 - Ground-truth spot check (recommended on a new board or new design team): pick 2-3 screen node
   ids in Figma, count their connectors, compare with edges touching those ids' collapsed screens
-  in `ui_flow` + `phase_a.report.json`. Any mismatch is a pipeline bug or a board convention the
+  in `ui_flow` + `phase_a.report.json`. `python3 identity_audit.py <export.json>` lists which
+  screens still hold frames from several flows and what a split would do. Any mismatch is a pipeline bug or a board convention the
   scripts haven't met — report it, don't patch the output.
-- For human review, `python3 viz_export.py <export.json> <edges.json> <out.json>` +
-  `viz_shell.html` renders the board replica used to validate this pipeline.
+- The `flow_map.html` from step 7 is the human-review gate: open it beside the Figma board and
+  check that each screen box carries the frames you expect, that split screens (`identity_splits`
+  in the report) really are different screens, and that no edge exists on the page that the board
+  does not draw.

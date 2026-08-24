@@ -464,20 +464,6 @@
   }
  ],
  "merges": {
-  "LOADING": [
-   "2571:14710",
-   "2269:62724"
-  ],
-  "SCROLL_VIEW": [
-   "2571:16086",
-   "2314:63199",
-   "2001:24802",
-   "2571:19061"
-  ],
-  "EMPTY_STATE": [
-   "2001:22870",
-   "2300:66062"
-  ],
   "RIWAYAT_KOMISI": [
    "2001:23440",
    "2001:23915",
@@ -528,11 +514,6 @@
    "2001:24143",
    "2001:24477"
   ],
-  "SCROLL_VIEW_WITH_PAGINATION_LOAD": [
-   "2300:63643",
-   "2269:67342",
-   "2269:62834"
-  ],
   "DOWNLINERS": [
    "2237:60661",
    "2237:60846",
@@ -577,7 +558,245 @@
   }
  ],
  "variant_links": [],
+ "entry_points": [
+  {
+   "screen_id": "WELCOME_PAGE",
+   "kind": "ENTRY_LABEL",
+   "condition": "Flow 1",
+   "evidence": "2001:38107",
+   "reaches_screens": 7
+  }
+ ],
+ "entry_candidates": [
+  {
+   "screen_id": "WELCOME_PAGE",
+   "out_degree": 1,
+   "reaches_screens": 7
+  },
+  {
+   "screen_id": "NATIVE_MONTH_PICKER",
+   "out_degree": 1,
+   "reaches_screens": 3
+  },
+  {
+   "screen_id": "DOWNLINERS",
+   "out_degree": 2,
+   "reaches_screens": 3
+  },
+  {
+   "screen_id": "EMPTY",
+   "out_degree": 1,
+   "reaches_screens": 3
+  },
+  {
+   "screen_id": "CONFIRM_ACCOUNT_ID",
+   "out_degree": 1,
+   "reaches_screens": 2
+  },
+  {
+   "screen_id": "FRAME_2117130931",
+   "out_degree": 1,
+   "reaches_screens": 2
+  },
+  {
+   "screen_id": "SKEMA_KOMISI_PERINTIS",
+   "out_degree": 2,
+   "reaches_screens": 2
+  }
+ ],
  "ambiguous_collapses": [],
+ "identity_splits": [
+  {
+   "base_screen_id": "EMPTY_STATE",
+   "base_name": "Empty State",
+   "frames": 2,
+   "screens": [
+    {
+     "screen_id": "EMPTY_STATE",
+     "named_by": "BASE",
+     "frames": 1,
+     "contexts": [
+      "Riwayat Komisi"
+     ],
+     "chips": [
+      "Empty State"
+     ],
+     "source_refs": [
+      "2001:22870"
+     ]
+    },
+    {
+     "screen_id": "EMPTY_STATE__LEVEL_2",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Level 2"
+     ],
+     "chips": [
+      "Empty State"
+     ],
+     "source_refs": [
+      "2300:66062"
+     ]
+    }
+   ],
+   "threshold": 0.3,
+   "min_similarity": 0.0
+  },
+  {
+   "base_screen_id": "LOADING",
+   "base_name": "Loading",
+   "frames": 2,
+   "screens": [
+    {
+     "screen_id": "LOADING",
+     "named_by": "BASE",
+     "frames": 1,
+     "contexts": [
+      "Riwayat Komisi"
+     ],
+     "chips": [
+      "Loading"
+     ],
+     "source_refs": [
+      "2269:62724"
+     ]
+    },
+    {
+     "screen_id": "LOADING__WELCOME_PAGE",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Welcome Page"
+     ],
+     "chips": [
+      "Loading"
+     ],
+     "source_refs": [
+      "2571:14710"
+     ]
+    }
+   ],
+   "threshold": 0.3,
+   "min_similarity": 0.0
+  },
+  {
+   "base_screen_id": "SCROLL_VIEW",
+   "base_name": "Scroll View",
+   "frames": 4,
+   "screens": [
+    {
+     "screen_id": "SCROLL_VIEW",
+     "named_by": "BASE",
+     "frames": 1,
+     "contexts": [
+      "Level 2"
+     ],
+     "chips": [
+      "Scroll View"
+     ],
+     "source_refs": [
+      "2001:24802"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW__RIWAYAT_KOMISI",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Riwayat Komisi"
+     ],
+     "chips": [
+      "Scroll View"
+     ],
+     "source_refs": [
+      "2314:63199"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW__WELCOME_PAGE",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Welcome Page"
+     ],
+     "chips": [
+      "Scroll View"
+     ],
+     "source_refs": [
+      "2571:16086"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW__AFFILIATE_ACTIVATION",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Affiliate Activation"
+     ],
+     "chips": [
+      "Scroll View"
+     ],
+     "source_refs": [
+      "2571:19061"
+     ]
+    }
+   ],
+   "threshold": 0.3,
+   "min_similarity": 0.0
+  },
+  {
+   "base_screen_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD",
+   "base_name": "Scroll View with Pagination Load",
+   "frames": 3,
+   "screens": [
+    {
+     "screen_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD",
+     "named_by": "BASE",
+     "frames": 1,
+     "contexts": [
+      "DEFAULT (Last 1 Month)"
+     ],
+     "chips": [
+      "Scroll View with Pagination Load"
+     ],
+     "source_refs": [
+      "2269:62834"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD__MY_DOWNLINERS",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "My Downliners"
+     ],
+     "chips": [
+      "Scroll View with Pagination Load"
+     ],
+     "source_refs": [
+      "2269:67342"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD__LEVEL_2",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Level 2"
+     ],
+     "chips": [
+      "Scroll View with Pagination Load"
+     ],
+     "source_refs": [
+      "2300:63643"
+     ]
+    }
+   ],
+   "threshold": 0.3,
+   "min_similarity": 0.0
+  }
+ ],
  "excluded_nodes": [
   {
    "id": "1997:30262",
@@ -1003,11 +1222,15 @@
  ],
  "counters": {
   "connectors_total": 47,
-  "edges_emitted": 20,
+  "entry_points": 1,
+  "edges_emitted": 21,
   "state_transition_connectors": 3,
   "variant_link_connectors": 0,
   "unresolved_connectors": 23,
-  "screens_emitted": 47,
+  "screens_emitted": 54,
+  "identity_splits": 4,
+  "identity_split_screens": 7,
+  "spec_frames_excluded": 0,
   "frames_collapsed": 92,
   "elements_deterministic": 15
  }
