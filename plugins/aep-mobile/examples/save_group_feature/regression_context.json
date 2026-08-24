@@ -1,0 +1,58 @@
+{
+  "extraction_status": "COMPLETE",
+  "app": "gojek-consumer",
+  "feature_key": "save-group-for-group-orders",
+  "module_namespace": [
+    "gofood-group-order"
+  ],
+  "regression_tests": [
+    {
+      "id": "TC-302383",
+      "case_number": "302383",
+      "title": "Landing page shows 'Groups you can invite' when host has Social Groups",
+      "source_module": "gofood-group-order",
+      "priority": "P0",
+      "steps": [
+        "1. Launch the app and log in with a test customer account",
+        "2. Open deeplink \"gojek://gofood/merchant/ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\"",
+        "3. Dismiss any onboarding tooltips if shown",
+        "4. Tap \"Group Order\"",
+        "5. Observe the invite section on the Group Order landing page"
+      ],
+      "is_automated": true
+    },
+    {
+      "id": "TC-302484",
+      "case_number": "302484",
+      "title": "Share Tray from landing (pre-GO) shows only Social Groups list, bottom CTR hidden",
+      "source_module": "gofood-group-order",
+      "priority": "P1",
+      "steps": [
+        "1. Launch the app and log in with a test customer account",
+        "2. Open deeplink \"gojek://gofood/merchant/ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\"",
+        "3. Dismiss any onboarding tooltips if shown",
+        "4. Tap \"Group Order\"",
+        "5. Tap \"Invite Group\""
+      ],
+      "is_automated": true
+    },
+    {
+      "id": "TC-302761",
+      "case_number": "302761",
+      "title": "Shared Cart without a linked Social Group shows three-dots 'Remove from Group Order' for host only",
+      "source_module": "gofood-group-order",
+      "priority": "P0",
+      "steps": [
+        "1. Launch the app and log in with a test customer account",
+        "2. Open deeplink \"gojek://gofood/merchant/ea84ce9a-7ed0-42b4-9f85-7efcd9eb3f2a\"",
+        "3. Dismiss any onboarding tooltips if shown",
+        "4. Tap \"Group Order\"",
+        "5. Add an item to the shared cart",
+        "6. Tap \"View group cart\"",
+        "7. As host, tap the three-dots menu on a member's cart",
+        "8. Tap outside the popup"
+      ],
+      "is_automated": true
+    }
+  ]
+}

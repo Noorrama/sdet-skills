@@ -1,0 +1,56 @@
+[
+  {
+    "mr": 54280,
+    "title": "[Ft]:[GOF-26520]: Group Order M5 3_dots_logic",
+    "state": "merged",
+    "files": 5
+  },
+  {
+    "mr": 54308,
+    "title": "[Ft]:[GOF-26522] : add_to_social_group_flow",
+    "state": "merged",
+    "files": 23
+  },
+  {
+    "mr": 54317,
+    "title": "[Ft]:[GOF-26382] : GO shared cart social group entry point UI",
+    "state": "opened",
+    "files": 4
+  },
+  {
+    "mr": 54169,
+    "title": "[Ft]:[GOF-26380]:Move add item & add saved group indicator",
+    "state": "merged",
+    "files": 13
+  },
+  {
+    "mr": 54196,
+    "title": "[Ft]:[GOF-26381]:Implement 3 dots with the actions (except add to social)",
+    "state": "merged",
+    "files": 16
+  },
+  {
+    "mr": 54170,
+    "title": "[Ft]:[GOF-26422]: Add litmus config for Group Order M5 (Save Group)",
+    "state": "merged",
+    "files": 3
+  },
+  {
+    "mr": 54222,
+    "title": "[Ft]:[GOF-26499]: Add standalone UI components for Save Group selected state",
+    "state": "merged",
+    "files": 2
+  },
+  {
+    "mr": 54232,
+    "title": "[Ft]:[GOF-26383]: Add standalone Social Group card UI for AOS",
+    "state": "merged",
+    "files": 5
+  },
+  {
+    "mr": 54311,
+    "title": "[Ft]:[GOF-26383]: Wire Social Group chat entry point into AOS",
+    "state": "opened",
+    "files": 12
+  }
+]

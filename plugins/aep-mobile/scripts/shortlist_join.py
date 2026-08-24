@@ -31,6 +31,10 @@ _PATH_MODULE_HINTS = (
     ("driver/profile", "driver-profile"),
     ("driver-profile", "driver-profile"),
     ("features/incentives/", "incentives"),
+    ("food-grouporder", "gofood-group-order"),
+    ("grouporder", "gofood-group-order"),
+    ("group-order", "gofood-group-order"),
+    ("invitefriends", "gofood-group-order"),
     ("deeplink", "navigation"),
 )
 
@@ -224,10 +228,13 @@ def deterministic_classify(cand, surface):
         ev["cr_risk_ids"] = hit_cr
 
     path_hits = []
+    signal_tokens = (
+        "loyalty", "profile", "catalogue", "membership", "achievement", "tier", "pam",
+        "group", "order", "share", "tray", "invite", "social", "cart", "gofood",
+    )
     for tok in file_path_tokens(surface["changed_files"]):
-        if tok in ("loyalty", "profile", "catalogue", "membership", "achievement", "tier", "pam"):
-            if tok in hay or (tok == "loyalty" and "loyalty" in hay):
-                path_hits.append(tok)
+        if tok in signal_tokens and tok in hay:
+            path_hits.append(tok)
     path_hits = sorted(set(path_hits))
     if path_hits:
         reasons.append("FILE_PATH_TOUCHED")
