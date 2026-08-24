@@ -21,7 +21,11 @@ Fast tier — Haiku
 
 ## Approval gate — check before reading anything else
 
-**Halt unless `sdet_plan.status == "approved"`.** Surface: *"sdet_plan.json is not approved (status: {value}). A human must review the plan and its qa_analysis.md, then set status to 'approved' before the automation plan can be generated."*
+**Halt unless the plan root `sdet_plan.status == "approved"`.** Surface: *"sdet_plan.json is not approved (status: {value}). A human must review the plan and its qa_analysis.md, then set status to 'approved' before the automation plan can be generated."*
+
+Approval is **two-level**. The root gate above says the plan was reviewed at all; each scenario then carries its own `status`. Once past the root gate, take only scenarios where **`status == "approved"`**. A plan may be partially approved — 60 scenarios cleared, 17 still in review — and the cleared ones generate now rather than waiting.
+
+Report the split in the run log: *N approved / N draft / N in_review / N changes_requested / N deprecated*. A reviewer who forgot to approve half the plan should see that, not silently receive half an automation plan.
 
 This skill has always described its input as "sdet_plan.json (approved)" without anything enforcing it. The field makes that real. Generating from a draft plan means locking in test classes, fixtures and method names from scenarios nobody has signed off — and every one of those decisions cascades into generated code.
 
@@ -234,13 +238,14 @@ One `fixture_id` = one call to the test data service at test runtime.
 
 Schema root structure:
 - `epic_id` — from tasks_context epics[0].id
-- `status: "draft"` — always `draft`; never approve your own output. With `approved_by: null`, `approved_at: null`.
+- `status: "draft"` at the **plan root** — never approve your own output. With `approved_by: null`, `approved_at: null`.
+- `status: "draft"` on **every automation scenario** — these get their own human review before code generation, the same way SDET scenarios do. Never carry the approved value across from the SDET scenario: what was approved there is the *test case*, not the class name, method name, fixtures and package chosen here.
 - `regression_selection` — propagated unchanged from `sdet_plan`.
 - `browserstack_sync: null` — written only by the sync.
 - `automation_scenarios[]` — flat list, one object per non-dedup scenario, with all fields above
 
 ## Guardrails
-- Skip scenarios where `is_dedup: true` **or** `execution_mode: "Manual"` — neither becomes a test method.
+- Take a scenario only when **all four** hold: `status == "approved"`, `execution_mode == "Automatable"`, `is_dedup == false`, and the plan root is `approved`. Anything else — including `deprecated`, which a human explicitly marked for removal — never becomes a test method.
 - Emit one entry per distinct `scenario_group`, not one per scenario. `covers_scenario_ids[]` must list every member.
 - Derive test data from `preconditions[]` and `step_descriptions[]` only. Do not read `prd_context`, `rfc_context` or `tasks_context` for it.
 - `required_state` is **your** decision, not the plan's. The plan states the requirement; you choose entity, category, count and config against the TDP catalog.

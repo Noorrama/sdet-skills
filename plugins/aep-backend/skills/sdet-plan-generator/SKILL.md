@@ -390,11 +390,13 @@ Scenarios that cross Kafka → consumer → Redis → downstream-read each need 
 
 If a scenario mutates fixture state (adds a member, attaches an entity, changes status), that fixture must not be reused by other scenarios expecting the pre-mutation state. Reusing a mutated fixture creates order-dependence — the classic "passes alone, fails in suite" flake. Give mutating scenarios their own `fixture_ids`.
 
-### Prefer stubs over provisioned data for failure paths
+### Failure paths — check the module can stub before writing a stub
 
-This is a **data** technique, not a layer technique — a stubbed downstream failure is still an `integration` scenario. See the test-layer rule above.
+Where request-level stubbing is available, prefer it to provisioned entities for downstream-failure scenarios (timeout, 5xx, unreachable dependency): stubs are deterministic and cost no runtime provisioning call. This is a **data** technique, not a layer technique — a stubbed downstream failure is still an `integration` scenario. See the test-layer rule above.
 
-Downstream-failure scenarios (timeout, 5xx, unreachable dependency) should be driven by request-level stubs, not by provisioned entities. Stubs are deterministic and cost no runtime provisioning call. List only the fixtures the scenario genuinely needs in `fixture_ids`.
+**Stubbing is not available in every module, so confirm it before relying on it.** The gofood suite has no WireMock/`stubFor`/MockServer usage across 2,315 Java files. In a module like that, a step reading a stub call log is an instruction nobody can carry out — assert the observable absence of the downstream's side effect instead, and record the limitation in `qa_analysis.md`.
+
+Either way, list only the fixtures the scenario genuinely needs in `fixture_ids`.
 
 ### Scenarios are BrowserStack test cases, not Java test methods
 
@@ -403,6 +405,53 @@ These are two different granularities and must not be conflated. In `gojek-backe
 Set `scenario_group` on every scenario, keyed by its Arrange — the same precondition state and triggering call. This records a test-design fact that downstream tooling needs but cannot reliably re-derive from prose preconditions, and it is what stops `automation-plan-generator` emitting one test method per scenario.
 
 Do not size the plan to the method count. Scenarios may legitimately outnumber test methods; the ratio depends on how many natural permutation axes the feature has (service type, payment method, country). A feature with no such axis will sit near 1:1 and that is correct.
+
+## Writing scenarios an engineer can execute
+
+A scenario is read by someone who was not in the room when it was written. Everything below is calibrated against the team's own manually drafted GoFood group-order cases in BrowserStack, so it matches house convention rather than a general style preference.
+
+### Titles — `Verify …`, and name the condition
+
+`name` is what lands in the BrowserStack `Title` column and is the only field most readers ever see. In the team's existing group-order set, **87% of titles open with `Verify`**. Match it:
+
+> `Verify <what happens> when <condition>`
+
+`Verify the create session API rejects a request carrying both invite fields` — not `Reject a create request carrying both invite fields`. Imperative phrasing reads as a task, not a test case.
+
+**Never ship a title whose condition is a filler word.** These say nothing about what is being tested and are the most common defect in generated titles:
+
+`correctly` · `properly` · `gracefully` · `as expected` · `appropriate` · `relevant` · `any <noun>` · a bare `handle`/`work`/`behaviour`
+
+If the scenario body enumerates the cases, the title names them or names the axis. `Verify create session degrades gracefully on any social group error` becomes `Verify create session still succeeds when the social group call times out, returns an unknown id, or the host is not ACTIVE`. Longer is fine — the team's median title is 74 characters, and titles routinely run past 100.
+
+### Steps — every state check names its artifact
+
+Steps split into two kinds, and the second is where generated plans go wrong:
+
+| Kind | Executable because | Verb |
+|---|---|---|
+| A call to a service | `curl_reference` carries the request | `Call` |
+| A read of resulting state | **only** if the step names the artifact | `Read` |
+
+An API step is self-documenting; the curl says exactly what to run. A state-read step has no curl, so the prose is the entire instruction — and `Read the session row`, `Inspect the job queue`, `Check the cache` are not instructions. The reader cannot act without knowing *which*.
+
+**Every state-read step must name the concrete artifact**: the table, the job or queue by name, the cache key, the topic, the log.
+
+| Not this | This |
+|---|---|
+| `Read the session row` | `Read the group_order_sessions row for the session id` |
+| `Inspect the worker job queue` | `Inspect the queue for the send-social-group-chat-extension job` |
+| `Inspect the job queue after all three attempts` | `Inspect the auto-detect-or-auto-create job queue after all three attempts` |
+
+The artifact name comes from `tasks_context.api_contract`, `external_systems[]` and `rfc_context.contracts.*`. **If no source names it, that is a gap — record it in `qa_analysis.md` rather than writing a vague step.** A step nobody can perform is worse than a missing step, because it looks complete.
+
+### Use two step verbs, not five
+
+`Read`, `Inspect`, `Fetch` and `Check` all mean *look at something*, and mixing them makes one plan read as though several people wrote it. Use **`Call`** for a request to a service and **`Read`** for any state check — DB row, queue, cache, log, response body alike. Other verbs are fine only where they carry real meaning: `Create`, `Publish`, `Compare`, `Run`, `Enqueue`, `Let … run` for an async wait.
+
+### Do not write steps against capabilities the suite lacks
+
+Check before assuming a verification mechanism exists. `Inspect the Gopay stub call log` assumes request-level stubbing; the gofood suite has **no** WireMock/`stubFor`/MockServer usage in 2,315 Java files, so that step cannot be run. Where "the downstream was not called" must be proven and no stub exists, assert the observable absence of its side effect instead, and flag the limitation in `qa_analysis.md`. See also the test-layer rule: stubbing is not a layer-lowering mechanism, and here it may not be available at all.
 
 ## Scenario generation rules
 
@@ -763,7 +812,7 @@ Schema root:
 - `canonical_team_id: string` — resolved from `team_registry.json`. `"unknown"` if no match; triggers warning in qa_analysis.md. Stable across plan versions even if team renames (update registry alias instead).
 - `code_module: string | null` — exact test code module directory name from `team_registry.json code.module`. Consumed verbatim by `automation-plan-generator` for Java package path construction. `null` when resolution failed.
 - `scenarios[]` — each with:
-  - `scenario_id`, `name`, `description`
+  - `scenario_id`, `name` (`Verify …` — see *Writing scenarios an engineer can execute*), `description`
   - `test_layer: component|integration|e2e`
   - `priority: P0|P1|P2`
   - `source: RFC|PRD|CODE_DIFF|RETRIGGER|REVIEW`, `source_ref`
@@ -782,7 +831,7 @@ Schema root:
   - `existing_test_ref: object | null` — `{class, method, file_path, case_numbers[], change_required}`. Required when `regression_action` is `modify`; `null` otherwise, and `null` is the only correct value when the regression context carries no method linkage.
   - `change_reason: string` — set by retrigger and review modes only.
   - `dedup_reason: string` — set by `dedup-generator`, not here.
-  - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`. Target 4–6 steps per scenario (see Scenario granularity). Every `expected_result` is a concrete assertion phrased as `Verify …`; `action` is imperative. Steps and expected results are 1:1.
+  - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`. Target 4–6 steps per scenario (see Scenario granularity). Every `expected_result` is a concrete assertion phrased as `Verify …`. `action` is imperative and, when it reads state rather than calling a service, **names the artifact it reads** — see *Writing scenarios an engineer can execute*. Steps and expected results are 1:1.
   - `preconditions[]`, `fixture_ids[]`
   - `scenario_group: string` — key shared by scenarios that rest on the **same Arrange**: the same precondition state and the same triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction — it applies equally to `Manual` scenarios, where it tells a human tester which cases can be executed back-to-back off one setup. A scenario with no sibling gets its own unique key. Format: `{feature_component}-{behaviour}`, e.g. `chatextension-terminal-status`. Downstream consumers decide what to do with the grouping; see `automation-plan-generator` for how it maps to test methods.
   - `browserstack_test_id: string | null` — BrowserStack's own id for this scenario, assigned when the plan is uploaded through the BrowserStack MCP. **Emit `null` at generation time and never author a value.** The sync writes it back after upload, which is what makes the plan round-trippable: re-running Review or Pass 2 can then update the existing case instead of creating a duplicate. Do not confuse it with `existing_testcase_ids[]` — that names cases which existed *before* this plan; this names the case *this* scenario became.
@@ -801,7 +850,18 @@ Schema root:
 
 ## Approval gate
 
-Every plan carries a root `status` (plan root). **Always write `draft`.** The generator never approves its own output — `approved` is set by a person after reading the plan and its analysis document, and nothing downstream may run until they do.
+Approval happens at **two levels**, and the generator writes `draft` at both.
+
+| Level | Field | Means |
+|---|---|---|
+| Plan | root `status` | this plan has been through review at all |
+| Scenario | `scenarios[].status` | **this** scenario is signed off |
+
+Both use `draft` → `in_review` → `changes_requested` → `approved`; scenarios add a fifth terminal value, `deprecated`. **Always write `draft` at both levels.** The generator never approves its own output — `approved` is set by a person after reading the plan and its analysis document, and nothing downstream may run until they do.
+
+Two levels exist because a plan is reviewed case by case: a reviewer may approve 60 scenarios and request changes on 17, and the 60 should not be held up by the 17. `automation-plan-generator` halts on the root value, then selects per scenario.
+
+**INVARIANT: root may not be `approved` while any scenario is still `draft` or `in_review`.** An approved plan holding unreviewed scenarios is ambiguous about what was actually signed off. `changes_requested` and `deprecated` scenarios do not block root approval — both are decisions a human has already made.
 
 | Value | Meaning |
 |---|---|
@@ -810,7 +870,7 @@ Every plan carries a root `status` (plan root). **Always write `draft`.** The ge
 | `changes_requested` | feedback is written in the `qa_analysis.md` Feedback block; a Review-mode run is pending |
 | `approved` | cleared to flow to `automation-plan-generator` |
 
-**Any run that changes scenario content resets `status` (plan root) to `draft`** — pass2, retrigger and review all qualify. An approval attaches to the content a person actually read, not to the filename. Set `approved_by` and `approved_at` to null at the same time; a plan whose `updated_at` is later than its `approved_at` has been edited since approval and the approval is stale.
+**Any run that changes scenario content resets `status` to `draft` at BOTH levels** — the plan root, and every scenario whose content that run actually changed. Scenarios the run left untouched keep their approval. Pass2, retrigger and review all qualify. An approval attaches to the content a person actually read, not to the filename. Set `approved_by` and `approved_at` to null at the same time; a plan whose `updated_at` is later than its `approved_at` has been edited since approval and the approval is stale.
 
 Keep this consistent with the `**Status:**` line in the `qa_analysis.md` Human Review block — the markdown is what the reviewer edits, the JSON field is what downstream tooling gates on. They must not disagree.
 
@@ -878,7 +938,7 @@ Flat CSV for BrowserStack upload via BrowserStack MCP after human approval. Colu
 | CSV column | Maps from | Notes |
 |---|---|---|
 | `Id` | `scenario_id` | External ID for traceability |
-| `Title` | `name` | Human-readable scenario name |
+| `Title` | `name` | `Verify <what> when <condition>` — house convention, no filler adjectives. See *Writing scenarios an engineer can execute*. |
 | `Priority` | `priority` | P0 / P1 / P2. P3/P4 not generated by this skill. |
 | `Platform` | Constant `Backend` | This skill generates backend test cases only |
 | `Execution Mode` | `execution_mode` | `Automatable` or `Manual` (see derivation below) |
@@ -1117,8 +1177,9 @@ Also log the granularity metrics, so drift back to one-assertion-per-scenario is
 Reject and regroup if any of these hold:
 - mean steps per scenario < 3
 - more than 20% of scenarios have exactly 1 step
-- `status` (plan root) is anything other than `draft` on a freshly generated plan — the generator never approves its own output
-- a pass2, retrigger or review run left `status` (plan root) at `approved` instead of resetting it to `draft`
+- `status` is anything other than `draft` on a freshly generated plan — at the root **or** on any scenario; the generator never approves its own output
+- root `status` is `approved` while any scenario sits at `draft` or `in_review` — violates the two-level invariant
+- a pass2, retrigger or review run left `status` at `approved` — at the root, or on a scenario whose content that run changed — instead of resetting it to `draft`
 - `scenario_group` is missing on any scenario, or every scenario has a unique one (it was not derived from the Arrange)
 - any scenario has `is_legacy_regression: true` with no `existing_case_ref`
 - any scenario has `regression_action: "modify"` with no `existing_test_ref`, or an `existing_test_ref` whose `change_required` is empty
