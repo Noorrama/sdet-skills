@@ -30,7 +30,7 @@ run → suite Java with `@Test` / `@TestInfo`.
 | Suite groups | plan/context `groups` (else derive carefully from tags) | `@Test(groups = …)` |
 | TestInfo | plan/context `test_info` / suite registry | `@TestInfo(countryName, projectId, suiteId, testCaseIds, owner)` |
 | Response field shape | **Often missing** | §3.1 vs §3.3 — flag, don't guess |
-| Bound memory keys | Derived by walking prior `save … as X` | §4 |
+| Bound memory keys | Derived by walking prior `save … as X` / `saveMemory` | §4 — reference as `saved X`, not `${memory.X}` |
 | Secrets | Not in schema | §7 `saveMemory` from env |
 
 ## Suite annotation contract
