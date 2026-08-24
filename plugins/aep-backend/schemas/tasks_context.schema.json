@@ -1,79 +1,1434 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "tasks_context",
+  "description": "Output of the tasks-extractor: the planning breakdown (EPICS.md, STORIES.md, TASKS.md and per-task files) as structured data. AUTHORITATIVE for test_layer and api_contract; CONTRIBUTING for preconditions and validation rules. Carries one or many epics depending on PRD scope.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["feature_name", "epics"],
+  "required": [
+    "feature_name",
+    "epics"
+  ],
   "properties": {
-    "feature_name": { "type": "string" },
+    "feature_name": {
+      "type": "string"
+    },
+    "feature_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rfc_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prd_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "jira_epic": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "planning_run": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "codebase_reconciled": {
+      "type": "boolean",
+      "description": "true only when a Local Scanner verified these contracts against the repo. When false the contracts are doc-derived and do NOT override rfc_context — a disagreement is for a human."
+    },
+    "codebase_reconciled_evidence": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "contract_confidence": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "reviewed",
+        "final"
+      ]
+    },
+    "environments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Deployment environments/markets. Empty when planning named none — sdet-plan-generator then falls back for Country v2 and must record that it did."
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "epic_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    "feature_flags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "gates": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "default_state": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "null when unknown. Scenarios must then pin the state explicitly rather than assume one."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "rfc",
+              "prd",
+              "test_corpus",
+              "codebase"
+            ]
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "epic_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    },
     "epics": {
       "type": "array",
       "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["id", "title", "stories"],
+        "type": "object",
+        "additionalProperties": false,
         "properties": {
-          "id": { "type": "string" },
-          "title": { "type": "string" },
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "goal": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "milestone_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "canonical_team_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "READY",
+              "BLOCKED"
+            ]
+          },
+          "status_raw": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "blocked_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scope_in": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scope_out": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "P0",
+              "P1",
+              "P2"
+            ]
+          },
+          "priority_derivation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "derived": {
+                "type": "boolean",
+                "description": "true when this value was inferred rather than stated by planning"
+              },
+              "basis": {
+                "type": "string",
+                "description": "The reasoning, naming what it was inferred from"
+              },
+              "confidence": {
+                "type": "string",
+                "enum": [
+                  "stated",
+                  "high",
+                  "medium",
+                  "low"
+                ],
+                "description": "'stated' = planning said it outright; the rest are inference grades"
+              }
+            },
+            "required": [
+              "derived"
+            ],
+            "description": "Provenance for an inferred value, so a reviewer can weigh it."
+          },
+          "feature_flag_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "open_question_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "stories": {
             "type": "array",
             "items": {
-              "type": "object", "additionalProperties": false,
-              "required": ["id", "title", "tasks"],
+              "type": "object",
+              "additionalProperties": false,
               "properties": {
-                "id": { "type": "string" },
-                "title": { "type": "string" },
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "epic_ref": {
+                  "type": "string"
+                },
+                "component": {
+                  "type": "string"
+                },
+                "team": {
+                  "type": "string"
+                },
+                "canonical_team_id": {
+                  "type": "string"
+                },
+                "capability": {
+                  "type": "string"
+                },
+                "story_type": {
+                  "type": "string",
+                  "enum": [
+                    "NEW_HTTP_API",
+                    "NEW_GRPC_API",
+                    "EXISTING_API_CHANGE",
+                    "DB_SCHEMA",
+                    "PROTO_UPDATE",
+                    "OTHER"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "READY",
+                    "BLOCKED"
+                  ]
+                },
+                "status_raw": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "blocked_by": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "depends_on": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": [
+                    "P0",
+                    "P1",
+                    "P2"
+                  ]
+                },
+                "user_story": {
+                  "type": "string"
+                },
+                "acceptance_criteria": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "source_ref": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "verifiable": {
+                        "type": "boolean",
+                        "description": "false = no deterministic assertion possible yet; sdet-plan-generator marks covering scenarios provisional."
+                      },
+                      "not_verifiable_reason": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "derived_by_planning": {
+                        "type": "boolean",
+                        "description": "true when planning wrote this AC rather than lifting it from the PRD or RFC."
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "text"
+                    ]
+                  }
+                },
+                "blast_radius": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Existing behaviour that must keep working — distinct from the ACs, which state new capability."
+                },
+                "technical_notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "test_layer": {
+                  "type": "string",
+                  "enum": [
+                    "component",
+                    "integration",
+                    "e2e"
+                  ],
+                  "description": "AUTHORITATIVE. Widest layer among the story's tasks."
+                },
+                "test_layer_derivation": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "derived": {
+                      "type": "boolean",
+                      "description": "true when this value was inferred rather than stated by planning"
+                    },
+                    "basis": {
+                      "type": "string",
+                      "description": "The reasoning, naming what it was inferred from"
+                    },
+                    "confidence": {
+                      "type": "string",
+                      "enum": [
+                        "stated",
+                        "high",
+                        "medium",
+                        "low"
+                      ],
+                      "description": "'stated' = planning said it outright; the rest are inference grades"
+                    }
+                  },
+                  "required": [
+                    "derived"
+                  ],
+                  "description": "Provenance for an inferred value, so a reviewer can weigh it."
+                },
+                "open_question_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "tasks": {
                   "type": "array",
                   "items": {
-                    "type": "object", "additionalProperties": false,
-                    "required": ["id", "type", "component"],
+                    "type": "object",
+                    "additionalProperties": false,
                     "properties": {
-                      "id": { "type": "string" },
-                      "type": { "type": "string", "enum": ["NEW_HTTP_API", "NEW_GRPC_API", "EXISTING_API_CHANGE", "DB_SCHEMA", "PROTO_UPDATE", "OTHER"] },
-                      "component": { "type": "string" },
-                      "package": { "type": "string" },
-                      "api_contract": {
-                        "type": "object", "additionalProperties": false,
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "NEW_HTTP_API",
+                          "NEW_GRPC_API",
+                          "EXISTING_API_CHANGE",
+                          "DB_SCHEMA",
+                          "PROTO_UPDATE",
+                          "BUSINESS_LOGIC",
+                          "KAFKA_EVENT",
+                          "OTHER"
+                        ]
+                      },
+                      "type_raw": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "Type string as written when it did not map cleanly onto the enum; null when it did."
+                      },
+                      "story_ref": {
+                        "type": "string"
+                      },
+                      "epic_ref": {
+                        "type": "string"
+                      },
+                      "component": {
+                        "type": "string",
+                        "description": "Owning service, e.g. gofood-meal-scheduler"
+                      },
+                      "team": {
+                        "type": "string"
+                      },
+                      "canonical_team_id": {
+                        "type": "string",
+                        "description": "Resolved team id. sdet-plan-generator uses this for owning_team rather than re-resolving the registry."
+                      },
+                      "package": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "Java package when planning stated one. Usually null — planning deliberately does not name source files."
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "READY",
+                          "BLOCKED"
+                        ]
+                      },
+                      "status_raw": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "Status verbatim, e.g. 'BLOCKED(Q-1)'."
+                      },
+                      "blocked_by": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Open-question ids blocking this task."
+                      },
+                      "priority": {
+                        "type": "string",
+                        "enum": [
+                          "P0",
+                          "P1",
+                          "P2"
+                        ]
+                      },
+                      "priority_derivation": {
+                        "type": "object",
+                        "additionalProperties": false,
                         "properties": {
-                          "route": { "type": "string" },
-                          "method": { "type": "string" },
-                          "request_fields": { "type": "array", "items": { "type": "object" } },
-                          "response_fields": { "type": "array", "items": { "type": "object" } },
-                          "error_codes": { "type": "array", "items": { "type": "string" } },
-                          "auth": { "type": "string" }
+                          "derived": {
+                            "type": "boolean",
+                            "description": "true when this value was inferred rather than stated by planning"
+                          },
+                          "basis": {
+                            "type": "string",
+                            "description": "The reasoning, naming what it was inferred from"
+                          },
+                          "confidence": {
+                            "type": "string",
+                            "enum": [
+                              "stated",
+                              "high",
+                              "medium",
+                              "low"
+                            ],
+                            "description": "'stated' = planning said it outright; the rest are inference grades"
+                          }
+                        },
+                        "required": [
+                          "derived"
+                        ],
+                        "description": "Provenance for an inferred value, so a reviewer can weigh it."
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "functional_behavior": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
                         }
+                      },
+                      "validation_rules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Prose rules as written."
                       },
                       "validation_constraints": {
                         "type": "array",
                         "items": {
-                          "type": "object", "additionalProperties": false,
+                          "type": "object",
+                          "additionalProperties": false,
                           "properties": {
-                            "layer": { "type": "string", "enum": ["controller", "service", "repository", "db"] },
-                            "rule": { "type": "string" },
-                            "reuses": { "type": ["string", "null"] }
+                            "layer": {
+                              "type": "string",
+                              "enum": [
+                                "controller",
+                                "service",
+                                "gateway",
+                                "db",
+                                "worker",
+                                "other"
+                              ]
+                            },
+                            "rule": {
+                              "type": "string"
+                            },
+                            "reuses": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "Existing validator reused, when planning named one."
+                            },
+                            "failure_code": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "Error code emitted, null when the rule has no distinct code."
+                            }
+                          },
+                          "required": [
+                            "layer",
+                            "rule"
+                          ]
+                        },
+                        "description": "The prose rules, structured. Confirms rfc_context.validation_sequence is implemented; does NOT override it."
+                      },
+                      "validation_gates": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "order": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "gate": {
+                              "type": "string"
+                            },
+                            "layer": {
+                              "type": "string"
+                            },
+                            "failure_code": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "is_remote": {
+                              "type": "boolean",
+                              "description": "true when the gate makes an external call. A remote gate after a local one is what the short-circuit assertion proves."
+                            }
+                          },
+                          "required": [
+                            "order",
+                            "gate"
+                          ]
+                        },
+                        "description": "Ordered gate chain where the task defines one; empty otherwise. Carries ordering structurally so it need not be re-derived from layer names."
+                      },
+                      "api_contract": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "route": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "method": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "current_contract": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "proposed_contract": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "compatibility": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "request_fields": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "type": "string"
+                                },
+                                "required": {
+                                  "type": "boolean"
+                                },
+                                "validation": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "name"
+                              ]
+                            }
+                          },
+                          "response_fields": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "type": "string"
+                                },
+                                "required": {
+                                  "type": "boolean"
+                                },
+                                "validation": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "name"
+                              ]
+                            }
+                          },
+                          "error_codes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "status": {
+                                  "type": "integer"
+                                },
+                                "body": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ],
+                                  "description": "Literal error body. null when the source documents none — never invented."
+                                },
+                                "trigger": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "code"
+                              ]
+                            }
+                          },
+                          "headers": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "query_params": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "auth": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "deprecation": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "description": "Authoritative endpoint and schema. All fields null for tasks with no HTTP surface."
+                      },
+                      "sequence": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "step": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "caller": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "callee": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "action": {
+                              "type": "string"
+                            },
+                            "branch": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "Conditional guard on this step; null for unconditional steps."
+                            }
+                          },
+                          "required": [
+                            "step"
+                          ]
+                        }
+                      },
+                      "dependencies": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "tasks": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "direction": {
+                                  "type": "string",
+                                  "enum": [
+                                    "upstream",
+                                    "downstream"
+                                  ]
+                                },
+                                "task_id": {
+                                  "type": "string"
+                                },
+                                "note": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "direction",
+                                "task_id"
+                              ]
+                            }
+                          },
+                          "services": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "direction": {
+                                  "type": "string",
+                                  "enum": [
+                                    "upstream",
+                                    "downstream"
+                                  ]
+                                },
+                                "service": {
+                                  "type": "string"
+                                },
+                                "capability": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "direction",
+                                "service"
+                              ]
+                            }
                           }
                         }
                       },
-                      "test_layer": { "type": "string", "enum": ["component", "integration", "e2e"] },
-                      "preconditions": { "type": "array", "items": { "type": "string" } }
-                    }
+                      "external_systems": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Distinct systems the task crosses. The count drives test_layer."
+                      },
+                      "test_layer": {
+                        "type": "string",
+                        "enum": [
+                          "component",
+                          "integration",
+                          "e2e"
+                        ],
+                        "description": "AUTHORITATIVE for sdet-plan-generator — never infer test_layer from rfc_context.validation_sequence[].layer when this is present."
+                      },
+                      "test_layer_derivation": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "derived": {
+                            "type": "boolean",
+                            "description": "true when this value was inferred rather than stated by planning"
+                          },
+                          "basis": {
+                            "type": "string",
+                            "description": "The reasoning, naming what it was inferred from"
+                          },
+                          "confidence": {
+                            "type": "string",
+                            "enum": [
+                              "stated",
+                              "high",
+                              "medium",
+                              "low"
+                            ],
+                            "description": "'stated' = planning said it outright; the rest are inference grades"
+                          }
+                        },
+                        "required": [
+                          "derived"
+                        ],
+                        "description": "Provenance for an inferred value, so a reviewer can weigh it."
+                      },
+                      "test_plan": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "existing_tests_affected": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "tests_to_modify": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "new_tests": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "deferred": {
+                            "type": "boolean",
+                            "description": "true when the task is blocked and no test plan could be written."
+                          }
+                        }
+                      },
+                      "dod_criteria": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Definition of done as a checklist."
+                      },
+                      "preconditions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "State a test needs before it runs. CONTRIBUTING only — sdet_plan.json owns preconditions once approved. Check extraction_gaps: these are often the extractor's reading of Dependencies and Test Plan, not a statement by planning."
+                      },
+                      "type_specific": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "description": "Fields belonging to this task type only. Shape varies by type by design."
+                      },
+                      "non_functional_constraints": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "implementation_constraints": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "open_question_refs": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "source_refs": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "type",
+                      "component"
+                    ]
                   }
                 }
-              }
+              },
+              "required": [
+                "id",
+                "title",
+                "tasks"
+              ]
             }
           }
-        }
+        },
+        "required": [
+          "id",
+          "title",
+          "stories"
+        ]
       }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "addressed_to": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Epic/story/task ids this blocks. May reference ids outside the epics present in this file."
+          },
+          "blocks_all": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "RESOLVED"
+            ]
+          },
+          "status_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "blocking": {
+            "type": "boolean",
+            "description": "true = downstream must not invent an answer; emit a deferred placeholder instead."
+          }
+        },
+        "required": [
+          "id",
+          "question"
+        ]
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADDITION_DELTA",
+              "CONFLICT",
+              "STALE_SPEC",
+              "ARCHITECTURAL_DISCONNECT"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "resolution_owner": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "affects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "description"
+        ]
+      },
+      "description": "Classified, not reconciled. CONFLICT means spec and code disagree and an architect must decide."
     },
     "rfc_conflicts": {
       "type": "array",
       "items": {
-        "type": "object", "additionalProperties": false,
+        "type": "object",
+        "additionalProperties": false,
         "properties": {
-          "field": { "type": "string" },
-          "rfc_value": { "type": "string" },
-          "tasks_value": { "type": "string" },
-          "resolution": { "type": "string", "enum": ["tasks_wins", "needs_review"] }
+          "field": {
+            "type": "string"
+          },
+          "tasks_value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rfc_value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "resolution": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "field"
+        ]
+      },
+      "description": "Contract drift between tasks_context and rfc_context. EMPTY MEANS ONE OF TWO THINGS — check extraction_gaps: either the comparison ran and found nothing, or no rfc_context was supplied and it never ran."
+    },
+    "dependency_graph": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "task_edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "blocked": {
+                "type": "string"
+              },
+              "blocked_by": {
+                "type": "string"
+              },
+              "cross_service": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "blocked",
+              "blocked_by"
+            ]
+          }
+        },
+        "service_edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "consumer": {
+                "type": "string"
+              },
+              "provider": {
+                "type": "string"
+              },
+              "capability": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "task_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "consumer",
+              "provider"
+            ]
+          }
+        }
+      }
+    },
+    "non_functional_targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "metric": {
+            "type": "string"
+          },
+          "target": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "null when the source names the metric but no value."
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "has_backend_surface": {
+            "type": "boolean",
+            "description": "false = no backend assertion possible; record as out of scope rather than as a gap."
+          }
+        },
+        "required": [
+          "metric"
+        ]
+      }
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "total_epics": {
+          "type": "integer"
+        },
+        "total_stories": {
+          "type": "integer"
+        },
+        "total_tasks": {
+          "type": "integer"
+        },
+        "blocked_tasks": {
+          "type": "integer"
+        },
+        "open_questions": {
+          "type": "integer"
+        },
+        "by_type": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "by_service": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "by_test_layer": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "by_team": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "unresolved_teams": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Team names that did not resolve in team_registry.json. Never silently dropped."
+    },
+    "extraction_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "missing_from_source",
+              "contract_incomplete",
+              "ambiguous",
+              "not_reconciled",
+              "flag_underspecified",
+              "missing_timeline"
+            ]
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "blocking": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "field",
+          "reason"
+        ]
+      },
+      "description": "What the source did not say, recorded instead of guessed. blocking:true means downstream must not proceed on that field."
+    },
+    "blocking_issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open_questions_unmapped": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Question ids whose blocks[] targets are absent from this file's epics — typically referencing tasks in another epic."
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_type": {
+          "type": "string"
+        },
+        "source_revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_content_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extracted_at": {
+          "type": "string"
+        },
+        "extractor_skill": {
+          "type": "string"
+        },
+        "extractor_skill_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status_at_extract": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "finalised_at_extract": {
+          "type": "boolean"
+        },
+        "prior_run": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "files_read": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

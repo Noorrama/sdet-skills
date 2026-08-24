@@ -4,14 +4,29 @@
   "description": "Backend SDET test plan produced by the sdet-plan-generator skill. Versioned output — scenarios are never deleted, only deprecated.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["feature_name", "plan_version", "generation_mode", "scenarios", "coverage_summary"],
+  "required": [
+    "feature_name",
+    "plan_version",
+    "generation_mode",
+    "scenarios",
+    "coverage_summary"
+  ],
   "properties": {
-
-    "feature_name":    { "type": "string" },
-    "plan_version":    { "type": "string", "description": "Semantic version bumped on every generation or review run, e.g. '1.0', '1.1'" },
+    "feature_name": {
+      "type": "string"
+    },
+    "plan_version": {
+      "type": "string",
+      "description": "Semantic version bumped on every generation or review run, e.g. '1.0', '1.1'"
+    },
     "generation_mode": {
       "type": "string",
-      "enum": ["pass1", "pass2", "retrigger", "review"],
+      "enum": [
+        "pass1",
+        "pass2",
+        "retrigger",
+        "review"
+      ],
       "description": "Mode of the last run that wrote this file"
     },
     "canonical_team_id": {
@@ -19,51 +34,97 @@
       "description": "Stable team identifier resolved from team_registry.json. 'unknown' signals a registry miss — triggers a warning in qa_analysis.md and blocks downstream module path construction."
     },
     "code_module": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Exact test code module directory name from team_registry.json code.module. Consumed verbatim by automation-plan-generator for Java package path. null when team resolution failed."
     },
-
-    "created_at":  { "type": "string", "format": "date-time" },
-    "updated_at":  { "type": "string", "format": "date-time" },
-
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "scenarios": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "scenario_id", "name", "test_layer", "priority", "source",
-          "generated_by_mode", "review_round",
-          "is_delta", "is_legacy_regression", "is_dedup",
-          "provisional", "status",
-          "test_type", "execution_mode", "markets", "type_of_test",
-          "human_corrected", "human_correction_types"
+          "scenario_id",
+          "name",
+          "test_layer",
+          "priority",
+          "source",
+          "generated_by_mode",
+          "review_round",
+          "is_delta",
+          "is_legacy_regression",
+          "is_dedup",
+          "provisional",
+          "status",
+          "test_type",
+          "execution_mode",
+          "markets",
+          "type_of_test",
+          "human_corrected",
+          "human_correction_types",
+          "owning_team"
         ],
         "properties": {
-          "scenario_id":   { "type": "string", "description": "Stable unique ID, e.g. SC-EPIC1122-001. Never reused." },
-          "name":          { "type": "string" },
-          "description":   { "type": "string" },
-
+          "scenario_id": {
+            "type": "string",
+            "description": "Stable unique ID, e.g. SC-EPIC1122-001. Never reused."
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
           "test_layer": {
             "type": "string",
-            "enum": ["component", "integration", "e2e"],
+            "enum": [
+              "component",
+              "integration",
+              "e2e"
+            ],
             "description": "Authoritative value comes from tasks_context.test_layer"
           },
-          "priority": { "type": "string", "enum": ["P0", "P1", "P2"] },
-
+          "priority": {
+            "type": "string",
+            "enum": [
+              "P0",
+              "P1",
+              "P2"
+            ]
+          },
           "source": {
             "type": "string",
-            "enum": ["RFC", "PRD", "CODE_DIFF", "RETRIGGER", "REVIEW"],
+            "enum": [
+              "RFC",
+              "PRD",
+              "CODE_DIFF",
+              "RETRIGGER",
+              "REVIEW"
+            ],
             "description": "Origin of the scenario requirement"
           },
           "source_ref": {
             "type": "string",
             "description": "Pointer to originating AC / RFC step / PRD section, e.g. 'RFC-78:step-3 / AC-002'"
           },
-
           "generated_by_mode": {
             "type": "string",
-            "enum": ["pass1", "pass2", "retrigger", "review"],
+            "enum": [
+              "pass1",
+              "pass2",
+              "retrigger",
+              "review"
+            ],
             "description": "Which pipeline mode CREATED this scenario. Set once at creation; never overwritten."
           },
           "review_round": {
@@ -71,51 +132,79 @@
             "minimum": 0,
             "description": "Which review round last modified this scenario. 0 = not yet reviewed. Incremented by Review mode runs."
           },
-
           "provisional": {
             "type": "boolean",
             "description": "True when approach_finalised:false or edge_case.inferred:true. Assertions may change."
           },
           "status": {
             "type": "string",
-            "enum": ["active", "deprecated"],
+            "enum": [
+              "active",
+              "deprecated"
+            ],
             "description": "deprecated = human marked for removal; not deleted so downstream tools can detect the change"
           },
           "change_reason": {
             "type": "string",
             "description": "One sentence — what changed and why. Set by retrigger and review modes."
           },
-
-          "is_delta":             { "type": "boolean", "description": "true for pass2 / retrigger / review-added scenarios" },
-          "is_legacy_regression": { "type": "boolean", "description": "true when scenario covers pre-existing regression coverage" },
-          "is_dedup":             { "type": "boolean", "description": "true when scenario duplicates an existing regression test; skipped by automation-plan-generator" },
-          "dedup_reason":         { "type": "string" },
-
+          "is_delta": {
+            "type": "boolean",
+            "description": "true for pass2 / retrigger / review-added scenarios"
+          },
+          "is_legacy_regression": {
+            "type": "boolean",
+            "description": "true when scenario covers pre-existing regression coverage"
+          },
+          "is_dedup": {
+            "type": "boolean",
+            "description": "true when scenario duplicates an existing regression test; skipped by automation-plan-generator"
+          },
+          "dedup_reason": {
+            "type": "string"
+          },
           "test_type": {
             "type": "array",
             "minItems": 1,
             "items": {
               "type": "string",
-              "enum": ["Smoke", "Non-FCT", "Regression", "Automation", "Story"]
+              "enum": [
+                "Smoke",
+                "Non-FCT",
+                "Regression",
+                "Automation",
+                "Story"
+              ]
             },
             "description": "BrowserStack TestType — multi-select. Collect ALL applicable values (additive, not first-match). Serialised as comma-separated in CSV."
           },
           "execution_mode": {
             "type": "string",
-            "enum": ["Automatable", "Manual"],
+            "enum": [
+              "Automatable",
+              "Manual"
+            ],
             "description": "Manual when tags contain 'deferred' or 'underspecified'; Automatable otherwise"
           },
           "markets": {
             "type": "array",
-            "items": { "type": "string", "enum": ["Indonesia", "Singapore"] },
+            "items": {
+              "type": "string",
+              "enum": [
+                "Indonesia",
+                "Singapore"
+              ]
+            },
             "description": "Countries this scenario applies to. Maps to BrowserStack Country v2."
           },
           "type_of_test": {
             "type": "string",
-            "enum": ["functional", "performance"],
-            "description": "performance when tags contain load/nfr/concurrency/reliability; functional otherwise"
+            "enum": [
+              "functional",
+              "performance"
+            ],
+            "description": "performance ONLY when tags contain load or nfr, i.e. the scenario measures a throughput or latency target. functional otherwise — including reliability, concurrency, security and compliance scenarios, which assert functional behaviour under adverse conditions rather than measuring performance."
           },
-
           "human_corrected": {
             "type": "boolean",
             "description": "false at generation time. Set to true when any Review run modifies or deprecates this scenario. Never reset. LLM accuracy signal."
@@ -124,52 +213,190 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["field_change", "deprecated", "missed_scenario"]
+              "enum": [
+                "field_change",
+                "deprecated",
+                "missed_scenario"
+              ]
             },
             "description": "Accumulated correction types across all review rounds. field_change = field corrected by human; deprecated = LLM over-generated; missed_scenario = LLM failed to generate (set on review-added scenarios)."
           },
-
           "step_descriptions": {
             "type": "array",
             "items": {
-              "type": "object", "additionalProperties": false,
-              "required": ["step", "action", "expected_result"],
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "step",
+                "action",
+                "expected_result"
+              ],
               "properties": {
-                "step":            { "type": "integer", "minimum": 1 },
-                "action":          { "type": "string" },
-                "curl_reference":  { "type": ["string", "null"], "description": "null for DB/infra-only steps with no HTTP call" },
-                "expected_result": { "type": "string" }
+                "step": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "action": {
+                  "type": "string"
+                },
+                "curl_reference": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "null for DB/infra-only steps with no HTTP call"
+                },
+                "expected_result": {
+                  "type": "string"
+                }
               }
             }
           },
-          "preconditions": { "type": "array", "items": { "type": "string" } },
-          "fixture_ids":   { "type": "array", "items": { "type": "string" } },
+          "preconditions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fixture_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "tags": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "happy_path | negative | boundary | flag_on | flag_off | e2e | load | concurrency | security | reliability | compliance | nfr | deferred | underspecified | provisional"
+          },
+          "scenario_group": {
+            "type": "string",
+            "description": "Key shared by scenarios resting on the same Arrange: identical precondition state and triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction — it applies to Manual scenarios too, where it marks cases a human tester can run back-to-back off one setup. Standalone scenarios get a unique key. Format: {feature_component}-{behaviour}. Downstream consumers decide how to use it."
+          },
+          "existing_testcase_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Existing BrowserStack case ids (e.g. TC-302383) this scenario extends, replaces, or re-runs under a new flag state. From regression_context.json only — never invented. Rendered into the Preconditions block and consumed downstream for @TestInfo."
+          },
+          "owning_team": {
+            "type": "string",
+            "description": "canonical_id of the team owning this scenario's SYSTEM UNDER TEST — the service whose contract the assertions are about, not the team whose feature triggered the work. Defaults to the primary canonical_team_id and is set explicitly on every scenario. automation-plan-generator resolves the code module and BrowserStack project from this, not from the root code_module."
+          },
+          "browserstack_test_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "BrowserStack's own test-case id, assigned when this scenario is uploaded via the BrowserStack MCP. null until the upload runs — always emit the key so downstream readers never infer state from absence. Written back into the plan by the sync, never authored by the generator. DISTINCT from existing_testcase_ids[], which holds ids of cases that already existed BEFORE this plan (sourced from regression_context.json); this field is the id THIS scenario received."
+          },
+          "existing_case_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The single BrowserStack case id this scenario duplicates or directly impacts, verbatim (e.g. 'TC-329330' or 'C3260998'). Set whenever is_legacy_regression is true because of a real match — is_legacy_regression true with no ref is a bare flag nobody can audit or trace back. Omit when the scenario is genuinely new. Use existing_testcase_ids[] when a scenario maps to several cases."
+          },
+          "regression_action": {
+            "type": "string",
+            "enum": [
+              "none",
+              "reuse",
+              "modify"
+            ],
+            "default": "none",
+            "description": "What this scenario implies for existing automated coverage. 'none' = net-new; generate a new test method. 'reuse' = an existing case already covers this exact behaviour; emit the row so reviewers can see it exists, but generate no code. 'modify' = an existing test covers this surface and must be EDITED because the change alters what it should assert. 'modify' is the disposition most easily missed on backend: a response POJO that tolerates unknown fields lets the existing test keep PASSING after a field is added, while silently covering less — nobody re-runs their way to noticing that."
+          },
+          "existing_test_ref": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "default": null,
+            "additionalProperties": false,
+            "description": "Repo location of the existing automated test this scenario reuses or modifies, copied from regression_context.regression_tests[].test_ref. REQUIRED when regression_action is 'modify' — an edit instruction cannot be emitted against a case id alone.",
+            "required": [
+              "class",
+              "method"
+            ],
+            "properties": {
+              "class": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              },
+              "file_path": {
+                "type": "string"
+              },
+              "case_numbers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Numeric case ids this method implements, from @TestInfo(testCaseIds={...})."
+              },
+              "change_required": {
+                "type": "string",
+                "description": "What must change in the existing test and why. REQUIRED when regression_action is 'modify'. Name the assertion that becomes insufficient, not merely that the test is affected."
+              }
+            }
           }
         }
       }
     },
-
     "coverage_summary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["total", "by_layer", "by_priority"],
+      "required": [
+        "total",
+        "by_layer",
+        "by_priority"
+      ],
       "properties": {
-        "total":             { "type": "integer" },
-        "by_layer":          { "type": "object", "additionalProperties": { "type": "integer" } },
-        "by_priority":       { "type": "object", "additionalProperties": { "type": "integer" } },
-        "rfc_steps_covered": { "type": "integer" },
-        "rfc_steps_total":   { "type": "integer" },
-        "rfc_gaps":          { "type": "array", "items": { "type": "string" } },
-
+        "total": {
+          "type": "integer"
+        },
+        "by_layer": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "by_priority": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "rfc_steps_covered": {
+          "type": "integer"
+        },
+        "rfc_steps_total": {
+          "type": "integer"
+        },
+        "rfc_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "llm_quality": {
           "type": "object",
           "additionalProperties": false,
           "description": "LLM generation accuracy — populated at plan creation; updated after each Review run.",
-          "required": ["auto_approved", "human_modified", "human_deprecated", "human_added", "review_rounds_completed"],
+          "required": [
+            "auto_approved",
+            "human_modified",
+            "human_deprecated",
+            "human_added",
+            "review_rounds_completed"
+          ],
           "properties": {
             "auto_approved": {
               "type": "integer",
@@ -188,7 +415,10 @@
               "description": "Scenarios LLM missed entirely — added from scratch by human via Review"
             },
             "llm_accuracy_pct": {
-              "type": ["number", "null"],
+              "type": [
+                "number",
+                "null"
+              ],
               "minimum": 0,
               "maximum": 100,
               "description": "auto_approved / (auto_approved + human_modified + human_deprecated) × 100. null until first review round completes."
@@ -201,7 +431,155 @@
         }
       }
     },
-
-    "dedup_report": { "type": "object" }
+    "dedup_report": {
+      "type": "object"
+    },
+    "teams_in_scope": {
+      "type": "array",
+      "description": "Every team resolved from prd_context.team[], prd_context.pdg[] and rfc_context.team_ownership[], with what each routes to. Records the teams the human excluded as well as those included, so the scope decision is auditable. The primary team also appears here.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "canonical_id",
+          "raw_name",
+          "included"
+        ],
+        "properties": {
+          "canonical_id": {
+            "type": "string"
+          },
+          "raw_name": {
+            "type": "string",
+            "description": "The team name as written in the PRD or RFC that matched this entry"
+          },
+          "matched_via": {
+            "type": "string",
+            "description": "Which candidate path matched, e.g. prd.team[0], rfc.team_ownership[2]"
+          },
+          "code_module": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "regression_id_prefix": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "browserstack_project": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "is_primary": {
+            "type": "boolean",
+            "description": "true for the team that owns the plan and its review gate"
+          },
+          "included": {
+            "type": "boolean",
+            "description": "Whether the human included this team in the generated scope"
+          }
+        }
+      }
+    },
+    "browserstack_sync": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "description": "Record of the last BrowserStack MCP upload. null until the first sync. Written by the sync, not the generator.",
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "BrowserStack project the scenarios were uploaded to — should match the registry browserstack_project for the owning team"
+        },
+        "suite_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "synced_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "synced_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Scenarios that received a browserstack_test_id in this sync"
+        },
+        "unsynced_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Scenarios still carrying null — e.g. those owned by a team whose project was not the upload target"
+        }
+      }
+    },
+    "regression_selection": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "description": "The executable signoff selection: existing suites CI runs alongside the new tests. Copied from regression_context.regression_selection. Holds the 'reuse' population in bulk so the plan does not carry one no-op row per already-covered case.",
+      "properties": {
+        "test_groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "test_classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "case_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_review",
+        "changes_requested",
+        "approved"
+      ],
+      "default": "draft",
+      "description": "Human approval gate for this plan as a whole. The GENERATOR always writes 'draft' and must never write 'approved' — only a person sets that, after reading the plan and its analysis document. 'in_review' = a reviewer has picked it up. 'changes_requested' = feedback was written into the qa_analysis.md Feedback block and a Review-mode run is pending. 'approved' = cleared to flow downstream. ANY run that changes scenario content — pass2, retrigger, review — resets this to 'draft'. An approval attaches to the content that was read, not to the filename. NOTE: a per-scenario field named `status` also exists with enum 'active' | 'deprecated' — that is scenario lifecycle, not plan approval. They sit at different levels (plan root vs scenarios[]) so they never collide in JSON, but read the path carefully."
+    },
+    "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "Who approved. Set alongside status='approved'; null otherwise."
+    },
+    "approved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "default": null,
+      "description": "When approval was given. Set alongside status='approved'; null otherwise. If updated_at is later than this, the plan changed after approval and the approval is stale."
+    }
   }
 }

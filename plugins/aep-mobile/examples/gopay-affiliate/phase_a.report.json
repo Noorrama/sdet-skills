@@ -1,0 +1,1237 @@
+{
+ "protos": [
+  {
+   "identity": "Welcome Page",
+   "frames": [
+    "2001:38107"
+   ]
+  },
+  {
+   "identity": "Hero Image",
+   "frames": [
+    "2482:14499"
+   ]
+  },
+  {
+   "identity": "Loading",
+   "frames": [
+    "2571:14710"
+   ]
+  },
+  {
+   "identity": "Scroll View",
+   "frames": [
+    "2571:16086"
+   ]
+  },
+  {
+   "identity": "Empty State",
+   "frames": [
+    "2001:22870"
+   ]
+  },
+  {
+   "identity": "Default State",
+   "frames": [
+    "2001:23154"
+   ]
+  },
+  {
+   "identity": "Frame 2117130857",
+   "frames": [
+    "2001:26717"
+   ]
+  },
+  {
+   "identity": "Frame 2117130928",
+   "frames": [
+    "2588:17100"
+   ]
+  },
+  {
+   "identity": "Riwayat Komisi",
+   "frames": [
+    "2001:23440"
+   ]
+  },
+  {
+   "identity": "Native Month Picker",
+   "frames": [
+    "2001:23438"
+   ]
+  },
+  {
+   "identity": "Riwayat Komisi",
+   "frames": [
+    "2001:23915",
+    "2269:66953"
+   ]
+  },
+  {
+   "identity": "Scroll View",
+   "frames": [
+    "2314:63199"
+   ]
+  },
+  {
+   "identity": "Share Tray | iOS",
+   "frames": [
+    "2001:27015"
+   ]
+  },
+  {
+   "identity": "Share Tray | Android",
+   "frames": [
+    "2001:27063",
+    "2001:27069"
+   ]
+  },
+  {
+   "identity": "Frame 2117130771",
+   "frames": [
+    "2001:27008"
+   ]
+  },
+  {
+   "identity": "Tips & Tricks",
+   "frames": [
+    "2001:28996"
+   ]
+  },
+  {
+   "identity": "Home | Perintis",
+   "frames": [
+    "2080:18469",
+    "2097:21081"
+   ]
+  },
+  {
+   "identity": "Disbursed",
+   "frames": [
+    "2001:24045"
+   ]
+  },
+  {
+   "identity": "Commission Details | Weekly | Status Scheduled",
+   "frames": [
+    "2001:24089",
+    "2482:15405",
+    "2444:14131"
+   ]
+  },
+  {
+   "identity": "Frame 2117130931",
+   "frames": [
+    "3959:42581"
+   ]
+  },
+  {
+   "identity": "Overlay",
+   "frames": [
+    "3959:42338"
+   ]
+  },
+  {
+   "identity": "Frame 2117130883",
+   "frames": [
+    "2001:28247"
+   ]
+  },
+  {
+   "identity": "Merchant Performance",
+   "frames": [
+    "2001:28871"
+   ]
+  },
+  {
+   "identity": "Overlay",
+   "frames": [
+    "2001:28961"
+   ]
+  },
+  {
+   "identity": "Merchant Performance",
+   "frames": [
+    "2300:64232"
+   ]
+  },
+  {
+   "identity": "Scroll View with Filter Applied",
+   "frames": [
+    "2300:65186"
+   ]
+  },
+  {
+   "identity": "Overlay",
+   "frames": [
+    "2001:28993"
+   ]
+  },
+  {
+   "identity": "Skema Komisi | Perintis",
+   "frames": [
+    "2001:24143",
+    "2001:24477"
+   ]
+  },
+  {
+   "identity": "Scroll View",
+   "frames": [
+    "2001:24802"
+   ]
+  },
+  {
+   "identity": "Frame 2117130875",
+   "frames": [
+    "2001:28535"
+   ]
+  },
+  {
+   "identity": "Overlay",
+   "frames": [
+    "2001:27259"
+   ]
+  },
+  {
+   "identity": "Initial Page Loader",
+   "frames": [
+    "2300:62612"
+   ]
+  },
+  {
+   "identity": "Scroll View with Pagination Load",
+   "frames": [
+    "2300:63643"
+   ]
+  },
+  {
+   "identity": "Empty State",
+   "frames": [
+    "2300:66062"
+   ]
+  },
+  {
+   "identity": "Overlay",
+   "frames": [
+    "2001:25920",
+    "2001:25143"
+   ]
+  },
+  {
+   "identity": "Downliners",
+   "frames": [
+    "2237:60661"
+   ]
+  },
+  {
+   "identity": "Native OS Month Picker",
+   "frames": [
+    "2269:67971"
+   ]
+  },
+  {
+   "identity": "Downliners",
+   "frames": [
+    "2237:60846",
+    "2269:61747"
+   ]
+  },
+  {
+   "identity": "Scroll View with Pagination Load",
+   "frames": [
+    "2269:67342"
+   ]
+  },
+  {
+   "identity": "Home | Perintis",
+   "frames": [
+    "2255:67352"
+   ]
+  },
+  {
+   "identity": "qris-suspended",
+   "frames": [
+    "2255:67285"
+   ]
+  },
+  {
+   "identity": "Overlay",
+   "frames": [
+    "4613:17406",
+    "2300:66912"
+   ]
+  },
+  {
+   "identity": "technical error",
+   "frames": [
+    "5055:17857"
+   ]
+  },
+  {
+   "identity": "no-internet",
+   "frames": [
+    "5053:19295"
+   ]
+  },
+  {
+   "identity": "refresh-error",
+   "frames": [
+    "5053:19284"
+   ]
+  },
+  {
+   "identity": "Confirm account",
+   "frames": [
+    "1997:31939",
+    "1997:32055",
+    "1997:31997",
+    "1997:32229",
+    "1997:32287"
+   ]
+  },
+  {
+   "identity": "Scroll View",
+   "frames": [
+    "2571:19061"
+   ]
+  },
+  {
+   "identity": "Confirm account",
+   "frames": [
+    "1997:32171",
+    "1997:32113"
+   ]
+  },
+  {
+   "identity": "General (As-Is)",
+   "frames": [
+    "5055:17994"
+   ]
+  },
+  {
+   "identity": "Link GoPay screen",
+   "frames": [
+    "4559:19051"
+   ]
+  },
+  {
+   "identity": "Frame",
+   "frames": [
+    "4559:18436"
+   ]
+  },
+  {
+   "identity": "Confirm account / ID",
+   "frames": [
+    "4535:21369"
+   ]
+  },
+  {
+   "identity": "If KYC is still in progress",
+   "frames": [
+    "4732:43801"
+   ]
+  },
+  {
+   "identity": "If KYC is rejected",
+   "frames": [
+    "4776:17512"
+   ]
+  },
+  {
+   "identity": "Riwayat Komisi",
+   "frames": [
+    "2269:62243"
+   ]
+  },
+  {
+   "identity": "Last 3 Months",
+   "frames": [
+    "2269:62556"
+   ]
+  },
+  {
+   "identity": "Share Tray | Android",
+   "frames": [
+    "2269:62241"
+   ]
+  },
+  {
+   "identity": "Riwayat Komisi",
+   "frames": [
+    "2269:62380"
+   ]
+  },
+  {
+   "identity": "Scroll View with Pagination Load",
+   "frames": [
+    "2269:62834"
+   ]
+  },
+  {
+   "identity": "Loading",
+   "frames": [
+    "2269:62724"
+   ]
+  },
+  {
+   "identity": "Riwayat Komisi",
+   "frames": [
+    "2269:62347",
+    "2269:62490"
+   ]
+  },
+  {
+   "identity": "Commission Details | Weekly | Status Done",
+   "frames": [
+    "2482:15226"
+   ]
+  },
+  {
+   "identity": "Frame 2117130600",
+   "frames": [
+    "2482:15269"
+   ]
+  },
+  {
+   "identity": "Disbursed",
+   "frames": [
+    "2269:63013"
+   ]
+  },
+  {
+   "identity": "Scheduled",
+   "frames": [
+    "2269:63057"
+   ]
+  },
+  {
+   "identity": "Filled",
+   "frames": [
+    "2001:36364"
+   ]
+  },
+  {
+   "identity": "Empty",
+   "frames": [
+    "2001:36450"
+   ]
+  },
+  {
+   "identity": "Share Tray | Android",
+   "frames": [
+    "2001:37106"
+   ]
+  },
+  {
+   "identity": "Riwayat Komisi",
+   "frames": [
+    "2001:37108"
+   ]
+  },
+  {
+   "identity": "Downliners",
+   "frames": [
+    "2097:23738",
+    "2097:24022"
+   ]
+  },
+  {
+   "identity": "Downliners",
+   "frames": [
+    "2001:28118"
+   ]
+  },
+  {
+   "identity": "Downliners",
+   "frames": [
+    "2237:39380",
+    "2237:39491"
+   ]
+  },
+  {
+   "identity": "Confirm account / EN",
+   "frames": [
+    "4535:19397"
+   ]
+  },
+  {
+   "identity": "Merchant Performance",
+   "frames": [
+    "3978:43368",
+    "3965:43004"
+   ]
+  }
+ ],
+ "merges": {
+  "RIWAYAT_KOMISI": [
+   "2001:23440",
+   "2001:23915",
+   "2269:66953",
+   "2269:62243",
+   "2269:62380",
+   "2269:62347",
+   "2269:62490",
+   "2001:37108"
+  ],
+  "SHARE_TRAY_ANDROID": [
+   "2001:27063",
+   "2001:27069",
+   "2269:62241",
+   "2001:37106"
+  ],
+  "HOME_PERINTIS": [
+   "2080:18469",
+   "2097:21081",
+   "2255:67352"
+  ],
+  "DISBURSED": [
+   "2001:24045",
+   "2269:63013"
+  ],
+  "COMMISSION_DETAILS_WEEKLY_STATUS_SCHEDULED": [
+   "2001:24089",
+   "2482:15405",
+   "2444:14131"
+  ],
+  "OVERLAY": [
+   "3959:42338",
+   "2001:28961",
+   "2001:28993",
+   "2001:27259",
+   "2001:25920",
+   "2001:25143",
+   "4613:17406",
+   "2300:66912"
+  ],
+  "MERCHANT_PERFORMANCE": [
+   "2001:28871",
+   "2300:64232",
+   "3978:43368",
+   "3965:43004"
+  ],
+  "SKEMA_KOMISI_PERINTIS": [
+   "2001:24143",
+   "2001:24477"
+  ],
+  "DOWNLINERS": [
+   "2237:60661",
+   "2237:60846",
+   "2269:61747",
+   "2097:23738",
+   "2097:24022",
+   "2001:28118",
+   "2237:39380",
+   "2237:39491"
+  ],
+  "CONFIRM_ACCOUNT": [
+   "1997:31939",
+   "1997:32055",
+   "1997:31997",
+   "1997:32229",
+   "1997:32287",
+   "1997:32171",
+   "1997:32113"
+  ]
+ },
+ "state_transitions": [
+  {
+   "connector_id": "1997:32356",
+   "screen_id": "CONFIRM_ACCOUNT",
+   "from_state": "",
+   "to_state": "",
+   "condition": ""
+  },
+  {
+   "connector_id": "4613:17401",
+   "screen_id": "CONFIRM_ACCOUNT",
+   "from_state": "",
+   "to_state": "Code incorrect / not found",
+   "condition": ""
+  },
+  {
+   "connector_id": "2269:61446",
+   "screen_id": "DOWNLINERS",
+   "from_state": "My Downliners",
+   "to_state": "My Downliners — Page Loading",
+   "condition": ""
+  }
+ ],
+ "variant_links": [],
+ "entry_points": [
+  {
+   "screen_id": "WELCOME_PAGE",
+   "kind": "ENTRY_LABEL",
+   "condition": "Flow 1",
+   "evidence": "2001:38107",
+   "reaches_screens": 7
+  }
+ ],
+ "entry_candidates": [
+  {
+   "screen_id": "WELCOME_PAGE",
+   "out_degree": 1,
+   "reaches_screens": 7
+  },
+  {
+   "screen_id": "NATIVE_MONTH_PICKER",
+   "out_degree": 1,
+   "reaches_screens": 3
+  },
+  {
+   "screen_id": "DOWNLINERS",
+   "out_degree": 2,
+   "reaches_screens": 3
+  },
+  {
+   "screen_id": "EMPTY",
+   "out_degree": 1,
+   "reaches_screens": 3
+  },
+  {
+   "screen_id": "CONFIRM_ACCOUNT_ID",
+   "out_degree": 1,
+   "reaches_screens": 2
+  },
+  {
+   "screen_id": "FRAME_2117130931",
+   "out_degree": 1,
+   "reaches_screens": 2
+  },
+  {
+   "screen_id": "SKEMA_KOMISI_PERINTIS",
+   "out_degree": 2,
+   "reaches_screens": 2
+  }
+ ],
+ "ambiguous_collapses": [],
+ "identity_splits": [
+  {
+   "base_screen_id": "EMPTY_STATE",
+   "base_name": "Empty State",
+   "frames": 2,
+   "screens": [
+    {
+     "screen_id": "EMPTY_STATE",
+     "named_by": "BASE",
+     "frames": 1,
+     "contexts": [
+      "Riwayat Komisi"
+     ],
+     "chips": [
+      "Empty State"
+     ],
+     "source_refs": [
+      "2001:22870"
+     ]
+    },
+    {
+     "screen_id": "EMPTY_STATE__LEVEL_2",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Level 2"
+     ],
+     "chips": [
+      "Empty State"
+     ],
+     "source_refs": [
+      "2300:66062"
+     ]
+    }
+   ],
+   "threshold": 0.3,
+   "min_similarity": 0.0
+  },
+  {
+   "base_screen_id": "LOADING",
+   "base_name": "Loading",
+   "frames": 2,
+   "screens": [
+    {
+     "screen_id": "LOADING",
+     "named_by": "BASE",
+     "frames": 1,
+     "contexts": [
+      "Riwayat Komisi"
+     ],
+     "chips": [
+      "Loading"
+     ],
+     "source_refs": [
+      "2269:62724"
+     ]
+    },
+    {
+     "screen_id": "LOADING__WELCOME_PAGE",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Welcome Page"
+     ],
+     "chips": [
+      "Loading"
+     ],
+     "source_refs": [
+      "2571:14710"
+     ]
+    }
+   ],
+   "threshold": 0.3,
+   "min_similarity": 0.0
+  },
+  {
+   "base_screen_id": "SCROLL_VIEW",
+   "base_name": "Scroll View",
+   "frames": 4,
+   "screens": [
+    {
+     "screen_id": "SCROLL_VIEW",
+     "named_by": "BASE",
+     "frames": 1,
+     "contexts": [
+      "Level 2"
+     ],
+     "chips": [
+      "Scroll View"
+     ],
+     "source_refs": [
+      "2001:24802"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW__RIWAYAT_KOMISI",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Riwayat Komisi"
+     ],
+     "chips": [
+      "Scroll View"
+     ],
+     "source_refs": [
+      "2314:63199"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW__WELCOME_PAGE",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Welcome Page"
+     ],
+     "chips": [
+      "Scroll View"
+     ],
+     "source_refs": [
+      "2571:16086"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW__AFFILIATE_ACTIVATION",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Affiliate Activation"
+     ],
+     "chips": [
+      "Scroll View"
+     ],
+     "source_refs": [
+      "2571:19061"
+     ]
+    }
+   ],
+   "threshold": 0.3,
+   "min_similarity": 0.0
+  },
+  {
+   "base_screen_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD",
+   "base_name": "Scroll View with Pagination Load",
+   "frames": 3,
+   "screens": [
+    {
+     "screen_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD",
+     "named_by": "BASE",
+     "frames": 1,
+     "contexts": [
+      "DEFAULT (Last 1 Month)"
+     ],
+     "chips": [
+      "Scroll View with Pagination Load"
+     ],
+     "source_refs": [
+      "2269:62834"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD__MY_DOWNLINERS",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "My Downliners"
+     ],
+     "chips": [
+      "Scroll View with Pagination Load"
+     ],
+     "source_refs": [
+      "2269:67342"
+     ]
+    },
+    {
+     "screen_id": "SCROLL_VIEW_WITH_PAGINATION_LOAD__LEVEL_2",
+     "named_by": "CONTEXT",
+     "frames": 1,
+     "contexts": [
+      "Level 2"
+     ],
+     "chips": [
+      "Scroll View with Pagination Load"
+     ],
+     "source_refs": [
+      "2300:63643"
+     ]
+    }
+   ],
+   "threshold": 0.3,
+   "min_similarity": 0.0
+  }
+ ],
+ "excluded_nodes": [
+  {
+   "id": "1997:30262",
+   "reason": "DRAFT_LOOSE_CLUSTER",
+   "name": "Welcome Page"
+  }
+ ],
+ "unresolved_connectors": [
+  {
+   "connector_id": "1997:31837",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2272:40743",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Welcome Page",
+    "text": "Daftar jadi GoPay Affiliate Apa itu GoPay Spiker? PLACEHOLDER"
+   },
+   "end": {
+    "node_id": "1997:31836",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation KV asset from Marketing"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2300:66901",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2300:66883",
+    "via": "NON_SCREEN:CONTAINER?",
+    "name": "Group 3128256",
+    "text": "English Aktivasi GoPay Affiliate Pastikan semuanya sudah benar supaya proses aktivasi lancar."
+   },
+   "end": {
+    "node_id": "2300:66892",
+    "via": "NON_SCREEN:CONTAINER?",
+    "name": "Group 3128256",
+    "text": "English Aktivasi GoPay Affiliate Pastikan semuanya sudah benar supaya proses aktivasi lancar."
+   },
+   "reason": "start=NON_SCREEN:CONTAINER? end=NON_SCREEN:CONTAINER?"
+  },
+  {
+   "connector_id": "2001:24044",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2001:23437",
+    "via": "SECTION_AMBIGUOUS(Riwayat Komisi, 9 screens)",
+    "name": "Riwayat Komisi",
+    "text": "12:59 Riwayat komisi Apr 2026 Akumulasi Pendapatan: Rp500.000"
+   },
+   "end": {
+    "node_id": "2001:24043",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation “Akan Datang” section:\nonly appears under “current month”\nNominal= exclude from Akumulasi Pendapatan IF it’s for next month."
+   },
+   "reason": "start=SECTION_AMBIGUOUS(Riwayat Komisi, 9 screens) end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2001:36354",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2001:25125",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Frame 2117130850",
+    "text": "12:59 Skema Komisi Program GoPay Affiliate Rekrut GoPay Merchant dan dapatkan penghasilan ekstra hingga 2 juta per bulan!"
+   },
+   "end": {
+    "node_id": "2001:36351",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation Tab is sticky after user scrolls down beyond “Cara dapat komisi:”"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2001:39973",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2001:39490",
+    "via": "NON_SCREEN:COMPONENT_SET",
+    "name": "Level 1",
+    "text": "Level Saya Level 1: PERINTIS 20 GoPay Spiker Diterima 0 /20 Ayo naik level untuk dapatkan 15 ribu setiap kali tim Anda berhasil ajak merchant pakai GoPay Spiker."
+   },
+   "end": {
+    "node_id": "2001:39972",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation “Ayo tinggal x lagi” \nOnly appears when..."
+   },
+   "reason": "start=NON_SCREEN:COMPONENT_SET end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2001:28031",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2001:27176",
+    "via": "NON_SCREEN:COMPONENT_SET",
+    "name": "Level 2",
+    "text": "Level Saya Level 2: PANUTAN Ajak teman gabung GoPay Affiliate & dapatkan bonus tambahan!"
+   },
+   "end": {
+    "node_id": "2001:27264",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Overlay",
+    "text": "Bagaimana caranya? 1 Ajak teman jadi Affiliate & bagikan kode Anda"
+   },
+   "reason": "start=NON_SCREEN:COMPONENT_SET end=ELEMENT_IN_SCREEN"
+  },
+  {
+   "connector_id": "2269:68239",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2001:39982",
+    "via": "NON_SCREEN:COMPONENT_SET",
+    "name": "Level 2",
+    "text": "Level Saya Level 2: PANUTAN Ajak teman gabung GoPay Affiliate & dapatkan bonus tambahan!"
+   },
+   "end": {
+    "node_id": "2269:68215",
+    "via": "ARTIFACT",
+    "name": "Notes",
+    "text": "Notes / Annotation Sort by: \nhighest Spiker Delivered\n\nWhat to show?\nOnly show downliners who ARE peforming (not 0). Hide remaining.\nIf NONE are performing: show min. 3 users, based on most recent recruit."
+   },
+   "reason": "start=NON_SCREEN:COMPONENT_SET end=ARTIFACT"
+  },
+  {
+   "connector_id": "3998:45251",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "4530:18883",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Home | Perintis",
+    "text": "08:08 Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!"
+   },
+   "end": {
+    "node_id": "2001:27076",
+    "via": "NON_SCREEN:DECOR",
+    "name": "tooltip/floating",
+    "text": "Cair setiap hari Rabu di minggu berikutnya."
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2001:27079",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2097:21960",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Home | Perintis",
+    "text": "08:08 Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!"
+   },
+   "end": {
+    "node_id": "2001:27078",
+    "via": "NON_SCREEN:DECOR",
+    "name": "tooltip/floating",
+    "text": "Spiker yang telah dipakai bertransaksi 15 hari dalam sebulan."
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2097:21594",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2297:40979",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Home | Perintis",
+    "text": "Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!"
+   },
+   "end": {
+    "node_id": "2097:21593",
+    "via": "NON_SCREEN:DECOR",
+    "name": "tooltip/floating",
+    "text": "Jumlah Spiker produktif dari rekrutan anggota tim Anda"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "3900:16196",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2001:39714",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Home | Perintis",
+    "text": "08:08 Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!"
+   },
+   "end": {
+    "node_id": "3900:16193",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation Show motivational copy at 50% onwards (aka 10 and above)"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2001:36346",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2097:21960",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Home | Perintis",
+    "text": "08:08 Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!"
+   },
+   "end": {
+    "node_id": "2001:36342",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation If Spiker Delivered reached 30/Week = \nDisplay max number at 30\nThis info will be in T&C"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2482:14834",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2097:22514",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Home | Perintis",
+    "text": "Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!"
+   },
+   "end": {
+    "node_id": "2482:14831",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation Only appears when Spiker Dipesan = 0"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2269:67956",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "4813:19214",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Riwayat Komisi",
+    "text": "Pantau performa downliner Anda! Maksimalkan cuan dan dapatkan +Rp15.000 untuk setiap Spiker produktif dari tim Anda"
+   },
+   "end": {
+    "node_id": "2269:67942",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation Month picker is part of Sticky header"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2269:67961",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2269:67901",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Riwayat Komisi",
+    "text": "Pantau performa downliner Anda! Maksimalkan cuan dan dapatkan +Rp15.000 untuk setiap Spiker produktif dari tim Anda"
+   },
+   "end": {
+    "node_id": "2269:67945",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation If loading"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2269:68339",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2255:67386",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Home | Perintis",
+    "text": "Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!"
+   },
+   "end": {
+    "node_id": "2269:68246",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation Only Riwayat button can be directed to actual page\n\nTool tip buttons can still be revealed.\n\nEverything else, show the suspended dialog."
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  },
+  {
+   "connector_id": "2001:28205",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "3869:42297",
+    "via": "NON_SCREEN:COMPONENT_SET",
+    "name": "Level 2",
+    "text": "Level Saya Level 2: PANUTAN Ajak teman gabung GoPay Affiliate & dapatkan bonus tambahan!"
+   },
+   "end": {
+    "node_id": "2237:60661",
+    "via": "SCREEN",
+    "name": "Downliners",
+    "text": "Pantau performa tim Anda! Maksimalkan cuan dan dapatkan +Rp15.000 untuk setiap Spiker produktif dari tim Anda."
+   },
+   "reason": "start=NON_SCREEN:COMPONENT_SET end=SCREEN"
+  },
+  {
+   "connector_id": "4570:17376",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "4559:17874",
+    "via": "ARTIFACT",
+    "name": "Group 3128252",
+    "text": "SEE MORE IN  1KYC FIGMA"
+   },
+   "end": {
+    "node_id": "1997:28540",
+    "via": "MISSING_NODE",
+    "name": null,
+    "text": null
+   },
+   "reason": "start=ARTIFACT end=MISSING_NODE"
+  },
+  {
+   "connector_id": "2269:62987",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2269:62570",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Riwayat Komisi",
+    "text": "12:59 Riwayat komisi 1 bulan 3 bulan 6 bulan Pilih tanggal Akumulasi Pendapatan:"
+   },
+   "end": {
+    "node_id": "2269:62240",
+    "via": "SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)",
+    "name": "Riwayat Komisi",
+    "text": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)"
+  },
+  {
+   "connector_id": "2269:63010",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2269:62240",
+    "via": "SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)",
+    "name": "Riwayat Komisi",
+    "text": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14"
+   },
+   "end": {
+    "node_id": "2269:62240",
+    "via": "SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)",
+    "name": "Riwayat Komisi",
+    "text": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14"
+   },
+   "reason": "start=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens) end=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)"
+  },
+  {
+   "connector_id": "2269:63011",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2269:62986",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Riwayat Komisi",
+    "text": "Akumulasi Pendapatan: April 2026 23 Apr 2026 Rp120.000 ** 6258"
+   },
+   "end": {
+    "node_id": "2269:62240",
+    "via": "SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)",
+    "name": "Riwayat Komisi",
+    "text": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)"
+  },
+  {
+   "connector_id": "2269:63012",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "2269:62972",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "Riwayat Komisi",
+    "text": "Akumulasi Pendapatan: April 2026 23 Apr 2026 Rp120.000 ** 6258"
+   },
+   "end": {
+    "node_id": "2269:62240",
+    "via": "SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)",
+    "name": "Riwayat Komisi",
+    "text": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)"
+  },
+  {
+   "connector_id": "4813:17545",
+   "condition": "",
+   "direction": "FORWARD",
+   "start": {
+    "node_id": "4732:43925",
+    "via": "ELEMENT_IN_SCREEN",
+    "name": "success-screen",
+    "text": "Aktivasi GoPay Affiliate sedang diproses Silakan cek lagi halaman ini secara berkala untuk mengetahui status pendaftaran Anda."
+   },
+   "end": {
+    "node_id": "4813:17541",
+    "via": "NON_SCREEN:DECOR",
+    "name": "Notes",
+    "text": "Notes / Annotation Back to Welcome Page"
+   },
+   "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR"
+  }
+ ],
+ "counters": {
+  "connectors_total": 47,
+  "entry_points": 1,
+  "edges_emitted": 21,
+  "state_transition_connectors": 3,
+  "variant_link_connectors": 0,
+  "unresolved_connectors": 23,
+  "screens_emitted": 54,
+  "identity_splits": 4,
+  "identity_split_screens": 7,
+  "spec_frames_excluded": 0,
+  "frames_collapsed": 92,
+  "elements_deterministic": 15
+ }
+}

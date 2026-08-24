@@ -55,7 +55,7 @@
               "properties": {
                 "fixture_id": { "type": "string" },
                 "description": { "type": "string" },
-                "required_state": { "type": "object", "description": "Static entity attributes, verbatim from the SDET fixture. Carried as-is — never re-derived here." },
+                "required_state": { "type": "array", "items": { "type": "object" }, "description": "Array of state blocks, verbatim from the SDET fixture. Each block carries its own \"entity\" plus that entity's static attributes. Carried as-is — never re-derived here." },
                 "entity": { "type": "string" },
                 "dynamic_conditions": { "type": "array", "items": { "type": "object" }, "description": "Carried through from the SDET fixture — temporal/relational/selection needs that are not static attributes." },
                 "count": { "type": "integer" }

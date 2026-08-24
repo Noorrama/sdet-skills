@@ -19,7 +19,7 @@ Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_c
 - **`prd_context.json`**: Business rules, boundary rules, expected UI copy, and `clickstream_events` (telemetry specs).
 - **`design_context.json`**: Screen definitions, UI elements with `screen_name:element_id_name` logical tokens, state variants, and flow matrix.
 - **`rfc_context.json`**: Feature flag mappings, API contracts, error codes, and N-1 fallback rules.
-- **`regression_context.json`**: **Generator-internal, not a QA-supplied file.** Produced by invoking the `regression-extractor` skill from *within* this generator (Preflight step 8), before any scenario is created — never something the QA hands in alongside the other four contexts.
+- **`regression_context.json`**: **Generator-internal, not a QA-supplied file.** Produced by invoking the `regression-extractor` skill from *within* this generator (Preflight step 9), before any scenario is created — never something the QA hands in alongside the other four contexts.
 
 > **Pipeline Alignment & Architecture:** Upstream extractor skills (`prd-extractor`, `design-extractor`, `rfc-extractor`) run independently in isolated silos per stage and **do not communicate with each other**. The `sdet-plan-generator` is the first convergence point in the pipeline. It is responsible for cross-referencing these decoupled contexts to detect drift, mismatches, and gaps.
 
@@ -73,12 +73,48 @@ what was not covered.
 6. **App agreement.** Every context loaded for the run must carry the same `app`. A mismatch
    means files for different apps were mixed — pick nothing, use the majority value, and raise a
    `NEEDS_ANSWER` note naming the conflicting files and values.
-7. **Shared requirements across apps.** When a source document covered several apps, items that
+7. **Team & milestone resolution — one team, one milestone per plan.** Collect distinct
+   `team_name` and `milestone` values across `prd_context.business_requirements[]`.
+   Requirements with no `team_name` are **shared** — they stay in scope for every team's plan.
+   Requirements with no `milestone` are **milestone-agnostic** — they stay in scope for every
+   milestone's plan.
+
+   **Detection:**
+   - Count distinct non-null `team_name` values and distinct non-null `milestone` values.
+   - If both have ≤1 distinct value → proceed; no prompt needed.
+   - If either (or both) have >1 distinct value → ask the QA via a single `AskUserQuestion`
+     call. Use one question per dimension that needs disambiguation (≤2 questions):
+     - Team question (if >1 team): *"PRD contains requirements from N teams: [list]. Which
+       team should this SDET plan cover?"* Options = the distinct team names.
+     - Milestone question (if >1 milestone): *"PRD spans N milestones: [list]. Which milestone
+       should this SDET plan cover?"* Options = the distinct milestone values.
+
+   **After selection, apply filters in order:**
+   1. **Team filter** (if a team was selected): keep only requirements where `team_name`
+      matches the selected team **or** `team_name` is absent (shared). Drop the rest.
+   2. **Milestone filter** (if a milestone was selected): from the surviving requirements, keep
+      only those where `milestone` matches the selected milestone **or** `milestone` is absent
+      (milestone-agnostic). Drop the rest.
+   3. **Boundary conditions**: filter `boundary_conditions[]` — keep only entries whose
+      `req_id` traces to a retained requirement.
+   4. **Feature key suffixing**: suffix `feature_key` with the team slug and/or milestone
+      (`save_group_food_m5`) so different runs' deliverables don't collide on import.
+   5. **Stamp** `team_name` and/or `milestone` into `feature_metadata`.
+
+   - **RFC cross-check.** After team selection, if `rfc_context` is loaded, compare the RFC's
+     scope (`affected_modules`, `affected_services`, or any team-scoped sections) against the
+     selected team. If the RFC clearly scopes to a different team, emit a `WORTH_CHECKING` note:
+     *"RFC scopes to [X] but selected team is [Y] — confirm the RFC applies to this team's
+     plan."* If the RFC covers the selected team (or is team-agnostic), no note needed.
+   - **Headless fallback:** if no user is available to answer, generate for **all teams and
+     milestones combined** (no filtering) and add a `WORTH_CHECKING` note: *"PRD has N teams
+     and/or M milestones — generating a combined plan; re-run interactively to scope."*
+8. **Shared requirements across apps.** When a source document covered several apps, items that
    apply to all of them carry the **same id in every file** (`req_id`, `risk_id`, `flag_key`,
    `endpoint`). Generate scenarios for them normally — they are in scope for this app too — and
    list those ids under a *Shared across apps* note in `<feature_key>_analysis.md`, so the QA
    reviewing both plans knows which scenarios are duplicates rather than distinct coverage.
-8. **Invoke `regression-extractor` as a subagent — before any scenario is created, not after.**
+9. **Invoke `regression-extractor` as a subagent — before any scenario is created, not after.**
    Use the `Agent` tool to spawn the regression-extractor in an isolated context. Pass it the
    resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
    coverage). The subagent does all BrowserStack MCP querying, nav_index joins, and deeplink
@@ -255,11 +291,23 @@ Flow:
   - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario. **Flag record precedence: RFC is authoritative.** When the same flag appears in both, take the RFC `experimentation_matrix[]` record (`flag_key` verbatim + `default_variant` + `variants` + `kill_switch`) as the source of truth; the PRD entry is name-only corroboration. A PRD-only flag (absent from RFC) still gets a toggle scenario from its name **and** a `prd_vs_rfc_gap` note ("flag in PRD, undocumented in RFC — no variants/default"). An RFC-only flag is fine.
   - Every scenario MUST carry a `requirement_ref` (the `req_id` / boundary index / event it satisfies) so Step 4 can audit coverage mechanically.
   - **Clickstream Telemetry Rules:** Clickstream verification is **NOT** a mandatory hard gate for the generator. If `clickstream_events` are explicitly provided/told in the input contexts, then generate $\ge 1$ verification step per event. If they are NOT provided or explicitly mentioned, **do NOT fail validation and do NOT generate telemetry tests.** Instead, simply list it as an Open Question / Clarification inside `<feature_key>_analysis.md` (e.g., *"Are clickstream telemetry events required for this feature?"*).
-- **Regression dedup — using `regression_context.json` from Preflight step 8, before writing any scenario:**
+- **Regression dedup — using `regression_context.json` from Preflight step 9, before writing any scenario:**
   - For each requirement/boundary/flag about to get a Hard-Coverage scenario, check `regression_context.json.regression_tests[]` for a case whose `title` or `steps` clearly cover the same behaviour.
-  - **Exact match (the existing case already covers this exact behaviour)** → do not create a new scenario. Still emit a row for it (QA needs to see it exists), with `is_legacy_regression: true` and `existing_case_ref` set to that case's `id` (e.g. `C2879733`) — never `is_legacy_regression: true` with no ref; that's a flag nobody can audit or trace back.
-  - **Partial overlap (related but not identical — e.g. the existing case covers the happy path, this requirement needs a boundary variant)** → still create the new scenario (the Hard Coverage Rule requires it), but set `existing_case_ref` to the related case anyway, so the analysis doc shows the relationship instead of two disconnected-looking rows.
-  - **No match** → proceed normally, no `existing_case_ref`.
+  - **Exact match (the existing case already covers this exact behaviour)** → do not create a new scenario. Still emit a row for it (QA needs to see it exists), with `is_legacy_regression: true` and `existing_case_ref` set to that case's `id` (e.g. `TC-302383`) — never `is_legacy_regression: true` with no ref; that's a flag nobody can audit or trace back.
+  - **Directly impacted (the new feature modifies a screen/flow that the existing case tests)** →
+    still create the new scenario (the Hard Coverage Rule requires it), but set
+    `existing_case_ref` to the related case AND `is_legacy_regression: true`. This tells the
+    QA: "this existing case needs re-testing because the new feature changed its screen."
+  - **No match** → proceed normally, `is_legacy_regression: false`, no `existing_case_ref`.
+  - **Indirectly impacted cases** — regression cases that share a screen with the new feature
+    but whose specific flow is not modified (e.g. a deadline nudge test on the same Shared Cart
+    page where Save Group adds a Chat section). These do NOT get `is_legacy_regression: true`
+    and are NOT emitted as scenarios. Instead, list them in `<feature_key>_analysis.md` under
+    a dedicated **Indirectly Impacted Regression Cases** table (case number + title only) so the
+    QA knows to include them in the regression run. Identify them by comparing
+    `regression_context.regression_tests[].title` / `steps` against the screens and flows the
+    new feature touches — if a regression case operates on a screen that the new feature adds
+    UI to, it is indirectly impacted.
   - This never overrides a Hard Coverage Rule (Step 1 above) — every P0 requirement and boundary condition still gets ≥1 row in the plan even if a legacy case already covers it; the point of dedup is to avoid generating a *second, redundant automation target*, not to avoid *documenting* coverage.
 
 ### 2. Scenario Expansion
@@ -334,6 +382,10 @@ Expand scenarios across:
         `LOYALTY_HOME`). Use the URI **verbatim** — never edit, complete, or invent a path; a screen
         the dictionary does not name is simply not resolved at this rung, fall through to rung 2.
      Found at any of a/b/c → the scenario opens with `Open deeplink "<uri>"`, no UI walk needed.
+     **The URI in the step must include the full app scheme** (`gojek://`, `gojekdriver://`,
+     `gopay://`, etc.) — never emit a bare path like `Open deeplink "/loyalty/catalogue"`.
+     Deep links from source (c) already carry the scheme; deep links from (a) and (b) may be
+     stored as paths — if so, prepend the app's `deeplink_scheme` from `config/<app>.json`.
      Tag the scenario's provenance as hook-resolved and cite the source (plan hook / rfc / repo
      deeplink dictionary); no note required, this is the ideal case. Only when **none** of the three
      names the screen does resolution fall through to rung 2.
@@ -707,7 +759,7 @@ A human-readable Markdown asset automatically generated for engineering leads de
 #### **Required Document Sections & Formatting**:
 
 1. **Meta Header:**
-   - Include clear, bold rows: **Feature Key**, **App**, **RFC (ID, Title, Status)**, **Analysis Date**, **SDET Plan File**, **Test Cases File**.
+   - Include clear, bold rows: **Feature Key**, **App**, **Team** (selected team from Preflight step 7, or "All teams" if single/none), **Milestone** (selected milestone, or "All milestones" if single/none), **RFC (ID, Title, Status)**, **Analysis Date**, **SDET Plan File**, **Test Cases File**.
 
 2. **Section 0: Selected Test Coverage Categories:**
    - A table mirroring `coverage_categories` with columns: `Category`, `Tier` (`Auto` / `Extra — feature-adjacent` / `Extra — fe_baseline`), `Selected?`, and `Why` (the field that fired, or why it was offered as an extra).
@@ -717,7 +769,13 @@ A human-readable Markdown asset automatically generated for engineering leads de
      `coverage_audit.balance`: `Positive (business/use-case) | Non-positive (negative, boundary,
      hygiene) | Positive % | Action taken`. If `action_taken` is `under_target`, state the reason
      in plain words directly beneath it, so a reviewer sees the tilt without opening the JSON.
-   - Immediately after that, if any scenario in this plan carries `existing_case_ref`, render a **Regression Coverage table**: `Scenario` (title), `Existing Case` (the BrowserStack id), `Relationship` (`Duplicate — not re-created` / `Related — new variant still generated`). If `regression_context.json` itself was unavailable this run (Preflight step 8), say so in one line instead of an empty table — e.g. *"Regression check did not run this pass: <reason from the note>."*
+   - Immediately after that, if any scenario in this plan carries `existing_case_ref`, render a **Regression Coverage table**: `Scenario` (title), `Existing Case` (the BrowserStack id), `Relationship` (`Duplicate — not re-created` / `Related — new variant still generated`). If `regression_context.json` itself was unavailable this run (Preflight step 9), say so in one line instead of an empty table — e.g. *"Regression check did not run this pass: <reason from the note>."*
+   - Immediately after the Regression Coverage table, render an **Indirectly Impacted Regression
+     Cases** table: `Case ID` | `Title`. These are regression cases that operate on screens the
+     new feature modifies but whose specific flow is NOT directly changed — they need re-testing
+     in the regression run but do NOT get `is_legacy_regression: true` in the SDET plan. List
+     case number and title only — no steps, no detailed analysis. If there are none, omit the
+     section entirely (do not render an empty table).
 
 3. **Section 1: Missing Input Context:**
    - If any input context (like `plan_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).
@@ -795,15 +853,22 @@ Flattened CSV strictly matching squad project template headers:
   `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes
   in user-friendly, non-technical language. **For boundary scenarios the assertion derives from
   `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker
-  rather than a guessed outcome.** When multiple actions share one observable outcome, the
-  earlier actions' expected results can be `—` (no assertion at that step) with the combined
-  assertion on the final action's line.
+  rather than a guessed outcome.** Every action step must have a corresponding verification —
+  a tester needs to know what to observe after each action, not just at the end. **Do NOT use
+  `—` (dash) as a placeholder for missing verifications.** If you cannot state what the tester
+  should observe after an action, that is a signal the action step is too granular or should be
+  merged with the next action. A sequence of 2+ consecutive `—` dashes in Expected Result is a
+  defect — restructure the steps so each action has a real observable outcome (e.g. "Verify
+  [screen/element] is visible", "Verify page loads", "Verify navigation succeeds").
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`. **Resolution precedence: (1) `prd.applicable_platforms` (PRD is the scope authority), (2) else `rfc.scope.target_platforms`, (3) else infer from `design`.** One platform → `"Android"`/`"iOS"`; more than one → `"Cross-Platform"`. If PRD and RFC conflict, use PRD and raise it as a `prd_vs_rfc_gap` — never silently prefer one.
 - `Country v2`: MUST be derived from `prd.applicable_countries` (map ISO code → name, e.g. `ID`→`"Indonesia"`, `SG`→`"Singapore"`, `VN`→`"Vietnam"`). Never pick a country the inputs do not list. If `applicable_countries` has one entry, every row uses that country.
 - `Android Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is iOS-only). Set to `"Automated"` only if matched with an existing automated Android case.
 - `iOS Automation Status v2`: By default, set to `"Manual"` (or `"N/A"` if platform is Android-only). Set to `"Automated"` only if matched with an existing automated iOS case.
 - `TestType`: always the literal `"Story"` for every row. Do NOT substitute `"FCT"`, `"Non-FCT"`, or any other value.
+- `Existing Case Ref`: the `existing_case_ref` value from the JSON (e.g. `TC-302383`), or empty
+  if none. Surfaces which scenarios are linked to existing regression cases so the QA can see
+  the relationship directly in the CSV without opening the JSON.
 
 > **Enum validation (run as part of the Step 4 gate):** before writing the CSV, verify every row's `State` / `Priority` / `Type of Test Case` / `Execution Mode` / `Platform` / `TestType` / `Country v2` holds only a value allowed above; reject and fix any other value.
 
