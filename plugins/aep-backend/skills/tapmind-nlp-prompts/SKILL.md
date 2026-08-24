@@ -62,7 +62,7 @@ If suite meta is missing, leave `@TestInfo` fields as empty strings / empty arra
 
 For each scenario, emit an ordered `prompts[]` (one string per step) using the grammar in §§2–10:
 
-1. Prefer scenario-level `curl_reference` + `test_data` for placeholders (`{{FIX-xxx.field}}` → `${memory.<field>}` after fixture bind).
+1. Prefer scenario-level `curl_reference` + `test_data` for placeholders (`{{FIX-xxx.field}}` → natural **`saved <field>`** after fixture / `saveMemory` bind — see §4).
 2. Classify each step (generic — not domain-specific):
    - non-empty curl → §3.1 API action `| verify: …`
    - Redis/Kafka/DB verbs + no curl → §3.5
@@ -70,7 +70,7 @@ For each scenario, emit an ordered `prompts[]` (one string per step) using the g
    - wait/poll or e2e+reliability wait → §3.2 (must include fetch)
    - stub/queue/log inspect with no TapMind grammar → omit from runnable prompts; flag `NEEDS_REVIEW`
 3. First-touch vs repeat-touch by resource + step order (§3.4).
-4. Track memory keys across the list — never invent `${memory.x}` not saved earlier.
+4. Track memory keys across the list — never invent a name not saved earlier. Reference bound keys as **`saved <key>`**, not `${memory.<key>}` (§4).
 5. Unknown scalar vs array shape → flag; do not guess `save $.path` vs `entry where`.
 
 Output shape after generate:
@@ -105,8 +105,8 @@ order:
 Apply that call's `corrected_test_prompt` / `corrected_verify_prompt` → update `prompts[i]` →
 re-verify that prompt until clean or flag `NEEDS_REVIEW` (response `status:
 "NEEDS_CLARIFICATION"` + `clarifying_question`). The response's `declared_bindings` also lists
-the `${memory.x}` keys the planner actually resolved for that step — cross-check against your
-own memory-key tracking (§4) rather than assuming.
+the memory keys the planner actually resolved for that step (`saved <key>` / `${memory.x}`) —
+cross-check against your own memory-key tracking (§4) rather than assuming.
 
 > If a batch overload (`prompts: string[]`) is ever exposed on the MCP tool, prefer it — one
 > call per scenario's full list lets the planner see the whole sequence + memory names at once,
@@ -154,7 +154,7 @@ Example (from a validated suite scenario):
 |---|---|
 | Action / poll / tool | `TapMind.runStep("<prompt>");` or with pdg/service/polling overloads (§3.2, §3.6) |
 | Final assertion focus | `TapMind.assertStep("<prompt>", "<failure message>");` when a custom message helps |
-| Setup (secrets / fixtures) | `saveMemory(...)` / TDP resolve **before** prompts that need `${memory.*}` |
+| Setup (secrets / fixtures) | `saveMemory(...)` / TDP resolve **before** prompts that need `saved <key>` |
 | Inserted guards from run | Extra `runStep(...)` lines with `kind: guard` in the ledger |
 
 Also emit machine form for reports / downstream generators (`tapmindTest`):
@@ -302,7 +302,7 @@ may still PASS if there is no `verify:`).
 
 ```java
 // Combined: call API with a query intent + save from a list by a different response field
-runStep("Get payment options with intent EWALLET_QR_COINS, header User-ID: ${memory.userId} "
+runStep("Get payment options with intent EWALLET_QR_COINS, header User-ID: saved userId "
     + "and save token from the payment_options entry where type equals GOPAY_WALLET as gopayWalletToken",
     "gopay", "payment-options-service");
 
@@ -310,7 +310,7 @@ runStep("Get payment options with intent EWALLET_QR_COINS, header User-ID: ${mem
 runStep("Verify payment_options contains type GOPAY_WALLET; save token from the payment_options entry where type equals GOPAY_WALLET as gopay_token");
 
 // Filtering by a value saved earlier
-runStep("save driver_name from the drivers entry where driver_id equals ${memory.saved_driver_id} as matched_driver_name");
+runStep("save driver_name from the drivers entry where driver_id equals saved driverId as matched_driver_name");
 ```
 
 **Nested (two-level) array search** — e.g. pick an estimate by `service_type`, then a payment
@@ -321,7 +321,7 @@ method inside it by `payment_method_type`:
 
 > **Always use the phrase "entry where [field] equals [value]".** Don't write
 > `payment_options.type` — TapMind needs the word **"entry"** to know you're searching a list.
-> When the filter value is itself a saved variable, wrap it as `${memory.variableName}` — never
+> When the filter value is itself a saved variable, write `saved <variableName>` — never
 > quote it as a literal string like `'paymentMethod'` (that searches for the literal text
 > `paymentMethod`, not the value you saved, and silently returns nothing).
 
@@ -332,7 +332,7 @@ runStep("verify payment_options contains an entry with type GOPAY_WALLET");
 
 **Later steps** must reuse the exact `as <name>`:
 ```java
-runStep("Set default payment option with body token as ${memory.gopayWalletToken} | verify: status is 200 and success is true",
+runStep("Set default payment option with body token as saved gopayWalletToken | verify: status is 200 and success is true",
     "gopay", "payment-options-service");
 ```
 
@@ -359,8 +359,8 @@ prompt must start with the exact prefix.
 ```java
 runStep("Run query 'SELECT status FROM drivers WHERE driver_id = ''957378666''' on DB 'driver_service'");
 runStep("Run redis GET 'driver:active_session:957378666'");
-runStep("Produce to kafka topic 'driver-location-events' with key '${memory.driverId}' and payload '{\"lat\": -6.2, \"long\": 106.8}'");
-runStep("Consume from kafka topic 'order-status-events' where order_id equals ${memory.orderNumber}");
+runStep("Produce to kafka topic 'driver-location-events' with key saved driverId and payload '{\"lat\": -6.2, \"long\": 106.8}'");
+runStep("Consume from kafka topic 'order-status-events' where order_id equals saved orderNumber");
 ```
 
 ### 3.6 Pin a step to a specific PDG / service
@@ -401,15 +401,41 @@ plain Java:
 
 ```java
 saveMemory("bookingId", "BK-100234");
+saveMemory("localeTemplateName", templateName + "_default");
 String bookingId = TapMind.getValueFromMemory("bookingId");
 String bookingId = TapMind.getValueFromMemory("bookingId", "defaultIfMissing");
 ```
 
-Reference a saved value inside a later prompt with `${memory.<variable_name>}` — always use
-the **exact name** you saved it as. A guessed/hallucinated name won't match anything TapMind
-actually stored. This isn't just a style rule: the planner only sees the keys actually bound
-so far in that conversation (`available_memory_keys`) and will refuse to invent a name that
-isn't in that list — so an unbound `${memory.x}` fails at plan time, not silently.
+**Preferred reference form (generation + hand-writes):** use the natural-language
+**`saved <exactKey>`** phrasing — not `${memory.<exactKey>}`.
+
+The planner compiles `saved <key>` → `${memory.<key>}` internally. Same bound key, clearer
+NLP. Works for values saved via prior `save … as <key>` **or** Java `saveMemory("<key>", …)`.
+
+| Prefer (generation) | Also valid (SDK / older tests) |
+|---|---|
+| `… default = saved localeTemplateName …` | `… default = ${memory.localeTemplateName} …` |
+| `… name = saved localeTemplateName …` | `… name = ${memory.localeTemplateName} …` |
+| `… token as saved gopayWalletToken …` | `… token as ${memory.gopayWalletToken} …` |
+| `… where type equals saved paymentMethod …` | `… where type equals ${memory.paymentMethod} …` |
+| `… using saved customer token …` | `… using ${memory.customerToken} …` |
+| `… from the saved estimateAmount …` | `… from ${memory.estimateAmount} …` |
+
+```java
+// After saveMemory("localeTemplateName", …) / saveMemory("whatsappAuth", …):
+runStep(
+    "Create a whatsapp template with template_name = saved templateName, "
+        + "templates array having exactly one object with channel = whatsapp "
+        + "and default = saved localeTemplateName and without the id and en fields, "
+        + "and whatsapp_templates array having exactly one object with "
+        + "name = saved localeTemplateName, category = UTILITY and language = id, "
+        + "with header Authorization: saved whatsappAuth",
+    "communication-platform", "notification-gateway");
+```
+
+Always use the **exact** `as <name>` / `saveMemory` key. A guessed name won't match
+`available_memory_keys` and fails at plan time. Do **not** invent keys; do **not** mix a
+wrong spelling (`locale_template_name` vs `localeTemplateName`).
 
 ---
 
@@ -441,12 +467,12 @@ runStep("verify status is one of ACTIVE, PENDING, or COMPLETED");
 ## 7. Handling secrets (auth tokens, client secrets, etc.)
 
 API specs never store secrets. If an API needs one, fetch and save it in Java **first**, then
-reference it in the prompt via `${memory.<key>}` — never paste the raw secret into the prompt
+reference it in the prompt as **`saved <key>`** — never paste the raw secret into the prompt
 string itself.
 
 ```java
 saveMemory("clientSecret", System.getenv("SOME_SECRET_ENV_VAR")); // TODO: load from your actual secrets source, don't hardcode
-runStep("Hit login methods api with phone_number +628210274599, country_code 62 and header X-ClientSecret as ${memory.clientSecret}");
+runStep("Hit login methods api with phone_number +628210274599, country_code 62 and header X-ClientSecret as saved clientSecret");
 ```
 
 ---
@@ -481,12 +507,12 @@ spec examples.
 field that must carry the value:
 
 ```
-Create <resource> with <arrayA>[<idx>].<key> = ${memory.value}, <arrayB>[<idx>].<key> = ${memory.value}, ...
+Create <resource> with <arrayA>[<idx>].<key> = saved value, <arrayB>[<idx>].<key> = saved value, ...
 ```
 
 (e.g. for a create-template endpoint where `templates[0].id/en/default` must all match a
 `name` inside `whatsapp_templates[]`, you'd set each of those six paths individually to
-`${memory.templateName}` rather than saying "template_name = ...".)
+`saved templateName` rather than saying "template_name = ...".)
 
 This indexed-path override isn't a formally documented grammar feature (unlike header/query
 param edits above) — it works because the planner matches literal key names. Always verify
@@ -517,11 +543,12 @@ Two independent mechanisms — know which one applies to your API:
 | `where type equals GOPAY_WALLET` but later `${memory.gopay_token}` when you saved `as gopayWalletToken` | Use the exact `as <name>` everywhere | Memory keys are exact; a different spelling is unbound. |
 | `verify state is A and state is B` | `verify state is one of A, B` | Separate checks are ANDed — always fails for a single field. |
 | Guessed variable name, e.g. `as customerToken` when you never saved it | The exact name used in the earlier `save ... as <name>` | Hallucinated names won't match what was actually stored. |
-| `[?(@.type=='paymentMethod')]` (quoting a variable name as a literal) | `entry where type equals ${memory.paymentMethod}` | Quoting filters for that literal text, not the saved value — matches nothing, silently saves empty. |
+| `${memory.localeTemplateName}` after `saveMemory("localeTemplateName", …)` in **generated** prompts | `saved localeTemplateName` (or `as saved …` / `equals saved …`) | Preferred NLP form; planner expands `saved X` → `${memory.X}`. `${memory.x}` still works but is not the generation default. |
+| `[?(@.type=='paymentMethod')]` (quoting a variable name as a literal) | `entry where type equals saved paymentMethod` | Quoting filters for that literal text, not the saved value — matches nothing, silently saves empty. |
 | `"Please verify status is 200"` after an earlier fetch | `"Verify status is 200"` | Only prompts that **start with** verify/assert/validate/check/expect are verify-only; extra words in front cause a needless re-fetch. |
 | `runStep("Verify status is 200", 5, 2000)` (polling a verify-only prompt) | `runStep("fetch order details ... and verify status is 200", 5, 2000)` | Verify-only prompts don't re-fetch, so polling just re-checks the same stale response. |
 | Asserting `vehicle_type` on a "Get a customer/driver from TDP" step | Only assert `accessToken` / `customerId` / `driverId` | Other fields aren't in the TDP response — see §5. |
-| Pasting a raw secret into the prompt string | `saveMemory(...)` first, then `${memory.<key>}` in the prompt | See §7. |
+| Pasting a raw secret into the prompt string | `saveMemory(...)` first, then `saved <key>` in the prompt | See §7. |
 | Loading strict assertions onto a shared setup step (e.g. a "create booking" step other scenarios also reuse as a precondition) | Keep setup steps assertion-free (or a bare `status is 200`); put the detailed checks in the dedicated verify-only step for that specific scenario | Over-asserting a shared step breaks reuse by other scenarios (e.g. negative tests) that need that same step's evidence to look different. |
 | `data.whatsapp_templates.provider is X` (dotted path into a list) | `whatsapp_templates contains an entry with provider X` | Same "entry" rule as above — a scalar dotted path can't reach into a list. |
 | One generic field name (e.g. "template_name = X") when the schema actually needs the value on several nested/cross-referenced fields | Name each real field path explicitly: `arrayA[0].key = X, arrayB[1].key = X, ...` | A generic/wrapper field name only overrides an exact key match — nested or cross-referenced fields with different key names silently keep spec-example defaults instead of erroring. See §8.1. |

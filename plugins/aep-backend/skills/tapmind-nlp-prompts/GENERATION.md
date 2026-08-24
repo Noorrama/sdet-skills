@@ -40,7 +40,7 @@ automation_plan.json
 
 ### Prefer scenario curl + fixtures
 
-- Scenario-level `curl_reference` uses `{{FIX-xxx.fieldName}}` — map to `${memory.fieldName}` after fixture bind / `saveMemory`.
+- Scenario-level `curl_reference` uses `{{FIX-xxx.fieldName}}` — after fixture bind / `saveMemory`, reference as natural **`saved fieldName`** (not `${memory.fieldName}`).
 - Step-level curl may still use `$ACCESS_TOKEN` / `{session_id}` — treat as intent only when scenario curl exists.
 - `module` → PDG; `service_name` → `targetServiceId` / `runStep(..., pdg, service)`.
 
@@ -58,11 +58,11 @@ automation_plan.json
 
 ### Memory
 
-Walk prompts in order. Only reference `${memory.x}` if an earlier prompt has `save … as x` or setup called `saveMemory("x", …)`. Unresolvable placeholders → flag, do not invent names.
+Walk prompts in order. Only reference a key if an earlier prompt has `save … as x` or setup called `saveMemory("x", …)`. **Emit `saved x`** (or `as saved x` / `equals saved x` / `from the saved x`) — do **not** default to `${memory.x}` in generated prompts. Planner expands `saved x` → `${memory.x}` internally. Unresolvable placeholders → flag, do not invent names.
 
 ### Secrets
 
-Never inline tokens/secrets into prompts. `saveMemory` from env / fixture first (§7).
+Never inline tokens/secrets into prompts. `saveMemory` from env / fixture first, then `saved <key>` in the prompt (§7).
 
 ## 3. Verify (sequential — one prompt per call)
 
