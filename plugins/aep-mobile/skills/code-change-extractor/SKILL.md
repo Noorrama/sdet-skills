@@ -26,13 +26,19 @@ and to **gate** that the dev actually implemented what the plan required.
    are excluded. Take the **union of all MRs linked to the EPIC** (by JIRA key/label), then
    **intersect with the SDET_PLAN scope** (scenario screens / `affected_modules`) — hunks outside the
    EPIC's scenarios are ignored.
-3. **The SDET plan → `element_locator_handoff`** — the **expected** logical-ID shopping list. This is
-   the reference the gate checks the built code against. Also read `preconditions_metadata`
-   (`target_entry_deeplink`, `active_experiment_flags`) as the **expected** deep links/flags to verify.
+3. **`task_context.json` (optional enrichment)** — if present, read `epics[].screens_touched[]` to
+   scope element discovery, and `epics[].test_hooks[]` to populate `screens[].deep_links` and
+   `observable_state` directly (avoids re-deriving from the diff). Never replace the diff/manifest as
+   the locator source of truth — task_context carries the plan-time spec, not the built locators.
+4. **The SDET plan → `element_locator_handoff`** — the **expected** logical-ID shopping list. This is
+   the reference the gate checks the built code against. Also read:
+   - `preconditions_metadata.target_entry_deeplink` + `active_experiment_flags` → expected deep links/flags to verify.
+   - `scenario_list[].automation_steps[]` → element labels referenced in TapMind NLP steps. Cross-check that every on-screen label used in `automation_steps` has a matching real locator in the built code; a label with no locator match is a `NO_LOCATOR` gap to surface in `id_compliance`.
+   - `scenario_list[].test_data[]` → structured fixtures (`fixture_id`, `required_state`, `provision`, `sensitive`). Carry `sensitive: true` fixtures into `change_context.cr_risks[]` as a `data_sensitivity` risk when the screen renders PII state.
    *Filename:* match **`*sdet_plan.json`** — the plan is emitted feature-suffixed as
    `<feature_key>_sdet_plan.json` (e.g. `split_bill_gopay_groups_sdet_plan.json`), so resolve it by
    suffix (or by matching `feature_metadata.feature_key` to the EPIC), never a hardcoded `sdet_plan.json`.
-4. **MR review comments** (CR notes) — reviewer edge cases.
+5. **MR review comments** (CR notes) — reviewer edge cases.
 
 ## Model
 Fast tier — Haiku / Composer 2.5. Locator extraction is deterministic where a manifest exists.

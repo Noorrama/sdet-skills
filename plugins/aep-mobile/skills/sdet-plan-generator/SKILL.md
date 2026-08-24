@@ -281,6 +281,7 @@ Before scenario expansion, partition all FE-mobile test categories into tiers us
 
 **Never label a category "not eligible."** A no-signal category simply moves to the appropriate extras sub-tier.
 
+
 Flow:
 1. **Emit the Coverage Matrix** to the user as a markdown table: `Category | Tier (🔒 Auto / ☐ Extra-adjacent / ☐ Extra-baseline) | Why`. The "Why" cites the exact input field that fired (auto) or the field checked as empty/absent (extra). Reasons are generated from *which field fired*, so they are feature-agnostic.
    - **Directly under the matrix, print the projected balance** so the skew is visible at
