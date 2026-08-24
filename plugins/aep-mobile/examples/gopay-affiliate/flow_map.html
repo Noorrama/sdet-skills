@@ -1,0 +1,303 @@
+<meta charset="utf-8">
+<title>Group Order Flow Map</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* dark-first: bare :root carries the complete dark palette */
+  :root {
+    --bg: #14161f; --panel: #1d2130; --panel-2: #232840; --line: #343a55;
+    --ink: #e8eaf2; --ink-dim: #9aa1bd; --ink-faint: #6b7292;
+    --tile: #eef0f6; --tile-ink: #232840; --tile-line: #b9bed2;
+    --nav: #5aa7ff; --variant: #f0a832; --unres: #ff6470; --ok: #3fd0a4;
+    --banner: #2f9e63; --banner-ink: #dff7ea; --caption: #c9a0e8;
+    --sub: #4a5378; --sel: #5aa7ff;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f2f3f7; --panel: #ffffff; --panel-2: #e9ebf3; --line: #d4d8e6;
+      --ink: #23263a; --ink-dim: #5b6280; --ink-faint: #8d93ad;
+      --tile: #ffffff; --tile-ink: #23263a; --tile-line: #9aa1bd;
+      --nav: #1d6fd8; --variant: #b97a10; --unres: #d43a4a; --ok: #14805f;
+      --banner: #1e7a4a; --banner-ink: #eafff3; --caption: #8a4fc0;
+      --sub: #aab1cc; --sel: #1d6fd8;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f2f3f7; --panel: #ffffff; --panel-2: #e9ebf3; --line: #d4d8e6;
+    --ink: #23263a; --ink-dim: #5b6280; --ink-faint: #8d93ad;
+    --tile: #ffffff; --tile-ink: #23263a; --tile-line: #9aa1bd;
+    --nav: #1d6fd8; --variant: #b97a10; --unres: #d43a4a; --ok: #14805f;
+    --banner: #1e7a4a; --banner-ink: #eafff3; --caption: #8a4fc0;
+    --sub: #aab1cc; --sel: #1d6fd8;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.45 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    display: flex; flex-direction: column;
+  }
+  header {
+    padding: 14px 20px 10px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 17px; font-weight: 600; margin: 0; }
+  header .meta { color: var(--ink-dim); font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+  main { flex: 1; display: flex; min-height: 0; }
+  #side {
+    width: 296px; flex: none; border-right: 1px solid var(--line);
+    overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .statgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+  .stat b { display: block; font-size: 20px; font-weight: 600; font-family: "IBM Plex Mono", monospace; }
+  .stat span { font-size: 11px; color: var(--ink-dim); letter-spacing: .04em; text-transform: uppercase; }
+  .stat.ok b { color: var(--ok); } .stat.bad b { color: var(--unres); }
+  nav#groups { display: flex; flex-direction: column; gap: 4px; }
+  nav#groups button {
+    text-align: left; background: var(--panel); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px;
+    font: inherit; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px;
+  }
+  nav#groups button:hover { border-color: var(--ink-faint); }
+  nav#groups button.on { border-color: var(--sel); background: var(--panel-2); }
+  nav#groups button:focus-visible { outline: 2px solid var(--sel); outline-offset: 1px; }
+  nav#groups .cnt { color: var(--ink-dim); font-family: "IBM Plex Mono", monospace; font-size: 12px; flex: none; }
+  .legend { font-size: 12px; color: var(--ink-dim); display: flex; flex-direction: column; gap: 5px; }
+  .legend .sw { display: inline-block; width: 22px; height: 0; border-top: 3px solid; margin-right: 7px; vertical-align: middle; border-radius: 2px; }
+  #canvasWrap { flex: 1; position: relative; min-width: 0; }
+  #board { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+  #board.panning { cursor: grabbing; }
+  #tip {
+    position: absolute; pointer-events: none; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px;
+    font-size: 12px; max-width: 340px; display: none; z-index: 5;
+    box-shadow: 0 4px 18px rgba(0,0,0,.35);
+  }
+  #tip .mono { font-family: "IBM Plex Mono", monospace; color: var(--ink-dim); font-size: 11px; }
+  #hint { position: absolute; right: 14px; top: 10px; font-size: 11px; color: var(--ink-faint); }
+  #unres {
+    border-top: 1px solid var(--line); max-height: 200px; overflow: auto;
+    background: var(--panel);
+  }
+  #unres summary { padding: 8px 20px; cursor: pointer; font-size: 13px; color: var(--ink-dim); }
+  #unres table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  #unres th, #unres td { text-align: left; padding: 4px 12px; border-top: 1px solid var(--line); max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #unres th { color: var(--ink-dim); font-weight: 500; position: sticky; top: 0; background: var(--panel); }
+  #unres td.mono { font-family: "IBM Plex Mono", monospace; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<header>
+  <h1>Group Order Flow Map</h1>
+  <span class="meta" id="metaLine"></span>
+</header>
+<main>
+  <div id="side">
+    <div class="statgrid" id="stats"></div>
+    <div class="legend">
+      <div><span class="sw" style="border-color:var(--nav)"></span>navigation edge (connector)</div>
+      <div><span class="sw" style="border-color:var(--variant); border-top-style:dashed"></span>variant link (dashed box)</div>
+      <div><span class="sw" style="border-color:var(--banner)"></span>swim-lane banner</div>
+      <div><span class="sw" style="border-color:var(--caption)"></span>row caption / note</div>
+      <div><span class="sw" style="border-color:var(--sub); border-top-style:dotted"></span>sub-section (blue box)</div>
+      <div id="legEntry" style="display:none"><span class="sw" style="border-color:var(--ok)"></span>▶ entry screen (flow start)</div>
+    </div>
+    <nav id="groups" aria-label="Board groups"></nav>
+  </div>
+  <div id="canvasWrap">
+    <svg id="board" role="img" aria-label="Board replica with flow edges"></svg>
+    <div id="hint">drag to pan · wheel to zoom · hover for detail</div>
+    <div id="tip"></div>
+  </div>
+</main>
+<details id="unres">
+  <summary>Unresolved connectors (<span id="unresCount"></span>) — annotations &amp; open questions, reported not guessed</summary>
+  <table>
+    <thead><tr><th>connector</th><th>reason</th><th>start</th><th>end</th><th>label</th></tr></thead>
+    <tbody id="unresBody"></tbody>
+  </table>
+</details>
+<script id="DATA" type="application/json">{"screen_size": [360, 822], "stats": {"connectors_total": 47, "reaction_actions_with_destination": 29, "edges_resolved": 21, "edges_connector": 21, "edges_reaction": 0, "unresolved": 55, "unresolved_reasons": [["dest=MISSING_NODE", 27], ["start=ELEMENT_IN_SCREEN", 16], ["start=NON_SCREEN:COMPONENT_SET", 4], ["start=NON_SCREEN:DECOR", 2], ["start=SECTION_AMBIGUOUS(Riwayat", 2], ["SOURCE_NOT_IN_SCREEN", 2], ["start=NON_SCREEN:CONTAINER?", 1], ["start=ARTIFACT", 1]], "direction_mix": [["FORWARD", 19], ["REVERSED", 2]], "labelled_conditions": 1}, "groups": [{"name": "Main Flow", "id": "2001:22869", "kind": "SECTION", "x": 4203.0, "y": -1813.0, "w": 8977, "h": 9192, "screens": 50, "items": [{"k": "SUBSECTION", "id": "2001:23437", "x": 7317.0, "y": -1571.0, "w": 2599, "h": 2927, "t": "Riwayat Komisi"}, {"k": "SUBSECTION", "id": "2001:24140", "x": 4395.0, "y": 2111.0, "w": 2794, "h": 3021, "t": "Skema Komisi"}, {"k": "SUBSECTION", "id": "2001:27005", "x": 10024.0, "y": -1571.0, "w": 1618, "h": 1325, "t": "Share Tray"}, {"k": "SUBSECTION", "id": "2001:27080", "x": 7328.0, "y": 1476.0, "w": 2588, "h": 2329, "t": "Level Saya"}, {"k": "SUBSECTION", "id": "2001:28868", "x": 10024.0, "y": 1476.0, "w": 2834, "h": 2329, "t": "Merchant Saya"}, {"k": "SUBSECTION", "id": "2001:28995", "x": 11764.0, "y": -1571.0, "w": 1077, "h": 2927, "t": "TIps Jualan"}, {"k": "SUBSECTION", "id": "2097:21822", "x": 4398.0, "y": -1571.0, "w": 2791, "h": 3508, "t": "HOME DASHBOARD"}, {"k": "SUBSECTION", "id": "2269:61440", "x": 10024.0, "y": 3931.0, "w": 2958, "h": 1899, "t": "My Downliners"}, {"k": "SUBSECTION", "id": "2255:67239", "x": 4395.0, "y": 5337.0, "w": 2085, "h": 1751, "t": "SUSPENDED ACC"}, {"k": "SUBSECTION", "id": "2300:66906", "x": 6676.0, "y": 5361.0, "w": 2484, "h": 1727, "t": "General Error Relaod States"}, {"k": "SUBSECTION", "id": "3959:42337", "x": 10024.0, "y": 3.0, "w": 1602, "h": 1353, "t": "Join Whatsapp Group"}, {"k": "SCREEN", "id": "2001:23438", "x": 8182.0, "y": -1207.0, "w": 360, "h": 822, "t": "Native Month Picker", "n": "Native Month Picker"}, {"k": "SCREEN", "id": "2001:23440", "x": 7440.0, "y": -1207.0, "w": 360, "h": 822, "t": "Riwayat Komisi", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2269:66953", "x": 9040.0, "y": -1207.0, "w": 360, "h": 822, "t": "If No Activity", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2001:23915", "x": 8611.0, "y": -1207.0, "w": 360, "h": 822, "t": "Loading", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2001:24045", "x": 8010.0, "y": 239.0, "w": 360, "h": 770, "t": "Disbursed", "n": "Commission Details | Weekly | Status Don"}, {"k": "SCREEN", "id": "2001:24089", "x": 8435.0, "y": 239.0, "w": 360, "h": 770, "t": "Scheduled", "n": "Commission Details | Weekly | Status Sch"}, {"k": "SCREEN", "id": "2482:15405", "x": 8860.0, "y": 239.0, "w": 360, "h": 770, "t": "Loading", "n": "Commission Details | Weekly | Status Sch"}, {"k": "SCREEN", "id": "2444:14131", "x": 9285.0, "y": 239.0, "w": 360, "h": 770, "t": "Error", "n": "Commission Details | Weekly | Status Sch"}, {"k": "SCREEN", "id": "2314:63199", "x": 9469.0, "y": -1207.0, "w": 360, "h": 700, "t": "Scroll View", "n": "Loading"}, {"k": "SCREEN", "id": "2001:24143", "x": 4532.0, "y": 2376.0, "w": 360, "h": 2537, "t": "Skema Komisi | Perintis", "n": "Skema Komisi | Perintis"}, {"k": "SCREEN", "id": "2001:24477", "x": 4933.0, "y": 2376.0, "w": 360, "h": 2537, "t": "Skema Komisi | Perintis", "n": "Skema Komisi | Perintis"}, {"k": "SCREEN", "id": "2001:24802", "x": 5426.0, "y": 2376.0, "w": 360, "h": 720, "t": "Scroll View", "n": "Frame 2117130850"}, {"k": "SCREEN", "id": "2001:25143", "x": 5933.0, "y": 3287.0, "w": 360, "h": 823, "t": "For Level 2", "n": "Overlay"}, {"k": "SCREEN", "id": "2001:25920", "x": 5426.0, "y": 3287.0, "w": 360, "h": 823, "t": "For Level 1", "n": "Overlay"}, {"k": "SCREEN", "id": "2001:27008", "x": 11090.0, "y": -1327.0, "w": 360, "h": 878, "t": "Frame 2117130771", "n": "Frame 2117130771"}, {"k": "SCREEN", "id": "2001:27015", "x": 10210.0, "y": -1327.0, "w": 393, "h": 852, "t": "Share Tray | iOS", "n": "Share Tray | iOS"}, {"k": "SCREEN", "id": "2001:27063", "x": 10653.0, "y": -1327.0, "w": 360, "h": 852, "t": "Share Tray | Android", "n": "Share Tray | Android"}, {"k": "SCREEN", "id": "2001:27069", "x": 10653.0, "y": -1327.0, "w": 360, "h": 852, "t": "Share Tray | Android", "n": "Share Tray | Android"}, {"k": "SCREEN", "id": "2001:27259", "x": 8892.0, "y": 2715.0, "w": 360, "h": 823, "t": "Overlay", "n": "Overlay"}, {"k": "SCREEN", "id": "2001:28247", "x": 7443.0, "y": 1660.0, "w": 360, "h": 800, "t": "Frame 2117130883", "n": "Frame 2117130883"}, {"k": "SCREEN", "id": "2001:28535", "x": 7443.0, "y": 2692.0, "w": 360, "h": 800, "t": "Frame 2117130875", "n": "Frame 2117130875"}, {"k": "SCREEN", "id": "2001:28871", "x": 10226.0, "y": 1728.0, "w": 360, "h": 822, "t": "Merchant Performance", "n": "Merchant Performance"}, {"k": "SCREEN", "id": "2300:64232", "x": 11145.0, "y": 1813.0, "w": 360, "h": 822, "t": "Merchant Performance", "n": "Merchant Performance"}, {"k": "SCREEN", "id": "2300:62612", "x": 10699.0, "y": 2857.0, "w": 360, "h": 812, "t": "Initial Page Loader", "n": "Merchant Performance"}, {"k": "SCREEN", "id": "2300:66062", "x": 11563.0, "y": 2857.0, "w": 360, "h": 812, "t": "Empty State", "n": "Merchant Performance"}, {"k": "SCREEN", "id": "2001:28961", "x": 10699.0, "y": 1813.0, "w": 360, "h": 812, "t": "Overlay", "n": "Overlay"}, {"k": "SCREEN", "id": "2001:28993", "x": 12280.0, "y": 1728.0, "w": 360, "h": 812, "t": "Overlay", "n": "Overlay"}, {"k": "SCREEN", "id": "2300:63643", "x": 11145.0, "y": 2857.0, "w": 360, "h": 822, "t": "Scroll View with Pagination Load", "n": "Loading"}, {"k": "SCREEN", "id": "2300:65186", "x": 11563.0, "y": 1813.0, "w": 360, "h": 822, "t": "Scroll View with Filter Applied", "n": "Loading"}, {"k": "SCREEN", "id": "2001:28996", "x": 11919.0, "y": -1349.0, "w": 360, "h": 2627, "t": "Tips & Tricks", "n": "Tips & Tricks"}, {"k": "SCREEN", "id": "2001:22870", "x": 4476.0, "y": -1304.0, "w": 360, "h": 1184, "t": "Empty State", "n": "Home | Perintis"}, {"k": "SCREEN", "id": "2080:18469", "x": 4476.0, "y": 407.0, "w": 360, "h": 1393, "t": "Empty State", "n": "Home | Perintis"}, {"k": "SCREEN", "id": "2097:21081", "x": 4944.0, "y": 407.0, "w": 360, "h": 1393, "t": "Default State", "n": "Home | Perintis"}, {"k": "SCREEN", "id": "2001:23154", "x": 5125.0, "y": -1304.0, "w": 360, "h": 1184, "t": "Default State", "n": "Home | Perintis"}, {"k": "SCREEN", "id": "2001:26717", "x": 6157.0, "y": -1215.0, "w": 360, "h": 800, "t": "Frame 2117130857", "n": "Frame 2117130857"}, {"k": "SCREEN", "id": "2588:17100", "x": 6589.0, "y": -1215.0, "w": 360, "h": 800, "t": "Frame 2117130928", "n": "Frame 2117130928"}, {"k": "SCREEN", "id": "2237:60846", "x": 11306.0, "y": 4249.0, "w": 360, "h": 822, "t": "Page Loading", "n": "Downliners"}, {"k": "SCREEN", "id": "2269:61747", "x": 11751.0, "y": 4248.0, "w": 360, "h": 881, "t": "Empty (No Downliners)", "n": "Downliners"}, {"k": "SCREEN", "id": "2237:60661", "x": 10159.0, "y": 4184.0, "w": 360, "h": 887, "t": "Downliners", "n": "Downliners"}, {"k": "SCREEN", "id": "2269:67342", "x": 12196.0, "y": 4268.0, "w": 360, "h": 822, "t": "Scroll View with Pagination Load", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2269:67971", "x": 10881.0, "y": 4249.0, "w": 360, "h": 822, "t": "Native OS Month Picker", "n": "Native Month Picker"}, {"k": "SCREEN", "id": "2255:67285", "x": 5449.0, "y": 5669.0, "w": 360, "h": 720, "t": "qris-suspended", "n": "qris-suspended"}, {"k": "SCREEN", "id": "2255:67352", "x": 4567.0, "y": 5669.0, "w": 360, "h": 859, "t": "Home | Perintis", "n": "Home | Perintis"}, {"k": "SCREEN", "id": "2300:66912", "x": 7278.0, "y": 5667.0, "w": 360, "h": 720, "t": "Overlay", "n": "Overlay"}, {"k": "SCREEN", "id": "4613:17406", "x": 6837.0, "y": 5667.0, "w": 360, "h": 720, "t": "Overlay", "n": "Overlay"}, {"k": "SCREEN", "id": "5053:19284", "x": 8703.0, "y": 5669.0, "w": 360, "h": 720, "t": "refresh-error", "n": "refresh-error"}, {"k": "SCREEN", "id": "5053:19295", "x": 8254.0, "y": 5669.0, "w": 360, "h": 720, "t": "no-internet", "n": "no-internet"}, {"k": "SCREEN", "id": "3959:42338", "x": 10677.0, "y": 288.0, "w": 360, "h": 812, "t": "Overlay", "n": "Overlay"}, {"k": "SCREEN", "id": "3959:42581", "x": 10179.0, "y": 288.0, "w": 360, "h": 800, "t": "Frame 2117130931", "n": "Frame 2117130931"}, {"k": "SCREEN", "id": "5055:17857", "x": 7801.0, "y": 5669.0, "w": 360, "h": 720, "t": "technical error", "n": "technical error"}, {"k": "BANNER", "id": "2001:24132", "x": 7428.0, "y": -1438.0, "w": 2401, "h": 64, "t": "Riwayat Komisi"}, {"k": "BANNER", "id": "2001:24136", "x": 8010.0, "y": 22.0, "w": 1678, "h": 64, "t": "Detail Komisi Page"}, {"k": "BANNER", "id": "2001:24141", "x": 4532.0, "y": 2228.0, "w": 743, "h": 71, "t": "Skema Komisi"}, {"k": "BANNER", "id": "2001:27006", "x": 10152.0, "y": -1487.0, "w": 1355, "h": 71, "t": "Share Tray"}, {"k": "BANNER", "id": "2001:27081", "x": 7439.0, "y": 1568.0, "w": 1943, "h": 64, "t": "Level 1"}, {"k": "BANNER", "id": "2001:27085", "x": 7439.0, "y": 2546.0, "w": 2245, "h": 64, "t": "Level 2"}, {"k": "BANNER", "id": "2300:65184", "x": 10699.0, "y": 1738.0, "w": 806, "h": 37, "t": "Apply Filter"}, {"k": "BANNER", "id": "2300:64213", "x": 10104.0, "y": 1602.0, "w": 2644, "h": 64, "t": "Merchant Saya"}, {"k": "BANNER", "id": "2001:26715", "x": 6157.0, "y": -1274.0, "w": 792, "h": 37, "t": "Scroll View with Loading State"}, {"k": "BANNER", "id": "2097:21068", "x": 4476.0, "y": -1478.0, "w": 1377, "h": 64, "t": "HOME DASHBOARD | LEVEL 1"}, {"k": "BANNER", "id": "2097:21818", "x": 4476.0, "y": 194.0, "w": 1209, "h": 64, "t": "HOME DASHBOARD | LEVEL 2"}, {"k": "BANNER", "id": "2269:61441", "x": 10133.0, "y": 4065.0, "w": 2644, "h": 64, "t": "My Downliners"}, {"k": "BANNER", "id": "2300:66910", "x": 6837.0, "y": 5577.0, "w": 801, "h": 37, "t": "General (As-Is)"}, {"k": "CAPTION", "id": "2001:24028", "x": 8768.0, "y": -1264.0, "w": 88, "h": 20, "t": "Custom Date"}, {"k": "CAPTION", "id": "2001:29005", "x": 5057.0, "y": -216.0, "w": 5, "h": 16, "t": "t"}, {"k": "VBOX", "id": "2001:39483", "x": 7936.0, "y": 1853.0, "w": 1446, "h": 345, "t": ""}, {"k": "VBOX", "id": "2001:39981", "x": 7927.0, "y": 2699.0, "w": 736, "h": 450, "t": ""}, {"k": "VBOX", "id": "2297:40837", "x": 6157.0, "y": 554.0, "w": 792, "h": 712, "t": ""}, {"k": "VBOX", "id": "2588:17729", "x": 6173.0, "y": -216.0, "w": 776, "h": 522, "t": ""}]}, {"name": "Downliners", "id": "2001:36359", "kind": "SECTION", "x": 7434.0, "y": 12433.0, "w": 2732, "h": 4095, "screens": 9, "items": [{"k": "SCREEN", "id": "2001:36364", "x": 7543.0, "y": 12725.0, "w": 360, "h": 961, "t": "Filled", "n": "Downliners"}, {"k": "SCREEN", "id": "2097:23738", "x": 7543.0, "y": 13863.0, "w": 360, "h": 1076, "t": "Downliners", "n": "Downliners"}, {"k": "SCREEN", "id": "2097:24022", "x": 8034.0, "y": 13863.0, "w": 360, "h": 1076, "t": "Downliners", "n": "Downliners"}, {"k": "SCREEN", "id": "2001:36450", "x": 8615.0, "y": 12725.0, "w": 360, "h": 829, "t": "Empty", "n": "Downliners"}, {"k": "SCREEN", "id": "2001:37106", "x": 9338.0, "y": 12745.0, "w": 360, "h": 822, "t": "Share Tray | Android", "n": "Share Tray | Android"}, {"k": "SCREEN", "id": "2001:37108", "x": 9749.0, "y": 12745.0, "w": 360, "h": 822, "t": "Riwayat Komisi", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2001:28118", "x": 9000.0, "y": 13991.0, "w": 360, "h": 819, "t": "Downliners", "n": "Downliners"}, {"k": "SCREEN", "id": "2237:39380", "x": 8441.0, "y": 15114.0, "w": 360, "h": 1076, "t": "Downliners", "n": "Downliners"}, {"k": "SCREEN", "id": "2237:39491", "x": 8932.0, "y": 15114.0, "w": 360, "h": 1076, "t": "Downliners", "n": "Downliners"}, {"k": "BANNER", "id": "2001:36360", "x": 7543.0, "y": 12567.0, "w": 1946, "h": 64, "t": "My Downliners"}, {"k": "BANNER", "id": "2001:37218", "x": 9338.0, "y": 12661.0, "w": 771, "h": 37, "t": "Custom Date"}, {"k": "CAPTION", "id": "2080:19861", "x": 7935.0, "y": 13082.0, "w": 93, "h": 16, "t": "Total Anggota: 4"}, {"k": "CAPTION", "id": "2001:37451", "x": 9240.0, "y": 13732.0, "w": 168, "h": 40, "t": "Sort default based on..."}]}, {"name": "Riwayat Komisi", "id": "2269:62240", "kind": "SECTION", "x": 4818.0, "y": 12433.0, "w": 2495, "h": 3623, "screens": 12, "items": [{"k": "SCREEN", "id": "2269:62241", "x": 6344.0, "y": 12797.0, "w": 360, "h": 822, "t": "Share Tray | Android", "n": "Share Tray | Android"}, {"k": "SCREEN", "id": "2269:62243", "x": 4941.0, "y": 12797.0, "w": 360, "h": 822, "t": "Riwayat Komisi", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2269:62347", "x": 6344.0, "y": 13814.0, "w": 360, "h": 822, "t": "Riwayat Komisi", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2269:62380", "x": 6755.0, "y": 12797.0, "w": 360, "h": 822, "t": "Riwayat Komisi", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2269:62490", "x": 6748.0, "y": 13814.0, "w": 360, "h": 822, "t": "Riwayat Komisi", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2269:62556", "x": 5747.0, "y": 12797.0, "w": 360, "h": 822, "t": "Last 3 Months", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2269:62724", "x": 5747.0, "y": 13814.0, "w": 360, "h": 822, "t": "Loading", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2269:62834", "x": 4941.0, "y": 13814.0, "w": 360, "h": 822, "t": "Scroll View with Pagination Load", "n": "Riwayat Komisi"}, {"k": "SCREEN", "id": "2269:63013", "x": 5747.0, "y": 15107.0, "w": 360, "h": 770, "t": "Disbursed", "n": "Commission Details | Weekly | Status Don"}, {"k": "SCREEN", "id": "2269:63057", "x": 6215.0, "y": 15107.0, "w": 360, "h": 770, "t": "Scheduled", "n": "Commission Details | Weekly | Status Sch"}, {"k": "SCREEN", "id": "2482:15226", "x": 4893.0, "y": 15234.0, "w": 360, "h": 770, "t": "Commission Details | Weekly | Status Done", "n": "Commission Details | Weekly | Status Don"}, {"k": "SCREEN", "id": "2482:15269", "x": 5432.0, "y": 15316.0, "w": 328, "h": 594, "t": "Frame 2117130600", "n": "Frame 2117130600"}, {"k": "BANNER", "id": "2269:62991", "x": 4941.0, "y": 12713.0, "w": 666, "h": 37, "t": "DEFAULT  (Last 1 Month)"}, {"k": "BANNER", "id": "2269:62999", "x": 6344.0, "y": 13730.0, "w": 764, "h": 37, "t": "If No Activity"}, {"k": "BANNER", "id": "2269:63005", "x": 6344.0, "y": 12713.0, "w": 771, "h": 37, "t": "Custom Date"}, {"k": "BANNER", "id": "2269:63100", "x": 4929.0, "y": 12566.0, "w": 2186, "h": 64, "t": "Riwayat Komisi"}, {"k": "BANNER", "id": "2269:63104", "x": 5747.0, "y": 14890.0, "w": 828, "h": 64, "t": "Detail Komisi Page"}, {"k": "CAPTION", "id": "2269:62990", "x": 6501.0, "y": 12740.0, "w": 88, "h": 20, "t": "Custom Date"}]}, {"name": "Affiliate Activation", "id": "1997:31938", "kind": "SECTION", "x": -218.0, "y": -1810.0, "w": 2053, "h": 3888, "screens": 9, "items": [{"k": "SCREEN", "id": "1997:31939", "x": -79.0, "y": -1506.0, "w": 360, "h": 918, "t": "Confirm account", "n": "Confirm account"}, {"k": "SCREEN", "id": "2571:19061", "x": -70.0, "y": -364.0, "w": 360, "h": 708, "t": "Scroll View", "n": "Confirm account"}, {"k": "SCREEN", "id": "1997:31997", "x": 730.0, "y": -1506.0, "w": 360, "h": 918, "t": "Confirm account", "n": "Confirm account"}, {"k": "SCREEN", "id": "1997:32055", "x": 327.0, "y": -1506.0, "w": 360, "h": 918, "t": "Confirm account", "n": "Confirm account"}, {"k": "SCREEN", "id": "1997:32113", "x": 346.0, "y": 914.0, "w": 360, "h": 918, "t": "Code incorrect / not found", "n": "Confirm account"}, {"k": "SCREEN", "id": "1997:32171", "x": -70.0, "y": 914.0, "w": 360, "h": 918, "t": "Not eligible to become upliner yet", "n": "Confirm account"}, {"k": "SCREEN", "id": "1997:32229", "x": 1137.0, "y": -1506.0, "w": 360, "h": 918, "t": "Confirm account", "n": "Confirm account"}, {"k": "SCREEN", "id": "1997:32287", "x": 1137.0, "y": -1506.0, "w": 360, "h": 918, "t": "Confirm account", "n": "Confirm account"}, {"k": "SCREEN", "id": "5055:17994", "x": 757.0, "y": 914.0, "w": 360, "h": 720, "t": "General (As-Is)", "n": "technical error"}, {"k": "BANNER", "id": "1997:32373", "x": -75.0, "y": -1641.0, "w": 1572, "h": 64, "t": "Affiliate Activation"}]}, {"name": "Welcome Page", "id": "1997:30261", "kind": "SECTION", "x": -2533.0, "y": -1813.0, "w": 2232, "h": 2952, "screens": 4, "items": [{"k": "SCREEN", "id": "2001:38107", "x": -2096.0, "y": -1584.0, "w": 360, "h": 2066, "t": "Welcome Page", "n": "Welcome Page", "e": "L", "es": "WELCOME_PAGE", "ec": "Flow 1"}, {"k": "SCREEN", "id": "2571:14710", "x": -1127.0, "y": -1517.0, "w": 360, "h": 812, "t": "Loading", "n": "Welcome Page"}, {"k": "SCREEN", "id": "2482:14499", "x": -1658.0, "y": -1584.0, "w": 360, "h": 607, "t": "Hero Image", "n": "Hero Image"}, {"k": "SCREEN", "id": "2571:16086", "x": -1127.0, "y": -337.0, "w": 360, "h": 800, "t": "Scroll View", "n": "Frame 2117130924"}]}, {"name": "1KYC / GOPAY+ ACTIVATION", "id": "4559:19219", "kind": "SECTION", "x": 1918.0, "y": -1810.0, "w": 2162, "h": 2403, "screens": 3, "items": [{"k": "SCREEN", "id": "4535:21369", "x": 3069.0, "y": -349.0, "w": 360, "h": 812, "t": "Confirm account / ID", "n": "Confirm account / ID"}, {"k": "SCREEN", "id": "4559:18436", "x": 2604.0, "y": -349.0, "w": 375, "h": 812, "t": "Frame", "n": "Frame"}, {"k": "SCREEN", "id": "4559:19051", "x": 3069.0, "y": -1514.0, "w": 360, "h": 960, "t": "Link GoPay screen", "n": "Link GoPay screen"}, {"k": "BANNER", "id": "4559:17669", "x": 2524.0, "y": -1631.0, "w": 1416, "h": 64, "t": "1KYC   |  Progressive Flow (Screens are only for reference, not owned "}, {"k": "BANNER", "id": "4559:17673", "x": 2524.0, "y": -453.0, "w": 1416, "h": 64, "t": "1KYC  |  NON-Progressive Flow (Screens are only for reference, not own"}]}, {"name": "Post-KYC status page", "id": "4776:17781", "kind": "SECTION", "x": 1918.0, "y": 687.0, "w": 2162, "h": 1391, "screens": 2, "items": [{"k": "SCREEN", "id": "4732:43801", "x": 2620.0, "y": 1017.0, "w": 360, "h": 720, "t": "If KYC is still in progress", "n": "success-screen"}, {"k": "SCREEN", "id": "4776:17512", "x": 3155.0, "y": 1017.0, "w": 360, "h": 720, "t": "If KYC is rejected", "n": "Dead-End-Screen"}]}, {"name": "Loose cluster 0", "id": "loose-0", "kind": "LOOSE", "x": 10933.0, "y": 14730.0, "w": 789.0, "h": 1326.0, "screens": 2, "items": [{"k": "SCREEN", "id": "3965:43004", "x": 11362.0, "y": 15234.0, "w": 360, "h": 822, "t": "Merchant Performance", "n": "Merchant Performance"}, {"k": "SCREEN", "id": "3978:43368", "x": 10933.0, "y": 15234.0, "w": 360, "h": 822, "t": "Toko Sentosa Gemilang Namanya Panjang Banget... Spiker Dipes", "n": "Merchant Performance"}]}, {"name": "Loose cluster 1", "id": "loose-1", "kind": "LOOSE", "x": -3128.0, "y": 2968.0, "w": 1456.0, "h": 1312.0, "screens": 1, "items": [{"k": "SCREEN", "id": "4535:19397", "x": -2032.0, "y": 3468.0, "w": 360, "h": 812, "t": "Confirm account / EN", "n": "Confirm account / EN"}]}, {"name": "Loose cluster 2", "id": "loose-2", "kind": "LOOSE", "x": 4337.0, "y": 12378.0, "w": 360.0, "h": 2144.0, "screens": 1, "items": [{"k": "SCREEN", "id": "1997:30262", "x": 4337.0, "y": 12378.0, "w": 360, "h": 2144, "t": "Welcome Page", "n": "Welcome Page"}]}, {"name": "Loose cluster 3", "id": "loose-3", "kind": "LOOSE", "x": 3794.0, "y": 3123.0, "w": 207.0, "h": 208.0, "screens": 0, "items": [{"k": "CAPTION", "id": "2097:21938", "x": 3794.0, "y": 3123.0, "w": 207, "h": 208, "t": "To cater to new commission structure and insight from driver"}]}], "edges": [{"g": "1997:30261", "g2": "1997:30261", "x1": -1916.0, "y1": -551.0, "x2": -947.0, "y2": -1111.0, "rel": "NAVIGATION", "cond": "", "fl": "Welcome Page", "tl": "Loading", "via": "ELEMENT_IN_SCREEN→ELEMENT_IN_SCREEN", "cid": "2571:16075"}, {"g": "1997:31938", "g2": "1997:31938", "x1": 910.0, "y1": -1047.0, "x2": 1317.0, "y2": -1047.0, "rel": "NAVIGATION", "cond": "", "fl": "Confirm account", "tl": "Confirm account", "via": "ELEMENT_IN_SCREEN→ELEMENT_IN_SCREEN", "cid": "1997:32356"}, {"g": "1997:31938", "g2": "1997:31938", "x1": 1317.0, "y1": -1047.0, "x2": 937.0, "y2": 1274.0, "rel": "NAVIGATION", "cond": "If NOT successful", "fl": "Confirm account", "tl": "General (As-Is)", "via": "ELEMENT_IN_SCREEN→CHIP_LABEL", "cid": "2571:19056"}, {"g": "1997:31938", "g2": "1997:31938", "x1": 910.0, "y1": -1047.0, "x2": 526.0, "y2": 1373.0, "rel": "NAVIGATION", "cond": "", "fl": "Confirm account", "tl": "Code incorrect / not found", "via": "ELEMENT_IN_SCREEN→CHIP_LABEL", "cid": "4613:17401"}, {"g": "1997:30261", "g2": "1997:31938", "x1": -947.0, "y1": -1111.0, "x2": 101.0, "y2": -1047.0, "rel": "NAVIGATION", "cond": "", "fl": "Loading", "tl": "Confirm account", "via": "ELEMENT_IN_SCREEN→SCREEN", "cid": "4570:17396"}, {"g": "4559:19219", "g2": null, "x1": 3249.0, "y1": -1034.0, "x2": 3709.0, "y2": -999.0, "rel": "NAVIGATION", "cond": "", "fl": "Link GoPay screen", "tl": "SEE MORE IN  1KYC FIGMA", "via": "ELEMENT_IN_SCREEN→ARTIFACT", "cid": "4570:17381"}, {"g": "4559:19219", "g2": null, "x1": 3249.0, "y1": 57.0, "x2": 3709.0, "y2": 57.0, "rel": "NAVIGATION", "cond": "", "fl": "Confirm account / ID", "tl": "SEE MORE IN  1KYC FIGMA", "via": "ELEMENT_IN_SCREEN→ARTIFACT", "cid": "4570:17391"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 8362.0, "y1": -796.0, "x2": 8791.0, "y2": -796.0, "rel": "NAVIGATION", "cond": "", "fl": "Native Month Picker", "tl": "Loading", "via": "ELEMENT_IN_SCREEN→SCREEN", "cid": "2269:67335"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 7620.0, "y1": -796.0, "x2": 8190.0, "y2": 624.0, "rel": "NAVIGATION", "cond": "", "fl": "Riwayat Komisi", "tl": "Disbursed", "via": "ELEMENT_IN_SCREEN→SCREEN", "cid": "2001:24088"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 5113.0, "y1": 3644.5, "x2": 6113.0, "y2": 3698.5, "rel": "NAVIGATION", "cond": "", "fl": "Skema Komisi | Perintis", "tl": "For Level 2", "via": "ELEMENT_IN_SCREEN→ELEMENT_IN_SCREEN", "cid": "2001:25915"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 4712.0, "y1": 3644.5, "x2": 5606.0, "y2": 3698.5, "rel": "NAVIGATION", "cond": "", "fl": "Skema Komisi | Perintis", "tl": "For Level 1", "via": "ELEMENT_IN_SCREEN→ELEMENT_IN_SCREEN", "cid": "2001:26714"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 10879.0, "y1": 2219.0, "x2": 11325.0, "y2": 2224.0, "rel": "NAVIGATION", "cond": "", "fl": "Overlay", "tl": "Merchant Performance", "via": "ELEMENT_IN_SCREEN→SCREEN", "cid": "2300:65927"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 10339.0, "y1": 4627.5, "x2": 11486.0, "y2": 4660.0, "rel": "NAVIGATION", "cond": "", "fl": "Downliners", "tl": "Page Loading", "via": "ELEMENT_IN_SCREEN→SCREEN", "cid": "2269:61446"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 10339.0, "y1": 4627.5, "x2": 11061.0, "y2": 4660.0, "rel": "NAVIGATION", "cond": "", "fl": "Downliners", "tl": "Native OS Month Picker", "via": "ELEMENT_IN_SCREEN→SCREEN", "cid": "2269:62233"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 11931.0, "y1": 4688.5, "x2": 9072.0, "y2": 3126.5, "rel": "NAVIGATION", "cond": "", "fl": "Empty (No Downliners)", "tl": "Overlay", "via": "ELEMENT_IN_SCREEN→ELEMENT_IN_SCREEN", "cid": "2001:36490"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 10359.0, "y1": 688.0, "x2": 10857.0, "y2": 694.0, "rel": "NAVIGATION", "cond": "", "fl": "Frame 2117130931", "tl": "Overlay", "via": "ELEMENT_IN_SCREEN→ELEMENT_IN_SCREEN", "cid": "3959:42867"}, {"g": "2001:22869", "g2": "2001:22869", "x1": 3709.0, "y1": -999.0, "x2": 4656.0, "y2": -712.0, "rel": "NAVIGATION", "cond": "", "fl": "SEE MORE IN  1KYC FIGMA", "tl": "Empty State", "via": "ARTIFACT→SCREEN", "cid": "2482:14826"}, {"g": "2001:36359", "g2": "2001:36359", "x1": 8795.0, "y1": 13139.5, "x2": 9518.0, "y2": 13156.0, "rel": "NAVIGATION", "cond": "", "fl": "Empty", "tl": "Share Tray | Android", "via": "ELEMENT_IN_SCREEN→SCREEN", "cid": "2001:37371"}, {"g": "2269:62240", "g2": "2269:62240", "x1": 6524.0, "y1": 13208.0, "x2": 6935.0, "y2": 13208.0, "rel": "NAVIGATION", "cond": "", "fl": "Share Tray | Android", "tl": "Riwayat Komisi", "via": "ELEMENT_IN_SCREEN→SCREEN", "cid": "2269:62988"}, {"g": "2269:62240", "g2": "2269:62240", "x1": 6935.0, "y1": 13208.0, "x2": 6524.0, "y2": 13208.0, "rel": "NAVIGATION", "cond": "", "fl": "Riwayat Komisi", "tl": "Share Tray | Android", "via": "ELEMENT_IN_SCREEN→ELEMENT_IN_SCREEN", "cid": "2269:62989"}, {"g": "2269:62240", "g2": "2269:62240", "x1": 5121.0, "y1": 13208.0, "x2": 5927.0, "y2": 15492.0, "rel": "NAVIGATION", "cond": "", "fl": "Riwayat Komisi", "tl": "Disbursed", "via": "ELEMENT_IN_SCREEN→SCREEN", "cid": "2269:63056"}], "unresolved": [{"id": "1997:31837", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "Daftar jadi GoPay Affiliate Apa itu GoPay Spiker? PLACEHOLDER", "end": "Notes / Annotation KV asset from Marketing", "cond": ""}, {"id": "2300:66901", "reason": "start=NON_SCREEN:CONTAINER? end=NON_SCREEN:CONTAINER?", "start": "English Aktivasi GoPay Affiliate Pastikan semuanya sudah benar supaya proses aktivasi lancar.", "end": "English Aktivasi GoPay Affiliate Pastikan semuanya sudah benar supaya proses aktivasi lancar.", "cond": ""}, {"id": "1997:32350", "reason": "start=NON_SCREEN:DECOR end=BANNER_SCOPE", "start": "Does user have GoPay+ ?", "end": "1KYC  |  NON-Progressive Flow (Screens are only for reference, not owned by MSME Team)", "cond": "NO"}, {"id": "1997:32347", "reason": "start=NON_SCREEN:DECOR end=BANNER_SCOPE", "start": "Does user have GoPay+ ?", "end": "1KYC   |  Progressive Flow (Screens are only for reference, not owned by MSME Team)", "cond": "YES"}, {"id": "2571:16081", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "English Aktivasi GoPay Affiliate Pastikan semuanya sudah benar supaya proses aktivasi lancar.", "end": "Does user have GoPay+ ?", "cond": ""}, {"id": "2001:24044", "reason": "start=SECTION_AMBIGUOUS(Riwayat Komisi, 9 screens) end=NON_SCREEN:DECOR", "start": "12:59 Riwayat komisi Apr 2026 Akumulasi Pendapatan: Rp500.000", "end": "Notes / Annotation “Akan Datang” section:\nonly appears under “current month”\nNominal= exclude from Akumulasi Pendapatan IF it’s for next month.", "cond": ""}, {"id": "2001:36354", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "12:59 Skema Komisi Program GoPay Affiliate Rekrut GoPay Merchant dan dapatkan penghasilan ekstra hingga 2 juta per bulan!", "end": "Notes / Annotation Tab is sticky after user scrolls down beyond “Cara dapat komisi:”", "cond": ""}, {"id": "2001:39973", "reason": "start=NON_SCREEN:COMPONENT_SET end=NON_SCREEN:DECOR", "start": "Level Saya Level 1: PERINTIS 20 GoPay Spiker Diterima 0 /20 Ayo naik level untuk dapatkan 15 ribu setiap kali tim Anda berhasil ajak merchant pakai GoPay Spiker.", "end": "Notes / Annotation “Ayo tinggal x lagi” \nOnly appears when...", "cond": ""}, {"id": "2001:28031", "reason": "start=NON_SCREEN:COMPONENT_SET end=ELEMENT_IN_SCREEN", "start": "Level Saya Level 2: PANUTAN Ajak teman gabung GoPay Affiliate & dapatkan bonus tambahan!", "end": "Bagaimana caranya? 1 Ajak teman jadi Affiliate & bagikan kode Anda", "cond": ""}, {"id": "2269:68239", "reason": "start=NON_SCREEN:COMPONENT_SET end=ARTIFACT", "start": "Level Saya Level 2: PANUTAN Ajak teman gabung GoPay Affiliate & dapatkan bonus tambahan!", "end": "Notes / Annotation Sort by: \nhighest Spiker Delivered\n\nWhat to show?\nOnly show downliners who ARE peforming (not 0). Hide remaining.\nIf NONE are performing: show min. 3 users, based on most recent recruit.", "cond": ""}, {"id": "3998:45251", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "08:08 Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!", "end": "Cair setiap hari Rabu di minggu berikutnya.", "cond": ""}, {"id": "2001:27079", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "08:08 Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!", "end": "Spiker yang telah dipakai bertransaksi 15 hari dalam sebulan.", "cond": ""}, {"id": "2097:21594", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!", "end": "Jumlah Spiker produktif dari rekrutan anggota tim Anda", "cond": ""}, {"id": "3900:16196", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "08:08 Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!", "end": "Notes / Annotation Show motivational copy at 50% onwards (aka 10 and above)", "cond": ""}, {"id": "2001:36346", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "08:08 Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!", "end": "Notes / Annotation If Spiker Delivered reached 30/Week = \nDisplay max number at 30\nThis info will be in T&C", "cond": ""}, {"id": "2482:14834", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!", "end": "Notes / Annotation Only appears when Spiker Dipesan = 0", "cond": ""}, {"id": "2269:67956", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "Pantau performa downliner Anda! Maksimalkan cuan dan dapatkan +Rp15.000 untuk setiap Spiker produktif dari tim Anda", "end": "Notes / Annotation Month picker is part of Sticky header", "cond": ""}, {"id": "2269:67961", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "Pantau performa downliner Anda! Maksimalkan cuan dan dapatkan +Rp15.000 untuk setiap Spiker produktif dari tim Anda", "end": "Notes / Annotation If loading", "cond": ""}, {"id": "2269:68339", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "Ajak merchant pakai GoPay Spiker dan dapatkan komisi mingguan!", "end": "Notes / Annotation Only Riwayat button can be directed to actual page\n\nTool tip buttons can still be revealed.\n\nEverything else, show the suspended dialog.", "cond": ""}, {"id": "2001:28205", "reason": "start=NON_SCREEN:COMPONENT_SET end=SCREEN", "start": "Level Saya Level 2: PANUTAN Ajak teman gabung GoPay Affiliate & dapatkan bonus tambahan!", "end": "Pantau performa tim Anda! Maksimalkan cuan dan dapatkan +Rp15.000 untuk setiap Spiker produktif dari tim Anda.", "cond": ""}, {"id": "4570:17376", "reason": "start=ARTIFACT end=MISSING_NODE", "start": "SEE MORE IN  1KYC FIGMA", "end": "", "cond": ""}, {"id": "2269:62987", "reason": "start=ELEMENT_IN_SCREEN end=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)", "start": "12:59 Riwayat komisi 1 bulan 3 bulan 6 bulan Pilih tanggal Akumulasi Pendapatan:", "end": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14", "cond": ""}, {"id": "2269:63010", "reason": "start=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens) end=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)", "start": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14", "end": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14", "cond": ""}, {"id": "2269:63011", "reason": "start=ELEMENT_IN_SCREEN end=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)", "start": "Akumulasi Pendapatan: April 2026 23 Apr 2026 Rp120.000 ** 6258", "end": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14", "cond": ""}, {"id": "2269:63012", "reason": "start=ELEMENT_IN_SCREEN end=SECTION_AMBIGUOUS(Riwayat Komisi, 12 screens)", "start": "Akumulasi Pendapatan: April 2026 23 Apr 2026 Rp120.000 ** 6258", "end": "OK CANCEL 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14", "cond": ""}, {"id": "4813:17545", "reason": "start=ELEMENT_IN_SCREEN end=NON_SCREEN:DECOR", "start": "Aktivasi GoPay Affiliate sedang diproses Silakan cek lagi halaman ini secara berkala untuk mengetahui status pendaftaran Anda.", "end": "Notes / Annotation Back to Welcome Page", "cond": ""}], "entry_frames": 1, "entry_screens": 1}</script>
+<script>
+const D = JSON.parse(document.getElementById('DATA').textContent);
+const svg = document.getElementById('board');
+const tip = document.getElementById('tip');
+const NS = 'http://www.w3.org/2000/svg';
+const [SW, SH] = D.screen_size;
+
+document.getElementById('metaLine').textContent =
+  `${D.groups.length} groups · ${D.edges.length} resolved edges · calibrated screen ${SW}×${SH}` +
+  (D.entry_screens ? ` · ${D.entry_screens} entry screen${D.entry_screens > 1 ? 's' : ''} (${D.entry_frames} frames marked ▶)` : '');
+if (D.entry_frames) document.getElementById('legEntry').style.display = '';
+
+const st = D.stats;
+document.getElementById('stats').innerHTML = `
+  <div class="stat"><b>${st.connectors_total}</b><span>connectors</span></div>
+  <div class="stat ok"><b>${st.edges_resolved}</b><span>edges resolved</span></div>
+  <div class="stat bad"><b>${D.unresolved.length}</b><span>conn. unresolved</span></div>
+  <div class="stat"><b>${st.labelled_conditions}</b><span>labelled conditions</span></div>`;
+
+const ub = document.getElementById('unresBody');
+document.getElementById('unresCount').textContent = D.unresolved.length;
+for (const u of D.unresolved) {
+  const tr = document.createElement('tr');
+  const cells = [u.id, u.reason, u.start, u.end, u.cond];
+  cells.forEach((c, i) => {
+    const td = document.createElement('td');
+    if (i === 0) td.className = 'mono';
+    td.textContent = c || '—';
+    td.title = c || '';
+    tr.appendChild(td);
+  });
+  ub.appendChild(tr);
+}
+
+let cur = null, vb = null;
+const nav = document.getElementById('groups');
+D.groups.filter(g => g.screens > 0).forEach((g, i) => {
+  const b = document.createElement('button');
+  const edgeN = D.edges.filter(e => e.g === g.id || e.g2 === g.id).length;
+  const hasEntry = g.items.some(it => it.k === 'SCREEN' && it.e);
+  b.innerHTML = `<span>${hasEntry ? '<span style="color:var(--ok)">▶</span> ' : ''}${g.name}</span>` +
+    `<span class="cnt">${g.screens}s·${edgeN}e</span>`;
+  b.onclick = () => { select(g, b); };
+  nav.appendChild(b);
+  if (i === 0) select(g, b);
+});
+
+function select(g, btn) {
+  cur = g;
+  [...nav.children].forEach(x => x.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  const pad = SW * 1.2;
+  vb = { x: g.x - pad, y: g.y - pad, w: g.w + pad * 2, h: g.h + pad * 2 };
+  draw();
+}
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(e);
+  return e;
+}
+
+function draw() {
+  svg.innerHTML = '';
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const defs = el('defs', {});
+  for (const [id, col] of [['aNav', 'var(--nav)'], ['aVar', 'var(--variant)']]) {
+    const m = el('marker', { id, viewBox: '0 0 10 10', refX: 9, refY: 5,
+      markerWidth: 4.2, markerHeight: 4.2, orient: 'auto-start-reverse' }, defs);
+    el('path', { d: 'M0 0L10 5L0 10z', fill: col }, m);
+  }
+  const g = cur;
+  const fs = SW * 0.12, fsSmall = SW * 0.095;
+  // group frame
+  el('rect', { x: g.x, y: g.y, width: g.w, height: g.h, rx: SW * 0.1,
+    fill: 'none', stroke: 'var(--line)', 'stroke-width': SW * 0.02 });
+  const layer = { box: el('g', {}), item: el('g', {}), edge: el('g', {}), txt: el('g', {}) };
+
+  for (const it of g.items) {
+    if (it.k === 'SUBSECTION') {
+      el('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: SW * 0.06,
+        fill: 'var(--panel-2)', 'fill-opacity': .45, stroke: 'var(--sub)',
+        'stroke-width': SW * 0.018, 'stroke-dasharray': `${SW * .06} ${SW * .05}` }, layer.box);
+      if (it.t) txt(it.x + SW * .08, it.y + fs * 1.2, it.t, fs, 'var(--ink-dim)', layer.box);
+    } else if (it.k === 'VBOX') {
+      el('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: SW * 0.04,
+        fill: 'none', stroke: 'var(--variant)', 'stroke-width': SW * 0.02,
+        'stroke-dasharray': `${SW * .05} ${SW * .04}` }, layer.box);
+    } else if (it.k === 'BANNER') {
+      el('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: it.h / 2,
+        fill: 'var(--banner)', 'fill-opacity': .9 }, layer.item);
+      txt(it.x + it.h * .6, it.y + it.h * .68, it.t, Math.min(it.h * .5, fs * 1.5),
+          'var(--banner-ink)', layer.txt);
+    } else if (it.k === 'CAPTION') {
+      txt(it.x, it.y + fsSmall, it.t.replace(/\n/g, ' '), fsSmall, 'var(--caption)', layer.txt,
+          it.w * 1.6);
+    } else if (it.k === 'SCREEN') {
+      const isEntry = !!it.e;
+      const r = el('rect', { x: it.x, y: it.y, width: it.w, height: it.h, rx: SW * 0.05,
+        fill: 'var(--tile)', stroke: isEntry ? 'var(--ok)' : 'var(--tile-line)',
+        'stroke-width': isEntry ? SW * 0.035 : SW * 0.012 }, layer.item);
+      hover(r, () => `<b>${esc(it.t)}</b><br><span class="mono">frame “${esc(it.n)}” · ${it.id}</span>` +
+        (isEntry ? `<br><span style="color:var(--ok)">▶ ENTRY → ${esc(it.es || '')} — ${it.e === 'L' ? 'explicit label' : 'inferred from topology'}${it.ec ? ` · “${esc(it.ec)}”` : ''}</span>` : ''));
+      if (isEntry) {
+        const br = fs * 1.05;
+        el('circle', { cx: it.x, cy: it.y, r: br,
+          fill: 'var(--ok)' }, layer.item);
+        const play = el('text', { x: it.x, y: it.y + br * .42, 'font-size': br * 1.15,
+          fill: 'var(--banner-ink)', 'text-anchor': 'middle',
+          'font-family': '"IBM Plex Sans", sans-serif' }, layer.item);
+        play.textContent = '▶';
+      }
+      txt(it.x + SW * .05, it.y - fs * .45, (isEntry ? '▶ ' : '') + it.t, fs,
+          isEntry ? 'var(--ok)' : 'var(--ink)', layer.txt, it.w * 2.2);
+    }
+  }
+
+  for (const e of D.edges) {
+    if (e.g !== g.id && e.g2 !== g.id) continue;
+    const variant = e.rel === 'VARIANT_LINK';
+    const col = variant ? 'var(--variant)' : 'var(--nav)';
+    const mx = (e.x1 + e.x2) / 2, dy = Math.abs(e.y1 - e.y2);
+    const bend = (e.y1 === e.y2 ? -SH * .35 : 0);
+    const p = el('path', {
+      d: `M${e.x1} ${e.y1} Q ${mx} ${(e.y1 + e.y2) / 2 + bend - dy * 0.12} ${e.x2} ${e.y2}`,
+      fill: 'none', stroke: col, 'stroke-width': 1.8,
+      'vector-effect': 'non-scaling-stroke',
+      'stroke-opacity': .9, 'marker-end': `url(#${variant ? 'aVar' : 'aNav'})`,
+      'stroke-dasharray': variant ? '7 5' : 'none',
+    }, layer.edge);
+    hover(p, () => `<b>${esc(e.fl)}</b> → <b>${esc(e.tl)}</b>` +
+      (e.cond ? `<br>condition: “${esc(e.cond)}”` : '') +
+      `<br><span class="mono">${esc(e.via)} · ${esc(e.cid)}${e.g !== e.g2 && e.g2 ? ' · cross-group' : ''}</span>`);
+    if (e.cond) {
+      txt(mx, (e.y1 + e.y2) / 2 + bend * .55 - fs * .3, e.cond, fs, col, layer.txt, SW * 4);
+    }
+  }
+}
+
+function txt(x, y, s, size, fill, parent, maxW) {
+  const t = el('text', { x, y, 'font-size': size, fill,
+    'font-family': '"IBM Plex Sans", sans-serif' }, parent);
+  t.textContent = s;
+  if (maxW) { t.setAttribute('textLength', ''); /* let it run; clipped visually is fine */ }
+  return t;
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function hover(node, html) {
+  node.addEventListener('pointerenter', ev => { tip.innerHTML = html(); tip.style.display = 'block'; move(ev); });
+  node.addEventListener('pointermove', move);
+  node.addEventListener('pointerleave', () => { tip.style.display = 'none'; });
+}
+function move(ev) {
+  const r = svg.parentElement.getBoundingClientRect();
+  tip.style.left = Math.min(ev.clientX - r.left + 14, r.width - 350) + 'px';
+  tip.style.top = (ev.clientY - r.top + 14) + 'px';
+}
+
+// pan / zoom
+let drag = null;
+svg.addEventListener('pointerdown', ev => {
+  drag = { x: ev.clientX, y: ev.clientY, vb: { ...vb } };
+  svg.classList.add('panning'); svg.setPointerCapture(ev.pointerId);
+});
+svg.addEventListener('pointermove', ev => {
+  if (!drag) return;
+  const r = svg.getBoundingClientRect();
+  vb.x = drag.vb.x - (ev.clientX - drag.x) * vb.w / r.width;
+  vb.y = drag.vb.y - (ev.clientY - drag.y) * vb.h / r.height;
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+});
+svg.addEventListener('pointerup', ev => { drag = null; svg.classList.remove('panning'); });
+svg.addEventListener('wheel', ev => {
+  ev.preventDefault();
+  const r = svg.getBoundingClientRect();
+  const px = vb.x + (ev.clientX - r.left) / r.width * vb.w;
+  const py = vb.y + (ev.clientY - r.top) / r.height * vb.h;
+  const f = ev.deltaY > 0 ? 1.18 : 1 / 1.18;
+  vb = { x: px - (px - vb.x) * f, y: py - (py - vb.y) * f, w: vb.w * f, h: vb.h * f };
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+}, { passive: false });
+</script>

@@ -29,6 +29,7 @@ from collections import defaultdict
 
 import spatial_scan as sp
 import connector_resolve as cr
+import screen_identity as si
 
 PLUGIN_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            '..', '..', '..'))
@@ -240,6 +241,10 @@ def build(path, app=None):
         if m0['group_kind'] == 'LOOSE' and not m0['group_has_labels']:
             excluded.extend((s['id'], 'DRAFT_LOOSE_CLUSTER', s['name']) for s in run)
             continue
+        # spec / annotation / asset material: documents a screen, is not one
+        if si.is_spec_frame(m0):
+            excluded.extend((s['id'], 'SPEC_MATERIAL', s['name']) for s in run)
+            continue
         if len(run) > 1:
             identity = head['name']
         else:
@@ -265,15 +270,70 @@ def build(path, app=None):
             frame_state[s['id']] = f'{scen} — {state}' if scen and state \
                 else (scen or state)
 
-    # cross-board merge by normalized identity
+    # ---- identity disambiguation: one frame NAME is not always one screen.
+    # Frames sharing a base identity are split only when they sit in
+    # different flow contexts AND their control sets diverge (see
+    # screen_identity.py for the rule and the evidence behind it).
+    node_of = {}
+    for g in world['groups']:
+        for r in g['rows']:
+            for s in r['screens']:
+                node_of[s['id']] = s.get('node', s)
+
+    by_identity = defaultdict(list)
+    for fid, identity in frame_identity.items():
+        by_identity[identity].append(fid)
+
+    frame_sid, sid_name, identity_splits = {}, {}, []
+    taken = set()
+    for identity in sorted(by_identity):
+        frames = by_identity[identity]
+        base_sid = upper_snake(identity)
+        groups, sims = si.split_frames(frames, identity, meta, node_of)
+        ctrl_of = {f: si.control_labels(node_of[f])
+                   for f in frames if f in node_of}
+        if len(groups) < 2:
+            taken.add(base_sid)
+            for fid in frames:
+                frame_sid[fid] = base_sid
+            sid_name[base_sid] = identity
+            continue
+        # largest group keeps the base id; the rest are named from their own
+        # chip title or flow context
+        entry = dict(base_screen_id=base_sid, base_name=identity,
+                     frames=len(frames), screens=[],
+                     threshold=si.SPLIT_THRESHOLD,
+                     min_similarity=min(sims.values()) if sims else None)
+        for i, grp in enumerate(groups):
+            if i == 0:
+                sid, name, how = base_sid, identity, 'BASE'
+            else:
+                others = [f for g2 in groups if g2 is not grp for f in g2]
+                sid, name, how = si.name_group(identity, grp, meta, taken,
+                                               siblings=others,
+                                               controls=ctrl_of)
+            taken.add(sid)
+            sid_name[sid] = name
+            for fid in grp:
+                frame_sid[fid] = sid
+            entry['screens'].append(dict(
+                screen_id=sid, named_by=how, frames=len(grp),
+                contexts=sorted({si.context_of(meta[f]) for f in grp}),
+                chips=sorted({meta[f]['chip_title'] for f in grp
+                              if meta[f]['chip_title']}),
+                source_refs=sorted(grp)))
+        identity_splits.append(entry)
+
+    # cross-board merge by disambiguated identity
     screens_out = {}
     merges = defaultdict(list)
     for run in protos:
         for s in run:
             if s['id'] not in frame_identity:
                 continue
-            identity = frame_identity[s['id']]
-            sid = upper_snake(identity)
+            identity = sid_name.get(frame_sid[s['id']],
+                                    frame_identity[s['id']])
+            sid = frame_sid[s['id']]
             merges[sid].append(s['id'])
             m = meta[s['id']]
             e = screens_out.setdefault(sid, {
@@ -703,6 +763,7 @@ def build(path, app=None):
             {'screen_id': s, 'out_degree': len(outadj[s]),
              'reaches_screens': forward_reach(s)} for s in roots],
         'ambiguous_collapses': ambiguous_collapses,
+        'identity_splits': identity_splits,
         'excluded_nodes': [dict(id=i, reason=r, name=n) for i, r, n in excluded],
         'unresolved_connectors': unresolved,
         'counters': {
@@ -713,6 +774,11 @@ def build(path, app=None):
             'variant_link_connectors': len(variant_links),
             'unresolved_connectors': len(unresolved),
             'screens_emitted': len(screens_list),
+            'identity_splits': len(identity_splits),
+            'identity_split_screens': sum(len(e['screens']) - 1
+                                          for e in identity_splits),
+            'spec_frames_excluded': sum(1 for _, r, _ in excluded
+                                        if r == 'SPEC_MATERIAL'),
             'frames_collapsed': sum(len(v) for v in merges.values()),
             'elements_deterministic': sum(len(s['elements']) for s in screens_list),
         },
