@@ -1,13 +1,14 @@
 ---
 name: aep-mobile-setup
-description: Preflight check for aep-mobile plugin dependencies — validates Python/jsonschema, BrowserStack MCP connectivity (mandatory), and prints actionable setup steps for anything missing. Run after installing the plugin or when any aep-mobile skill reports a missing dependency.
+description: Preflight check for aep-mobile plugin dependencies — validates Python/jsonschema, BrowserStack MCP connectivity (required only for BrowserStack-backed skills), and prints actionable setup steps for anything missing. Run after installing the plugin or when any aep-mobile skill reports a missing dependency.
 ---
 
 # AEP Mobile — Setup & Preflight Check
 
 Run this skill once after installing the plugin, or any time a skill reports
-a missing dependency. **BrowserStack MCP is mandatory** — regression-extractor and
-SDET plan upload will hard-stop without it.
+a missing dependency. **BrowserStack MCP is required only for the BrowserStack-backed
+skills** — regression-extractor and SDET plan upload hard-stop without it. The pre-build
+extractors (prd, rfc, design, task) do **not** need it; they need only python3 + jsonschema.
 
 All paths below are relative to the aep-mobile plugin root (where `config/`,
 `schemas/`, and `skills/` live).
@@ -26,9 +27,10 @@ python3 -c "import jsonschema; print('jsonschema', jsonschema.__version__)"
   pip3 install --break-system-packages jsonschema
   ```
 
-### 2. BrowserStack MCP Server (mandatory)
+### 2. BrowserStack MCP Server (required for BrowserStack-backed skills)
 
-BrowserStack MCP must be connected before any pipeline skill runs. Check connectivity
+BrowserStack MCP must be connected before running regression-extractor or the SDET-plan
+upload — the pre-build extractors (prd/rfc/design/task) skip this check entirely. Check connectivity
 by discovering and calling a lightweight BrowserStack MCP tool (e.g. `listTestCases`).
 
 **In Cursor:** use dynamic MCP tool discovery to find BrowserStack tools in the
@@ -46,10 +48,11 @@ available, then call one.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   BrowserStack MCP is not connected.
 
-  BrowserStack MCP is MANDATORY for aep-mobile.
-  regression-extractor and SDET plan upload require
-  a live connection to BrowserStack Test Management.
-  Skills will hard-stop without it.
+  Required for the BrowserStack-backed skills:
+  regression-extractor and SDET plan upload need
+  a live connection to BrowserStack Test Management
+  and hard-stop without it. The prd/rfc/design/task
+  extractors do not need it.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Setup steps:
@@ -98,11 +101,11 @@ Dependency              Status
 ──────────────────────  ──────
 python3                 ✓ / ✗
 jsonschema              ✓ / ✗
-BrowserStack MCP        ✓ / ✗  (mandatory)
+BrowserStack MCP        ✓ / ✗  (needed for regression / SDET upload)
 ```
 
 If everything passes: `All dependencies satisfied. You're ready to use aep-mobile skills.`
 
-If BrowserStack MCP fails: `BrowserStack MCP is mandatory. Fix the item marked ✗ above, then run the aep-mobile-setup skill again.`
+If BrowserStack MCP fails: `BrowserStack MCP is needed only for regression-extractor and SDET-plan upload. If you're only running the prd/rfc/design/task extractors you can ignore this; otherwise fix the ✗ above and re-run aep-mobile-setup.`
 
 If only python/jsonschema fails: `Fix the items marked ✗ above, then run the aep-mobile-setup skill again.`

@@ -98,7 +98,7 @@ Then run the **aep-mobile-setup** skill to verify dependencies.
 1. Install the plugin from the AEP marketplace (same repo as Claude Code), or symlink/copy
    `plugins/aep-mobile/skills/` into your project's `.cursor/skills/` or personal
    `~/.cursor/skills/`.
-2. **Configure BrowserStack MCP (mandatory)** in Cursor Settings → MCP (or `~/.cursor/mcp.json`):
+2. **Configure BrowserStack MCP** (required only for `regression-extractor` and SDET-plan upload; the prd/rfc/design/task extractors don't need it) in Cursor Settings → MCP (or `~/.cursor/mcp.json`):
 
    ```json
    {
@@ -116,9 +116,10 @@ Then run the **aep-mobile-setup** skill to verify dependencies.
    ```
 
 3. Restart Cursor.
-4. Ask the agent to run the **aep-mobile-setup** skill — all three checks must pass,
-   especially **BrowserStack MCP ✓**. Without it, `regression-extractor` and
-   `sdet-plan-generator` will hard-stop.
+4. Ask the agent to run the **aep-mobile-setup** skill. python3 + jsonschema are needed by
+   every skill; **BrowserStack MCP** is needed only by `regression-extractor` and
+   `sdet-plan-generator` (upload), which hard-stop without it — the prd/rfc/design/task
+   extractors run fine without it.
 
 ### Updating
 
