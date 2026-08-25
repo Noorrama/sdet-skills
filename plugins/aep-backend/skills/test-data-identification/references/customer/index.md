@@ -4,6 +4,14 @@ TDP models a consumer as a **pooled, pre-provisioned account** — most statemen
 answered by selecting an existing account of the right category from the pool, not by creating
 one. `CREATE_CUSTOMER` exists for pool-miss cases, but the default path is **select by category**.
 
+## Signal vocabulary
+
+"Participant"/"participants" (e.g. group-order session participants, "host plus two
+participants") is CUSTOMER-domain wording — each participant is a consumer account, not a
+session- or booking-only construct. Identify one CUSTOMER fixture per participant the same way a
+"host customer" is identified, unless the plan already provisions the whole session as a single
+composite fixture.
+
 ## The account vs. wallet-amount split
 
 The most common source of mis-identification: TDP separates *whether a payment method is linked at
