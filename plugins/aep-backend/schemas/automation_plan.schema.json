@@ -204,6 +204,15 @@
               }
             }
           },
+          "scenario_gbt_context": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "default": null,
+            "additionalProperties": true,
+            "description": "Repo grounding written by the GBT context builder \u2014 NOT by automation-plan-generator, which emits null or omits it. On success carries endpoint_file, upstream_files[], downstream_files[], test_methods_calling_endpoint[], test_data_providers[] and test_assertions[]; on failure carries a single `error` string instead (e.g. no_endpoint_match when the endpoint resolves to 0 rows in the searched module, or no_endpoint when the `endpoint` value is not a REST path). Both shapes are valid \u2014 an error is a result, not a malformed record. Every downstream stage, test-data-identification included, must pass this through UNCHANGED: those stages re-validate the enriched plan against this schema, so a field they do not know about must still be legal here or the run fails after the work is already done. additionalProperties is true inside deliberately, so the builder can evolve its shape without a schema change, while the entry level stays closed and still catches genuine typos."
+          },
           "tags": {
             "type": "array",
             "items": {
