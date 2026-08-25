@@ -1,0 +1,512 @@
+{
+  "contract_version": "1.0.0",
+  "generated_at": "2026-08-24T04:21:59+00:00",
+  "feature_metadata": {
+    "feature_key": "pam_8_levels_relaunch",
+    "epic_ref": "pam_8_levels_relaunch",
+    "app": "gojek-driver",
+    "platform": "android",
+    "module_namespace": "PAM 8 Levels"
+  },
+  "change_surface": {
+    "source": "gitlab_mr_diff",
+    "merge_requests": [
+      "!13303",
+      "!13326",
+      "!13352",
+      "!13354",
+      "!13386"
+    ],
+    "changed_files": [
+      "app/src/main/java/com/gojek/driver/deeplink/GoJekDriverDispatcher.java",
+      "app/src/main/java/com/gojek/driver/deps/FragmentDepsModule.kt",
+      "app/src/main/java/com/gojek/driver/home/konmari/KonmariScreenModules.kt",
+      "app/src/main/java/com/gojek/driver/launcher/model/LoyaltyIntentExtra.kt",
+      "app/src/main/java/com/gojek/driver/profile/konmari/di/ProfileDependencyModule.kt",
+      "app/src/main/java/com/gojek/driver/profile/konmari/navigation/KonmariLoyaltyNavigator.kt",
+      "app/src/main/java/com/gojek/driver/profile/konmari/navigation/KonmariProfileNavigatorImpl.kt",
+      "app/src/main/java/com/gojek/driver/profile/konmari/navigation/NavFragmentDeeplinkMapper.kt",
+      "core/configs/src/main/kotlin/com/gojek/driver/configs/toggle/Toggles.kt",
+      "features/driver-profile/implementation/src/main/kotlin/com/gojek/driver/profile/container/KonmariProfileNavigator.kt",
+      "features/driver-profile/implementation/src/main/kotlin/com/gojek/driver/profile/container/ProfileContainerFragment.kt",
+      "features/driver-profile/implementation/src/main/kotlin/com/gojek/driver/profile/performanceLoyaltyContainer/PerformanceLoyaltyContainerContainerComponent.kt",
+      "features/driver-profile/implementation/src/main/kotlin/com/gojek/driver/profile/performanceLoyaltyContainer/dependency/LoyaltySummaryComponentDependency.kt",
+      "features/incentives/implementation/src/main/kotlin/com/gojek/driver/incentives/summary/IncentivesAdapter.kt",
+      "features/loyalty/api/src/main/java/com/gojek/driver/loyalty/onboarding/PamLoyaltyEnabledUseCase.kt",
+      "features/loyalty/implementation/build.gradle",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/di/LoyaltyModule.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/di/LoyaltyScreenInjectorModule.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/domain/GetLoyaltyProgressUsecase.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/domain/PamLoyaltyFeatureEnabledInteractor.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/navigation/LoyaltyNavigator.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/navigation/LoyaltyPageNavigator.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/repo/LoyaltyRepository.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/repo/api/LoyaltyApi.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/repo/model/api/LoyaltyProgressResponseEntity.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/repo/model/api/LoyaltyRewardCatalogueEntity.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/repo/model/api/LoyaltyTierEntity.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/repo/model/api/MonthlyProgress.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/repo/model/api/ProgressHistory.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/repo/model/internal/LoyaltyRewardCatalogueResult.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/LoyaltyCatalogueFragment.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/di/LoyaltyCatalogueFragmentDepsModule.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/di/LoyaltyCatalogueModule.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/effect/LoyaltyCatalogueEffect.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/effect/LoyaltyCatalogueEffectHandler.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/effect/LoyaltyCatalogueViewEffect.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/event/LoyaltyCatalogueEvent.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/event/LoyaltyCatalogueUpdate.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/event/LoyaltyCatalogueViewModel.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/mapper/LoyaltyCatalogueMapper.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/model/LoyaltyCatalogueModel.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/model/LoyaltyCatalogueViewEntity.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/view/adapter/LoyaltyCatalogueGroupAdapter.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/view/adapter/LoyaltyCatalogueTargetAdapter.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/di/LoyaltyMembershipScreenInjector.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/onboarding/LoyaltyMembershipOnboardingCache.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/LoyaltyMembershipFragment.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/LoyaltyMembershipPresenter.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/LoyaltyMembershipView.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/adapter/AchievementMonthAdapter.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/adapter/AchievementMonthItemDecoration.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/adapter/AchievementYearAdapter.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/mapper/AchievementCalendarMapper.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/mapper/AchievementYearMapper.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/model/AchievementCalendarViewEntity.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/model/AchievementMonthViewEntity.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/model/AchievementYearViewEntity.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltySummaryCard/LoyaltySummaryComponentKonmari.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltySummaryCard/LoyaltySummaryPresenter.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltySummaryCard/LoyaltySummaryView.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/loyaltySummaryCard/di/LoyaltySummaryComponentModule.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/tierInfo/mapper/LoyaltyTierInfoMapper.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/screens/tierInfo/view/adapter/TierInfoRewardListAdapter.kt",
+      "features/loyalty/implementation/src/main/kotlin/com/gojek/driver/loyalty/tracking/LoyaltyEventNames.kt",
+      "features/loyalty/implementation/src/main/res/drawable/background_swadaya_poin.xml",
+      "features/loyalty/implementation/src/main/res/drawable/check_my_level_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_background_banner_green.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_catalogue_badge_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_catalogue_group_header_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_catalogue_group_header_special_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_common_content_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_common_header_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_eval_both_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_eval_both_top_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_eval_end_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_eval_end_top_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_eval_start_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_eval_start_top_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_year_selected_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/loyalty_pam_year_unselected_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/pam_catalogue_badge_shimmer_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/pam_catalogue_trophy_icon.xml",
+      "features/loyalty/implementation/src/main/res/drawable/pam_loyalty_card_stroke.xml",
+      "features/loyalty/implementation/src/main/res/drawable/pam_loyalty_catalogue_target_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/pam_loyalty_entrypoint_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/pam_loyalty_reward_note_banner_bg.xml",
+      "features/loyalty/implementation/src/main/res/drawable/pam_loyalty_scroll_indicator_bg.xml",
+      "features/loyalty/implementation/src/main/res/layout/fragment_loyalty_catalogue.xml",
+      "features/loyalty/implementation/src/main/res/layout/layout_pam_loyalty_entrypoint.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_achievement_empty.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_achievement_month_item.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_achievement_year_item.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_catalogue_shimmer.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_layout_membership.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_pam_achievement_container.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_pam_benefit_banner.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_pam_card_layout_konmari.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_tier_details_container.xml",
+      "features/loyalty/implementation/src/main/res/layout/loyalty_tier_info_content.xml",
+      "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_badge.xml",
+      "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_content.xml",
+      "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_group.xml",
+      "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_target_item.xml",
+      "features/loyalty/implementation/src/main/res/layout/swadaya_point_content_layout.xml",
+      "features/loyalty/implementation/src/main/res/navigation/loyalty_graph.xml",
+      "features/loyalty/implementation/src/main/res/values/dimens.xml",
+      "features/loyalty/implementation/src/test/kotlin/com/gojek/driver/loyalty/LoyaltyTestProvider.kt",
+      "features/loyalty/implementation/src/test/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/effect/LoyaltyCatalogueEffectHandlerTest.kt",
+      "features/loyalty/implementation/src/test/kotlin/com/gojek/driver/loyalty/screens/loyaltyCatalogue/event/LoyaltyCatalogueUpdateTest.kt",
+      "features/loyalty/implementation/src/test/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/onboarding/LoyaltyMembershipOnboardingCacheTest.kt",
+      "features/loyalty/implementation/src/test/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/LoyaltyMembershipPresenterTest.kt",
+      "features/loyalty/implementation/src/test/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/mapper/AchievementCalendarMapperTest.kt",
+      "features/loyalty/implementation/src/test/kotlin/com/gojek/driver/loyalty/screens/loyaltyMembership/view/mapper/AchievementYearMapperTest.kt",
+      "features/loyalty/implementation/src/test/kotlin/com/gojek/driver/loyalty/screens/loyaltySummaryCard/LoyaltySummaryPresenterTest.kt",
+      "features/loyalty/implementation/src/test/kotlin/com/gojek/driver/loyalty/screens/tierInfo/mapper/LoyaltyTierInfoMapperTest.kt",
+      "features/loyalty/shared-ui/build.gradle",
+      "features/loyalty/shared-ui/src/main/kotlin/com/gojek/driver/loyalty/sharedui/LoyaltyTier.kt",
+      "features/loyalty/shared-ui/src/main/kotlin/com/gojek/driver/loyalty/sharedui/screens/loyaltyMembership/view/components/TripProgressView.kt",
+      "features/loyalty/shared-ui/src/main/kotlin/com/gojek/driver/loyalty/sharedui/screens/loyaltySummaryCard/LoyaltySummaryComponentBridge.kt",
+      "gradle/libs.versions.toml"
+    ],
+    "changed_modules": [
+      "loyalty",
+      "driver-profile",
+      "incentives"
+    ],
+    "changed_screens": [
+      "PROFILE_CONTAINER",
+      "LOYALTY_CATALOGUE",
+      "LOYALTY_MEMBERSHIP",
+      "LOYALTY_SUMMARY_CARD",
+      "DEEPLINK_ROUTING"
+    ],
+    "changed_element_ids": [],
+    "flags": [
+      "giab_pam_revamp_enabled"
+    ],
+    "api_endpoints": [
+      "/v1/loyalty/tiers",
+      "/v1/loyalty/progress",
+      "/v2/loyalty/rewards"
+    ],
+    "cr_risks": [
+      {
+        "id": "RISK-01",
+        "area": "LoyaltyMembershipFragment",
+        "suggested_test": "Verify final localized copy for last_period_progress_label"
+      }
+    ],
+    "id_compliance_status": "NOT_RUN"
+  },
+  "candidate_pool_size": 5,
+  "must_run": [
+    {
+      "test_id": "C5542964",
+      "case_number": "5542964",
+      "browserstack_id": "C5542964",
+      "title": "[AUT_B_326][AUT_C_326] Validate loyalty and point section on profile menu",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "FILE_PATH_TOUCHED"
+      ],
+      "evidence": {
+        "path_tokens": [
+          "loyalty",
+          "profile"
+        ]
+      },
+      "execution_target": "GMT_JAVA",
+      "priority": "P0",
+      "source_module": "driverapp",
+      "plan_scenario_refs": [
+        "[Legacy regression] Validate loyalty and point section on profile menu"
+      ],
+      "source": "plan_legacy"
+    },
+    {
+      "test_id": "C5542965",
+      "case_number": "5542965",
+      "browserstack_id": "C5542965",
+      "title": "[AUT_B_327][AUT_C_327] Validate loyalty home page and tier detail section and Learn more section",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "FILE_PATH_TOUCHED"
+      ],
+      "evidence": {
+        "path_tokens": [
+          "loyalty",
+          "profile",
+          "tier"
+        ]
+      },
+      "execution_target": "GMT_JAVA",
+      "priority": "P0",
+      "source_module": "driverapp",
+      "plan_scenario_refs": [
+        "[Legacy regression] Validate loyalty home page and tier detail section and Learn more section"
+      ],
+      "source": "plan_legacy"
+    },
+    {
+      "test_id": "C5542968",
+      "case_number": "5542968",
+      "browserstack_id": "C5542968",
+      "title": "[AUT_B_328][AUT_C_328] Validate Point history and reward catalogue pages",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "FILE_PATH_TOUCHED"
+      ],
+      "evidence": {
+        "path_tokens": [
+          "catalogue",
+          "loyalty",
+          "profile"
+        ]
+      },
+      "execution_target": "GMT_JAVA",
+      "priority": "P1",
+      "source_module": "driverapp",
+      "plan_scenario_refs": [
+        "[Legacy regression] Validate Point history and reward catalogue pages"
+      ],
+      "source": "plan_legacy"
+    },
+    {
+      "test_id": "C5542971",
+      "case_number": "5542971",
+      "browserstack_id": "C5542971",
+      "title": "[AUT_B_329][AUT_C_329] Validate voucher redeem success flow",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "FILE_PATH_TOUCHED"
+      ],
+      "evidence": {
+        "path_tokens": [
+          "loyalty",
+          "profile"
+        ]
+      },
+      "execution_target": "GMT_JAVA",
+      "priority": "P1",
+      "source_module": "driverapp",
+      "plan_scenario_refs": [
+        "[Legacy regression] Validate voucher redeem success flow"
+      ],
+      "source": "plan_legacy"
+    },
+    {
+      "test_id": "C5542973",
+      "case_number": "5542973",
+      "browserstack_id": "C5542973",
+      "title": "[AUT_B_330][AUT_C_330] Validate voucher list page",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "FILE_PATH_TOUCHED"
+      ],
+      "evidence": {
+        "path_tokens": [
+          "loyalty",
+          "profile"
+        ]
+      },
+      "execution_target": "GMT_JAVA",
+      "priority": "P1",
+      "source_module": "driverapp",
+      "plan_scenario_refs": [
+        "[Legacy regression] Validate voucher list page"
+      ],
+      "source": "plan_legacy"
+    }
+  ],
+  "review_queue": [],
+  "unresolved_ids": [],
+  "new_scenarios_to_run": [
+    {
+      "csv_title_association": "PAM 8 Levels intro page explains monthly, yearly and special recognition",
+      "requirement_ref": "PAM-01",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "'Cek level saya saat ini' entry from Profile opens the current level",
+      "requirement_ref": "PAM-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Pencapaian Saya tab shows 12-month progress toward yearly Mitra Juara",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Yearly selector row shows previous/current/next year with current year centered",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Start month highlighted green and end month red in the yearly calendar",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Manfaat & Pencapaian Anda lists benefits for the driver's recognition level",
+      "requirement_ref": "PAM-03",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Profile page shows special badges for 5th year, 10th year, Perintis Jalan and Legend",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Internal portal can segment drivers and assign multi-year/special benefits",
+      "requirement_ref": "PAM-05",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "SDF/Kilat/Box drivers can access PAM entry points (M1.1 fast-follow)",
+      "requirement_ref": "PAM-06",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "End-to-end: Profile -> Loyalty Home -> Pencapaian Saya progress",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "End-to-end: Profile banner -> PAM 8 Levels catalogue -> level benefits",
+      "requirement_ref": "PAM-01",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Yearly eligibility period follows the shifting Lebaran calendar",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Driver is not MJG in a given month (mix of Harapan/Andalan/Juara)",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Driver joined Gojek before 2017 \u2014 how far back to display",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Driver progressing across previous years (yearly/5th/10th)",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Future Lebaran dates shift; future years have unfinalized windows",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Pre-2017 driver eligible for 5th/10th-year by backdated achievement",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] Driver breaks consecutive Yearly MJG while progressing to 5th/10th",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "[Boundary] A benefit eligibility criterion evaluates to 'No' or 'Null'",
+      "requirement_ref": "PAM-03",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Loyalty catalogue shows error state with retry on API failure",
+      "requirement_ref": "LoyaltyCatalogueScreen",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Missing monthly data renders an 'x' icon, not a blank cell (Q3 resolved)",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Loyalty progress API timeout is handled gracefully",
+      "requirement_ref": "/v1/loyalty/progress",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Rewards page (/v2/loyalty/rewards) handles load failure",
+      "requirement_ref": "/v2/loyalty/rewards",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Achievement-tab red dot clears after uninstall/reinstall",
+      "requirement_ref": "APP_UNINSTALL_REINSTALL",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "giab_pam_revamp_enabled OFF hides the new banner and shows the existing loyalty banner",
+      "requirement_ref": "giab_pam_revamp_enabled",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Non-ID market (SG) is unchanged by the PAM revamp",
+      "requirement_ref": "giab_pam_revamp_enabled",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "giab_pam_revamp_enabled ON surfaces the PAM 8 Levels banner",
+      "requirement_ref": "giab_pam_revamp_enabled",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "/loyalty/catalogue deeplink opens the PAM 8 Levels catalogue",
+      "requirement_ref": "LoyaltyCatalogueFragment",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Catalogue tier list shows Harapan/Andalan/Juara with badge, metric and rewards",
+      "requirement_ref": "PAM-01",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Fully-achieved year (12/12 MJG) shows the Mitra Juara year badge",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Poin Swadaya label is shown on the Level Saya page",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "5th-year Mitra Juara badge is shown on the Profile page",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "10th-year Mitra Juara badge is shown on the Profile page",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Manfaat & Pencapaian Anda shows achieved badges row",
+      "requirement_ref": "PAM-03",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Achievement tab shows the red-dot 'new' indicator on first open",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Calendar month labels render in Indonesian (Q1 resolved)",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    }
+  ]
+}

@@ -94,8 +94,8 @@ area* via the Blocking gates section, never the run.
 |---|---|
 | `rfc_context.json` | validation_sequence (business rules), flows, edge_cases, error_codes, contracts (all protocols), feature_flags, risk_areas, non_functional_requirements, extraction_gaps, open_questions, provenance |
 | `prd_context.json` | `acceptance_criteria[]` (incl. `verifiable` flag), `user_flows[]` + `failure_states[]`, `requirements[]`, `boundary_values[]`, `boundary_conditions[]`, `error_codes[]`, `feature_flags[]`, `non_functional_requirements[]`, `risk_areas[]`, `open_decisions[]` (blocking gate), `needs_clarification[]` (blocking gate), `comment_resolutions[]` (`implication_for_sdet`), `rollout_plan.phases[].variants`, `in_scope`, `out_of_scope` |
-| `tasks_context.json` | test_layer per story (authoritative), api_contract (authoritative endpoint + schema), validation_constraints (implementation confirmation), preconditions (contributing input for writing sdet_plan preconditions) |
-| `regression_context.json` | Active non-legacy non-flaky tests — deduplication signal |
+| `tasks_context.json` | `test_layer` at **story and task** level (authoritative — see below), `api_contract` (authoritative endpoint + schema), `validation_gates[]` (ordered gate chain with `is_remote`), `validation_constraints` (implementation confirmation), `canonical_team_id`, `external_systems[]`, `non_functional_targets[].has_backend_surface`, `preconditions` (contributing). **Never** `priority`. |
+| `regression_context.json` (the resolver's `scope.json`) | Existing coverage in the blast radius, scoped by **service** not feature. Read `testCases[]` (id + name), `resolvedServices[]` (`testGroups`/`testClasses` for the signoff run), `unresolvedServices[]`, `unmatchedTestCaseIds[]` and `browserstack.status`. Field names are camelCase. |
 | `code_change_context.json` | Pass 2 only — new endpoints, new error mappings, new validation rules not in RFC |
 | `qa_analysis.md` | Review mode — read the `## Human Review → ### Feedback` section for human corrections. Also read in all modes to preserve the Human Review section when regenerating. |
 | `team_registry.json` | Canonical team resolution — maps free-form PRD/RFC team names and dashboard PDG labels to stable `canonical_id`, `code_module`, and `regression_id_prefix`. Read once at startup before scenario generation begins. |
@@ -247,10 +247,10 @@ This is the RFC's formal A/C matrix applied per dimension. When sources conflict
 | API endpoints + schema | `tasks_context.api_contract` (route, request_fields, response_fields) | `rfc_context.contracts.rest[]` · `code_change_context` |
 | Business logic / validation rules | `rfc_context.validation_sequence` (ordered steps, constraints, failure codes) | `tasks_context.validation_constraints` · `code_change_context` |
 | Acceptance criteria + error scenarios | `prd_context` (business classification, AC list) | `tasks_context` (impl error code strings) · `rfc_context.error_codes[]` · `code_change_context` |
-| Test layer assignment | `tasks_context.test_layer` per story | `rfc_context.validation_sequence[].layer` (signal only — do not use to assign test_layer) |
+| Test layer assignment | `tasks_context.test_layer` — task-level for task-derived scenarios, story-level for story-spanning ones | `rfc_context.validation_sequence[].layer` (signal only — never use to assign test_layer) |
 | Package / class naming | `tasks_context` component + package | — |
 | Test-data / preconditions | `sdet_plan.json` — **this output is authoritative once written** | `prd_context` (business state) · `tasks_context.preconditions` · `rfc_context.flows[].trigger` |
-| Scenario priority | `prd_context` priority · `rfc_context.risk_areas[].priority` (P0 escalates) | `tasks_context` story priority |
+| Scenario priority | `prd_context` priority · `rfc_context.risk_areas[].priority` (P0 escalates) | — (**never** `tasks_context` priority — see below) |
 | Protocol contracts (gRPC, Kafka) | `rfc_context.contracts.grpc[]` / `kafka[]` | `code_change_context` |
 | Feature flag behaviour | `rfc_context.feature_flags[]` | `tasks_context` (implementation of the flag) |
 
@@ -299,6 +299,72 @@ This is the RFC's formal A/C matrix applied per dimension. When sources conflict
 | `out_of_scope` | Do not generate scenarios for flagged flows; note in coverage_summary.rfc_gaps[] if RFC has steps for them |
 | `open_decisions[]` | `blocking: true` → see Blocking gates; `blocking: false` → mark covering scenarios `provisional: true` |
 | `needs_clarification[]` | `blocking: true` → see Blocking gates; `blocking: false` → mark covering scenarios `provisional: true` |
+
+### `tasks_context` is an evolving contract — read it defensively
+
+`tasks_context.json` is produced by another team whose extractor is still in development. Any sample of it seen during this skill's development is a **sample, not the contract** — field shapes, derivations and coverage will change. Two standing rules follow:
+
+1. **Treat every field below `feature_name` and `epics[]` as optional.** Only `id`/`title`/`stories` on an epic and `id`/`type`/`component` on a task are guaranteed. Check presence before reading; never let an absent field become a default value. Absent is *undetermined*, not zero, not empty, not false.
+2. **Never re-implement their derivations here.** Where they own a value, read it. A copy of their rule in this skill is a copy that drifts silently the moment their branch moves.
+
+Degrade per field — a missing field costs one input, never the run:
+
+| Absent field | Degrade to |
+|---|---|
+| `test_layer` | our own fallback rule (below) |
+| `api_contract` | `rfc_context.contracts.rest[]`; flag endpoints as unconfirmed |
+| `validation_gates[]` | `rfc_context.validation_sequence` order; treat `is_remote` as unknown, not false |
+| `validation_constraints` | `rfc_context.validation_sequence` alone; scenarios stay valid, implementation detail is thinner |
+| `canonical_team_id` | resolve via the team registry from the service name |
+| `external_systems[]` | do **not** infer a layer from its absence — see rule 1 |
+| `non_functional_targets[].has_backend_surface` | treat as unknown; include the scenario and mark it for confirmation |
+| `preconditions` | `prd_context` business state + `rfc_context.flows[].trigger` (already the A/C order) |
+| `environments` | the market resolution order already defined below |
+| `component` / `package` | derive naming from the feature and module; flag as derived |
+
+Record in `qa_analysis.md` which authoritative inputs were actually present, as one line. When their extractor lands for real, that line is what shows whether a thin plan was thin because the feature was small or because the input was.
+
+### Test layer — read it at the matching scope, do not re-derive it
+
+`tasks_context` carries `test_layer` at both story and task level. These are **not in conflict**; they describe different scopes:
+
+| Scenario covers | Read layer from |
+|---|---|
+| One task's behaviour — an endpoint, a migration, a worker job | that **task's** `test_layer` |
+| A flow spanning several tasks in one story | that **story's** `test_layer` |
+| A flow spanning stories or epics | the widest layer among the stories it crosses |
+
+A story is the widest layer among its tasks, so applying story-level uniformly would over-classify: in one real breakdown STORY-01 is `e2e` while its four tasks are integration, e2e, integration and component. A component-level scenario derived from the component-level task must not inherit the story's `e2e`.
+
+**Read the value; do not re-derive it and do not second-guess it.** `tasks_context` is produced by the planning team and its layer derivation is theirs to own — it may change without changing anything here. Take `test_layer` verbatim at the matching scope, even where our own reading of the scenario would have chosen differently. If a value looks wrong, note it in `qa_analysis.md` under extraction concerns and carry on with their value; never silently override it, and never build a correction rule here that has to track theirs.
+
+Read `external_systems[]` and `test_layer_derivation.basis` only as context for a reviewer. **Absent is not empty** — a missing `external_systems` means undetermined, never zero, and must never be turned into `component`.
+
+Internal layers of the same service — controller, service, gateway, repository — are **not** external systems. A task is not component-level merely because it looks small: an API task whose logic calls a downstream service crosses one boundary and is integration. A DB migration crosses one boundary and is integration; it cannot be proven against a mock.
+
+**Stubbing a downstream does not lower the layer.** This is the mistake to avoid: a scenario is not `component` because its downstream *could* be stubbed. Backend suites here run against real deployed services — TestNG groups are suite and environment labels (`REGRESSION`, `SANITY`, `PHOENIX`), not layer labels, and there is no stubbed component tier to fall back to. `component` means the behaviour is provable **inside one service with no boundary crossed at all** — request validation, field defaulting, in-service state transitions, serialisation. Everything else is at least `integration`. Expect `component` to be a small minority of scenarios; if it comes out as a third of the plan, the rule has been applied as "mockable" instead of "no boundary crossed".
+
+**When `tasks_context` is absent entirely**, derive the layer here — this fallback is ours, and it is written for what we consume `test_layer` for: choosing where the test file lands (`package` and `test_class` in the automation plan). Component vs integration is about *boundaries crossed*; integration vs e2e is about *entry points chained*. Do not use one measure for both.
+
+| Layer | Fallback rule |
+|---|---|
+| `component` | No boundary crossed — provable inside one service. |
+| `integration` | At least one boundary crossed, driven by a **single entry point** — one API call or one consumed event — however many downstreams it fans out to. |
+| `e2e` | **Multiple chained entry points** — a journey, where a later call depends on state left by an earlier one. |
+
+A fan-out is not a journey: an endpoint calling two downstreams is `integration`. Count boundaries from `rfc_context.contracts.*` and `cross_service_dependencies[]`; count chained calls from the scenario's own steps.
+
+Record in `qa_analysis.md` that layers were derived rather than read, and that this fallback rule was used — if `tasks_context` later arrives with a different derivation, that note is what makes the divergence visible.
+
+### Never take scenario priority from `tasks_context`
+
+`tasks_context` carries `priority` at epic, story and task level. **None of it may drive scenario priority.** Planning priority reflects development sequencing — what must be built first given dependencies and team capacity. Scenario priority reflects business and user-journey risk — what breaks worst for a user. Those are different questions, and a task being built first says nothing about whether its failure matters most.
+
+The observed data makes this concrete: in one real breakdown every task carried `priority: P0` with `priority_derivation.basis` reading *"Inherited from EPIC-01 (P0); planning marks no priority on tasks."* The epic's own priority was derived from a feature spec whose priorities were themselves derived, with an open question noting the RFC states no explicit tiers. Reading that as business priority would mark an entire plan P0 on the strength of one inherited value.
+
+Priority comes from `prd_context` priority and PRD risk severity, escalated by `rfc_context.risk_areas[priority: P0]`. If neither source states a priority, say so in `qa_analysis.md` rather than borrowing planning's.
+
+`priority_derivation.confidence` is still worth reading — not to set priority, but to know how much of the planning artifact is inference when weighing anything else it says.
 
 **READ FROM `tasks_context` (A) for test layer and endpoint schema:**
 - `test_layer` per story → authoritative for all scenarios in that story; do not infer test_layer from `rfc_context.validation_sequence[].layer`
@@ -381,9 +447,13 @@ Scenarios that cross Kafka → consumer → Redis → downstream-read each need 
 
 If a scenario mutates fixture state (adds a member, attaches an entity, changes status), that fixture must not be reused by other scenarios expecting the pre-mutation state. Reusing a mutated fixture creates order-dependence — the classic "passes alone, fails in suite" flake. Give mutating scenarios their own `fixture_ids`.
 
-### Prefer stubs over provisioned data for failure paths
+### Failure paths — check the module can stub before writing a stub
 
-Downstream-failure scenarios (timeout, 5xx, unreachable dependency) should be driven by request-level stubs, not by provisioned entities. Stubs are deterministic and cost no runtime provisioning call. List only the fixtures the scenario genuinely needs in `fixture_ids`.
+Where request-level stubbing is available, prefer it to provisioned entities for downstream-failure scenarios (timeout, 5xx, unreachable dependency): stubs are deterministic and cost no runtime provisioning call. This is a **data** technique, not a layer technique — a stubbed downstream failure is still an `integration` scenario. See the test-layer rule above.
+
+**Stubbing is not available in every module, so confirm it before relying on it.** The gofood suite has no WireMock/`stubFor`/MockServer usage across 2,315 Java files. In a module like that, a step reading a stub call log is an instruction nobody can carry out — assert the observable absence of the downstream's side effect instead, and record the limitation in `qa_analysis.md`.
+
+Either way, list only the fixtures the scenario genuinely needs in `fixture_ids`.
 
 ### Scenarios are BrowserStack test cases, not Java test methods
 
@@ -392,6 +462,53 @@ These are two different granularities and must not be conflated. In `gojek-backe
 Set `scenario_group` on every scenario, keyed by its Arrange — the same precondition state and triggering call. This records a test-design fact that downstream tooling needs but cannot reliably re-derive from prose preconditions, and it is what stops `automation-plan-generator` emitting one test method per scenario.
 
 Do not size the plan to the method count. Scenarios may legitimately outnumber test methods; the ratio depends on how many natural permutation axes the feature has (service type, payment method, country). A feature with no such axis will sit near 1:1 and that is correct.
+
+## Writing scenarios an engineer can execute
+
+A scenario is read by someone who was not in the room when it was written. Everything below is calibrated against the team's own manually drafted GoFood group-order cases in BrowserStack, so it matches house convention rather than a general style preference.
+
+### Titles — `Verify …`, and name the condition
+
+`name` is what lands in the BrowserStack `Title` column and is the only field most readers ever see. In the team's existing group-order set, **87% of titles open with `Verify`**. Match it:
+
+> `Verify <what happens> when <condition>`
+
+`Verify the create session API rejects a request carrying both invite fields` — not `Reject a create request carrying both invite fields`. Imperative phrasing reads as a task, not a test case.
+
+**Never ship a title whose condition is a filler word.** These say nothing about what is being tested and are the most common defect in generated titles:
+
+`correctly` · `properly` · `gracefully` · `as expected` · `appropriate` · `relevant` · `any <noun>` · a bare `handle`/`work`/`behaviour`
+
+If the scenario body enumerates the cases, the title names them or names the axis. `Verify create session degrades gracefully on any social group error` becomes `Verify create session still succeeds when the social group call times out, returns an unknown id, or the host is not ACTIVE`. Longer is fine — the team's median title is 74 characters, and titles routinely run past 100.
+
+### Steps — every state check names its artifact
+
+Steps split into two kinds, and the second is where generated plans go wrong:
+
+| Kind | Executable because | Verb |
+|---|---|---|
+| A call to a service | `curl_reference` carries the request | `Call` |
+| A read of resulting state | **only** if the step names the artifact | `Read` |
+
+An API step is self-documenting; the curl says exactly what to run. A state-read step has no curl, so the prose is the entire instruction — and `Read the session row`, `Inspect the job queue`, `Check the cache` are not instructions. The reader cannot act without knowing *which*.
+
+**Every state-read step must name the concrete artifact**: the table, the job or queue by name, the cache key, the topic, the log.
+
+| Not this | This |
+|---|---|
+| `Read the session row` | `Read the group_order_sessions row for the session id` |
+| `Inspect the worker job queue` | `Inspect the queue for the send-social-group-chat-extension job` |
+| `Inspect the job queue after all three attempts` | `Inspect the auto-detect-or-auto-create job queue after all three attempts` |
+
+The artifact name comes from `tasks_context.api_contract`, `external_systems[]` and `rfc_context.contracts.*`. **If no source names it, that is a gap — record it in `qa_analysis.md` rather than writing a vague step.** A step nobody can perform is worse than a missing step, because it looks complete.
+
+### Use two step verbs, not five
+
+`Read`, `Inspect`, `Fetch` and `Check` all mean *look at something*, and mixing them makes one plan read as though several people wrote it. Use **`Call`** for a request to a service and **`Read`** for any state check — DB row, queue, cache, log, response body alike. Other verbs are fine only where they carry real meaning: `Create`, `Publish`, `Compare`, `Run`, `Enqueue`, `Let … run` for an async wait.
+
+### Do not write steps against capabilities the suite lacks
+
+Check before assuming a verification mechanism exists. `Inspect the Gopay stub call log` assumes request-level stubbing; the gofood suite has **no** WireMock/`stubFor`/MockServer usage in 2,315 Java files, so that step cannot be run. Where "the downstream was not called" must be proven and no stub exists, assert the observable absence of its side effect instead, and flag the limitation in `qa_analysis.md`. See also the test-layer rule: stubbing is not a layer-lowering mechanism, and here it may not be available at all.
 
 ## Scenario generation rules
 
@@ -404,7 +521,7 @@ For each step:
 - **Failure** — one negative scenario per `failure_error_code` the step can produce → `tags: ["negative"]`
 - **Boundary** — quantitative constraints in `constraint` field (min/max/edge) → `tags: ["boundary"]`
 
-Use `tasks_context.test_layer` for the story that implements this step — never infer test_layer from `validation_sequence[].layer`.
+Use `tasks_context.test_layer` at the scope the scenario covers — never infer test_layer from `validation_sequence[].layer`.
 
 **Assert the short-circuit, not just the rejection.** `validation_sequence` is ordered, and the `layer` field (`controller` → `service` → `gateway`) records where each gate sits. The ordering is itself a contract: a cheap local gate must reject before an expensive remote one runs. "Returns 422" does not prove that; "returns 422 **and the gateway was never invoked**" does.
 
@@ -544,6 +661,67 @@ For each flag:
 - New error mapping → negative scenario
 - All Pass 2 scenarios: `is_delta: true`
 
+## Regression disposition — classify against existing coverage before writing a scenario
+
+A backend feature almost always lands on endpoints that already have regression. For GoFood group order, 48 existing methods across 13 classes covered the endpoints this RFC touches before a line was written. Treating regression context purely as a dedup filter misses the larger half of the work: existing tests that must be **re-run**, and existing tests that must be **edited**.
+
+Scope is by **service**, not feature. Any change to a service has blast radius across that service and the impacted services its mapping declares, so the question is not "does a case duplicate my scenario" but "what must keep working".
+
+For every scenario about to be written, check `regression_context.testCases[]` and assign one disposition:
+
+| Situation | `is_legacy_regression` | `existing_case_ref` | `regression_action` | Scenario emitted? |
+|---|---|---|---|---|
+| **Exact match** — a case already covers this exact behaviour | `true` | set | `reuse` | Yes — a row so reviewers see it exists, but no code is generated |
+| **Directly impacted** — the change alters what an existing test should assert | `true` | set | `modify` | Yes — **plus** `existing_test_ref` naming the class, method and required change |
+| **No match** | `false` | omit | `none` | Yes — normal generation |
+| **Indirectly impacted** — shares a service but the behaviour is untouched | `false` | — | — | **No** — goes to `regression_selection` for the run, not to `scenarios[]` |
+
+**Never set `is_legacy_regression: true` without `existing_case_ref`.** A bare flag is untraceable — nobody can audit which case it claims to match.
+
+### What this file can tell you — depends on whether `steps` are present
+
+Always available per case: `id`, `name`, `projectId`. Optionally: `steps`, `expectedResults` and `stepsSource`. That optional block changes what may be concluded, so check for it before choosing a matching strategy.
+
+| Output | Titles only | With `steps` |
+|---|---|---|
+| `regression_selection` | **Yes, fully** — `resolvedServices[].testGroups` / `.testClasses` / `.testCaseIds` | same |
+| `existing_case_ref` | Yes, once matched — `testCases[].id` verbatim | same |
+| `regression_action: reuse` / `none` | **Weak** — title similarity only | **Strong** — behaviour-level match |
+| `regression_action: modify` | **No** | **Only when `stepsSource` is `repo`** — see below |
+| `existing_test_ref` | **No** | **No** — steps still name no class or method |
+
+### Matching with `steps` present
+
+Match on `steps` and `expectedResults` first, falling back to `name` only when steps are absent. Steps resolve the ambiguity titles cannot: in one real driver-platform scope, 20 cases shared the byte-identical title `"verify driver metadata with valid metadata key and value"` while each exercised a different metadata key — indistinguishable by title, trivially separable by steps.
+
+Record which signal produced the match in `qa_analysis.md`. A `reuse` justified by steps and one justified by a title guess deserve different levels of reviewer trust.
+
+### Matching without `steps`
+
+Title similarity only, and it is weak enough to need an explicit rule: **several candidates is not a match.** Leave `is_legacy_regression: false` rather than picking one. Under-claiming costs a duplicate test; over-claiming hides a real gap behind a case id that does not cover the behaviour.
+
+### Ids carry two prefixes — always
+
+One project renders cases as both `TC-{n}` and `C{n}` (298 and 61 respectively in that same scope). Strip both before comparing; matching on the raw `id` silently drops every case using the other form. Store the id **verbatim** in `existing_case_ref` and normalise only for comparison.
+
+### When `modify` may be concluded
+
+Only when `stepsSource` is `repo` **and** the steps or expected results state an assertion the change makes insufficient — a masking rule the change extends to new fields, an exact field set or collection size the change adds to, an error-code set gaining a code.
+
+`stepsSource: browserstack` is **not** sufficient. Human-written case steps describe intent and drift from the code; a step reading "verify the response is correct" says nothing about whether the Java asserts an exact field set or a bare `assertNotNull`. Treat browserstack-sourced steps as evidence for `reuse`, never for `modify`.
+
+**`existing_test_ref` still cannot be derived from this file at all**, because nothing here names a method. So a `modify` conclusion drawn from repo-sourced steps must be recorded as a finding in `qa_analysis.md` for a reviewer to convert, with `regression_action` left at `reuse` or `none` until the reference exists. Emitting `modify` with a null `existing_test_ref` fails the self-check by design — an edit instruction with no target sends a coding agent to guess which method to change.
+
+**One case does not mean one method.** In that same scope, 14 case ids sat on a single `dataProvider`-driven method. When method linkage does become available, `existing_test_ref.case_numbers[]` must list every case the method serves, or someone edits a shared method believing it belongs to one case.
+
+### Before trusting an empty result
+
+Read `browserstack.status` and `unresolvedServices[]` first. A failed fetch and genuinely-no-existing-coverage produce the same short `testCases[]`, and only these fields distinguish them. Note `unmatchedTestCaseIds[]` too — those ids were in scope but returned no detail, so they cannot be matched against and are not evidence of absence.
+
+### When `regression_context.json` is absent
+
+Leave `is_legacy_regression: false`, `existing_case_ref` and `existing_test_ref` null, `regression_action: "none"` and `regression_selection: null` on every scenario, and state in `qa_analysis.md` that the regression check did not run. Do **not** infer coverage from the RFC or the codebase — an unverified `true` is worse than an honest `false`.
+
 ## Completeness sweeps — run AFTER the per-source rules, BEFORE the granularity check
 
 The rules above generate from what the documents **state**. These four sweeps generate from what documents systematically **omit**. An RFC records the rules it intends; it does not record that a job can run twice, that an array can be empty, or that a condition has an inverse. Those gaps are structural, not accidental, so they need mechanical sweeps rather than careful reading.
@@ -680,12 +858,18 @@ Once `sdet_plan.json` is written and approved by a human:
 
 ## Output → sdet_plan.json
 
+> **Emit every field listed here explicitly, including the ones whose value is `null`, `false` or a default.** JSON Schema `default:` is annotation only — no validator injects it — so a field the generator does not write is simply absent, and every downstream consumer then has to distinguish "absent" from "not yet set". Write the key.
+
 Schema root:
-- `feature_name`, `plan_version`, `generation_mode: pass1|pass2|retrigger|review`
+- `feature_name`, `plan_version`, `generation_mode: pass1|pass2|retrigger|review`, `created_at`, `updated_at`
+- `status: draft|in_review|changes_requested|approved` — **always write `draft`**; see Approval gate. With `approved_by: null` and `approved_at: null`.
+- `teams_in_scope[]` — every resolved team with `canonical_id`, `raw_name`, `matched_via`, `code_module`, `regression_id_prefix`, `browserstack_project`, `is_primary`, `included`. Includes teams the human excluded at the scope gate.
+- `regression_selection: {test_groups[], test_classes[], case_ids[], rationale} | null` — the signoff run, copied from `regression_context.resolvedServices[]`. `null` when no regression context was available.
+- `browserstack_sync: null` — always `null` at generation. Written only by the BrowserStack MCP sync after upload.
 - `canonical_team_id: string` — resolved from `team_registry.json`. `"unknown"` if no match; triggers warning in qa_analysis.md. Stable across plan versions even if team renames (update registry alias instead).
 - `code_module: string | null` — exact test code module directory name from `team_registry.json code.module`. Consumed verbatim by `automation-plan-generator` for Java package path construction. `null` when resolution failed.
 - `scenarios[]` — each with:
-  - `scenario_id`, `name`, `description`
+  - `scenario_id`, `name` (`Verify …` — see *Writing scenarios an engineer can execute*), `description`
   - `test_layer: component|integration|e2e`
   - `priority: P0|P1|P2`
   - `source: RFC|PRD|CODE_DIFF|RETRIGGER|REVIEW`, `source_ref`
@@ -698,7 +882,13 @@ Schema root:
   - `execution_mode: Automatable|Manual` — BrowserStack Execution Mode. `Manual` for scenarios tagged `deferred` or `underspecified`; `Automatable` for all others.
   - `markets: array` — Countries this scenario applies to. Values: `Indonesia` | `Singapore`. Derived from `tasks_context.environments`; default `["Indonesia", "Singapore"]` when not specified.
   - `type_of_test: functional|performance` — BrowserStack Type of Test Case. `performance` **only** when tags contain `load` or `nfr` — i.e. the scenario measures a throughput or latency target. Everything else is `functional`, including `reliability` and `concurrency` scenarios: a timeout, retry-exhaustion, circuit-breaker or race-condition test asserts *functional* behaviour under adverse conditions, it does not measure performance.
-  - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`. Target 4–6 steps per scenario (see Scenario granularity). Every `expected_result` is a concrete assertion phrased as `Verify …`; `action` is imperative. Steps and expected results are 1:1.
+  - `owning_team: string` — canonical id of the team owning this scenario's system under test. Defaults to the primary `canonical_team_id`; set explicitly on every scenario.
+  - `regression_action: none|reuse|modify` — disposition against existing coverage. `none` unless a regression match was made.
+  - `existing_case_ref: string | null` — the matched BrowserStack case id, verbatim. Never `is_legacy_regression: true` without it.
+  - `existing_test_ref: object | null` — `{class, method, file_path, case_numbers[], change_required}`. Required when `regression_action` is `modify`; `null` otherwise, and `null` is the only correct value when the regression context carries no method linkage.
+  - `change_reason: string` — set by retrigger and review modes only.
+  - `dedup_reason: string` — set by `dedup-generator`, not here.
+  - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`. Target 4–6 steps per scenario (see Scenario granularity). Every `expected_result` is a concrete assertion phrased as `Verify …`. `action` is imperative and, when it reads state rather than calling a service, **names the artifact it reads** — see *Writing scenarios an engineer can execute*. Steps and expected results are 1:1.
   - `preconditions[]`, `fixture_ids[]`
   - `scenario_group: string` — key shared by scenarios that rest on the **same Arrange**: the same precondition state and the same triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction — it applies equally to `Manual` scenarios, where it tells a human tester which cases can be executed back-to-back off one setup. A scenario with no sibling gets its own unique key. Format: `{feature_component}-{behaviour}`, e.g. `chatextension-terminal-status`. Downstream consumers decide what to do with the grouping; see `automation-plan-generator` for how it maps to test methods.
   - `browserstack_test_id: string | null` — BrowserStack's own id for this scenario, assigned when the plan is uploaded through the BrowserStack MCP. **Emit `null` at generation time and never author a value.** The sync writes it back after upload, which is what makes the plan round-trippable: re-running Review or Pass 2 can then update the existing case instead of creating a duplicate. Do not confuse it with `existing_testcase_ids[]` — that names cases which existed *before* this plan; this names the case *this* scenario became.
@@ -714,6 +904,32 @@ Schema root:
   - `human_added: integer` — scenarios added by review (LLM under-generated; `generated_by_mode: "review"`)
   - `llm_accuracy_pct: float` — `auto_approved / (auto_approved + human_modified + human_deprecated)` × 100. Excludes `human_added` from denominator (can't penalise the LLM for what it never generated)
   - `review_rounds_completed: integer`
+
+## Approval gate
+
+Approval happens at **two levels**, and the generator writes `draft` at both.
+
+| Level | Field | Means |
+|---|---|---|
+| Plan | root `status` | this plan has been through review at all |
+| Scenario | `scenarios[].status` | **this** scenario is signed off |
+
+Both use `draft` → `in_review` → `changes_requested` → `approved`; scenarios add a fifth terminal value, `deprecated`. **Always write `draft` at both levels.** The generator never approves its own output — `approved` is set by a person after reading the plan and its analysis document, and nothing downstream may run until they do.
+
+Two levels exist because a plan is reviewed case by case: a reviewer may approve 60 scenarios and request changes on 17, and the 60 should not be held up by the 17. `automation-plan-generator` halts on the root value, then selects per scenario.
+
+**INVARIANT: root may not be `approved` while any scenario is still `draft` or `in_review`.** An approved plan holding unreviewed scenarios is ambiguous about what was actually signed off. `changes_requested` and `deprecated` scenarios do not block root approval — both are decisions a human has already made.
+
+| Value | Meaning |
+|---|---|
+| `draft` | generated, not yet reviewed. The only value this skill ever writes. |
+| `in_review` | a reviewer has picked it up |
+| `changes_requested` | feedback is written in the `qa_analysis.md` Feedback block; a Review-mode run is pending |
+| `approved` | cleared to flow to `automation-plan-generator` |
+
+**Any run that changes scenario content resets `status` to `draft` at BOTH levels** — the plan root, and every scenario whose content that run actually changed. Scenarios the run left untouched keep their approval. Pass2, retrigger and review all qualify. An approval attaches to the content a person actually read, not to the filename. Set `approved_by` and `approved_at` to null at the same time; a plan whose `updated_at` is later than its `approved_at` has been edited since approval and the approval is stale.
+
+Keep this consistent with the `**Status:**` line in the `qa_analysis.md` Human Review block — the markdown is what the reviewer edits, the JSON field is what downstream tooling gates on. They must not disagree.
 
 ## Output → qa_analysis.md
 
@@ -734,6 +950,7 @@ Human-readable summary for SDET + PM review gate:
 - **Granularity check** — mean steps per scenario, count of 1-step scenarios, scenarios exceeding 3 fixtures, and the `scenario_group`-to-scenario ratio (see Log). Call out explicitly if the plan drifted toward one-assertion-per-scenario.
 - **Market assumption** — which market(s) were set and on what basis, flagged for confirmation whenever they were inferred rather than read from `tasks_context.environments`.
 - **BrowserStack sync** — after a sync has run, how many scenarios carry a `browserstack_test_id` and how many are still null, with the project they landed in. Before the first sync, state plainly that none are tracked yet.
+- **Regression disposition** — counts by `regression_action`, a table of every `modify` scenario with its case id, target class/method and required change, and the `regression_selection` contents. When `regression_context.json` was unavailable, say so in one line rather than printing an empty table.
 - **Team scope** — the full `teams_in_scope[]` table with each team's module, regression prefix and BrowserStack project, which team is primary, the scope the human confirmed at the gate, and an **excluded-by-scope table** naming every scenario dropped for team reasons with its `owning_team`, entry point and what it covered. An excluded scenario that leaves no trace here is indistinguishable from a coverage gap.
 - **Coverage ledger** — the full table with every unmapped row and its stated reason. This is the section a reviewer scans to find what the plan does not cover, so unmapped rows belong here in full rather than summarised.
 - **Completeness sweep results** — how many scenarios or steps each of the four sweeps contributed. A sweep contributing zero is a signal it was skipped, not that the feature had nothing to find.
@@ -778,7 +995,7 @@ Flat CSV for BrowserStack upload via BrowserStack MCP after human approval. Colu
 | CSV column | Maps from | Notes |
 |---|---|---|
 | `Id` | `scenario_id` | External ID for traceability |
-| `Title` | `name` | Human-readable scenario name |
+| `Title` | `name` | `Verify <what> when <condition>` — house convention, no filler adjectives. See *Writing scenarios an engineer can execute*. |
 | `Priority` | `priority` | P0 / P1 / P2. P3/P4 not generated by this skill. |
 | `Platform` | Constant `Backend` | This skill generates backend test cases only |
 | `Execution Mode` | `execution_mode` | `Automatable` or `Manual` (see derivation below) |
@@ -1017,7 +1234,13 @@ Also log the granularity metrics, so drift back to one-assertion-per-scenario is
 Reject and regroup if any of these hold:
 - mean steps per scenario < 3
 - more than 20% of scenarios have exactly 1 step
+- `status` is anything other than `draft` on a freshly generated plan — at the root **or** on any scenario; the generator never approves its own output
+- root `status` is `approved` while any scenario sits at `draft` or `in_review` — violates the two-level invariant
+- a pass2, retrigger or review run left `status` at `approved` — at the root, or on a scenario whose content that run changed — instead of resetting it to `draft`
 - `scenario_group` is missing on any scenario, or every scenario has a unique one (it was not derived from the Arrange)
+- any scenario has `is_legacy_regression: true` with no `existing_case_ref`
+- any scenario has `regression_action: "modify"` with no `existing_test_ref`, or an `existing_test_ref` whose `change_required` is empty
+- `regression_context.json` was present and `regression_selection` is null
 - `owning_team` is missing on any scenario, or names a `canonical_id` absent from `teams_in_scope[]`
 - more than one registry entry matched and the scope confirmation gate was not run
 - a scenario was excluded for team scope without a corresponding entry in the `qa_analysis.md` excluded-by-scope table

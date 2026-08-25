@@ -1,0 +1,472 @@
+{
+  "contract_version": "1.0.0",
+  "generated_at": "2026-08-19T08:21:02+00:00",
+  "extraction_status": "COMPLETE",
+  "extraction_notes": [],
+  "feature_metadata": {
+    "feature_key": "birthday_feature",
+    "epic_ref": "birthday_feature",
+    "app": "gopay-consumer",
+    "platform": "cross-platform",
+    "module_namespace": "home,birthday,push_notification,sharing"
+  },
+  "inputs": {
+    "sdet_plan": {
+      "path": "/private/tmp/claude-502/-Users-ashishsharma-Repos-smartscope/53b2677c-3b11-4046-b4e0-ecdce5545327/scratchpad/plan.json",
+      "present": true
+    },
+    "regression_context": {
+      "path": "/private/tmp/claude-502/-Users-ashishsharma-Repos-smartscope/53b2677c-3b11-4046-b4e0-ecdce5545327/scratchpad/regression_context.json",
+      "present": true
+    },
+    "change_context": {
+      "path": "examples/birthday_feature/change_context.json",
+      "present": true
+    },
+    "id_compliance": {
+      "path": "id_compliance.json",
+      "present": true,
+      "generated_at": "2026-08-18T11:05:00Z",
+      "contract_version": "1.0.0"
+    }
+  },
+  "change_surface": {
+    "source": "change_context",
+    "merge_requests": [
+      "!7101",
+      "!7102",
+      "!7103"
+    ],
+    "changed_files": [
+      "lib/birthday/animation/lottie_celebration_screen.dart",
+      "lib/birthday/candle/blow_candle_screen.dart",
+      "lib/birthday/candle/flash_transition.dart",
+      "lib/birthday/result/birthday_result_screen.dart",
+      "lib/birthday/result/card_gallery_screen.dart",
+      "lib/birthday/result/save_share_bottomsheet.dart",
+      "lib/birthday/share/insta_stories_preview.dart",
+      "lib/birthday/share/whatsapp_preview.dart",
+      "lib/home/genie/birthday_genie_card.dart"
+    ],
+    "changed_modules": [
+      "home",
+      "birthday",
+      "push_notification",
+      "sharing"
+    ],
+    "changed_screens": [
+      "HOMESCREEN",
+      "LOTTIE_ANIMATION",
+      "HAPPY_BIRTHDAY",
+      "ANIMATION_FLASH",
+      "BIRTHDAY_RESULT",
+      "INSTA_STORIES",
+      "WHATSAPP_CHAT"
+    ],
+    "changed_element_ids": [
+      {
+        "element_id": "HOMESCREEN.TAP_BIRTHDAY_CARD",
+        "change_type": "added"
+      },
+      {
+        "element_id": "HOMESCREEN.birthday_card_headline",
+        "change_type": "added"
+      },
+      {
+        "element_id": "LOTTIE_ANIMATION.TIMEOUT_COMPLETE",
+        "change_type": "added"
+      },
+      {
+        "element_id": "LOTTIE_ANIMATION.TAP_SKIP_BTN",
+        "change_type": "added"
+      },
+      {
+        "element_id": "HAPPY_BIRTHDAY.TAP_CANDLE_BTN",
+        "change_type": "added"
+      },
+      {
+        "element_id": "HAPPY_BIRTHDAY.TAP_CLOSE_BTN",
+        "change_type": "added"
+      },
+      {
+        "element_id": "HAPPY_BIRTHDAY.LABEL_USER_NAME",
+        "change_type": "added"
+      },
+      {
+        "element_id": "HAPPY_BIRTHDAY.wish_text_label",
+        "change_type": "added"
+      },
+      {
+        "element_id": "ANIMATION_FLASH.TIMEOUT_COMPLETE",
+        "change_type": "added"
+      },
+      {
+        "element_id": "BIRTHDAY_RESULT.SWIPE_CARD_CAROUSEL",
+        "change_type": "added"
+      },
+      {
+        "element_id": "BIRTHDAY_RESULT.card_select_btn",
+        "change_type": "added"
+      },
+      {
+        "element_id": "BIRTHDAY_RESULT.TAP_SAVE_SHARE_BTN",
+        "change_type": "added"
+      },
+      {
+        "element_id": "BIRTHDAY_RESULT.TAP_WHATSAPP_BTN",
+        "change_type": "added"
+      },
+      {
+        "element_id": "BIRTHDAY_RESULT.TAP_SOCIAL_MEDIA_BTN",
+        "change_type": "added"
+      },
+      {
+        "element_id": "BIRTHDAY_RESULT.TAP_DISMISS_SHEET_BTN",
+        "change_type": "added"
+      },
+      {
+        "element_id": "BIRTHDAY_RESULT.TAP_CLOSE_BTN",
+        "change_type": "added"
+      },
+      {
+        "element_id": "INSTA_STORIES.TAP_CLOSE_BTN",
+        "change_type": "added"
+      },
+      {
+        "element_id": "WHATSAPP_CHAT.TAP_BACK_BTN",
+        "change_type": "added"
+      }
+    ],
+    "flags": [
+      "birthday_feature_litmus_content"
+    ],
+    "api_endpoints": [],
+    "cr_risks": [
+      {
+        "id": "RISK-002",
+        "area": "HOMESCREEN / LOTTIE_ANIMATION",
+        "suggested_test": "First cold launch on D-Day after a 24h+ app-close gap may serve a stale pre-birthday Litmus snapshot; verify birthday variant renders (SDET plan RISK-002, TC first-cold-launch)."
+      },
+      {
+        "id": "BR-002-GAP",
+        "area": "LOTTIE_ANIMATION.TAP_SKIP_BTN",
+        "suggested_test": "Figma ON_CLICK is null for the skip CTA \u2014 confirm the dev-implemented skip destination and verify no crash/freeze (SDET plan cross_stage_gap_analysis, CRITICAL_BLOCKER)."
+      },
+      {
+        "id": "BR-004-DRIFT",
+        "area": "BIRTHDAY_RESULT / card persistence",
+        "suggested_test": "PRD implies BE profile persistence of the selected card; RFC/build implement FE-local birthday_selected_card_id only \u2014 verify uninstall/reinstall clears the card and escalate the drift (SDET plan prd_vs_rfc_gaps)."
+      },
+      {
+        "id": "BR-006-GAP",
+        "area": "PUSH_NOTIFICATION \u2192 LOTTIE_ANIMATION",
+        "suggested_test": "No PN deeplink is defined in RFC or bound in the manifest; verify PN-tap actually lands on the celebration animation, else fall back to nav-macro (SDET plan cross_stage_gap_analysis, CRITICAL_BLOCKER)."
+      }
+    ],
+    "id_compliance_status": "PASS"
+  },
+  "selection_summary": {
+    "candidate_pool_size": 8,
+    "shortlisted_count": 6,
+    "deselected_count": 2,
+    "must_run_count": 5,
+    "should_run_count": 1,
+    "optional_count": 0,
+    "reduction_pct": 25.0,
+    "estimated_runtime_sec": null
+  },
+  "shortlisted_tests": [
+    {
+      "test_id": "C2879733",
+      "case_number": "2879733",
+      "browserstack_id": "C2879733",
+      "title": "GoPay home carousel renders all Genie cards in order",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "PLAN_SCENARIO_LINK"
+      ],
+      "evidence": {},
+      "execution_target": "TAPMIND_NLP",
+      "priority": "P0",
+      "source_module": "gopay-consumer",
+      "plan_scenario_refs": [
+        "Birthday Genie card appears at position 1 in home carousel on birthday D-Day"
+      ],
+      "source": "regression_pool"
+    },
+    {
+      "test_id": "C2880112",
+      "case_number": "2880112",
+      "browserstack_id": "C2880112",
+      "title": "Share a receipt to WhatsApp from GoPay",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "MODULE_TOUCHED"
+      ],
+      "evidence": {
+        "changed_modules": [
+          "sharing"
+        ]
+      },
+      "execution_target": "MANUAL",
+      "priority": "P1",
+      "source_module": "sharing",
+      "plan_scenario_refs": [],
+      "source": "regression_pool"
+    },
+    {
+      "test_id": "C2880115",
+      "case_number": "2880115",
+      "browserstack_id": "C2880115",
+      "title": "Share a receipt to Instagram Stories from GoPay",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "MODULE_TOUCHED"
+      ],
+      "evidence": {
+        "changed_modules": [
+          "sharing"
+        ]
+      },
+      "execution_target": "MANUAL",
+      "priority": "P1",
+      "source_module": "sharing",
+      "plan_scenario_refs": [],
+      "source": "regression_pool"
+    },
+    {
+      "test_id": "C2881004",
+      "case_number": "2881004",
+      "browserstack_id": "C2881004",
+      "title": "Push notification deeplink opens GoPay home",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "MODULE_TOUCHED"
+      ],
+      "evidence": {
+        "changed_modules": [
+          "push_notification"
+        ]
+      },
+      "execution_target": "MANUAL",
+      "priority": "P1",
+      "source_module": "push_notification",
+      "plan_scenario_refs": [],
+      "source": "regression_pool"
+    },
+    {
+      "test_id": "C2883900",
+      "case_number": "2883900",
+      "browserstack_id": "C2883900",
+      "title": "Legacy birthday banner removed for non-KYC users",
+      "run_tier": "MUST_RUN",
+      "reason_codes": [
+        "MODULE_TOUCHED"
+      ],
+      "evidence": {
+        "changed_modules": [
+          "home"
+        ]
+      },
+      "execution_target": "MANUAL",
+      "priority": "P2",
+      "source_module": "home",
+      "plan_scenario_refs": [],
+      "source": "regression_pool"
+    },
+    {
+      "test_id": "C2879740",
+      "case_number": "2879740",
+      "browserstack_id": "C2879740",
+      "title": "Home V3.1 Genie card tap opens the linked destination",
+      "run_tier": "SHOULD_RUN",
+      "reason_codes": [
+        "AGENT_JUDGED_RELEVANT"
+      ],
+      "evidence": {},
+      "execution_target": "MANUAL",
+      "priority": "P0",
+      "source_module": "gopay-consumer",
+      "plan_scenario_refs": [],
+      "source": "regression_pool",
+      "explanation": "Genie card tap navigation is exactly the interaction HOMESCREEN.TAP_BIRTHDAY_CARD adds; this case covers what that tap does next."
+    }
+  ],
+  "deselected_tests": [
+    {
+      "test_id": "C2882301",
+      "case_number": "2882301",
+      "title": "GoPay PIN change from settings",
+      "reason_code": "NO_IMPACT_SIGNAL",
+      "explanation": "PIN/settings flow has no overlap with the changed screens, modules, or flags."
+    },
+    {
+      "test_id": "C2882345",
+      "case_number": "2882345",
+      "title": "Transaction history filters by date range",
+      "reason_code": "NO_IMPACT_SIGNAL",
+      "explanation": "Transaction history filtering is unrelated to the birthday Genie card / celebration / sharing surface."
+    }
+  ],
+  "unresolved_ids": [],
+  "run_buckets": {
+    "GMT_JAVA": [],
+    "TAPMIND_NLP": [
+      "C2879733"
+    ],
+    "MANUAL": [
+      "C2880112",
+      "C2880115",
+      "C2881004",
+      "C2883900",
+      "C2879740"
+    ],
+    "UNKNOWN_AUTOMATED": []
+  },
+  "new_scenarios_to_run": [
+    {
+      "csv_title_association": "Birthday Genie card is NOT visible on home carousel on a non-birthday day",
+      "requirement_ref": "BR-001",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Birthday celebration animation plays and exit CTA is visible when Genie card is tapped",
+      "requirement_ref": "BR-002",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Exit CTA tapped during animation navigates away from animation screen",
+      "requirement_ref": "BR-002",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Blow candle screen renders user display name and CTA text correctly",
+      "requirement_ref": "BR-003",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "First-time card selection: 10 birthday cards visible in swipeable gallery and a card can be selected",
+      "requirement_ref": "BR-004",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Save and Share bottom sheet appears with correct share options after card selection",
+      "requirement_ref": "BR-004",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Re-trigger flow: second Genie card tap within birthday window skips card selection and shows previously selected card",
+      "requirement_ref": "BR-005",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Push notification received on birthday D-Day and tapping it deeplinks to celebration animation",
+      "requirement_ref": "BR-006",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Kill switch (Litmus disabled) hides birthday feature \u2014 Genie card and flow not visible",
+      "requirement_ref": "FE-BIRTHDAY-001 kill_switch_flag",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "First cold launch on birthday D-Day loads birthday Litmus content (not a stale prior-session snapshot)",
+      "requirement_ref": "RISK-002",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Birthday Genie card disappears from home carousel after the 24-hour birthday window closes",
+      "requirement_ref": "BR-001 BC-001",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Birthday flow is not accessible via navigation outside Genie card or push notification on a non-birthday day",
+      "requirement_ref": "RISK-001",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Process death after card selection \u2014 re-opening birthday flow within window shows previously selected card",
+      "requirement_ref": "OQ-006 lifecycle:PROCESS_DEATH",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Uninstall and reinstall within birthday window \u2014 card selection starts from scratch",
+      "requirement_ref": "OQ-007 lifecycle:APP_UNINSTALL_REINSTALL",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Android: photo library permission DENIED \u2014 save fails silently and WhatsApp share still works",
+      "requirement_ref": "BR-004 permissions:READ_MEDIA_IMAGES",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "iOS: photo library permission DENIED \u2014 save fails silently and WhatsApp share still works",
+      "requirement_ref": "BR-004 permissions:NSPhotoLibraryAddUsageDescription",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Second and subsequent launches within birthday window serve Litmus data from cache with no network calls",
+      "requirement_ref": "OQ-004 local_data:birthday_litmus_data",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Non-KYC user does not see birthday Genie card in home carousel",
+      "requirement_ref": "BR-001 persona:non_kyc_user",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Birthday card shared directly to Instagram Stories with no native OS share popup",
+      "requirement_ref": "BR-007 OQ-002",
+      "priority_tier": "P1",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Long user display name is truncated with ellipsis on blow candle screen without layout breakage",
+      "requirement_ref": "BR-003 RISK-003",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "App backgrounded and foregrounded during celebration animation \u2014 state is handled gracefully",
+      "requirement_ref": "lifecycle:BACKGROUND_FOREGROUND",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "Android: photo library permission GRANTED \u2014 birthday card saves to device gallery successfully",
+      "requirement_ref": "BR-004 BR-007 permissions:READ_MEDIA_IMAGES",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "iOS: photo library permission GRANTED \u2014 birthday card saves to device photo library successfully",
+      "requirement_ref": "BR-004 BR-007 permissions:NSPhotoLibraryAddUsageDescription",
+      "priority_tier": "P2",
+      "target_execution_framework": "TAPMIND_NLP"
+    },
+    {
+      "csv_title_association": "WhatsApp share: birthday card image and GoPay deeplink sent via WhatsApp",
+      "requirement_ref": "BR-007",
+      "priority_tier": "P0",
+      "target_execution_framework": "TAPMIND_NLP"
+    }
+  ]
+}

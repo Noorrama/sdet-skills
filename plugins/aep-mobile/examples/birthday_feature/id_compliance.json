@@ -1,0 +1,17 @@
+{
+  "contract_version": "1.0.0",
+  "app": "gopay-consumer",
+  "epic_ref": "birthday_feature",
+  "platform": "cross-platform",
+  "framework": "flutter",
+  "status": "PASS",
+  "missing_ids": [],
+  "renamed_ids": [],
+  "missing_deeplinks": [],
+  "gap_filled_ids": [
+    "HOMESCREEN.birthday_card_headline",
+    "HAPPY_BIRTHDAY.wish_text_label",
+    "BIRTHDAY_RESULT.card_select_btn"
+  ],
+  "reject_codes": []
+}

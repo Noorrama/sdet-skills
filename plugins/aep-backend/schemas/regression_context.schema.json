@@ -1,0 +1,240 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "regression_context",
+  "description": "Output of the backend regression scope resolver (scope.json). Resolves requested services against the per-module regression index (e.g. gofood.regression.json) and returns the existing BrowserStack cases plus the TestNG selectors that cover them. Scoped by SERVICE, not by feature: any change to a service has blast radius across that service and the impacted services its index declares. Field names are camelCase, matching the emitted file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "module",
+    "resolvedServices",
+    "testCaseIds",
+    "testCases"
+  ],
+  "properties": {
+    "module": {
+      "type": "string",
+      "description": "Test code module the scope was resolved in, e.g. 'driver-platform'. Matches team_registry code.module."
+    },
+    "indexFile": {
+      "type": "string",
+      "description": "Per-module mapping file the scope was resolved through, e.g. 'driver-platform.regression.json'."
+    },
+    "caseIdNamespace": {
+      "type": "string",
+      "description": "Where the numeric case ids originate, e.g. 'testrail'. The same number is rendered by BrowserStack as either 'TC-{n}' or 'C{n}' — see testCases[].id."
+    },
+    "projectIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "BrowserStack project identifiers queried, e.g. ['PR-143']."
+    },
+    "requestedServices": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Service names asked for. The caller supplies the service under change; the index expands it to impacted services."
+    },
+    "resolvedServices": {
+      "type": "array",
+      "description": "One entry per successfully resolved service. testGroups and testClasses are the executable selectors for the signoff run.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "service"
+        ],
+        "properties": {
+          "requested": {
+            "type": "string",
+            "description": "The name as asked for."
+          },
+          "service": {
+            "type": "string",
+            "description": "The name it resolved to in the index."
+          },
+          "matchedBy": {
+            "type": "string",
+            "description": "How it resolved, e.g. 'exact'."
+          },
+          "testCaseIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Bare numeric case ids covering this service."
+          },
+          "testGroups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "TestNG groups — what CI runs for the signoff."
+          },
+          "testClasses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Test class simple names. Note: class-level only — no method names, so a case cannot be traced to a specific method from this file alone."
+          },
+          "coverage": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "testMethods": {
+                "type": "integer"
+              },
+              "linkedToCaseIds": {
+                "type": "integer"
+              },
+              "unlinked": {
+                "type": "integer",
+                "description": "Methods carrying no @TestInfo case id. They exist but can never be matched to a case — a coverage-quality signal, not an error."
+              }
+            }
+          }
+        }
+      }
+    },
+    "unresolvedServices": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Requested services the index could not resolve. Never silently dropped."
+    },
+    "testCaseIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Union of bare numeric case ids across all resolved services."
+    },
+    "testCases": {
+      "type": "array",
+      "description": "Case detail fetched from BrowserStack. Only id, name and projectId are available — there is no status, priority, endpoint, method or requirement linkage in this file.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "BrowserStack case id verbatim. BOTH 'TC-{n}' and 'C{n}' renderings occur within a single project — in one real driver-platform scope, 298 cases used TC- and 61 used C. Any join must strip both prefixes, or it silently drops the other form."
+          },
+          "name": {
+            "type": "string",
+            "description": "Case title. NOT unique — in the same real scope, 61 of 359 cases shared a title and 20 were identical. A weak matching signal that cannot disambiguate on its own."
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Execution steps for this case. OPTIONAL — present only when the resolver fetched them. When present they are the strongest matching signal available in this file: they disambiguate cases that share a title, which titles alone cannot. Preferred source is the repo (what actually runs) when an automated counterpart exists; otherwise BrowserStack's human-written steps, which may be thin or empty."
+          },
+          "stepsSource": {
+            "type": "string",
+            "enum": [
+              "repo",
+              "browserstack"
+            ],
+            "description": "Where steps came from. 'repo' = derived from the automated counterpart, so it reflects what executes. 'browserstack' = the human-written case steps, which describe intent and may have drifted from the code. The distinction matters: only repo-sourced steps are evidence about what a test asserts."
+          },
+          "expectedResults": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Expected result per step, positionally aligned with steps[] where the source provides them. Carries the assertions a case makes, which is what reveals an assertion becoming insufficient after a contract change."
+          }
+        },
+        "description": "Case detail fetched from BrowserStack. id, name and projectId are always present. steps/expectedResults are optional and, when present, upgrade matching from weak title similarity to behaviour-level. There is still no method, endpoint or requirement linkage in this file."
+      }
+    },
+    "unmatchedTestCaseIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ids present in testCaseIds for which BrowserStack returned no case detail."
+    },
+    "browserstack": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Fetch outcome. Read this before trusting an empty or short testCases[] — a failed fetch and genuinely-no-coverage look identical otherwise.",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "e.g. OK."
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fetchedCases": {
+          "type": "integer",
+          "description": "Total cases pulled from the project before filtering to the requested services."
+        },
+        "projects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "projectId": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "fetchedCases": {
+                "type": "integer"
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requestedServices": {
+          "type": "integer"
+        },
+        "resolvedServices": {
+          "type": "integer"
+        },
+        "unresolvedServices": {
+          "type": "integer"
+        },
+        "testCaseIds": {
+          "type": "integer"
+        },
+        "matchedTestCases": {
+          "type": "integer"
+        },
+        "unmatchedTestCaseIds": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

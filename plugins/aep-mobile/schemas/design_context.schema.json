@@ -185,10 +185,11 @@
     },
     "ui_flow": {
       "type": "array",
+      "description": "Ordered breadth-first from the flow's entry point(s): ENTRY edges first, then each reached screen's outgoing edges wave by wave, then edges of components unreachable from any entry (appended deterministically by board position). Order is presentational — no consumer may attach semantics to array position beyond readability.",
       "items": {
         "type": "object",
         "properties": {
-          "from_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+          "from_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$", "description": "Screen id, or the reserved pseudo-node 'ENTRY' (statechart initial-state pattern): an ENTRY edge marks where the flow starts. 'ENTRY' never appears in screens[], is valid only as from_screen_id, and only on edges whose edge_source is ENTRY_LABEL or ENTRY_TOPOLOGY. Scripts emit it; the enrichment pass never touches it." },
           "trigger_element_id": {
             "type": "string",
             "pattern": "^[A-Z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$",
@@ -201,13 +202,13 @@
           "decision_node_id": { "type": "string", "description": "ADDITION, contracted edges only. Figma node id of the decision box, so a reviewer can see why the condition attached where it did." },
           "navigation_kind": {
             "type": "string",
-            "enum": ["NAVIGATE", "OVERLAY", "BACK", "CLOSE", "DEEP_LINK"],
-            "description": "ADDITION. SWAP / CHANGE_TO / SCROLL_TO reactions are element state changes, not navigation, and never appear as ui_flow edges."
+            "enum": ["NAVIGATE", "OVERLAY", "BACK", "CLOSE", "DEEP_LINK", "ENTRY"],
+            "description": "ADDITION. SWAP / CHANGE_TO / SCROLL_TO reactions are element state changes, not navigation, and never appear as ui_flow edges. ENTRY is used only on edges from the reserved ENTRY pseudo-node."
           },
           "edge_source": {
             "type": "string",
-            "enum": ["CONNECTOR", "PROTOTYPE_REACTION", "CONNECTOR_INFERRED", "REACTION_INFERRED", "CONNECTOR_CONTRACTED"],
-            "description": "ADDITION. Where the edge came from. _INFERRED means the destination was derived rather than drawn. CONNECTOR_CONTRACTED means a decision box between two screens was collapsed so its condition could attach to the screen it belongs to; source_ref holds the EXIT connector (the one carrying the branch label), consistent with every other edge, and the box itself is in decision_node_id."
+            "enum": ["CONNECTOR", "PROTOTYPE_REACTION", "CONNECTOR_INFERRED", "REACTION_INFERRED", "CONNECTOR_CONTRACTED", "ENTRY_LABEL", "ENTRY_TOPOLOGY"],
+            "description": "ADDITION. Where the edge came from. _INFERRED means the destination was derived rather than drawn. CONNECTOR_CONTRACTED means a decision box between two screens was collapsed so its condition could attach to the screen it belongs to; source_ref holds the EXIT connector (the one carrying the branch label), consistent with every other edge, and the box itself is in decision_node_id. ENTRY_LABEL / ENTRY_TOPOLOGY appear only on edges from the reserved ENTRY pseudo-node: ENTRY_LABEL = an explicit designer signal (an 'Entry point' / '1st time' qualifier on a screen label chip, or a prototype flow starting point; source_ref = the chip/frame node id), ENTRY_TOPOLOGY = inferred from graph topology when the board carries no explicit label (zero in-degree root with the widest forward reach; source_ref = the screen's frame id)."
           },
           "confidence": { "type": "string", "enum": ["EXPLICIT", "INFERRED"], "description": "ADDITION." },
           "edge_direction_source": { "type": "string", "enum": ["ARROWHEAD", "ARROWHEAD_REVERSED", "AMBIGUOUS", "UNDIRECTED"], "description": "ADDITION, present only when direction was NOT the plain case. The arrowhead defines flow direction, not the order the line was drawn: ARROWHEAD_REVERSED means the arrow sits on connectorStart and the edge was emitted swapped. AMBIGUOUS = arrows both ends; UNDIRECTED = neither. Absent means the ordinary ARROWHEAD case." },

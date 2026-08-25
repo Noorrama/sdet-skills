@@ -267,11 +267,6 @@
                   },
                   "operationSupported": {
                     "type": "boolean"
-                  },
-                  "operationInput": {
-                    "type": "object",
-                    "additionalProperties": true,
-                    "description": "Inputs the operation needs, drawn from required_state / config / a preceding operation's output. Never fabricated IDs, never real PII, card numbers or tokens."
                   }
                 }
               }
@@ -307,9 +302,12 @@
           ],
           "description": "Confidence of the domain + category semantic match. low routes the fixture to human review before provisioning."
         },
-        "identification_notes": {
-          "type": "string",
-          "description": "Reviewer-facing free text. When the validation gate rejects the matcher's category, record what it proposed and the top candidates[] here, so a wrong match is visible rather than lost."
+        "identification_steps": {
+          "type": "array",
+          "description": "Ordered account of what the agent did to identify THIS fixture — one short sentence per action, in the order taken (knowledge read, signals extracted, category returned, gate decision, each operation resolved, status concluded, prompt generated or skipped). Reviewer-facing: a wrong category or missing operation should be explainable from this list alone.",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

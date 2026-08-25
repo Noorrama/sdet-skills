@@ -1,0 +1,3126 @@
+{
+  "extraction_status": "PARTIAL",
+  "extraction_notes": [
+    {
+      "field": "prd_context.Development Milestones[M1-M4].Timeline",
+      "reason": "The Development Milestones table (M1: Establish Extended PAM program, M2: Clarify PAM Information Architecture, M3: Personalize Benefits by PAM Level, M4: Evolve PAM Loyalty Mechanics) has a 'Timeline' column present but left blank for all four milestones.",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm milestone timelines with the PM (Petrick Kluivert Tambunan)."
+    },
+    {
+      "field": "prd_context.Objectives.Success Metrics (target values)",
+      "reason": "Primary metrics (A-to-A Monthly Continuity Rate, 3/6/12-month A-Level/MJG Retention Rate) are defined structurally, but the actual target percentages are placeholders ('XX% retention') and the comment thread notes a baseline analysis from the data team (Sowmiya) is still pending to set the target.",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm numeric retention targets once the baseline analysis is complete."
+    },
+    {
+      "field": "prd_context.Objectives.Tech Metrics",
+      "reason": "The 'Tech Metrics' row in the Objectives/Success Metrics table is present but empty.",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm whether tech metrics (e.g. API latency/error rate for the new loyalty-service calls) apply and add them."
+    },
+    {
+      "field": "prd_context.Readiness Check",
+      "reason": "The Readiness Check table (Topic / Feature Description / Status / Timeline / Temporary Measures) has all rows empty.",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "PM/Engineering to populate the readiness check before rollout sign-off."
+    },
+    {
+      "field": "prd_context.boundary_conditions (Edge Case and Error Screens scenario #5)",
+      "reason": "The Edge Case and Error Screens table is numbered 1-7, but the row content for scenario #5 was not present between scenario #4 (driver in process of becoming yearly/5th/10th MJG) and scenario #6 (Lebaran date shifts in future years) in the source document.",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Re-check the source PRD table for scenario #5 (likely a PDF export/pagination artifact) and confirm its content."
+    },
+    {
+      "field": "prd_context.business_requirements[PAM-06]",
+      "reason": "MoM notes dated July 23rd state PAM entry points (PAM 8 Levels & Cek Level Saya) will NOT be available for SDF/Kilat/Box drivers in this rollout ('incentive differentiations per driver tag can't be done now'), but the later 'Milestone 1.1 - Fast Follow' section lists a P0 user story to extend those exact entry points to SDF/Kilat/Box cohorts targeting app version v1.134.",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Confirm with Petrick Kluivert / Yonathan whether entry-point extension for SDF/Kilat/Box is in scope for M1.1 or deferred further."
+    },
+    {
+      "field": "prd_context.Impact table.Mitra Juara 10 Tahun (Estimated Qualified Drivers)",
+      "reason": "The impact estimate table lists 'TBC' for both 2W and 4W estimated qualified driver counts for the Mitra Juara 10 Tahun tier.",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm estimated driver counts with the data/business team."
+    },
+    {
+      "field": "prd_context.applicable_platforms",
+      "reason": "The PRD text names only the Driver app version (v1.133 for M1, v1.134 for the SDF/Kilat/Box fast-follow) and does not explicitly enumerate Android/iOS as separate platforms anywhere in the document.",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Confirm with the PM whether both Android and iOS are in scope for this rollout."
+    },
+    {
+      "field": "prd_context.FAQ",
+      "reason": "The FAQ section header exists in the document but has no content beneath it.",
+      "follow_up": "FYI"
+    },
+    {
+      "field": "rfc_context.rfc_id",
+      "reason": "No explicit RFC identifier/ticket number is present anywhere in the document header or body (only a document title, PRD link, and Figma link are given).",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm the RFC's tracked identifier (Lark/Confluence/Jira reference) with the author (Petrick Kluivert / Yonathan)."
+    },
+    {
+      "field": "rfc_context.rfc_status",
+      "reason": "The document has no status/metadata table (no 'Draft'/'In Review'/'Approved' marker anywhere in the header or body), unlike the linked PRD which had an explicit Status field.",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm the current RFC status with the author before using this for release-readiness checks."
+    },
+    {
+      "field": "rfc_context.scope.target_platforms",
+      "reason": "Only Android-specific Kotlin Fragment class names (ProfileContainerFragment.kt, LoyaltyCatalogueFragment.kt, LoyaltyMembershipFragment.kt) appear anywhere in the document; no iOS class, framework, or implementation detail is mentioned, despite the Gojek Driver app config listing iOS as a supported platform.",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Confirm with the FE team whether iOS work for PAM 8 Levels is tracked in a separate RFC or is out of scope for this change."
+    },
+    {
+      "field": "rfc_context.experimentation_matrix",
+      "reason": "Two feature flags are referenced by name \u2014 giab_pam_revamp_enabled (gates the new PAM banner on the Profile Page) and is_point_swadaya_kilat_enabled (gates the Kilat/Box point-swadaya component) \u2014 but neither's variants nor default value are documented anywhere in the RFC.",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm flag variants/default values and rollout gating logic with engineering (Yonathan / Petrick Kluivert) before flag-toggle test scenarios can be scripted."
+    },
+    {
+      "field": "rfc_context.compatibility_mandates[0].min_supported_app_version / min_os_version",
+      "reason": "The RFC does not itself state a minimum supported app version or OS version (the linked PRD states Driver app v1.133/v1.134, but this skill reads only the RFC, per its scope).",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Cross-reference the PRD's rollout section (or confirm with engineering) for the minimum supported app version this RFC targets."
+    },
+    {
+      "field": "rfc_context.api_contract_changes[2].endpoint",
+      "reason": "The 'New Page' row for the benefits/achievement page names the API as https://integration-driver.gojekapi.com/v1/loyalty/benefit, but the 'Proposed contract changes' block immediately below it for the same page shows the endpoint as /v2/loyalty/rewards.",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Confirm with engineering (Yonathan / Soumya) which endpoint path is authoritative for the benefits/achievement page."
+    },
+    {
+      "field": "rfc_context.scope (Profile Page [Out of scope] row \u2014 SDF/Kilat/Box point-swadaya component)",
+      "reason": "The RFC's 'Profile Page [Out of scope]' row (gated behind is_point_swadaya_kilat_enabled) is explicitly confirmed by Petrick Kluivert Denilson as 'out of scope for the M1 Release'. This resolves an ambiguity noted in the prd_context.json extraction for this feature (requirement PAM-06), which flagged a conflict between a July 23rd MoM (entry points not available for SDF/Kilat/Box) and the PRD's later 'Milestone 1.1 - Fast Follow' section.",
+      "follow_up": "FYI",
+      "action": "Scope M1 test coverage to exclude the SDF/Kilat/Box point-swadaya component; treat the Milestone 1.1 Fast Follow user stories as a separate, later effort per this RFC's explicit confirmation."
+    },
+    {
+      "field": "rfc_context.architectural_risks",
+      "reason": "The RFC has no dedicated 'Risks' or 'Cons' section and does not present multiple trade-off approaches to compare; only one architectural risk (unfinalized copy shipping as a placeholder) could be inferred from an inline comment thread.",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Confirm with the author whether a formal risk assessment exists elsewhere, since none is documented in this RFC."
+    },
+    {
+      "field": "regression_context.browserstack_project",
+      "reason": "gojek-driver spans driverapp / driver-platforms / driver-platform-android, none of which have a single static BrowserStack project id (per-case resolution via Lumos at runtime). Queried the documented static fallback PR-143 directly instead of resolving per case.",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Treat PR-143 as the queried project; if a case's true live project id differs, its BrowserStack URL still resolves correctly since case ids are globally unique."
+    },
+    {
+      "field": "regression_context.regression_tests[] (Loyalty folder, legacy Basic/Silver/Gold/Platinum tiers, folder id 28586372)",
+      "reason": "A second, older 'Loyalty' folder (distinct from 'Loyalty Revamp') exists under the same Driver Incentives area with 30 cases using Basic/Silver/Gold/Platinum tier naming, not the Harapan/Andalan/Juara naming used by PRD/RFC for this feature. Its relationship to the current PAM 8 Levels feature (superseded program vs. still-live parallel program) could not be determined from BrowserStack alone.",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Confirm with engineering whether the Basic/Silver/Gold/Platinum loyalty program is deprecated/replaced by the Harapan/Andalan/Juara program this feature extends, or still active for a different cohort."
+    },
+    {
+      "field": "regression_context.regression_tests[] (voucher/rewards cases C5542971, C5542972, C5542973)",
+      "reason": "These cases cover redeeming loyalty points for vouchers via the existing Points page, which is adjacent to but not the same as this feature's new /v2/loyalty/rewards 'Manfaat & Pencapaian Anda' benefits-by-badge page (PAM-03). Included as impacted_area since both touch the Loyalty Home/Points surface RFC is modifying, not as an exact match.",
+      "follow_up": "FYI",
+      "action": "Confirm with QA whether voucher redemption regression stays in scope for this feature's release or is tracked separately."
+    },
+    {
+      "field": "design_context.ENVIRONMENT",
+      "reason": "output.json (second version, 120MB) still does not match the 'Export Design Raw JSON' Figma plugin envelope this skill requires (no exportedAt, scope, file{name,page}, or export{maxDepth,nodeCount,...",
+      "follow_up": "WORTH_CHECKING",
+      "action": "In Figma, open the file '8 PAM Levels 2026', go to page '\ud83d\ude80 Ready for Development' > '\u21aa M1 - Jul 2026 (Profile Page & PAM)', select that page (or just the PAM 8 Levels screen frames within it), and run the 'Export Design Raw JSON' plugin with page/selection scope. That produces the pruned envelope this skill can process directly."
+    },
+    {
+      "field": "design_context.screens",
+      "reason": "The correct content does appear to exist this time: page '\u21aa  M1 - Jul 2026 (Profile Page & PAM)' contains device-width (360pt) frames named '1a. Harapan - Daftar 8 PAM Levels', '1b. Andalan - Daftar 8",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Export just that page (or the 8-9 screen frames listed above) via the 'Export Design Raw JSON' plugin and re-run this skill on the resulting file for a full, properly-classified screens/ui_flow extraction."
+    },
+    {
+      "field": "design_context.app",
+      "reason": "This export does not carry the standard app-resolution signals (no file.page-as-app-name, SECTION name, or frame-name prefix formatted like '[App] ...'). However, component instances on the M1 page ar",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Confirmed as gojek-driver for this note's purposes via cross-document evidence, not from this export's own page/section naming alone; re-verify once a proper plugin export of the M1 page is available."
+    },
+    {
+      "field": "design_context.project_context.blocking_issues",
+      "reason": "Input file is a full raw Figma file REST API export (document/components/componentSets/styles), not the 'Export Design Raw JSON' plugin envelope \u2014 none of this skill's classification/connector/contrac",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Re-export the M1 page with the Export Design Raw JSON plugin and re-run"
+    },
+    {
+      "field": "design_context.project_context.blocking_issues",
+      "reason": "The relevant screens exist on page '\u21aa  M1 - Jul 2026 (Profile Page & PAM)' (confirmed by frame names matching the PAM 8 Levels feature) but that page's ~86,945-node unpruned subtree is out of scope fo",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Re-export the M1 page with the Export Design Raw JSON plugin and re-run"
+    },
+    {
+      "field": "design_context.project_context.blocking_issues",
+      "reason": "app resolved to gojek-driver only via cross-referencing this project's prd_context.json/rfc_context.json and component-name evidence ('File management/Driver/...'), not from this export's own page/sec",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Re-export the M1 page with the Export Design Raw JSON plugin and re-run"
+    },
+    {
+      "field": "design_context.project_context.overall_ambiguity_rating",
+      "reason": "design overall_ambiguity_rating is HIGH; screens[]/ui_flow[] empty (DEGRADED export)",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "screen/element-derived scenarios need design confirmation before automation; steps authored from PRD/RFC + regression nav"
+    },
+    {
+      "field": "scope.target_platforms",
+      "reason": "RFC scopes target_platforms=[android] only; app supports iOS but no iOS class/detail present. All scenarios are Android-only; iOS is either a separate RFC or out of scope",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm whether iOS PAM 8 Levels work is a separate effort"
+    },
+    {
+      "field": "prd.clickstream_events",
+      "reason": "No structured clickstream_events array in PRD/RFC \u2014 no telemetry scenarios generated",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm whether clickstream telemetry is required and supply the event/attribute list"
+    },
+    {
+      "field": "rfc.experimentation_matrix",
+      "reason": "Flag variants/defaults undocumented for giab_pam_revamp_enabled and is_point_swadaya_kilat_enabled; is_point_swadaya_kilat_enabled is explicitly OUT of M1 scope (SDF/Kilat/Box point-swadaya)",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm flag variants/defaults; keep is_point_swadaya_kilat_enabled out of M1 coverage"
+    },
+    {
+      "field": "test_data.DriverType",
+      "reason": "PRD/RFC do not restrict driver vehicle type; fixtures fanned out across 2W/4W observed in regression_context.observed_variant_dimensions (IDBike/IDCar). Confirm PAM behaves identically across them",
+      "follow_up": "WORTH_CHECKING"
+    },
+    {
+      "field": "rfc.open_questions[Q4,Q5]",
+      "reason": "Q4 (10-year backfill window anchoring) and Q5 (empty achievement-tab state) are OPEN \u2014 boundary/empty-state expected behaviour undefined",
+      "follow_up": "NEEDS_ANSWER",
+      "action": "Confirm the backfill-window rule and the empty-state design before scripting those cases"
+    },
+    {
+      "field": "rfc.open_questions[Q2]",
+      "reason": "last_period_progress_label copy (descriptive vs 'Month YYYY') still OPEN; RISK-01 placeholder copy may ship",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Confirm final Lokalise copy before asserting exact label text"
+    },
+    {
+      "field": "scenario.automation_steps",
+      "reason": "automation_steps are a consolidated action+verification sequence in TapMind dialect; code-gen owns exact constants/setup",
+      "follow_up": "WORTH_CHECKING"
+    },
+    {
+      "field": "ENVIRONMENT",
+      "reason": "coverage_audit and coverage_categories are emitted per the sdet-plan-generator spec but sdet_plan.schema.json declares additionalProperties:false and does not list coverage_audit, so validation flags it as an unexpected property",
+      "follow_up": "WORTH_CHECKING",
+      "action": "Add coverage_audit to the schema, or ignore the additionalProperties error for these two spec-mandated blocks"
+    }
+  ],
+  "version": "1.0.0",
+  "created_at": "2026-08-19T09:30:29+00:00",
+  "updated_at": "2026-08-24T04:22:12+00:00",
+  "unmapped_extractor_data": {
+    "rfc": {
+      "architectural_risks": [
+        {
+          "risk_id": "RISK-01",
+          "description": "UI copy for the yearly achievement banner (e.g., the 'last_period_progress_label' moving from 'Periode pencapaian kinerja Juli' to 'Juli 2026') was still being finalized by the copywriter as of the RFC comments, with the placeholder value remaining in place pending sign-off.",
+          "severity": "Medium",
+          "affected_modules": [
+            "LoyaltyMembershipFragment.kt"
+          ],
+          "mitigation": "Copy to be finalized by Iqbal Dwiharianto and reviewed in the team's standup before code freeze.",
+          "testability_note": "Verify the final localized copy (Lokalise keys under PAM_8_*) replaces the placeholder text before release sign-off; re-check banner copy after each Lokalise sync.",
+          "rfc_section_ref": "Loyalty Page - Update value on API last_period_progress_label"
+        }
+      ],
+      "state_management_changes": [
+        {
+          "entity": "LoyaltyTier",
+          "change_type": "MODIFIED",
+          "new_fields": [
+            "group",
+            "description",
+            "show_claimed_once_banner"
+          ],
+          "rfc_section_ref": "/v1/loyalty/tiers contract"
+        },
+        {
+          "entity": "LoyaltyProgress",
+          "change_type": "MODIFIED",
+          "new_fields": [
+            "progress_history",
+            "progress_history.year",
+            "progress_history.icon_url",
+            "progress_history.eval_start_period",
+            "progress_history.eval_end_period",
+            "progress_history.juara_count",
+            "progress_history.monthly_progress"
+          ],
+          "rfc_section_ref": "/v1/loyalty/progress contract"
+        },
+        {
+          "entity": "LoyaltyRewards",
+          "change_type": "NEW_ENTITY",
+          "new_fields": [
+            "badges",
+            "badges.icon_url",
+            "badges.label",
+            "rewards.icon_url",
+            "rewards.title",
+            "rewards.action_cta_text",
+            "rewards.description",
+            "rewards.details",
+            "rewards.show_claimed_once_banner"
+          ],
+          "rfc_section_ref": "/v2/loyalty/rewards contract"
+        },
+        {
+          "entity": "LoyaltyCatalogueScreen",
+          "change_type": "NEW_ENTITY",
+          "state_transitions": [
+            {
+              "from": "Loading",
+              "to": "Loaded",
+              "trigger": "API /v1/loyalty/tiers or /v1/loyalty/progress returns success (HTTP 200)"
+            },
+            {
+              "from": "Loading",
+              "to": "Error",
+              "trigger": "API call fails"
+            },
+            {
+              "from": "Error",
+              "to": "Loading",
+              "trigger": "User taps the retry button"
+            }
+          ],
+          "rfc_section_ref": "New Page - item 10 (loading/failed states)"
+        },
+        {
+          "entity": "AchievementTabIndicator",
+          "change_type": "NEW_ENTITY",
+          "state_transitions": [
+            {
+              "from": "Unseen",
+              "to": "Seen",
+              "trigger": "Driver opens the Loyalty Page and views the achievement tab for the first time"
+            },
+            {
+              "from": "Seen",
+              "to": "Unseen",
+              "trigger": "App cache/data is cleared, or the app is uninstalled and reinstalled"
+            }
+          ],
+          "rfc_section_ref": "Loyalty Page - item 10 (red dot behavior)"
+        }
+      ],
+      "api_contract_changes": [
+        {
+          "endpoint": "/v1/loyalty/tiers",
+          "method": "GET",
+          "change_type": "MODIFIED",
+          "request_shape": "Adds query parameter include_special_tiers=true",
+          "response_shape": "Adds new fields to each tiers[] item: group (tab group value sent by BE: bulanan/tahunan/penghargaan spesial/penghormatan tertinggi), description (badge description text), show_claimed_once_banner (boolean). Existing fields (badge_url, name, rewards[]) unchanged.",
+          "breaking_change": false,
+          "rfc_section_ref": "New Page - API /v1/loyalty/tiers, Proposed contract changes"
+        },
+        {
+          "endpoint": "/v1/loyalty/progress",
+          "method": "GET",
+          "change_type": "MODIFIED",
+          "request_shape": "Adds query parameter include_special_tiers=true",
+          "response_shape": "Adds a new progress_history[] array (yearly achievement history), each item containing year, icon_url, eval_start_period, eval_end_period, juara_count, and a monthly_progress[] sub-array (month, icon_url, tier_name). Also updates the existing last_period_progress_label field's copy/format.",
+          "breaking_change": false,
+          "rfc_section_ref": "Loyalty Page - API /v1/loyalty/progress, Proposed contract changes"
+        },
+        {
+          "endpoint": "/v2/loyalty/rewards",
+          "method": "GET",
+          "change_type": "NEW",
+          "request_shape": null,
+          "response_shape": "Returns badges[] (icon_url, label) showing badges the driver has achieved, and rewards[] (icon_url, title, action_cta_text, description, details{...}, details_cta_text, show_claimed_once_banner) for the selected badge's benefits.",
+          "breaking_change": false,
+          "rfc_section_ref": "New Page - Manfaat & Pencapaian Anda, Proposed contract changes"
+        }
+      ],
+      "open_questions": [
+        {
+          "question_id": "Q1",
+          "question": "Will the month label displayed in the yearly achievement calendar be in Indonesian or English?",
+          "owner": "Soumya",
+          "status": "RESOLVED",
+          "impact_on_testing": "Verify calendar month labels render in Indonesian (e.g., 'Jan', 'Feb'), consistent with existing UI conventions.",
+          "rfc_section_ref": "Loyalty Page - Details on calendar"
+        },
+        {
+          "question_id": "Q2",
+          "question": "Should the 'last_period_progress_label' copy move from the descriptive Indonesian phrase ('Periode pencapaian kinerja Juli') to a simpler 'Month YYYY' format ('Juli 2026')?",
+          "owner": "Iqbal Dwiharianto / Petrick Kluivert",
+          "status": "OPEN",
+          "impact_on_testing": "Confirm final localized copy before asserting exact label text in automated tests; the placeholder value may still be present pending finalization.",
+          "rfc_section_ref": "Loyalty Page - Update value on API last_period_progress_label"
+        },
+        {
+          "question_id": "Q3",
+          "question": "When a driver's monthly or yearly performance data is missing/unavailable, should the API omit the entry or return an icon flag indicating 'no data'?",
+          "owner": "Petrick Kluivert / Soumya",
+          "status": "RESOLVED",
+          "impact_on_testing": "Test that months with missing data render an 'x' icon (not a blank/omitted cell) across all 12 months, and that a fully-missing year falls back to the 'not achieved' year icon.",
+          "rfc_section_ref": "Loyalty Page - progress_history discussion"
+        },
+        {
+          "question_id": "Q4",
+          "question": "How should the rolling 10-year backfill window be anchored when a driver's earliest available performance data starts mid-window (e.g., 2015 or 2020)? Does the displayed range always roll forward as a fixed 10-year window regardless of the driver's actual onboarding data?",
+          "owner": "Soumya",
+          "status": "OPEN",
+          "impact_on_testing": "Needs a confirmed rule before writing boundary tests for drivers with partial historical data at various onboarding years.",
+          "rfc_section_ref": "New Page (rewards) - backfill discussion, Jul 30"
+        },
+        {
+          "question_id": "Q5",
+          "question": "What should the 'Pencapaian Saya' (My Achievement) tab display when a driver has no backfilled progress history at all?",
+          "owner": "Soumya",
+          "status": "OPEN",
+          "impact_on_testing": "Blocking for the empty-state test case on the achievement tab for brand-new or unbackfilled drivers \u2014 need the defined empty state before scripting.",
+          "rfc_section_ref": "New Page (rewards) - backfill discussion, Jul 30"
+        },
+        {
+          "question_id": "Q6",
+          "question": "Should the /v2/loyalty/rewards 'rewards' field shape match the existing /v1/rewards (getLoyaltyRewards) API's rewards field shape?",
+          "owner": "Soumya",
+          "status": "RESOLVED",
+          "impact_on_testing": "Contract tests for /v2/loyalty/rewards should assert the rewards[] shape matches v1/rewards for parity.",
+          "rfc_section_ref": "New Page - Manfaat & Pencapaian Anda, rewards field discussion"
+        }
+      ],
+      "platform_specific": {
+        "android": {
+          "implementation_notes": "All screens described are Android-native Fragments: ProfileContainerFragment.kt (Profile Page), LoyaltyCatalogueFragment.kt (reused for both the 8 Level Program intro page and the Manfaat & Pencapaian Anda benefits page, distinguished by a passed flag), and LoyaltyMembershipFragment.kt (Loyalty Page / Level Saya). No iOS-specific classes or implementation details are mentioned in this RFC."
+        }
+      }
+    },
+    "prd": {
+      "rollout_plan": {
+        "user_segment": "All Indonesia drivers, phased by rollout percentage (SDF/Kilat/Box cohorts added in the M1.1 fast-follow targeting app v1.134)",
+        "timeline": "Targeting Driver app v1.133. Beta Testing: 13-14 August 2026. Prod Rollout 1% across all Indonesia: Aug 18th. Prod Rollout 10%/50%/100%: dates not yet started. M1.1 fast-follow (SDF/Kilat/Box) targets v1.134, with 100% rollout planned around Aug 24th-28th."
+      },
+      "out_of_scope_module": [
+        "Revamping the full Swadaya benefit logic or eligibility rules",
+        "Changing how monthly PAM recognition is calculated",
+        "Changing how yearly or special recognition eligibility is calculated, unless already defined by Business/Ops",
+        "Introducing points as a loyalty currency in M1",
+        "Personalizing Swadaya benefits based on PAM level in M1",
+        "Migrating all PAM-related Profile content into the new PAM entry point",
+        "Building a full recognition history/badge system experience",
+        "Removing existing Swadaya benefit access before replacement flows are validated"
+      ]
+    },
+    "design": {
+      "visual_analysis_scratchpad": "The input is now a full raw Figma REST API file export (document + components + componentSets + styles) for the file '8 PAM Levels 2026', not an 'Export Design Raw JSON' plugin export. Scanning the file's 15 pages, the relevant board is '\ud83d\ude80 Ready for Development' > '\u21aa  M1 - Jul 2026 (Profile Page & PAM)', which contains actual PAM 8 Levels screen frames (1a/1b/1c tier list screens, 'Mitra Tahun X', 'Mitra 5/10 Tahun', 'Perintis Jalan', 'Legend', a full-page Harapan variant) confirming the right design work exists in this file. That page's subtree is ~86,945 nodes of unpruned REST data with no FigJam-style CONNECTOR nodes, so this skill's screen/element/flow classification pipeline (built for the plugin's pruned, connector-annotated envelope) cannot be run against it without inventing an unsupported conversion layer. No screens, elements, or ui_flow edges are emitted this run; a properly-scoped plugin export of that one page is needed instead.",
+      "blocking_issues": [
+        "Input file is a full raw Figma file REST API export (document/components/componentSets/styles), not the 'Export Design Raw JSON' plugin envelope \u2014 none of this skill's classification/connector/contraction logic can be run against it as specified.",
+        "The relevant screens exist on page '\u21aa  M1 - Jul 2026 (Profile Page & PAM)' (confirmed by frame names matching the PAM 8 Levels feature) but that page's ~86,945-node unpruned subtree is out of scope for a hand-built, unsupported conversion \u2014 re-export that page specifically with the plugin.",
+        "app resolved to gojek-driver only via cross-referencing this project's prd_context.json/rfc_context.json and component-name evidence ('File management/Driver/...'), not from this export's own page/section naming convention."
+      ]
+    },
+    "regression": {
+      "observed_variant_dimensions": {
+        "DriverType": [
+          "IDBike",
+          "IDCar"
+        ],
+        "Country v2": [
+          "Indonesia"
+        ]
+      },
+      "browserstack_project": "PR-143",
+      "resolved_folders": [
+        {
+          "id": 28586427,
+          "name": "Loyalty Revamp"
+        },
+        {
+          "id": 28586372,
+          "name": "Loyalty"
+        }
+      ]
+    }
+  },
+  "feature_metadata": {
+    "feature_key": "pam_8_levels_relaunch",
+    "module_namespace": "PAM 8 Levels"
+  },
+  "scope_summary": "PAM 8 Levels Relaunch (M1) \u2014 Gojek Driver loyalty revamp presenting PAM as monthly/yearly/special recognition across 8 levels: new PAM 8 Levels catalogue (/loyalty/catalogue), Level Saya 'Pencapaian Saya' yearly progress calendar, Manfaat & Pencapaian Anda benefits-by-badge page, and profile recognition badges. Android only, Indonesia only, gated by giab_pam_revamp_enabled. SDF/Kilat/Box entry points are an M1.1 fast-follow (v1.134); the point-swadaya component is out of M1 scope.",
+  "risk_assessment": [
+    "RISK-01: UI copy for the yearly achievement banner (e.g., the 'last_period_progress_label' moving from 'Periode pencapaian kinerja Juli' to 'Juli 2026') was still being finalized by the copywriter as of the RFC comments, with the placeholder value remaining in place pending sign-off."
+  ],
+  "environments": [
+    "QA"
+  ],
+  "coverage_categories": {
+    "auto_selected": [
+      {
+        "category": "functional",
+        "reason": "prd.business_requirements[] non-empty (PAM-01..06)"
+      },
+      {
+        "category": "boundary",
+        "reason": "prd.boundary_conditions[] non-empty (8 entries)"
+      },
+      {
+        "category": "negative_error",
+        "reason": "boundary edge entries + rfc LoyaltyCatalogueScreen Error state"
+      },
+      {
+        "category": "interruption_network",
+        "reason": "rfc.api_contract_changes[] (tiers/progress/rewards)"
+      },
+      {
+        "category": "interruption_lifecycle",
+        "reason": "rfc.lifecycle_considerations[0].event = APP_UNINSTALL_REINSTALL"
+      },
+      {
+        "category": "local_data_migration",
+        "reason": "rfc.compatibility_mandates[] non-empty (giab_pam_revamp_enabled off -> old banner)"
+      },
+      {
+        "category": "feature_flag_killswitch",
+        "reason": "giab_pam_revamp_enabled referenced in rfc.compatibility_mandates + extraction_notes"
+      },
+      {
+        "category": "deep_link_nav",
+        "reason": "rfc.navigation_changes[0].deep_link = /loyalty/catalogue"
+      }
+    ],
+    "optional_extras_available": {
+      "feature_adjacent": [
+        {
+          "category": "platform_variance",
+          "rationale": "rfc.scope.target_platforms = [android] only \u2014 single platform, no cross-platform variance to test"
+        },
+        {
+          "category": "telemetry_clickstream",
+          "rationale": "no clickstream_events array in PRD/RFC"
+        },
+        {
+          "category": "localization_regional",
+          "rationale": "prd.applicable_countries = [Indonesia] single"
+        },
+        {
+          "category": "permission",
+          "rationale": "rfc.permissions_required[] absent"
+        },
+        {
+          "category": "offline",
+          "rationale": "rfc.offline_behavior absent"
+        }
+      ],
+      "fe_baseline": [
+        {
+          "group": "session_auth",
+          "category": "session_expiry",
+          "rationale": "feature requires an authenticated driver account",
+          "applicability": "personas require account"
+        },
+        {
+          "group": "app_upgrade",
+          "category": "n_minus_1_upgrade",
+          "rationale": "app ships incrementally",
+          "applicability": "always true"
+        },
+        {
+          "group": "nav_gesture",
+          "category": "hardware_back",
+          "rationale": "multi-screen flow",
+          "applicability": "multi-screen flow present"
+        },
+        {
+          "group": "resilience",
+          "category": "empty_error_states",
+          "rationale": "networked loyalty screens",
+          "applicability": "stateful screens present"
+        },
+        {
+          "group": "a11y_baseline",
+          "category": "screenreader_traversal",
+          "rationale": "interactive PAM screens",
+          "applicability": "interactive screens present"
+        }
+      ]
+    },
+    "optional_extras_selected": [],
+    "user_removed": []
+  },
+  "coverage_audit": {
+    "required": {
+      "business_requirements": [
+        "PAM-01",
+        "PAM-02",
+        "PAM-03",
+        "PAM-04",
+        "PAM-05",
+        "PAM-06"
+      ],
+      "boundary_conditions": [
+        "PAM-02: Consistent, easy-to-understand yearly progress display is ne",
+        "PAM-02: Driver is not a Monthly Juara Gojek (MJG) driver in a given ",
+        "PAM-02: Driver joined Gojek before 2017 - how far back should the ye",
+        "PAM-02: Driver is in the process of becoming yearly / 5th-year / 10t",
+        "PAM-02: Future Lebaran dates may shift and future years may have mul",
+        "PAM-04: Driver joined pre-2017 and is eligible for the 5th-year or 1",
+        "PAM-04: Driver fails to maintain consecutive Yearly MJG status while",
+        "PAM-03: A benefit's eligibility criterion (Monthly Harapan/Andalan/J"
+      ],
+      "lifecycle_events": [
+        "APP_UNINSTALL_REINSTALL"
+      ],
+      "feature_flags": [
+        "giab_pam_revamp_enabled"
+      ],
+      "business_flows": [
+        "profile->loyalty->pencapaian",
+        "profile-banner->catalogue->benefits"
+      ],
+      "clickstream_events": []
+    },
+    "covered": {
+      "PAM-01": [
+        "PAM 8 Levels intro page explains monthly, yearly and special recognition",
+        "'Cek level saya saat ini' entry from Profile opens the current level",
+        "End-to-end: Profile banner -> PAM 8 Levels catalogue -> level benefits",
+        "Catalogue tier list shows Harapan/Andalan/Juara with badge, metric and rewards"
+      ],
+      "PAM-02": [
+        "Pencapaian Saya tab shows 12-month progress toward yearly Mitra Juara",
+        "Yearly selector row shows previous/current/next year with current year centered",
+        "Start month highlighted green and end month red in the yearly calendar",
+        "End-to-end: Profile -> Loyalty Home -> Pencapaian Saya progress",
+        "[Boundary] Yearly eligibility period follows the shifting Lebaran calendar",
+        "[Boundary] Driver is not MJG in a given month (mix of Harapan/Andalan/Juara)",
+        "[Boundary] Driver joined Gojek before 2017 \u2014 how far back to display",
+        "[Boundary] Driver progressing across previous years (yearly/5th/10th)",
+        "[Boundary] Future Lebaran dates shift; future years have unfinalized windows",
+        "Missing monthly data renders an 'x' icon, not a blank cell (Q3 resolved)",
+        "Fully-achieved year (12/12 MJG) shows the Mitra Juara year badge",
+        "Poin Swadaya label is shown on the Level Saya page",
+        "Achievement tab shows the red-dot 'new' indicator on first open",
+        "Calendar month labels render in Indonesian (Q1 resolved)"
+      ],
+      "PAM-03": [
+        "Manfaat & Pencapaian Anda lists benefits for the driver's recognition level",
+        "[Boundary] A benefit eligibility criterion evaluates to 'No' or 'Null'",
+        "Manfaat & Pencapaian Anda shows achieved badges row"
+      ],
+      "PAM-04": [
+        "Profile page shows special badges for 5th year, 10th year, Perintis Jalan and Legend",
+        "[Boundary] Pre-2017 driver eligible for 5th/10th-year by backdated achievement",
+        "[Boundary] Driver breaks consecutive Yearly MJG while progressing to 5th/10th",
+        "5th-year Mitra Juara badge is shown on the Profile page",
+        "10th-year Mitra Juara badge is shown on the Profile page"
+      ],
+      "PAM-05": [
+        "Internal portal can segment drivers and assign multi-year/special benefits"
+      ],
+      "PAM-06": [
+        "SDF/Kilat/Box drivers can access PAM entry points (M1.1 fast-follow)"
+      ],
+      "LoyaltyCatalogueScreen": [
+        "Loyalty catalogue shows error state with retry on API failure"
+      ],
+      "/v1/loyalty/progress": [
+        "Loyalty progress API timeout is handled gracefully"
+      ],
+      "/v2/loyalty/rewards": [
+        "Rewards page (/v2/loyalty/rewards) handles load failure"
+      ],
+      "APP_UNINSTALL_REINSTALL": [
+        "Achievement-tab red dot clears after uninstall/reinstall"
+      ],
+      "giab_pam_revamp_enabled": [
+        "giab_pam_revamp_enabled OFF hides the new banner and shows the existing loyalty banner",
+        "Non-ID market (SG) is unchanged by the PAM revamp",
+        "giab_pam_revamp_enabled ON surfaces the PAM 8 Levels banner"
+      ],
+      "LoyaltyCatalogueFragment": [
+        "/loyalty/catalogue deeplink opens the PAM 8 Levels catalogue"
+      ]
+    },
+    "gaps_closed_in_this_pass": [],
+    "still_blocked": [
+      {
+        "item": "PAM-02 empty-state (no backfilled history)",
+        "reason": "RFC Q5 OPEN \u2014 empty state undefined; scenario deferred"
+      },
+      {
+        "item": "PAM-02 10-year backfill window anchoring",
+        "reason": "RFC Q4 OPEN \u2014 rule undefined for partial-history drivers"
+      }
+    ],
+    "balance": {
+      "positive": 19,
+      "non_positive": 17,
+      "positive_pct": 0.53,
+      "action_taken": "regenerated_positives \u2014 added alternate valid paths / distinct criteria to reach >=50%"
+    }
+  },
+  "scenario_list": [
+    {
+      "csv_title_association": "[Legacy regression] Validate loyalty and point section on profile menu",
+      "requirement_ref": "REGRESSION_POOL",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": true,
+      "existing_case_ref": "C5542964",
+      "automatable": true,
+      "target_execution_framework": "GMT_JAVA",
+      "test_case_type": "Regression",
+      "automation_status": "Automated",
+      "source": "regression_pool",
+      "steps": [
+        "Given Test case info for AEP DASHBOARD",
+        "Given Driver app's default precondition to turn off Spotlight and LeakCanary",
+        "And Driver enables Driver Loyalty",
+        "And Driver enables feature Server Driver profile",
+        "And Driver app custom precondition to enable recognition badges",
+        "And Driver Login to <Vehicle Type> as a <Driver Account> through backdoor",
+        "And Driver skip walkthrough and tooltip",
+        "And driver dismiss set vehicle information card",
+        "And driver tap on profile icon konmari",
+        "Then Driver validates profile details and loyalty sections are displayed",
+        "Then Driver validates points section is displayed",
+        "And Driver clicks on points section and check point section navigation"
+      ]
+    },
+    {
+      "csv_title_association": "[Legacy regression] Validate loyalty home page and tier detail section and Learn more section",
+      "requirement_ref": "REGRESSION_POOL",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": true,
+      "existing_case_ref": "C5542965",
+      "automatable": true,
+      "target_execution_framework": "GMT_JAVA",
+      "test_case_type": "Regression",
+      "automation_status": "Automated",
+      "source": "regression_pool",
+      "steps": [
+        "Given Test case info for AEP DASHBOARD",
+        "Given Driver app's default precondition to turn off Spotlight and LeakCanary",
+        "And Driver enables Driver Loyalty",
+        "And Driver enables feature Server Driver profile",
+        "And Driver app custom precondition to enable recognition badges",
+        "And Driver Login to <Vehicle Type> as a <Driver Account> through backdoor",
+        "And Driver skip walkthrough and tooltip",
+        "And driver dismiss set vehicle information card",
+        "And driver tap on profile icon konmari",
+        "Then Driver taps on detail button of loyalty",
+        "And Driver verifies Loyalty Home page",
+        "Then Driver clicks on see all tiers",
+        "And Driver verifies tier details page",
+        "Then Driver clicks Back and clicks on learn more",
+        "And Driver verify learn mode section is displayed"
+      ]
+    },
+    {
+      "csv_title_association": "[Legacy regression] Validate Point history and reward catalogue pages",
+      "requirement_ref": "REGRESSION_POOL",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": true,
+      "existing_case_ref": "C5542968",
+      "automatable": true,
+      "target_execution_framework": "GMT_JAVA",
+      "test_case_type": "Regression",
+      "automation_status": "Automated",
+      "source": "regression_pool",
+      "steps": [
+        "Given Test case info for AEP DASHBOARD",
+        "Given Driver app's default precondition to turn off Spotlight and LeakCanary",
+        "And Driver enables Driver Loyalty",
+        "And Driver enables feature Server Driver profile",
+        "And Driver enables points history pagination toggle",
+        "And Driver enables points redeem feature toggle",
+        "And Driver app custom precondition to enable recognition badges",
+        "And Driver Login to <Vehicle Type> as a <Driver Account> through backdoor",
+        "And Driver skip walkthrough and tooltip",
+        "And driver dismiss set vehicle information card",
+        "And driver tap on profile icon konmari",
+        "Then Driver clicks on points balance tab",
+        "And Driver validates points balance Page"
+      ]
+    },
+    {
+      "csv_title_association": "[Legacy regression] Validate voucher redeem success flow",
+      "requirement_ref": "REGRESSION_POOL",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": true,
+      "existing_case_ref": "C5542971",
+      "automatable": true,
+      "target_execution_framework": "GMT_JAVA",
+      "test_case_type": "Regression",
+      "automation_status": "Automated",
+      "source": "regression_pool",
+      "steps": [
+        "Given Test case info for AEP DASHBOARD",
+        "Given Driver app's default precondition to turn off Spotlight and LeakCanary",
+        "And Driver enables Driver Loyalty",
+        "And Driver enables feature Server Driver profile",
+        "And Driver enables points history pagination toggle",
+        "And Driver enables points redeem feature toggle",
+        "And Driver app custom precondition to enable recognition badges",
+        "And Driver Login to <Vehicle Type> as a <Driver Account> through backdoor",
+        "And Driver skip walkthrough and tooltip",
+        "And driver dismiss set vehicle information card",
+        "And driver tap on profile icon konmari",
+        "And Driver adds loyalty points to driver",
+        "Then Driver clicks on points balance tab",
+        "And driver verify point section is displayed",
+        "Then Driver redeems first voucher",
+        "Then Driver verifies vouched successfully redeemed"
+      ]
+    },
+    {
+      "csv_title_association": "[Legacy regression] Validate voucher list page",
+      "requirement_ref": "REGRESSION_POOL",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": true,
+      "existing_case_ref": "C5542973",
+      "automatable": true,
+      "target_execution_framework": "GMT_JAVA",
+      "test_case_type": "Regression",
+      "automation_status": "Automated",
+      "source": "regression_pool",
+      "steps": [
+        "Given Test case info for AEP DASHBOARD",
+        "Given Driver app's default precondition to turn off Spotlight and LeakCanary",
+        "And Driver enables Driver Loyalty",
+        "And Driver enables feature Server Driver profile",
+        "And Driver enables points history pagination toggle",
+        "And Driver enables points redeem feature toggle",
+        "And Driver app custom precondition to enable recognition badges",
+        "And Driver Login to <Vehicle Type> as a <Driver Account> through backdoor",
+        "And Driver skip walkthrough and tooltip",
+        "And driver dismiss set vehicle information card",
+        "And driver tap on profile icon konmari",
+        "And Driver adds loyalty points to driver",
+        "Then Driver clicks on points balance tab",
+        "And driver verify point section is displayed",
+        "And driver verify vouchers section is displayed",
+        "Then driver clicks on vouchers tab",
+        "And driver validates the vouchers page",
+        "And Driver back from voucher to points page",
+        "And driver verify point section is displayed"
+      ]
+    },
+    {
+      "csv_title_association": "PAM 8 Levels intro page explains monthly, yearly and special recognition",
+      "requirement_ref": "PAM-01",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Open deeplink \"/loyalty/catalogue\"",
+        "Review the PAM 8 Levels catalogue content"
+      ],
+      "automation_steps": [
+        "openDeeplink(\"/loyalty/catalogue\")",
+        "Review the PAM 8 Levels catalogue content",
+        "Verify the page presents PAM as monthly, yearly and special recognition (8 levels), not only monthly performance"
+      ],
+      "expected_result": "1. \u2014\n2. Verify the page presents PAM as monthly, yearly and special recognition (8 levels), not only monthly performance",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "target_entry_deeplink": "/loyalty/catalogue"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PAM_8_LEVELS_CATALOGUE",
+        "trigger_action": "Review the PAM 8 Levels catalogue content",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-2w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (2-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "2W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_2w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ],
+      "existing_case_ref": "C5542965"
+    },
+    {
+      "csv_title_association": "'Cek level saya saat ini' entry from Profile opens the current level",
+      "requirement_ref": "PAM-01",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap \"Cek level saya saat ini\""
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap \"Cek level saya saat ini\"",
+        "Verify \"Cek level saya saat ini\" is shown and opens the driver's current level"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. Verify \"Cek level saya saat ini\" is shown and opens the driver's current level",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Tap \"Cek level saya saat ini\"",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-4w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (4-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "4W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_4w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ],
+      "existing_case_ref": "C5542964"
+    },
+    {
+      "csv_title_association": "Pencapaian Saya tab shows 12-month progress toward yearly Mitra Juara",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open the \"Pencapaian Saya\" tab"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open the \"Pencapaian Saya\" tab",
+        "Verify the tab shows the 12-month performance calendar with headline \"X dari 12 kali jadi Mitra Juara\" and the \"Poin Swadaya\" label"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify the tab shows the 12-month performance calendar with headline \"X dari 12 kali jadi Mitra Juara\" and the \"Poin Swadaya\" label",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Open the \"Pencapaian Saya\" tab",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ],
+      "existing_case_ref": "C5542965"
+    },
+    {
+      "csv_title_association": "Yearly selector row shows previous/current/next year with current year centered",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open the \"Pencapaian Saya\" tab",
+        "Observe the 'Pencapaian tahunan Anda' year selector"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open the \"Pencapaian Saya\" tab",
+        "Observe the 'Pencapaian tahunan Anda' year selector",
+        "Verify the 3-year selector shows previous/current/next year with the current year centered (default 2027)"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. \u2014\n8. Verify the 3-year selector shows previous/current/next year with the current year centered (default 2027)",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Observe the 'Pencapaian tahunan Anda' year selector",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Start month highlighted green and end month red in the yearly calendar",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open the \"Pencapaian Saya\" tab",
+        "Observe the 12-month calendar"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open the \"Pencapaian Saya\" tab",
+        "Observe the 12-month calendar",
+        "Verify the starting month is highlighted green (\"Awal periode YYYY\") and the ending month red (\"Akhir periode YYYY\")"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. \u2014\n8. Verify the starting month is highlighted green (\"Awal periode YYYY\") and the ending month red (\"Akhir periode YYYY\")",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Observe the 12-month calendar",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Manfaat & Pencapaian Anda lists benefits for the driver's recognition level",
+      "requirement_ref": "PAM-03",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Open deeplink \"/loyalty/catalogue\"",
+        "Tap a recognition level/badge the driver has achieved",
+        "Review the benefits list"
+      ],
+      "automation_steps": [
+        "openDeeplink(\"/loyalty/catalogue\")",
+        "Tap a recognition level/badge the driver has achieved",
+        "Review the benefits list",
+        "Verify the \"Manfaat & Pencapaian Anda\" page shows achieved badges and the rewards/benefits for the selected badge"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. Verify the \"Manfaat & Pencapaian Anda\" page shows achieved badges and the rewards/benefits for the selected badge",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "target_entry_deeplink": "/loyalty/catalogue"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PAM_8_LEVELS_CATALOGUE",
+        "trigger_action": "Review the benefits list",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Profile page shows special badges for 5th year, 10th year, Perintis Jalan and Legend",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the recognition badges on the profile"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the recognition badges on the profile",
+        "Verify special badges (5th Year, 10th Year, Perintis Jalan, Legend) are shown for the eligible driver"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. Verify special badges (5th Year, 10th Year, Perintis Jalan, Legend) are shown for the eligible driver",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Observe the recognition badges on the profile",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-special",
+          "entity": "DRIVER",
+          "description": "Driver with a special recognition (Perintis Jalan / Legend)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "recognition": "SPECIAL"
+          },
+          "type_signals": [
+            "driver",
+            "special"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ],
+      "existing_case_ref": "C5542964"
+    },
+    {
+      "csv_title_association": "Internal portal can segment drivers and assign multi-year/special benefits",
+      "requirement_ref": "PAM-05",
+      "priority_tier": "P2",
+      "execution_scope": "BACKEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "[NAVIGATION NOT CONFIRMED] Manually navigate to INTERNAL_PORTAL (Mercury Segmentation / CSV Upload) \u2014 no deeplink (plan, RFC, or repo dictionary), design flow, or regression precedent was found.",
+        "Upload/segment the eligible-driver list and assign benefits per level"
+      ],
+      "automation_steps": [],
+      "expected_result": "1. \u2014\n2. Verify the internal tool can determine the eligible-driver list and add strategic benefits per PAM level",
+      "execution_mode": "Manual",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "APP",
+        "trigger_action": "Upload/segment the eligible-driver list and assign benefits per level",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-internal-team",
+          "entity": "INTERNAL_USER",
+          "description": "Internal Gojek team member with Mercury segmentation / CSV upload access",
+          "required_state": {
+            "role": "INTERNAL_OPS"
+          },
+          "type_signals": [
+            "internal_portal"
+          ],
+          "source_refs": [
+            "PAM-05"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "SDF/Kilat/Box drivers can access PAM entry points (M1.1 fast-follow)",
+      "requirement_ref": "PAM-06",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the PAM entry point and Poin Swadaya"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the PAM entry point and Poin Swadaya",
+        "Verify the SDF/Kilat/Box driver sees the PAM 8 Levels entry point and \"Poin Swadaya\" (M1.1 fast-follow, v1.134)"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. Verify the SDF/Kilat/Box driver sees the PAM 8 Levels entry point and \"Poin Swadaya\" (M1.1 fast-follow, v1.134)",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Observe the PAM entry point and Poin Swadaya",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-sdf-kilat-box",
+          "entity": "DRIVER",
+          "description": "Driver dedicated to SDF, Kilat or Box services",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "service_type": "SDF|Kilat|Box"
+          },
+          "type_signals": [
+            "driver",
+            "sdf-kilat-box"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "End-to-end: Profile -> Loyalty Home -> Pencapaian Saya progress",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open the \"Pencapaian Saya\" tab",
+        "Review yearly progress"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open the \"Pencapaian Saya\" tab",
+        "Review yearly progress",
+        "Verify the driver reaches Loyalty Home and sees the yearly achievement progress calendar"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. \u2014\n8. Verify the driver reaches Loyalty Home and sees the yearly achievement progress calendar",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Review yearly progress",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ],
+      "existing_case_ref": "C5542965"
+    },
+    {
+      "csv_title_association": "End-to-end: Profile banner -> PAM 8 Levels catalogue -> level benefits",
+      "requirement_ref": "PAM-01",
+      "priority_tier": "P0",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the \"8 level Program Apresiasi Mitra\" banner",
+        "Tap a level to view its benefits"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the \"8 level Program Apresiasi Mitra\" banner",
+        "Tap a level to view its benefits",
+        "Verify the catalogue opens and the selected level's benefits are shown"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify the catalogue opens and the selected level's benefits are shown",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Tap a level to view its benefits",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-2w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (2-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "2W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_2w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "[Boundary] Yearly eligibility period follows the shifting Lebaran calendar",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "boundary",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" and inspect the yearly layout"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" and inspect the yearly layout",
+        "Verify: Two rows: 3-year 'Pencapaian tahunan Anda' selector (default 2027) + 12-month calendar with headline 'X dari 12 kali jadi Mitra Juara'; start month green, end month red"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify: Two rows: 3-year 'Pencapaian tahunan Anda' selector (default 2027) + 12-month calendar with headline 'X dari 12 kali jadi Mitra Juara'; start month green, end month red",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Open \"Pencapaian Saya\" and inspect the yearly layout",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "[Boundary] Driver is not MJG in a given month (mix of Harapan/Andalan/Juara)",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "boundary",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" for a mixed-status year"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" for a mixed-status year",
+        "Verify: Show distinct visual cues per monthly status (Mitra Andalan/Harapan/Juara), plus a blank 'Data belum tersedia' state when backdated data is missing"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify: Show distinct visual cues per monthly status (Mitra Andalan/Harapan/Juara), plus a blank 'Data belum tersedia' state when backdated data is missing",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Open \"Pencapaian Saya\" for a mixed-status year",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-mixed-monthly",
+          "entity": "DRIVER",
+          "description": "Driver with a mix of Mitra Harapan/Andalan/Juara across the year",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "monthly_mix": true
+          },
+          "type_signals": [
+            "driver",
+            "mixed-monthly"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "[Boundary] Driver joined Gojek before 2017 \u2014 how far back to display",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "boundary",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" for a pre-2017 driver"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" for a pre-2017 driver",
+        "Verify: Show performance data only from the extrapolated 2016 period onward (or actual onboarding date if later); do not show data before that; rolling 10-year window"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify: Show performance data only from the extrapolated 2016 period onward (or actual onboarding date if later); do not show data before that; rolling 10-year window",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Open \"Pencapaian Saya\" for a pre-2017 driver",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-pre-2017",
+          "entity": "DRIVER",
+          "description": "Driver who joined Gojek before 2017 (backdated history)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "joined_before": 2017
+          },
+          "type_signals": [
+            "driver",
+            "pre-2017"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "[Boundary] Driver progressing across previous years (yearly/5th/10th)",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "boundary",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" and review prior years"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" and review prior years",
+        "Verify: Each month shows its visual cue; a 12/12 MJG year shows that year's Mitra Juara badge, otherwise the 'not achieved' icon; headline 'X dari 12 kali jadi Mitra Juara' stays consistent"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify: Each month shows its visual cue; a 12/12 MJG year shows that year's Mitra Juara badge, otherwise the 'not achieved' icon; headline 'X dari 12 kali jadi Mitra Juara' stays consistent",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Open \"Pencapaian Saya\" and review prior years",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "[Boundary] Future Lebaran dates shift; future years have unfinalized windows",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "boundary",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" and scroll to a future year"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" and scroll to a future year",
+        "Verify: Show future years as a consistent 12-month calendar with a locked visual cue, only up to 2028, copy 'X out of 12'; red card marks current-year end month, green card marks next-year start month"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify: Show future years as a consistent 12-month calendar with a locked visual cue, only up to 2028, copy 'X out of 12'; red card marks current-year end month, green card marks next-year start month",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Open \"Pencapaian Saya\" and scroll to a future year",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "[Boundary] Pre-2017 driver eligible for 5th/10th-year by backdated achievement",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "boundary",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Review the multi-year badges for a pre-2017 driver"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Review the multi-year badges for a pre-2017 driver",
+        "Verify: 5th-year: badge shown in 2021 for MJ5 achieved 2017-2021, offline rewards granted 2027. 10th-year: badge shown in 2025 for MJ10 achieved 2016-2025, offline rewards granted 2027"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. Verify: 5th-year: badge shown in 2021 for MJ5 achieved 2017-2021, offline rewards granted 2027. 10th-year: badge shown in 2025 for MJ10 achieved 2016-2025, offline rewards granted 2027",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Review the multi-year badges for a pre-2017 driver",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-mj10",
+          "entity": "DRIVER",
+          "description": "Driver eligible for Mitra Juara 10 Tahun recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "recognition": "MJ_10_TAHUN"
+          },
+          "type_signals": [
+            "driver",
+            "mj10"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "[Boundary] Driver breaks consecutive Yearly MJG while progressing to 5th/10th",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "boundary",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Review badge progression for a driver who missed a year"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Review badge progression for a driver who missed a year",
+        "Verify: Restart the 5th/10th-year consecutive-year calculation from the next qualifying year onward"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. Verify: Restart the 5th/10th-year consecutive-year calculation from the next qualifying year onward",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Review badge progression for a driver who missed a year",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-mj5",
+          "entity": "DRIVER",
+          "description": "Driver eligible for Mitra Juara 5 Tahun recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "recognition": "MJ_5_TAHUN"
+          },
+          "type_signals": [
+            "driver",
+            "mj5"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "[Boundary] A benefit eligibility criterion evaluates to 'No' or 'Null'",
+      "requirement_ref": "PAM-03",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "boundary",
+      "source": "input_derived",
+      "steps": [
+        "Open deeplink \"/loyalty/catalogue\"",
+        "Review benefits where a criterion is No/Null"
+      ],
+      "automation_steps": [
+        "openDeeplink(\"/loyalty/catalogue\")",
+        "Review benefits where a criterion is No/Null",
+        "Verify: Do not display the eligibility validation/badge for that criterion; only display it when the value is 'Yes'"
+      ],
+      "expected_result": "1. \u2014\n2. Verify: Do not display the eligibility validation/badge for that criterion; only display it when the value is 'Yes'",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "target_entry_deeplink": "/loyalty/catalogue"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PAM_8_LEVELS_CATALOGUE",
+        "trigger_action": "Review benefits where a criterion is No/Null",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Loyalty catalogue shows error state with retry on API failure",
+      "requirement_ref": "LoyaltyCatalogueScreen",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "negative_error",
+      "source": "input_derived",
+      "steps": [
+        "Using a proxy tool, force /v1/loyalty/tiers to return a failure",
+        "Open deeplink \"/loyalty/catalogue\"",
+        "Tap the retry button once the API recovers"
+      ],
+      "automation_steps": [],
+      "expected_result": "1. \u2014\n2. Verify the error state is shown when the API call fails\n3. Verify tapping retry reloads and shows the Loaded state",
+      "execution_mode": "Manual",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "target_entry_deeplink": "/loyalty/catalogue"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PAM_8_LEVELS_CATALOGUE",
+        "trigger_action": "Tap the retry button once the API recovers",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-2w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (2-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "2W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_2w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Missing monthly data renders an 'x' icon, not a blank cell (Q3 resolved)",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "negative_error",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" for a year with some missing months"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" for a year with some missing months",
+        "Verify months with missing data render an 'x' icon across all 12 months and a fully-missing year falls back to the 'not achieved' year icon"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify months with missing data render an 'x' icon across all 12 months and a fully-missing year falls back to the 'not achieved' year icon",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Open \"Pencapaian Saya\" for a year with some missing months",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-mixed-monthly",
+          "entity": "DRIVER",
+          "description": "Driver with a mix of Mitra Harapan/Andalan/Juara across the year",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "monthly_mix": true
+          },
+          "type_signals": [
+            "driver",
+            "mixed-monthly"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Loyalty progress API timeout is handled gracefully",
+      "requirement_ref": "/v1/loyalty/progress",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "interruption_network",
+      "source": "input_derived",
+      "steps": [
+        "Using a proxy tool, force /v1/loyalty/progress to time out",
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\""
+      ],
+      "automation_steps": [],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. \u2014\n8. Verify a graceful error/retry state is shown and the app does not crash",
+      "execution_mode": "Manual",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "APP",
+        "trigger_action": "Open \"Pencapaian Saya\"",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Rewards page (/v2/loyalty/rewards) handles load failure",
+      "requirement_ref": "/v2/loyalty/rewards",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "interruption_network",
+      "source": "input_derived",
+      "steps": [
+        "Using a proxy tool, force /v2/loyalty/rewards to return 500",
+        "Open deeplink \"/loyalty/catalogue\"",
+        "Tap a badge to open its benefits"
+      ],
+      "automation_steps": [],
+      "expected_result": "1. \u2014\n2. \u2014\n3. Verify the benefits page shows an error/retry state, not a raw failure",
+      "execution_mode": "Manual",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "target_entry_deeplink": "/loyalty/catalogue"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PAM_8_LEVELS_CATALOGUE",
+        "trigger_action": "Tap a badge to open its benefits",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Achievement-tab red dot clears after uninstall/reinstall",
+      "requirement_ref": "APP_UNINSTALL_REINSTALL",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": false,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "interruption_lifecycle",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open the achievement tab so the red dot is marked seen",
+        "Uninstall and reinstall the app",
+        "Return to the Loyalty Page"
+      ],
+      "automation_steps": [],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. \u2014\n8. \u2014\n9. Verify the red-dot 'new' indicator is cleared after the cache/data reset (NO_RESTORE)",
+      "execution_mode": "Manual",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Return to the Loyalty Page",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-2w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (2-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "2W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_2w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "giab_pam_revamp_enabled OFF hides the new banner and shows the existing loyalty banner",
+      "requirement_ref": "giab_pam_revamp_enabled",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "local_data_migration",
+      "source": "input_derived",
+      "steps": [
+        "Set the giab_pam_revamp_enabled flag to false",
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the loyalty banner"
+      ],
+      "automation_steps": [
+        "setDriverToggle(giab_pam_revamp_enabled, false)",
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the loyalty banner",
+        "Verify the new PAM 8 Levels banner is hidden and the existing loyalty banner is shown (backward compatible)"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify the new PAM 8 Levels banner is hidden and the existing loyalty banner is shown (backward compatible)",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "giab_pam_revamp_enabled": "false"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "APP",
+        "trigger_action": "Observe the loyalty banner",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-2w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (2-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "2W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_2w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Non-ID market (SG) is unchanged by the PAM revamp",
+      "requirement_ref": "giab_pam_revamp_enabled",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "local_data_migration",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the loyalty page for a non-Indonesia (SG) driver"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the loyalty page for a non-Indonesia (SG) driver",
+        "Verify the SG driver continues to see the existing loyalty page/banner unchanged"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. Verify the SG driver continues to see the existing loyalty page/banner unchanged",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Observe the loyalty page for a non-Indonesia (SG) driver",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-4w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (4-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "4W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_4w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "giab_pam_revamp_enabled ON surfaces the PAM 8 Levels banner",
+      "requirement_ref": "giab_pam_revamp_enabled",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "feature_flag_killswitch",
+      "source": "input_derived",
+      "steps": [
+        "Set the giab_pam_revamp_enabled flag to true",
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the profile page"
+      ],
+      "automation_steps": [
+        "setDriverToggle(giab_pam_revamp_enabled, true)",
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the profile page",
+        "Verify the new PAM 8 Levels entry-point banner is shown on the Profile Page"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify the new PAM 8 Levels entry-point banner is shown on the Profile Page",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "active_experiment_flags": {
+          "giab_pam_revamp_enabled": "true"
+        }
+      },
+      "mapped_user_flow": {
+        "origin_screen": "APP",
+        "trigger_action": "Observe the profile page",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-2w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (2-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "2W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_2w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "/loyalty/catalogue deeplink opens the PAM 8 Levels catalogue",
+      "requirement_ref": "LoyaltyCatalogueFragment",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "deep_link_nav",
+      "source": "input_derived",
+      "steps": [
+        "Open deeplink \"/loyalty/catalogue\""
+      ],
+      "automation_steps": [
+        "openDeeplink(\"/loyalty/catalogue\")",
+        "Verify the 8 Level Program Apresiasi Mitra catalogue screen is shown"
+      ],
+      "expected_result": "1. Verify the 8 Level Program Apresiasi Mitra catalogue screen is shown",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "target_entry_deeplink": "/loyalty/catalogue"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PAM_8_LEVELS_CATALOGUE",
+        "trigger_action": "Open deeplink \"/loyalty/catalogue\"",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-2w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (2-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "2W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_2w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Catalogue tier list shows Harapan/Andalan/Juara with badge, metric and rewards",
+      "requirement_ref": "PAM-01",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Open deeplink \"/loyalty/catalogue\"",
+        "Open the tier list",
+        "Select a tier (Harapan/Andalan/Juara)"
+      ],
+      "automation_steps": [
+        "openDeeplink(\"/loyalty/catalogue\")",
+        "Open the tier list",
+        "Select a tier (Harapan/Andalan/Juara)",
+        "Verify tier badge, metric display and rewards listing appear correctly for the selected tier"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. Verify tier badge, metric display and rewards listing appear correctly for the selected tier",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "target_entry_deeplink": "/loyalty/catalogue"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PAM_8_LEVELS_CATALOGUE",
+        "trigger_action": "Select a tier (Harapan/Andalan/Juara)",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-2w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (2-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "2W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_2w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ],
+      "existing_case_ref": "C5542965"
+    },
+    {
+      "csv_title_association": "Fully-achieved year (12/12 MJG) shows the Mitra Juara year badge",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" for a 12/12 MJG year"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" for a 12/12 MJG year",
+        "Verify the year icon shows the Mitra Juara badge and the headline reads \"12 dari 12 kali jadi Mitra Juara\""
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify the year icon shows the Mitra Juara badge and the headline reads \"12 dari 12 kali jadi Mitra Juara\"",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Open \"Pencapaian Saya\" for a 12/12 MJG year",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Poin Swadaya label is shown on the Level Saya page",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Observe the Level Saya header"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Observe the Level Saya header",
+        "Verify the \"Poin Swadaya\" label is displayed"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify the \"Poin Swadaya\" label is displayed",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Observe the Level Saya header",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-4w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (4-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "4W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_4w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ],
+      "existing_case_ref": "C5542965"
+    },
+    {
+      "csv_title_association": "5th-year Mitra Juara badge is shown on the Profile page",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the recognition badges"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the recognition badges",
+        "Verify the Mitra Juara 5 Tahun badge is shown for the eligible driver"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. Verify the Mitra Juara 5 Tahun badge is shown for the eligible driver",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Observe the recognition badges",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-mj5",
+          "entity": "DRIVER",
+          "description": "Driver eligible for Mitra Juara 5 Tahun recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "recognition": "MJ_5_TAHUN"
+          },
+          "type_signals": [
+            "driver",
+            "mj5"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ],
+      "existing_case_ref": "C5542964"
+    },
+    {
+      "csv_title_association": "10th-year Mitra Juara badge is shown on the Profile page",
+      "requirement_ref": "PAM-04",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the recognition badges"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Observe the recognition badges",
+        "Verify the Mitra Juara 10 Tahun badge is shown for the eligible driver"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. Verify the Mitra Juara 10 Tahun badge is shown for the eligible driver",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Observe the recognition badges",
+        "destination_screen": "PROFILE_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-mj10",
+          "entity": "DRIVER",
+          "description": "Driver eligible for Mitra Juara 10 Tahun recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "recognition": "MJ_10_TAHUN"
+          },
+          "type_signals": [
+            "driver",
+            "mj10"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ],
+      "existing_case_ref": "C5542964"
+    },
+    {
+      "csv_title_association": "Manfaat & Pencapaian Anda shows achieved badges row",
+      "requirement_ref": "PAM-03",
+      "priority_tier": "P1",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Open deeplink \"/loyalty/catalogue\"",
+        "Open the Manfaat & Pencapaian Anda page"
+      ],
+      "automation_steps": [
+        "openDeeplink(\"/loyalty/catalogue\")",
+        "Open the Manfaat & Pencapaian Anda page",
+        "Verify the badges[] row shows the badges the driver has achieved (icon + label)"
+      ],
+      "expected_result": "1. \u2014\n2. Verify the badges[] row shows the badges the driver has achieved (icon + label)",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID",
+        "target_entry_deeplink": "/loyalty/catalogue"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PAM_8_LEVELS_CATALOGUE",
+        "trigger_action": "Open the Manfaat & Pencapaian Anda page",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-special",
+          "entity": "DRIVER",
+          "description": "Driver with a special recognition (Perintis Jalan / Legend)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "recognition": "SPECIAL"
+          },
+          "type_signals": [
+            "driver",
+            "special"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Achievement tab shows the red-dot 'new' indicator on first open",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Observe the achievement tab before opening it"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Observe the achievement tab before opening it",
+        "Verify the red-dot 'new' indicator is shown on the achievement tab the first time the driver opens the Loyalty Page"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify the red-dot 'new' indicator is shown on the achievement tab the first time the driver opens the Loyalty Page",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Observe the achievement tab before opening it",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-base-2w",
+          "entity": "DRIVER",
+          "description": "Active Gojek driver (2-wheeler)",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "vehicle_type": "2W"
+          },
+          "type_signals": [
+            "driver",
+            "base",
+            "vehicle_2w"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    },
+    {
+      "csv_title_association": "Calendar month labels render in Indonesian (Q1 resolved)",
+      "requirement_ref": "PAM-02",
+      "priority_tier": "P2",
+      "execution_scope": "FRONTEND_ONLY",
+      "is_legacy_regression": false,
+      "automatable": true,
+      "target_execution_framework": "TAPMIND_NLP",
+      "test_case_type": "Regression",
+      "automation_status": "Manual",
+      "coverage_category": "functional",
+      "source": "input_derived",
+      "steps": [
+        "Launch the app and log in with a test driver account",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" and read the month labels"
+      ],
+      "automation_steps": [
+        "loginToDriver(<account>)",
+        "Skip the walkthrough",
+        "Skip the tooltip prompts",
+        "Dismiss the set-vehicle-information card",
+        "Tap the profile icon",
+        "Tap the loyalty detail button",
+        "Open \"Pencapaian Saya\" and read the month labels",
+        "Verify month labels render in Indonesian (e.g. 'Jan', 'Feb')"
+      ],
+      "expected_result": "1. \u2014\n2. \u2014\n3. \u2014\n4. \u2014\n5. \u2014\n6. \u2014\n7. Verify month labels render in Indonesian (e.g. 'Jan', 'Feb')",
+      "execution_mode": "Automatable",
+      "platform": "Android",
+      "country": "Indonesia",
+      "preconditions_metadata": {
+        "target_environment": "QA",
+        "target_locale": "id-ID"
+      },
+      "mapped_user_flow": {
+        "origin_screen": "PROFILE_PAGE",
+        "trigger_action": "Open \"Pencapaian Saya\" and read the month labels",
+        "destination_screen": "LOYALTY_PAGE"
+      },
+      "test_data": [
+        {
+          "fixture_id": "fixture-driver-yearly-mjg",
+          "entity": "DRIVER",
+          "description": "Driver who achieved a Yearly Mitra Juara Tahun-X recognition",
+          "required_state": {
+            "account": "REGISTERED",
+            "country": "Indonesia",
+            "yearly_mjg": true
+          },
+          "type_signals": [
+            "driver",
+            "yearly-mjg"
+          ],
+          "source_refs": [
+            "observed_variant_dimensions.DriverType"
+          ]
+        }
+      ]
+    }
+  ],
+  "cross_stage_gap_analysis": {
+    "prd_vs_figma_gaps": [
+      {
+        "requirement_id": "PAM-01",
+        "severity": "CRITICAL_BLOCKER",
+        "gap_description": "design_context is DEGRADED \u2014 screens[] and ui_flow[] are empty (raw Figma REST export, not the plugin envelope). PAM 8 Levels catalogue frames exist on the M1 page but were not classified; catalogue layout/copy cannot be verified against design."
+      },
+      {
+        "requirement_id": "PAM-02",
+        "severity": "CRITICAL_BLOCKER",
+        "gap_description": "Pencapaian Saya yearly calendar (green/red month markers, year selector) has no classified design frames or ui_flow \u2014 visual assertions rely on PRD prose only."
+      },
+      {
+        "requirement_id": "PAM-03",
+        "severity": "WARNING",
+        "gap_description": "Manfaat & Pencapaian Anda page reuses LoyaltyCatalogueFragment via a passed flag; no design frame classified and no dedicated deeplink \u2014 entry resolved via catalogue + badge tap."
+      },
+      {
+        "requirement_id": "PAM-04",
+        "severity": "WARNING",
+        "gap_description": "Special badge visuals (Perintis Jalan, Legend, 5/10-year) not classifiable from the degraded export."
+      }
+    ],
+    "prd_vs_rfc_gaps": [
+      {
+        "requirement_id": "PAM-06",
+        "gap_description": "PRD Milestone 1.1 extends PAM entry points to SDF/Kilat/Box (v1.134); RFC confirms the is_point_swadaya_kilat_enabled point-swadaya component is OUT of M1 scope. Entry-point extension vs point-swadaya component are separate \u2014 treat point-swadaya as out of M1."
+      },
+      {
+        "requirement_id": "PAM-03",
+        "gap_description": "RFC api_contract_changes note conflict: benefits page endpoint named both /v1/loyalty/benefit and /v2/loyalty/rewards. Tests reference /v2/loyalty/rewards (the contract block) pending confirmation."
+      },
+      {
+        "requirement_id": "feature_flags",
+        "gap_description": "Flags giab_pam_revamp_enabled / is_point_swadaya_kilat_enabled named but variants/defaults undocumented in the RFC."
+      }
+    ],
+    "rfc_vs_impl_plan_gaps": [
+      {
+        "rfc_id": "[FE] PAM Level 8 RFC",
+        "gap_description": "No plan_context.json (impl plan) supplied \u2014 RFC risks (RISK-01 placeholder copy), state transitions (Loading/Error/Retry), and the red-dot cache behaviour cannot be checked against implementation view-models/hooks."
+      }
+    ]
+  },
+  "testability_feedback": {
+    "missing_hooks": [
+      "design_context DEGRADED \u2014 no element locators; screens[]/ui_flow[] empty. Navigation uses the regression preamble (login->skip walkthrough->dismiss vehicle card->tap profile icon) + /loyalty/catalogue deeplink",
+      "Manfaat & Pencapaian Anda \u2014 no dedicated deeplink (LoyaltyCatalogueFragment reused via flag); reached via /loyalty/catalogue then a badge tap",
+      "INTERNAL_PORTAL (PAM-05, Mercury Segmentation / CSV Upload) \u2014 internal web tool, not the driver app; no mobile navigation",
+      "No plan_context test hooks; login relies on the corroborated regression backdoor preamble (normalized)"
+    ],
+    "locator_readiness_checklist": [
+      "No element_locator_handoff possible \u2014 degraded design carries no android_resource_id / ios_accessibility_identifier / flutter_key",
+      "Confirm stable IDs for the PAM 8 Levels banner, catalogue tier list, Pencapaian Saya calendar cells, year selector, and recognition badges once a proper plugin export lands"
+    ],
+    "unclear_ac": [
+      "Q4 \u2014 10-year backfill window anchoring for partial-history drivers (OPEN)",
+      "Q5 \u2014 empty achievement-tab state for unbackfilled drivers (OPEN)",
+      "Q2 \u2014 last_period_progress_label final copy (OPEN; placeholder may ship)",
+      "PRD edge-case scenario #5 missing from source table (pagination artifact)"
+    ]
+  },
+  "element_locator_handoff": [],
+  "impact_shortlist": {
+    "contract_version": "1.0.0",
+    "generated_at": "2026-08-24T04:21:59+00:00",
+    "ref": "impact_shortlist.json",
+    "status": "COMPLETE",
+    "merge_requests": [
+      "!13303",
+      "!13326",
+      "!13352",
+      "!13354",
+      "!13386"
+    ],
+    "candidate_pool_size": 5,
+    "shortlisted_count": 5,
+    "reduction_pct": 0.0,
+    "must_run": [
+      "C5542964",
+      "C5542965",
+      "C5542968",
+      "C5542971",
+      "C5542973"
+    ],
+    "should_run": [],
+    "optional": [],
+    "run_buckets": {
+      "GMT_JAVA": [
+        "C5542964",
+        "C5542965",
+        "C5542968",
+        "C5542971",
+        "C5542973"
+      ],
+      "TAPMIND_NLP": [],
+      "MANUAL": [],
+      "UNKNOWN_AUTOMATED": []
+    },
+    "new_scenario_count": 36
+  }
+}

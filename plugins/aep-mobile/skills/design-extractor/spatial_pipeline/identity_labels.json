@@ -1,0 +1,19 @@
+{
+ "_comment": "Ground truth from the design team for screen-identity splitting. Each entry: board file (in ~/Downloads or wherever the export lives), two frame node ids, and whether they are the SAME screen. Used by identity_audit.py --check-labels as the regression gate for screen_identity.split_frames.",
+ "labels": [
+  {"board": "GoFood-Group-Order-Artboard.json", "a": "11011:48756", "b": "10950:27992", "same": false,
+   "note": "11011 shows a dialog overlay; 10950 is the plain host creation Landing — design team call"},
+  {"board": "GoFood-Group-Order-Artboard.json", "a": "11015:52600", "b": "10950:27992", "same": false,
+   "note": "member join Landing vs host creation Landing — design team call"},
+  {"board": "GoFood-Group-Order-Artboard.json", "a": "11011:48756", "b": "11015:52600", "same": true,
+   "note": "same screen, elements are the same — design team call"},
+  {"board": "GoFood-Group-Order-Artboard.json", "a": "12094:48022", "b": "10885:32974", "same": false,
+   "note": "two different dialog overlays, elements differ — design team call"},
+  {"board": "GoFood-Group-Order-Artboard.json", "a": "10882:10914", "b": "11974:58748", "same": true,
+   "note": "same MPS, same elements — design team call"},
+  {"board": "GoFood-Group-Order-Artboard.json", "a": "14155:123161", "b": "10882:10914", "same": true,
+   "note": "slightly different, one extra button below — design team call: same screen"},
+  {"board": "GoPay-Affiliate-v2.json", "a": "1997:31939", "b": "1997:32287", "same": true,
+   "note": "OTP entry empty vs filled — state variant, not a second screen"}
+ ]
+}

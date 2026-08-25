@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "sdet_plan",
-  "description": "Backend SDET test plan produced by the sdet-plan-generator skill. Versioned output — scenarios are never deleted, only deprecated.",
+  "description": "Backend SDET test plan produced by the sdet-plan-generator skill. Versioned output \u2014 scenarios are never deleted, only deprecated.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -31,7 +31,7 @@
     },
     "canonical_team_id": {
       "type": "string",
-      "description": "Stable team identifier resolved from team_registry.json. 'unknown' signals a registry miss — triggers a warning in qa_analysis.md and blocks downstream module path construction."
+      "description": "Stable team identifier resolved from team_registry.json. 'unknown' signals a registry miss \u2014 triggers a warning in qa_analysis.md and blocks downstream module path construction."
     },
     "code_module": {
       "type": [
@@ -71,12 +71,8 @@
           "markets",
           "type_of_test",
           "human_corrected",
-<<<<<<< HEAD
           "human_correction_types",
           "owning_team"
-=======
-          "human_correction_types"
->>>>>>> origin
         ],
         "properties": {
           "scenario_id": {
@@ -143,14 +139,18 @@
           "status": {
             "type": "string",
             "enum": [
-              "active",
+              "draft",
+              "in_review",
+              "changes_requested",
+              "approved",
               "deprecated"
             ],
-            "description": "deprecated = human marked for removal; not deleted so downstream tools can detect the change"
+            "description": "Per-scenario human sign-off. The GENERATOR always writes 'draft' and must never write 'approved' \u2014 only a person sets that. 'in_review' = a reviewer picked it up. 'changes_requested' = feedback written into qa_analysis.md, Review-mode run pending. 'approved' = this scenario is cleared to flow downstream. 'deprecated' = human marked it for removal; the scenario is kept, not deleted, so downstream can detect the change. Distinct from the plan-root `status`: root says the plan has been through review at all, this says whether THIS scenario is signed off. A plan may be partially approved. Any run that changes this scenario's content resets it to 'draft'.",
+            "default": "draft"
           },
           "change_reason": {
             "type": "string",
-            "description": "One sentence — what changed and why. Set by retrigger and review modes."
+            "description": "One sentence \u2014 what changed and why. Set by retrigger and review modes."
           },
           "is_delta": {
             "type": "boolean",
@@ -180,7 +180,7 @@
                 "Story"
               ]
             },
-            "description": "BrowserStack TestType — multi-select. Collect ALL applicable values (additive, not first-match). Serialised as comma-separated in CSV."
+            "description": "BrowserStack TestType \u2014 multi-select. Collect ALL applicable values (additive, not first-match). Serialised as comma-separated in CSV."
           },
           "execution_mode": {
             "type": "string",
@@ -207,7 +207,7 @@
               "functional",
               "performance"
             ],
-            "description": "performance ONLY when tags contain load or nfr, i.e. the scenario measures a throughput or latency target. functional otherwise — including reliability, concurrency, security and compliance scenarios, which assert functional behaviour under adverse conditions rather than measuring performance."
+            "description": "performance ONLY when tags contain load or nfr, i.e. the scenario measures a throughput or latency target. functional otherwise \u2014 including reliability, concurrency, security and compliance scenarios, which assert functional behaviour under adverse conditions rather than measuring performance."
           },
           "human_corrected": {
             "type": "boolean",
@@ -277,19 +277,18 @@
           },
           "scenario_group": {
             "type": "string",
-            "description": "Key shared by scenarios resting on the same Arrange: identical precondition state and triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction — it applies to Manual scenarios too, where it marks cases a human tester can run back-to-back off one setup. Standalone scenarios get a unique key. Format: {feature_component}-{behaviour}. Downstream consumers decide how to use it."
+            "description": "Key shared by scenarios resting on the same Arrange: identical precondition state and triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction \u2014 it applies to Manual scenarios too, where it marks cases a human tester can run back-to-back off one setup. Standalone scenarios get a unique key. Format: {feature_component}-{behaviour}. Downstream consumers decide how to use it."
           },
           "existing_testcase_ids": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Existing BrowserStack case ids (e.g. TC-302383) this scenario extends, replaces, or re-runs under a new flag state. From regression_context.json only — never invented. Rendered into the Preconditions block and consumed downstream for @TestInfo."
-<<<<<<< HEAD
+            "description": "Existing BrowserStack case ids (e.g. TC-302383) this scenario extends, replaces, or re-runs under a new flag state. From regression_context.json only \u2014 never invented. Rendered into the Preconditions block and consumed downstream for @TestInfo."
           },
           "owning_team": {
             "type": "string",
-            "description": "canonical_id of the team owning this scenario's SYSTEM UNDER TEST — the service whose contract the assertions are about, not the team whose feature triggered the work. Defaults to the primary canonical_team_id and is set explicitly on every scenario. automation-plan-generator resolves the code module and BrowserStack project from this, not from the root code_module."
+            "description": "canonical_id of the team owning this scenario's SYSTEM UNDER TEST \u2014 the service whose contract the assertions are about, not the team whose feature triggered the work. Defaults to the primary canonical_team_id and is set explicitly on every scenario. automation-plan-generator resolves the code module and BrowserStack project from this, not from the root code_module."
           },
           "browserstack_test_id": {
             "type": [
@@ -297,9 +296,60 @@
               "null"
             ],
             "default": null,
-            "description": "BrowserStack's own test-case id, assigned when this scenario is uploaded via the BrowserStack MCP. null until the upload runs — always emit the key so downstream readers never infer state from absence. Written back into the plan by the sync, never authored by the generator. DISTINCT from existing_testcase_ids[], which holds ids of cases that already existed BEFORE this plan (sourced from regression_context.json); this field is the id THIS scenario received."
-=======
->>>>>>> origin
+            "description": "BrowserStack's own test-case id, assigned when this scenario is uploaded via the BrowserStack MCP. null until the upload runs \u2014 always emit the key so downstream readers never infer state from absence. Written back into the plan by the sync, never authored by the generator. DISTINCT from existing_testcase_ids[], which holds ids of cases that already existed BEFORE this plan (sourced from regression_context.json); this field is the id THIS scenario received."
+          },
+          "existing_case_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The single BrowserStack case id this scenario duplicates or directly impacts, verbatim (e.g. 'TC-329330' or 'C3260998'). Set whenever is_legacy_regression is true because of a real match \u2014 is_legacy_regression true with no ref is a bare flag nobody can audit or trace back. Omit when the scenario is genuinely new. Use existing_testcase_ids[] when a scenario maps to several cases."
+          },
+          "regression_action": {
+            "type": "string",
+            "enum": [
+              "none",
+              "reuse",
+              "modify"
+            ],
+            "default": "none",
+            "description": "What this scenario implies for existing automated coverage. 'none' = net-new; generate a new test method. 'reuse' = an existing case already covers this exact behaviour; emit the row so reviewers can see it exists, but generate no code. 'modify' = an existing test covers this surface and must be EDITED because the change alters what it should assert. 'modify' is the disposition most easily missed on backend: a response POJO that tolerates unknown fields lets the existing test keep PASSING after a field is added, while silently covering less \u2014 nobody re-runs their way to noticing that."
+          },
+          "existing_test_ref": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "default": null,
+            "additionalProperties": false,
+            "description": "Repo location of the existing automated test this scenario reuses or modifies, copied from regression_context.regression_tests[].test_ref. REQUIRED when regression_action is 'modify' \u2014 an edit instruction cannot be emitted against a case id alone.",
+            "required": [
+              "class",
+              "method"
+            ],
+            "properties": {
+              "class": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              },
+              "file_path": {
+                "type": "string"
+              },
+              "case_numbers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Numeric case ids this method implements, from @TestInfo(testCaseIds={...})."
+              },
+              "change_required": {
+                "type": "string",
+                "description": "What must change in the existing test and why. REQUIRED when regression_action is 'modify'. Name the assertion that becomes insufficient, not merely that the test is affected."
+              }
+            }
           }
         }
       }
@@ -343,7 +393,7 @@
         "llm_quality": {
           "type": "object",
           "additionalProperties": false,
-          "description": "LLM generation accuracy — populated at plan creation; updated after each Review run.",
+          "description": "LLM generation accuracy \u2014 populated at plan creation; updated after each Review run.",
           "required": [
             "auto_approved",
             "human_modified",
@@ -354,7 +404,7 @@
           "properties": {
             "auto_approved": {
               "type": "integer",
-              "description": "Scenarios not touched by any review round — LLM got them right"
+              "description": "Scenarios not touched by any review round \u2014 LLM got them right"
             },
             "human_modified": {
               "type": "integer",
@@ -362,11 +412,11 @@
             },
             "human_deprecated": {
               "type": "integer",
-              "description": "Scenarios LLM generated unnecessarily — duplicate or wrong (deprecated by human)"
+              "description": "Scenarios LLM generated unnecessarily \u2014 duplicate or wrong (deprecated by human)"
             },
             "human_added": {
               "type": "integer",
-              "description": "Scenarios LLM missed entirely — added from scratch by human via Review"
+              "description": "Scenarios LLM missed entirely \u2014 added from scratch by human via Review"
             },
             "llm_accuracy_pct": {
               "type": [
@@ -375,7 +425,7 @@
               ],
               "minimum": 0,
               "maximum": 100,
-              "description": "auto_approved / (auto_approved + human_modified + human_deprecated) × 100. null until first review round completes."
+              "description": "auto_approved / (auto_approved + human_modified + human_deprecated) \u00d7 100. null until first review round completes."
             },
             "review_rounds_completed": {
               "type": "integer",
@@ -387,7 +437,6 @@
     },
     "dedup_report": {
       "type": "object"
-<<<<<<< HEAD
     },
     "teams_in_scope": {
       "type": "array",
@@ -452,7 +501,7 @@
       "properties": {
         "project": {
           "type": "string",
-          "description": "BrowserStack project the scenarios were uploaded to — should match the registry browserstack_project for the owning team"
+          "description": "BrowserStack project the scenarios were uploaded to \u2014 should match the registry browserstack_project for the owning team"
         },
         "suite_id": {
           "type": [
@@ -472,11 +521,69 @@
         "unsynced_count": {
           "type": "integer",
           "minimum": 0,
-          "description": "Scenarios still carrying null — e.g. those owned by a team whose project was not the upload target"
+          "description": "Scenarios still carrying null \u2014 e.g. those owned by a team whose project was not the upload target"
         }
       }
-=======
->>>>>>> origin
+    },
+    "regression_selection": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "description": "The executable signoff selection: existing suites CI runs alongside the new tests. Copied from regression_context.regression_selection. Holds the 'reuse' population in bulk so the plan does not carry one no-op row per already-covered case.",
+      "properties": {
+        "test_groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "test_classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "case_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_review",
+        "changes_requested",
+        "approved"
+      ],
+      "default": "draft",
+      "description": "Human approval gate for this plan as a whole. The GENERATOR always writes 'draft' and must never write 'approved' \u2014 only a person sets that, after reading the plan and its analysis document. 'in_review' = a reviewer has picked it up. 'changes_requested' = feedback was written into the qa_analysis.md Feedback block and a Review-mode run is pending. 'approved' = cleared to flow downstream. ANY run that changes scenario content \u2014 pass2, retrigger, review \u2014 resets this to 'draft'. An approval attaches to the content that was read, not to the filename. A per-scenario `status` also exists on scenarios[] with the same four approval values plus 'deprecated'. INVARIANT: root may not be 'approved' while any scenario is still 'draft' or 'in_review' \u2014 an approved plan holding unreviewed scenarios is ambiguous. They sit at different levels so they never collide in JSON, but read the path carefully."
+    },
+    "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "Who approved. Set alongside status='approved'; null otherwise."
+    },
+    "approved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "default": null,
+      "description": "When approval was given. Set alongside status='approved'; null otherwise. If updated_at is later than this, the plan changed after approval and the approval is stale."
     }
   }
 }

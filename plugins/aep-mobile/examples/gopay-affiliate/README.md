@@ -1,39 +1,49 @@
-# GoPay Affiliate — golden regression corpus for design-extractor
+# GoPay Affiliate — design-extractor golden example (spatial pipeline)
 
-A real "Export Design Raw JSON" **format v2** export (geometry, label chips, dashed
-nodes, board-level lines) of the GoPay Affiliate main flow, plus the extractor's
-expected output. Exported 2026-08-21, plugin v0.6.0, 9,977 nodes, 47 connectors.
+Real-board golden for `skills/design-extractor` (spatial-first pipeline).
+Export 2026-08-21, plugin v0.6.0, 9,977 nodes, 47 connectors.
+Regenerated 2026-08-24 after the screen-identity split landed.
 
-| File | What |
+| file | what |
 | :--- | :--- |
-| `figma_export.json` | the raw plugin export — the extractor's input |
-| `design_context.json` | expected output (`--app gopay-merchant`) |
-| `design_context.report.json` | expected sidecar — tallies, conservation, `unclassified_states` |
+| `figma_export.json` | "Export Design Raw JSON" v2 export of the GoPay Affiliate board |
+| `design_context.json` | full-pipeline output: Phase A + deterministic auto-bind + Haiku notes-only pass + one Sonnet escalation, schema-valid, referential checks OK |
+| `phase_a.report.json` | Phase A provenance sidecar (protos, merges, `identity_splits`, state transitions, unresolved endpoints) |
+| `flow_map.html` | the required review page — open it beside the Figma board; self-contained, no server |
 
-## Re-run and compare
+Regenerate the deterministic half (must reproduce byte-identically):
 
 ```bash
-python3 ../../scripts/extract_design_context.py figma_export.json \
-    --app gopay-merchant --config ../../config/gopay-merchant.json \
-    -o /tmp/regen.json --report
-diff <(jq -S 'del(.design_source.exported_at)' /tmp/regen.json) \
-     <(jq -S 'del(.design_source.exported_at)' design_context.json)
+cd ../../skills/design-extractor/spatial_pipeline
+python3 phase_a.py ../../../examples/gopay-affiliate/figma_export.json \
+        --app gopay-merchant --out /tmp/gpa
 ```
 
-The extractor is deterministic: same input, byte-identical output (only
-`exported_at` provenance differs between re-exports of the board itself). Any
-diff after a script change is a behaviour change — intended ones update this
-corpus, unintended ones are regressions.
+Expected Phase A counters: 47 connectors → 21 edges (2 of them
+`CONNECTOR_CONTRACTED` through the "Does user have GoPay+?" decision box),
+3 state transitions, 23 unresolved, **54 screens from 92 frames**,
+4 identity splits adding 7 screens, `schema: VALID`, `referential checks: OK`.
 
-## What this board exercises
+The identity splits are the point of this golden — `SCROLL_VIEW` was one screen
+holding four unrelated screens' frames before the split rule, and is now
+`SCROLL_VIEW`, `SCROLL_VIEW__RIWAYAT_KOMISI`, `SCROLL_VIEW__WELCOME_PAGE`,
+`SCROLL_VIEW__AFFILIATE_ACTIVATION`. Same for `SCROLL_VIEW_WITH_PAGINATION_LOAD`
+(3), `EMPTY_STATE` (2) and `LOADING` (2). This board carries no screen-label
+chips, so the flow context does the seeding.
 
-- 94 state frames collapsing to 33 screens (name qualifiers + variants)
-- 42 label-chip states swept proactively (standard #6) — e.g. `CONFIRM_ACCOUNT`
-  gains "Not eligible to become upliner yet" / "Code incorrect / not found"
-- 47-connector conservation across all six buckets, incl. 16 note connectors,
-  1 decision contraction, 12 honestly-unresolved
-- Dashed `COMPONENT_SET` borders correctly ignored as group boxes (Figma chrome)
-- 2,800px+ section rule LINEs correctly ignored as arrows
-- 25 `unclassified_states` entries — input for the State normalisation pass
-- 2 `ambiguous_collapses` flagged (e.g. `OVERLAY` collapsing "For Level 1/2") —
-  possibly-distinct screens sharing a base name, reported instead of trusted
+The finished `design_context.json` additionally carries 813 elements (auto-bind,
+zero tokens), 47 states, note-traced validations from two Haiku batches, and one
+Sonnet-confirmed HIGH ambiguity (`EMPTY` — the designer's own unanswered
+annotation about whether the member list shows all members or only productive
+ones for the selected period). It ends `INCOMPLETE` with 4 gaps, rating MEDIUM,
+2 blocking issues — the honest state of this board, not a defect.
+
+The two model passes are not byte-reproducible; the Phase A half and the
+auto-bound elements are.
+
+```bash
+# review page (required step of the skill)
+python3 connector_resolve.py <export> /tmp/gpa/flow_edges.json
+python3 viz_export.py <export> /tmp/gpa/flow_edges.json /tmp/gpa/viz_data.json \
+        /tmp/gpa/design_context.json --html /tmp/gpa/flow_map.html
+```
