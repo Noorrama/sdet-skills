@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SDETComplianceReportSchema",
+  "description": "Sidecar audit proof for sdet-plan-generator Step 4. Not embedded in sdet_plan.json (schema additionalProperties:false).",
+  "type": "object",
+  "required": ["feature_key", "rules_version", "balance", "checklist_summary"],
+  "additionalProperties": false,
+  "properties": {
+    "feature_key": { "type": "string" },
+    "rules_version": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "checklist_summary": {
+      "type": "object",
+      "properties": {
+        "checklist_item_count": { "type": "integer", "minimum": 0 },
+        "scenario_count": { "type": "integer", "minimum": 0 },
+        "min_e2e_scenarios": { "type": "integer", "minimum": 0 },
+        "e2e_scenarios_found": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "required": {
+      "type": "object",
+      "description": "Checklist partition: covered vs still_blocked",
+      "additionalProperties": true
+    },
+    "covered": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    "still_blocked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item", "reason"],
+        "properties": {
+          "item": { "type": "string" },
+          "reason": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "gaps_closed_in_this_pass": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "balance": {
+      "type": "object",
+      "required": ["positive", "non_positive", "positive_pct", "action_taken"],
+      "additionalProperties": false,
+      "properties": {
+        "positive": { "type": "integer", "minimum": 0 },
+        "non_positive": { "type": "integer", "minimum": 0 },
+        "positive_pct": { "type": "number", "minimum": 0, "maximum": 1 },
+        "action_taken": {
+          "type": "string",
+          "description": "balanced | regenerated_positives | under_target — reason"
+        }
+      }
+    },
+    "validator_passed": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,61 @@
+# SDET Plan Generator — Anti-Patterns (org-wide)
+
+These outputs violate `SKILL.md` regardless of feature, app, or model. The compliance
+validator (`scripts/validate_sdet_deliverables.py`) rejects them mechanically.
+
+## FORBIDDEN — CSV format
+
+| Anti-pattern | Why |
+|---|---|
+| Columns `id`, `requirement_ref`, `automation_steps`, `execution_scope` | Internal pipeline format, not BrowserStack TMS |
+| Rows titled `SDET-001: …` as the primary Title column | SDET ids belong in JSON metadata; CSV Title is human-readable scenario name |
+| `Verify …` / `Assert …` lines in the **Steps** column | Actions and assertions must be split (Steps vs Expected Result) |
+| `TestType` other than `Story` | Squad template requires literal `Story` |
+
+**Correct:** Copy `templates/test_cases.csv` header verbatim; fill rows from `scenario_list`.
+
+## FORBIDDEN — Scenario set shape
+
+| Anti-pattern | Why |
+|---|---|
+| Exactly one scenario per `req_id` when PRD has multiple acceptance criteria / UI copy rows | Hard Coverage Rule: floor ≠ target |
+| Zero **End-to-end** / **E2E** scenarios when design `ui_flow` or multi-screen PRD exists | Hard Coverage Rule: business flows first |
+| `positive_pct < 50%` without documented `under_target` escape after regeneration | Step 4c-mix balance gate |
+| Clickstream/telemetry scenarios when inputs have **no** event names/schema | Telemetry Rules — open question only |
+| iOS/dark-mode **placeholder scenarios** when OQ blocks expected behavior | Report blocked in Section 4; do not invent tests |
+| Mobile scenario for admin-only / backend-only requirements (Frontend Focus) | Out of FE scope — block in analysis |
+
+## FORBIDDEN — JSON / steps
+
+| Anti-pattern | Why |
+|---|---|
+| `is_legacy_regression: true` without `existing_case_ref` | Regression dedup must be auditable |
+| `existing_case_ref` with `is_legacy_regression: false` | Contradictory legacy marking |
+| Verification lines inside JSON `steps[]` | Belongs in `expected_result` |
+| Invented deeplinks, flags, event names, API paths | Provenance rule |
+
+## FORBIDDEN — analysis.md
+
+| Anti-pattern | Why |
+|---|---|
+| Missing Section 0 Coverage Audit / Coverage Balance tables | Mechanical coverage proof for reviewers |
+| Cross-stage gaps only in JSON, not Section 2 tables | Human-readable QA asset |
+| Abbreviated Section 5 (no env / test data / device matrix) | Gold-standard layout |
+
+## REQUIRED before shipping deliverables
+
+```bash
+python3 scripts/build_coverage_checklist.py --prd prd_context.json [--design ...] [--rfc ...] --out coverage_checklist.json
+
+python3 scripts/validate_sdet_deliverables.py \
+  --prd prd_context.json \
+  --plan <feature_key>_SDET_plan.json \
+  --csv <feature_key>_test_cases.csv \
+  --analysis <feature_key>_analysis.md \
+  [--design design_context.json] \
+  [--rfc rfc_context.json] \
+  [--checklist coverage_checklist.json] \
+  [--compliance <feature_key>_compliance_report.json]
+```
+
+Exit code **must be 0** before writing or importing deliverables.
