@@ -23,8 +23,12 @@ here, no create/mutate tool is called. It reads catalogs and writes a plan.
 | `automation_plan.json` (approved) | `fixtures_summary[]` → `fixture_id`, `description`, `required_state`, `used_by_scenarios[]`. These three fields are the whole input signal. |
 | `references/index.md` | **Step 1 entry point** — the QA Knowledge Catalog. Routes to per-domain OKF bundles and carries the procedure for reading a natural-language statement. |
 | `references/customer/index.md` · `references/driver/index.md` | Populated domain bundles: real TDP category enums (with `isEnabled`), the account-vs-wallet-amount split, signal→token vocabulary |
+| `references/workflow/index.md`, `references/workflow/transport/index.md`, `references/workflow/food/index.md` | Which entities a booking vertical needs and in what order (Transport: Customer → Driver; Food: Customer → Merchant → Driver), grounded in `BookingService`/`GoFoodBookingService` guards — use before sequencing any fixture that names a booking, ride, or order |
+| `references/merchant/index.md` · `references/payment_instrument/index.md` | Grounded **gap** bundles: confirm no pooled entity exists in TDP for either domain, and where a fixture naming one should route instead (never an invented category) |
+| `references/voucher/index.md` | Grounded bundle: the real `VoucherModel` batch shape (`voucherBatchId`, `serviceTypeIds`, `voucherBatchType`, `countryCode`) — narrower than the domain file's promo-code-shaped signals |
+| `references/location/index.md` | Grounded bundle: the real `ServiceAreaModel` shape and lock lifecycle; clarifies Polygon is a driver-fleet tag, not a location entity |
 | `references/sequence/sequence.md` | **Operation authority** — every Consumer/Driver function as an ordered call sequence, plus the composite booking flow. Use it for sequencing instead of inferring order. |
-| `references/test_data_domains.md` | Domain vocabulary for the domains with no bundle yet (MERCHANT, VOUCHER, PAYMENT_INSTRUMENT, BOOKING, LOCATION) + cross-domain disambiguation |
+| `references/test_data_domains.md` | Domain vocabulary — still consulted for cross-domain disambiguation rules even though every domain now has a bundle |
 | TestBuddy MCP → `TestDataAgent_get_supported_category` | Best-match TDP category for a domain + signal set, plus `candidates[]` and a ready-made `TDP_Request`. Returns a nearest match always — see the validation gate. |
 | TestBuddy MCP → `TestDataAgent_get_supported_operation` | Operation catalog for a domain + signal set. Federates TestBuddy's own `<Domain>Agent_*` tools and Pertamax features; returns names, `operationSupported`, and descriptions. Prefer a TestBuddy/TDP tool, fall back to Pertamax. |
 | TestBuddy MCP → `TestDataAgent_generate_testbuddy_prompt` | Turns a resolved category into the prompt TestBuddy will execute |
@@ -143,11 +147,15 @@ mention, then vehicle/service tokens, then any downstream use that spills into a
 | `references/index.md` | Which domain, and how to parse the statement |
 | `references/<domain>/index.md` | That domain's real TDP category enum and signal→token vocabulary |
 | `references/sequence/sequence.md` | Which operation, and in what order |
-| `references/test_data_domains.md` | Domains without a bundle yet, and cross-domain disambiguation |
+| `references/test_data_domains.md` | Cross-domain disambiguation rules — still authoritative even now every domain has a bundle |
 
-Bundles exist today for **Consumer** and **Driver** only. For every other domain, fall back to
-`test_data_domains.md` and treat the identification as `match_confidence: medium` at best — there is
-no grounded category enum to corroborate against.
+Every domain in `test_data_domains.md` now has a bundle: **Consumer**, **Driver**, and
+**Workflow** (booking-composition, covering the Transport and Food verticals) are fully populated;
+**Merchant**, **Voucher**, **Payment Instrument**, and **Location** are grounded bundles that may
+themselves conclude "no pooled entity exists" or "the code models less than expected" — that
+conclusion is itself the grounded answer, not a placeholder. Read the bundle before falling back to
+`test_data_domains.md`'s illustrative signals; where the bundle says a concept has no TDP code path,
+trust the bundle over the domain file.
 
 Extending the vocabulary stays a **file edit, not a skill change**: a new domain becomes a bundle
 directory plus a row in `references/index.md`. Never hardcode a domain, category, or operation list
