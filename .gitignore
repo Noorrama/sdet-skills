@@ -6,3 +6,5 @@ __pycache__/
 # macOS finder metadata
 .DS_Store
 .env
+
+plugins/aep-backend/skills/automation-plan-test-enricher/automation_plan.enriched.json
