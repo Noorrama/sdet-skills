@@ -3,6 +3,21 @@
 Companion to `SKILL.md` §G. Follow this when producing runnable suite tests from
 an automation plan (any feature — rules are schema-generic).
 
+## Intent vs tool routing
+
+Prompts are **protocol-agnostic intent**. Do not encode ingest type or MCP tool names in the
+string. TapMind matches the ingested operation and selects the tool (`rest.invoke`,
+`grpc.invoke`, redis, db, kafka, …). See `SKILL.md` → **Intent vs tool routing**.
+
+| Plan signal | Generation action |
+|---|---|
+| REST / HTTP (curl or OpenAPI-backed) | Intent §3.1 / §3.4 — planner routes to `rest.invoke` when op is ingested |
+| Redis / DB / Kafka | §3.5 prefixes only (TapMind requires them today as tool selectors) |
+| gRPC (or any protocol **not** in planner `tools_catalog`) | Do **not** invent NLP grammar. Flag `NEEDS_REVIEW: no catalogued NLP tool for <protocol>`. Optional: side-path MCP `grpc_invoke` outside `runStep` |
+| Stub / queue / call-log inspect with no tool | `NEEDS_REVIEW` — same honesty rule |
+
+Never rewrite a gRPC step into a fake REST prompt just to make generation succeed.
+
 ## Pipeline
 
 ```
@@ -55,6 +70,7 @@ automation_plan.json
 | Same resource re-check, no new curl, prior step was HTTP fetch of it | §3.4 verify-only starter word |
 | Wait / poll / drain queue (e2e/reliability) | §3.2 polling overload; must include fetch |
 | Stub call-log / job-queue inspect with no tool grammar | Do not emit runnable prompt; `NEEDS_REVIEW` |
+| gRPC / protocol not in planner catalog | Intent optional for humans; **no** invented `Run grpc …`; `NEEDS_REVIEW` (or direct MCP outside NLP) |
 
 ### Memory
 
