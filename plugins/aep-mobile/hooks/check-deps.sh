@@ -26,7 +26,7 @@ if [ -z "$warnings" ]; then
   exit 0
 fi
 
-context="ENVIRONMENT CHECK (aep-mobile plugin): ${warnings}BrowserStack MCP is mandatory for regression-extractor and SDET plan upload. If the user invokes any aep-mobile QA skill, tell them about the missing dependencies and suggest running the aep-mobile-setup skill. Do not install anything yourself."
+context="ENVIRONMENT CHECK (aep-mobile plugin): ${warnings}BrowserStack MCP (needs npx) is required only for regression-extractor and SDET-plan upload; the prd/rfc/design/task extractors do not need it and run on python3 + jsonschema alone. If the user invokes a BrowserStack-backed skill, tell them about the missing dependencies and suggest running the aep-mobile-setup skill. Do not install anything yourself."
 
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
   # Cursor hook output format
