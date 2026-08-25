@@ -14,7 +14,7 @@ and to **gate** that the dev actually implemented what the plan required.
 2. `id_compliance.json` — the stable-ID gate (PASS/FAIL + what's missing/renamed).
 
 ## Config
-`${CLAUDE_PLUGIN_ROOT}/config/<app>.json` → `locator_keys` (android=`resource-id`, ios=`accessibilityId`, optional flutter=`Key/Semantics`),
+`config/<app>.json` → `locator_keys` (android=`resource-id`, ios=`accessibilityId`, optional flutter=`Key/Semantics`),
 `platforms`, `deeplink_scheme`, `naming_convention.developer_locator_equals_role`.
 
 ## Reads (in priority order)
@@ -38,7 +38,7 @@ and to **gate** that the dev actually implemented what the plan required.
 Fast tier — Haiku / Composer 2.5. Locator extraction is deterministic where a manifest exists.
 
 ## Produces
-### 1. `change_context.json` (→ `${CLAUDE_PLUGIN_ROOT}/schemas/change_context.schema.json`)
+### 1. `change_context.json` (→ `schemas/change_context.schema.json`)
 - `app`, `epic_ref`, `merge_requests`/`processed_mrs`, `changed_screens`.
 - `screens[]` — per screen: `deep_links` (uri + preconditions + auth_required), `observable_state`, `nav_macro_fallback`.
 - `elements[]` — `element_id` → `android_locator` (resource-id) + `ios_locator` (accessibilityId) [+ optional `flutter_locator` = Key/Semantics]; plus `role`, `interaction`, `states`, `change_type` (added/modified/removed), `locator_fallback`, `triggers_api`, `provenance` (mr/file/line).
@@ -47,7 +47,7 @@ Fast tier — Haiku / Composer 2.5. Locator extraction is deterministic where a 
 - Routing/readiness (when derivable): `pdg`, `test_repo`, `module_path`, `scoped_to_modules`, `ready_jira_ids`.
 - `id_compliance` — inline `{ status, ref }` pointer to the gate result.
 
-### 2. `id_compliance.json` (→ `${CLAUDE_PLUGIN_ROOT}/schemas/id_compliance.schema.json`)
+### 2. `id_compliance.json` (→ `schemas/id_compliance.schema.json`)
 The stable-ID gate. `status` (PASS/FAIL), `missing_ids`, `renamed_ids` (expected vs found),
 `missing_deeplinks`, `reject_codes`. This is what CI blocks on.
 
@@ -67,5 +67,5 @@ The stable-ID gate. `status` (PASS/FAIL), `missing_ids`, `renamed_ids` (expected
 
 ## Guardrails
 Report only what the diff/manifest/CR show — never invent a locator. Never emit accounts/tokens/PII.
-Output valid JSON only, conforming to `${CLAUDE_PLUGIN_ROOT}/schemas/change_context.schema.json` and
-`${CLAUDE_PLUGIN_ROOT}/schemas/id_compliance.schema.json`.
+Output valid JSON only, conforming to `schemas/change_context.schema.json` and
+`schemas/id_compliance.schema.json`.

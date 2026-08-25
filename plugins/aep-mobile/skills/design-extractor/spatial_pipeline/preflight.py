@@ -136,7 +136,7 @@ def main(export_path, app=None):
                 'field': 'ENVIRONMENT',
                 'reason': f'cannot read {p} — element IDs are unverified '
                           'against the app naming convention.',
-                'action': 'run `claude plugin update aep-mobile@aep`, '
+                'action': 'reinstall/update the aep-mobile plugin and restart your editor, '
                           'restart, re-run',
                 'severity': 'DEGRADED'})
     else:
@@ -153,7 +153,7 @@ def main(export_path, app=None):
         out['gaps'].append({
             'field': 'ENVIRONMENT',
             'reason': f'cannot read {SCHEMA_PATH}',
-            'action': 'run `claude plugin update aep-mobile@aep`, restart, '
+            'action': 'reinstall/update the aep-mobile plugin and restart your editor, '
                       're-run',
             'severity': 'DEGRADED'})
 

@@ -24,13 +24,13 @@ fill the hole.
    - **None resolvable** → emit a single file with `app` absent and a `NEEDS_ANSWER` note on `app`.
    Report the decision in your reply before extracting: *"2 apps detected — gopay-consumer
    (§4.1), gojek-consumer (§4.2). Writing 2 context files."*
-2. **Config, per app in the set** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json`. Each output file's
+2. **Config, per app in the set** — `config/<app>.json`. Each output file's
    `app` comes from its own config's `app_id`; never copy one app's config onto another's file.
    Unreadable → add a `WORTH_CHECKING` note on `ENVIRONMENT` with reason *"cannot read
-   ${CLAUDE_PLUGIN_ROOT}/config/<app>.json — plugin install may be incomplete"* and action *"run
-   `claude plugin update aep-mobile@aep`, restart Claude, re-run"*. Set
+   config/<app>.json — plugin install may be incomplete"* and action *"reinstall/update the
+   aep-mobile plugin and restart your editor, then re-run"*. Set
    `extraction_status: LIMITED`. Continue; without it `app` stays absent with a `NEEDS_ANSWER` note.
-3. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/prd_context.schema.json`. Unreadable → `WORTH_CHECKING` note on `ENVIRONMENT`, same install action.
+3. **Schema** — `schemas/prd_context.schema.json`. Unreadable → `WORTH_CHECKING` note on `ENVIRONMENT`, same install action.
    Fall back to the field list in this document **only** in that case, and say so in the note.
 4. **Input.** PRD attached and readable. Empty or unparsed → emit the file with `extraction_status: PARTIAL` and one `NEEDS_ANSWER` note saying the source could not be read. Do not emit an extraction with zero requirements as though the PRD had none.
 
@@ -124,7 +124,7 @@ PRD text (Lark/Confluence)
 Fast tier — Haiku / Composer 2.5. Escalate to a higher reasoning model only if the PRD is long or ambiguous.
 
 ## Output schema (→ prd_context.schema.json)
-The output must conform to `${CLAUDE_PLUGIN_ROOT}/schemas/prd_context.schema.json`. The list below
+The output must conform to `schemas/prd_context.schema.json`. The list below
 is a reading aid, not the contract — validate against the file.
 
 - `app` (string, from config)
@@ -176,7 +176,7 @@ Run once **per output file** — every file in a multi-app split is validated se
 ```
 python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('<each prd_context file>')),
-  json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/prd_context.schema.json')))"
+  json.load(open('schemas/prd_context.schema.json')))"
 ```
 - Passes → `extraction_status: COMPLETE` (when `extraction_notes` is empty).
 - Fails → **still write the file.** Convert every validator error into an `extraction_notes`

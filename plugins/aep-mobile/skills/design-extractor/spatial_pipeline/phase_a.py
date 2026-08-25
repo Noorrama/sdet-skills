@@ -117,7 +117,7 @@ def load_app_config(app):
             'reason': f'cannot read {p} — element IDs are unverified against '
                       'the app naming convention and may not join to real '
                       'locators at code-gen.',
-            'action': 'run `claude plugin update aep-mobile@aep`, restart, re-run',
+            'action': 'reinstall/update the aep-mobile plugin and restart your editor, re-run',
             'severity': 'DEGRADED'}
 
 

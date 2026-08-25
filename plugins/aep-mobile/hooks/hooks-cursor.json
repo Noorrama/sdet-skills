@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "sessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CURSOR_PLUGIN_ROOT}\"/hooks/check-deps.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

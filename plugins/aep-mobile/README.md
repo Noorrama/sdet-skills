@@ -79,6 +79,64 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 3. The **naming convention** (`element_id` rule) + whether existing screens follow it (brownfield).
 4. Per-app config values (repos, deeplink scheme, package/bundle, device matrix, TestBuddy segment names).
 
-## Installing a skill
-Each `skills/<name>/SKILL.md` is a loadable skill (folder name = skill id). Point your skills
-directory at `skills/`, or install per Settings → Capabilities. Schemas are referenced from `schemas/`.
+## Installing the plugin
+
+Each `skills/<name>/SKILL.md` is a loadable skill (folder name = skill id). Schemas and config
+are referenced with paths relative to the plugin root (`schemas/`, `config/`, `scripts/`).
+
+### Claude Code (CLI / Desktop)
+
+```
+claude plugin marketplace add https://source.golabs.io/aep/skills.git
+claude plugin install aep-mobile@aep
+```
+
+Then run the **aep-mobile-setup** skill to verify dependencies.
+
+### Cursor
+
+1. Install the plugin from the AEP marketplace (same repo as Claude Code), or symlink/copy
+   `plugins/aep-mobile/skills/` into your project's `.cursor/skills/` or personal
+   `~/.cursor/skills/`.
+2. **Configure BrowserStack MCP (mandatory)** in Cursor Settings → MCP (or `~/.cursor/mcp.json`):
+
+   ```json
+   {
+     "mcpServers": {
+       "browserstack": {
+         "command": "npx",
+         "args": ["-y", "@browserstack/mcp-server@latest"],
+         "env": {
+           "BROWSERSTACK_USERNAME": "<your-username>",
+           "BROWSERSTACK_ACCESS_KEY": "<your-access-key>"
+         }
+       }
+     }
+   }
+   ```
+
+3. Restart Cursor.
+4. Ask the agent to run the **aep-mobile-setup** skill — all three checks must pass,
+   especially **BrowserStack MCP ✓**. Without it, `regression-extractor` and
+   `sdet-plan-generator` will hard-stop.
+
+### Updating
+
+Bump pulls require a version change in `.claude-plugin/plugin.json` / `.cursor-plugin/plugin.json`:
+
+```
+claude plugin update aep-mobile@aep    # Claude Code
+```
+
+Then restart your editor. In Cursor, reinstall or refresh the plugin if skills don't update.
+
+### Using the skills
+
+Skills auto-trigger from their description. You can also invoke them explicitly by name, e.g.
+`mobile-prd-extractor`, `mobile-regression-extractor`, `mobile-sdet-plan-generator`,
+`aep-mobile-setup`.
+
+Or naturally in conversation:
+> *"Extract the PRD context for this mobile feature"* → triggers `mobile-prd-extractor`
+> *"Generate the SDET plan"* → triggers `mobile-sdet-plan-generator`
+> *"Check aep-mobile dependencies"* → triggers `aep-mobile-setup`
