@@ -66,8 +66,25 @@ Shared at both stages: **test-data-provisioner** (TestBuddy → GBT fallback →
 synthetic for sensitive (KYC/PII). Always returns handles, never raw values; secrets from vault.
 
 ## Validation
-Every skill output must validate against its schema:
+
+Every skill output must validate against its schema. **SDET plan deliverables** also require the
+org-wide compliance gate (any feature, any app):
+
+```bash
+python3 scripts/build_coverage_checklist.py --prd prd_context.json [--design ...] [--rfc ...] --out coverage_checklist.json
+
+python3 scripts/validate_sdet_deliverables.py \
+  --prd prd_context.json \
+  --plan <feature_key>_SDET_plan.json \
+  --csv <feature_key>_test_cases.csv \
+  --analysis <feature_key>_analysis.md \
+  [--design design_context.json] [--rfc rfc_context.json] \
+  --checklist coverage_checklist.json
 ```
+
+See `skills/sdet-plan-generator/workflow.md` and `anti_patterns.md`. JSON schema-only check:
+
+```bash
 python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('examples/gojek-consumer-save20/sdet_plan.json')),
   json.load(open('schemas/scenario.schema.json')))"

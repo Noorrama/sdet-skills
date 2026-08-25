@@ -27,7 +27,21 @@ python3 -c "import jsonschema; print('jsonschema', jsonschema.__version__)"
   pip3 install --break-system-packages jsonschema
   ```
 
-### 2. BrowserStack MCP Server (required for BrowserStack-backed skills)
+### 2. SDET compliance scripts (required for sdet-plan-generator)
+
+From the plugin root, confirm the org-wide deliverable gate is runnable:
+
+```
+python3 scripts/build_coverage_checklist.py --help
+python3 scripts/validate_sdet_deliverables.py --help
+```
+
+- **Passes** → print `sdet compliance scripts ✓`
+- **Fails** → ensure `plugins/aep-mobile/scripts/` is on PATH or invoke with full path from plugin root
+
+See `skills/sdet-plan-generator/workflow.md`.
+
+### 3. BrowserStack MCP Server (required for BrowserStack-backed skills)
 
 BrowserStack MCP must be connected before running regression-extractor or the SDET-plan
 upload — the pre-build extractors (prd/rfc/design/task) skip this check entirely. Check connectivity
@@ -92,7 +106,7 @@ Setup steps:
 Do NOT attempt to edit the user's config files or install the MCP server
 yourself. Print the instructions and let them do it.
 
-### 3. Summary
+### 4. Summary
 
 Print a single summary table:
 
@@ -101,6 +115,7 @@ Dependency              Status
 ──────────────────────  ──────
 python3                 ✓ / ✗
 jsonschema              ✓ / ✗
+sdet compliance scripts ✓ / ✗
 BrowserStack MCP        ✓ / ✗  (needed for regression / SDET upload)
 ```
 

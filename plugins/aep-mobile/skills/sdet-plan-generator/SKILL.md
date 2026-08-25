@@ -1,15 +1,52 @@
 ---
 name: mobile-sdet-plan-generator
-description: Ingests pre-build contexts (plan, prd, design, rfc) to perform cross-stage gap analysis and generate master SDET Plan deliverables in JSON, MD, and CSV formats. Use during implementation planning to produce test scenarios, clickstream verifications, and testability feedback.
+description: Ingests pre-build contexts (plan, prd, design, rfc) to perform cross-stage gap analysis and generate master SDET Plan deliverables in JSON, MD, CSV, and compliance_report formats. Use during implementation planning. MUST run scripts/validate_sdet_deliverables.py (exit 0) before shipping — see workflow.md.
 ---
 
 # Mobile SDET Plan Generator
 
 ## Purpose
-Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_context`, `rfc_context`) during implementation planning to generate 3 standardized pre-build deliverables:
+Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_context`, `rfc_context`) during implementation planning to generate 4 standardized pre-build deliverables:
 1. `<feature_key>_SDET_plan.json` (Machine-readable master execution contract)
 2. `<feature_key>_analysis.md` (Human-readable Markdown QA analysis asset)
-3. `<feature_key>_test_cases.csv` (TMS bulk-import format)
+3. `<feature_key>_test_cases.csv` (TMS bulk-import format — **15-column squad template only**)
+4. `<feature_key>_compliance_report.json` (Mechanical Step 4 audit proof — see `schemas/compliance_report.schema.json`)
+
+> **Model-independent gate:** Follow `workflow.md` end-to-end. Read `anti_patterns.md` before writing CSV/analysis. **Do not write or import deliverables until the compliance validator exits 0** (applies to every feature, every app, every model).
+
+---
+
+## Mandatory workflow (read first)
+
+Full spine: **`workflow.md`**. Anti-patterns: **`anti_patterns.md`**. TMS header template: **`templates/test_cases.csv`**. Analysis layout: **`templates/analysis_skeleton.md`**.
+
+### Before any output file is written
+
+1. **Build checklist** (deterministic, from inputs — not from memory):
+   ```bash
+   python3 scripts/build_coverage_checklist.py \
+     --prd prd_context.json \
+     [--design design_context.json] \
+     [--rfc rfc_context.json] \
+     --out coverage_checklist.json
+   ```
+2. Generate scenarios until checklist + Step 4 balance/navigation audits pass.
+3. Emit `<feature_key>_compliance_report.json` with `balance.action_taken` (`balanced`, `regenerated_positives`, or `under_target — …`).
+4. **Run compliance validator — blocking:**
+   ```bash
+   python3 scripts/validate_sdet_deliverables.py \
+     --prd prd_context.json \
+     --plan <feature_key>_SDET_plan.json \
+     --csv <feature_key>_test_cases.csv \
+     --analysis <feature_key>_analysis.md \
+     [--design design_context.json] \
+     [--rfc rfc_context.json] \
+     --checklist coverage_checklist.json \
+     [--compliance <feature_key>_compliance_report.json]
+   ```
+   Fix every reported error and re-run until **exit 0**. Never ship on validator failure.
+
+`coverage_audit` cannot live inside `sdet_plan.json` when the schema sets `additionalProperties: false` — mirror the audit in **analysis.md Section 0** and in **`compliance_report.json`**, not only in prose.
 
 ---
 
@@ -618,14 +655,15 @@ describe N requirements against M boundary/error entries"` in the balance block,
 `WORTH_CHECKING` note. That is an escape hatch for a real input shape, not a way to skip the
 regeneration pass — it is only legal *after* a documented retry.
 
-**4d. Emit the audit result** into the SDET plan as a `coverage_audit` object and echo it as a table in `<feature_key>_analysis.md`:
+**4d. Emit the audit result** into `<feature_key>_compliance_report.json` (conforms to `schemas/compliance_report.schema.json`) and echo it as tables in `<feature_key>_analysis.md` Section 0. If the SDET plan schema cannot hold `coverage_audit` inline, **do not** skip the sidecar — the validator checks analysis + optional compliance file.
 ```
-"coverage_audit": {
+"<feature_key>_compliance_report.json": {
   "required": { "business_requirements": [...], "business_flows": [...], "boundary_conditions": [...], "lifecycle_events": [...], "feature_flags": [...], "clickstream_events": [...] },
   "covered": { "<checklist_item>": ["<scenario title>", ...], ... },
   "gaps_closed_in_this_pass": ["<item that was missing and got a new scenario>", ...],
   "still_blocked": [ { "item": "...", "reason": "expected behavior undefined (e.g. OQ-open)" } ],
-  "balance": { "positive": 0, "non_positive": 0, "positive_pct": 0.0, "action_taken": "balanced | regenerated_positives | under_target — <reason>" }
+  "balance": { "positive": 0, "non_positive": 0, "positive_pct": 0.0, "action_taken": "balanced | regenerated_positives | under_target — <reason>" },
+  "validator_passed": true
 }
 ```
 An item may legitimately remain uncovered ONLY if its expected behavior is undefined in every input (e.g. an OPEN open-question). In that case it goes in `still_blocked` with the reason — it is never silently dropped.
@@ -647,7 +685,7 @@ Must also include the `coverage_categories` object produced by Step 0:
 - `optional_extras_selected[]` — categories the QA ticked.
 - `user_removed[]` — `{ category, reason }` for any AUTO category the QA explicitly overrode out of scope.
 
-It must also include the `coverage_audit` object produced by Step 4 (the mechanical coverage proof).
+It must also include the Step 4 audit in `<feature_key>_compliance_report.json` and Section 0 of the analysis doc (see Step 4d).
 
 Generate scenarios ONLY for `auto_selected ∪ optional_extras_selected`, and tag each scenario with `coverage_category` + `source`. Every scenario also carries a `requirement_ref` linking it to the checklist item it satisfies.
 
@@ -875,6 +913,20 @@ Flattened CSV strictly matching squad project template headers:
 ---
 
 ## Validate — report, never block
+
+**Compliance gate (blocking before ship):**
+```bash
+python3 scripts/validate_sdet_deliverables.py \
+  --prd prd_context.json \
+  --plan <feature_key>_SDET_plan.json \
+  --csv <feature_key>_test_cases.csv \
+  --analysis <feature_key>_analysis.md \
+  [--design design_context.json] [--rfc rfc_context.json] \
+  [--checklist coverage_checklist.json] \
+  [--compliance <feature_key>_compliance_report.json]
+```
+
+**JSON schema:**
 ```
 python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('<feature_key>_SDET_plan.json')),
