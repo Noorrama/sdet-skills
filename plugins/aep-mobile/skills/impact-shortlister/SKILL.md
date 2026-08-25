@@ -54,7 +54,7 @@ paths (`ProfileContainerFragment` → `PROFILE_CONTAINER`, etc.).
 
 ### 2. Run the deterministic join
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/shortlist_join.py draft \
+python3 scripts/shortlist_join.py draft \
   --plan <feature>_sdet_plan.json \
   [--regression regression_context.json] \
   --change change_context.json \
@@ -92,4 +92,4 @@ Merge draft `must_run` with judgments; validate against schema; patch plan roll-
 - **New (non-legacy) scenarios always run** — listed in `new_scenarios_to_run`.
 - **No hallucinated evidence.**
 
-See `${CLAUDE_PLUGIN_ROOT}/examples/pam_feature/IMPACT_SHORTLISTER_REPORT.md` for a worked PAM validation.
+See `examples/pam_feature/IMPACT_SHORTLISTER_REPORT.md` for a worked PAM validation.

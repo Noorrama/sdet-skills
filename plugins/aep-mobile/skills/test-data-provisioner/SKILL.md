@@ -10,7 +10,7 @@ calling **TestBuddy** (the ground-truth provisioner), falling back to GBT builde
 synthetic data for sensitive states.
 
 ## Config
-`${CLAUDE_PLUGIN_ROOT}/config/<app>.json` → `testbuddy.agents` and `testbuddy.segments` (logical state → segment name).
+`config/<app>.json` → `testbuddy.agents` and `testbuddy.segments` (logical state → segment name).
 
 ## Reads
 A scenario's `data_needs` (from `scenario.schema.json`): `entity`, `state`, `provision`, `sensitive`, `testbuddy_hint`.
@@ -44,4 +44,4 @@ Fast tier — Haiku / Composer 2.5 (parse intent → tool calls). Most work is d
 - **Code-gen time (Code Generation):** actually provision and bind the handle to the test.
 
 ## Guardrails
-Output valid JSON only, conforming to `${CLAUDE_PLUGIN_ROOT}/schemas/data_handle.schema.json`.
+Output valid JSON only, conforming to `schemas/data_handle.schema.json`.

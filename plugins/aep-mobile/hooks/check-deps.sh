@@ -4,6 +4,8 @@
 #
 # Checks: (1) python3 + jsonschema for schema validation
 #          (2) npx availability for BrowserStack MCP server
+#
+# Emits Cursor format when CURSOR_PLUGIN_ROOT is set, else Claude Code format.
 
 warnings=""
 
@@ -24,9 +26,15 @@ if [ -z "$warnings" ]; then
   exit 0
 fi
 
-printf '{"systemMessage":"aep-mobile: %s Run /aep-mobile:setup for full dependency check.",' "$warnings"
-printf '"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":'
-printf '"ENVIRONMENT CHECK (aep-mobile plugin): %s' "$warnings"
-printf 'If the user invokes any aep-mobile QA skill, tell them about the missing dependencies and suggest running /aep-mobile:setup. '
-printf 'Do not install anything yourself."}}\n'
+context="ENVIRONMENT CHECK (aep-mobile plugin): ${warnings}BrowserStack MCP is mandatory for regression-extractor and SDET plan upload. If the user invokes any aep-mobile QA skill, tell them about the missing dependencies and suggest running the aep-mobile-setup skill. Do not install anything yourself."
+
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  # Cursor hook output format
+  printf '{"additional_context":"%s"}\n' "$context"
+else
+  # Claude Code hook output format
+  printf '{"systemMessage":"aep-mobile: %s Run the aep-mobile-setup skill for full dependency check.",' "$warnings"
+  printf '"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":'
+  printf '"%s"}}\n' "$context"
+fi
 exit 0

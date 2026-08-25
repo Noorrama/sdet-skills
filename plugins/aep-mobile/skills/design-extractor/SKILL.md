@@ -57,13 +57,13 @@ continues — a partial, honestly labelled output beats no output. Inventing a v
    - None resolvable → one file, `app` absent, `BLOCKING` note on `app`. Never guess from visual
      style; a dark-themed frame is not proof of an app.
    Report the decision in your reply before extracting.
-3. **Config** — `${CLAUDE_PLUGIN_ROOT}/config/<app>.json` supplies
+3. **Config** — `config/<app>.json` supplies
    `naming_convention.role_vocabulary` (the `_btn/_input/…` suffixes phase_a and the merge use).
    Unreadable → scripts fall back to their built-in default vocabulary; add a `DEGRADED` gap
    warning IDs are unverified against the app convention.
-4. **Schema** — `${CLAUDE_PLUGIN_ROOT}/schemas/design_context.schema.json`. The scripts locate it
+4. **Schema** — `schemas/design_context.schema.json`. The scripts locate it
    relative to the plugin root automatically; unreadable → `DEGRADED` gap, same install action as
-   other skills (`claude plugin update aep-mobile@aep`).
+   other skills (reinstall/update the aep-mobile plugin and restart your editor).
 
 ## Output files — one per app in scope
 
@@ -79,8 +79,11 @@ unresolved endpoints); keep it next to the context for reviewers, never feed it 
 
 ## Workflow
 
+Run all commands from the aep-mobile plugin root (the directory containing `config/`, `schemas/`,
+`skills/`).
+
 ```bash
-cd ${CLAUDE_PLUGIN_ROOT}/skills/design-extractor/spatial_pipeline
+cd skills/design-extractor/spatial_pipeline
 
 # 1. deterministic skeleton (screens, states, ui_flow, connector-trigger elements)
 python3 phase_a.py <export.json> --app <app_id> --out <workdir>

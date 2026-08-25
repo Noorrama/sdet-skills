@@ -31,9 +31,9 @@ context from the others, never reconstruct one from the source PRD/RFC/Figma, an
 missing input pass unmentioned — generate what the available inputs support and say plainly
 what was not covered.
 
-1. **Schemas.** Read `${CLAUDE_PLUGIN_ROOT}/schemas/sdet_plan.schema.json` and
-   `${CLAUDE_PLUGIN_ROOT}/schemas/scenario.schema.json`. Unreadable → `WORTH_CHECKING` note on
-   `ENVIRONMENT`, action *"run `claude plugin update aep-mobile@aep`, restart Claude, re-run"*.
+1. **Schemas.** Read `schemas/sdet_plan.schema.json` and
+   `schemas/scenario.schema.json`. Unreadable → `WORTH_CHECKING` note on
+   `ENVIRONMENT`, action *"reinstall/update the aep-mobile plugin and restart your editor, then re-run"*.
    Fall back to the field lists in this document **only** then, and say so in the note.
 2. **Required contexts.** `prd_context.json` and `design_context.json`. Either missing → carry
    on with what remains and add a `NEEDS_ANSWER` note: *"generated without <name> — requirement
@@ -128,7 +128,7 @@ what was not covered.
    - **BrowserStack MCP unavailable → STOP.** If the regression-extractor reports that
      BrowserStack MCP is unreachable or unauthorised (no `regression_context.json` written),
      **do NOT proceed with generation.** Stop and tell the user:
-     *"BrowserStack MCP is not connected. Run `/aep-mobile:setup` for setup steps, then re-run."*
+     *"BrowserStack MCP is not connected. Run the aep-mobile-setup skill for setup steps, then re-run."*
      Generating without regression dedup risks duplicating the entire existing suite into TMS
      on CSV import — that is not recoverable, so it is a hard gate.
    - **`extraction_status: LIMITED` for a non-MCP reason is different — continue.**
@@ -639,7 +639,7 @@ An item may legitimately remain uncovered ONLY if its expected behavior is undef
 Generate the following files in the current working directory, naming them dynamically using the `<feature_key>` defined in `feature_metadata`. The first three are always produced in `GENERATE`/`SYNC` mode; the fourth (`automation_plan_generator.json`) is produced on CSV feedback, per the *Automation-Plan-Generator emission* section:
 
 ### 1. `<feature_key>_SDET_plan.json`
-Full machine-readable master payload conforming strictly to `${CLAUDE_PLUGIN_ROOT}/schemas/sdet_plan.schema.json`. Must include `created_at` and `updated_at` ISO date-time timestamps.
+Full machine-readable master payload conforming strictly to `schemas/sdet_plan.schema.json`. Must include `created_at` and `updated_at` ISO date-time timestamps.
 
 Must also include the `coverage_categories` object produced by Step 0:
 - `auto_selected[]` — `{ category, reason }` where `reason` = the exact input field that fired (e.g. `"rfc.lifecycle_considerations[0].event = PROCESS_DEATH"`).
@@ -878,7 +878,7 @@ Flattened CSV strictly matching squad project template headers:
 ```
 python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('<feature_key>_SDET_plan.json')),
-  json.load(open('${CLAUDE_PLUGIN_ROOT}/schemas/sdet_plan.schema.json')))"
+  json.load(open('schemas/sdet_plan.schema.json')))"
 ```
 - Passes and `extraction_notes` is empty → `extraction_status: COMPLETE`.
 - Fails → **still write all three files.** Convert each validator error into an
@@ -899,7 +899,7 @@ report-never-block rule — an upstream file that fails validation gets a `NEEDS
 the file and the error.
 
 In `SYNC` mode, validate the emitted `<feature_key>_automation_plan_generator.json` against
-`${CLAUDE_PLUGIN_ROOT}/schemas/automation_plan_generator.schema.json` the same way — write it even
+`schemas/automation_plan_generator.schema.json` the same way — write it even
 on failure, record the validator error, and never report an unvalidated handoff as valid.
 
 ---
@@ -969,7 +969,7 @@ Use the BrowserStack MCP tool `createTestCasesFromFile` with the finalised
 
 - **BrowserStack MCP unavailable at upload time → do not block.** The SYNC and automation-plan
   emission still complete. Add a `WORTH_CHECKING` note:
-  *"BrowserStack upload skipped — MCP unavailable. Run `/aep-mobile:setup`, then re-run SYNC
+  *"BrowserStack upload skipped — MCP unavailable. Run the aep-mobile-setup skill, then re-run SYNC
   to upload and stamp case IDs."*
   Scenarios that already carry a `browserstack_case_id` from regression context keep it;
   new scenarios simply omit the field (never set it to `null`).
@@ -998,7 +998,7 @@ Print a one-line summary: *"Uploaded N test cases to BrowserStack project PR-XXX
 ## Automation-Plan-Generator emission (Test-Data-Generation handoff)
 When the QA feeds the edited CSV back, the point of the round-trip is to produce the handoff the
 Backend QA Test-Data-Generation RFC consumes. Emit `<feature_key>_automation_plan_generator.json`
-conforming to `${CLAUDE_PLUGIN_ROOT}/schemas/automation_plan_generator.schema.json`.
+conforming to `schemas/automation_plan_generator.schema.json`.
 
 **Build from the synced JSON, never from the raw CSV.** The CSV has no test-data column, so the
 fixtures only exist in `<feature_key>_SDET_plan.json`. Order of operations: SYNC the CSV into the

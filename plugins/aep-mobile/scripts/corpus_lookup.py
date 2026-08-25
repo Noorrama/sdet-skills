@@ -18,9 +18,10 @@ Examples:
 """
 import sys, json, os
 
-PLUGIN_ROOT = os.environ.get(
-    "CLAUDE_PLUGIN_ROOT",
-    os.path.join(os.path.dirname(__file__), ".."),
+PLUGIN_ROOT = (
+    os.environ.get("CURSOR_PLUGIN_ROOT")
+    or os.environ.get("CLAUDE_PLUGIN_ROOT")
+    or os.path.join(os.path.dirname(__file__), "..")
 )
 CONFIG = os.path.join(PLUGIN_ROOT, "config")
 
