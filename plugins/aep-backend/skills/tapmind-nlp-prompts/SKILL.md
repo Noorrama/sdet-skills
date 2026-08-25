@@ -37,6 +37,42 @@ Pipeline detail: `GENERATION.md` in this skill folder. Grammar for each prompt t
 
 ---
 
+## Intent vs tool routing (protocol-agnostic NLP)
+
+NLP prompts describe **what should happen**, not how the API was ingested or which MCP/tool
+runs it. Tool selection is TapMind’s job.
+
+```
+plain-English intent
+        │
+        ▼
+  match ingested operation (any protocol in the knowledge store)
+        │
+        ▼
+  planner picks tool from catalog → rest.invoke | grpc.invoke | redis | db | kafka | …
+        │
+        ▼
+  execute via MCP / invoker
+```
+
+| Do | Don't |
+|---|---|
+| Write intent from `action` + `expected_result` | Mention ingest type in the prompt ("OpenAPI…", "curl-ingested…") |
+| Assume the planner/MCP picks the tool once the op is ingested | Hardcode MCP tool names (`rest.invoke`, `grpc_invoke`, …) inside the NLP string |
+| Flag `NEEDS_REVIEW` when no catalogued tool can realize the intent | Invent protocol grammar the planner cannot route (e.g. fake `Run grpc …` while `grpc.invoke` is not in `tools_catalog`) |
+| Use §3.5 prefixes (`Run redis` / `Run query` / kafka) **only** where TapMind already requires them as tool selectors | Treat those prefixes as the long-term pattern for every protocol |
+
+**Current control-plane gap:** `grpc.invoke` is an executor stub and is **not** in the planner
+`tools_catalog` — NLP cannot yet route to gRPC. For gRPC plan steps: emit intent if useful for
+humans, but mark `NEEDS_REVIEW: no catalogued NLP tool for gRPC` (or run MCP `grpc_invoke`
+**outside** `runStep`, not as pretend NLP). Same honesty for any future protocol until it is
+ingested + catalogued.
+
+Ingest (OpenAPI / curl / proto / …) only **registers** operations. It must not change prompt
+wording.
+
+---
+
 ## G. Generation mode — automation suite → TapMind test
 
 ### G.1 Inputs (prefer `automation_plan.json`)
