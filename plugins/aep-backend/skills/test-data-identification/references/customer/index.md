@@ -36,6 +36,22 @@ From `TestDataCategoryCustomer.java` (`(value, isEnabled, paymentMode)`):
 `isEnabled: false` is a hard signal for the parent skill's validation gate: even if the matcher
 returns a coins category, corroborate against `isEnabled` before accepting.
 
+## Fixture-description vocabulary that isn't a real category name
+
+Automation plans (e.g. `EPIC-1122/automation_plan.json`) sometimes author fixture-level category
+names that describe intent but don't match a real `TestDataCategoryCustomer` value — don't propose
+these literally, translate them to the enum above:
+
+| Fixture-description wording | Real TDP category | Why |
+|---|---|---|
+| `CUSTOMER_WITH_WALLET`, `wallet_status: ACTIVE` | `CUSTOMER_WITH_GO_PAY` | "wallet" in fixture prose means the linked GoPay wallet, the same signal as "gopay"/"linked wallet" above — there is no separate `_WITH_WALLET` enum value. |
+| `CUSTOMER_WITH_SAVED_CARD`, `saved_card_type`, `saved_card_number` | `CUSTOMER_WITH_CC` | "saved card" is the `CUSTOMER_WITH_CC` signal; the card-specific sub-fields (`saved_card_type`, `saved_card_number`, a SHA-256 fingerprint) describe state this domain does not track — see [../payment_instrument/index.md](../payment_instrument/index.md) for why those sub-fields fall outside TDP. |
+| `card_already_saved: false` | N/A — not a Consumer signal | Describes payment-instrument state, not the account; route the instrument-state part to [../payment_instrument/index.md](../payment_instrument/index.md), keep only the customer-category part here. |
+
+A fixture combining one of these left-column names with true `CUSTOMER_WITH_CC` (as this file uses
+it) still resolves to that customer for the pool-fetch — the "not a Consumer signal" phrase above
+applies only to the card-specific attributes layered on top.
+
 ## Fetching a pooled customer
 
 ```json

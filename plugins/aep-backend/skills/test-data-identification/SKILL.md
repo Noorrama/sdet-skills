@@ -166,8 +166,16 @@ in this skill.
 Three things in the bundles override the skill's generic behaviour:
 
 - **Pooling is the default path.** TDP pre-provisions accounts by category; most fixtures are a *select from pool*, not a create. `CREATE_CUSTOMER` / `POST /driver/create` are pool-miss cases only. Do not emit a creation operation for a state the pool already serves.
+- **Booking creation usually already has its customer.** When TDP or TestBuddy creates a booking (`createBooking` / the workflow bundles' Transport and Food chains), the customer step most of the time resolves to an existing pooled/already-created customer — `fetchAndEngageCustomer`-style auto-fetch, not a fresh `CREATE_CUSTOMER`. Only emit a customer-creation operation when the fixture's signals show no customer is available to fetch; don't default to creating one just because a booking fixture names a customer.
 - **The account-vs-wallet-amount split.** Whether an instrument is *linked* is the category; how much is *in it* is a mutable balance. "A user with gopay" is `CUSTOMER_WITH_GO_PAY` and needs **no** operation. Only when the amount itself is under test does a recharge operation join the record.
 - **`isEnabled: false` is a hard stop.** `Customer_With_Go_Pay_coins` and `Customer_With_Partial_Go_Pay_coins` are disabled in `TestDataCategoryCustomer`. A coins category coming back from the matcher must be rejected by the validation gate and recorded as `TDP_NOT_SUPPORTED`, however well the signals seem to corroborate it.
+- **Upstream-first identification.** If the requested domain has upstream domains in its workflow
+  chain (e.g. Food's Merchant depends on Customer already existing; Driver in either workflow
+  depends on the booking having moved past its initial status), the upstream domain's TestData must
+  be identified *first*, before the requested (downstream) domain is resolved. Never resolve a
+  downstream domain's category/operation in isolation from its upstream chain — see the
+  per-workflow "Required entities, in order" tables in `references/workflow/transport/index.md` and
+  `references/workflow/food/index.md`.
 
 ## Step 2 — Domain & category identification (per fixture)
 
