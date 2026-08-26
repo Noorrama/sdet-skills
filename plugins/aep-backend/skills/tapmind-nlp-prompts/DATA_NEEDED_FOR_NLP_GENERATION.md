@@ -1,16 +1,13 @@
 # NLP Step Generation — Data Needed & Skill Changes
 
 Scope: `tapmind-nlp-prompts` generation / verify / suite-convert modes.
-Primary input is **`automation_plan.json`** (carries `step_descriptions` from sdet_plan
-plus class/method/service/fixture fields). `sdet_plan.json` alone is a fallback.
-
-See `SKILL.md` §G and `GENERATION.md` for the runtime pipeline.
+Primary input is **`automation_plan.json`**. See `SKILL.md` §G, `GENERATION.md`, and
+`CONTROL_PLANE.md`.
 
 ## Why
 
-`tapmind-nlp-prompts` used to be a human reference only. Goal: go from automation
-suite scenario data → real `runStep`/`assertStep` prompts → batch verify → sequential
-run → suite Java with `@Test` / `@TestInfo`.
+Go from automation scenario data → real `runStep`/`assertStep` prompts → MCP verify → MCP run
+→ suite Java with `@Test` / `@TestInfo`.
 
 ## Data needed per scenario
 
@@ -19,50 +16,43 @@ run → suite Java with `@Test` / `@TestInfo`.
 | Action text | `automation_scenarios[].step_descriptions[].action` | §3.1 action |
 | Expected result | `…step_descriptions[].expected_result` | §3.1 verify / §3.4 |
 | Step order | `…step_descriptions[].step` | first-touch vs verify-only |
-| Step curl (optional) | `…step_descriptions[].curl_reference` | intent hint |
-| Scenario curl (preferred) | `automation_scenarios[].curl_reference` | FIX-scoped API shape |
-| Endpoint | `…endpoint` | ingest / pin |
-| PDG / service | `…module` / `…service_name` | §3.6 + MCP `productGroup` / `targetServiceId` |
+| Step curl (optional) | `…step_descriptions[].curl_reference` | grpcurl → §3.8 |
+| Scenario curl (preferred) | `automation_scenarios[].curl_reference` | FIX-scoped HTTP or grpcurl |
+| gRPC rpc_alias | HTTP `GET /v1/grpc/targets` on control plane host | §3.8 |
+| gRPC service / method | grpcurl `Service/Method` | §3.8 |
+| gRPC request body | grpcurl `-d` JSON | §3.8 `request:` |
+| Static proto | HTTP `GET /v1/grpc/static-proto/aliases` | when reflection off |
+| Control plane host | `environments[]` / user / tasks context | `CONTROL_PLANE.md` |
+| PDG / service | `…module` / `…service_name` | MCP `productGroup` / `targetServiceId` |
 | Class / method | `…package` / `…test_class` / `…method_name` | suite convert |
-| Description | `…description` | `@Test(description = …)` |
-| Tags | `…tags[]` | skip / provisional / negative / poll |
-| Fixtures | `…test_data[]` | memory / secrets phrasing |
-| Suite groups | plan/context `groups` (else derive carefully from tags) | `@Test(groups = …)` |
-| TestInfo | plan/context `test_info` / suite registry | `@TestInfo(countryName, projectId, suiteId, testCaseIds, owner)` |
-| Response field shape | **Often missing** | §3.1 vs §3.3 — flag, don't guess |
-| Bound memory keys | Derived by walking prior `save … as X` / `saveMemory` | §4 — reference as `saved X`, not `${memory.X}` |
-| Secrets | Not in schema | §7 `saveMemory` from env |
+| Fixtures / tags / TestInfo | plan + suite context | as before |
 
-## Suite annotation contract
+## MCP usage (two tools only)
 
-Emit:
-
-```java
-@Test(description = "…", groups = {"…"})
-@TestInfo(countryName = "…", projectId = "…", suiteId = "…", testCaseIds = {"…"}, owner = "…")
-```
-
-Never invent BrowserStack/TestRail IDs. Empty owner → `owner = ""`.
-
-## MCP usage
-
-| Phase | Tool | Shape |
+| Phase | Tool | Notes |
 |---|---|---|
-| Verify | `tapmind_verify_prompt` | **one** `prompt` string per call, looped in list order (backend `/v1/runs/verifyPrompt` supports a `prompts[]` batch; exposed tool doesn't yet) |
-| Execute | `tapmind_run_nlp_command` | **one** command per call; reuse `conversationId` |
-| Ingest | `tapmind_ingest_curl` | when verify finds no matching API |
-| Side-check | `postgres_query` / `redis_get` / `invoke` | infra expected_results |
+| Verify | `tapmind_verify_prompt` | One prompt per call; REST and gRPC §3.8 |
+| Execute | `tapmind_run_nlp_command` | One prompt per call; reuse `conversationId` |
 
-## Schema / ownership notes
+## HTTP usage (registry lookup — not MCP)
 
-- `automation_plan.schema.json` now includes `service_name`, `module`, `curl_reference`, etc. Prefer it over older gap notes.
-- Response typing / explicit memory registry still absent upstream — skill flags instead of guessing.
-- Whether `test-code-generator` consumes `nlp_suite_tests.json` or calls this skill inline is an integration decision outside this skill's grammar docs.
+| Phase | Endpoint | Host |
+|---|---|---|
+| gRPC alias | `GET /v1/grpc/targets` | `tapmind-backend-i.golabs.io` or `-q.golabs.io` |
+| Static proto | `GET /v1/grpc/static-proto/aliases` | same |
+| REST targets | `GET /v1/targets` | same |
+| Schema check | `POST /v1/verify/schema` | explicit validation only (§9) |
 
-## Skill files in this folder
+Swagger: `https://<host>/swagger-ui/index.html` — allowed controllers listed in
+`CONTROL_PLANE.md`. **Do not** call ingest, database, or cache controllers.
+
+On HTTP/MCP connectivity failure → ask user to connect to respective VPN and retry.
+
+## Skill files
 
 | File | Role |
 |---|---|
-| `SKILL.md` | Grammar §§0–10 + generation modes §G |
-| `GENERATION.md` | Full generate → verify → run → suite-convert pipeline |
+| `SKILL.md` | Grammar + generation §G |
+| `GENERATION.md` | Pipeline |
+| `CONTROL_PLANE.md` | Hosts, Swagger, MCP vs HTTP, VPN |
 | `DATA_NEEDED_FOR_NLP_GENERATION.md` | This field map |
