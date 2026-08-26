@@ -12,10 +12,12 @@ description: >-
 
 # gofood API Automation Test Writer
 
-**Prerequisite:** read `.claude/skills/backend-automation/SKILL.md` first if you haven't already
-this task — it defines the common module-identification, local-framework-discovery,
-search-before-create, never-invent-data, and compile-check workflow. This file only covers what's
-specific to gofood on top of that.
+**Prerequisite:** read `backend-automation/SKILL.md` first if you haven't already this task — it
+defines the common module-identification, local-framework-discovery, search-before-create,
+never-invent-data, and compile-check workflow. This file only covers what's specific to gofood on
+top of that. Also read `backend-automation/references/extending-an-existing-api.md` when the cURL
+targets an endpoint that already has tests, and
+`backend-automation/references/environment-specific-test-data.md` before adding any test-data id.
 
 ## Architecture — two coexisting paradigms, pick the right one
 
@@ -100,11 +102,35 @@ match that shape rather than introducing a Controller where none exists for that
 - JSON fixtures are relatively rare (~13 files) under `src/test/resources/`, loaded via
   `GoFoodTestBase.loadJson(fileName)`.
 - Hardcoded restaurant/merchant UUIDs as `static final String` fields directly in test classes
-  are the norm for this module (e.g. `MerchantOperationalHoursTests.RESTAURANT_ID`) — this matches
-  existing convention here (unlike some other modules), but still never invent a UUID that doesn't
-  exist in the target environment; copy a real one from a sibling test or ask.
+  exist and are common in the older content/merchant areas (e.g.
+  `MerchantOperationalHoursTests.RESTAURANT_ID`). **Do not read that as licence to add one.** It is
+  the weakest of the module's test-data mechanisms — check the four below first, and never invent
+  a UUID that doesn't exist in the target environment.
 - Pooled dynamic customer/driver data via the `testdata.FoodTestDataManager` annotation
   (`needsNewDriver`, `needsGopayCustomer`, etc.) processed in `GoFoodTestBase.setUpBeforeMethod`.
+
+### Environment-specific ids — four mechanisms coexist, check the feature area
+
+gofood resolves environment-dependent test data four different ways. Find which one your feature
+area uses **before** writing a constant; read
+`backend-automation/references/environment-specific-test-data.md` for the general rule.
+
+| Mechanism | Where | Use for |
+|---|---|---|
+| Interface + per-environment impls | `src/main/java/constants/` — `I<Domain>Constants` + `<Domain>ConstantsQa`/`<Domain>ConstantsInt` behind a `<Domain>Constants` holder that switches on `System.getenv("INFRA")` (default `qa`; `tencent`/`integration`/`staging` → Int) | provisioned entity ids in the feature areas that have it |
+| Env properties | `src/main/resources/{qa,integration,config}.properties` via `commons.PropertiesReader` / `GoFoodProperties` | hosts and service URLs, always |
+| Env-keyed test data | `utils/gofood_testdata_env/**` | the dine-in / conversion / openAPI areas |
+| Runtime pooling | `@FoodTestDataManager`, `poolingUtility.getTDPCustomer(...)` | customers and drivers — no constant at all |
+
+Where a `<Domain>Constants` holder exists, its own contents show the split you must preserve:
+plain literals for enum/protocol values, locales, country and app-version headers, and
+deliberately-invalid ids (`"abcd"`-style) that resolve nowhere by design; `ENVIRONMENT_CONSTANTS.getX()`
+for every provisioned id. Adding a provisioned id means a getter on the interface **and** an
+implementation in **both** the `…Qa` and `…Int` classes — missing one is a compile error, which is
+the point. If the value isn't provisioned yet, the placeholder and the `// TODO:` go in the
+per-environment classes; the public constant name stays clean, never `DUMMY_`/`TODO_`.
+
+Don't carry one feature area's mechanism across to another that doesn't use it.
 
 ## Validation patterns
 
@@ -163,11 +189,14 @@ MerchantCatalogInternalTests → GoFoodTestBase`). Other domain bases: `SearchTe
 
 ### The annotation block
 
+`GROUP`, `PROJECT` and `SUITE` below stand in for the real constant names — substitute them from
+the tables in this section.
+
 ```java
-@Test(groups = {GoFoodCategories.<GROUP>}, description = "<human-readable intent>")
-@TestInfo(projectId = TestRailConfig.<PROJECT>, suiteId = TestRailConfig.<SUITE>,
+@Test(groups = {GoFoodCategories.GROUP}, description = "<human-readable intent>")
+@TestInfo(projectId = TestRailConfig.PROJECT, suiteId = TestRailConfig.SUITE,
           testCaseIds = {"<real id>"}, owner = "first.last@gojek.com")
-public void verifySomething() {
+public void verifySomething() {}
 ```
 
 - `groups` is **mandatory** (2267 uses, always present) and must reference a constant from
@@ -197,6 +226,37 @@ gofood has **no `SuiteConstants`** and **no `OWNER_*` constants** — `owner` is
 
 Several suite constants are empty strings in source (`OPEN_API`, `DISCOVERY`,
 `MERCHANT_EXCELLENCE_*`) — that is expected; still reference the named constant, not `""`.
+
+### Test-class placement — one endpoint, one class
+
+gofood follows the repo-wide convention strictly: each feature folder under `tests/**` holds one
+test class per endpoint, named for that endpoint. A new endpoint gets a new class beside its
+siblings, even when a closely-related class sits in the same folder — a different path (or the
+same path with a different method) is a different endpoint. Needing a resource another class
+creates is not a reason to live in that class: create it in your own method through the inherited
+controller, as the sibling classes already do, and clean up inline at method end.
+
+### Request-body DTOs — class-level Lombok, no hand-written constructor
+
+Request bodies here are `@Getter @Setter @Builder` at class level, fields in raw snake_case, plus
+`@JsonInclude`/`@JsonIgnoreProperties` where needed. Some older ones *also* carry a hand-written
+constructor that happens to match the all-args signature. **Adding a field to one of those breaks
+that coincidence** — Lombok's class-level `@Builder` only generates an all-args constructor when
+none is declared. Delete the hand-written constructor (check `rg 'new <Class>\(' gofood/src` first;
+these usually have zero callers) rather than demoting `@Builder` onto a new constructor. Both code
+shapes are in `backend-automation/references/extending-an-existing-api.md`.
+
+When adding an *optional* field to a DTO existing tests already use, add
+`@JsonInclude(JsonInclude.Include.NON_NULL)` in the same change — otherwise every existing caller
+starts sending `"your_field": null`.
+
+### Failure-path controllers pin one status — check it before reusing
+
+The `*Failure` methods on gofood controllers hardcode one expected status per method. If your
+scenario expects a different status — a new validation path returning 400 where the method pins
+422, say — add an overload taking the expected status. Do not loosen the existing assertion into
+`assertTrue(a || b)`; several methods in this module already do that, and it lets a test expecting
+400 pass on a 404. Treat those as a wart to avoid, not the convention to copy.
 
 ### Method naming — follow the surrounding package, both styles are live
 
