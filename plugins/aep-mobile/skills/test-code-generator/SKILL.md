@@ -72,8 +72,8 @@ Do **not** emit a broken test. Add the scenario to `deferred[]` with a reason wh
 2. **`test-code-generator.json`** (→ `schemas/test-code-generator.schema.json`) — one entry per scenario
    acted on: `op`, `target`, `class_name`/`test_method`, `artifact_ref`, `traceability`, `setup`,
    `given_strategy`, `nl_steps`, `assertions_from`, `analytics_assertions`, `locators_used`,
-   `data_binding`, `flags_required`, `waits`, `teardown`, `validation` — plus `deferred[]` and a
-   `summary` (created/updated/skipped_legacy/deferred/unmapped_data_need/validated_on_device/needs_review).
+   `data_bindings[]`, `flags_required`, `waits`, `teardown`, `validation` — plus `deferred[]` and a
+   `summary` (created/updated/skipped_legacy/deferred/unmapped_data_need/validated_on_device/needs_review/no_nlp_steps).
 
 ## Validated by construction (when a device is available)
 Drive the emitted NLP on a real device (BrowserStack/emulator), keep only steps that PASS, and record

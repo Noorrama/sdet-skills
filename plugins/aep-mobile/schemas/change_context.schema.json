@@ -46,6 +46,11 @@
               }
             }
           },
+          "deep_link_source": {
+            "type": "string",
+            "enum": ["manifest", "diff", "task_context"],
+            "description": "Where deep_links were populated from. task_context = from test_hooks[] (plan-time spec, not build-verified); manifest/diff = extracted from built code."
+          },
           "observable_state": { "type": "array", "items": { "type": "string" } },
           "nav_macro_fallback": { "type": "string" }
         }
