@@ -34,7 +34,34 @@ real TapMind control-plane SDK, and for **generating suite-ready tests** from
 | **Verify + run** | After generate, using backend MCP TapMind tools | Corrected `prompts[]` + per-step verdicts |
 | **Suite convert** | After prompts are verified (and optionally run) | Java method with `@Test` / `@TestInfo` + `runStep`/`assertStep` lines |
 
-Pipeline detail: `GENERATION.md` in this skill folder. Grammar for each prompt type: §§2–10 below.
+Pipeline detail: `GENERATION.md`. Control plane access: `CONTROL_PLANE.md`. Grammar: §§2–10 below.
+
+---
+
+## Control plane access (MCP + HTTP)
+
+**Two MCP tools only** for verify and execute:
+
+| MCP tool | Purpose |
+|---|---|
+| `tapmind_verify_prompt` | Correct / dry-run one prompt |
+| `tapmind_run_nlp_command` | Run one prompt; reuse `conversationId` across steps |
+
+Registry lookups (gRPC targets, static proto, REST targets) use **HTTP GET** to the control
+plane — not additional MCP tools. Full host list, allowed Swagger controllers, and VPN
+guidance: **`CONTROL_PLANE.md`**.
+
+| Environment | Host |
+|---|---|
+| Integration | `tapmind-backend-i.golabs.io` |
+| QA | `tapmind-backend-q.golabs.io` |
+
+Swagger: `https://<host>/swagger-ui/index.html` — use **gRPC Targets**, **gRPC Static Proto**,
+**target-registry-controller**, **verify-prompt-controller**, **nlp-command-controller**, and
+**verify-schema-controller** only. Do **not** call ingest, database, or cache controllers.
+
+On connectivity / `INTERNAL_ERROR` → tell the user to connect to the respective VPN and retry
+(see `CONTROL_PLANE.md`).
 
 ---
 
@@ -56,14 +83,16 @@ Infra: §3.5 prefix → redis | db | kafka
 | Redis / DB / Kafka | §3.5 exact prefix | Use §3.5 pattern for REST |
 | Unknown / no registry entry | Flag `NEEDS_REVIEW` | Invent REST intent for a gRPC step |
 
-**gRPC `rpc_alias`:** resolve before generating §3.8 prompts — `GET /v1/grpc/targets` (Swagger:
-gRPC Targets), match grpcurl `host:port` to a registered alias. Optional override: `# alias:
-<name>` as the first line of `curl_reference`. When `reflection_enabled: false`, schema comes
-from `GET /v1/grpc/static-proto/aliases` (Swagger: gRPC Static Proto). If lookup fails →
-`NEEDS_REVIEW: no rpc_alias for <host>:<port>` — do not guess.
+**gRPC `rpc_alias`:** resolve before generating §3.8 prompts — `GET https://<host>/v1/grpc/targets`
+(Swagger: gRPC Targets; host from `CONTROL_PLANE.md`), match grpcurl `host:port` to a registered
+alias. Optional override: `# alias: <name>` as the first line of `curl_reference`. When
+`reflection_enabled: false`, check `GET /v1/grpc/static-proto/aliases`. If lookup fails →
+`NEEDS_REVIEW: no rpc_alias for <host>:<port>`. If HTTP fails → VPN message from
+`CONTROL_PLANE.md`.
 
-Ingest (OpenAPI / curl / proto / …) registers operations for REST matching. gRPC uses the
-targets + static-proto registries, not plain intent.
+**gRPC verify/execute:** only via `tapmind_verify_prompt` and `tapmind_run_nlp_command` — never
+direct `grpc_invoke` MCP. If execute returns `no tool_call.target`, check gRPC targets registry
+over HTTP; target may be unregistered.
 
 ---
 
@@ -93,8 +122,9 @@ If suite meta is missing, leave `@TestInfo` fields as empty strings / empty arra
 
 For each scenario, emit an ordered `prompts[]` (one string per step) using the grammar in §§2–10:
 
-0. If any step has a grpcurl `curl_reference`, fetch `GET /v1/grpc/targets` once (per batch) and
-   build a host:port → alias map before classifying steps.
+0. If any step has a grpcurl `curl_reference`, `GET https://<control-plane-host>/v1/grpc/targets`
+   once (per batch; host from `CONTROL_PLANE.md`) and build host:port → alias map. On HTTP
+   failure → VPN message; do not guess aliases.
 1. Prefer scenario-level `curl_reference` + `test_data` for placeholders (`{{FIX-xxx.field}}` → natural **`saved <field>`** after fixture / `saveMemory` bind — see §4).
 2. Classify each step (generic — not domain-specific):
    - `curl_reference` starts with `grpcurl` → §3.8 gRPC invoke
@@ -121,11 +151,11 @@ Output shape after generate:
 
 ### G.3 Verify one prompt at a time, then run one-by-one
 
-**Verify (sequential):** the exposed `tapmind_verify_prompt` MCP tool takes a **single**
-`prompt` string per call — it always wraps it as a one-element list before forwarding to the
-backend, even though the backend's own `/v1/runs/verifyPrompt` endpoint accepts a batch
-`prompts[]`. Until a batch overload is exposed on the tool, call it once per prompt, in list
-order:
+Use **only** MCP tools `tapmind_verify_prompt` and `tapmind_run_nlp_command` (see
+`CONTROL_PLANE.md`). Do not use `grpc_invoke`, ingest, postgres, or redis MCP tools in this
+pipeline.
+
+**Verify (sequential):** `tapmind_verify_prompt` — one `prompt` string per call:
 
 ```json
 {
@@ -146,7 +176,11 @@ cross-check against your own memory-key tracking (§4) rather than assuming.
 > call per scenario's full list lets the planner see the whole sequence + memory names at once,
 > which catches cross-step issues that one-at-a-time verification can't.
 
-**Execute (sequential):** `tapmind_run_nlp_command` **one prompt at a time**. Reuse the `conversationId` returned by step 1 on steps 2…N (a new chat without that id loses memory).
+**Execute (sequential):** `tapmind_run_nlp_command` — one prompt at a time. Reuse
+`conversationId` from step 1 on steps 2…N.
+
+If execute fails with `no tool_call.target` or missing gRPC routing → `GET /v1/grpc/targets` via
+HTTP on the same environment host; flag `NEEDS_REVIEW` if alias/host is not registered.
 
 Record corrections as `correctedSteps[]`: `{ n, text, change: "reworded"|"inserted", was, why }`.
 
@@ -467,7 +501,9 @@ runStep("Consume from kafka topic 'order-status-events' where order_id equals sa
 ### 3.8 gRPC invoke (`grpc.invoke`)
 
 gRPC steps use an explicit MCP tool prefix (like §3.5 for Redis/Kafka). Resolve `rpc_alias`
-from `GET /v1/grpc/targets` by matching the grpcurl host and port before writing the prompt.
+via HTTP `GET /v1/grpc/targets` on the control plane host (`CONTROL_PLANE.md`) before writing
+the prompt. Verify and run the prompt only through `tapmind_verify_prompt` /
+`tapmind_run_nlp_command` — not direct gRPC MCP.
 
 **Template:**
 

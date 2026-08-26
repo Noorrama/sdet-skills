@@ -1,7 +1,7 @@
 # Generation pipeline — automation_plan → suite TapMind test
 
-Companion to `SKILL.md` §G. Follow this when producing runnable suite tests from
-an automation plan (any feature — rules are schema-generic).
+Companion to `SKILL.md` §G. Control plane hosts, allowed HTTP APIs, and VPN rules:
+`CONTROL_PLANE.md`.
 
 ## Intent vs tool routing
 
@@ -25,8 +25,9 @@ Never rewrite a gRPC step into a fake REST prompt just to make generation succee
 automation_plan.json
         │
         ▼
- 0. If any grpcurl steps: GET /v1/grpc/targets → host:port → rpc_alias map
-    (optional: GET /v1/grpc/static-proto/aliases when reflection disabled)
+ 0. If any grpcurl steps: GET https://<host>/v1/grpc/targets (host from CONTROL_PLANE.md)
+    → host:port → rpc_alias map. On failure → VPN message; stop guessing.
+    Optional: GET /v1/grpc/static-proto/aliases when reflection disabled
         │
         ▼
  1. Filter scenarios (skip is_dedup / deferred / skip / manual)
@@ -64,19 +65,21 @@ automation_plan.json
 - Step-level curl may still use `$ACCESS_TOKEN` / `{session_id}` — treat as intent only when scenario curl exists.
 - `module` → PDG; `service_name` → `targetServiceId` / `runStep(..., pdg, service)`.
 
-### gRPC alias resolution
+### gRPC alias resolution (HTTP only — not MCP)
 
-Before generating §3.8 prompts:
+Before generating §3.8 prompts, call control plane HTTP (see `CONTROL_PLANE.md`):
 
-1. `GET http://<control-plane>/v1/grpc/targets` — list registered aliases with host/port/tls/reflection.
+1. `GET https://tapmind-backend-i.golabs.io/v1/grpc/targets` (integration) or
+   `GET https://tapmind-backend-q.golabs.io/v1/grpc/targets` (QA).
 2. Parse grpcurl host and port from `curl_reference`.
 3. Match to alias (exact host+port; respect `-plaintext` → tls false).
 4. Optional override: first line `# alias: gami-orbit-grpc` in `curl_reference`.
-5. If no match → flag `NEEDS_REVIEW: no rpc_alias for <host>:<port>` — do not guess.
-6. If targets API unreachable → flag `NEEDS_REVIEW: grpc targets registry unavailable`.
+5. If no match → flag `NEEDS_REVIEW: no rpc_alias for <host>:<port>`.
+6. If HTTP unreachable / `INTERNAL_ERROR` → **Please connect to the respective VPN** and retry.
 
-When `reflection_enabled: false` on the matched target, schema discovery uses
-`GET /v1/grpc/static-proto/aliases` (compiled proto set for that alias).
+When `reflection_enabled: false`, read `GET /v1/grpc/static-proto/aliases`.
+
+**Conversion alone does not need MCP** — grpcurl → §3.8 string is local + HTTP lookup.
 
 ### Step classifier
 
@@ -99,12 +102,10 @@ Walk prompts in order. Only reference a key if an earlier prompt has `save … a
 
 Never inline tokens/secrets into prompts. `saveMemory` from env / fixture first, then `saved <key>` in the prompt (§7).
 
-## 3. Verify (sequential — one prompt per call)
+## 3. Verify (sequential — MCP only)
 
-The exposed `tapmind_verify_prompt` MCP tool takes a single `prompt` string, not a list —
-it always wraps it as a one-element list before calling the backend, even though the
-backend's own `/v1/runs/verifyPrompt` endpoint accepts a batch `prompts[]`. Call once per
-prompt, in list order:
+Use **`tapmind_verify_prompt` only** — one prompt per call (`CONTROL_PLANE.md`). Do not use
+ingest MCP tools when verify shows no matching REST operation; flag `NEEDS_REVIEW` instead.
 
 ```json
 {
@@ -116,13 +117,15 @@ prompt, in list order:
 ```
 
 - Apply that call's `corrected_test_prompt` / `corrected_verify_prompt` into `correctedSteps` (`change: "reworded"`).
-- `status: "NEEDS_CLARIFICATION"` + `clarifying_question` in the response → flag `NEEDS_REVIEW`, don't guess.
-- Re-ingest curls via `tapmind_ingest_curl` when verify shows no matching operation.
+- `status: "NEEDS_CLARIFICATION"` + `clarifying_question` → flag `NEEDS_REVIEW`, don't guess.
+- gRPC: verify §3.8 prompt through this same MCP tool — not `grpc_invoke`.
 
-If a batch overload (`prompts: string[]`) is ever exposed on the MCP tool, prefer it — one
-call per scenario's full list lets the planner see the whole sequence + memory names at once.
+If a batch overload (`prompts: string[]`) is ever exposed on the MCP tool, prefer it.
 
-## 4. Execute (sequential)
+## 4. Execute (sequential — MCP only)
+
+Use **`tapmind_run_nlp_command` only** — one prompt per call. gRPC §3.8 prompts execute here;
+the planner routes to `grpc.invoke` internally.
 
 ```json
 {
@@ -138,9 +141,11 @@ call per scenario's full list lets the planner see the whole sequence + memory n
 | First | omit / null — capture id from response |
 | Later | **must** pass the same id |
 
-Optional side checks: `postgres_query` / `redis_get` / `invoke` when expected_result is infra and NLP cannot assert it — attach evidence; may insert a corrected step.
+On `no tool_call.target` or gRPC routing errors → `GET /v1/grpc/targets` over HTTP; if alias
+missing, flag `NEEDS_REVIEW` (target registration is admin/user action).
 
-Failures → reword or insert setup (`change: "inserted"`) → re-verify affected prompts → continue with same conversation when possible.
+Failures → reword or insert setup (`change: "inserted"`) → re-verify → continue with same
+`conversationId` when possible. Do not call postgres/redis/ingest MCP tools as workarounds.
 
 ## 5. Suite convert
 
