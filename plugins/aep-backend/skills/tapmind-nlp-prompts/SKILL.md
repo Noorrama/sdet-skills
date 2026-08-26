@@ -250,18 +250,84 @@ chatbot, so it only reliably understands the sentence shapes documented here.
 
 ## 1. Minimal setup (once per test class)
 
+**PDG resolution (SDK `resolveAndSetUp`):** `PDG` **environment variable first**, then
+`tapmind.pdg` system property as fallback. CI and Gradle test tasks should export
+`PDG=<squad>` — do **not** set `System.setProperty("tapmind.pdg", …)` in `@BeforeMethod` when
+`PDG` is already provided (the property is ignored in that case).
+
+| Variable / property | Required | Role |
+|---|---|---|
+| `PDG` env | Yes (or property fallback) | Product group for control-plane routing |
+| `INFRA` env | No | `integration`/`tencent` → integration env; else `qa` |
+| `TAPMIND_CONTROL_PLANE_URL` env / `tapmind.control.plane.url` property | No | Override control-plane host |
+| `TAPMIND_SERVICE_TOKEN` env / `tapmind.service.token` property | No | Service auth token |
+
 ```java
 @BeforeMethod(alwaysRun = true)
 public void beforeMethod(Method method) throws Exception {
-    System.setProperty("tapmind.pdg", "transport"); // your PDG/squad
     TapMind.setUp(method);
 }
 ```
+
+Local IDE only (when `PDG` env is unset): module `TapMindTestSupport.configure()` may set
+`tapmind.pdg` as fallback — prefer exporting `PDG` in the run configuration instead.
 
 Then, inside a `@Test` method, just call:
 
 ```java
 TapMind.runStep("Get a customer from TDP");
+```
+
+### 1.1 Setup overloads
+
+Both overloads call the same `resolveAndSetUp(testId)` and send `testId` to the control plane as
+`test_session_name` (via `InitiateRequest`). This label is for TapMind run tracing only — it does
+**not** wire BrowserStack execution; `@TestInfo(testCaseIds = …)` handles that separately.
+
+| Overload | Session name shape | When to use |
+|---|---|---|
+| `TapMind.setUp(method)` | `<testMethodName>-<random5>` (e.g. `createOrderHappyPath-x7k2m`) | **Default** — use from `@BeforeMethod`; unique per invocation (parallel, retries, dataProvider rows) |
+| `TapMind.setUp(String testId)` | literal `<testId>` you pass (e.g. `"12345678"`) | Optional — when you explicitly want TapMind logs grep-able by a fixed label (often a BrowserStack case id); avoid duplicating the same id already on `@TestInfo` unless traceability is the goal |
+
+Examples above are **placeholders** — use your suite's real `@Test` method names and `@TestInfo`
+`testCaseIds`; do not copy ids or method names from another module's tests.
+
+**Mixed classes** (only some tests use TapMind): scope `@BeforeMethod` to the `TAPMIND` TestNG group:
+
+```java
+@BeforeMethod(alwaysRun = true, groups = {TestGroups.TAPMIND})
+public void tapMindSetup(Method method) throws Exception {
+    TapMind.setUp(method);
+}
+```
+
+When every test in the class uses TapMind, a shared base class with that `@BeforeMethod` is fine.
+
+### 1.2 When to use TapMind vs keep Java
+
+| Good for NLP | Keep Java (or hybrid) |
+|---|---|
+| Single HTTP GET/POST with JSON envelope checks | Multi-step flows needing cross-step `save … as` memory (e.g. widget → progress → claim) |
+| Strategy / auth / 404-style negative GETs | Numeric delta asserts (progress increased by N seconds) |
+| Ingested curl/OpenAPI under your PDG | gRPC/proto until ingested + catalogued (see **Intent vs tool routing** above) |
+
+### 1.3 `@TapmindAutoMode` (BrowserStack-driven)
+
+`@TapmindAutoMode` fetches **BrowserStack Steps** and runs each as `TapMind.runStep(step)` — not the
+`AI Prompt` column. Steps must be plain NLP sentences (not grpcurl dumps, JavaDoc, or
+`TapMind.runStep("…")` wrappers). Requires `@TestInfo` + `BROWSERSTACK_API_KEY`.
+
+### 1.4 Verify-prompt API shape (control plane)
+
+REST body for `POST /v1/runs/verifyPrompt` (MCP `tapmind_verify_prompt` wraps one prompt at a time):
+
+```json
+{
+  "product_group": "<pdg>",
+  "target_service_id": "<service_id>",
+  "dry_run_llm": false,
+  "prompts": [{ "prompt": "Get order details for order id 12345" }]
+}
 ```
 
 ---
