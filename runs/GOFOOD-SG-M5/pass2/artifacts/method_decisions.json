@@ -1,0 +1,256 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 2,
+  "generated_at": "2026-08-23T18:52:52.648715+00:00",
+  "_provenance": {
+    "enrichment": "4 of 7 enriched from the graph (create-session endpoint resolved to CreateGroupOrderEndPoint.java with 44 calling test methods - the graph has been re-indexed since pass 1, where the same path returned no_endpoint_match). 3 errored with no_endpoint_match on /invite, INDEPENDENTLY CONFIRMED absent by repo grep, so genuinely new.",
+    "base": "stacked on the pass-1 branch (MR !21035); method summaries read from that tree, which carries 7 @Test methods"
+  },
+  "method_summaries": [
+    {
+      "class": "CreateGroupOrderTests",
+      "path": "gofood/src/test/java/tests/GroupOrder/regression/CreateGroupOrderTests.java",
+      "method_count": 7,
+      "methods": [
+        "createSuccessGroupOrder (DataProvider BillingTypes, 3 rows)",
+        "createGOFailureWithInvalidBillingTypeAndRestoId",
+        "createGOFailureForClosedResto",
+        "createGOFailureForBlacklistedCustomer",
+        "createGOFailureForUserWithActiveGOSession",
+        "createGroupOrderWithInviteSocialGroupIdAttachesSocialGroup (pass 1, disabled)",
+        "createGOFailureWithBothInviteFields (pass 1, enabled)"
+      ]
+    }
+  ],
+  "assertion_summaries": [
+    {
+      "assertion_class": "CreateAndUpdateGroupOrderResponse",
+      "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+      "methods": [
+        "assertCreateGroupOrder - asserts social_group is NULL (added pass 1)",
+        "assertSocialGroupAttached - asserts social_group present (added pass 1)"
+      ]
+    }
+  ],
+  "data_provider_summaries": [
+    {
+      "data_provider_class": "CreateGroupOrderTests",
+      "data_provider_method": "getBillingTypes",
+      "rows": 3,
+      "rows_fully_parsed": true
+    }
+  ],
+  "decisions": [
+    {
+      "scenario_id": "SC-GOFOODSGM5-004",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "verdict": "not_automatable",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "requires_new_test_class": false,
+      "ambiguous_candidates": [],
+      "confidence": 0.9,
+      "requires_new_method": false,
+      "partial": true,
+      "signals": [
+        "flow is exercised by SC-001 (pass 1), but the scenario's PRECONDITION is a Gopay TIMEOUT",
+        "rule 8a search, module + :core + :gojek-commons, by behaviour: WireMock 0, stubFor 0, MockServer 0, Toxiproxy 0 - MECHANISM ABSENT, not merely a missing config",
+        "a test that cannot induce its own precondition is not a test; generating it would be dead code"
+      ],
+      "unsatisfiable_expectations": [
+        "step 1: induce a Gopay Get-Group-Details timeout - no fault-injection mechanism exists anywhere in the module or its Gradle dependencies",
+        "step 2: 'Inspect the enqueued job list' - see SC-007"
+      ],
+      "recommendation": "Do not generate. Needs a stub/proxy capability (WireMock or Toxiproxy) introduced to the module first."
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-005",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "verdict": "no_match",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "requires_new_test_class": false,
+      "ambiguous_candidates": [],
+      "confidence": 0.88,
+      "requires_new_method": true,
+      "partial": false,
+      "signals": [
+        "FULLY AUTOMATABLE. 'A group id unknown to Gopay' is DATA, not fault injection - a syntactically valid but nonexistent id suffices, so no stub is needed",
+        "the 3-arg builder overload createGroupOrderRequestBody(billingType, restaurantId, inviteSocialGroupId) exists on the stacked base (pass 1)",
+        "the expected outcome - session created, no social group - is exactly what assertCreateGroupOrder already asserts (assertNull(social_group), added in pass 1)",
+        "fixture FIX-GOFOODSG-003 is TDP_SUPPORTED (CUSTOMER_WITH_GO_PAY); GO_RESTO_1 covers the restaurant per rule 8c",
+        "no existing method sends an unresolvable group id, so this is a new method, not assertion_add"
+      ],
+      "unsatisfiable_expectations": []
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-006",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "verdict": "no_match",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "requires_new_test_class": false,
+      "ambiguous_candidates": [],
+      "confidence": 0.8,
+      "requires_new_method": true,
+      "partial": true,
+      "signals": [
+        "flow and assertions are identical in shape to SC-005 (session created without a social group)",
+        "but the precondition needs a REAL GOTO group the caller is not an ACTIVE member of - fixture FIX-GOFOODSG-004, same provisioning gap as FIX-GOFOODSG-002"
+      ],
+      "unsatisfiable_expectations": [
+        "a real social group whose membership excludes the caller - TDP has no operation to create a group or set membership status"
+      ],
+      "recommendation": "Generate, disabled, with the group-id placeholder."
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-007",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "verdict": "not_automatable",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "requires_new_test_class": false,
+      "ambiguous_candidates": [],
+      "confidence": 0.75,
+      "requires_new_method": false,
+      "partial": true,
+      "signals": [
+        "rule 8a: MECHANISM PRESENT, TOPIC MISSING. gofood has a Kafka assertion framework - kafka/Base/KafkaAssertions (SpawnerContext), per-topic kafka/KafkaJudge/*, kafka/LogWiseKafkaAssertions/* - used by tests/waiter/.../TuringEtaTest",
+        "what is missing is narrow: no Judge/Assertions pair and no proto Key/Message for a chat-extension topic",
+        "it is also unconfirmed that the chat-extension job travels over Kafka at all - the RFC says 'enqueued job list', which may be a different queue"
+      ],
+      "unsatisfiable_expectations": [
+        "assert the chat-extension job was enqueued - needs (a) the topic confirmed and (b) a KafkaJudge + LogWiseKafkaAssertions pair for it"
+      ],
+      "recommendation": "Do not generate yet. First confirm the transport; if Kafka, this is a small addition following the TuringEtaTest pattern."
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-008",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions/{id}/invite",
+      "verdict": "not_automatable",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "requires_new_test_class": false,
+      "ambiguous_candidates": [],
+      "confidence": 0.82,
+      "requires_new_method": false,
+      "partial": true,
+      "signals": [
+        "endpoint layer absent: /invite returns 0 rows from the graph AND no *Invite* class exists in serviceEndpoints/groupOrder - graph and repo agree, so it is genuinely new",
+        "scenario is e2e and asserts 'all jobs enqueued', which carries SC-007's gap on top of the missing endpoint"
+      ],
+      "unsatisfiable_expectations": [
+        "job-enqueue assertions (see SC-007)",
+        "a real social group to attach (FIX-GOFOODSG-002)"
+      ],
+      "recommendation": "Do not generate. The /invite endpoint layer built for SC-009 will unblock the request half."
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-009",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions/{id}/invite",
+      "verdict": "no_match",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "requires_new_test_class": false,
+      "ambiguous_candidates": [],
+      "confidence": 0.85,
+      "requires_new_method": true,
+      "partial": false,
+      "signals": [
+        "FULLY AUTOMATABLE once the /invite endpoint layer exists - the assertion is a 400 on mutual exclusion, raised by request validation before any id is resolved",
+        "mirrors SC-003 (pass 1) exactly in shape: same GroupOrderErrors.MUTUALLY_EXCLUSIVE_INVITE_FIELDS code, already added on the stacked base",
+        "needs a session to invite into: createGroupOrder + leaveGroupOrder, the pattern every method in this class already uses",
+        "no stub, no social group, no job assertion required"
+      ],
+      "unsatisfiable_expectations": [],
+      "blocking_prerequisites": [
+        "create the /invite endpoint layer: InviteToGroupOrderEndPoint, InviteToGroupOrderRequestBody, a GroupOrderClient method and a GroupOrderController pair"
+      ]
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-010",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions/{id}/invite",
+      "verdict": "no_match",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "requires_new_test_class": false,
+      "ambiguous_candidates": [],
+      "confidence": 0.78,
+      "requires_new_method": true,
+      "partial": true,
+      "signals": [
+        "reuses the /invite layer built for SC-009",
+        "asserts 422 social_group_already_attached",
+        "but the precondition is a session that ALREADY HAS a social group, which needs a real group (FIX-GOFOODSG-007 -> same gap as FIX-GOFOODSG-002)"
+      ],
+      "unsatisfiable_expectations": [
+        "a session with a social group already attached - requires real social-group provisioning"
+      ],
+      "blocking_prerequisites": [
+        "/invite endpoint layer",
+        "a GroupOrderErrors constant for social_group_already_attached (422)"
+      ],
+      "recommendation": "Generate, disabled."
+    }
+  ],
+  "summary": {
+    "fully_automatable": [
+      "SC-GOFOODSGM5-005",
+      "SC-GOFOODSGM5-009"
+    ],
+    "generate_disabled": [
+      "SC-GOFOODSGM5-006",
+      "SC-GOFOODSGM5-010"
+    ],
+    "not_generated": [
+      "SC-GOFOODSGM5-004",
+      "SC-GOFOODSGM5-007",
+      "SC-GOFOODSGM5-008"
+    ]
+  },
+  "gaps": [
+    {
+      "type": "missing_capability",
+      "ref": "fault injection",
+      "detail": "No WireMock/MockServer/Toxiproxy anywhere in gofood, :core or :gojek-commons. Blocks SC-004. MECHANISM ABSENT."
+    },
+    {
+      "type": "missing_route",
+      "ref": "kafka chat-extension topic",
+      "detail": "Kafka assertion mechanism PRESENT (kafka/Base/KafkaAssertions + KafkaJudge + LogWiseKafkaAssertions, used by TuringEtaTest); no Judge/proto for a chat-extension topic, and the transport is unconfirmed. Blocks SC-007, SC-008."
+    },
+    {
+      "type": "missing_capability",
+      "ref": "social group provisioning",
+      "detail": "TDP cannot create a GOTO social group or set membership. Blocks SC-006, SC-008, SC-010 - and SC-001 from pass 1."
+    }
+  ]
+}

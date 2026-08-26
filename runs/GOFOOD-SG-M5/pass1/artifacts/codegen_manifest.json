@@ -1,0 +1,142 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 1,
+  "generated_at": "2026-08-22T19:25:05.463130+00:00",
+  "module": "gofood",
+  "module_root": "gofood",
+  "module_profile_skill": "",
+  "module_profile_substitute": "gofood-api-test-writer",
+  "review": {
+    "status": "approved",
+    "reviewer": "piyush.sharma"
+  },
+  "counts": {
+    "scenarios_in_plan": 3,
+    "generated": 3,
+    "skipped_dedup": 0,
+    "files_created": 0,
+    "files_updated": 6,
+    "new_test_methods": 2,
+    "assertion_additions": 1,
+    "new_test_classes": 0
+  },
+  "files": [
+    {
+      "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateGroupOrderRequestBody.java",
+      "action": "update",
+      "role": "request",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-001",
+        "SC-GOFOODSGM5-003"
+      ],
+      "reason": "+invite_social_group_id, +invite_history_group_ids; @Builder moved to an explicit all-args ctor because Lombok will not synthesise one alongside the retained 2-arg ctor; @JsonInclude(NON_NULL) so existing callers serialise unchanged"
+    },
+    {
+      "path": "gofood/src/main/java/requestbodybuilders/groupOrder/GroupOrderRequestBodyBuilder.java",
+      "action": "update",
+      "role": "helper",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-001",
+        "SC-GOFOODSGM5-003"
+      ],
+      "reason": "+2 overloads; the existing 2-arg method is untouched"
+    },
+    {
+      "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+      "action": "update",
+      "role": "response",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-001",
+        "SC-GOFOODSGM5-002"
+      ],
+      "reason": "+social_group field, +SocialGroup POJO, +assertSocialGroupAttached (SC-001), +additive assertNull in assertCreateGroupOrder (SC-002 assertion_add)"
+    },
+    {
+      "path": "gofood/src/main/java/constants/GroupOrderConstants.java",
+      "action": "update",
+      "role": "constants",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-001",
+        "SC-GOFOODSGM5-003"
+      ],
+      "reason": "+DUMMY_SOCIAL_GROUP_ID, +DUMMY_HISTORY_GROUP_ID, +SOCIAL_GROUP_SOURCE_MANUAL - all placeholders with TODO"
+    },
+    {
+      "path": "gofood/src/test/java/utils/GroupOrderErrors.java",
+      "action": "update",
+      "role": "assertion",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-003"
+      ],
+      "reason": "+MUTUALLY_EXCLUSIVE_INVITE_FIELDS with code 'bad_request'; messageTitle/message are TODO_CONFIRM_* placeholders"
+    },
+    {
+      "path": "gofood/src/test/java/tests/GroupOrder/regression/CreateGroupOrderTests.java",
+      "action": "update",
+      "role": "test",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-001",
+        "SC-GOFOODSGM5-003"
+      ],
+      "reason": "+2 @Test methods, both enabled = false; SC-002 needed no method (assertion_add)"
+    }
+  ],
+  "skipped": [],
+  "anchoring_notes": [
+    "All 9 layers were reuse: no file created, nothing relocated. Placement from gbt_context.json packages.test=tests.GroupOrder.regression / packages.main=serviceEndpoints.groupOrder, both verified on disk.",
+    "The plan's package gofood.test.component.session, class SocialGroupSessionComponentTest and class SocialGroupSessionAssertions were all overridden - none exists in this module, and gofood has no <Svc>Assertions convention at all."
+  ],
+  "needs_human_placement": [],
+  "todos": [
+    "DUMMY IDS: GroupOrderConstants.DUMMY_SOCIAL_GROUP_ID / DUMMY_HISTORY_GROUP_ID are placeholders. FIX-GOFOODSG-001 (group-order-enabled restaurant, max_participants 8) and FIX-GOFOODSG-002 (ACTIVE OWNER of a GOTO social group with 3 active members) are both TDP_NOT_SUPPORTED - no catalog operation provisions them.",
+    "PLACEHOLDER ERROR COPY: GroupOrderErrors.MUTUALLY_EXCLUSIVE_INVITE_FIELDS carries TODO_CONFIRM_TITLE / TODO_CONFIRM_MESSAGE. Only the code ('bad_request') is asserted; add the message asserts once the copy is confirmed.",
+    "BOTH NEW TESTS ARE enabled = false pending the two items above.",
+    "@TestInfo OMITTED on both new methods - no TestRail case ids exist. Every other method in the class has one.",
+    "NOT ASSERTED (no capability in this module): SC-001 step 2 DB check of social_group_details.source == MANUAL; SC-002 DB check that social_group_details is null; SC-003 'no session created' and 'Gopay not called'. gofood/src/test/java/db holds only WaiterServiceQueries.java and no tests/GroupOrder class asserts DB state; there is no Gopay stub call-log facility.",
+    "TRACEABILITY: SC-GOFOODSGM5-002 has NO test method of its own (assertion_add per rule 4a). A regression surfaces as createSuccessGroupOrder failing, with no link back to SC-002. Reviewer may prefer a dedicated method instead.",
+    "GRAPH INDEX GAP: this endpoint is absent from all 4056 Memgraph Endpoint nodes because CreateGroupOrderEndPoint builds its URL with String.format. Until the indexer resolves that, the enricher will keep reporting this route as uncovered."
+  ],
+  "reused_identifiers": [
+    {
+      "class": "GroupOrderController",
+      "file": "gofood/src/main/java/controllers/GroupOrder/GroupOrderController.java",
+      "methods_called": [
+        "createGroupOrder",
+        "createGroupOrderFailure",
+        "leaveGroupOrder"
+      ],
+      "verified": true
+    },
+    {
+      "class": "GroupOrderRequestBodyBuilder",
+      "file": "gofood/src/main/java/requestbodybuilders/groupOrder/GroupOrderRequestBodyBuilder.java",
+      "methods_called": [
+        "createGroupOrderRequestBody(3-arg)",
+        "createGroupOrderRequestBodyWithBothInviteFields"
+      ],
+      "verified": true,
+      "note": "both added in this MR"
+    },
+    {
+      "class": "CreateAndUpdateGroupOrderResponse",
+      "file": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+      "methods_called": [
+        "assertSocialGroupAttached"
+      ],
+      "verified": true,
+      "note": "added in this MR"
+    },
+    {
+      "class": "GoFoodTestBase",
+      "file": "gofood/src/test/java/base/GoFoodTestBase.java",
+      "methods_called": [
+        "groupOrderController",
+        "customer_aep",
+        "getGroupOrderRequestBodyBuilder"
+      ],
+      "verified": true,
+      "note": "inherited members"
+    }
+  ],
+  "notes": "Option A. Zero new classes: 2 methods added to the existing CreateGroupOrderTests, 1 additive assertion in the shared response assert, and 4 supporting src/main updates. All dummy values and unasserted expectations are recorded in todos and repeated in the MR body."
+}

@@ -1,0 +1,175 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 2,
+  "generated_at": "2026-08-23T18:56:41.269890+00:00",
+  "module": "gofood",
+  "module_root": "gofood",
+  "module_profile_substitute": "gofood-api-test-writer",
+  "stacked_on": {
+    "branch": "automate/gofood-social-group-session-gofood-07edc3",
+    "mr": "!21035",
+    "sha": "ab6d0281d71889766210a8f2e8e202be47931d7c",
+    "why": "All 7 pass-2 scenarios need invite_social_group_id on CreateGroupOrderRequestBody, the social_group response block, and the 3-arg builder overload - none of which is on master. MR !21035 is unmerged, so this branch is cut from it and must TARGET it, not master."
+  },
+  "review": {
+    "status": "approved",
+    "reviewer": "piyush.sharma",
+    "approval_source": "operator chat instruction, recorded in run-pass2.json"
+  },
+  "counts": {
+    "scenarios_in_scope": 7,
+    "generated": 4,
+    "not_generated": 3,
+    "files_created": 2,
+    "files_updated": 5,
+    "new_test_methods": 4,
+    "enabled": 2,
+    "disabled": 2,
+    "new_test_classes": 0
+  },
+  "files": [
+    {
+      "path": "gofood/src/main/java/serviceEndpoints/groupOrder/InviteToGroupOrderRequestBody.java",
+      "action": "create",
+      "role": "request",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-009",
+        "SC-GOFOODSGM5-010"
+      ],
+      "reason": "body DTO for /invite; JsonInclude NON_NULL so a scenario can omit a field"
+    },
+    {
+      "path": "gofood/src/main/java/serviceEndpoints/groupOrder/InviteToGroupOrderEndPoint.java",
+      "action": "create",
+      "role": "endpoint",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-009",
+        "SC-GOFOODSGM5-010"
+      ],
+      "reason": "implements IServiceEndpoint; header set and structure mirror GroupOrderMarkReadyEndpoint (closest existing session-scoped POST), plus a body"
+    },
+    {
+      "path": "gofood/src/main/java/clients/mealScheduler/GroupOrderClient.java",
+      "action": "update",
+      "role": "client",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-009",
+        "SC-GOFOODSGM5-010"
+      ],
+      "reason": "+inviteToGroupOrder, same 4-line shape as every sibling"
+    },
+    {
+      "path": "gofood/src/main/java/controllers/GroupOrder/GroupOrderController.java",
+      "action": "update",
+      "role": "controller",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-009",
+        "SC-GOFOODSGM5-010"
+      ],
+      "reason": "+inviteToGroupOrderFailure; accepts BAD_REQUEST or UNPROCESSABLE_ENTITY, mirroring joinGroupOrderFailure's multi-status shape"
+    },
+    {
+      "path": "gofood/src/test/java/utils/GroupOrderErrors.java",
+      "action": "update",
+      "role": "assertion",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-010"
+      ],
+      "reason": "+SOCIAL_GROUP_ALREADY_ATTACHED (422); copy is TODO_CONFIRM_*"
+    },
+    {
+      "path": "gofood/src/main/java/constants/GroupOrderConstants.java",
+      "action": "update",
+      "role": "constants",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-005",
+        "SC-GOFOODSGM5-006"
+      ],
+      "reason": "+UNKNOWN_SOCIAL_GROUP_ID (real input, not a placeholder) and +DUMMY_NON_MEMBER_SOCIAL_GROUP_ID (placeholder)"
+    },
+    {
+      "path": "gofood/src/test/java/tests/GroupOrder/regression/CreateGroupOrderTests.java",
+      "action": "update",
+      "role": "test",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-005",
+        "SC-GOFOODSGM5-006",
+        "SC-GOFOODSGM5-009",
+        "SC-GOFOODSGM5-010"
+      ],
+      "reason": "+4 methods; 005 and 009 ENABLED, 006 and 010 disabled on one stated blocker each"
+    }
+  ],
+  "skipped": [
+    {
+      "scenario_id": "SC-GOFOODSGM5-004",
+      "reason": "not_automatable",
+      "detail": "Requires inducing a Gopay timeout. No WireMock/MockServer/Toxiproxy in gofood, :core or :gojek-commons - mechanism absent, not a missing config. A test that cannot induce its own precondition is dead code."
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-007",
+      "reason": "not_automatable",
+      "detail": "Requires asserting the chat-extension job was enqueued. The Kafka assertion MECHANISM exists (kafka/Base/KafkaAssertions + KafkaJudge + LogWiseKafkaAssertions, used by TuringEtaTest) but there is no Judge/proto for a chat-extension topic, and it is unconfirmed the job even travels over Kafka."
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-008",
+      "reason": "not_automatable",
+      "detail": "e2e attach + all-jobs assertions: carries SC-007's gap and additionally needs a real social group. The /invite layer added here unblocks its request half."
+    }
+  ],
+  "anchoring_notes": [
+    "All placement from gbt_context: tests.GroupOrder.regression / serviceEndpoints.groupOrder. Zero new test classes; the plan's SocialGroupSessionComponentTest / SocialGroupSessionIntegrationTest / gofood.test.* packages were overridden - none exists in this module.",
+    "SC-001/002/003 excluded before generation: byte-identical to pass 1, already on MR !21035."
+  ],
+  "needs_human_placement": [],
+  "todos": [
+    "STACKED MR: target branch MUST be automate/gofood-social-group-session-gofood-07edc3 (MR !21035), NOT master. All 7 scenarios need invite_social_group_id, the social_group response block and the 3-arg builder overload, none of which is on master.",
+    "SC-005 and SC-009 are ENABLED and expected to pass. SC-005's UNKNOWN_SOCIAL_GROUP_ID is a real input, not a placeholder - 'unknown to Gopay' is a data condition.",
+    "SC-006 disabled: needs a real GOTO group whose active membership excludes the caller (FIX-GOFOODSG-004). TDP cannot create a group or set membership.",
+    "SC-010 disabled: needs a session that already HAS a social group (FIX-GOFOODSG-007) - same provisioning gap.",
+    "@TestInfo testCaseIds are placeholders on all 4 new methods; projectId, suiteId and owner were read from the sibling methods. Reassign owner if these are not the class owner's.",
+    "GroupOrderErrors.SOCIAL_GROUP_ALREADY_ATTACHED and MUTUALLY_EXCLUSIVE_INVITE_FIELDS both carry TODO_CONFIRM_* copy; only the error CODE is asserted.",
+    "NOT GENERATED: SC-004 (no fault injection), SC-007 and SC-008 (no chat-extension topic assertion). See skipped[] for the evidence.",
+    "The /invite response shape is unverified - InviteToGroupOrderRequestBody was derived from the RFC's mutual-exclusion contract, and only failure paths are exercised here. A success-path response POJO is still needed for SC-008."
+  ],
+  "reused_identifiers": [
+    {
+      "class": "GroupOrderController",
+      "file": "gofood/src/main/java/controllers/GroupOrder/GroupOrderController.java",
+      "methods_called": [
+        "createGroupOrder",
+        "leaveGroupOrder",
+        "inviteToGroupOrderFailure"
+      ],
+      "verified": true
+    },
+    {
+      "class": "GroupOrderRequestBodyBuilder",
+      "file": "gofood/src/main/java/requestbodybuilders/groupOrder/GroupOrderRequestBodyBuilder.java",
+      "methods_called": [
+        "createGroupOrderRequestBody(2-arg)",
+        "createGroupOrderRequestBody(3-arg)"
+      ],
+      "verified": true,
+      "note": "3-arg added in pass 1"
+    },
+    {
+      "class": "CreateAndUpdateGroupOrderResponse",
+      "file": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+      "methods_called": [
+        "assertCreateGroupOrder"
+      ],
+      "verified": true,
+      "note": "its pass-1 assertNull(social_group) is exactly SC-005's expectation"
+    },
+    {
+      "class": "GoFoodSecurityHelper",
+      "file": "gofood/src/main/java/helpers/GoFoodSecurityHelper.java",
+      "methods_called": [
+        "runSecurityScanIfRequired"
+      ],
+      "verified": true
+    }
+  ],
+  "notes": "Pass 2, stacked on MR !21035. 4 of 7 in-scope scenarios generated (2 enabled, 2 disabled); 3 deliberately not generated rather than shipped as dead stubs. Zero new test classes - a new /invite endpoint layer plus 4 methods on the existing CreateGroupOrderTests."
+}

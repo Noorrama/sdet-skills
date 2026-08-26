@@ -1,0 +1,147 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 1,
+  "started_at": "2026-08-22T18:57:30.905402+00:00",
+  "finished_at": "2026-08-22T19:34:10.189765+00:00",
+  "stages": [
+    {
+      "stage": "gbt-workspace-prep",
+      "stage_number": 0,
+      "status": "completed",
+      "detail": "worktree on automate/gofood-social-group-session-gofood-07edc3 off master@097a4882; base clone untouched",
+      "artifact": "runs/GOFOOD-SG-M5/pass1/artifacts/workspace.json"
+    },
+    {
+      "stage": "endpoint_extraction",
+      "stage_number": 1,
+      "status": "completed",
+      "detail": "3 scenarios, 1 distinct (module, endpoint) pair"
+    },
+    {
+      "stage": "automation-plan-test-enricher",
+      "stage_number": 2,
+      "status": "completed_after_reclassification",
+      "detail": "0 enriched / 3 no_endpoint_match; reclassified to empty-lists (uncovered) on operator instruction. Query proven working; endpoint absent from all 4056 graph endpoints due to a String.format indexer gap",
+      "artifact": "runs/GOFOOD-SG-M5/pass1/artifacts/automation_plan_enriched.json"
+    },
+    {
+      "stage": "test-data-generator",
+      "stage_number": 3,
+      "status": "completed",
+      "detail": "3 fixtures: 1 TDP_SUPPORTED, 2 TDP_NOT_SUPPORTED",
+      "artifact": "runs/GOFOOD-SG-M5/pass1/artifacts/test_data.json"
+    },
+    {
+      "stage": "merge_test_data_into_plan",
+      "stage_number": 4,
+      "status": "completed",
+      "detail": "test_data_payloads set from test_data.json, 3 entries"
+    },
+    {
+      "stage": "gbt-method-decision-maker",
+      "stage_number": 5,
+      "status": "completed",
+      "detail": "2 no_match + 1 assertion_add; 0 new test classes; all 3 partial",
+      "artifact": "runs/GOFOOD-SG-M5/pass1/artifacts/method_decisions.json"
+    },
+    {
+      "stage": "module_profile_resolver",
+      "stage_number": 6,
+      "status": "completed_with_substitute",
+      "detail": "gbt-module-gofood ABSENT -> gofood-api-test-writer"
+    },
+    {
+      "stage": "gbt-code-understanding",
+      "stage_number": 7,
+      "status": "loaded",
+      "detail": "five-phase analysis applied; no artifact written"
+    },
+    {
+      "stage": "gbt-context-builder",
+      "stage_number": 8,
+      "status": "completed",
+      "detail": "all 9 layers reuse, verified on disk; packages.test=tests.GroupOrder.regression",
+      "artifact": "runs/GOFOOD-SG-M5/pass1/gbt_context.json"
+    },
+    {
+      "stage": "gbt-test-code-generator",
+      "stage_number": 9,
+      "status": "completed",
+      "detail": "6 files updated, 0 created, 2 new @Test methods, 1 assertion addition",
+      "artifact": "runs/GOFOOD-SG-M5/pass1/artifacts/codegen_manifest.json"
+    },
+    {
+      "stage": "test-code-validator",
+      "stage_number": 10,
+      "status": "completed_after_fix",
+      "detail": "attempt 1: 1 error (validator false positive on a Lombok accessor); attempt 2: 0 errors, 1 pre-existing warning",
+      "artifact": "runs/GOFOOD-SG-M5/pass1/artifacts/validation_report.json"
+    },
+    {
+      "stage": "validate_fix_loop",
+      "stage_number": 11,
+      "status": "completed",
+      "detail": "2 attempts of 2; the fix was to the reference-exists RULE (made Lombok-aware), not to generated code"
+    },
+    {
+      "stage": "gbt-build-fix",
+      "stage_number": 12,
+      "status": "completed",
+      "detail": ":gofood:compileTestJava BUILD SUCCESSFUL, 0 fix attempts needed"
+    },
+    {
+      "stage": "gbt-mr-raiser",
+      "stage_number": 13,
+      "status": "completed",
+      "detail": "Draft MR !21035 from automate/gofood-social-group-session-gofood-07edc3 with 7 TODOs carried; empty first push corrected (BSD xargs -a unsupported) before the real commit",
+      "artifact": "runs/GOFOOD-SG-M5/pass1/artifacts/mr.json",
+      "mr_url": "https://source.golabs.io/qa/gojek-backend-tests/-/merge_requests/21035"
+    }
+  ],
+  "compile": {
+    "passed": true,
+    "attempts_used": 0,
+    "budget": 2,
+    "fix_budget_exhausted": false
+  },
+  "enrichment": {
+    "enriched": 0,
+    "errored": 3,
+    "reclassified_uncovered": 3,
+    "total": 3,
+    "module_fallbacks": [],
+    "errors": [],
+    "uncovered_endpoints": [
+      "POST /gofood/meal-scheduler/v1/group-order-sessions - reported uncovered by the graph, but PRESENT on disk (indexer gap). Reuse decided by repo verification."
+    ]
+  },
+  "fix_loop": {
+    "attempts_used": 2,
+    "budget": 2,
+    "fix_budget_exhausted": false
+  },
+  "final_validation": {
+    "passed": true,
+    "counts": {
+      "error": 0,
+      "warning": 1
+    }
+  },
+  "files_written": {
+    "created": 0,
+    "updated": 6
+  },
+  "blocked": false,
+  "reviewer_todos": [
+    "DUMMY IDS: GroupOrderConstants.DUMMY_SOCIAL_GROUP_ID / DUMMY_HISTORY_GROUP_ID are placeholders. FIX-GOFOODSG-001 (group-order-enabled restaurant, max_participants 8) and FIX-GOFOODSG-002 (ACTIVE OWNER of a GOTO social group with 3 active members) are both TDP_NOT_SUPPORTED - no catalog operation provisions them.",
+    "PLACEHOLDER ERROR COPY: GroupOrderErrors.MUTUALLY_EXCLUSIVE_INVITE_FIELDS carries TODO_CONFIRM_TITLE / TODO_CONFIRM_MESSAGE. Only the code ('bad_request') is asserted; add the message asserts once the copy is confirmed.",
+    "BOTH NEW TESTS ARE enabled = false pending the two items above.",
+    "@TestInfo OMITTED on both new methods - no TestRail case ids exist. Every other method in the class has one.",
+    "NOT ASSERTED (no capability in this module): SC-001 step 2 DB check of social_group_details.source == MANUAL; SC-002 DB check that social_group_details is null; SC-003 'no session created' and 'Gopay not called'. gofood/src/test/java/db holds only WaiterServiceQueries.java and no tests/GroupOrder class asserts DB state; there is no Gopay stub call-log facility.",
+    "TRACEABILITY: SC-GOFOODSGM5-002 has NO test method of its own (assertion_add per rule 4a). A regression surfaces as createSuccessGroupOrder failing, with no link back to SC-002. Reviewer may prefer a dedicated method instead.",
+    "GRAPH INDEX GAP: this endpoint is absent from all 4056 Memgraph Endpoint nodes because CreateGroupOrderEndPoint builds its URL with String.format. Until the indexer resolves that, the enricher will keep reporting this route as uncovered."
+  ],
+  "mr_url": "https://source.golabs.io/qa/gojek-backend-tests/-/merge_requests/21035",
+  "mr_iid": 21035,
+  "notes": "All 14 stages completed. Option A: zero new test classes - 2 methods added to the existing CreateGroupOrderTests, 1 additive assertion in the shared response assert, and 4 supporting src/main updates. Compile green, validator green. Two course corrections during the run, both recorded: (1) the graph reported the endpoint uncovered, but repo verification found CreateGroupOrderEndPoint plus 31 sibling files and 11 GroupOrder test classes - generating new classes as the graph implied would have duplicated a fully built layer; (2) the first push staged nothing because BSD xargs lacks -a, pushing an empty branch at the base commit, corrected before the MR was opened. All three scenarios are only PARTIALLY automated: the DB and Gopay-stub assertions have no capability in this module, and that is stated in the MR body rather than hidden."
+}

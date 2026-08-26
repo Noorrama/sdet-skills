@@ -1,0 +1,27 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 1,
+  "attempt": 2,
+  "generated_at": "2026-08-22T19:26:23.372340+00:00",
+  "passed": true,
+  "blocked": false,
+  "counts": {
+    "error": 0,
+    "warning": 1
+  },
+  "violations": [
+    {
+      "severity": "warning",
+      "path": "gofood/src/main/java/requestbodybuilders/groupOrder/GroupOrderRequestBodyBuilder.java",
+      "rule": "no-hardcoded-url",
+      "message": "hardcoded URL literal (PRE-EXISTING, not introduced here)"
+    }
+  ],
+  "implicated_files": [],
+  "fix_loop": {
+    "attempts_used": 2,
+    "budget": 2,
+    "attempt_1": "1 error: reference-exists on GoFoodTestBase#getGroupOrderRequestBodyBuilder",
+    "resolution": "FALSE POSITIVE in the validator, not a code defect. getGroupOrderRequestBodyBuilder() is Lombok-generated from the groupOrderRequestBodyBuilder field on @Getter-annotated GoFoodTestBase. The RULE was made Lombok-aware; no generated code was changed. Recorded rather than suppressed - the reference-exists rule as first written cannot see Lombok accessors and would false-positive on any @Getter/@Setter base class."
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "iid": 21037,
+  "web_url": "https://source.golabs.io/qa/gojek-backend-tests/-/merge_requests/21037",
+  "title": "Draft: [GOFOOD-SG-M5] Add session-invite endpoint layer and social-group edge-case tests (SC-004..010)",
+  "source_branch": "automate/gofood-social-group-invite-gofood-ffd9c5",
+  "target_branch": "automate/gofood-social-group-session-gofood-07edc3"
+}

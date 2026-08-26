@@ -1,0 +1,100 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 3,
+  "generated_at": "2026-08-24T10:09:52.019690+00:00",
+  "module": "gofood",
+  "module_root": "gofood",
+  "module_profile_skill": "",
+  "module_profile_substitute": "gofood-api-test-writer",
+  "stacked_on": {
+    "branch": "automate/gofood-social-group-invite-gofood-ffd9c5",
+    "mr": "pass2 invite branch (stacked on !21035)",
+    "sha": "08de87440dfac81945215ac8d4d7c8e77fa1bc56",
+    "why": "SC-028 needs invite_social_group_id create path to attach a social group before join-backfill; that lives on the pass-2 invite branch, not master."
+  },
+  "review": {
+    "status": "approved",
+    "reviewer": "piyush.sharma",
+    "approval_source": "operator chat instruction, recorded in run-pass3.json"
+  },
+  "counts": {
+    "scenarios_in_scope": 1,
+    "scenarios_in_plan": 1,
+    "generated": 1,
+    "skipped_dedup": 0,
+    "not_generated": 0,
+    "files_created": 0,
+    "files_updated": 1,
+    "new_test_methods": 1,
+    "enabled": 0,
+    "disabled": 1,
+    "new_test_classes": 0
+  },
+  "files": [
+    {
+      "path": "gofood/src/test/java/tests/GroupOrder/regression/JoinGroupOrderTests.java",
+      "action": "update",
+      "role": "test",
+      "scenario_ids": [
+        "SC-GOFOODSGM5-028"
+      ],
+      "package": "tests.GroupOrder.regression",
+      "reason": "+VerifyJoinBackfillsMissingActiveSocialGroupMemberIds; disabled on FIX-GOFOODSG-002/007 social-group provisioning gap; FIX-006 wired via poolingUtility.getTDPCustomer(CUSTOMER_WITH_GO_PAY)"
+    }
+  ],
+  "skipped": [],
+  "anchoring_notes": [
+    "Placement from gbt_context: tests.GroupOrder.regression / serviceEndpoints.groupOrder. Zero new test classes; the plan's SocialGroupSessionIntegrationTest / gofood.test.integration.session were overridden \u2014 none exists in this module.",
+    "Join endpoint layers all reuse: GroupOrderJoinEndpoint, GroupOrderClient.joinGroupOrder, GroupOrderController, GroupOrderJoinResponse, JoinGroupOrderTests."
+  ],
+  "needs_human_placement": [],
+  "todos": [
+    "STACKED MR: target branch MUST be automate/gofood-social-group-invite-gofood-ffd9c5 (stacked on !21035), NOT master.",
+    "SC-028 disabled: needs a real GOTO social group attached to an IN_PROGRESS session (FIX-GOFOODSG-007/002). TDP cannot create a group or attach social_group_details source=MANUAL. GO_RESTO_1 already satisfies the restaurant half.",
+    "NOT ASSERTED (mechanism present, bakso group-order-session route missing): step 2 social_group_details.members map keys for joining participant + previously missing ACTIVE member. GenericUtils.fetchMealPlanBulkOrderDetailsFromDb covers meal-plan orders only; SocialGroup POJO has members_count only.",
+    "@TestInfo testCaseIds is TODO-SC-GOFOODSGM5-028 placeholder; projectId/suiteId/owner inherited from JoinGroupOrderTests siblings.",
+    "FIX-GOFOODSG-006 (TDP_SUPPORTED CUSTOMER_WITH_GO_PAY) acquired via poolingUtility.getTDPCustomer \u2014 the same pool API this class already uses."
+  ],
+  "reused_identifiers": [
+    {
+      "class": "GroupOrderController",
+      "file": "gofood/src/main/java/controllers/GroupOrder/GroupOrderController.java",
+      "methods_called": [
+        "createGroupOrder",
+        "joinGroupOrder",
+        "getGroupOrderDetails",
+        "leaveGroupOrder"
+      ],
+      "verified": true
+    },
+    {
+      "class": "GroupOrderRequestBodyBuilder",
+      "file": "gofood/src/main/java/requestbodybuilders/groupOrder/GroupOrderRequestBodyBuilder.java",
+      "methods_called": [
+        "createGroupOrderRequestBody(3-arg)"
+      ],
+      "verified": true,
+      "note": "3-arg added in pass 1"
+    },
+    {
+      "class": "GroupOrderJoinResponse",
+      "file": "gofood/src/main/java/serviceEndpoints/groupOrder/GroupOrderJoinResponse.java",
+      "methods_called": [
+        "assertGroupOrderJoin"
+      ],
+      "verified": true
+    },
+    {
+      "class": "GoFoodTestBase",
+      "file": "gofood/src/test/java/base/GoFoodTestBase.java",
+      "methods_called": [
+        "groupOrderController",
+        "poolingUtility",
+        "getGroupOrderRequestBodyBuilder"
+      ],
+      "verified": true,
+      "note": "inherited members"
+    }
+  ],
+  "notes": "Pass 3, scoped to SC-GOFOODSGM5-028 only from enriched_automation_plan_nitin.json. One disabled method added to existing JoinGroupOrderTests; zero new classes or endpoint layers."
+}

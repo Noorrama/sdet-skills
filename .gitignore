@@ -5,6 +5,17 @@ __pycache__/
 
 # macOS finder metadata
 .DS_Store
-.env
+
 
 plugins/aep-backend/skills/automation-plan-test-enricher/automation_plan.enriched.json
+
+# Local GBT working clone. Never committed: it is a full checkout of
+# qa/gojek-backend-tests (79 modules), it is its own git repo, and its `origin`
+# may carry a credential. Each machine provides its own; point the skills at it
+# with GBT_REPO_PATH if it does not sit here.
+plugins/aep-backend/.gbt_repo/
+.gbt_repo/
+.gbt_worktrees/
+
+# Personal Claude Code overrides (machine-specific paths, e.g. GBT_REPO_PATH)
+.claude/settings.local.json
