@@ -5,15 +5,16 @@ an automation plan (any feature — rules are schema-generic).
 
 ## Intent vs tool routing
 
-Prompts are **protocol-agnostic intent**. Do not encode ingest type or MCP tool names in the
-string. TapMind matches the ingested operation and selects the tool (`rest.invoke`,
-`grpc.invoke`, redis, db, kafka, …). See `SKILL.md` → **Intent vs tool routing**.
+Prompt style is protocol-specific. REST uses plain intent (§3.1); gRPC uses §3.8 explicit
+prefix; Redis/DB/Kafka use §3.5. See `SKILL.md` → **Intent vs tool routing**.
 
 | Plan signal | Generation action |
 |---|---|
 | REST / HTTP (curl or OpenAPI-backed) | Intent §3.1 / §3.4 — planner routes to `rest.invoke` when op is ingested |
+| `curl_reference` starts with `grpcurl` | §3.8 — resolve `rpc_alias` from `GET /v1/grpc/targets` (host:port match) |
+| Same gRPC method re-check, no new request | §3.4 verify-only starter word |
+| Poll / wait on gRPC state | §3.2 — must repeat full §3.8 fetch, not verify-only |
 | Redis / DB / Kafka | §3.5 prefixes only (TapMind requires them today as tool selectors) |
-| gRPC (or any protocol **not** in planner `tools_catalog`) | Do **not** invent NLP grammar. Flag `NEEDS_REVIEW: no catalogued NLP tool for <protocol>`. Optional: side-path MCP `grpc_invoke` outside `runStep` |
 | Stub / queue / call-log inspect with no tool | `NEEDS_REVIEW` — same honesty rule |
 
 Never rewrite a gRPC step into a fake REST prompt just to make generation succeed.
@@ -22,6 +23,10 @@ Never rewrite a gRPC step into a fake REST prompt just to make generation succee
 
 ```
 automation_plan.json
+        │
+        ▼
+ 0. If any grpcurl steps: GET /v1/grpc/targets → host:port → rpc_alias map
+    (optional: GET /v1/grpc/static-proto/aliases when reflection disabled)
         │
         ▼
  1. Filter scenarios (skip is_dedup / deferred / skip / manual)
@@ -59,18 +64,32 @@ automation_plan.json
 - Step-level curl may still use `$ACCESS_TOKEN` / `{session_id}` — treat as intent only when scenario curl exists.
 - `module` → PDG; `service_name` → `targetServiceId` / `runStep(..., pdg, service)`.
 
+### gRPC alias resolution
+
+Before generating §3.8 prompts:
+
+1. `GET http://<control-plane>/v1/grpc/targets` — list registered aliases with host/port/tls/reflection.
+2. Parse grpcurl host and port from `curl_reference`.
+3. Match to alias (exact host+port; respect `-plaintext` → tls false).
+4. Optional override: first line `# alias: gami-orbit-grpc` in `curl_reference`.
+5. If no match → flag `NEEDS_REVIEW: no rpc_alias for <host>:<port>` — do not guess.
+6. If targets API unreachable → flag `NEEDS_REVIEW: grpc targets registry unavailable`.
+
+When `reflection_enabled: false` on the matched target, schema discovery uses
+`GET /v1/grpc/static-proto/aliases` (compiled proto set for that alias).
+
 ### Step classifier
 
 | Signal | Form |
 |---|---|
-| Non-empty curl (or clear HTTP action) | §3.1 `<action> \| verify: <expected>` |
+| `curl_reference` starts with `grpcurl` | §3.8 `call mcp grpc grpc.invoke for rpc_alias: …` |
+| Non-empty HTTP curl (or clear HTTP action) | §3.1 `<action> \| verify: <expected>` |
 | Action mentions redis | §3.5 `Run redis …` |
 | Action mentions kafka produce/consume | §3.5 kafka prefix |
 | Action is DB row/table/query read | §3.5 `Run query … on DB '…'` |
-| Same resource re-check, no new curl, prior step was HTTP fetch of it | §3.4 verify-only starter word |
-| Wait / poll / drain queue (e2e/reliability) | §3.2 polling overload; must include fetch |
+| Same resource re-check, no new curl/request, prior step was HTTP or gRPC fetch | §3.4 verify-only starter word |
+| Wait / poll / drain queue (e2e/reliability) | §3.2 polling overload; must include fetch (§3.1 or §3.8) |
 | Stub call-log / job-queue inspect with no tool grammar | Do not emit runnable prompt; `NEEDS_REVIEW` |
-| gRPC / protocol not in planner catalog | Intent optional for humans; **no** invented `Run grpc …`; `NEEDS_REVIEW` (or direct MCP outside NLP) |
 
 ### Memory
 

@@ -6,7 +6,8 @@ description: >-
   automation_plan scenarios into suite-ready Java tests with @Test /
   @TestInfo. Use when the user is writing/debugging a TapMind prompt,
   mentions TapMind / runStep / assertStep / bind_select / "entry where" /
-  verify-only steps, OR when given automation_plan.json (or sdet_plan
+  verify-only steps / grpc / grpcurl / grpc.invoke / rpc_alias, OR when given
+  automation_plan.json (or sdet_plan
   step_descriptions) to generate prompts, batch-verify them, run steps
   via MCP, and emit corrected suite test methods. This is the actual
   TapMind SDK grammar — not the Allure `@Step("Given/When/Then ...")`
@@ -28,7 +29,7 @@ real TapMind control-plane SDK, and for **generating suite-ready tests** from
 
 | Mode | When | Output |
 |---|---|---|
-| **Reference** | Hand-writing / debugging one prompt | Corrected prompt string(s) using §§0–10 |
+| **Reference** | Hand-writing / debugging one prompt | Corrected prompt string(s) using §§0–10 (rewrite grpcurl → §3.8) |
 | **Generate** | Given `automation_plan.json` (preferred) or `sdet_plan` steps | Ordered `prompts[]` per `scenario_id` |
 | **Verify + run** | After generate, using backend MCP TapMind tools | Corrected `prompts[]` + per-step verdicts |
 | **Suite convert** | After prompts are verified (and optionally run) | Java method with `@Test` / `@TestInfo` + `runStep`/`assertStep` lines |
@@ -37,39 +38,32 @@ Pipeline detail: `GENERATION.md` in this skill folder. Grammar for each prompt t
 
 ---
 
-## Intent vs tool routing (protocol-agnostic NLP)
+## Intent vs tool routing (by protocol)
 
-NLP prompts describe **what should happen**, not how the API was ingested or which MCP/tool
-runs it. Tool selection is TapMind’s job.
+Prompt style depends on protocol. REST uses plain-English intent; gRPC, Redis, DB, and Kafka
+use explicit tool-selector prefixes TapMind already routes.
 
 ```
-plain-English intent
-        │
-        ▼
-  match ingested operation (any protocol in the knowledge store)
-        │
-        ▼
-  planner picks tool from catalog → rest.invoke | grpc.invoke | redis | db | kafka | …
-        │
-        ▼
-  execute via MCP / invoker
+REST:  plain-English intent → match ingested op → rest.invoke
+gRPC:  §3.8 prefix → grpc.invoke (rpc_alias from GET /v1/grpc/targets)
+Infra: §3.5 prefix → redis | db | kafka
 ```
 
-| Do | Don't |
-|---|---|
-| Write intent from `action` + `expected_result` | Mention ingest type in the prompt ("OpenAPI…", "curl-ingested…") |
-| Assume the planner/MCP picks the tool once the op is ingested | Hardcode MCP tool names (`rest.invoke`, `grpc_invoke`, …) inside the NLP string |
-| Flag `NEEDS_REVIEW` when no catalogued tool can realize the intent | Invent protocol grammar the planner cannot route (e.g. fake `Run grpc …` while `grpc.invoke` is not in `tools_catalog`) |
-| Use §3.5 prefixes (`Run redis` / `Run query` / kafka) **only** where TapMind already requires them as tool selectors | Treat those prefixes as the long-term pattern for every protocol |
+| Protocol | Prompt style | Don't |
+|---|---|---|
+| REST / HTTP | §3.1 intent from `action` + `expected_result` | Mention ingest type ("OpenAPI…", "curl-ingested…") |
+| gRPC | §3.8 `call mcp grpc grpc.invoke for rpc_alias: …` | Paste raw grpcurl dumps; guess `rpc_alias` from hostname |
+| Redis / DB / Kafka | §3.5 exact prefix | Use §3.5 pattern for REST |
+| Unknown / no registry entry | Flag `NEEDS_REVIEW` | Invent REST intent for a gRPC step |
 
-**Current control-plane gap:** `grpc.invoke` is an executor stub and is **not** in the planner
-`tools_catalog` — NLP cannot yet route to gRPC. For gRPC plan steps: emit intent if useful for
-humans, but mark `NEEDS_REVIEW: no catalogued NLP tool for gRPC` (or run MCP `grpc_invoke`
-**outside** `runStep`, not as pretend NLP). Same honesty for any future protocol until it is
-ingested + catalogued.
+**gRPC `rpc_alias`:** resolve before generating §3.8 prompts — `GET /v1/grpc/targets` (Swagger:
+gRPC Targets), match grpcurl `host:port` to a registered alias. Optional override: `# alias:
+<name>` as the first line of `curl_reference`. When `reflection_enabled: false`, schema comes
+from `GET /v1/grpc/static-proto/aliases` (Swagger: gRPC Static Proto). If lookup fails →
+`NEEDS_REVIEW: no rpc_alias for <host>:<port>` — do not guess.
 
-Ingest (OpenAPI / curl / proto / …) only **registers** operations. It must not change prompt
-wording.
+Ingest (OpenAPI / curl / proto / …) registers operations for REST matching. gRPC uses the
+targets + static-proto registries, not plain intent.
 
 ---
 
@@ -85,6 +79,7 @@ Per `automation_scenarios[]` entry, read:
 | Class / method | `package`, `test_class`, `method_name`, `test_layer` |
 | Pinning | `module` (PDG), `service_name` |
 | API | `endpoint`, scenario-level `curl_reference` (prefer over step curl — FIX-scoped) |
+| gRPC alias | `GET /v1/grpc/targets` — match grpcurl host:port; or `# alias:` in curl |
 | Steps | `step_descriptions[]` → `step`, `action`, `expected_result`, optional `curl_reference` |
 | Fixtures | `test_data[].fixture_id`, `required_state`, later `response_fields_used` |
 | Modifiers | `tags[]`, `execution_hints`, `is_dedup` |
@@ -98,12 +93,15 @@ If suite meta is missing, leave `@TestInfo` fields as empty strings / empty arra
 
 For each scenario, emit an ordered `prompts[]` (one string per step) using the grammar in §§2–10:
 
+0. If any step has a grpcurl `curl_reference`, fetch `GET /v1/grpc/targets` once (per batch) and
+   build a host:port → alias map before classifying steps.
 1. Prefer scenario-level `curl_reference` + `test_data` for placeholders (`{{FIX-xxx.field}}` → natural **`saved <field>`** after fixture / `saveMemory` bind — see §4).
 2. Classify each step (generic — not domain-specific):
-   - non-empty curl → §3.1 API action `| verify: …`
+   - `curl_reference` starts with `grpcurl` → §3.8 gRPC invoke
+   - non-empty HTTP curl → §3.1 API action `| verify: …`
    - Redis/Kafka/DB verbs + no curl → §3.5
-   - re-check same HTTP resource, no new curl → §3.4 verify-only
-   - wait/poll or e2e+reliability wait → §3.2 (must include fetch)
+   - re-check same resource (HTTP or gRPC), no new curl/request → §3.4 verify-only
+   - wait/poll or e2e+reliability wait → §3.2 (must include fetch — §3.1 action or full §3.8)
    - stub/queue/log inspect with no TapMind grammar → omit from runnable prompts; flag `NEEDS_REVIEW`
 3. First-touch vs repeat-touch by resource + step order (§3.4).
 4. Track memory keys across the list — never invent a name not saved earlier. Reference bound keys as **`saved <key>`**, not `${memory.<key>}` (§4).
@@ -309,13 +307,13 @@ When every test in the class uses TapMind, a shared base class with that `@Befor
 |---|---|
 | Single HTTP GET/POST with JSON envelope checks | Multi-step flows needing cross-step `save … as` memory (e.g. widget → progress → claim) |
 | Strategy / auth / 404-style negative GETs | Numeric delta asserts (progress increased by N seconds) |
-| Ingested curl/OpenAPI under your PDG | gRPC/proto until ingested + catalogued (see **Intent vs tool routing** above) |
+| Ingested curl/OpenAPI under your PDG | gRPC unary calls via §3.8 (resolve `rpc_alias` from `/v1/grpc/targets` first) |
 
 ### 1.3 `@TapmindAutoMode` (BrowserStack-driven)
 
 `@TapmindAutoMode` fetches **BrowserStack Steps** and runs each as `TapMind.runStep(step)` — not the
-`AI Prompt` column. Steps must be plain NLP sentences (not grpcurl dumps, JavaDoc, or
-`TapMind.runStep("…")` wrappers). Requires `@TestInfo` + `BROWSERSTACK_API_KEY`.
+`AI Prompt` column. Steps must be plain NLP sentences (§3.8 for gRPC — not raw grpcurl dumps),
+JavaDoc, or `TapMind.runStep("…")` wrappers). Requires `@TestInfo` + `BROWSERSTACK_API_KEY`.
 
 ### 1.4 Verify-prompt API shape (control plane)
 
@@ -343,6 +341,7 @@ REST body for `POST /v1/runs/verifyPrompt` (MCP `tapmind_verify_prompt` wraps on
 | 5 | Direct DB / Redis / Kafka call | `run query ...` / `run redis ...` / `produce to kafka ...` / `consume from kafka ...` | `runStep("Run redis GET 'driver:active_session:123'");` |
 | 6 | Pin to a specific PDG / service | `runStep(prompt, pdg)` / `runStep(prompt, pdg, targetServiceId)` | `runStep("Get driver details", "transport-pdg", "driver-service");` |
 | 7 | Assert with a custom failure message | `assertStep(prompt, failureMessage)` | `assertStep("Verify status is 200", "Order creation failed!");` |
+| 8 | gRPC unary invoke | `call mcp grpc grpc.invoke for rpc_alias: … service: … Method: … request: …` | See §3.8 |
 
 ---
 
@@ -464,6 +463,64 @@ runStep("Run redis GET 'driver:active_session:957378666'");
 runStep("Produce to kafka topic 'driver-location-events' with key saved driverId and payload '{\"lat\": -6.2, \"long\": 106.8}'");
 runStep("Consume from kafka topic 'order-status-events' where order_id equals saved orderNumber");
 ```
+
+### 3.8 gRPC invoke (`grpc.invoke`)
+
+gRPC steps use an explicit MCP tool prefix (like §3.5 for Redis/Kafka). Resolve `rpc_alias`
+from `GET /v1/grpc/targets` by matching the grpcurl host and port before writing the prompt.
+
+**Template:**
+
+```
+call mcp grpc grpc.invoke for rpc_alias: <alias> service: <fq.service> Method: <Method> request: <json> [| verify: <checks>]
+```
+
+**grpcurl → prompt parsing:**
+
+| grpcurl part | Prompt field |
+|---|---|
+| `-d '{…}'` or `-d @file` body | `request:` JSON object |
+| Last arg `pkg.Service/Method` | `service:` + `Method:` |
+| Host before service arg (`host:port`) | Lookup → `rpc_alias:` via `/v1/grpc/targets` |
+| `# alias: name` first line in curl_reference | Use as `rpc_alias` (skip host lookup) |
+| `-H 'key: value'` metadata | Fold into request or omit unless required |
+
+**Example** — input grpcurl:
+
+```bash
+grpcurl -plaintext -d '{"user_id":"8427051","group_id":"1","task_ids":["2","4"]}' \
+  grpc-gami-orbit-cgk.service.q.gojek.com:80 orbit.v1.RewardService/InitTaskProgress
+```
+
+Registered target `gami-orbit-grpc` → host `grpc-gami-orbit-cgk.service.q.gojek.com`, port `80`:
+
+```java
+runStep("call mcp grpc grpc.invoke for rpc_alias: gami-orbit-grpc service: orbit.v1.RewardService "
+    + "Method: InitTaskProgress request: {\"user_id\":\"8427051\",\"group_id\":\"1\",\"task_ids\":[\"2\",\"4\"]} "
+    + "| verify: status is OK");
+```
+
+With save (same rules as HTTP §3.1 / §3.3):
+
+```java
+runStep("call mcp grpc grpc.invoke for rpc_alias: gami-orbit-grpc service: orbit.v1.RewardService "
+    + "Method: InitTaskProgress request: {\"user_id\":\"saved userId\",\"group_id\":\"1\",\"task_ids\":[\"2\",\"4\"]} "
+    + "and save $.progress_id as progressId");
+```
+
+**After the invoke clause, HTTP rules apply unchanged:**
+
+| Concern | gRPC behavior |
+|---|---|
+| Re-check same response | §3.4 verify-only (`Verify $.field is …`) |
+| Poll until state changes | §3.2 — repeat full §3.8 fetch, not verify-only |
+| Scalar save | `save $.path as name` in action clause |
+| Array save | `entry where field equals value as name` (§3.3) |
+| Later request fields | `saved key` in request JSON (§4) |
+| Secrets | `saveMemory` first; never inline in request (§7) |
+
+**Reference / correction mode:** rewrite raw grpcurl dumps, JavaDoc, or `TapMind.runStep("grpcurl …")`
+wrappers into §3.8 format. Resolve `rpc_alias` via targets registry before emitting the fix.
 
 ### 3.6 Pin a step to a specific PDG / service
 
@@ -654,3 +711,5 @@ Two independent mechanisms — know which one applies to your API:
 | Loading strict assertions onto a shared setup step (e.g. a "create booking" step other scenarios also reuse as a precondition) | Keep setup steps assertion-free (or a bare `status is 200`); put the detailed checks in the dedicated verify-only step for that specific scenario | Over-asserting a shared step breaks reuse by other scenarios (e.g. negative tests) that need that same step's evidence to look different. |
 | `data.whatsapp_templates.provider is X` (dotted path into a list) | `whatsapp_templates contains an entry with provider X` | Same "entry" rule as above — a scalar dotted path can't reach into a list. |
 | One generic field name (e.g. "template_name = X") when the schema actually needs the value on several nested/cross-referenced fields | Name each real field path explicitly: `arrayA[0].key = X, arrayB[1].key = X, ...` | A generic/wrapper field name only overrides an exact key match — nested or cross-referenced fields with different key names silently keep spec-example defaults instead of erroring. See §8.1. |
+| Raw grpcurl command as the prompt | §3.8 `call mcp grpc grpc.invoke for rpc_alias: …` | Planner expects structured gRPC grammar, not a shell grpcurl line. |
+| Guessing `rpc_alias` from hostname substring | Lookup `GET /v1/grpc/targets` by host:port | Unregistered alias fails at invoke time. |

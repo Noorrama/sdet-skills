@@ -19,8 +19,12 @@ run → suite Java with `@Test` / `@TestInfo`.
 | Action text | `automation_scenarios[].step_descriptions[].action` | §3.1 action |
 | Expected result | `…step_descriptions[].expected_result` | §3.1 verify / §3.4 |
 | Step order | `…step_descriptions[].step` | first-touch vs verify-only |
-| Step curl (optional) | `…step_descriptions[].curl_reference` | intent hint |
-| Scenario curl (preferred) | `automation_scenarios[].curl_reference` | FIX-scoped API shape |
+| Step curl (optional) | `…step_descriptions[].curl_reference` | intent hint; grpcurl → §3.8 |
+| Scenario curl (preferred) | `automation_scenarios[].curl_reference` | FIX-scoped API shape or grpcurl |
+| gRPC rpc_alias | `GET /v1/grpc/targets` (host:port match) or `# alias:` in curl | §3.8 `rpc_alias:` |
+| gRPC service / method | grpcurl last arg `Service/Method` | §3.8 `service:` / `Method:` |
+| gRPC request body | grpcurl `-d` JSON | §3.8 `request:` |
+| Static proto (no reflection) | `GET /v1/grpc/static-proto/aliases` | invoke-time schema for alias |
 | Endpoint | `…endpoint` | ingest / pin |
 | PDG / service | `…module` / `…service_name` | §3.6 + MCP `productGroup` / `targetServiceId` |
 | Class / method | `…package` / `…test_class` / `…method_name` | suite convert |
@@ -48,9 +52,12 @@ Never invent BrowserStack/TestRail IDs. Empty owner → `owner = ""`.
 
 | Phase | Tool | Shape |
 |---|---|---|
+| gRPC alias lookup | Control plane `GET /v1/grpc/targets` | host:port → alias before §3.8 generate |
+| gRPC static proto | Control plane `GET /v1/grpc/static-proto/aliases` | when target has reflection disabled |
 | Verify | `tapmind_verify_prompt` | **one** `prompt` string per call, looped in list order (backend `/v1/runs/verifyPrompt` supports a `prompts[]` batch; exposed tool doesn't yet) |
 | Execute | `tapmind_run_nlp_command` | **one** command per call; reuse `conversationId` |
-| Ingest | `tapmind_ingest_curl` | when verify finds no matching API |
+| Execute (gRPC direct) | `grpc_invoke` | same fields as §3.8 (`rpcAlias`, `service`, `method`, `request`) — used by planner behind §3.8 NLP |
+| Ingest | `tapmind_ingest_curl` | when verify finds no matching REST API |
 | Side-check | `postgres_query` / `redis_get` / `invoke` | infra expected_results |
 
 ## Schema / ownership notes
