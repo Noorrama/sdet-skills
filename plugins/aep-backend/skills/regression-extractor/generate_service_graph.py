@@ -10,13 +10,21 @@ Supports two architecture patterns (auto-detected per module):
 
 Works for any module — all paths are auto-discovered at runtime.
 
+The BrowserStack project is auto-resolved from the module name
+(see MODULE_BS_PROJECTS); -bp overrides it, -nb skips BrowserStack.
+
+Omitting --module processes every module in settings.gradle, writing one
+<module>_regression.json per module (one BrowserStack fetch per distinct project).
+
 Usage:
-    python3 generate_service_graph.py --module driver-platform
-    python3 generate_service_graph.py --module driver-platform -bp PR-166
-    python3 generate_service_graph.py --module gopay
+    python3 generate_service_graph.py                             # all modules
+    python3 generate_service_graph.py --module gopay              # → PR-166
+    python3 generate_service_graph.py --module driver-platform    # → PR-143
+    python3 generate_service_graph.py --module gopay -bp PR-999   # override
+    python3 generate_service_graph.py --module gopay -nb          # offline
     python3 generate_service_graph.py --module care-platform -b testcases_PR-100.json
 
-Output: <module>_service_graph.json (in this script's directory)
+Output: <module>_regression.json (in this script's directory)
 """
 
 import base64
@@ -33,6 +41,45 @@ from collections import defaultdict
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ---------------------------------------------------------------------------
+# Module → BrowserStack project mapping
+# ---------------------------------------------------------------------------
+# Keyed by the Gradle module directory name (as in settings.gradle), so
+# `-m <module>` alone resolves the BrowserStack project. Override with -bp.
+# Note: several modules deliberately share a project (payments domain on PR-166,
+# and PR-143 across driver-platform / marketplace / pricing).
+
+MODULE_BS_PROJECTS = {
+    "care-platform": "PR-196",
+    "cartography": "PR-149",
+    "customer-platforms": "PR-140",
+    "data-platform": "PR-152",
+    "driver-platform": "PR-143",
+    "ep-web-platform": "PR-181",
+    "go-logistics": "PR-141",
+    "gofood": "PR-125",
+    "gomart": "PR-124",
+    "gopay": "PR-166",
+    "gopay-merchant": "PR-168",
+    "gopaylater": "PR-178",
+    "gtl": "PR-155",
+    "helpcenter": "PR-119",
+    "icp": "PR-129",
+    "iris": "PR-166",
+    "marketplace": "PR-143",
+    "merchant-platform": "PR-134",
+    "merchantlending": "PR-162",
+    "midtrans-core-api": "PR-137",
+    "midtrans-enterprise": "PR-294",
+    "payment-core": "PR-166",
+    "pricing": "PR-143",
+    "ticket-arbitration": "PR-120",
+    "transport": "PR-177",
+    "vehicle-financing": "PR-193",
+}
+
+
+
+# ---------------------------------------------------------------------------
 # Repo root detection
 # ---------------------------------------------------------------------------
 
@@ -47,9 +94,65 @@ def find_repo_root():
 
 REPO_ROOT = find_repo_root()
 
+
+def normalize_module_name(name):
+    """Normalize a module argument to its Gradle directory name.
+
+    Accepts the shapes people actually type — GOPAY, gopay, DRIVER_PLATFORM,
+    driver_platform — and resolves them to the on-disk module directory.
+    """
+    if not name:
+        return name
+    candidate = name.strip().lower()
+    if os.path.isdir(os.path.join(REPO_ROOT, candidate)):
+        return candidate
+    dashed = candidate.replace("_", "-")
+    if os.path.isdir(os.path.join(REPO_ROOT, dashed)):
+        return dashed
+    # Modules whose directory drops the separator entirely (helpcenter, merchantlending)
+    squashed = candidate.replace("_", "").replace("-", "")
+    if os.path.isdir(os.path.join(REPO_ROOT, squashed)):
+        return squashed
+    if dashed in MODULE_BS_PROJECTS:
+        return dashed
+    return candidate
+
+
+def resolve_bs_project(module_name):
+    """Look up the BrowserStack project for a module, or None if unmapped."""
+    return MODULE_BS_PROJECTS.get(module_name)
+
+
+def discover_all_modules():
+    """List every Gradle module from settings.gradle whose directory exists.
+
+    Used when --module is omitted. Falls back to the BrowserStack mapping keys
+    if settings.gradle can't be read.
+    """
+    settings = os.path.join(REPO_ROOT, "settings.gradle")
+    modules = []
+    if os.path.isfile(settings):
+        with open(settings, encoding="utf-8", errors="ignore") as f:
+            for m in re.finditer(r"^\s*include\s+['\"]([^'\"]+)['\"]", f.read(), re.M):
+                name = m.group(1).lstrip(":").strip()
+                if name and name not in modules:
+                    modules.append(name)
+    if not modules:
+        modules = sorted(MODULE_BS_PROJECTS)
+    return [m for m in modules if os.path.isdir(os.path.join(REPO_ROOT, m))]
+
 # ---------------------------------------------------------------------------
 # Dynamic directory discovery
 # ---------------------------------------------------------------------------
+
+# Architectural directory names, matched case-insensitively. Modules spell these
+# inconsistently — controller/controllers/Controller, and gomart's "controlers"
+# typo — so each category carries every spelling that occurs in this repo.
+CONTROLLER_DIR_NAMES = {"controller", "controllers", "controlers"}
+HELPER_DIR_NAMES = {"helper", "helpers"}
+CLIENT_DIR_NAMES = {"client", "clients"}
+CLIENTWRAPPER_DIR_NAMES = {"clientwrapper", "clientwrappers"}
+
 
 def discover_dirs(module_name):
     """Discover all relevant Java directories for a given module."""
@@ -74,8 +177,7 @@ def discover_dirs(module_name):
         "helper_dirs": [],
         "client_dirs": [],
         "clientwrapper_dirs": [],
-        "entities_dirs": [],
-        "apis_dirs": [],
+        "endpoint_dirs": [],
         "test_dirs": [],
     }
 
@@ -100,19 +202,20 @@ def discover_dirs(module_name):
 
     # Find all architectural directories at any nesting depth
     for root, subdirs, _ in os.walk(main_java):
-        basename = os.path.basename(root)
-        if basename == "controller":
+        basename = os.path.basename(root).lower()
+        if basename in CONTROLLER_DIR_NAMES:
             dirs["controller_dirs"].append(root)
-        elif basename == "helpers":
+        elif basename in HELPER_DIR_NAMES:
             dirs["helper_dirs"].append(root)
-        elif basename in ("client", "clients"):
+        elif basename in CLIENT_DIR_NAMES:
             dirs["client_dirs"].append(root)
-        elif basename in ("clientwrappers", "clientWrapper"):
+        elif basename in CLIENTWRAPPER_DIR_NAMES:
             dirs["clientwrapper_dirs"].append(root)
-        elif basename == "entities":
-            dirs["entities_dirs"].append(root)
-        elif basename == "apis":
-            dirs["apis_dirs"].append(root)
+
+    # Endpoints are matched by file name (*Endpoint.java), so scan the whole
+    # module rather than a whitelist of directory names — modules put them in
+    # entities/, apis/, serviceEndpoints/, endpoint/, endpoints/, ...
+    dirs["endpoint_dirs"] = [main_java]
 
     # Test directories: always use test_java root to catch all test patterns
     # (driver-platform uses tests/, gopay uses userJourneyTests/, paymentTooling/, etc.)
@@ -149,8 +252,7 @@ def print_discovery(module_name, dirs, arch):
     print(f"  Helper dirs       : {len(dirs['helper_dirs'])}")
     print(f"  Client dirs       : {len(dirs['client_dirs'])}")
     print(f"  ClientWrapper dirs: {len(dirs['clientwrapper_dirs'])}")
-    print(f"  Entities dirs     : {len(dirs['entities_dirs'])}")
-    print(f"  APIs dirs         : {len(dirs['apis_dirs'])}")
+    print(f"  Endpoint scan     : {'whole src/main/java' if dirs['endpoint_dirs'] else '(none)'}")
     print(f"  Test dirs         : {len(dirs['test_dirs'])}")
 
 
@@ -238,14 +340,18 @@ def read_properties_files(resources_dir):
 # Java source scanners (unified for controllers + helpers)
 # ---------------------------------------------------------------------------
 
-def scan_entry_points(scan_dirs, base_dir, suffix_filter=None):
+def scan_entry_points(scan_dirs, base_dir, name_token=None):
     """Scan entry point classes (controllers or helpers) across directories.
 
     Args:
         scan_dirs: list of directories to scan
         base_dir: module base dir for relative paths
-        suffix_filter: if set, only include classes whose name ends with this
-                       (e.g. "Controller", "Helper"). None = include all.
+        name_token: if set, only include classes whose name *contains* this
+                    token (e.g. "Controller", "Helper"). None = include all.
+                    Substring rather than suffix, so real entry points like
+                    WalkerServiceControllerInternal, CourierControllers and
+                    ThaiKycHelperV2 are kept, while unrelated classes that
+                    share the directory are still filtered out.
 
     Returns {ClassName: {clients: [...], methods: [...], file: str}}
     """
@@ -256,7 +362,7 @@ def scan_entry_points(scan_dirs, base_dir, suffix_filter=None):
                 if not fname.endswith(".java"):
                     continue
                 class_name = fname.replace(".java", "")
-                if suffix_filter and not class_name.endswith(suffix_filter):
+                if name_token and name_token not in class_name:
                     continue
 
                 fpath = os.path.join(root, fname)
@@ -364,13 +470,23 @@ def scan_endpoints(endpoint_dirs, base_dir, properties_internal_class):
                 # Direct URL path string assignments
                 for m in re.finditer(r'String\s+\w*[Uu]rl\w*\s*=\s*[^;]*"(/[^"]+)"', content):
                     url_paths.add(m.group(1))
+                # String.format host+path (gofood-style):
+                #   String.format("%s/gofood/meal-scheduler/v1/orders", SomeProperties.host)
+                for m in re.finditer(r'String\.format\(\s*"%s(/[^"]*)"', content):
+                    if m.group(1) != "/":
+                        url_paths.add(m.group(1))
 
-                # Extract host references from gopay-style endpoints
+                # Extract host references from the endpoint
                 host_ref = None
                 # Pattern: PropertiesReader.getXxxHost() or propertiesReader.getXxxHost()
                 m = re.search(r'(?:\w+\.)*(?:get\w*Host\w*|get\w*BaseUrl\w*)\s*\(', content)
                 if m:
                     host_ref = m.group(0).rstrip("(").strip()
+                else:
+                    # Static field host refs (gofood-style): GoFoodProperties.mealSchedulerHost
+                    m = re.search(r'(\w*Propert(?:ies|y)\.\w*(?:[Hh]ost|[Bb]aseUrl)\w*)', content)
+                    if m:
+                        host_ref = m.group(1)
 
                 endpoints[class_name] = {
                     "urlConstant": url_const,
@@ -580,8 +696,73 @@ def load_env_file():
                     os.environ[key] = value
 
 
+def _iter_step_pairs(raw):
+    """Yield (step, expected_result) pairs from any BrowserStack steps payload shape.
+
+    BrowserStack returns steps in a few shapes depending on the endpoint:
+      - list of {step, result} / {description, expected_result}
+      - dict already keyed by step number
+      - a plain string (single-block / BDD style test case)
+    """
+    if not raw:
+        return
+
+    if isinstance(raw, str):
+        yield raw, None
+        return
+
+    if isinstance(raw, dict):
+        # Some payloads wrap the list, e.g. {"test_case_steps": [...]}
+        for key in ("steps", "test_case_steps", "data"):
+            if isinstance(raw.get(key), (list, dict)):
+                yield from _iter_step_pairs(raw[key])
+                return
+        # A single step object rather than a map of them
+        if "step" in raw or "description" in raw:
+            yield (raw.get("step") or raw.get("description"),
+                   raw.get("expected_result") or raw.get("result"))
+            return
+        for _, value in sorted(raw.items(), key=lambda kv: str(kv[0])):
+            yield from _iter_step_pairs(value)
+        return
+
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, dict):
+                yield (item.get("step") or item.get("description") or item.get("name"),
+                       item.get("expected_result") or item.get("result"))
+            else:
+                yield from _iter_step_pairs(item)
+        return
+
+
+def flatten_steps(raw):
+    """Flatten a BrowserStack steps payload into (steps, expected_result) strings.
+
+    All step text is joined into one string, and all expected results into another.
+    Returns (None, None) when there is nothing usable.
+    """
+    steps = []
+    expected = []
+    for step, exp in _iter_step_pairs(raw):
+        if step and str(step).strip():
+            steps.append(str(step).strip())
+        if exp and str(exp).strip():
+            expected.append(str(exp).strip())
+
+    return ("\n".join(steps) or None, "\n".join(expected) or None)
+
+
+def extract_steps_from_testcase(tc):
+    """Pull (steps, expected_result) out of a raw BrowserStack test case dict."""
+    for key in ("steps", "test_case_steps", "testCaseSteps", "test_steps"):
+        if tc.get(key):
+            return flatten_steps(tc[key])
+    return (None, None)
+
+
 def load_browserstack_lookup(bs_file):
-    """Load BrowserStack test cases JSON and return {numeric_id: {testId, testTitle}}."""
+    """Load BrowserStack test cases JSON → {numeric_id: {testId, testTitle, steps, expectedResult, folderId}}."""
     with open(bs_file) as f:
         data = json.load(f)
 
@@ -591,7 +772,14 @@ def load_browserstack_lookup(bs_file):
         title = tc.get("testTitle", "")
         numeric = bs_id.replace("TC-", "") if bs_id.startswith("TC-") else bs_id
         if numeric:
-            lookup[numeric] = {"testId": bs_id, "testTitle": title}
+            steps, expected = flatten_steps(tc.get("steps"))
+            lookup[numeric] = {
+                "testId": bs_id,
+                "testTitle": title,
+                "steps": steps,
+                "expectedResult": expected or tc.get("expectedResult"),
+                "folderId": tc.get("folderId"),
+            }
     return lookup
 
 
@@ -612,9 +800,8 @@ def build_browserstack_auth_header():
     return None
 
 
-def fetch_browserstack_page(project_id, page, page_size, auth_header, api_host):
-    """Fetch a single page of test cases from BrowserStack API."""
-    url = f"{api_host}/api/v2/projects/{project_id}/test-cases?p={page}&page_size={page_size}"
+def browserstack_get(url, auth_header, label=""):
+    """GET a BrowserStack API URL and return the decoded JSON (or None)."""
     req = urllib.request.Request(url)
     req.add_header("Authorization", auth_header)
     req.add_header("Accept", "application/json")
@@ -626,11 +813,37 @@ def fetch_browserstack_page(project_id, page, page_size, auth_header, api_host):
             return json.loads(body)
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", errors="replace")
-        print(f"  HTTP {e.code} on page {page}: {body[:200]}", file=sys.stderr)
+        print(f"  HTTP {e.code} on {label or url}: {body[:200]}", file=sys.stderr)
         return None
     except urllib.error.URLError as e:
-        print(f"  URL error on page {page}: {e.reason}", file=sys.stderr)
+        print(f"  URL error on {label or url}: {e.reason}", file=sys.stderr)
         return None
+
+
+def fetch_browserstack_page(project_id, page, page_size, auth_header, api_host):
+    """Fetch a single page of test cases from BrowserStack API."""
+    url = f"{api_host}/api/v2/projects/{project_id}/test-cases?p={page}&page_size={page_size}"
+    return browserstack_get(url, auth_header, label=f"page {page}")
+
+
+def fetch_browserstack_testcase_detail(project_id, tc_id, folder_id, auth_header, api_host):
+    """Fetch a single test case detail (used to pull steps the list endpoint omits)."""
+    urls = []
+    if folder_id:
+        urls.append(
+            f"{api_host}/api/v2/projects/{project_id}/folder/{folder_id}/test-cases/{tc_id}"
+        )
+    urls.append(f"{api_host}/api/v2/projects/{project_id}/test-cases/{tc_id}")
+
+    for url in urls:
+        data = browserstack_get(url, auth_header, label=f"test case {tc_id}")
+        if not data:
+            continue
+        payload = data.get("data") if isinstance(data.get("data"), dict) else data
+        tc = payload.get("test_case") or payload.get("testcase") or payload
+        if isinstance(tc, dict):
+            return tc
+    return None
 
 
 def fetch_browserstack_testcases(project_id, page_size=300):
@@ -675,7 +888,14 @@ def fetch_browserstack_testcases(project_id, page_size=300):
         for tc in test_cases:
             identifier = tc.get("identifier") or tc.get("id") or ""
             title = tc.get("title") or tc.get("name") or ""
-            all_test_cases.append({"testId": str(identifier), "testTitle": title})
+            steps, expected = extract_steps_from_testcase(tc)
+            all_test_cases.append({
+                "testId": str(identifier),
+                "testTitle": title,
+                "steps": steps,
+                "expectedResult": expected,
+                "folderId": tc.get("folder_id") or tc.get("folderId"),
+            })
 
         print(f"got {len(test_cases)} (total: {len(all_test_cases)})")
 
@@ -690,11 +910,6 @@ def fetch_browserstack_testcases(project_id, page_size=300):
 
     print(f"  Fetched {len(all_test_cases)} test cases from BrowserStack")
 
-    cache_file = os.path.join(SCRIPT_DIR, f"testcases_{project_id}.json")
-    with open(cache_file, "w", encoding="utf-8") as f:
-        json.dump({"testCases": all_test_cases}, f, indent=4, ensure_ascii=False)
-    print(f"  Cached to {cache_file}")
-
     lookup = {}
     for tc in all_test_cases:
         bs_id = tc["testId"]
@@ -704,31 +919,90 @@ def fetch_browserstack_testcases(project_id, page_size=300):
     return lookup
 
 
+def hydrate_steps(bs_lookup, numeric_ids, project_id):
+    """Fetch steps from the test case detail endpoint for IDs whose steps are missing.
+
+    Only the IDs actually referenced by the graph are fetched, so this stays bounded.
+    """
+    missing = [n for n in sorted(numeric_ids)
+               if n in bs_lookup and not bs_lookup[n].get("steps")]
+    if not missing or not project_id:
+        return 0
+
+    load_env_file()
+    auth_header = build_browserstack_auth_header()
+    if not auth_header:
+        return 0
+    api_host = os.environ.get("BS_API_HOST", "https://test-management.browserstack.com").rstrip("/")
+
+    print(f"  Fetching steps for {len(missing)} referenced test case(s)...")
+    fetched = 0
+    for numeric in missing:
+        entry = bs_lookup[numeric]
+        detail = fetch_browserstack_testcase_detail(
+            project_id, entry.get("testId") or numeric, entry.get("folderId"),
+            auth_header, api_host,
+        )
+        if not detail:
+            continue
+        steps, expected = extract_steps_from_testcase(detail)
+        if steps:
+            entry["steps"] = steps
+            fetched += 1
+        if expected and not entry.get("expectedResult"):
+            entry["expectedResult"] = expected
+        if not entry.get("testTitle"):
+            entry["testTitle"] = detail.get("title") or detail.get("name") or ""
+    print(f"  Got steps for {fetched}/{len(missing)}")
+    return fetched
+
+
 # ---------------------------------------------------------------------------
 # Graph builder
 # ---------------------------------------------------------------------------
 
+def collect_referenced_numeric_ids(graph):
+    """Collect the BrowserStack numeric IDs actually referenced by the graph."""
+    numeric_ids = set()
+    for entry in graph.values():
+        for tc in entry["testCaseIds"]:
+            numeric = normalize_bs_id(tc.get("id"))
+            if numeric:
+                numeric_ids.add(numeric)
+    return numeric_ids
+
+
+def normalize_bs_id(tc_id):
+    """Strip a 'TC-' prefix so annotation IDs line up with the BrowserStack lookup."""
+    if not tc_id:
+        return None
+    return tc_id[3:] if tc_id.startswith("TC-") else tc_id
+
+
 def enrich_with_browserstack(graph, bs_lookup):
-    """Enrich testCaseIds with BrowserStack test case names."""
+    """Fill in name + steps + expected_result on each test case object from BrowserStack.
+
+    Test cases with an ID that BrowserStack doesn't know about — and those with no ID
+    at all (method_name only) — keep those fields as null.
+    """
     total_matched = 0
-    total_numeric = 0
+    total_with_id = 0
 
-    for service_key, entry in graph.items():
-        enriched = []
-        for tc_id in entry["testCaseIds"]:
-            if tc_id.isdigit():
-                total_numeric += 1
-                if tc_id in bs_lookup:
-                    bs = bs_lookup[tc_id]
-                    enriched.append(f"{bs['testId']}: {bs['testTitle']}")
-                    total_matched += 1
-                else:
-                    enriched.append(tc_id)
-            else:
-                enriched.append(tc_id)
-        entry["testCaseIds"] = enriched
+    for entry in graph.values():
+        for tc in entry["testCaseIds"]:
+            numeric = normalize_bs_id(tc.get("id"))
+            if not numeric:
+                continue
+            total_with_id += 1
+            bs = bs_lookup.get(numeric)
+            if not bs:
+                continue
+            tc["name"] = bs.get("testTitle") or None
+            tc["steps"] = bs.get("steps")
+            tc["expected_result"] = bs.get("expectedResult")
+            total_matched += 1
 
-    return total_matched, total_numeric
+    return total_matched, total_with_id
 
 
 def build_service_graph(module_name, dirs, arch):
@@ -769,13 +1043,14 @@ def build_service_graph(module_name, dirs, arch):
 
     if dirs["controller_dirs"]:
         print("Scanning controllers...")
-        controllers = scan_entry_points(dirs["controller_dirs"], base_dir)
+        controllers = scan_entry_points(dirs["controller_dirs"], base_dir,
+                                        name_token="Controller")
         print(f"  Found {len(controllers)} controllers")
         entry_points.update(controllers)
 
     if dirs["helper_dirs"]:
         print("Scanning helpers...")
-        helpers = scan_entry_points(dirs["helper_dirs"], base_dir, suffix_filter="Helper")
+        helpers = scan_entry_points(dirs["helper_dirs"], base_dir, name_token="Helper")
         print(f"  Found {len(helpers)} helpers")
         entry_points.update(helpers)
 
@@ -788,10 +1063,9 @@ def build_service_graph(module_name, dirs, arch):
     clients = scan_clients(all_client_dirs, base_dir)
     print(f"  Found {len(clients)} clients")
 
-    # 6. Scan endpoints (from entities/ and apis/)
-    all_endpoint_dirs = dirs["entities_dirs"] + dirs["apis_dirs"]
+    # 6. Scan endpoints (*Endpoint.java anywhere under src/main/java)
     print("Scanning endpoints...")
-    endpoints = scan_endpoints(all_endpoint_dirs, base_dir, properties_internal_class)
+    endpoints = scan_endpoints(dirs["endpoint_dirs"], base_dir, properties_internal_class)
     print(f"  Found {len(endpoints)} endpoints")
 
     # 7. Scan test bases
@@ -933,25 +1207,38 @@ def build_service_graph(module_name, dirs, arch):
 
         display_key = derive_display_key(ep_name)
 
-        # Collect test case IDs — deduplicated
+        # Collect test cases — one object per (id, method), deduplicated.
+        # name/steps stay null here; they are filled in from BrowserStack later.
         raw_ids = ep_test_ids.get(ep_name, [])
         seen_methods = set()
-        flat_ids = set()
+        seen_keys = set()
+        test_cases = []
         for tid in raw_ids:
-            if tid["method"] in seen_methods:
+            method_name = tid["method"]
+            if method_name in seen_methods:
                 continue
-            seen_methods.add(tid["method"])
-            if tid["testCaseIds"]:
-                flat_ids.update(tid["testCaseIds"])
-            else:
-                flat_ids.add(tid["method"])
+            seen_methods.add(method_name)
+            # No TCID on the annotation → method_name only, everything else null
+            for tc_id in (tid["testCaseIds"] or [None]):
+                key = (tc_id, method_name)
+                if key in seen_keys:
+                    continue
+                seen_keys.add(key)
+                test_cases.append({
+                    "id": tc_id,
+                    "name": None,
+                    "steps": None,
+                    "expected_result": None,
+                    "method_name": method_name,
+                })
+        test_cases.sort(key=lambda tc: (tc["id"] or "", tc["method_name"]))
 
         graph[display_key] = {
             "serviceName": service_name,
             "host": host,
             "features": features,
             "TestGroups": groups,
-            "testCaseIds": sorted(flat_ids),
+            "testCaseIds": test_cases,
             "impacted_service": sorted(impacted),
             "supported_flows": sorted(flows),
         }
@@ -963,77 +1250,11 @@ def build_service_graph(module_name, dirs, arch):
 # Main
 # ---------------------------------------------------------------------------
 
-def main():
-    import argparse as _ap
-
-    parser = _ap.ArgumentParser(
-        description="Generate a service graph for any module."
-    )
-    parser.add_argument(
-        "--module", "-m", required=True,
-        help="Module name (e.g. driver-platform, gopay, care-platform).",
-    )
-    bs_group = parser.add_mutually_exclusive_group()
-    bs_group.add_argument(
-        "--browserstack", "-b",
-        help="Path to a local BrowserStack test cases JSON file.",
-    )
-    bs_group.add_argument(
-        "--browserstack-project", "-bp",
-        help="BrowserStack project ID (e.g. PR-143). Fetches live from the API.",
-    )
-    args = parser.parse_args()
-
-    module_name = args.module
-
-    print("=" * 70)
-    print(f"Generating Service Graph — {module_name}")
-    print("=" * 70)
-
-    # Discover directories
-    print("\nDiscovering module structure...")
-    dirs = discover_dirs(module_name)
-    arch = detect_architecture(dirs)
-    print_discovery(module_name, dirs, arch)
-    print()
-
-    # Build the graph
-    graph = build_service_graph(module_name, dirs, arch)
-
-    # Enrich with BrowserStack
-    bs_lookup = None
-    if args.browserstack_project:
-        project_id = args.browserstack_project
-        cache_file = os.path.join(SCRIPT_DIR, f"testcases_{project_id}.json")
-        if os.path.exists(cache_file):
-            print(f"\nFound cached BrowserStack data: {cache_file}")
-            print("  Using cached file (delete it to force re-fetch from API)")
-            bs_lookup = load_browserstack_lookup(cache_file)
-        else:
-            print(f"\nFetching BrowserStack test cases from API...")
-            bs_lookup = fetch_browserstack_testcases(project_id)
-    elif args.browserstack:
-        bs_file = args.browserstack
-        if not os.path.exists(bs_file):
-            auto_path = os.path.join(SCRIPT_DIR, f"testcases_{bs_file}.json")
-            if os.path.exists(auto_path):
-                bs_file = auto_path
-        if os.path.exists(bs_file):
-            print(f"\nEnriching with BrowserStack data from {bs_file}...")
-            bs_lookup = load_browserstack_lookup(bs_file)
-        else:
-            print(f"\nWARNING: BrowserStack file not found: {bs_file}", file=sys.stderr)
-
-    bs_matched, bs_total = 0, 0
-    if bs_lookup:
-        print(f"  Loaded {len(bs_lookup)} BrowserStack test cases")
-        bs_matched, bs_total = enrich_with_browserstack(graph, bs_lookup)
-        print(f"  Matched {bs_matched}/{bs_total} numeric IDs to BrowserStack names")
-
-    # Dynamic output file name
+def write_outputs(module_name, graph):
+    """Write <module>_regression.json + .csv. Returns (json_path, csv_path)."""
     module_slug = module_name.replace("-", "_")
-    output_json = os.path.join(SCRIPT_DIR, "regression.json")
-    output_csv = os.path.join(SCRIPT_DIR, f"{module_slug}_service_graph.csv")
+    output_json = os.path.join(SCRIPT_DIR, f"{module_slug}_regression.json")
+    output_csv = os.path.join(SCRIPT_DIR, f"{module_slug}_regression.csv")
 
     with open(output_json, "w") as f:
         json.dump(graph, f, indent=2, ensure_ascii=False)
@@ -1050,10 +1271,119 @@ def main():
                 "host": entry["host"],
                 "features": ";".join(entry["features"]),
                 "TestGroups": ";".join(entry["TestGroups"]),
-                "testCaseIds": ";".join(entry["testCaseIds"]),
+                "testCaseIds": ";".join(
+                    tc["id"] or tc["method_name"] for tc in entry["testCaseIds"]
+                ),
                 "impacted_service": ";".join(entry["impacted_service"]),
                 "supported_flows": ";".join(entry["supported_flows"]),
             })
+
+    return output_json, output_csv
+
+
+def get_bs_lookup(bs_project, args, bs_cache):
+    """Resolve the BrowserStack lookup for a project, fetching at most once per project.
+
+    Modules deliberately share projects (PR-166, PR-143), so the cache keeps an
+    all-modules run down to one fetch per distinct project.
+    """
+    if bs_project:
+        if bs_project in bs_cache:
+            print(f"\nReusing BrowserStack test cases for {bs_project} "
+                  f"(already fetched this run)")
+            return bs_cache[bs_project]
+        print(f"\nFetching BrowserStack test cases for {bs_project} from API...")
+        lookup = fetch_browserstack_testcases(bs_project)
+        bs_cache[bs_project] = lookup
+        return lookup
+
+    if args.browserstack:
+        if "__file__" in bs_cache:
+            return bs_cache["__file__"]
+        bs_file = args.browserstack
+        if not os.path.exists(bs_file):
+            auto_path = os.path.join(SCRIPT_DIR, f"testcases_{bs_file}.json")
+            if os.path.exists(auto_path):
+                bs_file = auto_path
+        if os.path.exists(bs_file):
+            print(f"\nEnriching with BrowserStack data from {bs_file}...")
+            lookup = load_browserstack_lookup(bs_file)
+        else:
+            print(f"\nWARNING: BrowserStack file not found: {bs_file}", file=sys.stderr)
+            lookup = None
+        bs_cache["__file__"] = lookup
+        return lookup
+
+    return None
+
+
+def process_module(module_name, args, bs_cache):
+    """Build, enrich and write the graph for one module. Returns a stats dict."""
+
+    # Resolve the BrowserStack project: explicit -bp wins, otherwise the mapping.
+    bs_project = args.browserstack_project
+    if not bs_project and not args.browserstack and not args.no_browserstack:
+        bs_project = resolve_bs_project(module_name)
+
+    print()
+    print("=" * 70)
+    print(f"Generating Service Graph — {module_name}")
+    print("=" * 70)
+    if args.browserstack_project:
+        print(f"  BrowserStack project: {bs_project} (override)")
+    elif bs_project:
+        print(f"  BrowserStack project: {bs_project} (auto-resolved from module)")
+    elif not args.browserstack and not args.no_browserstack:
+        print(f"  BrowserStack project: (no mapping for '{module_name}' — "
+              f"pass -bp <project> to enrich)")
+
+    # Discover directories
+    print("\nDiscovering module structure...")
+    dirs = discover_dirs(module_name)
+    arch = detect_architecture(dirs)
+    print_discovery(module_name, dirs, arch)
+    print()
+
+    # Build the graph
+    graph = build_service_graph(module_name, dirs, arch)
+
+    stats = {
+        "module": module_name,
+        "arch": arch,
+        "bsProject": bs_project,
+        "services": len(graph),
+        "testCases": 0,
+        "withSteps": 0,
+        "bsMatched": 0,
+        "bsTotal": 0,
+        "written": False,
+    }
+
+    if not graph:
+        print(f"\nNo services found in {module_name} — nothing to write.")
+        return stats
+
+    # Enrich with BrowserStack
+    bs_lookup = get_bs_lookup(bs_project, args, bs_cache)
+
+    if bs_lookup:
+        print(f"  Loaded {len(bs_lookup)} BrowserStack test cases")
+        hydrate_steps(bs_lookup, collect_referenced_numeric_ids(graph), bs_project)
+        bs_matched, bs_total = enrich_with_browserstack(graph, bs_lookup)
+        stats["bsMatched"], stats["bsTotal"] = bs_matched, bs_total
+        print(f"  Matched {bs_matched}/{bs_total} test case IDs to BrowserStack")
+
+    output_json, output_csv = write_outputs(module_name, graph)
+    stats["written"] = True
+
+    total_features = sum(len(v['features']) for v in graph.values())
+    total_groups = len(set(g for v in graph.values() for g in v['TestGroups']))
+    services_with_host = sum(1 for v in graph.values() if v['host'])
+    services_with_tests = sum(1 for v in graph.values() if v['TestGroups'])
+    total_test_ids = sum(len(v['testCaseIds']) for v in graph.values())
+    with_steps = sum(1 for v in graph.values() for tc in v['testCaseIds'] if tc['steps'])
+    stats["testCases"] = total_test_ids
+    stats["withSteps"] = with_steps
 
     print()
     print("=" * 70)
@@ -1061,20 +1391,94 @@ def main():
     print(f"  Module: {module_name}")
     print(f"  Architecture: {arch}")
     print(f"  Services: {len(graph)}")
-    total_features = sum(len(v['features']) for v in graph.values())
-    total_groups = len(set(g for v in graph.values() for g in v['TestGroups']))
-    services_with_host = sum(1 for v in graph.values() if v['host'])
-    services_with_tests = sum(1 for v in graph.values() if v['TestGroups'])
-    total_test_ids = sum(len(v['testCaseIds']) for v in graph.values())
     print(f"  Features: {total_features}")
     print(f"  Unique test groups: {total_groups}")
     print(f"  Services with host: {services_with_host}/{len(graph)}")
     print(f"  Services with tests: {services_with_tests}/{len(graph)}")
     print(f"  Test cases: {total_test_ids}")
-    if bs_lookup and bs_total:
-        print(f"  BrowserStack enriched: {bs_matched}/{bs_total}")
+    print(f"  Test cases with steps: {with_steps}/{total_test_ids}")
+    if bs_lookup and stats["bsTotal"]:
+        print(f"  BrowserStack enriched: {stats['bsMatched']}/{stats['bsTotal']}")
     print("=" * 70)
     print(f"CSV written to {output_csv}")
+
+    return stats
+
+
+def print_run_summary(results):
+    """Print the aggregate table for an all-modules (or multi-module) run."""
+    print()
+    print("=" * 78)
+    print("ALL MODULES SUMMARY")
+    print("=" * 78)
+    print(f"{'Module':<24}{'Project':<10}{'Services':>9}{'TestCases':>11}"
+          f"{'Steps':>8}{'BS':>12}")
+    print("-" * 78)
+    for r in results:
+        bs = f"{r['bsMatched']}/{r['bsTotal']}" if r["bsTotal"] else "-"
+        project = r["bsProject"] or "-"
+        note = "" if r["written"] else "  (skipped)"
+        print(f"{r['module']:<24}{project:<10}{r['services']:>9}{r['testCases']:>11}"
+              f"{r['withSteps']:>8}{bs:>12}{note}")
+    print("-" * 78)
+    written = [r for r in results if r["written"]]
+    print(f"Modules processed : {len(results)}  "
+          f"(written: {len(written)}, skipped: {len(results) - len(written)})")
+    print(f"Services          : {sum(r['services'] for r in results)}")
+    print(f"Test cases        : {sum(r['testCases'] for r in results)}")
+    print(f"With steps        : {sum(r['withSteps'] for r in results)}")
+    print("=" * 78)
+
+
+def main():
+    import argparse as _ap
+
+    parser = _ap.ArgumentParser(
+        description="Generate a service graph for one module, or for all "
+                    "modules when --module is omitted."
+    )
+    parser.add_argument(
+        "--module", "-m",
+        help="Module name (e.g. driver-platform, gopay, care-platform). "
+             "Omit to process every module in settings.gradle.",
+    )
+    bs_group = parser.add_mutually_exclusive_group()
+    bs_group.add_argument(
+        "--browserstack", "-b",
+        help="Path to a local BrowserStack test cases JSON file.",
+    )
+    bs_group.add_argument(
+        "--browserstack-project", "-bp",
+        help="BrowserStack project ID (e.g. PR-143). Overrides the module's "
+             "auto-resolved project; without it the project is looked up from "
+             "the module name.",
+    )
+    bs_group.add_argument(
+        "--no-browserstack", "-nb", action="store_true",
+        help="Skip BrowserStack entirely (offline run — names/steps stay null).",
+    )
+    args = parser.parse_args()
+
+    if args.module:
+        modules = [normalize_module_name(args.module)]
+    else:
+        modules = discover_all_modules()
+        print("=" * 70)
+        print(f"No --module given — processing all {len(modules)} modules")
+        print("=" * 70)
+        for m in modules:
+            print(f"  {m:<24} → {resolve_bs_project(m) or '(no BS project)'}")
+        if args.browserstack_project:
+            print(f"\n  NOTE: -bp {args.browserstack_project} overrides the mapping "
+                  f"for every module in this run.")
+
+    bs_cache = {}
+    results = []
+    for module_name in modules:
+        results.append(process_module(module_name, args, bs_cache))
+
+    if len(results) > 1:
+        print_run_summary(results)
 
 
 if __name__ == "__main__":
