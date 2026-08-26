@@ -130,8 +130,7 @@ Failures → reword or insert setup (`change: "inserted"`) → re-verify affecte
 ```java
 @BeforeMethod(alwaysRun = true)
 public void tapMindSetup(Method method) throws Exception {
-    System.setProperty("tapmind.pdg", "<module>"); // or module TapMindTestSupport
-    TapMind.setUp(method);
+    TapMind.setUp(method); // PDG from PDG env (CI); tapmind.pdg property only if env unset
 }
 
 @Test(description = "…", groups = {"…", "TAPMIND"})
@@ -142,8 +141,9 @@ public void <method_name>() throws Exception {
 ```
 
 Do not invent `projectId` / `suiteId` / `testCaseIds`. Do **not** duplicate BS case ids in
-`TapMind.setUp("730447")` when `@TestInfo(testCaseIds=…)` is already present unless traceability
-in TapMind logs is explicitly required (see SKILL.md §1.1).
+`TapMind.setUp("<bs-case-id>")` when `@TestInfo(testCaseIds=…)` is already present unless
+traceability in TapMind logs is explicitly required (see SKILL.md §1.1). Use ids from the target
+suite only — never copy case ids from another module's tests.
 Empty owner → `owner = ""`. Empty ids → `testCaseIds = {}` only if the suite annotation allows; otherwise omit IDs until known.
 
 ### Line kinds

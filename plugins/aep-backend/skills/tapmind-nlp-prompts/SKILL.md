@@ -250,13 +250,27 @@ chatbot, so it only reliably understands the sentence shapes documented here.
 
 ## 1. Minimal setup (once per test class)
 
+**PDG resolution (SDK `resolveAndSetUp`):** `PDG` **environment variable first**, then
+`tapmind.pdg` system property as fallback. CI and Gradle test tasks should export
+`PDG=<squad>` — do **not** set `System.setProperty("tapmind.pdg", …)` in `@BeforeMethod` when
+`PDG` is already provided (the property is ignored in that case).
+
+| Variable / property | Required | Role |
+|---|---|---|
+| `PDG` env | Yes (or property fallback) | Product group for control-plane routing |
+| `INFRA` env | No | `integration`/`tencent` → integration env; else `qa` |
+| `TAPMIND_CONTROL_PLANE_URL` env / `tapmind.control.plane.url` property | No | Override control-plane host |
+| `TAPMIND_SERVICE_TOKEN` env / `tapmind.service.token` property | No | Service auth token |
+
 ```java
 @BeforeMethod(alwaysRun = true)
 public void beforeMethod(Method method) throws Exception {
-    System.setProperty("tapmind.pdg", "transport"); // your PDG/squad
     TapMind.setUp(method);
 }
 ```
+
+Local IDE only (when `PDG` env is unset): module `TapMindTestSupport.configure()` may set
+`tapmind.pdg` as fallback — prefer exporting `PDG` in the run configuration instead.
 
 Then, inside a `@Test` method, just call:
 
@@ -270,17 +284,19 @@ Both overloads call the same `resolveAndSetUp(testId)` and send `testId` to the 
 `test_session_name` (via `InitiateRequest`). This label is for TapMind run tracing only — it does
 **not** wire BrowserStack execution; `@TestInfo(testCaseIds = …)` handles that separately.
 
-| Overload | Session name example | When to use |
+| Overload | Session name shape | When to use |
 |---|---|---|
-| `TapMind.setUp(method)` | `getDeliveryButtonsHappyPath-a1b2c` | **Default** — use from `@BeforeMethod`; unique per invocation (parallel, retries, dataProvider rows) |
-| `TapMind.setUp(String testId)` | `730447` | Optional — when you explicitly want TapMind logs grep-able by BS case id; avoid duplicating the same id already on `@TestInfo` unless traceability is the goal |
+| `TapMind.setUp(method)` | `<testMethodName>-<random5>` (e.g. `createOrderHappyPath-x7k2m`) | **Default** — use from `@BeforeMethod`; unique per invocation (parallel, retries, dataProvider rows) |
+| `TapMind.setUp(String testId)` | literal `<testId>` you pass (e.g. `"12345678"`) | Optional — when you explicitly want TapMind logs grep-able by a fixed label (often a BrowserStack case id); avoid duplicating the same id already on `@TestInfo` unless traceability is the goal |
+
+Examples above are **placeholders** — use your suite's real `@Test` method names and `@TestInfo`
+`testCaseIds`; do not copy ids or method names from another module's tests.
 
 **Mixed classes** (only some tests use TapMind): scope `@BeforeMethod` to the `TAPMIND` TestNG group:
 
 ```java
 @BeforeMethod(alwaysRun = true, groups = {TestGroups.TAPMIND})
 public void tapMindSetup(Method method) throws Exception {
-    System.setProperty("tapmind.pdg", "<your-pdg>");
     TapMind.setUp(method);
 }
 ```
@@ -310,7 +326,7 @@ REST body for `POST /v1/runs/verifyPrompt` (MCP `tapmind_verify_prompt` wraps on
   "product_group": "<pdg>",
   "target_service_id": "<service_id>",
   "dry_run_llm": false,
-  "prompts": [{ "prompt": "Get delivery buttons with position id 1" }]
+  "prompts": [{ "prompt": "Get order details for order id 12345" }]
 }
 ```
 
