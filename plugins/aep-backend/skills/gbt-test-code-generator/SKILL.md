@@ -51,6 +51,12 @@ flag it, because output quality drops sharply without one.
    - `closest_match_modify` → edit the named method's named assertion only, and touch nothing
      else in it.
    - `no_match` → add a new method, naming it per the module profile.
+   **A `reuse` test-layer path is only valid for the endpoint that class already covers.** If the
+   scenario's endpoint differs in method or path from the one the reused class tests, do not add a
+   method to it — create a new test class in that class's directory, named for your endpoint, and
+   note the override in `anchoring_notes`. One endpoint, one test class is the repo convention;
+   a stale `reuse` verdict does not license breaking it. Use the class you were pointed at as the
+   structural template, and call its controller for setup if you need the resource it creates.
    Emit `"action": "update"` with the complete new file content in the
    `data_provider_new_row`/`closest_match_modify`/`no_match` cases. Never create a sibling
    class, and never add a data-provider row to a method other than the one named. A
@@ -82,6 +88,21 @@ flag it, because output quality drops sharply without one.
     paths resolve through the module's properties/config readers; secrets through its secret
     reader; test values come from `automation_plan.test_data_payloads`. This holds even in a
     comment or an example.
+    - **An environment-dependent test-data id goes in the module's per-environment holder, never
+      in a shared constants class.** Before adding one, look for an `I<Domain>Constants` +
+      `<Domain>Constants{Qa,Int,Uat}` family (or the module's equivalent) in the feature area and
+      add a getter plus an implementation in **every** environment class. Environment-independent
+      values — enum literals, locales, and *deliberately invalid* ids — stay in the shared class.
+      Keep the public constant name clean; if the value isn't provisioned yet, the placeholder and
+      the `// TODO:` go in the per-environment implementation, not in the constant's name. See
+      `backend-automation/references/environment-specific-test-data.md`.
+    - **Extending an existing API means walking the whole request chain.** When a scenario adds a
+      field to an already-automated endpoint, check each of request model, body builder, endpoint,
+      client, controller (its pinned expected status especially), response model, shared assertion
+      helper, and data provider — and record in `notes` what you did to each, including what you
+      left unchanged and why. Adding the field to the DTO alone is the standard half-finished
+      result. See `backend-automation/references/extending-an-existing-api.md` for the chain, the
+      Lombok `@Builder` trap that a third field triggers, and the shared-assert rule.
 11. **Unknowns become `// TODO(agent-pm): <what is missing and why>`** *and* an entry in
     `todos[]`. Guessing silently is the failure; a TODO is correct behaviour.
 12. **Write the files and the manifest.** This skill's deliverable is files on disk, not a
