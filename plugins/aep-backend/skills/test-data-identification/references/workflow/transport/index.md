@@ -4,6 +4,13 @@ Every transport booking needs a **customer to place it** and a **driver to fulfi
 cannot exist as data without both. This bundle documents the exact code path that enforces that
 order, so identification never emits a booking-first / driver-first signal chain.
 
+## Keywords
+
+`RIDE`, `TRANSPORT`, `BOOKING`, `DRIVER_ASSIGN`, `SCHEDULE`, `INSTANT`, order-number prefix `RB-` —
+see [../index.md](../index.md#examples) for where each token is grounded (TDP `BookingConfig` /
+`serviceTypeId` mapping, TestBuddy's `transport_*`/`handle_quick_*` tools, GBT's transport
+regression suite).
+
 ## Required entities, in order
 
 | Step | Entity | Why it must come first |
