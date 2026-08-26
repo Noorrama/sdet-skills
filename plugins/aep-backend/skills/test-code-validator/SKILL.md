@@ -30,6 +30,10 @@ Fast tier — Haiku
 | Import validity | All imports resolvable from tasks_context package paths. Error code constants from correct enum class (code_change_context new_enums). No invented package names. |
 | Compile | `javac` dry-run — capture per-file errors on failure |
 | Coverage completeness | Every `automation_plan.json` method with `is_dedup: false` must have a generated method — flag missing methods |
+| One endpoint per test class | Every method added to an existing test class must target the same HTTP method + path that class already tests. A method whose endpoint differs → **FAIL**, remediation: new test class in the same package, named for that endpoint. Resolve each method's endpoint via the controller/client/endpoint chain it calls, not by name |
+| Environment-specific constants | Any new `public static final String` holding a provisioned entity id (restaurant/merchant/customer/group/offer/voucher/outlet) added to a shared constants class → **FAIL** if that feature area has an `I<Domain>Constants` + `<Domain>Constants{Qa,Int,Uat}` family. Exempt: enum/protocol literals, locale/country/app-version headers, and deliberately-invalid ids. Also **FAIL** a getter added to the interface without an implementation in *every* environment class, and **WARN** on `DUMMY_`/`TODO_` in a public constant name |
+| Request-chain completeness | When a diff adds a field to an existing request DTO, check the rest of the chain. **FAIL** if no body-builder method can set it. **FAIL** if a `*Failure` controller method is called with an expected status different from the one it pins. **WARN** if `@JsonInclude(NON_NULL)` is absent on a DTO that gained an optional field and has pre-existing callers. **WARN** if `@Builder` was moved from the class onto a constructor |
+| Shared assertion mutation | **WARN** when an assertion is added to a `static assert*` helper that has callers outside the files in this change — list every caller so the reviewer can confirm it holds for each |
 
 **Severity mapping:** P0 → `SeverityLevel.CRITICAL`, P1 → `NORMAL`, P2 → `MINOR`
 

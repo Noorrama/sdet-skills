@@ -70,6 +70,26 @@ decompiled annotation contract, the per-module `projectId`/`suiteId`/`owner` tab
 `testCaseIds` placeholder convention, the gopay groups silent-skip trap, and a pre-flight
 checklist. Guessing these produces either a build failure or a test that silently never runs.
 
+**A third invariant: one endpoint, one test class.** A genuinely new endpoint gets its own test
+class — never extra methods on an existing class for a *different* endpoint, however closely
+related. Verified across independent modules with unrelated domains (`driver-platform`
+`tests/rakam/componentTests/`, `customer-platforms` `com/co/services/tests/internal/` and
+`vouchers/bff/getuservouchers/`), each of which is one class per endpoint with no exceptions.
+
+**A fourth: an environment-dependent test-data id never goes in a shared constants class.**
+Provisioned entity ids (merchant, customer, outlet, offer, voucher batch) differ per environment
+and belong in the module's per-environment holder. Putting one beside the enum
+literals in a shared class yields a test that passes on QA and 404s on integration — and reviews
+as fine, because the constant looks like its neighbours.
+
+**Both are covered in detail, with the exact repo evidence and the traps, in:**
+- [`references/extending-an-existing-api.md`](references/extending-an-existing-api.md) — the
+  layer-by-layer chain to walk when an already-automated API gains a field (including the
+  controller pinned-status trap and the Lombok `@Builder` trap), and where a new API's tests go.
+- [`references/environment-specific-test-data.md`](references/environment-specific-test-data.md) —
+  the three live mechanisms for environment-specific data, how to find which one your module uses,
+  and how to add a value that isn't provisioned yet.
+
 ## Do NOT assume — verified counterexamples
 
 Every one of these has been directly disproven somewhere in this repo. Treat them as "check
@@ -106,6 +126,12 @@ Step 5  — Check the "Module routing" table below. If a module-specific skill e
           skill.
 Step 6  — Search for the exact endpoint/path already being tested (see "Search before creating").
           If found, this is a Case-1 "extend existing" task, not a Case-2 "build everything" task.
+Step 6a — Decide the test class, explicitly, before writing any method. SAME path+method as an
+          existing test class → add methods there. DIFFERENT path (or same path, different
+          method) → a NEW test class named for the new endpoint, in the same package as its
+          siblings. A related sibling class in the folder is a structural template and a source
+          of setup calls — not a home for your methods. See
+          references/extending-an-existing-api.md, Part 2.
 Step 7  — Search for similar tests in the same module/feature folder — these are your style
           template, not just inspiration. Match their imports, annotation shape, and assertion
           style exactly.
@@ -114,6 +140,16 @@ Step 8  — Discover the local Client/Endpoint/Controller/DTO architecture for t
           exists — module skills describe the general shape, not every corner.
 Step 9  — Determine whether an existing Endpoint/Client/Controller/DTO can be reused or extended
           rather than duplicated (see "Search before creating" and the reuse-hierarchy idea below).
+Step 9a — If you are adding a FIELD to an already-automated API, walk the whole request-building
+          chain — request model, body builder, endpoint, client, controller (check its pinned
+          expected status), response model, shared assertion helper, data provider — and say in
+          your summary what you did to each, including what you deliberately left unchanged.
+          Stopping at the DTO is the standard failure. See
+          references/extending-an-existing-api.md, Part 1.
+Step 9b — If the change needs an environment-dependent test-data id, find the module's
+          per-environment mechanism BEFORE writing the constant, and search the whole repo for an
+          existing constant or provisioning helper first. See
+          references/environment-specific-test-data.md.
 Step 10 — Implement only what's missing. If Steps 6-9 found a full existing chain, you may only
           need a new `@Test` method.
 Step 11 — Follow the nearest proven sibling file's exact convention (Lombok annotation choice,
@@ -248,6 +284,19 @@ method (Case 1). If you find a near-match that's missing one field/header your c
 it (add the field/header) rather than cloning the whole class. Only build all layers from scratch
 (Case 2) when nothing close exists.
 
+**"Extend it" means every layer that builds the request, not just the DTO.** Adding the field to
+the request model and stopping there is the most common half-finished version of this task: the
+body builder still can't set it, and the controller still asserts the old expected status. Read
+[`references/extending-an-existing-api.md`](references/extending-an-existing-api.md) before doing
+this — it has the chain, the Lombok `@Builder` trap that a third field triggers, and the rule
+about not mutating a shared assertion helper.
+
+Search *outside* the module too before concluding a capability doesn't exist. "No mechanism exists
+to provision X" is a claim that needs a search behind it, and it is frequently wrong — another
+module may have a full framework for exactly that entity. If it's there but in a module yours
+doesn't depend on, that's a build-dependency question for the user, not grounds for asserting the
+capability is absent.
+
 ## Determining validation strategy
 
 - Check what **existing sibling tests for the same endpoint/feature area** actually assert — not
@@ -324,9 +373,27 @@ Before reporting the task done:
    you called into unchanged), what was **extended** (existing class you added a field/method
    to), and what was **newly created**. List every placeholder you left (TestRail ID, error text,
    credentials) and what the user needs to supply.
+3. If you added a field to an existing API, include the **request-chain table**: each of request
+   model / body builder / endpoint / client / controller / response model / assertion helper /
+   data provider, and what you did to it — `extended`, or `unchanged` **with the reason**. An
+   unexplained gap in that table is the review finding this step exists to pre-empt.
+4. State which test class each new method landed in and why — "same endpoint as the existing
+   class" or "new endpoint, new class". If you created a new class, name the sibling you used as
+   its template.
+5. For every environment-dependent id you added, state which per-environment file(s) it went into
+   and which environments still need a real value provisioned.
 
 ## Other resources referenced by this skill (read when relevant, not by default)
 
+- `references/extending-an-existing-api.md` — **read this whenever the cURL targets an endpoint
+  that is already automated, or a new endpoint in a folder that already has test classes.** Part 1
+  is the request-building chain to walk when an existing API gains a field (with the controller
+  pinned-status trap, the Lombok `@Builder` trap, and the shared-assert rule); Part 2 is the
+  one-endpoint-one-test-class convention and how to decide.
+- `references/environment-specific-test-data.md` — **read this before adding any test-data id
+  constant.** The three live mechanisms for environment-specific values, how to detect which one
+  your module uses, the environment-independent exceptions (invalid ids, enum literals), and how
+  to represent a value that isn't provisioned yet.
 - `references/test-annotation-rules.md` — **read this before writing any `@Test` method.** The
   decompiled `@TestInfo` contract, the per-module `projectId`/`suiteId`/`owner` constants table for
   all 32 modules that use it, the 10 modules that must not, `testCaseIds` placeholder convention,

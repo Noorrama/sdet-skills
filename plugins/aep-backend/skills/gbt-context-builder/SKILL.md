@@ -38,6 +38,14 @@ Your output is `gbt_context.json`.
    identity — `{driverId}` and `{id}` are the same. A method difference on the same path is
    a **weaker** match: record `match_quality: "path_only"` and treat it as *not* a reuse
    signal for the test layer.
+   - **The `test` layer reuses only on an exact endpoint match — same method AND same path.**
+     One endpoint, one test class is the repo convention (every module's component-test package
+     is one class per endpoint). A *sibling* class testing a neighbouring endpoint in the same
+     package is **`create_new`, not `reuse`**: emit the sibling's directory, and record the
+     nearest sibling under `exemplars` so codegen has a structural template. Path-prefix
+     similarity (`POST /resources` vs `POST /resources/{id}/action`) is not a match — it is the
+     case this rule exists for. The helper layers (`endpoint`, `client`, `controller`) are
+     unaffected: those legitimately aggregate many endpoints per class.
 6. **Prefer graph matches over text search.** The graph is exact static analysis; a repo
    blob-search is keyword matching that hits comments and unrelated strings. When both
    return a candidate, the graph wins.
