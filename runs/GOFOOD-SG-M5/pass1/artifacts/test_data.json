@@ -1,0 +1,79 @@
+[
+  {
+    "fixture_id": "FIX-GOFOODSG-001",
+    "description": "Restaurant enabled for GoFood group order, max_participants 8",
+    "required_state": {
+      "entity": "MERCHANT",
+      "category": "MERCHANT_GROUP_ORDER_ENABLED",
+      "count": 1,
+      "config": {
+        "group_order_enabled": true,
+        "max_participants": 8
+      }
+    },
+    "used_by_scenarios": [
+      "SC-GOFOODSGM5-001",
+      "SC-GOFOODSGM5-002",
+      "SC-GOFOODSGM5-003"
+    ],
+    "test_data_status": "TDP_NOT_SUPPORTED",
+    "tdp_test_data_category": null,
+    "test_buddy_prompt": null,
+    "tdp_request": null,
+    "identification_notes": "get_supported_category returned no candidates for MERCHANT (domain has no populated TDP bundle). get_supported_operation returned no match either -- no catalog operation enables group-order on a merchant or sets max_participants.",
+    "match_confidence": "medium"
+  },
+  {
+    "fixture_id": "FIX-GOFOODSG-002",
+    "description": "Host customer with a GoPay account who is the ACTIVE OWNER of a GOTO social group with 3 ACTIVE members",
+    "required_state": {
+      "entity": "CUSTOMER",
+      "category": "CUSTOMER_WITH_GOPAY_SOCIAL_GROUP",
+      "count": 1,
+      "config": {
+        "social_group_type": "GOTO",
+        "caller_role": "OWNER",
+        "caller_membership_status": "ACTIVE",
+        "active_member_count": 3
+      }
+    },
+    "used_by_scenarios": [
+      "SC-GOFOODSGM5-001",
+      "SC-GOFOODSGM5-003"
+    ],
+    "test_data_status": "TDP_NOT_SUPPORTED",
+    "tdp_test_data_category": null,
+    "test_buddy_prompt": null,
+    "tdp_request": null,
+    "identification_notes": "get_supported_category proposed CUSTOMER_WITH_SUBSCRIPTION -- rejected, 'SUBSCRIPTION' not corroborated by any signal (top candidates: CUSTOMER_WITH_GO_PAY, VANILLA, CUSTOMER_WITH_GOCORP, ...). The GoPay-account portion alone would be covered by CUSTOMER_WITH_GO_PAY, but no operation exists in the TestBuddy/Pertamax catalog to create a social group, make this customer its owner, or add active members, so the fixture as a whole is unsupported.",
+    "match_confidence": "low"
+  },
+  {
+    "fixture_id": "FIX-GOFOODSG-003",
+    "description": "Host customer with a GoPay account and no saved social group",
+    "required_state": {
+      "entity": "CUSTOMER",
+      "category": "CUSTOMER_WITH_GOPAY_ACCOUNT",
+      "count": 1,
+      "config": {
+        "saved_social_group_count": 0
+      }
+    },
+    "used_by_scenarios": [
+      "SC-GOFOODSGM5-002"
+    ],
+    "test_data_status": "TDP_SUPPORTED",
+    "tdp_test_data_category": "CUSTOMER_WITH_GO_PAY",
+    "test_buddy_prompt": "Create CUSTOMER_WITH_GO_PAY",
+    "tdp_request": {
+      "test_data_domain": "CUSTOMER",
+      "test_data_type_signals": [
+        "GoPay",
+        "No Saved Social Group"
+      ],
+      "description": "Host customer with a GoPay account and no saved social group"
+    },
+    "identification_notes": "CUSTOMER_WITH_GO_PAY corroborated by 'GoPay'. 'No saved social group' is an absence of state -- any freshly pooled account already satisfies it, no operation needed.",
+    "match_confidence": "high"
+  }
+]

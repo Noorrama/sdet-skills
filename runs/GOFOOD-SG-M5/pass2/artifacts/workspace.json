@@ -1,0 +1,29 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 2,
+  "generated_at": "2026-08-23T18:51:07.973624+00:00",
+  "base_repo": "/Users/piyushsharma/agentPM/.gbt_repo",
+  "base_branch": "automate/gofood-social-group-session-gofood-07edc3",
+  "base_sha": "ab6d0281d71889766210a8f2e8e202be47931d7c",
+  "base_may_be_stale": false,
+  "branch": "automate/gofood-social-group-invite-gofood-ffd9c5",
+  "worktree_path": "/Users/piyushsharma/skills/.gbt_worktrees/gofood-social-group-invite-gofood-ffd9c5",
+  "gbt_repo": "/Users/piyushsharma/skills/.gbt_worktrees/gofood-social-group-invite-gofood-ffd9c5",
+  "module": "gofood",
+  "module_root": "gofood",
+  "offline": false,
+  "stacked_on": {
+    "branch": "automate/gofood-social-group-session-gofood-07edc3",
+    "mr": "!21035",
+    "sha": "ab6d0281d71889766210a8f2e8e202be47931d7c",
+    "why": "All 7 pass-2 scenarios need invite_social_group_id on CreateGroupOrderRequestBody, the social_group response block, and the 3-arg builder overload - none of which is on master. MR !21035 is unmerged, so this branch is cut from it and must TARGET it, not master."
+  },
+  "warnings": [
+    "MR target must be automate/gofood-social-group-session-gofood-07edc3, NOT master. Merging this before !21035 would take pass-1's commits along with it.",
+    "origin embeds a user:token credential; fetched via credential-free remote 'gbtfetch'. Rotate it."
+  ],
+  "todos": [
+    "Rebase this branch if !21035 changes in review."
+  ],
+  "notes": "Stacked pass-2 worktree on the pass-1 branch."
+}

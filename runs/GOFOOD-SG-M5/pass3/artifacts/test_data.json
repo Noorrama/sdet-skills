@@ -1,0 +1,85 @@
+[
+  {
+    "fixture_id": "FIX-GOFOODSG-007",
+    "description": "IN_PROGRESS group order session with social_group_details attached, source MANUAL",
+    "required_state": {
+      "entity": "BOOKING",
+      "category": "GROUP_ORDER_SESSION_IN_PROGRESS",
+      "count": 1,
+      "config": {
+        "session_status": "IN_PROGRESS",
+        "social_group_attached": true,
+        "social_group_source": "MANUAL",
+        "participant_count": 3
+      }
+    },
+    "used_by_scenarios": [
+      "SC-GOFOODSGM5-028"
+    ],
+    "test_data_status": "TDP_NOT_SUPPORTED",
+    "tdp_test_data_category": null,
+    "test_data_operations": [],
+    "test_buddy_prompt": null,
+    "tdp_request": null,
+    "identification_notes": "handle_group_order_create + handle_group_order_join would cover the base 'session in progress with 3 participants' state (same as FIX-GOFOODSG-005), but no operation in the catalog exposes a field to attach a social group (source=MANUAL) to the session -- operationInput contracts for handle_group_order_create/join carry no social-group parameter. Per the all-or-nothing rule the whole fixture is unsupported. ALREADY_SATISFIED restaurant half: GroupOrderConstants.GO_RESTO_1 is a group-order-enabled resto with max_participants 8 (assertCreateGroupOrder). Social-group attachment (source=MANUAL) remains TDP_NOT_SUPPORTED \u2014 no catalog op attaches a social group.",
+    "match_confidence": "medium",
+    "already_satisfied_by_partial": "GroupOrderConstants.GO_RESTO_1 (restaurant only)"
+  },
+  {
+    "fixture_id": "FIX-GOFOODSG-002",
+    "description": "Host customer with a GoPay account who is the ACTIVE OWNER of a GOTO social group with 3 ACTIVE members",
+    "required_state": {
+      "entity": "CUSTOMER",
+      "category": "CUSTOMER_WITH_GOPAY_SOCIAL_GROUP",
+      "count": 1,
+      "config": {
+        "social_group_type": "GOTO",
+        "caller_role": "OWNER",
+        "caller_membership_status": "ACTIVE",
+        "active_member_count": 3
+      }
+    },
+    "used_by_scenarios": [
+      "SC-GOFOODSGM5-028"
+    ],
+    "test_data_status": "TDP_NOT_SUPPORTED",
+    "tdp_test_data_category": null,
+    "test_data_operations": [],
+    "test_buddy_prompt": null,
+    "tdp_request": null,
+    "identification_notes": "get_supported_category proposed CUSTOMER_WITH_SUBSCRIPTION -- rejected, 'SUBSCRIPTION' not corroborated by any signal (top candidates: CUSTOMER_WITH_GO_PAY, VANILLA, CUSTOMER_WITH_GOCORP, ...). The GoPay-account portion alone would be covered by CUSTOMER_WITH_GO_PAY, but no operation exists in the TestBuddy/Pertamax catalog to create a social group, make this customer its owner, or add active members, so the fixture as a whole is unsupported.",
+    "match_confidence": "low",
+    "already_satisfied_by_partial": ""
+  },
+  {
+    "fixture_id": "FIX-GOFOODSG-006",
+    "description": "Two customers with GoPay accounts who are session participants but not members of the social group",
+    "required_state": {
+      "entity": "CUSTOMER",
+      "category": "CUSTOMER_WITH_GOPAY_ACCOUNT",
+      "count": 2,
+      "config": {
+        "social_group_member": false
+      }
+    },
+    "used_by_scenarios": [
+      "SC-GOFOODSGM5-028"
+    ],
+    "test_data_status": "TDP_SUPPORTED",
+    "tdp_test_data_category": "CUSTOMER_WITH_GO_PAY",
+    "test_data_operations": [],
+    "test_buddy_prompt": "Create CUSTOMER_WITH_GO_PAY",
+    "tdp_request": {
+      "test_data_domain": "CUSTOMER",
+      "test_data_type_signals": [
+        "GoPay",
+        "Session Participant",
+        "Not a Social Group Member"
+      ],
+      "description": "Two customers with GoPay accounts who are session participants but not members of the social group"
+    },
+    "identification_notes": "CUSTOMER_WITH_GO_PAY corroborated by 'GoPay'. Session participation is established later at the BOOKING fixture (FIX-GOFOODSG-005/007) via handle_group_order_join, not a customer-level operation. 'Not a social group member' is the default absence of state.",
+    "match_confidence": "high",
+    "already_satisfied_by_partial": ""
+  }
+]

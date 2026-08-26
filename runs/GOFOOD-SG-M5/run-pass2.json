@@ -1,0 +1,20 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 2,
+  "review": {
+    "pass": 2,
+    "status": "approved",
+    "reviewer": "piyush.sharma",
+    "at": "2026-08-23T18:48:18.767964+00:00",
+    "approval_source": "Operator instruction in chat: 'read this automation plan and automate only first 10 scenarios and automate them create new branch', followed by an explicit scope choice of SC-004..010 (excluding the three already shipped on MR !21035). The supplied plan carries NO status field - this approval is the operator's chat instruction recorded verbatim, NOT a field on the artifact and NOT self-approval by the orchestrator.",
+    "per_scenario": {
+      "SC-GOFOODSGM5-004": "keep",
+      "SC-GOFOODSGM5-005": "keep",
+      "SC-GOFOODSGM5-006": "keep",
+      "SC-GOFOODSGM5-007": "keep",
+      "SC-GOFOODSGM5-008": "keep",
+      "SC-GOFOODSGM5-009": "keep",
+      "SC-GOFOODSGM5-010": "keep"
+    }
+  }
+}

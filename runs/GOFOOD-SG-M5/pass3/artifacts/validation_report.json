@@ -1,0 +1,20 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 3,
+  "attempt": 1,
+  "generated_at": "2026-08-24T10:09:52.019690+00:00",
+  "passed": true,
+  "blocked": false,
+  "counts": {
+    "error": 0,
+    "warning": 0
+  },
+  "violations": [],
+  "implicated_files": [],
+  "compile": {
+    "passed": true,
+    "command": "./gradlew :gofood:compileTestJava",
+    "attempts": 1,
+    "gradle_user_home": "/Users/piyushsharma/agentPM/.gbt_gradle_home"
+  }
+}
