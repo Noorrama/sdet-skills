@@ -90,7 +90,7 @@ flag it, because output quality drops sharply without one.
     comment or an example.
     - **An environment-dependent test-data id goes in the module's per-environment holder, never
       in a shared constants class.** Before adding one, look for an `I<Domain>Constants` +
-      `<Domain>Constants{Qa,Int,Uat}` family (or the module's equivalent) in the feature area and
+      `<Domain>Constants{QA/PREPROD,Integration/int}` family (or the module's equivalent) in the feature area and
       add a getter plus an implementation in **every** environment class. Environment-independent
       values — enum literals, locales, and *deliberately invalid* ids — stay in the shared class.
       Keep the public constant name clean; if the value isn't provisioned yet, the placeholder and
