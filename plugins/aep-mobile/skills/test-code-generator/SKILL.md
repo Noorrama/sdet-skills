@@ -23,7 +23,6 @@ produced where NLP can't express the case.
   - `scenario_list[].browserstack_case_id` — present on SDET plan scenarios post-SYNC; use directly for `@TestInfo` instead of creating a new BS case when already set.
   - `coverage_categories.auto_selected[]` + `scenario_list[].source` — filter: generate for `source: input_derived` and `source: fe_baseline`; for `source: qa_added` generate only when `automatable: true`.
 - `change_context.json` — **real per-platform locators** (android + ios), API shapes, routes, flags (post-build). **How to interact only.**
-- `task_context.json` *(optional)* — if present, read `epics[].test_hooks[]` as an additional source for the Given hierarchy (see below). A `method: deeplink` / `hook_id` hook here supplements or overrides the SDET plan's `target_entry_deeplink`.
 - `design_context.json` — screens/flows for navigation (when present).
 - **Grounding = the GMT coded repo** (page objects, base classes, existing tests) via retrieval — where the real navigation & element knowledge lives; the TapMind repo alone is too thin to ground on.
 - Test data via the **test-data-provisioner** (resolves each `test_data[]` fixture → handle):
@@ -41,11 +40,10 @@ Generate only where `automatable: true` **and** `is_legacy_regression: false` (n
 scenarios are **updated**, not regenerated (see Dedup). Route by `target_execution_framework`
 (`TAPMIND_NLP` → NLP; `GMT_JAVA` → coded).
 
-## Given strategy (the "Given" — Pillar 4 fallback hierarchy)
-1. **`task_context` test hook** (`method: deeplink` / `hook_id`) — highest priority when `task_context.json` is present; overrides the SDET plan's deeplink when both name the same screen.
-2. **Deep link** from the plan's `preconditions_metadata.target_entry_deeplink` — jump straight to the screen.
-3. **API state injection** (via TDP) *then* deep link — if the screen needs state (items in cart, etc.).
-4. **Reusable nav macro** — if no deep link; search the GMT/TapMind repo for a stable macro.
+## Given strategy (the "Given" — Pillar 3 fallback hierarchy)
+1. **Deep link** from the plan's `preconditions_metadata.target_entry_deeplink` — jump straight to the screen.
+2. **API state injection** (via TDP) *then* deep link — if the screen needs state (items in cart, etc.).
+3. **Reusable nav macro** — if no deep link; search the GMT/TapMind repo for a stable macro.
    Never generate raw home-screen tap-walks. No deep link **and** no macro → defer (see below).
 
 ## Process (per selected scenario)

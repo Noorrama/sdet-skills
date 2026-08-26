@@ -59,7 +59,7 @@
               "backdoor_login": { "type": "string" }
             }
           },
-          "given_strategy": { "type": "string", "enum": ["task_context_hook", "deep_link", "api_injection_then_deeplink", "nav_macro"] },
+          "given_strategy": { "type": "string", "enum": ["deep_link", "api_injection_then_deeplink", "nav_macro"] },
           "deep_link": { "type": "string" },
           "nav_macro_fallback": { "type": "string" },
           "nl_steps": { "type": "array", "items": { "type": "string" }, "description": "runStep(...)/assertStep(...) lines (TapMind NLP)" },
