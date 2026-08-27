@@ -144,6 +144,16 @@ the planner routes to `grpc.invoke` internally.
 On `no tool_call.target` or gRPC routing errors → `GET /v1/grpc/targets` over HTTP; if alias
 missing, flag `NEEDS_REVIEW` (target registration is admin/user action).
 
+On HTTP **`400 invalid_request_body`** (or similar validation errors) after a create/update
+prompt that used indexed body overrides (`array[i].field = …`):
+
+1. Inspect the executed **request body** from the run result / control-plane log.
+2. If the object only contains the fields the prompt named (sparse body), apply **SKILL.md
+   §8.1.1** — name required sibling constants (e.g. `channel`) or switch to whole-object
+   phrasing. Do **not** first assume `saved <key>` failed when values are already substituted.
+3. `tapmind_verify_prompt` PASS is **not** sufficient proof the body is complete; body_defaults
+   merge gaps only appear at execute time.
+
 Failures → reword or insert setup (`change: "inserted"`) → re-verify → continue with same
 `conversationId` when possible. Do not call postgres/redis/ingest MCP tools as workarounds.
 

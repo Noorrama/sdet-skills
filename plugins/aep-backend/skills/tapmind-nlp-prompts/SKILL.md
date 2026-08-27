@@ -29,7 +29,7 @@ real TapMind control-plane SDK, and for **generating suite-ready tests** from
 
 | Mode | When | Output |
 |---|---|---|
-| **Reference** | Hand-writing / debugging one prompt | Corrected prompt string(s) using §§0–10 (rewrite grpcurl → §3.8) |
+| **Reference** | Hand-writing / debugging one prompt | Corrected prompt string(s) using §§0–10 (rewrite grpcurl → §3.8). On `400 invalid_request_body`, apply §8.1.1 sparse-body checklist before blaming memory. |
 | **Generate** | Given `automation_plan.json` (preferred) or `sdet_plan` steps | Ordered `prompts[]` per `scenario_id` |
 | **Verify + run** | After generate, using backend MCP TapMind tools | Corrected `prompts[]` + per-step verdicts |
 | **Suite convert** | After prompts are verified (and optionally run) | Java method with `@Test` / `@TestInfo` + `runStep`/`assertStep` lines |
@@ -706,12 +706,65 @@ Create <resource> with <arrayA>[<idx>].<key> = saved value, <arrayB>[<idx>].<key
 ```
 
 (e.g. for a create-template endpoint where `templates[0].id/en/default` must all match a
-`name` inside `whatsapp_templates[]`, you'd set each of those six paths individually to
-`saved templateName` rather than saying "template_name = ...".)
+`name` inside `whatsapp_templates[]`, set those paths **and** required siblings such as
+`templates[0].channel = whatsapp` — see §8.1.1 — rather than saying only "template_name = ...".)
 
 This indexed-path override isn't a formally documented grammar feature (unlike header/query
 param edits above) — it works because the planner matches literal key names. Always verify
 against the executor log after running; don't assume it took effect.
+
+#### 8.1.1 Sparse body trap (indexed overrides drop required siblings)
+
+Naming only the fields you care about (`templates[0].id = …`, `templates[0].en = …`) can
+make the planner emit a **sparse** array element that contains **only those keys**. Spec
+`body_defaults` merge is **not guaranteed** — required sibling fields the prompt never named
+(e.g. `channel`, `category`, `language`, `components`) may be omitted entirely.
+
+**How to spot it (Reference / debug mode):**
+
+1. Read the executed **Request Body** (SDK console / control-plane `HttpToolInvoker` log).
+2. If the array object has only the overridden keys — e.g.
+   `templates:[{id,en,default}]` with no `channel`, or
+   `whatsapp_templates:[{name},{name}]` with no `category`/`language`/`components` —
+   this is a sparse-body failure, **not** a memory / auth / routing bug.
+3. Match the API error to the missing key:
+   - `400 missing channel` → `templates[i].channel` absent
+   - `400 invalid default template` → `templates[i].default` absent or points at a name
+     with no matching `whatsapp_templates[].name`
+   - `400` / schema errors on incomplete `whatsapp_templates[]` → only `.name` was set
+
+**Fix (prefer in this order):**
+
+1. **Whole-object phrasing** (keeps body_defaults merge more often):
+   ```
+   templates array having exactly one object with channel = whatsapp
+   and id = saved idTemplateName and en = saved enTemplateName
+   and default = saved defaultTemplateName
+   ```
+2. **If you must use indexed paths**, name **every required field** on that object —
+   including constants, not only `saved …` values:
+   ```
+   templates[0].channel = whatsapp,
+   templates[0].id = saved idTemplateName,
+   templates[0].en = saved enTemplateName,
+   templates[0].default = saved defaultTemplateName,
+   …
+   ```
+3. After a create `400 invalid_request_body`, **do not** blame `saved <key>` first —
+   diff the request body against required schema fields; sparse indexed overrides are the
+   primary suspect.
+
+**WhatsApp create checklist** (notification-gateway `/v1/template-management/create`):
+
+| Must be present | Typical miss when prompt only sets |
+|---|---|
+| `templates[0].channel = whatsapp` | `templates[0].id/en/default = saved …` |
+| `templates[0].default` = a name that exists in `whatsapp_templates[].name` | EN-only create that sets `en` but omits `default` |
+| Each `whatsapp_templates[i]` has `name` (+ defaults for category/language/components) | `whatsapp_templates[i].name = saved …` only → skeleton `{name}` rows |
+
+`tapmind_verify_prompt` alone often **cannot** catch this — it checks planner shape, not
+whether body_defaults will merge at execute time. Always inspect the live request body after
+`tapmind_run_nlp_command` / a real run when create returns `invalid_request_body`.
 
 ---
 
@@ -747,5 +800,8 @@ Two independent mechanisms — know which one applies to your API:
 | Loading strict assertions onto a shared setup step (e.g. a "create booking" step other scenarios also reuse as a precondition) | Keep setup steps assertion-free (or a bare `status is 200`); put the detailed checks in the dedicated verify-only step for that specific scenario | Over-asserting a shared step breaks reuse by other scenarios (e.g. negative tests) that need that same step's evidence to look different. |
 | `data.whatsapp_templates.provider is X` (dotted path into a list) | `whatsapp_templates contains an entry with provider X` | Same "entry" rule as above — a scalar dotted path can't reach into a list. |
 | One generic field name (e.g. "template_name = X") when the schema actually needs the value on several nested/cross-referenced fields | Name each real field path explicitly: `arrayA[0].key = X, arrayB[1].key = X, ...` | A generic/wrapper field name only overrides an exact key match — nested or cross-referenced fields with different key names silently keep spec-example defaults instead of erroring. See §8.1. |
+| `templates[0].id/en/default = saved …` without `templates[0].channel = whatsapp` (or equivalent required siblings) | Whole-object phrasing **or** name every required field including constants — see §8.1.1 | Indexed overrides can emit a **sparse** object; body_defaults may not fill `channel` / category / components → API `400 missing channel` (or similar). |
+| Blaming `saved <key>` / memory when create returns `invalid_request_body` | Diff request body vs required schema fields first (§8.1.1) | Memory substitution often worked; the body is simply missing required keys the prompt never named. |
+| Relying on `tapmind_verify_prompt` PASS as proof the create body is complete | Run once and inspect Request Body / curl in the log | Verify checks planner routing; sparse body_defaults merge only shows up at execute time. |
 | Raw grpcurl command as the prompt | §3.8 `call mcp grpc grpc.invoke for rpc_alias: …` | Planner expects structured gRPC grammar, not a shell grpcurl line. |
 | Guessing `rpc_alias` from hostname substring | Lookup `GET /v1/grpc/targets` by host:port | Unregistered alias fails at invoke time. |
