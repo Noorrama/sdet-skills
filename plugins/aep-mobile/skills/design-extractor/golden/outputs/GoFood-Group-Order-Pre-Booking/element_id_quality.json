@@ -1,0 +1,142 @@
+[
+  {
+    "element_id": "SHARED_CART.add_items_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MERCHANT_PROFILE_REQUIRED.cell_horizontallayout_no_sugar_btn",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "SKU_DETAIL.add_to_cart_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.screenshot_img",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list_2",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "MPS.offer_paymentsiccoupon_icon_you_container",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "SHARED_CART.title_text_remove_member_lbl",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "LANDING.join_group_order_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "DIALOG.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "LANDING.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "SHARED_CART.content_content_title_defaultbusinessspottransaction_container",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "MPS.merchant_profile_sku_sku_list",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "HOMESCREEN.buttonprimary_items_delivery_from_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "LANDING.title_paymentsiccard_icon_text_lbl",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "SHARED_CART.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "MPS.ok_got_it_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "CHAT.message_bubble_avatar_bubble_container",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "LANDING.content_you_can_invite_container",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.order_type_socialicaddcontact_icon_container",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "LOADING.buttonprimary_indicatorspinner_btn",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "LANDING.create_invite_friends_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.yes_go_ahead_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.fore_matcha_club_lbl",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.defaultfoodspotgrouporder_defaultfoodspotgrouporder_group_lbl",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "MPS.promo_label_offer_logo_lbl",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "DIALOG.remove_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.tooltip_arrow_content_eating_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "EDIT_BILLING.title_actionsicfareandbonus_icon_you_lbl",
+    "quality": "BAD"
+  }
+]

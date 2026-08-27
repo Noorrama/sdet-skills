@@ -1,0 +1,675 @@
+{
+  "extraction_status": "INCOMPLETE",
+  "extraction_gaps": [
+    {
+      "field": "ui_flow",
+      "reason": "Export scope is 'selection': connectors leaving the selected frames are not present, so ui_flow coverage cannot be verified.",
+      "action": "Re-export the full page to get a complete flow graph.",
+      "severity": "INFO"
+    }
+  ],
+  "visual_analysis_scratchpad": "[auto] 18 screen frame(s) detected, 14 connector edge(s) resolved. Scope: selection. Review _render.html for visual confirmation. Element and interaction extraction is Phase 1 (mechanical derivation from pruned node_tree).",
+  "project_context": {
+    "overall_ambiguity_rating": "LOW",
+    "blocking_issues": []
+  },
+  "app": "gofood-merchant",
+  "design_source": {
+    "file_name": "GoFood Group Order",
+    "page_name": "    ↪ MVP - Group Order [v5.46]",
+    "scope": "selection",
+    "exported_at": "2026-08-25T09:35:57.545Z",
+    "max_depth": 30,
+    "node_count": 3540,
+    "truncated_count": 0,
+    "has_geometry": true,
+    "truncated_nodes": []
+  },
+  "screens": [
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "14090:111412",
+      "source_refs": [
+        "14090:111412"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": true,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+          "source_ref": "16321:130508",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Order type default/food/spot/group_order default/food/spot/group_order Group Group Order navigation/16/ic_next_ios icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS Changes | MPS - Entry point | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "14090:111628",
+      "source_refs": [
+        "14090:111628"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "MPS - Scroll Existing | MPS - Entry point | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "14090:111251",
+      "source_refs": [
+        "14090:111251"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.content_content_text_pojays_container",
+          "source_ref": "18833:91904",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Content Text Pojay's Group Order From Fore Coffee (Kopi), Pondok Indah divider Content Title Choose who pays Title payments/24/ic_card icon Text Everyone pays for their items selection_control",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.create_invite_friends_btn",
+          "source_ref": "14090:111409",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Create & invite friends",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Landing New screen | Group Order creation & Share | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "14090:111955",
+      "source_refs": [
+        "14090:111955"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.activity_view_iphone_sheet_btn",
+          "source_ref": "14090:112124",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "Activity View - iPhone Sheet Activity View Header Thumbnail Thumbnail Join my GoFood Group Order from Fore Coffee (Kopi), Pondok Indah. Add your favorites and let’s feast together!\nhttps://gofood.grou",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Share - Native Existing | Group Order creation & Share | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "14090:111833",
+      "source_refs": [
+        "14090:111833"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+          "source_ref": "14090:111898",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "page_control/scroll_pagination 1st 2nd 3rd 4th",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Default GO Changes | Group Order creation & Share | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "14090:117604",
+      "source_refs": [
+        "14090:117604"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.merchant_profile_sku_sku_list",
+          "source_ref": "14090:117610",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Meal Pack Fore Coffee Cream Bundle 2 Iced Matcha Butter Salt Cream, 2 Iced Matcha Earl Jasmine 132.000  120.000 Promo Right view Properties / Merchant Profile / SK",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Scroll Changes | Group Order creation & Share | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "15959:86239",
+      "source_refs": [
+        "15959:86239"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn",
+          "source_ref": "15959:86802",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "indicator/spinner/full_screen atoms/indicator/spinner/big indicator/spinner",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Scroll Changes | Add bundle items | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "14107:119629",
+      "source_refs": [
+        "14107:119629"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl",
+          "source_ref": "14107:119657",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "_properties/common/chips/text_style navigation/16/ic_edit icon Edit",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Bundling 4 items | Bundling 2 items | GO - Host item added New screen"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "14107:119843",
+      "source_refs": [
+        "14107:119843"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.go_to_checkout_btn",
+          "source_ref": "14107:119893",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Go to checkout",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Bundling 4 items | Bundling 2 items | GO - Member item added New screen"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "14107:120091",
+      "source_refs": [
+        "14107:120091"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl",
+          "source_ref": "14107:120150",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "_properties/common/chips/text_style navigation/16/ic_edit icon Edit",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Checkout - No promo Changes | Checkout - Group Order | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "SHIMMER",
+      "screen_name": "Shimmer",
+      "source_ref": "14090:116246",
+      "source_refs": [
+        "14090:116246"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Loading Existing | Add bundle items | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "BUNDLING_FULL_DATA",
+      "screen_name": "Bundling - Full data",
+      "source_ref": "14090:116262",
+      "source_refs": [
+        "14090:116262"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "BUNDLING_FULL_DATA.custom_btn",
+          "source_ref": "14090:116293",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Custom",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "SKU details - All require custom Existing | Add bundle items | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "BUNDLING_FULL_DATA",
+      "screen_name": "Bundling - Full data",
+      "source_ref": "14090:118735",
+      "source_refs": [
+        "14090:118735"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "BUNDLING_FULL_DATA.add_to_cart_btn",
+          "source_ref": "14090:118814",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Add to cart - 120.000",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "SKU details - Item customized Existing | Add bundle items | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "14107:118955",
+      "source_refs": [
+        "14107:118955"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.merchant_profile_sku_sku_list",
+          "source_ref": "14107:118961",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Meal Pack Fore Coffee Cream Bundle 2 Iced Matcha Butter Salt Cream, 2 Iced Matcha Earl Jasmine 132.000  120.000 Promo Right view Properties / Merchant Profile / SK",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.merchant_profile_sku_sku_list_2",
+          "source_ref": "14107:118963",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Buy 1 Get 1 Fore Coffee Time B1G1 1 Iced Dirty Matchapresso, FREE 1 Iced Butter Cream Latte 66.000  33.000 Promo Right view Properties / Merchant Profile / SKU Lis",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.view_group_cart_btn",
+          "source_ref": "14107:119618",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "View group cart • 1",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Scroll Changes | Add bundle items | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "screen_name": "Merchant Profile - Required",
+      "source_ref": "14090:118400",
+      "source_refs": [
+        "14090:118400"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.cell_horizontallayout_no_sugar_btn",
+          "source_ref": "14090:118409",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "cell horizontal_layout No Sugar _properties/cells/right_view Free selection_control/radio content",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_btn",
+          "source_ref": "14090:118427",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Add to cart - 33.000",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "SKU variants Existing"
+    },
+    {
+      "screen_id": "DISH_DETAILS_4_ITEMS",
+      "screen_name": "Dish details - 4 items",
+      "source_ref": "14107:119525",
+      "source_refs": [
+        "14107:119525"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.content_text_label_meal_container",
+          "source_ref": "14107:119528",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Text Label Meal Pack Fore Coffee Cream Bundle Content Package List Content Content Text Iced Matcha Butter Salt Cream Sugar Level: Normal Sugar\nIce Level: Normal Ice Edit divider List Content ",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Added item details Existing"
+    },
+    {
+      "screen_id": "DISH_DETAILS_4_ITEMS",
+      "screen_name": "Dish details - 4 items",
+      "source_ref": "15959:86870",
+      "source_refs": [
+        "15959:86870"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.price_loading_indicatorspinner_lbl",
+          "source_ref": "15959:86912",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "Text Price 120.000 Loading indicator/spinner",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Added item details Existing"
+    },
+    {
+      "screen_id": "DISH_DETAILS_4_ITEMS",
+      "screen_name": "Dish details - 4 items",
+      "source_ref": "17351:141627",
+      "source_refs": [
+        "17351:141627"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.content_text_label_meal_container",
+          "source_ref": "17351:141630",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Text Label Meal Pack Fore Coffee Cream Bundle Content Package List Content Content Text Iced Matcha Butter Salt Cream Sugar Level: Normal Sugar\nIce Level: Normal Ice Edit divider List Content ",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Added item details Existing"
+    }
+  ],
+  "ui_flow": [
+    {
+      "from_screen_id": "ENTRY",
+      "to_screen_id": "MPS",
+      "to_source_ref": "14090:111412",
+      "condition": "",
+      "navigation_kind": "ENTRY",
+      "edge_source": "ENTRY_LABEL",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:111412"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "14090:111412",
+      "to_source_ref": "14090:111251",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118188",
+      "trigger_element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "14090:111251",
+      "to_source_ref": "14090:111955",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118193",
+      "trigger_element_id": "LANDING.create_invite_friends_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "14090:111955",
+      "to_source_ref": "14090:111833",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118198",
+      "trigger_element_id": "MPS.activity_view_iphone_sheet_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHIMMER",
+      "from_source_ref": "14090:117604",
+      "to_source_ref": "14090:116246",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118395",
+      "trigger_element_id": "MPS.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "15959:86239",
+      "to_source_ref": "14107:118955",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15959:86809",
+      "trigger_element_id": "MPS.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "DISH_DETAILS_4_ITEMS",
+      "from_source_ref": "14107:119629",
+      "to_source_ref": "17351:141627",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:120070",
+      "trigger_element_id": "SHARED_CART.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "CHECKOUT",
+      "from_source_ref": "14107:119843",
+      "to_source_ref": "14107:120091",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:120764",
+      "trigger_element_id": "SHARED_CART.go_to_checkout_btn"
+    },
+    {
+      "from_screen_id": "CHECKOUT",
+      "to_screen_id": "DISH_DETAILS_4_ITEMS",
+      "from_source_ref": "14107:120091",
+      "to_source_ref": "17351:141627",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "17429:142749",
+      "trigger_element_id": "CHECKOUT.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl"
+    },
+    {
+      "from_screen_id": "BUNDLING_FULL_DATA",
+      "to_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "from_source_ref": "14090:116262",
+      "to_source_ref": "14090:118400",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118598",
+      "trigger_element_id": "BUNDLING_FULL_DATA.custom_btn"
+    },
+    {
+      "from_screen_id": "BUNDLING_FULL_DATA",
+      "to_screen_id": "MPS",
+      "from_source_ref": "14090:118735",
+      "to_source_ref": "15959:86239",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:119622",
+      "trigger_element_id": "BUNDLING_FULL_DATA.add_to_cart_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "14107:118955",
+      "to_source_ref": "14107:119629",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:119837",
+      "trigger_element_id": "MPS.view_group_cart_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "DISH_DETAILS_4_ITEMS",
+      "from_source_ref": "14107:118955",
+      "to_source_ref": "14107:119525",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:119606",
+      "trigger_element_id": "MPS.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "to_screen_id": "BUNDLING_FULL_DATA",
+      "from_source_ref": "14090:118400",
+      "to_source_ref": "14090:118735",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118949",
+      "trigger_element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_btn"
+    },
+    {
+      "from_screen_id": "DISH_DETAILS_4_ITEMS",
+      "to_screen_id": "DISH_DETAILS_4_ITEMS",
+      "from_source_ref": "14107:119525",
+      "to_source_ref": "15959:86870",
+      "condition": "Plus / minus",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15959:86946"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "refinements": [
+    {
+      "screen_id": "SHARED_CART",
+      "old_id": "SHARED_CART.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+      "suggested_id": "SHARED_CART.quantity_stepper_btn",
+      "confidence": "high",
+      "rationale": "Element is a quantity stepper control (minus/plus) for dish quantity adjustment, not a generic minus button"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "old_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+      "suggested_id": "CHECKOUT.quantity_stepper_btn",
+      "confidence": "high",
+      "rationale": "Element is a quantity stepper control (minus/plus) for dish quantity adjustment on checkout screen, not a generic minus button"
+    }
+  ]
+}

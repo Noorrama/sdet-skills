@@ -212,6 +212,8 @@
           },
           "confidence": { "type": "string", "enum": ["EXPLICIT", "INFERRED"], "description": "ADDITION." },
           "edge_direction_source": { "type": "string", "enum": ["ARROWHEAD", "ARROWHEAD_REVERSED", "AMBIGUOUS", "UNDIRECTED"], "description": "ADDITION, present only when direction was NOT the plain case. The arrowhead defines flow direction, not the order the line was drawn: ARROWHEAD_REVERSED means the arrow sits on connectorStart and the edge was emitted swapped. AMBIGUOUS = arrows both ends; UNDIRECTED = neither. Absent means the ordinary ARROWHEAD case." },
+          "from_source_ref": { "type": "string", "description": "ADDITION. Figma node id of connectorStart.endpointNodeId — the exact node the connector arrow starts from. Cross-reference with screens[].source_ref to find the originating screen object. Omitted for ENTRY pseudo-edges (no connector start)." },
+          "to_source_ref": { "type": "string", "description": "ADDITION. Figma node id of connectorEnd.endpointNodeId — the exact node the connector arrow lands on. Cross-reference with screens[].source_ref to find the destination screen object." },
           "source_ref": { "type": "string", "description": "ADDITION. Figma node id of the connector, or of the node carrying the reaction." }
         },
         "required": ["from_screen_id", "to_screen_id", "condition"]

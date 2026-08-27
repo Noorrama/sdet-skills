@@ -1,0 +1,3823 @@
+{
+  "extraction_status": "INCOMPLETE",
+  "extraction_gaps": [
+    {
+      "field": "ui_flow",
+      "reason": "Export scope is 'selection': connectors leaving the selected frames are not present, so ui_flow coverage cannot be verified.",
+      "action": "Re-export the full page to get a complete flow graph.",
+      "severity": "INFO"
+    }
+  ],
+  "visual_analysis_scratchpad": "[auto] 115 screen frame(s) detected, 82 connector edge(s) resolved. Scope: selection. Review _render.html for visual confirmation. Element and interaction extraction is Phase 1 (mechanical derivation from pruned node_tree).",
+  "project_context": {
+    "overall_ambiguity_rating": "LOW",
+    "blocking_issues": []
+  },
+  "app": "gofood-merchant",
+  "design_source": {
+    "file_name": "GoFood Group Order",
+    "page_name": "    ↪ MVP - Group Order [v5.46]",
+    "scope": "selection",
+    "exported_at": "2026-08-25T09:37:13.900Z",
+    "max_depth": 30,
+    "node_count": 21280,
+    "truncated_count": 0,
+    "has_geometry": true,
+    "truncated_nodes": []
+  },
+  "screens": [
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10882:10702",
+      "source_refs": [
+        "10882:10702"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": true,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.see_offers_promo_container",
+          "source_ref": "10882:10894",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Offer payments/16/ic_coupon icon You can save up to 77k, go go go order! Action See offers navigation/16/ic_next_ios icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.tooltip_arrow_content_eating_btn",
+          "source_ref": "10882:10913",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "tooltip arrow content Eating is happier together Try Group order with friends. GoFood in one purchase from your own phones, save more! navigation/24/ic_cancel icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Group Order tooltip Changes | 1st time experience | Host"
+    },
+    {
+      "screen_id": "SNIPPET",
+      "screen_name": "Snippet",
+      "source_ref": "11022:57180",
+      "source_refs": [
+        "11022:57180"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Snippets New screen | 1st time experience"
+    },
+    {
+      "screen_id": "SNIPPET",
+      "screen_name": "Snippet",
+      "source_ref": "19123:112565",
+      "source_refs": [
+        "19123:112565"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Snippets New screen | 1st time experience"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11016:53084",
+      "source_refs": [
+        "11016:53084"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group order - Closing soon Changes | Resto availability"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "11600:32884",
+      "source_refs": [
+        "11600:32884"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group order - Closing soon New screen | Resto availability"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11017:54628",
+      "source_refs": [
+        "11017:54628"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group order - Closed Changes | Resto availability"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "11017:54785",
+      "source_refs": [
+        "11017:54785"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Member Add items Done choosing items | Group order - Closed New screen | Resto availability"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10882:10914",
+      "source_refs": [
+        "10882:10914"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": true,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.group_order_type_container",
+          "source_ref": "10882:11048",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Order type default/food/spot/group_order default/food/spot/group_order Group Group Order navigation/16/ic_next_ios icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.promo_label_offer_logo_lbl",
+          "source_ref": "14884:166524",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "Promo label Offer logo Layer_1 Group Text 35% off, up to 88k badge/ribbon/patch 01 : 20",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+          "source_ref": "10882:11119",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "page_control/scroll_pagination 1st 2nd 3rd 4th",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Offer bars showing both regular & group order offers | Interaction reference: 🔗 Link | MPS Changes"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11194:60756",
+      "source_refs": [
+        "11194:60756"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "MPS - Scroll Existing | MPS - Entry point | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MOLP",
+      "screen_name": "MOLP",
+      "source_ref": "14712:105037",
+      "source_refs": [
+        "14712:105037"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group Order offers in MOLP. | MOLP Changes | MPS - Entry point"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "10950:27992",
+      "source_refs": [
+        "10950:27992"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.content_content_text_pojays_container",
+          "source_ref": "10957:29101",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Content Text Pojay's Group Order From Fore Coffee (Kopi), Pondok Indah divider Content Title Choose who pays Title payments/24/ic_card icon Text Everyone pays for their items selection_control",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.navbar_status_bar_dynamic_btn",
+          "source_ref": "10950:28009",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content button/circular navigation/24/ic_cancel icon ",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.create_invite_friends_btn",
+          "source_ref": "10950:28051",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Create & invite friends",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "In Group order landing page (creation), we’ll be showing group order offers only  | Landing New screen | Group Order creation & Share"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11598:37830",
+      "source_refs": [
+        "11598:37830"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.content_content_text_pojays_container",
+          "source_ref": "16777:195413",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Content Text Pojay's Group Order From Fore Coffee (Kopi), Pondok Indah divider Content Title Choose who pays Title payments/24/ic_card icon Text Everyone pays for their items selection_control",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.invite_limit_info_container",
+          "source_ref": "11598:37987",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content You can invite up to 7 persons button/primary indicator/spinner",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Loading New screen | Group Order creation & Share | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10882:25524",
+      "source_refs": [
+        "10882:25524"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.offer_bar_voucher_merchant_container",
+          "source_ref": "10966:34818",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Offer bar Voucher Merchant Profile / Offer bar / Offer card v1 Top Properties / Merchant Profile / Offer card / Offer type jago/24/ic_shared icon Group Order disc. 45% off Mid Divider divider Bottom M",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.navbar_status_bar_dynamic_btn",
+          "source_ref": "10882:25698",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content button/circular navigation/24/ic_back icon ri",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.share_with_lbl",
+          "source_ref": "14630:76726",
+          "type": "TEXT",
+          "role": "LABEL",
+          "label": "Share with",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.share_screenshot_img",
+          "source_ref": "14630:76727",
+          "type": "RECTANGLE",
+          "role": "IMAGE",
+          "label": "Screenshot",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Note Note User landed in MPS (Group buy), but we automatically open the share tray on top of it. | Dismiss\nswipe down | Share - Native Existing"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10882:26695",
+      "source_refs": [
+        "10882:26695"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.invite_friends_container",
+          "source_ref": "14903:167481",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Order type social/16/ic_add_contact icon Invite friends",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Dismiss\nswipe down | Even after group order is created, the offer bars will be still showing regular & group order offers | MPS - Default GO Changes"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10960:32736",
+      "source_refs": [
+        "10960:32736"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.group_name_header_lbl",
+          "source_ref": "14909:168793",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "Text default/food/spot/group_order default/food/spot/group_order Group Pojay's Group Order Order type social/16/ic_add_contact icon Invite friends",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MVP → Delivery only | Footer View group cart • 1 | MPS - Default GO Changes"
+    },
+    {
+      "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "screen_name": "Merchant Page Detail - Scrolled",
+      "source_ref": "10882:29367",
+      "source_refs": [
+        "10882:29367"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+          "source_ref": "10882:29938",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Dirty Matchapresso Kombinasi matcha dan espresso yang bold, satukan dua dunia untuk bangkitkan semangatmu! 40.000  33.000 50% Right view SKU Image Action butt",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.secondary_sku_list_item_list",
+          "source_ref": "10882:29940",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Matcha Earl Jasmine Matcha dengan sensasi aromatik teh melati yang harmonis dan menenangkan. 33.000 Right view SKU Image Add",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn",
+          "source_ref": "10882:30819",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "View group cart",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Scroll Changes | MPS - Group Order - Add items | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "SKU_DETAIL",
+      "screen_name": "SKU detail",
+      "source_ref": "15827:72458",
+      "source_refs": [
+        "15827:72458"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SKU_DETAIL.image_image_img",
+          "source_ref": "15827:72463",
+          "type": "FRAME",
+          "role": "IMAGE",
+          "label": "Image Image",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SKU_DETAIL.add_to_cart_btn",
+          "source_ref": "15827:72488",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Add to cart",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "SKU details - Variant Existing | MPS - Group Order - Add items | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "screen_name": "Merchant Page Detail - Scrolled",
+      "source_ref": "10882:30369",
+      "source_refs": [
+        "10882:30369"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+          "source_ref": "10882:31321",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Dirty Matchapresso Kombinasi matcha dan espresso yang bold, satukan dua dunia untuk bangkitkan semangatmu! 40.000  33.000 50% Right view SKU Image 1 item Cust",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.secondary_sku_list_item_list",
+          "source_ref": "11598:40972",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Matcha Earl Jasmine Matcha dengan sensasi aromatik teh melati yang harmonis dan menenangkan. 33.000 Right view SKU Image Add",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.content_view_group_cart_items_container",
+          "source_ref": "10882:30501",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content View group cart • 8 items",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Add item Changes | Merchant Profile / SKU / SKU List v3 Iced Matcha Earl Jasmine Matcha dengan sensasi aromatik teh mel | Note Note If user add non variant items"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "15645:69437",
+      "source_refs": [
+        "15645:69437"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.navbar_status_bar_dynamic_btn",
+          "source_ref": "15645:69440",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content button/circular navigation/24/ic_back icon ri",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Loading New screen | Group Order - Shared cart - Host no item | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10882:30851",
+      "source_refs": [
+        "10882:30851"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.edit_billing_summary_container",
+          "source_ref": "10933:47374",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Content Title default/business/spot/transaction default/business/spot/transaction Text Billing Everyone pays for their items navigation/16/ic_edit icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.delete_group_btn",
+          "source_ref": "10882:30872",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Delete group",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "GO - Host no item New screen | Group Order - Shared cart - Host no item | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10883:32172",
+      "source_refs": [
+        "10883:32172"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Before confirm their items | People joined toast | Host can edit member’s item"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10883:32345",
+      "source_refs": [
+        "10883:32345"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Before confirm their items | People joined toast | Before confirm their items"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10882:31110",
+      "source_refs": [
+        "10882:31110"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl",
+          "source_ref": "11600:27723",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "_properties/common/chips/text_style navigation/16/ic_edit icon Edit",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.content_add_items_go_container",
+          "source_ref": "10886:33435",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Add items Go to checkout",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Before confirm their items | GO - Host item added New screen | Note Note Regardless of the billing type, host cannot go to checkout page IF host doesn’t have items"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10885:32631",
+      "source_refs": [
+        "10885:32631"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.go_to_checkout_btn",
+          "source_ref": "10886:33473",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Go to checkout",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "GO - Host item added - Member add item New screen | Confirmation - Member still adding item New screen | Group Order - Shared cart - Host item added"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10885:32818",
+      "source_refs": [
+        "10885:32818"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.title_text_remove_member_lbl",
+          "source_ref": "11600:29069",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "Title Text Remove member",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "GO - Host item added - Member add item New screen | Group Order - Shared cart - Host item added | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10901:56106",
+      "source_refs": [
+        "10901:56106"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.content_add_items_go_container",
+          "source_ref": "10901:56203",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Add items Go to checkout",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "All done choosing items New screen | Toast Member removed New screen | Group Order - Shared cart - Host item added"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "16045:108530",
+      "source_refs": [
+        "16045:108530"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Failed to load Group cart New screen | Group Order - Shared cart - Host item added | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "11600:32059",
+      "source_refs": [
+        "11600:32059"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DIALOG.dialog_close_btn",
+          "source_ref": "11600:32061",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card header default/common/spot_hero/insufficient_balance default/common/spot_hero/insufficient_balance default/common/spot_hero/insufficien",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "1 item OOS Existing | Group Order - Shared cart - Host item added | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "11600:33146",
+      "source_refs": [
+        "11600:33146"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "2 items OOS Existing | Group Order - Shared cart - Host item added | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "12152:61380",
+      "source_refs": [
+        "12152:61380"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "More than 2 items OOS Existing | Group Order - Shared cart - Host item added | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "12152:61476",
+      "source_refs": [
+        "12152:61476"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Resto is closed while Checkout Existing | Group Order - Shared cart - Host item added | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "11598:39173",
+      "source_refs": [
+        "11598:39173"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+          "source_ref": "11598:39244",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "Home / Shuffle / Reorder v2 Comforting usuals See all Grid Vertical Card Image Right View Resto Name Fore Coffee (Kopi), Pondok Indah Rating ETA Rating actions/16/ic_rate icon 4.8 (900+) 30-40 min Rat",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group buy active cart | Host have active cart Existing | Host have\ngroup buy\nactive cart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11598:39622",
+      "source_refs": [
+        "11598:39622"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.merchant_profile_sku_sku_list",
+          "source_ref": "11598:39628",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Dirty Matchapresso Kombinasi matcha dan espresso yang bold, satukan dua dunia untuk bangkitkan semangatmu! 40.000  33.000 50% Right view SKU Image Add Customi",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.group_order_type_container",
+          "source_ref": "14909:170059",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Order type default/food/spot/group_order default/food/spot/group_order Group Group Order navigation/16/ic_next_ios icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+          "source_ref": "14909:170091",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "page_control/scroll_pagination 1st 2nd 3rd 4th",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Change resto confirmation Existing | Change resto confirmation Existing | Group buy active cart"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "13056:83577",
+      "source_refs": [
+        "13056:83577"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.content_content_text_pojays_container",
+          "source_ref": "16777:196116",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Content Text Pojay's Group Order From Fore Coffee (Kopi), Pondok Indah divider Content Title Choose who pays Title payments/24/ic_card icon Text Everyone pays for their items selection_control",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.create_invite_friends_btn",
+          "source_ref": "13056:83735",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Create & invite friends",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Landing New screen | Landing New screen | Group buy active cart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "13034:73997",
+      "source_refs": [
+        "13034:73997"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "13034:74157",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card .properties/cards/dialog/header_style default/food/spot_hero/change_merchant default/food/spot_hero/change_merchant default/food/spot_h",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Switch resto confirmation Changes | Landing Existing | Group buy active cart"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "11343:65017",
+      "source_refs": [
+        "11343:65017"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DIALOG.billing_methods_info_lbl",
+          "source_ref": "11343:65357",
+          "type": "TEXT",
+          "role": "LABEL",
+          "label": "Billing methods info",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Split bill info New screen | MPS - Active regular cart Existing | If link is invalid due to user typo or edit, it will leads them to GoFood Web"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "12246:95117",
+      "source_refs": [
+        "12246:95117"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Offer details Existing | Landing New screen | If link is invalid due to user typo or edit, it will leads them to GoFood Web"
+    },
+    {
+      "screen_id": "CHAT",
+      "screen_name": "Chat",
+      "source_ref": "10882:26560",
+      "source_refs": [
+        "10882:26560"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHAT.message_bubble_bubble_forward_container",
+          "source_ref": "10882:26565",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Message bubble Bubble Forward ico-24-forward Tail Attachment Preview File Text GoFood Group Order - Discount 50% GoFood your favorite foods together with friend and family hassle-free with saver deliv",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "If link is invalid due to user typo or edit, it will leads them to GoFood Web | Outside App - WA | MPS - Group Order Changes"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "12011:65591",
+      "source_refs": [
+        "12011:65591"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.section_resto_card_text_container",
+          "source_ref": "14909:170882",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Section Resto card Text default/food/spot/group_order default/food/spot/group_order Group Pojay's Group Order Order type social/16/ic_add_contact icon Invite friends Merchant Profile / Resto card / Re",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "If link is invalid due to user typo or edit, it will leads them to GoFood Web | Link copied Changes | Group buy active cart"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "11602:56644",
+      "source_refs": [
+        "11602:56644"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+          "source_ref": "11602:56715",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "Home / Shuffle / Reorder v2 Comforting usuals See all Grid Vertical Card Image Right View Resto Name Fore Coffee (Kopi), Pondok Indah Rating ETA Rating actions/16/ic_rate icon 4.8 (900+) 30-40 min Rat",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "HOMESCREEN.buttonprimary_view_group_cart_btn",
+          "source_ref": "11602:56723",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "button/primary View group cart Delivery from Fore Coffee (Kopi), Jakarta Selatan .properties/button/label/contextual/right 1 jago/24/ic_shared icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Note Note Go to Group cart, not MPS | Group Order active cart in Home Changes | Note Note Once there is an item added in the Group Cart, the “View group cart” button will changed i"
+    },
+    {
+      "screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "screen_name": "Merchant Profile - Required",
+      "source_ref": "11598:41072",
+      "source_refs": [
+        "11598:41072"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.navbar_status_bar_dynamic_btn",
+          "source_ref": "11598:41073",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content left_side navigation/24/ic_back icon Customiz",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_btn",
+          "source_ref": "11598:41091",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Add to cart - 33.000",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "button/primary indicator/spinner | Variant Existing | Variant - Unable to add item Changes"
+    },
+    {
+      "screen_id": "SKU_DETAIL",
+      "screen_name": "SKU detail",
+      "source_ref": "15827:71488",
+      "source_refs": [
+        "15827:71488"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SKU_DETAIL.overlay_img",
+          "source_ref": "15827:71489",
+          "type": "RECTANGLE",
+          "role": "IMAGE",
+          "label": "Overlay",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SKU_DETAIL.add_to_cart_btn",
+          "source_ref": "15827:71524",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Add to cart",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "SKU details - Non variant Existing | Non Variant - Unable to add item Changes | If link is invalid due to user typo or edit, it will leads them to GoFood Web"
+    },
+    {
+      "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "screen_name": "Merchant Page Detail - Scrolled",
+      "source_ref": "15827:71999",
+      "source_refs": [
+        "15827:71999"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.loading_spinner_btn",
+          "source_ref": "15827:72430",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "indicator/spinner/full_screen atoms/indicator/spinner/big indicator/spinner",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Loading - Only for Group Order Changes | If link is invalid due to user typo or edit, it will leads them to GoFood Web | Group buy active cart"
+    },
+    {
+      "screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "screen_name": "Merchant Profile - Required",
+      "source_ref": "11598:42100",
+      "source_refs": [
+        "11598:42100"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Edit SKU - Variant Existing | If link is invalid due to user typo or edit, it will leads them to GoFood Web | Group buy active cart"
+    },
+    {
+      "screen_id": "EDIT_BILLING",
+      "screen_name": "Edit billing",
+      "source_ref": "10882:28296",
+      "source_refs": [
+        "10882:28296"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "EDIT_BILLING.pay_for_everyone_lbl",
+          "source_ref": "12054:76450",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "Title actions/24/ic_fare_and_bonus icon You pay for everyone selection_control/radio content",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group Order - Edit billing New screen | Loading - Change billing New screen | If link is invalid due to user typo or edit, it will leads them to GoFood Web"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "10886:33588",
+      "source_refs": [
+        "10886:33588"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DIALOG.delete_group_btn",
+          "source_ref": "12061:79777",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Delete group",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Confirmation - Delete group order New screen | Billing changed New screen | If link is invalid due to user typo or edit, it will leads them to GoFood Web"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "11600:29242",
+      "source_refs": [
+        "11600:29242"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Non Variant Existing | Failed change billing New screen | If link is invalid due to user typo or edit, it will leads them to GoFood Web"
+    },
+    {
+      "screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "screen_name": "Merchant Profile - Required",
+      "source_ref": "11600:28790",
+      "source_refs": [
+        "11600:28790"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.no_sugar_option_btn",
+          "source_ref": "11600:28799",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "cell horizontal_layout No Sugar _properties/cells/right_view Free selection_control/radio content",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Variant Existing | Note Note Regardless of the billing type, host cannot go to checkout page IF host doesn’t have items | Group Order - Delete loading Changes"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "10885:32974",
+      "source_refs": [
+        "10885:32974"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Confirmation - Only host item New screen | Group Order - Delete success Changes | If link is invalid due to user typo or edit, it will leads them to GoFood Web"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "10886:33142",
+      "source_refs": [
+        "10886:33142"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DIALOG.dialog_close_btn",
+          "source_ref": "12051:74223",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card header default/common/spot_hero/limit_exceeded default/common/spot_hero/limit_exceeded default/common/spot_hero/limit_exceeded Layer_1 ",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Confirmation - Member still adding item New screen | Group Order - Delete failed Changes | If link is invalid due to user typo or edit, it will leads them to GoFood Web"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "10886:35728",
+      "source_refs": [
+        "10886:35728"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DIALOG.remove_btn",
+          "source_ref": "12061:79754",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Remove",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Confirmation - Remove member New screen | If link is invalid due to user typo or edit, it will leads them to GoFood Web | Group buy active cart"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "11600:29708",
+      "source_refs": [
+        "11600:29708"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.content_add_items_go_container",
+          "source_ref": "11600:29824",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Add items Go to checkout",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Toast Member removed New screen | If link is invalid due to user typo or edit, it will leads them to GoFood Web | Group buy active cart"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "15745:73286",
+      "source_refs": [
+        "15745:73286"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Toast Member removed failed New screen | If link is invalid due to user typo or edit, it will leads them to GoFood Web | Group buy active cart"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "11010:47577",
+      "source_refs": [
+        "11010:47577"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+          "source_ref": "11011:48597",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "Home / Shuffle / Reorder v2 Comforting usuals See all Grid Vertical Card Image Right View Resto Name Fore Coffee (Kopi), Pondok Indah Rating ETA Rating actions/16/ic_rate icon 4.8 (900+) 30-40 min Rat",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "HOMESCREEN.buttonprimary_items_delivery_from_btn",
+          "source_ref": "11010:47742",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "button/primary 2 items Delivery from Starbucks, Pasaraya Blok M .properties/button/label/contextual/right 64.000 icon icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Regular active cart | Host have active cart Existing | Host have\nregular active\ncart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11598:36771",
+      "source_refs": [
+        "11598:36771"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.group_order_type_container",
+          "source_ref": "14909:170275",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Order type default/food/spot/group_order default/food/spot/group_order Group Group Order navigation/16/ic_next_ios icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.offer_bar_section_promo_container",
+          "source_ref": "14909:170281",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Offer bar Section Promo label default/food/spot/group_order default/food/spot/group_order Group Text Group purchase 45% off Min. group spend 120k Promo label label/16/ic_flash_sale icon Text 35% off, ",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Change resto confirmation Existing | Regular active cart | Host have\nregular active\ncart"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11598:36417",
+      "source_refs": [
+        "11598:36417"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.create_invite_friends_btn",
+          "source_ref": "11710:65399",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Create & invite friends",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Landing New screen | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11011:48756",
+      "source_refs": [
+        "11011:48756"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "11013:49702",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card .properties/cards/dialog/header_style default/food/spot_hero/change_merchant default/food/spot_hero/change_merchant default/food/spot_h",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.yes_go_ahead_btn",
+          "source_ref": "11013:50288",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Yes, go ahead",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Landing Existing | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11604:59805",
+      "source_refs": [
+        "11604:59805"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.group_order_type_container",
+          "source_ref": "14909:169846",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Order type default/food/spot/group_order default/food/spot/group_order Group Group Order navigation/16/ic_next_ios icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+          "source_ref": "14909:169878",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "page_control/scroll_pagination 1st 2nd 3rd 4th",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Active regular cart Existing | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11604:60555",
+      "source_refs": [
+        "11604:60555"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.create_invite_friends_btn",
+          "source_ref": "11740:69666",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Create & invite friends",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Landing New screen | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11653:63490",
+      "source_refs": [
+        "11653:63490"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.content_view_group_cart_container",
+          "source_ref": "11653:64747",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content View group cart • 1",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Group Order Changes | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "screen_name": "Merchant Profile - Required",
+      "source_ref": "11809:77177",
+      "source_refs": [
+        "11809:77177"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.cell_ice_level_required_btn",
+          "source_ref": "11809:77189",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "cell Ice Level Required • Select 1 divider",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Variant - Unable to add item Changes | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "screen_name": "Merchant Page Detail - Scrolled",
+      "source_ref": "11809:76729",
+      "source_refs": [
+        "11809:76729"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+          "source_ref": "11809:76737",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Matcha Earl Jasmine Matcha dengan sensasi aromatik teh melati yang harmonis dan menenangkan. 33.000 Right view SKU Image Add",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Non Variant - Unable to add item Changes | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "11192:60540",
+      "source_refs": [
+        "11192:60540"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.navbar_status_bar_dynamic_btn",
+          "source_ref": "11192:60559",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content button/circular navigation/24/ic_back icon ri",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.content_add_items_go_container",
+          "source_ref": "11192:60608",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content Add items Go to checkout",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.loading_spinner_btn",
+          "source_ref": "15277:71003",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "indicator/spinner/full_screen atoms/indicator/spinner/big indicator/spinner",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Loading - Change billing New screen | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "15277:70829",
+      "source_refs": [
+        "15277:70829"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Billing changed New screen | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "15277:71016",
+      "source_refs": [
+        "15277:71016"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Failed change billing New screen | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "19534:109975",
+      "source_refs": [
+        "19534:109975"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group Order - Delete loading Changes | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10886:34997",
+      "source_refs": [
+        "10886:34997"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.merchant_profile_sku_sku_list",
+          "source_ref": "10886:35005",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Matcha Earl Jasmine Matcha dengan sensasi aromatik teh melati yang harmonis dan menenangkan. 33.000 Right view SKU Image Add Customizable",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.see_offers_promo_container",
+          "source_ref": "10886:35203",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Offer payments/16/ic_coupon icon You can save up to 77k, go go go order! Action See offers navigation/16/ic_next_ios icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group Order - Delete success Changes | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "15673:69907",
+      "source_refs": [
+        "15673:69907"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group Order - Delete failed Changes | Regular\nactive cart\nconverted\nto Group\nbuy | Regular active cart"
+    },
+    {
+      "screen_id": "CHAT",
+      "screen_name": "Chat",
+      "source_ref": "10886:37401",
+      "source_refs": [
+        "10886:37401"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHAT.group_order_share_bubble_container",
+          "source_ref": "10886:37406",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Message bubble Avatar + Bubble Bubble Tail Attachment Preview File Text GoFood Group Order - Discount 50% GoFood your favorite foods together with friend and family hassle-free with saver delivery fee",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHAT.input_bar_input_bar_input",
+          "source_ref": "10886:37436",
+          "type": "INSTANCE",
+          "role": "INPUT",
+          "label": "Input bar Input bar Plus ico-32-plus Input   ico-24-sticker Icons ico-32-camera-small ico-32-mic Home indicator",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group Order - Share WA | Join via link | Member Experience - Everyone pays for their items"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11982:60205",
+      "source_refs": [
+        "11982:60205"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.fore_matcha_club_lbl",
+          "source_ref": "11982:60208",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "Text Fore Matcha Club",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+          "source_ref": "14909:170523",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "page_control/scroll_pagination 1st 2nd 3rd 4th",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Note Note Participants who joining from WA link will be landed in MPS first and then directly open t | MPS Changes | Join via link"
+    },
+    {
+      "screen_id": "SHIMMER",
+      "screen_name": "Shimmer",
+      "source_ref": "10966:36905",
+      "source_refs": [
+        "10966:36905"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Note Note For participants, the landing page will have a shimmer to check the group buy\nName\nBilling | Group Order landing page Changes | Join via link"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11598:40661",
+      "source_refs": [
+        "11598:40661"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.title_paymentsiccard_icon_text_lbl",
+          "source_ref": "11598:40798",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "Title payments/24/ic_card icon Text Text Everyone pays for their items Make sure you have a sufficient GoPay. We will deduct it when the host checks out. actions/16/ic_info icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.join_group_order_btn",
+          "source_ref": "11598:40680",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Join group order",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "button/primary indicator/spinner | Group Order landing page Changes | Join via link"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10886:37535",
+      "source_refs": [
+        "10886:37535"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+          "source_ref": "10966:38340",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "page_control/scroll_pagination 1st 2nd 3rd 4th",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.invite_friends_container",
+          "source_ref": "14909:171108",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Order type social/16/ic_add_contact icon Invite friends",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Group Order Changes | Join Group Order → MPS | Member Experience - Everyone pays for their items"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10889:46904",
+      "source_refs": [
+        "10889:46904"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Invite friends Changes | Join Group Order → MPS | Member Experience - Everyone pays for their items"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "12011:66277",
+      "source_refs": [
+        "12011:66277"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.navbar_status_bar_dynamic_btn",
+          "source_ref": "14919:171733",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content button/circular navigation/24/ic_back icon ri",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Link copied Changes | Join Group Order → MPS | Member Experience - Everyone pays for their items"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10889:47826",
+      "source_refs": [
+        "10889:47826"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.fore_matcha_club_lbl",
+          "source_ref": "10966:38926",
+          "type": "FRAME",
+          "role": "LABEL",
+          "label": "Text Fore Matcha Club",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.navbar_status_bar_dynamic_btn",
+          "source_ref": "14919:171945",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content button/circular navigation/24/ic_back icon ri",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Group Order Changes | MPS - Group Order - Add items | Member Experience - Everyone pays for their items"
+    },
+    {
+      "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "screen_name": "Merchant Page Detail - Scrolled",
+      "source_ref": "10889:49416",
+      "source_refs": [
+        "10889:49416"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+          "source_ref": "11602:55763",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Matcha Earl Jasmine Matcha dengan sensasi aromatik teh melati yang harmonis dan menenangkan. 33.000 Right view SKU Image Add",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.secondary_sku_list_item_list",
+          "source_ref": "10889:49426",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Matcha Butter Salt Cream Perpaduan matcha dengan krim Butter Salt yang populer dan memanjakan di setiap tegukan. 33.000 Right view SKU Image Add Customizable",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn",
+          "source_ref": "10889:49549",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "View group cart",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.navbar_status_bar_dynamic_btn",
+          "source_ref": "10889:49554",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content left_side navigation/24/ic_back icon Fore Cof",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Scroll Changes | MPS - Group Order - Add items | Member Experience - Everyone pays for their items"
+    },
+    {
+      "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "screen_name": "Merchant Page Detail - Scrolled",
+      "source_ref": "10889:49858",
+      "source_refs": [
+        "10889:49858"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+          "source_ref": "10889:49868",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Matcha Butter Salt Cream Perpaduan matcha dengan krim Butter Salt yang populer dan memanjakan di setiap tegukan. 33.000 Right view SKU Image 1 item Customizab",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn",
+          "source_ref": "10897:56087",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "View group cart • 1",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Add item Changes | MPS - Group Order - Add items | Member Experience - Everyone pays for their items"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10889:50317",
+      "source_refs": [
+        "10889:50317"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.leave_group_btn",
+          "source_ref": "11602:57182",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Leave group",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.add_items_btn",
+          "source_ref": "10889:50389",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Add items",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Before confirm their items | GO - Member no item New screen | Group Order - Shared cart - Member no item"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10889:50558",
+      "source_refs": [
+        "10889:50558"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Before confirm their items | GO - Member no item - Others add item New screen | Group Order - Shared cart - Member no item"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10889:50733",
+      "source_refs": [
+        "10889:50733"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "GO - Member no item - Others add item New screen | Group Order - Shared cart - Member no item | Member Experience - Everyone pays for their items"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10894:52473",
+      "source_refs": [
+        "10894:52473"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Only show when split bill | Note Note If the group buy is fully paid by the host, the blue bar information doesnt need to show. | GO - Member item added New screen"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10894:54549",
+      "source_refs": [
+        "10894:54549"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Only show when split bill | GO - Member item added - Other item added New screen | Group Order - Shared cart - Member item added"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "10894:54771",
+      "source_refs": [
+        "10894:54771"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "GO - Member item added - Other item added New screen | button/primary indicator/spinner | Group Order - Shared cart - Member item added"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "10894:55072",
+      "source_refs": [
+        "10894:55072"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DIALOG.dialog_close_btn",
+          "source_ref": "12052:76007",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card header default/driver_refferal/spot_hero/document_approved default/driver_refferal/spot_hero/document_approved default/driver_refferal/",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Back to to GoFood home | Checkout identifier | Confirmation - Done add items New screen"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "15651:69684",
+      "source_refs": [
+        "15651:69684"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Back to to GoFood home | Checkout identifier | Group cart - Host checkout New screen"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "11015:52168",
+      "source_refs": [
+        "11015:52168"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Host have active cart Existing | Member have\nregular active\ncart | Host have active cart Changes"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11974:58748",
+      "source_refs": [
+        "11974:58748"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "MPS Changes | MPS Changes | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "SHIMMER",
+      "screen_name": "Shimmer",
+      "source_ref": "12137:60238",
+      "source_refs": [
+        "12137:60238"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group Order landing page Changes | Group Order landing page Changes | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11598:40350",
+      "source_refs": [
+        "11598:40350"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.join_group_order_btn",
+          "source_ref": "11598:40369",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Join group order",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group Order landing page Changes | MPS - Group Order Changes | Note Note For participants, the landing page will have a shimmer to check the group buy\nName\nBilling"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11015:52600",
+      "source_refs": [
+        "11015:52600"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "11647:63032",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card .properties/cards/dialog/header_style default/food/spot_hero/change_merchant default/food/spot_hero/change_merchant default/food/spot_h",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Change resto to group order Existing | Change resto to group order Existing | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11034:57535",
+      "source_refs": [
+        "11034:57535"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.billing_methods_info_lbl",
+          "source_ref": "12054:76356",
+          "type": "TEXT",
+          "role": "LABEL",
+          "label": "Billing methods info",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Billing info New screen | Go to Group Cart | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "10918:16815",
+      "source_refs": [
+        "10918:16815"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "HOMESCREEN.comforting_usuals_see_all_lbl",
+          "source_ref": "10918:16887",
+          "type": "TEXT",
+          "role": "LABEL",
+          "label": "Comforting usuals See all",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Go to Group Cart | Group Order active cart in Home Changes | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "11602:55819",
+      "source_refs": [
+        "11602:55819"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Go to Group Cart | Home - Group Order deleted Changes | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "11604:58549",
+      "source_refs": [
+        "11604:58549"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Home - Removed Changes | Go to Group Cart | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "DIALOG",
+      "screen_name": "Dialog",
+      "source_ref": "10889:50959",
+      "source_refs": [
+        "10889:50959"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "DIALOG.yes_leave_group_btn",
+          "source_ref": "12052:75322",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Yes, leave group",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Confirmation - Leave Group Order New screen | MPS - Group Buy Changes | Go to Group Cart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10889:51002",
+      "source_refs": [
+        "10889:51002"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.merchant_profile_sku_sku_list",
+          "source_ref": "10889:51008",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Dirty Matchapresso Kombinasi matcha dan espresso yang bold, satukan dua dunia untuk bangkitkan semangatmu! 40.000  33.000 50% Right view SKU Image Add Customi",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Note Note Participant will be back to MPS if they leave the group order | Group Order - Left group Changes | Go to Group Cart"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "15745:73520",
+      "source_refs": [
+        "15745:73520"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "GO - Member no item New screen | Go to Group Cart | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10889:51733",
+      "source_refs": [
+        "10889:51733"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group Order - Host delete group Changes | Note Note If the group buy is fully paid by the host, the blue bar information doesnt need to show. | Go to Group Cart"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "15838:85271",
+      "source_refs": [
+        "15838:85271"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Failed done choosing items New screen | Go to Group Cart | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11196:61535",
+      "source_refs": [
+        "11196:61535"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Delete Member item New screen | Go to Group Cart | Member have\nregular active\ncart"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "11602:28188",
+      "source_refs": [
+        "11602:28188"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Host have active cart Changes | Member have\ngroup buy\nactive cart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11982:59497",
+      "source_refs": [
+        "11982:59497"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.merchant_profile_sku_sku_list",
+          "source_ref": "11982:59503",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Iced Dirty Matchapresso Kombinasi matcha dan espresso yang bold, satukan dua dunia untuk bangkitkan semangatmu! 40.000  33.000 50% Right view SKU Image Add Customi",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS Changes | Member have\ngroup buy\nactive cart"
+    },
+    {
+      "screen_id": "SHIMMER",
+      "screen_name": "Shimmer",
+      "source_ref": "12137:60539",
+      "source_refs": [
+        "12137:60539"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group Order landing page Changes | Member have\ngroup buy\nactive cart"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11602:28688",
+      "source_refs": [
+        "11602:28688"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.join_group_order_btn",
+          "source_ref": "12335:101047",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Join group order",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "MPS - Group Order Changes | Member have\ngroup buy\nactive cart"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11602:28832",
+      "source_refs": [
+        "11602:28832"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "11647:63179",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card .properties/cards/dialog/header_style default/food/spot_hero/change_merchant default/food/spot_hero/change_merchant default/food/spot_h",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Change resto to group order Existing | Member have\ngroup buy\nactive cart"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "10889:48614",
+      "source_refs": [
+        "10889:48614"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "MPS - Group Buy Changes | Member have\ngroup buy\nactive cart"
+    },
+    {
+      "screen_id": "CHAT",
+      "screen_name": "Chat",
+      "source_ref": "11750:71372",
+      "source_refs": [
+        "11750:71372"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHAT.group_order_share_bubble_container",
+          "source_ref": "11750:71377",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Message bubble Avatar + Bubble Bubble Tail Attachment Preview File Text GoFood Group Buy - Discount 50% GoFood your favorite foods together with friend and family hassle-free with saver delivery fees!",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "WA | Unable to join - Member full | Member Experience - Unable to join"
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "11750:71072",
+      "source_refs": [
+        "11750:71072"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LANDING.join_group_order_btn",
+          "source_ref": "11750:71091",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Join group order",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.navbar_status_bar_dynamic_btn",
+          "source_ref": "12335:101334",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content button/circular navigation/24/ic_cancel icon ",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group order - Landing New screen | Unable to join - Member full | Member Experience - Unable to join"
+    },
+    {
+      "screen_id": "LOADING",
+      "screen_name": "Loading",
+      "source_ref": "11750:72288",
+      "source_refs": [
+        "11750:72288"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "LOADING.primary_loading_spinner_btn",
+          "source_ref": "11750:72307",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "button/primary indicator/spinner",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group order - Loading New screen | Unable to join - Member full | Member Experience - Unable to join"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "12108:59421",
+      "source_refs": [
+        "12108:59421"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "12108:59795",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card header default/food/spot_hero/group_order_reached_limit default/food/spot_hero/groupbuy_reached_limit Layer_1 Group Group Group Group G",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.ok_got_it_btn",
+          "source_ref": "12108:59797",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Ok, got it",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group order - Landing - Full New screen | Unable to join - Reached limit | Member Experience - Unable to join"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11750:72049",
+      "source_refs": [
+        "11750:72049"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "15731:72355",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card header default/food/spot_hero/grouporder_about_to_co default/food/spot_hero/grouporder_about_to_co Host is already checking out You may",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Unable to join New screen | Unable to join - Host checkout | Member Experience - Unable to join"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11982:61646",
+      "source_refs": [
+        "11982:61646"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "15731:72073",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card header default/food/spot_hero/group_order_delete default/food/spot_hero/groupbuy_delete Group 1000011502 Group Layer 1 Clip path group ",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Note Note This dialog card will appear when member try to join from landing page, but at the same ti | Unable to join New screen | Unable to join - Group Order is deleted"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "15173:185526",
+      "source_refs": [
+        "15173:185526"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "15173:186346",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon Group order is no longer available This group order has already been placed, completed, or deleted.",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Note Note This dialog card will appear when member click GO link and try to join, but the group is a | Unable to join New screen | No longer available"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11982:60938",
+      "source_refs": [
+        "11982:60938"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "MPS Changes | Unable to join - Member full | Member Experience - Unable to join"
+    }
+  ],
+  "ui_flow": [
+    {
+      "from_screen_id": "ENTRY",
+      "to_screen_id": "MPS",
+      "to_source_ref": "10882:10702",
+      "condition": "",
+      "navigation_kind": "ENTRY",
+      "edge_source": "ENTRY_LABEL",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:10702"
+    },
+    {
+      "from_screen_id": "ENTRY",
+      "to_screen_id": "MPS",
+      "to_source_ref": "10882:10914",
+      "condition": "",
+      "navigation_kind": "ENTRY",
+      "edge_source": "ENTRY_LABEL",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:10914"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "10882:10702",
+      "to_source_ref": "10882:10914",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:25255",
+      "trigger_element_id": "MPS.tooltip_arrow_content_eating_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "10882:10702",
+      "to_source_ref": "10882:10914",
+      "condition": "Dismiss",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:25256",
+      "trigger_element_id": "MPS.see_offers_promo_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "10882:10914",
+      "to_source_ref": "10950:27992",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:27461",
+      "trigger_element_id": "MPS.group_order_type_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MOLP",
+      "from_source_ref": "10882:10914",
+      "to_source_ref": "14712:105037",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14712:105246",
+      "trigger_element_id": "MPS.promo_label_offer_logo_lbl"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "10950:27992",
+      "to_source_ref": "11598:37830",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:26670",
+      "trigger_element_id": "LANDING.create_invite_friends_btn"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "DIALOG",
+      "from_source_ref": "10950:27992",
+      "to_source_ref": "11343:65017",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11343:65460"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "SNIPPET",
+      "from_source_ref": "10950:27992",
+      "to_source_ref": "11022:57180",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11032:57521",
+      "trigger_element_id": "LANDING.navbar_status_bar_dynamic_btn"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11598:37830",
+      "to_source_ref": "10882:25524",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11598:39166",
+      "trigger_element_id": "LANDING.invite_limit_info_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "10882:25524",
+      "to_source_ref": "12011:65591",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12011:66124",
+      "trigger_element_id": "MPS.share_screenshot_img"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "CHAT",
+      "from_source_ref": "10882:25524",
+      "to_source_ref": "10882:26560",
+      "condition": "Share to WA",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:27441",
+      "trigger_element_id": "MPS.share_screenshot_img"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "10882:26695",
+      "to_source_ref": "10882:25524",
+      "condition": "Share",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12900:68044",
+      "trigger_element_id": "MPS.invite_friends_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "from_source_ref": "10960:32736",
+      "to_source_ref": "10882:29367",
+      "condition": "Scroll",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:30356"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10960:32736",
+      "to_source_ref": "15645:69437",
+      "condition": "Tap the header area (except the Invite)",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11841:88443",
+      "trigger_element_id": "MPS.group_name_header_lbl"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10882:29367",
+      "to_source_ref": "15645:69437",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:31105",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "from_source_ref": "10882:29367",
+      "to_source_ref": "11598:41072",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:30823",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "from_source_ref": "10882:29367",
+      "to_source_ref": "11809:76729",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11750:74923",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "SKU_DETAIL",
+      "from_source_ref": "10882:29367",
+      "to_source_ref": "15827:72458",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15827:72544",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "SKU_DETAIL",
+      "to_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "from_source_ref": "15827:72458",
+      "to_source_ref": "11598:41072",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15827:72549",
+      "trigger_element_id": "SKU_DETAIL.add_to_cart_btn"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10882:30369",
+      "to_source_ref": "10882:31110",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10883:32096"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "from_source_ref": "10882:30369",
+      "to_source_ref": "11598:42100",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11598:42372",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "SKU_DETAIL",
+      "from_source_ref": "10882:30369",
+      "to_source_ref": "15827:71488",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15827:72452",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.secondary_sku_list_item_list"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "EDIT_BILLING",
+      "from_source_ref": "10882:30851",
+      "to_source_ref": "10882:28296",
+      "condition": "Edit billing",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11192:60736",
+      "trigger_element_id": "SHARED_CART.edit_billing_summary_container"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "DIALOG",
+      "from_source_ref": "10885:32818",
+      "to_source_ref": "10886:35728",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10886:35933",
+      "trigger_element_id": "SHARED_CART.title_text_remove_member_lbl"
+    },
+    {
+      "from_screen_id": "DIALOG",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "11600:32059",
+      "to_source_ref": "10901:56106",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11600:32371",
+      "trigger_element_id": "DIALOG.dialog_close_btn"
+    },
+    {
+      "from_screen_id": "HOMESCREEN",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11598:39173",
+      "to_source_ref": "11598:39622",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11598:40312",
+      "trigger_element_id": "HOMESCREEN.home_shuffle_reorder_v_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "11598:39622",
+      "to_source_ref": "13056:83577",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11598:40338",
+      "trigger_element_id": "MPS.group_order_type_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11598:39622",
+      "to_source_ref": "11011:48756",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11598:40343",
+      "trigger_element_id": "MPS.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "13056:83577",
+      "to_source_ref": "13034:73997",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13056:83924",
+      "trigger_element_id": "LANDING.create_invite_friends_btn"
+    },
+    {
+      "from_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "to_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "from_source_ref": "11598:41072",
+      "to_source_ref": "11809:77177",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11809:77375",
+      "trigger_element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_btn"
+    },
+    {
+      "from_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "to_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "from_source_ref": "11598:41072",
+      "to_source_ref": "15827:71999",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11598:41521",
+      "trigger_element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_btn"
+    },
+    {
+      "from_screen_id": "SKU_DETAIL",
+      "to_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "from_source_ref": "15827:71488",
+      "to_source_ref": "15827:71999",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15827:72437",
+      "trigger_element_id": "SKU_DETAIL.add_to_cart_btn"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "from_source_ref": "15827:71999",
+      "to_source_ref": "11809:76729",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15827:72442",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.loading_spinner_btn"
+    },
+    {
+      "from_screen_id": "EDIT_BILLING",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10882:28296",
+      "to_source_ref": "11192:60540",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15277:71010",
+      "trigger_element_id": "EDIT_BILLING.pay_for_everyone_lbl"
+    },
+    {
+      "from_screen_id": "DIALOG",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10886:33588",
+      "to_source_ref": "10882:30851",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10886:35703"
+    },
+    {
+      "from_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "11600:28790",
+      "to_source_ref": "10882:31110",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10886:33072",
+      "trigger_element_id": "MERCHANT_PROFILE_REQUIRED.no_sugar_option_btn"
+    },
+    {
+      "from_screen_id": "DIALOG",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10885:32974",
+      "to_source_ref": "10882:31110",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11742:69671"
+    },
+    {
+      "from_screen_id": "DIALOG",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10886:33142",
+      "to_source_ref": "10885:32631",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10886:33164",
+      "trigger_element_id": "DIALOG.dialog_close_btn"
+    },
+    {
+      "from_screen_id": "DIALOG",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10886:35728",
+      "to_source_ref": "11600:29708",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11600:29949",
+      "trigger_element_id": "DIALOG.remove_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "DIALOG",
+      "from_source_ref": "15745:73286",
+      "to_source_ref": "10886:35728",
+      "condition": "Failed to remove",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15745:73463"
+    },
+    {
+      "from_screen_id": "HOMESCREEN",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11010:47577",
+      "to_source_ref": "11598:36771",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11011:48749",
+      "trigger_element_id": "HOMESCREEN.home_shuffle_reorder_v_btn"
+    },
+    {
+      "from_screen_id": "HOMESCREEN",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11010:47577",
+      "to_source_ref": "11604:59805",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11604:60549",
+      "trigger_element_id": "HOMESCREEN.buttonprimary_items_delivery_from_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "11598:36771",
+      "to_source_ref": "11598:36417",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11013:50317",
+      "trigger_element_id": "MPS.group_order_type_container"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11598:36417",
+      "to_source_ref": "11011:48756",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11598:37818",
+      "trigger_element_id": "LANDING.create_invite_friends_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11011:48756",
+      "to_source_ref": "10882:25524",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11598:37463",
+      "trigger_element_id": "MPS.yes_go_ahead_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "11604:59805",
+      "to_source_ref": "11604:60555",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11604:60902",
+      "trigger_element_id": "MPS.group_order_type_container"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11604:60555",
+      "to_source_ref": "11653:63490",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11604:61470",
+      "trigger_element_id": "LANDING.create_invite_friends_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "11192:60540",
+      "to_source_ref": "15277:70829",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10882:28404",
+      "trigger_element_id": "SHARED_CART.loading_spinner_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "11192:60540",
+      "to_source_ref": "15277:71016",
+      "condition": "Failed to change billing",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15277:71184",
+      "trigger_element_id": "SHARED_CART.loading_spinner_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "DIALOG",
+      "from_source_ref": "19534:109975",
+      "to_source_ref": "10886:33588",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10886:35708"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10886:34997",
+      "to_source_ref": "19534:109975",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "19534:110138",
+      "trigger_element_id": "MPS.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "15673:69907",
+      "to_source_ref": "19534:109975",
+      "condition": "Failed to delete",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15673:70057"
+    },
+    {
+      "from_screen_id": "CHAT",
+      "to_screen_id": "MPS",
+      "from_source_ref": "10886:37401",
+      "to_source_ref": "11982:60205",
+      "condition": "Join via WA link",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10886:38302",
+      "trigger_element_id": "CHAT.group_order_share_bubble_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHIMMER",
+      "from_source_ref": "11982:60205",
+      "to_source_ref": "10966:36905",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11982:60908",
+      "trigger_element_id": "MPS.fore_matcha_club_lbl"
+    },
+    {
+      "from_screen_id": "SHIMMER",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "10966:36905",
+      "to_source_ref": "11598:40661",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10938:18908"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "11598:40661",
+      "to_source_ref": "11034:57535",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11034:58515",
+      "trigger_element_id": "LANDING.title_paymentsiccard_icon_text_lbl"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11598:40661",
+      "to_source_ref": "10886:37535",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11728:68126",
+      "trigger_element_id": "LANDING.join_group_order_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "10886:37535",
+      "to_source_ref": "10889:46904",
+      "condition": "Invite friends",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12900:68125",
+      "trigger_element_id": "MPS.invite_friends_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "from_source_ref": "10889:46904",
+      "to_source_ref": "12011:66277",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12011:66789"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "from_source_ref": "10889:47826",
+      "to_source_ref": "10889:49416",
+      "condition": "Scroll",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11602:55781",
+      "trigger_element_id": "MPS.fore_matcha_club_lbl"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "HOMESCREEN",
+      "from_source_ref": "10889:47826",
+      "to_source_ref": "10918:16815",
+      "condition": "Back before adding items",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10918:17208",
+      "trigger_element_id": "MPS.navbar_status_bar_dynamic_btn"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "from_source_ref": "10889:49416",
+      "to_source_ref": "10889:49858",
+      "condition": "Add item",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10889:49852",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.secondary_sku_list_item_list"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10889:49416",
+      "to_source_ref": "10889:50317",
+      "condition": "Check shared cart",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10889:50542",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn"
+    },
+    {
+      "from_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10889:49858",
+      "to_source_ref": "10894:52473",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10894:53092",
+      "trigger_element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "from_source_ref": "10889:50317",
+      "to_source_ref": "10889:49416",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10889:50537",
+      "trigger_element_id": "SHARED_CART.add_items_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "DIALOG",
+      "from_source_ref": "15651:69684",
+      "to_source_ref": "10894:55072",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15651:69897"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHIMMER",
+      "from_source_ref": "11974:58748",
+      "to_source_ref": "12137:60238",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12137:60835"
+    },
+    {
+      "from_screen_id": "SHIMMER",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "12137:60238",
+      "to_source_ref": "11598:40350",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12137:60527"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "11598:40350",
+      "to_source_ref": "11015:52600",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11598:40656",
+      "trigger_element_id": "LANDING.join_group_order_btn"
+    },
+    {
+      "from_screen_id": "DIALOG",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "10889:50959",
+      "to_source_ref": "10889:50317",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11602:58291"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "DIALOG",
+      "from_source_ref": "10889:51002",
+      "to_source_ref": "10889:50959",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "10889:51727",
+      "trigger_element_id": "MPS.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "DIALOG",
+      "from_source_ref": "15745:73520",
+      "to_source_ref": "10889:50959",
+      "condition": "Failed to leave",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15745:73649"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHIMMER",
+      "from_source_ref": "11982:59497",
+      "to_source_ref": "12137:60539",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12137:60840",
+      "trigger_element_id": "MPS.merchant_profile_sku_sku_list"
+    },
+    {
+      "from_screen_id": "SHIMMER",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "12137:60539",
+      "to_source_ref": "11602:28688",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11982:59491"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "11602:28688",
+      "to_source_ref": "11602:28832",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13021:80973",
+      "trigger_element_id": "LANDING.join_group_order_btn"
+    },
+    {
+      "from_screen_id": "CHAT",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11750:71372",
+      "to_source_ref": "11982:60938",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11982:61640",
+      "trigger_element_id": "CHAT.group_order_share_bubble_container"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "LOADING",
+      "from_source_ref": "11750:71072",
+      "to_source_ref": "11750:72288",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11750:72976",
+      "trigger_element_id": "LANDING.join_group_order_btn"
+    },
+    {
+      "from_screen_id": "LOADING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11750:72288",
+      "to_source_ref": "11982:61646",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11982:62630",
+      "trigger_element_id": "LOADING.primary_loading_spinner_btn"
+    },
+    {
+      "from_screen_id": "LOADING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11750:72288",
+      "to_source_ref": "11750:72049",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11750:72590",
+      "trigger_element_id": "LOADING.primary_loading_spinner_btn"
+    },
+    {
+      "from_screen_id": "LOADING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11750:72288",
+      "to_source_ref": "12108:59421",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12108:60166",
+      "trigger_element_id": "LOADING.primary_loading_spinner_btn"
+    },
+    {
+      "from_screen_id": "LOADING",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11750:72288",
+      "to_source_ref": "15173:185526",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15173:186419",
+      "trigger_element_id": "LOADING.primary_loading_spinner_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "12108:59421",
+      "to_source_ref": "11750:71072",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12108:60171",
+      "trigger_element_id": "MPS.ok_got_it_btn"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "LANDING",
+      "from_source_ref": "11982:60938",
+      "to_source_ref": "11750:71072",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11750:71811"
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "extraction_status": "INCOMPLETE",
+  "extraction_gaps": [
+    {
+      "field": "ui_flow",
+      "reason": "Export scope is 'selection': connectors leaving the selected frames are not present, so ui_flow coverage cannot be verified.",
+      "action": "Re-export the full page to get a complete flow graph.",
+      "severity": "INFO"
+    }
+  ],
+  "visual_analysis_scratchpad": "[auto] 5 screen frame(s) detected, 4 connector edge(s) resolved. Scope: selection. Review _render.html for visual confirmation. Element and interaction extraction is Phase 1 (mechanical derivation from pruned node_tree).",
+  "project_context": {
+    "overall_ambiguity_rating": "LOW",
+    "blocking_issues": []
+  },
+  "app": "gofood-merchant",
+  "design_source": {
+    "file_name": "GoFood Group Order",
+    "page_name": "    ↪ MVP - Group Order [v5.46]",
+    "scope": "selection",
+    "exported_at": "2026-08-25T09:36:28.350Z",
+    "max_depth": 30,
+    "node_count": 1190,
+    "truncated_count": 0,
+    "has_geometry": true,
+    "truncated_nodes": []
+  },
+  "screens": [
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "16616:180417",
+      "source_refs": [
+        "16616:180417"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": true,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.view_group_cart_btn",
+          "source_ref": "16619:181395",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "View group cart • 2",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Unable to add if the discounted SKU is sold out | Still able to add but the next items will be in normal price | Fixed inventory"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "16616:180952",
+      "source_refs": [
+        "16616:180952"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+          "source_ref": "16619:181363",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "_properties/gofood/dish/action stepper _properties/stepper actions/24/ic_minus 2 _properties/stepper actions/24/ic_plus",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "GO - Host item added New screen | Group Order - Shared cart - Host item added | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "16619:181404",
+      "source_refs": [
+        "16619:181404"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.go_to_checkout_btn",
+          "source_ref": "16619:181467",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Go to checkout",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "GO - Host item added New screen | Group Order - Shared cart - Host item added | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "16619:181674",
+      "source_refs": [
+        "16619:181674"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+          "source_ref": "16619:182120",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "_properties/gofood/dish/action stepper _properties/stepper actions/24/ic_minus 3 _properties/stepper actions/24/ic_plus",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Checkout Changes | Group Order - Checkout | Host - Pre-Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "16619:182176",
+      "source_refs": [
+        "16619:182176"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Checkout Changes | Group Order - Checkout | Host - Pre-Booking Experience [Everyone pays for their items]"
+    }
+  ],
+  "ui_flow": [
+    {
+      "from_screen_id": "ENTRY",
+      "to_screen_id": "MPS",
+      "to_source_ref": "16616:180417",
+      "condition": "",
+      "navigation_kind": "ENTRY",
+      "edge_source": "ENTRY_LABEL",
+      "confidence": "EXPLICIT",
+      "source_ref": "16616:180417"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "16616:180417",
+      "to_source_ref": "16616:180952",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "16619:181399",
+      "trigger_element_id": "MPS.view_group_cart_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "16616:180952",
+      "to_source_ref": "16619:181404",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "16619:181657",
+      "trigger_element_id": "SHARED_CART.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "CHECKOUT",
+      "from_source_ref": "16619:181404",
+      "to_source_ref": "16619:181674",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "16619:182159",
+      "trigger_element_id": "SHARED_CART.go_to_checkout_btn"
+    },
+    {
+      "from_screen_id": "CHECKOUT",
+      "to_screen_id": "CHECKOUT",
+      "from_source_ref": "16619:181674",
+      "to_source_ref": "16619:182176",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "16619:182641",
+      "trigger_element_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn"
+    }
+  ]
+}

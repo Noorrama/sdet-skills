@@ -1,279 +1,127 @@
 ---
-name: mobile-design-extractor
-description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, element IDs (logical), interactions, states, ui_flow, and project-level ambiguity tracking. Input is a JSON export from the "Export Design Raw JSON" Figma plugin (formatVersion 2 with geometry). Spatial-first pipeline — deterministic Python derives groups, swim lanes, screen collapse, and connector-resolved flows from geometry alone; a constrained fast-tier LLM pass only enriches (element labels, note-traced validations), and a stronger model is pulled in only for flagged escalations. Collapses state variants into screen-level states instead of fragmenting them into separate screens, and reports unresolved navigation in blocking_issues rather than inventing it. App-agnostic; the frontend-primary stage. Its element IDs are the logical half of the locator mapping.
+name: design-extractor
+description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, logical element IDs, interactions, states, ui_flow, and project-level ambiguity tracking. Input is a JSON export from the "Export Design Raw JSON" Figma plugin. The concrete extraction pipeline is intentionally not specified here; this skill defines the contract, principles, and output shape that any implementation must satisfy.
 ---
 
-# Mobile Design Extractor — spatial-first pipeline
+# Mobile Design Extractor
 
-Design is the frontend-primary stage. This skill produces the screen/element map whose logical
-`element_id`s later join to real per-platform locators from the Code Diff (code-change-extractor).
+This skill is the frontend-primary stage of the AEP mobile pipeline. It produces the screen/element map whose logical `element_id`s later join to real per-platform locators from the code-change-extractor stage.
 
-**Architecture: the scripts decide, the model decorates.** Everything structural — grouping,
-swim lanes, screen collapse, states, `ui_flow`, deterministic elements — comes byte-reproducibly
-from `spatial_pipeline/` scripts. The model pass (Phase B) may only enrich what the scripts
-emitted, under a merge contract that rejects anything it cannot trace to the export. If you ever
-find yourself counting connectors, classifying frames, or walking the board by hand — stop; the
-script exists so that never happens.
+## Golden input
 
-## Scripts (all in `spatial_pipeline/`, pure stdlib + jsonschema)
+The current POC reference export is `golden/inputs/GoFood-Group-Order-Bundling-Items.json` (Figma selection export, `formatVersion: 2`, 3 540 nodes). Its schema and observed conventions are memoised in `INPUT_SCHEMA.md`. Any new extraction implementation must be validated against this golden input before it replaces the previous pipeline.
 
-| script | role |
-| :--- | :--- |
-| `phase_a.py` | THE extractor: spatial analysis → collapse → skeleton `design_context.json` + `phase_a.report.json`, schema-validated |
-| `screen_identity.py` | the identity rule: does one frame NAME mean one screen? control-set comparison + chip/context evidence, plus spec-material exclusion |
-| `identity_audit.py` | read-only audit of identity contests across boards; `--check-labels` replays the design team's ground-truth same/different calls (`identity_labels.json`) as a regression gate |
-| `preflight.py` | ALL mechanical preflight checks in one deterministic pass — never hand-write these |
-| `phase_b_packets.py` | one grounded packet per screen for the enrichment pass |
-| `phase_b_autobind.py` | deterministic element auto-bind (zero tokens) + light packets for the notes-only LLM pass |
-| `phase_b_merge.py` | applies enrichment under the no-invention contract, writes `escalations.json`, re-validates |
-| `spatial_scan.py`, `connector_resolve.py` | libraries used by the above; each also runs standalone as a diagnostic |
-| `viz_export.py` + `viz_shell.html` | REQUIRED final step: board-replica review page (`--html`) for human side-by-side verification against Figma |
+## Output contract
 
-## Preflight — resolve, or record and continue
+One `design_context.json` per app in scope. The file must validate against the plugin-level `design_context` schema and contain at least:
 
-**Never stop, never guess.** Anything unresolvable becomes an `extraction_gaps` entry and the run
-continues — a partial, honestly labelled output beats no output. Inventing a value is forbidden.
+- `app`: the app identifier, when resolvable.
+- `screens`: a list of screens, each with its states and logical elements.
+- `elements`: logical element IDs with role hints derived from the design, not fabricated.
+- `ui_flow`: directed edges representing navigation, starting from the reserved `ENTRY` pseudo-node.
+- `extraction_gaps`: anything that could not be resolved, with a reason and a Figma node reference when available.
+- `blocking_issues`: questions that require a design-team answer before downstream stages can proceed safely.
 
-1. **Mechanical checks — one script, never hand-written.** Run
-   `python3 spatial_pipeline/preflight.py <export.json> [--app <app_id>]`. It performs EVERY
-   mechanical preflight check in one deterministic pass — jsonschema availability, export parse,
-   `formatVersion: 2` + geometry, `truncatedCount`, app config readability, schema readability —
-   and prints a JSON verdict with ready-made `extraction_gaps` entries to copy into the context,
-   plus the raw app-set evidence (file name/page, top-level sections, bracket prefixes, known app
-   ids) for step 2. **Never write ad-hoc code to inspect the export envelope** — that is exactly
-   the failure mode this script removes. `status: BLOCKED` (formatVersion 1 / no geometry) →
-   emit a `DEGRADED` context with empty screens carrying the script's `BLOCKING` gap and stop
-   the pipeline there; `DEGRADED` entries → copy the gaps and continue.
-2. **App set — how many apps does this export cover?** Never assume one. Check `file.name`,
-   `file.page`, top-level SECTION names, frame-name prefixes (`[GoPay] …`), or the user naming
-   them. Map to: `gojek-consumer`, `gojek-driver`, `gofood-merchant`, `gopay-consumer`,
-   `gopay-merchant`.
-   - One app → `phase_a.py <export> --app <app_id>` → `design_context.json`.
-   - Separate exports per app → run the whole pipeline once per file, writing
-     `design_context.<app_id>.json` each.
-   - **One export mixing several apps** → the pipeline has no app-splitting stage yet: emit one
-     file, leave the dominant app on `app`, and raise a `BLOCKING` note naming the frames that
-     belong elsewhere with the action "re-export per app as a selection export". Do NOT hand-split.
-   - None resolvable → one file, `app` absent, `BLOCKING` note on `app`. Never guess from visual
-     style; a dark-themed frame is not proof of an app.
-   Report the decision in your reply before extracting.
-3. **Config** — `config/<app>.json` supplies
-   `naming_convention.role_vocabulary` (the `_btn/_input/…` suffixes phase_a and the merge use).
-   Unreadable → scripts fall back to their built-in default vocabulary; add a `DEGRADED` gap
-   warning IDs are unverified against the app convention.
-4. **Schema** — `schemas/design_context.schema.json`. The scripts locate it
-   relative to the plugin root automatically; unreadable → `DEGRADED` gap, same install action as
-   other skills (reinstall/update the aep-mobile plugin and restart your editor).
+## Principles
 
-## Output files — one per app in scope
+- Never invent `screen_id`, `element_id`, states, or edges.
+- Collapse state variants into screen-level states; do not fragment them into separate screens.
+- Report unresolved navigation in `blocking_issues` rather than fabricating it.
+- Any unresolvable ambiguity becomes an `extraction_gaps` entry and the run continues. A partial, honestly labelled output is preferable to no output.
+- The model may enrich labels, validations, and wording, but it must not create structure that the design export does not support.
+- `element_id` casing and role suffixes are the join key to the code-change context; once established, downstream stages must not re-case or re-derive them.
 
-| Apps in scope | Files written |
-| :--- | :--- |
-| 1 | `design_context.json` |
-| 2+ (separate exports) | `design_context.<app_id>.json` each |
+## Workflow outline
 
-Each file is a complete, independently valid `design_context`. Always set `app` — the schema
-doesn't require it, but `sdet-plan-generator` keys off it to match contexts in a run.
-`phase_a.report.json` is a pipeline-internal sidecar (provenance: protos, merges, exclusions,
-unresolved endpoints); keep it next to the context for reviewers, never feed it downstream.
+1. **Preflight**: verify the export can be parsed, carries geometry, and contains the expected Figma document structure. Emit a `DEGRADED` context if not.
+2. **App set**: determine how many apps the export covers. Do not assume a single app from visual style or dark theme alone. Report the decision before extracting.
+3. **Extract**: derive screens, states, elements, and `ui_flow` from the export. Keep the derivation deterministic and reproducible.
+4. **Enrich**: use a constrained, fast-tier model pass only for decoration, labels, and note-traced validations. Escalate to a stronger tier only when a screen is flagged as genuinely ambiguous.
+5. **Review**: produce a human-verifiable side-by-side artifact so reviewers can confirm collapse, identity, and edge decisions against the Figma board.
+6. **Validate**: ensure the final context passes schema validation and referential integrity checks.
 
-## Workflow
+## Pipeline scripts
 
-Run all commands from the aep-mobile plugin root (the directory containing `config/`, `schemas/`,
-`skills/`).
+Four Python scripts implement the extraction pipeline. Run them from the skill directory.
 
-```bash
-cd skills/design-extractor/spatial_pipeline
+### Step 1 — Preprocess & render (`render_design.py`)
 
-# 1. deterministic skeleton (screens, states, ui_flow, connector-trigger elements)
-python3 phase_a.py <export.json> --app <app_id> --out <workdir>
-
-# 2. packets for the enrichment pass
-python3 phase_b_packets.py <export.json> <workdir>/design_context.json <workdir>/phase_b_packets.jsonl
+```
+python3 render_design.py -i <input.json> -w <workdir>
 ```
 
-**3. Phase B — light mode (the default).** Element binding is deterministic; only note
-interpretation needs a model.
+Runs both the `preprocess` phase (spatial analysis → `<stem>_pre-process.json`) and the `render` phase (HTML wireframe → `<stem>_render.html`). Pass `preprocess` or `render` as a positional argument to run only one phase.
 
-```bash
-# 3a. auto-bind elements from the packets (zero tokens, instant) and emit the
-#     light packets for the notes-only pass
-python3 phase_b_autobind.py <workdir>/phase_b_packets.jsonl \
-        <workdir>/autobind_out.jsonl <workdir>/phase_b_light.jsonl
+### Step 2 — Extract design context (`extract_design_context.py`)
 
-# 3b. merge the auto-bound elements (same contract, same validator)
-python3 phase_b_merge.py <workdir>/design_context.json <workdir>/phase_b_packets.jsonl \
-        <workdir>/autobind_out.jsonl <workdir>/design_context.autobound.json
+```
+python3 extract_design_context.py \
+    --preprocess <workdir>/stem_pre-process.json \
+    --input      <original-input.json> \
+    [-w <workdir>] \
+    [-o <workdir>/design_context.temp.json]  # default
 ```
 
-Then run the **notes-only LLM pass** over `phase_b_light.jsonl` (screens with notes, OTHER
-state kinds, or ambiguity flags — typically half the screens at ~6% of the full packet bytes):
-split into batches of ~21 lines, one **Haiku** agent per batch, in parallel. Each agent outputs
-one JSON object per screen in EXACTLY this shape — paste this block into every agent prompt
-verbatim; it is the merge contract, and any other shape (a boolean `ambiguity`, a string list,
-anything improvised) is rejected by `phase_b_merge.py` and burns a pointless escalation:
+Reads `_pre-process.json` and writes a schema-valid `design_context.temp.json` (intermediate artifact). Validates the output against `../../schemas/design_context.schema.json` before writing.
+
+### Step 3 — Agent Review & Refinement
+Once `design_context.temp.json` is generated, first check `<workdir>/element_id_quality.json` (produced by Step 2) to quickly identify which `trigger_element_id`s have `"quality": "BAD"`. Prioritize reviewing those flagged elements in the `ui_flow` array. Then identify and highlight any remaining `trigger_element_id` where the mechanical name is still too generic or ambiguous.
+
+For each identified element, suggest the most appropriate replacement id based on contextual clues on that element — e.g. its label/text content, accessibility name, role, position within the screen hierarchy, and the interaction semantics of its `ui_flow` edge. The suggested id must follow the same casing/role-suffix conventions as the rest of the context (see Principles), since it is the join key to downstream code-change locators.
+
+Output the proposed renames as a separate mapping JSON file, `<workdir>/id_refinement_map.json`, with one entry per refined element:
 
 ```json
-{"screen_id": "<copied from the packet>",
- "state_kind_map": {"<state name>": "DEFAULT|LOADING|EMPTY|ERROR|SUCCESS|OFFLINE|DISABLED|PERMISSION_DENIED|DARK_THEME|LIGHT_THEME|LOCALE_VARIANT|RTL|OTHER"},
- "screen_validations": ["<one sentence, traced to a note — never invented>"],
- "ambiguity": {"rating": "LOW|MEDIUM|HIGH", "reason": "<one concrete sentence naming the conflict>"}}
+{
+  "refinements": [
+    {
+      "screen_id": "...",
+      "old_id": "button_1",
+      "suggested_id": "checkout_apply_promo_button",
+      "confidence": "high",
+      "rationale": "Element label reads 'Apply promo' and triggers a checkout action"
+    }
+  ]
+}
 ```
 
-`ambiguity` is optional and is an OBJECT, never a boolean. Instruct agents to rate against the
-consequence: HIGH means a design-team question is required — it puts the screen in
-`blocking_issues` and `escalations.json`, and requires a non-empty reason a PM can answer.
-Conflicting notes that are per-lane/persona variants (host vs member) are MEDIUM at most;
-states with no note evidence are simply unannotated, not ambiguous — omit the field. No
-`elements`, no `element_updates`; instruct agents so explicitly. Never do this pass inline in
-your own context.
+Do not edit `design_context.temp.json` directly; reviewers use the mapping file to confirm or reject each rename before it is applied.
 
-```bash
-# 4. merge the light outputs; writes escalations.json
-cat light_out_*.jsonl > light_out.jsonl
-python3 phase_b_merge.py <workdir>/design_context.autobound.json \
-        <workdir>/phase_b_packets.jsonl light_out.jsonl \
-        <workdir>/design_context.enriched.json
+### Step 4 — Apply refinements (`recover_design_context.py`)
+
+```
+python3 recover_design_context.py \
+    --refinements <workdir>/id_refinement_map.json \
+    [-w <workdir>] \
+    [-c <workdir>/design_context.temp.json]  # default input \
+    [-o <workdir>/design_context.json]       # default output
 ```
 
-**Full mode (opt-in, only when the user asks for maximum element curation):** instead of 3a/3b,
-run one Haiku agent per ~14-packet batch of the FULL packets with the contract from the
-`phase_b_merge.py` docstring verbatim — the model then also selects/refines elements. Costs
-roughly 10x the light-mode tokens for modestly better decoration filtering; the merge's
-auto-repair makes light mode's naming just as safe.
+Reads `design_context.temp.json` and `id_refinement_map.json`, applies all refinements with `confidence: "medium"` or `"high"`, updates both `element_id` in screens and `trigger_element_id` in `ui_flow`, validates against schema, and writes the final `design_context.json`.
 
-**5. Escalation pass — stronger model, only when earned.** `phase_b_merge.py` writes
-`escalations.json`: one entry per screen that needs judgment beyond the fast tier —
-HIGH-ambiguity flags from the enrichment agents, ambiguous generic-name collapses from phase_a,
-and screens whose enrichment was rejected by the contract. If the file is empty (`[]`), skip this
-step entirely — do not escalate "just in case".
-For each escalated screen, spawn ONE agent on **Sonnet** with: that screen's packet line, the
-escalation reason, and the same contract. Merge its output with a second `phase_b_merge.py` run
-(input context = the enriched file; the merge is additive and rejects duplicates, so re-running
-is safe). A HIGH call that survives escalation stays in `blocking_issues` — escalation exists to
-refine bindings and wording, not to argue flags away.
+### Output artefacts (workdir convention)
 
-**6. Finalize.** Rename/move `design_context.enriched.json` to the output location as
-`design_context.json` (or `design_context.<app_id>.json`), confirm the merge printed
-`schema: VALID`, and summarize: screens, edges, elements, blocking issues, escalations run.
+All run outputs go to a workdir, never into the skill directory itself. Suggested layout:
 
-**7. Review page — always, never optional.** A `design_context.json` nobody can check against
-the board is not a finished deliverable: the collapse and identity decisions are only verifiable
-side by side with Figma. Always produce the page and always hand the user its path (publish it as
-an Artifact when the user wants a link):
-
-```bash
-python3 connector_resolve.py <export.json> <workdir>/flow_edges.json
-python3 viz_export.py <export.json> <workdir>/flow_edges.json <workdir>/viz_data.json \
-        <workdir>/design_context.json --html <workdir>/flow_map.html
 ```
-
-`flow_map.html` is self-contained (the shell with the data inlined) — no server, no assets. It
-draws every group, screen, chip, banner and resolved edge in board coordinates, marks entry
-screens (explicit label vs inferred topology), and lists the unresolved connectors, which is the
-fastest way for a reviewer to spot a fabricated or missing edge. One page per app in scope.
+golden/outputs/<stem>/
+  <stem>_pre-process.json
+  <stem>_render.html
+  design_context.temp.json      # Step 2 output (intermediate)
+  id_refinement_map.json        # Step 3 output (reviewer-produced)
+  design_context.json           # Step 4 output (final)
+```
 
 ## Model policy
 
-- **Default tier: Haiku.** Structure comes from scripts; Phase B batch enrichment is
-  closed-vocabulary language work and runs on Haiku agents.
-- **Escalate to Sonnet** only for screens listed in `escalations.json` (step 5), or for the two
-  preflight judgment calls a fast tier shouldn't make alone: an app split the page names don't
-  settle, and wording of user-facing blocking issues when the source notes conflict. Keep
-  escalation prompts minimal — one screen packet plus the contract, nothing else — so the Sonnet
-  spend stays proportional to the judgment actually needed.
-- **HARD CAP: Sonnet.** No agent in this skill may ever run on a tier above Sonnet (no Opus, no
-  Fable) — not for escalations, not for retries, not under any pressure. If Sonnet cannot settle
-  a question, the answer is a `blocking_issues` entry for a human, never a bigger model.
-- **Never escalate to redo structure.** If the structure looks wrong, the fix is a script fix or
-  a Figma fix — re-running a bigger model over the same export must produce the same skeleton by
-  construction.
-
-## What the scripts already guarantee (do not re-derive, do not override)
-
-- **Calibration**: every threshold derives from the modal portrait-frame size — no hardcoded
-  pixels, no reliance on component names, colors, or team-specific conventions.
-- **Swim lanes**: rows by top-line clustering; persona bands (wide banners) and flow-cluster
-  banners scoped per band; left captions as lane names; attached dialog shelves as overlays.
-- **Screen collapse** (validated against the GoFood Group Order board):
-  proto = consecutive same-frame-name run in a column; multi-frame proto → frame name,
-  single-frame proto → chip title; chip `Type` (New screen/Changes/Existing) is change-status
-  metadata, never a state; scenario sub-sections become state prefixes and edge conditions, never
-  screens; self-loops after collapse are state transitions in the report, never `ui_flow`.
-- **Screen identity** (`screen_identity.py`, validated against the design team's own
-  same/different calls in `identity_labels.json`): one frame NAME is not always one screen —
-  teams reuse "Landing"/"MPS"/"Dialog" across flows. Frames of one base identity are compared by
-  CONTROL SET (visible text of their interactive layers, digits normalised because "30%" vs
-  "60%" is data, not identity); a strong match merges transitively, weaker agreement merges on
-  the cluster average. Only a frame with its own non-state chip seeds a screen — unlabelled and
-  state-labelled frames attach to their best match, and on a board where nobody chipped anything
-  the flow context seeds instead (one context = one screen, still mergeable by controls). Splits
-  land in the report as `identity_splits[]` with their evidence; new ids are named from the
-  group's own chip, else its flow context, else a control it uniquely has. Whole-frame text and
-  component-name similarity were both measured and rejected: text scores 0.70 between screens
-  the team calls different (shared chrome), component names score 1.00 between unrelated dialogs
-  (shared design system).
-- **Spec material is excluded, not collapsed**: frames under a group/band/section named for
-  specs, annotations, redlines, guidelines, or assets document a screen instead of being one
-  (design-team call), so they leave `screens[]` and `ui_flow` and appear in `excluded_nodes` as
-  `SPEC_MATERIAL`. Connectors that touched them become unresolved rather than silent.
-- **Connector resolution**: arrowhead = direction (never draw order); endpoints resolve via
-  element-in-screen → chip label → variant box → small-section entry (≤8 screens only — a bigger
-  section carries no per-screen information and resolving it fabricates an edge); everything else
-  lands in the report as unresolved-with-reason.
-- **Entry points**: `ui_flow` starts with edges from the reserved `ENTRY` pseudo-node
-  (statechart initial-state pattern). Explicit signals win — an "Entry point"/"1st time"
-  qualifier on a screen label chip or a flow-cluster banner, or a prototype flow starting
-  point (`edge_source: ENTRY_LABEL`, `confidence: EXPLICIT`, `source_ref` = the chip/banner
-  node id). Only when the board carries no explicit signal does topology infer them: the
-  zero-in-degree root with the widest forward reach, plus per-persona-band coverage
-  (`ENTRY_TOPOLOGY`, `INFERRED`, plus an INFO gap advising an explicit chip). All root
-  candidates with reach counts land in `phase_a.report.json` (`entry_candidates`). `ENTRY`
-  is never a screen, never a `to_screen_id`, and Phase B may never create or touch it —
-  `context_checks.py` enforces all three.
-- **ui_flow ordering**: breadth-first from `ENTRY` — entry edges first, then each reached
-  screen's out-edges wave by wave (ties broken by target board position, condition,
-  source_ref), then components unreachable from any entry, appended per component by board
-  position. Purely presentational, byte-reproducible; no consumer may read semantics into
-  array position.
-- **Enrichment naming**: packets dedupe candidates repeating identical (name, type, text)
-  across a screen's state-variant frames and stamp each survivor with a deterministic,
-  screen-unique `suggested_purpose` derived from its own text. The merge auto-repairs the
-  fast tier's naming mistakes deterministically — generic purposes (`element_container`,
-  ...) are re-derived from the candidate's own text, colliding ids get a source_ref-derived
-  suffix, truncated source_refs snap to their unique candidate — and counts the repairs as
-  `auto_repaired` in its report. Escalations therefore mean genuine ambiguity, not cleanup;
-  do not re-run the fast tier to fix names.
-- **Honesty**: reference screenshots without chips, unlabeled draft clusters, external
-  prototype-reaction destinations, and ambiguous collapses are reported, never guessed at.
+- Default enrichment work runs on the fast tier.
+- Escalate only for screens flagged as genuinely ambiguous by the pipeline.
+- Never escalate to redo structure. If the structure looks wrong, the fix belongs in the Figma board or the extraction logic, not in a larger model call.
+- Do not use a tier above Sonnet for any design-extractor task.
 
 ## Rules
 
-- Never invent `screen_id`, `element_id`, states, or edges. The merge enforces this for Phase B;
-  you enforce it for yourself by never editing the context by hand.
-- `element_id` casing and role suffixes come from the scripts + app config. Never re-case or
-  re-derive them — they are the join key to `change_context`.
-- Blocking issues are questions for the design team, phrased so a PM can answer them, each naming
-  the Figma node id involved.
-- One Write per output file. Intermediates stay in the workdir; never commit run outputs into the
-  skill directory.
-
-## Verify
-
-- The merge run must end `schema: VALID` and `referential checks: OK` — phase_a and the merge
-  both run `context_checks.py` (screen/element/edge referential integrity, the checks the JSON
-  schema cannot express) and exit non-zero on failure. That is the gate, not a manual checklist.
-  Standalone: `python3 context_checks.py <design_context.json>`.
-- Identity regression: `python3 identity_audit.py --check-labels` replays the design team's
-  labelled frame pairs through the real splitter and must print `7/7 labels reproduced`. When a
-  design team settles a new same/different question, add the pair to `identity_labels.json` — that
-  gate is what keeps the identity rule honest across board dialects.
-- Ground-truth spot check (recommended on a new board or new design team): pick 2-3 screen node
-  ids in Figma, count their connectors, compare with edges touching those ids' collapsed screens
-  in `ui_flow` + `phase_a.report.json`. `python3 identity_audit.py <export.json>` lists which
-  screens still hold frames from several flows and what a split would do. Any mismatch is a pipeline bug or a board convention the
-  scripts haven't met — report it, don't patch the output.
-- The `flow_map.html` from step 7 is the human-review gate: open it beside the Figma board and
-  check that each screen box carries the frames you expect, that split screens (`identity_splits`
-  in the report) really are different screens, and that no edge exists on the page that the board
-  does not draw.
+- One write per output file. Keep intermediates in a work directory; never commit run outputs into the skill directory.
+- Blocking issues must be phrased so a PM can answer them and must name the Figma node id involved.
+- Never edit the final `design_context.json` by hand.
+- **Always re-run all pipeline steps from scratch** — never reuse previous run outputs (e.g. `_pre-process.json`, `design_context.temp.json`, `id_refinement_map.json`, `design_context.json`, `element_id_quality.json`). Each run must be fully reproducible from the original Figma input.

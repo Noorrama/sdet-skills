@@ -1,0 +1,414 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Mobile Design Extractor Golden Input",
+  "description": "Golden input schema for the mobile-design-extractor skill from Figma exports",
+  "additionalProperties": false,
+  "required": ["exportedAt", "scope", "file", "export", "nodes"],
+  "properties": {
+    "exportedAt": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\..*Z$",
+      "description": "ISO 8601 timestamp of the export."
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["page"],
+      "description": "Always \"page\" for page exports."
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "page"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Figma file name."
+        },
+        "page": {
+          "type": "string",
+          "description": "Page name; may contain unicode arrows and version tags."
+        }
+      }
+    },
+    "export": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["formatVersion", "maxDepth", "nodeCount", "truncatedCount", "truncatedNodes"],
+      "properties": {
+        "formatVersion": {
+          "type": "integer",
+          "const": 2,
+          "description": "Schema version. This skill targets 2."
+        },
+        "maxDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum traversal depth used by the exporter."
+        },
+        "nodeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total nodes in the export."
+        },
+        "truncatedCount": {
+          "type": "integer",
+          "const": 0,
+          "description": "Nodes omitted due to depth limits. Must be 0 for full extraction."
+        },
+        "truncatedNodes": {
+          "type": "array",
+          "description": "Node ids of truncated nodes, normally empty.",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]+:[0-9]+$"
+          }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Exactly one root PAGE node.",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "type"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9]+:[0-9]+$",
+            "description": "Figma node id, e.g. \"13056:83189\"."
+          },
+          "name": {
+            "type": "string",
+            "description": "Layer name. Often generic (\"Section\", \"Content\") for atoms; semantic at group/section level."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["PAGE", "FRAME", "INSTANCE", "TEXT", "GROUP", "RECTANGLE", "ELLIPSE", "SECTION", "CONNECTOR"],
+            "description": "Node type enum."
+          },
+          "x": { "type": "integer", "description": "X coordinate in Figma canvas coordinates. Absent only on PAGE." },
+          "y": { "type": "integer", "description": "Y coordinate in Figma canvas coordinates. Absent only on PAGE." },
+          "width": { "type": "integer", "description": "Width in Figma canvas coordinates. Absent only on PAGE." },
+          "height": { "type": "integer", "description": "Height in Figma canvas coordinates. Absent only on PAGE." },
+          "children": {
+            "type": "array",
+            "description": "Nested child nodes. Absent on leaf nodes.",
+            "items": { "$ref": "#/$defs/node" }
+          }
+        },
+        "$ref": "#/$defs/node-by-type"
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["id", "name", "type"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+        "name": { "type": "string" },
+        "type": { 
+          "type": "string",
+          "enum": ["PAGE", "FRAME", "INSTANCE", "TEXT", "GROUP", "RECTANGLE", "ELLIPSE", "SECTION", "CONNECTOR"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "page-node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "const": "PAGE" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/node" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "section-node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "const": "SECTION" },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/node" }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "x", "y", "width", "height", "children"]
+    },
+    "frame-node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "const": "FRAME" },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/node" }
+        },
+        "reactions": {
+          "type": "array",
+          "description": "Prototype interactions, see below.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "object",
+                "required": ["type", "destinationId", "navigation", "transition", "resetVideoPosition", "resetScrollPosition"],
+                "properties": {
+                  "type": { "type": "string", "const": "NODE" },
+                  "destinationId": { "type": ["string", "null"], "description": "Important: null means destination was not exported or is unresolved" },
+                  "navigation": { "type": "string", "const": "NAVIGATE" },
+                  "transition": {
+                    "type": "object",
+                    "required": ["type", "easing", "duration"],
+                    "properties": {
+                      "type": { "type": "string", "const": "SMART_ANIMATE" },
+                      "easing": {
+                        "type": "object",
+                        "required": ["type"],
+                        "properties": {
+                          "type": { "type": "string", "const": "EASE_OUT" }
+                        }
+                      },
+                      "duration": { "type": "number", "minimum": 0 }
+                    }
+                  },
+                  "resetVideoPosition": { "type": "boolean" },
+                  "resetScrollPosition": { "type": "boolean" }
+                }
+              },
+              "actions": {
+                "type": "array",
+                "description": "Same shape, one or more",
+                "items": { "$ref": "#/$defs/node-reactions-action" }
+              },
+              "trigger": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                  "type": { "type": "string", "const": "ON_CLICK" }
+                }
+              }
+            }
+          }
+        },
+        "dashed": {
+          "type": "boolean",
+          "description": "Decorative stroke style."
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "x", "y", "width", "height"]
+    },
+    "instance-node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "const": "INSTANCE" },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/node" }
+        },
+        "componentProperties": {
+          "type": "object",
+          "description": "Property bag with variant/config values.",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["value", "type", "boundVariables"],
+            "properties": {
+              "value": { "type": "string" },
+              "type": { "type": "string", "const": "VARIANT" },
+              "boundVariables": { "type": "object" }
+            }
+          }
+        },
+        "variantProperties": {
+          "type": "object",
+          "description": "Flattened variant key/value map.",
+          "additionalProperties": { "type": "string" }
+        },
+        "reactions": {
+          "type": "array",
+          "description": "Prototype interactions. Present on 181 instances.",
+          "items": { "$ref": "#/$defs/node-reactions" }
+        },
+        "dashed": {
+          "type": "boolean",
+          "description": "Rare decorative stroke style."
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "x", "y", "width", "height"]
+    },
+    "text-node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "const": "TEXT" },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "characters": {
+          "type": "string",
+          "description": "Rendered text, may contain newlines."
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "x", "y", "width", "height", "characters"]
+    },
+    "connector-node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "const": "CONNECTOR" },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "connectorStart": {
+          "type": "object",
+          "required": ["endpointNodeId", "magnet"],
+          "properties": {
+            "endpointNodeId": { "type": "string" },
+            "magnet": { 
+              "type": "string",
+              "enum": ["LEFT", "RIGHT", "TOP", "BOTTOM"],
+              "description": "Endpoint magnet values observed."
+            }
+          }
+        },
+        "connectorEnd": {
+          "type": "object",
+          "required": ["endpointNodeId", "magnet"],
+          "properties": {
+            "endpointNodeId": { "type": "string" },
+            "magnet": {
+              "type": "string",
+              "enum": ["LEFT", "RIGHT", "TOP", "BOTTOM"]
+            }
+          }
+        },
+        "connectorLineType": {
+          "type": "string",
+          "description": "e.g. \"ELBOWED\"."
+        },
+        "connectorStartStrokeCap": {
+          "type": "string",
+          "description": "e.g. \"DIAMOND_FILLED\"."
+        },
+        "connectorEndStrokeCap": {
+          "type": "string",
+          "description": "e.g. \"ARROW_LINES\" — direction indicator."
+        },
+        "text": {
+          "type": "object",
+          "properties": {
+            "characters": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "x", "y", "width", "height", "connectorStart", "connectorEnd", "connectorLineType", "connectorStartStrokeCap", "connectorEndStrokeCap"]
+    },
+    "group-rectangle-ellipse-node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9]+:[0-9]+$" },
+        "name": { "type": "string" },
+        "type": { 
+          "type": "string",
+          "enum": ["GROUP", "RECTANGLE", "ELLIPSE"]
+        },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/node" }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "x", "y", "width", "height"]
+    },
+    "node-reactions": {
+      "type": "object",
+      "properties": {
+        "action": { "$ref": "#/$defs/node-reactions-action" },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/node-reactions-action" }
+        },
+        "trigger": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "const": "ON_CLICK" }
+          }
+        }
+      },
+      "required": ["action", "actions", "trigger"]
+    },
+    "node-reactions-action": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "const": "NODE" },
+        "destinationId": { "type": ["string", "null"] },
+        "navigation": { "type": "string", "const": "NAVIGATE" },
+        "transition": {
+          "type": "object",
+          "required": ["type", "easing", "duration"],
+          "properties": {
+            "type": { "type": "string", "const": "SMART_ANIMATE" },
+            "easing": {
+              "type": "object",
+              "required": ["type"],
+              "properties": {
+                "type": { "type": "string", "const": "EASE_OUT" }
+              }
+            },
+            "duration": { "type": "number", "minimum": 0 }
+          }
+        },
+        "resetVideoPosition": { "type": "boolean" },
+        "resetScrollPosition": { "type": "boolean" }
+      },
+      "required": ["type", "destinationId", "navigation", "transition", "resetVideoPosition", "resetScrollPosition"]
+    },
+    "node-by-type": {
+      "oneOf": [
+        { "$ref": "#/$defs/page-node" },
+        { "$ref": "#/$defs/section-node" },
+        { "$ref": "#/$defs/frame-node" },
+        { "$ref": "#/$defs/instance-node" },
+        { "$ref": "#/$defs/text-node" },
+        { "$ref": "#/$defs/connector-node" },
+        { "$ref": "#/$defs/group-rectangle-ellipse-node" }
+      ]
+    }
+  }
+}
