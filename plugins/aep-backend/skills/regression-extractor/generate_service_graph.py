@@ -1,32 +1,54 @@
 #!/usr/bin/env python3
 """
-Generate <module>_service_graph.json by tracing the service architecture.
+Generate <module>_regression.json for every module using a GLOBAL BrowserStack index.
 
-Supports two architecture patterns (auto-detected per module):
-  A. Controller-based (e.g. driver-platform):
-       Controller → Client → Endpoint → PropertiesInternal
-  B. Helper-based (e.g. gopay):
-       Helper → Client → Endpoint (in apis/)
+Self-contained alternative to generate_service_graph.py — the two scripts share
+no code, so either can be deleted without touching the other.
 
-Works for any module — all paths are auto-discovered at runtime.
+  generate_service_graph.py   resolves each module to its BrowserStack
+                              project(s) from a hand-maintained mapping and
+                              fetches only those projects.
+  this script                 enumerates ALL projects (/api/v2/projects), fetches
+                              every project's test cases once, builds one global
+                              {id: test case} index, and enriches every module
+                              from it — no module→project mapping needed.
 
-The BrowserStack project is auto-resolved from the module name
-(see MODULE_BS_PROJECTS); -bp overrides it, -nb skips BrowserStack.
+Why: a wrong or missing mapping entry silently yields 0% enrichment for a module,
+indistinguishable from "these test cases were deleted". A global index removes
+the mapping from the critical path — an annotation ID matches whichever project
+it actually lives in — and enriches modules that have no mapping at all. As a
+by-product the run reports the mapping it observed, so the module→project
+relationship can be read off real data instead of maintained by hand.
 
-Omitting --module processes every module in settings.gradle, writing one
-<module>_regression.json per module (one BrowserStack fetch per distinct project).
+Cost: one sweep of every project per run, amortised across all modules.
+Use --use-cache while iterating, --max-projects N for a quick smoke test.
+
+How a module is turned into a service graph (the static half):
+  A. Controller-based:  Controller → Client → Endpoint → PropertiesInternal
+  B. Helper-based:      Helper → Client → Endpoint
+Both are auto-detected per module; all paths are discovered at runtime.
+
+Test case IDs: BrowserStack identifies a test case as "TC-<n>" or "C<n>" (two
+separate namespaces). GBT annotations use "TC-<n>", "C<n>", or a bare "<n>";
+a bare ID resolves to whichever prefix exists, and is reported as ambiguous when
+both do.
+
+Credentials come from regression-extractor/.env or the environment:
+    BS_USERNAME / BS_ACCESS_KEY   (or BS_AUTH_TOKEN), optional BS_API_HOST
 
 Usage:
-    python3 generate_service_graph.py                             # all modules
-    python3 generate_service_graph.py --module gopay              # → PR-166
-    python3 generate_service_graph.py --module driver-platform    # → PR-143
-    python3 generate_service_graph.py --module gopay -bp PR-999   # override
-    python3 generate_service_graph.py --module gopay -nb          # offline
-    python3 generate_service_graph.py --module care-platform -b testcases_PR-100.json
+    python3 generate_service_graph_get_all_tc.py                  # all modules
+    python3 generate_service_graph_get_all_tc.py -m gopay          # one module
+    python3 generate_service_graph_get_all_tc.py --use-cache       # reuse index
+    python3 generate_service_graph_get_all_tc.py --workers 16
+    python3 generate_service_graph_get_all_tc.py --max-projects 10 # smoke test
+    python3 generate_service_graph_get_all_tc.py --index-only      # build index only
 
-Output: <module>_regression.json (in this script's directory)
+Output: <module>_regression.json + .csv (one per module, in this script's
+        directory), plus bs_index_all_projects.json (the cached global index).
 """
 
+import argparse
 import base64
 import csv
 import json
@@ -34,54 +56,23 @@ import os
 import re
 import ssl
 import sys
+import time
 import urllib.error
 import urllib.request
-from collections import defaultdict
+from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+INDEX_FILE = os.path.join(SCRIPT_DIR, "bs_index_all_projects.json")
 
-# ---------------------------------------------------------------------------
-# Module → BrowserStack project mapping
-# ---------------------------------------------------------------------------
-# Keyed by the Gradle module directory name (as in settings.gradle), so
-# `-m <module>` alone resolves the BrowserStack project. Override with -bp.
-# Note: several modules deliberately share a project (payments domain on PR-166,
-# and PR-143 across driver-platform / marketplace / pricing).
-
-MODULE_BS_PROJECTS = {
-    "care-platform": "PR-196",
-    "cartography": "PR-149",
-    "customer-platforms": "PR-140",
-    "data-platform": "PR-152",
-    "driver-platform": "PR-143",
-    "ep-web-platform": "PR-181",
-    "go-logistics": "PR-141",
-    "gofood": "PR-125",
-    "gomart": "PR-124",
-    "gopay": "PR-166",
-    "gopay-merchant": "PR-168",
-    "gopaylater": "PR-178",
-    "gtl": "PR-155",
-    "helpcenter": "PR-119",
-    "icp": "PR-129",
-    "iris": "PR-166",
-    "marketplace": "PR-143",
-    "merchant-platform": "PR-134",
-    "merchantlending": "PR-162",
-    "midtrans-core-api": "PR-137",
-    "midtrans-enterprise": "PR-294",
-    "payment-core": "PR-166",
-    "pricing": "PR-143",
-    "ticket-arbitration": "PR-120",
-    "transport": "PR-177",
-    "vehicle-financing": "PR-193",
-}
+DEFAULT_API_HOST = "https://test-management.browserstack.com"
+PAGE_SIZE = 300
+MAX_RETRIES = 4
 
 
-
-# ---------------------------------------------------------------------------
-# Repo root detection
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Static analysis — repo layout, service graph, output files
+# ===========================================================================
 
 def find_repo_root():
     """Walk up from SCRIPT_DIR to find the repo root (contains .git)."""
@@ -91,6 +82,7 @@ def find_repo_root():
             return d
         d = os.path.dirname(d)
     return os.path.dirname(os.path.dirname(SCRIPT_DIR))
+
 
 REPO_ROOT = find_repo_root()
 
@@ -113,21 +105,14 @@ def normalize_module_name(name):
     squashed = candidate.replace("_", "").replace("-", "")
     if os.path.isdir(os.path.join(REPO_ROOT, squashed)):
         return squashed
-    if dashed in MODULE_BS_PROJECTS:
-        return dashed
     return candidate
-
-
-def resolve_bs_project(module_name):
-    """Look up the BrowserStack project for a module, or None if unmapped."""
-    return MODULE_BS_PROJECTS.get(module_name)
 
 
 def discover_all_modules():
     """List every Gradle module from settings.gradle whose directory exists.
 
-    Used when --module is omitted. Falls back to the BrowserStack mapping keys
-    if settings.gradle can't be read.
+    Used when --module is omitted. Falls back to scanning for directories that
+    look like Gradle modules if settings.gradle can't be read.
     """
     settings = os.path.join(REPO_ROOT, "settings.gradle")
     modules = []
@@ -138,19 +123,22 @@ def discover_all_modules():
                 if name and name not in modules:
                     modules.append(name)
     if not modules:
-        modules = sorted(MODULE_BS_PROJECTS)
+        modules = sorted(
+            d for d in os.listdir(REPO_ROOT)
+            if os.path.isdir(os.path.join(REPO_ROOT, d, "src"))
+        )
     return [m for m in modules if os.path.isdir(os.path.join(REPO_ROOT, m))]
 
-# ---------------------------------------------------------------------------
-# Dynamic directory discovery
-# ---------------------------------------------------------------------------
 
-# Architectural directory names, matched case-insensitively. Modules spell these
-# inconsistently — controller/controllers/Controller, and gomart's "controlers"
-# typo — so each category carries every spelling that occurs in this repo.
 CONTROLLER_DIR_NAMES = {"controller", "controllers", "controlers"}
+
+
 HELPER_DIR_NAMES = {"helper", "helpers"}
+
+
 CLIENT_DIR_NAMES = {"client", "clients"}
+
+
 CLIENTWRAPPER_DIR_NAMES = {"clientwrapper", "clientwrappers"}
 
 
@@ -256,10 +244,6 @@ def print_discovery(module_name, dirs, arch):
     print(f"  Test dirs         : {len(dirs['test_dirs'])}")
 
 
-# ---------------------------------------------------------------------------
-# Properties parsing (generic)
-# ---------------------------------------------------------------------------
-
 def parse_properties_internal(filepath):
     """Parse a *PropertiesInternal.java to extract host vars and URL constants."""
     if not filepath or not os.path.isfile(filepath):
@@ -335,10 +319,6 @@ def read_properties_files(resources_dir):
             pass
     return props
 
-
-# ---------------------------------------------------------------------------
-# Java source scanners (unified for controllers + helpers)
-# ---------------------------------------------------------------------------
 
 def scan_entry_points(scan_dirs, base_dir, name_token=None):
     """Scan entry point classes (controllers or helpers) across directories.
@@ -497,11 +477,6 @@ def scan_endpoints(endpoint_dirs, base_dir, properties_internal_class):
     return endpoints
 
 
-# ---------------------------------------------------------------------------
-# Test scanners (unified for controller + helper patterns)
-# ---------------------------------------------------------------------------
-
-# Suffixes for "entry point" classes that tests may reference
 _ENTRY_SUFFIXES = ("Controller", "Helper")
 
 
@@ -562,8 +537,16 @@ def extract_test_ids_from_file(filepath):
         desc_match = re.search(r'description\s*=\s*"([^"]+)"', block)
         description = desc_match.group(1) if desc_match else ""
 
-        tc_match = re.search(r'testCaseIds\s*=\s*\{([^}]+)\}', block)
-        tc_ids = re.findall(r'"(\w+)"', tc_match.group(1)) if tc_match else []
+        # Capture every quoted value, then keep only the ones that parse as IDs.
+        # Values take several shapes: "5214458", "TC-5214458", "C1046", and
+        # "5228461||5228581||..." — and sometimes prose, which is dropped.
+        tc_ids = []
+        tc_match = re.search(r'testCaseIds\s*=\s*\{([^}]*)\}', block)
+        if tc_match:
+            for value in re.findall(r'"([^"]*)"', tc_match.group(1)):
+                for token in split_id_tokens(value):
+                    if token not in tc_ids:
+                        tc_ids.append(token)
 
         method_match = re.search(r"public\s+void\s+(\w+)\s*\(", block)
         if method_match:
@@ -623,10 +606,6 @@ def scan_test_files(test_dirs, base_dir):
     return test_files
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
 def method_to_feature(method_name):
     """Convert a camelCase method name to a snake_case feature name."""
     s = re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', method_name)
@@ -673,10 +652,6 @@ def derive_display_key(class_name):
         name = name + "Service"
     return name
 
-
-# ---------------------------------------------------------------------------
-# BrowserStack integration
-# ---------------------------------------------------------------------------
 
 def load_env_file():
     """Load variables from a .env file next to this script."""
@@ -761,26 +736,143 @@ def extract_steps_from_testcase(tc):
     return (None, None)
 
 
-def load_browserstack_lookup(bs_file):
-    """Load BrowserStack test cases JSON → {numeric_id: {testId, testTitle, steps, expectedResult, folderId}}."""
-    with open(bs_file) as f:
-        data = json.load(f)
+ID_RE = re.compile(r'^\s*(TC|C)?[-_\s]*(\d+)\s*$', re.IGNORECASE)
 
-    lookup = {}
-    for tc in data.get("testCases", []):
-        bs_id = tc.get("testId", "")
-        title = tc.get("testTitle", "")
-        numeric = bs_id.replace("TC-", "") if bs_id.startswith("TC-") else bs_id
-        if numeric:
-            steps, expected = flatten_steps(tc.get("steps"))
-            lookup[numeric] = {
-                "testId": bs_id,
-                "testTitle": title,
-                "steps": steps,
-                "expectedResult": expected or tc.get("expectedResult"),
-                "folderId": tc.get("folderId"),
-            }
-    return lookup
+
+PREFIX_PREFERENCE = ("TC", "C")
+
+
+def parse_test_case_id(raw):
+    """Parse an ID into (prefix, digits); prefix is 'TC', 'C' or '' (bare).
+
+    Returns None for anything that isn't an ID — blank strings and the prose
+    that sometimes lands in testCaseIds are rejected rather than matched.
+    """
+    if raw is None:
+        return None
+    m = ID_RE.match(str(raw))
+    if not m:
+        return None
+    prefix = (m.group(1) or "").upper()
+    return prefix, m.group(2)
+
+
+def canonical_key(prefix, digits):
+    """Internal lookup key for a prefixed ID: 'TC-123' / 'C-123'."""
+    return f"{prefix}-{digits}"
+
+
+def split_id_tokens(raw):
+    """Split one annotation value into individual ID tokens.
+
+    Handles the '5228461||5228581||5228482' form some tests use, and drops
+    tokens that aren't IDs.
+    """
+    if raw is None:
+        return []
+    tokens = []
+    for part in re.split(r"\|\||,|;", str(raw)):
+        # Keep the token as the annotation wrote it (just trimmed) — matching
+        # goes through parse_test_case_id, so no need to rewrite the form.
+        if parse_test_case_id(part):
+            tokens.append(part.strip())
+    return tokens
+
+
+class BSLookup:
+    """BrowserStack test cases indexed for prefix-aware matching.
+
+    Entries are keyed by canonical prefixed key ('TC-123' / 'C-123'), with a
+    secondary index by bare number so a bare annotation ID can find whichever
+    prefix exists.
+    """
+
+    def __init__(self):
+        self.by_key = {}
+        self.by_number = defaultdict(list)
+        self.collisions = []
+        self.ambiguous = {}
+
+    def __len__(self):
+        return len(self.by_key)
+
+    def __bool__(self):
+        return bool(self.by_key)
+
+    def entries(self):
+        return self.by_key.values()
+
+    def add(self, entry):
+        """Index one entry, keyed off its BrowserStack identifier."""
+        parsed = parse_test_case_id(entry.get("testId"))
+        if not parsed:
+            return False
+        prefix, digits = parsed
+        # A BrowserStack ID with no prefix is treated as TC- (the default form).
+        prefix = prefix or "TC"
+        key = canonical_key(prefix, digits)
+        if key in self.by_key:
+            existing = self.by_key[key].get("project")
+            incoming = entry.get("project")
+            if existing != incoming:
+                self.collisions.append((key, existing, incoming))
+            return False
+        entry = dict(entry, canonicalKey=key)
+        self.by_key[key] = entry
+        self.by_number[digits].append(key)
+        return True
+
+    def get(self, raw_id):
+        """Resolve a GBT annotation ID. Returns (entry_or_None, was_ambiguous).
+
+        An explicit prefix must match that prefix exactly. A bare ID resolves to
+        whichever prefix exists; if both do it is ambiguous and PREFIX_PREFERENCE
+        decides, with the choice recorded for reporting.
+        """
+        parsed = parse_test_case_id(raw_id)
+        if not parsed:
+            return None, False
+        prefix, digits = parsed
+
+        if prefix:
+            return self.by_key.get(canonical_key(prefix, digits)), False
+
+        candidates = self.by_number.get(digits) or []
+        if not candidates:
+            return None, False
+        if len(candidates) == 1:
+            return self.by_key[candidates[0]], False
+
+        for preferred in PREFIX_PREFERENCE:
+            key = canonical_key(preferred, digits)
+            if key in candidates:
+                self.ambiguous[digits] = list(candidates)
+                return self.by_key[key], True
+        self.ambiguous[digits] = list(candidates)
+        return self.by_key[candidates[0]], True
+
+    def merge(self, other):
+        """Merge another lookup in — existing keys win (first project listed)."""
+        for entry in other.entries():
+            self.add(entry)
+        self.collisions.extend(other.collisions)
+        return self
+
+    def to_dict(self):
+        return {k: v for k, v in self.by_key.items()}
+
+    @classmethod
+    def from_entries(cls, entries):
+        lookup = cls()
+        for entry in entries:
+            lookup.add(entry)
+        return lookup
+
+    def prefix_counts(self):
+        counts = defaultdict(int)
+        for key in self.by_key:
+            counts[key.split("-", 1)[0]] += 1
+        return dict(counts)
 
 
 def build_browserstack_auth_header():
@@ -798,211 +890,6 @@ def build_browserstack_auth_header():
         return f"Basic {encoded}"
 
     return None
-
-
-def browserstack_get(url, auth_header, label=""):
-    """GET a BrowserStack API URL and return the decoded JSON (or None)."""
-    req = urllib.request.Request(url)
-    req.add_header("Authorization", auth_header)
-    req.add_header("Accept", "application/json")
-    ctx = ssl.create_default_context()
-
-    try:
-        with urllib.request.urlopen(req, context=ctx) as resp:
-            body = resp.read().decode("utf-8")
-            return json.loads(body)
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", errors="replace")
-        print(f"  HTTP {e.code} on {label or url}: {body[:200]}", file=sys.stderr)
-        return None
-    except urllib.error.URLError as e:
-        print(f"  URL error on {label or url}: {e.reason}", file=sys.stderr)
-        return None
-
-
-def fetch_browserstack_page(project_id, page, page_size, auth_header, api_host):
-    """Fetch a single page of test cases from BrowserStack API."""
-    url = f"{api_host}/api/v2/projects/{project_id}/test-cases?p={page}&page_size={page_size}"
-    return browserstack_get(url, auth_header, label=f"page {page}")
-
-
-def fetch_browserstack_testcase_detail(project_id, tc_id, folder_id, auth_header, api_host):
-    """Fetch a single test case detail (used to pull steps the list endpoint omits)."""
-    urls = []
-    if folder_id:
-        urls.append(
-            f"{api_host}/api/v2/projects/{project_id}/folder/{folder_id}/test-cases/{tc_id}"
-        )
-    urls.append(f"{api_host}/api/v2/projects/{project_id}/test-cases/{tc_id}")
-
-    for url in urls:
-        data = browserstack_get(url, auth_header, label=f"test case {tc_id}")
-        if not data:
-            continue
-        payload = data.get("data") if isinstance(data.get("data"), dict) else data
-        tc = payload.get("test_case") or payload.get("testcase") or payload
-        if isinstance(tc, dict):
-            return tc
-    return None
-
-
-def fetch_browserstack_testcases(project_id, page_size=300):
-    """Fetch all test cases from BrowserStack API and return the lookup dict."""
-    load_env_file()
-    # TODO: Securely load this value from an environment variable or secrets vault. Do not hardcode.
-    api_host = os.environ.get("BS_API_HOST", "https://test-management.browserstack.com").rstrip("/")
-
-    auth_header = build_browserstack_auth_header()
-    if not auth_header:
-        print("ERROR: No BrowserStack credentials found.", file=sys.stderr)
-        print("       Create a .env file in this folder with:", file=sys.stderr)
-        print("         BS_USERNAME=your_username", file=sys.stderr)
-        print("         BS_ACCESS_KEY=your_access_key", file=sys.stderr)
-        return {}
-
-    print(f"  Fetching test cases from BrowserStack project {project_id}...")
-    all_test_cases = []
-    page = 1
-
-    while True:
-        print(f"    Page {page}...", end=" ", flush=True)
-        data = fetch_browserstack_page(project_id, page, page_size, auth_header, api_host)
-
-        if data is None:
-            print("FAILED — stopping.")
-            break
-
-        payload = data
-        if isinstance(data.get("data"), dict):
-            payload = data["data"]
-        elif isinstance(data.get("data"), list):
-            payload = {"test_cases": data["data"]}
-
-        test_cases = payload.get("test_cases") or payload.get("testcases") or []
-        info = payload.get("info") or data.get("info") or {}
-
-        if not test_cases:
-            print("done.")
-            break
-
-        for tc in test_cases:
-            identifier = tc.get("identifier") or tc.get("id") or ""
-            title = tc.get("title") or tc.get("name") or ""
-            steps, expected = extract_steps_from_testcase(tc)
-            all_test_cases.append({
-                "testId": str(identifier),
-                "testTitle": title,
-                "steps": steps,
-                "expectedResult": expected,
-                "folderId": tc.get("folder_id") or tc.get("folderId"),
-            })
-
-        print(f"got {len(test_cases)} (total: {len(all_test_cases)})")
-
-        has_next = info.get("next")
-        if has_next is None:
-            if len(test_cases) < page_size:
-                break
-        if has_next is False or has_next == "false":
-            break
-
-        page += 1
-
-    print(f"  Fetched {len(all_test_cases)} test cases from BrowserStack")
-
-    lookup = {}
-    for tc in all_test_cases:
-        bs_id = tc["testId"]
-        numeric = bs_id.replace("TC-", "") if bs_id.startswith("TC-") else bs_id
-        if numeric:
-            lookup[numeric] = tc
-    return lookup
-
-
-def hydrate_steps(bs_lookup, numeric_ids, project_id):
-    """Fetch steps from the test case detail endpoint for IDs whose steps are missing.
-
-    Only the IDs actually referenced by the graph are fetched, so this stays bounded.
-    """
-    missing = [n for n in sorted(numeric_ids)
-               if n in bs_lookup and not bs_lookup[n].get("steps")]
-    if not missing or not project_id:
-        return 0
-
-    load_env_file()
-    auth_header = build_browserstack_auth_header()
-    if not auth_header:
-        return 0
-    api_host = os.environ.get("BS_API_HOST", "https://test-management.browserstack.com").rstrip("/")
-
-    print(f"  Fetching steps for {len(missing)} referenced test case(s)...")
-    fetched = 0
-    for numeric in missing:
-        entry = bs_lookup[numeric]
-        detail = fetch_browserstack_testcase_detail(
-            project_id, entry.get("testId") or numeric, entry.get("folderId"),
-            auth_header, api_host,
-        )
-        if not detail:
-            continue
-        steps, expected = extract_steps_from_testcase(detail)
-        if steps:
-            entry["steps"] = steps
-            fetched += 1
-        if expected and not entry.get("expectedResult"):
-            entry["expectedResult"] = expected
-        if not entry.get("testTitle"):
-            entry["testTitle"] = detail.get("title") or detail.get("name") or ""
-    print(f"  Got steps for {fetched}/{len(missing)}")
-    return fetched
-
-
-# ---------------------------------------------------------------------------
-# Graph builder
-# ---------------------------------------------------------------------------
-
-def collect_referenced_numeric_ids(graph):
-    """Collect the BrowserStack numeric IDs actually referenced by the graph."""
-    numeric_ids = set()
-    for entry in graph.values():
-        for tc in entry["testCaseIds"]:
-            numeric = normalize_bs_id(tc.get("id"))
-            if numeric:
-                numeric_ids.add(numeric)
-    return numeric_ids
-
-
-def normalize_bs_id(tc_id):
-    """Strip a 'TC-' prefix so annotation IDs line up with the BrowserStack lookup."""
-    if not tc_id:
-        return None
-    return tc_id[3:] if tc_id.startswith("TC-") else tc_id
-
-
-def enrich_with_browserstack(graph, bs_lookup):
-    """Fill in name + steps + expected_result on each test case object from BrowserStack.
-
-    Test cases with an ID that BrowserStack doesn't know about — and those with no ID
-    at all (method_name only) — keep those fields as null.
-    """
-    total_matched = 0
-    total_with_id = 0
-
-    for entry in graph.values():
-        for tc in entry["testCaseIds"]:
-            numeric = normalize_bs_id(tc.get("id"))
-            if not numeric:
-                continue
-            total_with_id += 1
-            bs = bs_lookup.get(numeric)
-            if not bs:
-                continue
-            tc["name"] = bs.get("testTitle") or None
-            tc["steps"] = bs.get("steps")
-            tc["expected_result"] = bs.get("expectedResult")
-            total_matched += 1
-
-    return total_matched, total_with_id
 
 
 def build_service_graph(module_name, dirs, arch):
@@ -1246,10 +1133,6 @@ def build_service_graph(module_name, dirs, arch):
     return graph
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
 def write_outputs(module_name, graph):
     """Write <module>_regression.json + .csv. Returns (json_path, csv_path)."""
     module_slug = module_name.replace("-", "_")
@@ -1281,81 +1164,315 @@ def write_outputs(module_name, graph):
     return output_json, output_csv
 
 
-def get_bs_lookup(bs_project, args, bs_cache):
-    """Resolve the BrowserStack lookup for a project, fetching at most once per project.
+def format_duration(seconds):
+    """Render an elapsed time as e.g. '48.3s' or '3m 12.4s' or '1h 04m 09s'."""
+    if seconds < 60:
+        return f"{seconds:.1f}s"
+    minutes, secs = divmod(seconds, 60)
+    if minutes < 60:
+        return f"{int(minutes)}m {secs:04.1f}s"
+    hours, minutes = divmod(int(minutes), 60)
+    return f"{hours}h {minutes:02d}m {int(secs):02d}s"
+# ===========================================================================
+# BrowserStack — HTTP with retry / backoff
+# ===========================================================================
 
-    Modules deliberately share projects (PR-166, PR-143), so the cache keeps an
-    all-modules run down to one fetch per distinct project.
+def api_host():
+    return os.environ.get("BS_API_HOST", DEFAULT_API_HOST).rstrip("/")
+
+
+def request_json(url, auth_header, label="", retries=MAX_RETRIES):
+    """GET JSON with retry + backoff on 429 and 5xx.
+
+    Returns (data, error). A rate limit must not be mistaken for "no more
+    pages": sweeping every project makes 429s likely, and a silent truncation
+    would look like unmatched test case IDs.
     """
-    if bs_project:
-        if bs_project in bs_cache:
-            print(f"\nReusing BrowserStack test cases for {bs_project} "
-                  f"(already fetched this run)")
-            return bs_cache[bs_project]
-        print(f"\nFetching BrowserStack test cases for {bs_project} from API...")
-        lookup = fetch_browserstack_testcases(bs_project)
-        bs_cache[bs_project] = lookup
-        return lookup
+    ctx = ssl.create_default_context()
+    delay = 1.0
 
-    if args.browserstack:
-        if "__file__" in bs_cache:
-            return bs_cache["__file__"]
-        bs_file = args.browserstack
-        if not os.path.exists(bs_file):
-            auto_path = os.path.join(SCRIPT_DIR, f"testcases_{bs_file}.json")
-            if os.path.exists(auto_path):
-                bs_file = auto_path
-        if os.path.exists(bs_file):
-            print(f"\nEnriching with BrowserStack data from {bs_file}...")
-            lookup = load_browserstack_lookup(bs_file)
-        else:
-            print(f"\nWARNING: BrowserStack file not found: {bs_file}", file=sys.stderr)
-            lookup = None
-        bs_cache["__file__"] = lookup
-        return lookup
+    for attempt in range(1, retries + 1):
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", auth_header)
+        req.add_header("Accept", "application/json")
+        try:
+            with urllib.request.urlopen(req, context=ctx, timeout=120) as resp:
+                return json.loads(resp.read().decode("utf-8")), None
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="replace")[:200]
+            retryable = e.code == 429 or 500 <= e.code < 600
+            if retryable and attempt < retries:
+                wait = float(e.headers.get("Retry-After") or delay)
+                print(f"    HTTP {e.code} on {label} — retry {attempt}/{retries - 1} "
+                      f"in {wait:.0f}s", file=sys.stderr)
+                time.sleep(wait)
+                delay = min(delay * 2, 30)
+                continue
+            return None, f"HTTP {e.code} on {label}: {body}"
+        except (urllib.error.URLError, TimeoutError) as e:
+            if attempt < retries:
+                print(f"    Network error on {label} — retry {attempt}/{retries - 1} "
+                      f"in {delay:.0f}s", file=sys.stderr)
+                time.sleep(delay)
+                delay = min(delay * 2, 30)
+                continue
+            return None, f"URL error on {label}: {e}"
+        except json.JSONDecodeError as e:
+            return None, f"Bad JSON on {label}: {e}"
 
-    return None
+    return None, f"gave up on {label}"
 
 
-def process_module(module_name, args, bs_cache):
-    """Build, enrich and write the graph for one module. Returns a stats dict."""
+def unwrap(data, *keys):
+    """Pull a list out of a BrowserStack payload, tolerating the wrapper shapes."""
+    payload = data
+    if isinstance(data.get("data"), dict):
+        payload = data["data"]
+    elif isinstance(data.get("data"), list):
+        return data["data"], data.get("info") or {}
+    for k in keys:
+        if isinstance(payload.get(k), list):
+            return payload[k], payload.get("info") or data.get("info") or {}
+    return [], payload.get("info") or data.get("info") or {}
 
-    # Resolve the BrowserStack project: explicit -bp wins, otherwise the mapping.
-    bs_project = args.browserstack_project
-    if not bs_project and not args.browserstack and not args.no_browserstack:
-        bs_project = resolve_bs_project(module_name)
 
+def has_more(info, got, page_size):
+    """Decide whether to ask for another page."""
+    nxt = info.get("next")
+    if nxt is False or str(nxt).lower() == "false":
+        return False
+    if nxt:
+        return True
+    return got >= page_size
+
+
+# ===========================================================================
+# Phase 1 — enumerate every project
+# ===========================================================================
+
+def fetch_all_projects(auth_header, max_projects=None):
+    """Page /api/v2/projects and return an ordered list of (identifier, name)."""
+    projects = []
+    page = 1
+    while True:
+        url = f"{api_host()}/api/v2/projects?p={page}"
+        data, err = request_json(url, auth_header, label=f"projects page {page}")
+        if err:
+            print(f"  {err}", file=sys.stderr)
+            break
+
+        items, info = unwrap(data, "projects", "project")
+        if not items:
+            break
+
+        known = {pid for pid, _ in projects}
+        for p in items:
+            ident = p.get("identifier") or p.get("project_id") or p.get("id")
+            if ident is None:
+                continue
+            ident = str(ident)
+            if ident not in known:
+                known.add(ident)
+                projects.append((ident, p.get("name") or p.get("title") or ""))
+
+        print(f"    page {page}: {len(items)} project(s) (total {len(projects)})")
+
+        if max_projects and len(projects) >= max_projects:
+            projects = projects[:max_projects]
+            break
+        if not has_more(info, len(items), len(items) or 1):
+            break
+        page += 1
+
+    return projects
+
+
+# ===========================================================================
+# Phase 2 — fetch every project's test cases
+# ===========================================================================
+
+def fetch_project_test_cases(project_id, auth_header):
+    """Fetch all test cases for one project. Returns (project_id, list, error)."""
+    out = []
+    page = 1
+    while True:
+        url = (f"{api_host()}/api/v2/projects/{project_id}/test-cases"
+               f"?p={page}&page_size={PAGE_SIZE}")
+        data, err = request_json(url, auth_header, label=f"{project_id} page {page}")
+        if err:
+            return project_id, out, err
+
+        items, info = unwrap(data, "test_cases", "testcases")
+        if not items:
+            break
+
+        for tc in items:
+            identifier = tc.get("identifier") or tc.get("id") or ""
+            steps, expected = extract_steps_from_testcase(tc)
+            out.append({
+                "testId": str(identifier),
+                "testTitle": tc.get("title") or tc.get("name") or "",
+                "steps": steps,
+                "expectedResult": expected,
+                "folderId": tc.get("folder_id") or tc.get("folderId"),
+                "project": project_id,
+            })
+
+        if not has_more(info, len(items), PAGE_SIZE):
+            break
+        page += 1
+
+    return project_id, out, None
+
+
+def build_global_index(projects, auth_header, workers=8):
+    """Fetch every project in parallel and merge into one BSLookup.
+
+    Returns (index, stats). Collisions — the same test case ID in more than one
+    project — are counted and reported, since the approach rests on IDs being
+    unique across projects.
+    """
+    index = BSLookup()
+    per_project_counts = {}
+    errors = []
+    fetched = {}
+
+    print(f"  Fetching test cases from {len(projects)} project(s) "
+          f"with {workers} worker(s)...")
+
+    done = 0
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {
+            pool.submit(fetch_project_test_cases, pid, auth_header): pid
+            for pid, _ in projects
+        }
+        for fut in as_completed(futures):
+            pid = futures[fut]
+            try:
+                project_id, test_cases, err = fut.result()
+            except Exception as e:  # a worker blew up — keep the sweep going
+                errors.append((pid, str(e)))
+                continue
+
+            done += 1
+            if err:
+                errors.append((project_id, err))
+            per_project_counts[project_id] = len(test_cases)
+            fetched[project_id] = test_cases
+
+            if done % 20 == 0 or done == len(projects):
+                print(f"    {done}/{len(projects)} projects — "
+                      f"{sum(len(v) for v in fetched.values())} test cases")
+
+    # Merge in project order, not completion order: threads finish
+    # nondeterministically, and an ID present in two projects must resolve the
+    # same way on every run.
+    for project_id, _ in projects:
+        for tc in fetched.get(project_id, []):
+            index.add(tc)
+
+    stats = {
+        "projects": len(projects),
+        "testCases": len(index),
+        "collisions": index.collisions,
+        "errors": errors,
+        "perProject": per_project_counts,
+        "prefixCounts": index.prefix_counts(),
+    }
+    return index, stats
+
+
+# ===========================================================================
+# Index cache
+# ===========================================================================
+
+def save_index(index, projects, path=INDEX_FILE):
+    payload = {
+        "fetchedAt": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "projects": [{"id": pid, "name": name} for pid, name in projects],
+        "testCases": index.to_dict(),
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False)
+    size_mb = os.path.getsize(path) / (1024 * 1024)
+    print(f"  Index saved to {path} ({size_mb:.1f} MB)")
+
+
+def load_index(path=INDEX_FILE):
+    """Load a saved index. Returns (BSLookup, fetched_at, projects) or None."""
+    if not os.path.isfile(path):
+        return None
+    with open(path, encoding="utf-8") as f:
+        payload = json.load(f)
+    raw = payload.get("testCases") or {}
+    if not raw:
+        return None
+    index = BSLookup.from_entries(raw.values())
+    return index, payload.get("fetchedAt", "unknown"), payload.get("projects", [])
+
+
+# ===========================================================================
+# Per-module processing
+# ===========================================================================
+
+def enrich_from_index(graph, index):
+    """Enrich a module's graph from the global index.
+
+    Returns (matched, total_with_id, project_hits, ambiguous). project_hits
+    counts how many matched IDs came from each project — an empirical read on
+    which project(s) a module actually belongs to.
+    """
+    matched = 0
+    total_with_id = 0
+    ambiguous = 0
+    project_hits = Counter()
+
+    for entry in graph.values():
+        for tc in entry["testCaseIds"]:
+            raw = tc.get("id")
+            if not raw:
+                continue
+            total_with_id += 1
+            bs, was_ambiguous = index.get(raw)
+            if was_ambiguous:
+                ambiguous += 1
+            if not bs:
+                continue
+            tc["name"] = bs.get("testTitle") or None
+            tc["steps"] = bs.get("steps")
+            tc["expected_result"] = bs.get("expectedResult")
+            matched += 1
+            if bs.get("project"):
+                project_hits[bs["project"]] += 1
+
+    return matched, total_with_id, project_hits, ambiguous
+
+
+def process_module(module_name, index):
+    """Build, enrich and write one module. Returns a stats dict."""
     print()
     print("=" * 70)
     print(f"Generating Service Graph — {module_name}")
     print("=" * 70)
-    if args.browserstack_project:
-        print(f"  BrowserStack project: {bs_project} (override)")
-    elif bs_project:
-        print(f"  BrowserStack project: {bs_project} (auto-resolved from module)")
-    elif not args.browserstack and not args.no_browserstack:
-        print(f"  BrowserStack project: (no mapping for '{module_name}' — "
-              f"pass -bp <project> to enrich)")
 
-    # Discover directories
     print("\nDiscovering module structure...")
     dirs = discover_dirs(module_name)
     arch = detect_architecture(dirs)
     print_discovery(module_name, dirs, arch)
     print()
 
-    # Build the graph
     graph = build_service_graph(module_name, dirs, arch)
 
     stats = {
         "module": module_name,
         "arch": arch,
-        "bsProject": bs_project,
         "services": len(graph),
         "testCases": 0,
         "withSteps": 0,
-        "bsMatched": 0,
-        "bsTotal": 0,
+        "matched": 0,
+        "withId": 0,
+        "ambiguous": 0,
+        "projectHits": Counter(),
         "written": False,
     }
 
@@ -1363,123 +1480,236 @@ def process_module(module_name, args, bs_cache):
         print(f"\nNo services found in {module_name} — nothing to write.")
         return stats
 
-    # Enrich with BrowserStack
-    bs_lookup = get_bs_lookup(bs_project, args, bs_cache)
-
-    if bs_lookup:
-        print(f"  Loaded {len(bs_lookup)} BrowserStack test cases")
-        hydrate_steps(bs_lookup, collect_referenced_numeric_ids(graph), bs_project)
-        bs_matched, bs_total = enrich_with_browserstack(graph, bs_lookup)
-        stats["bsMatched"], stats["bsTotal"] = bs_matched, bs_total
-        print(f"  Matched {bs_matched}/{bs_total} test case IDs to BrowserStack")
+    matched, with_id, project_hits, ambiguous = enrich_from_index(graph, index)
+    stats["matched"], stats["withId"] = matched, with_id
+    stats["projectHits"] = project_hits
+    stats["ambiguous"] = ambiguous
+    pct = (100.0 * matched / with_id) if with_id else 0.0
+    print(f"  Enriched {matched}/{with_id} test case IDs from the global index "
+          f"({pct:.1f}%)")
+    if ambiguous:
+        print(f"  NOTE: {ambiguous} bare ID(s) existed as both TC-<n> and C<n> — "
+              f"resolved as {PREFIX_PREFERENCE[0]}-<n>")
+    if project_hits:
+        top = ", ".join(f"{p}:{n}" for p, n in project_hits.most_common(4))
+        print(f"  Matched IDs by project: {top}")
 
     output_json, output_csv = write_outputs(module_name, graph)
     stats["written"] = True
+    stats["testCases"] = sum(len(v["testCaseIds"]) for v in graph.values())
+    stats["withSteps"] = sum(1 for v in graph.values()
+                             for tc in v["testCaseIds"] if tc["steps"])
 
-    total_features = sum(len(v['features']) for v in graph.values())
-    total_groups = len(set(g for v in graph.values() for g in v['TestGroups']))
-    services_with_host = sum(1 for v in graph.values() if v['host'])
-    services_with_tests = sum(1 for v in graph.values() if v['TestGroups'])
-    total_test_ids = sum(len(v['testCaseIds']) for v in graph.values())
-    with_steps = sum(1 for v in graph.values() for tc in v['testCaseIds'] if tc['steps'])
-    stats["testCases"] = total_test_ids
-    stats["withSteps"] = with_steps
-
-    print()
-    print("=" * 70)
-    print(f"Service graph written to {output_json}")
-    print(f"  Module: {module_name}")
-    print(f"  Architecture: {arch}")
-    print(f"  Services: {len(graph)}")
-    print(f"  Features: {total_features}")
-    print(f"  Unique test groups: {total_groups}")
-    print(f"  Services with host: {services_with_host}/{len(graph)}")
-    print(f"  Services with tests: {services_with_tests}/{len(graph)}")
-    print(f"  Test cases: {total_test_ids}")
-    print(f"  Test cases with steps: {with_steps}/{total_test_ids}")
-    if bs_lookup and stats["bsTotal"]:
-        print(f"  BrowserStack enriched: {stats['bsMatched']}/{stats['bsTotal']}")
-    print("=" * 70)
-    print(f"CSV written to {output_csv}")
-
+    print(f"\n  Services: {len(graph)}  Test cases: {stats['testCases']}  "
+          f"With steps: {stats['withSteps']}")
+    print(f"  Written: {output_json}")
+    print(f"           {output_csv}")
     return stats
 
 
-def print_run_summary(results):
-    """Print the aggregate table for an all-modules (or multi-module) run."""
+# ===========================================================================
+# Reporting
+# ===========================================================================
+
+def print_index_report(stats, index, elapsed):
     print()
     print("=" * 78)
-    print("ALL MODULES SUMMARY")
+    print("GLOBAL INDEX")
     print("=" * 78)
-    print(f"{'Module':<24}{'Project':<10}{'Services':>9}{'TestCases':>11}"
-          f"{'Steps':>8}{'BS':>12}")
-    print("-" * 78)
+    print(f"  Projects swept    : {stats['projects']}")
+    print(f"  Test cases indexed: {stats['testCases']}")
+    if stats.get("prefixCounts"):
+        print("  By ID prefix      : "
+              + ", ".join(f"{p}-*: {n}" for p, n in sorted(stats["prefixCounts"].items())))
+    if index is not None:
+        with_steps = sum(1 for v in index.entries() if v.get("steps"))
+        print(f"  With steps        : {with_steps}/{stats['testCases']}")
+    print(f"  Fetch time        : {format_duration(elapsed)}")
+
+    failed = {p for p, _ in stats["errors"]}
+    empty = [p for p, n in sorted(stats["perProject"].items())
+             if n == 0 and p not in failed]
+    if empty:
+        print(f"  Empty projects    : {len(empty)} "
+              f"({', '.join(empty[:8])}{' ...' if len(empty) > 8 else ''})")
+
+    if stats["collisions"]:
+        print(f"  COLLISIONS        : {len(stats['collisions'])} test case ID(s) "
+              f"appear in more than one project — kept the first seen.")
+        for key, kept, dropped in stats["collisions"][:5]:
+            print(f"                      {key}: kept {kept}, ignored {dropped}")
+        if len(stats["collisions"]) > 5:
+            print(f"                      ... +{len(stats['collisions']) - 5} more")
+    else:
+        print("  Collisions        : none (IDs are unique across projects)")
+
+    if stats["errors"]:
+        print(f"  ERRORS            : {len(stats['errors'])} project(s) failed — "
+              f"their test cases are missing from the index:", file=sys.stderr)
+        for pid, err in stats["errors"][:8]:
+            print(f"                      {pid}: {err}", file=sys.stderr)
+    print("=" * 78)
+
+
+def print_run_summary(results):
+    width = 96
+    print()
+    print("=" * width)
+    print("ALL MODULES SUMMARY")
+    print("=" * width)
+    print(f"{'Module':<24}{'Services':>9}{'TestCases':>11}{'Steps':>8}"
+          f"{'Enriched':>18}{'Top project':>14}")
+    print("-" * width)
     for r in results:
-        bs = f"{r['bsMatched']}/{r['bsTotal']}" if r["bsTotal"] else "-"
-        project = r["bsProject"] or "-"
+        enriched = f"{r['matched']}/{r['withId']}" if r["withId"] else "-"
+        pct = f" ({100.0 * r['matched'] / r['withId']:.0f}%)" if r["withId"] else ""
+        top = r["projectHits"].most_common(1)[0][0] if r["projectHits"] else "-"
         note = "" if r["written"] else "  (skipped)"
-        print(f"{r['module']:<24}{project:<10}{r['services']:>9}{r['testCases']:>11}"
-              f"{r['withSteps']:>8}{bs:>12}{note}")
-    print("-" * 78)
+        print(f"{r['module']:<24}{r['services']:>9}{r['testCases']:>11}"
+              f"{r['withSteps']:>8}{enriched + pct:>18}{top:>14}{note}")
+    print("-" * width)
     written = [r for r in results if r["written"]]
+    tot_matched = sum(r["matched"] for r in results)
+    tot_with_id = sum(r["withId"] for r in results)
+    tot_ambiguous = sum(r["ambiguous"] for r in results)
     print(f"Modules processed : {len(results)}  "
           f"(written: {len(written)}, skipped: {len(results) - len(written)})")
     print(f"Services          : {sum(r['services'] for r in results)}")
     print(f"Test cases        : {sum(r['testCases'] for r in results)}")
     print(f"With steps        : {sum(r['withSteps'] for r in results)}")
+    if tot_with_id:
+        print(f"Enriched          : {tot_matched}/{tot_with_id} "
+              f"({100.0 * tot_matched / tot_with_id:.1f}%)")
+    if tot_ambiguous:
+        print(f"Ambiguous bare IDs: {tot_ambiguous} "
+              f"(resolved as {PREFIX_PREFERENCE[0]}-<n>)")
+    print("=" * width)
+
+
+def print_observed_mapping(results):
+    """Print the module → project mapping the index actually observed.
+
+    This script needs no mapping, but the observed one is worth reporting: it is
+    read off real ID matches rather than maintained by hand, so it doubles as a
+    check on any mapping kept elsewhere. Projects contributing fewer than 1% of a
+    module's matches are treated as noise and dropped.
+    """
+    rows = [r for r in results if r["projectHits"]]
+    if not rows:
+        return
+    print()
+    print("=" * 78)
+    print("OBSERVED MODULE → PROJECT MAPPING (from matched IDs)")
+    print("=" * 78)
+    for r in rows:
+        total = sum(r["projectHits"].values())
+        significant = [(p, n) for p, n in r["projectHits"].most_common()
+                       if n >= max(2, total * 0.01)]
+        detail = ", ".join(f"{p} ({100.0 * n / total:.0f}%)" for p, n in significant)
+        print(f'  "{r["module"]}": "{", ".join(p for p, _ in significant)}",'
+              f'{"":<{max(0, 34 - len(r["module"]))}}# {detail}')
     print("=" * 78)
 
 
-def main():
-    import argparse as _ap
+# ===========================================================================
+# Main
+# ===========================================================================
 
-    parser = _ap.ArgumentParser(
-        description="Generate a service graph for one module, or for all "
-                    "modules when --module is omitted."
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate <module>_regression.json for all modules using a "
+                    "global BrowserStack index (every project fetched once)."
     )
-    parser.add_argument(
-        "--module", "-m",
-        help="Module name (e.g. driver-platform, gopay, care-platform). "
-             "Omit to process every module in settings.gradle.",
-    )
-    bs_group = parser.add_mutually_exclusive_group()
-    bs_group.add_argument(
-        "--browserstack", "-b",
-        help="Path to a local BrowserStack test cases JSON file.",
-    )
-    bs_group.add_argument(
-        "--browserstack-project", "-bp",
-        help="BrowserStack project ID (e.g. PR-143). Overrides the module's "
-             "auto-resolved project; without it the project is looked up from "
-             "the module name.",
-    )
-    bs_group.add_argument(
-        "--no-browserstack", "-nb", action="store_true",
-        help="Skip BrowserStack entirely (offline run — names/steps stay null).",
-    )
+    parser.add_argument("--module", "-m",
+                        help="Only this module (the index is still global). "
+                             "Omit to process every module in settings.gradle.")
+    parser.add_argument("--use-cache", action="store_true",
+                        help=f"Reuse the saved index ({os.path.basename(INDEX_FILE)}) "
+                             "instead of fetching. Default is always fetch fresh.")
+    parser.add_argument("--index-file", default=INDEX_FILE,
+                        help="Path of the index cache file.")
+    parser.add_argument("--workers", type=int, default=8,
+                        help="Parallel project fetches (default 8).")
+    parser.add_argument("--max-projects", type=int,
+                        help="Stop after N projects — for a quick smoke test.")
+    parser.add_argument("--index-only", action="store_true",
+                        help="Build and report the index, then stop.")
     args = parser.parse_args()
 
-    if args.module:
-        modules = [normalize_module_name(args.module)]
-    else:
-        modules = discover_all_modules()
-        print("=" * 70)
-        print(f"No --module given — processing all {len(modules)} modules")
-        print("=" * 70)
-        for m in modules:
-            print(f"  {m:<24} → {resolve_bs_project(m) or '(no BS project)'}")
-        if args.browserstack_project:
-            print(f"\n  NOTE: -bp {args.browserstack_project} overrides the mapping "
-                  f"for every module in this run.")
+    started = time.perf_counter()
+    index_elapsed = 0.0
 
-    bs_cache = {}
-    results = []
-    for module_name in modules:
-        results.append(process_module(module_name, args, bs_cache))
+    try:
+        # ---------------- Phases 1 + 2: the global index ----------------
+        index = None
+        if args.use_cache:
+            cached = load_index(args.index_file)
+            if cached:
+                index, fetched_at, projects = cached
+                print("=" * 78)
+                print(f"Using cached index: {args.index_file}")
+                print(f"  {len(index)} test cases from {len(projects)} projects, "
+                      f"fetched {fetched_at}")
+                print("  (drop --use-cache to refresh)")
+                print("=" * 78)
+            else:
+                print(f"No usable cache at {args.index_file} — fetching fresh.",
+                      file=sys.stderr)
 
-    if len(results) > 1:
-        print_run_summary(results)
+        if index is None:
+            load_env_file()
+            auth_header = build_browserstack_auth_header()
+            if not auth_header:
+                print("ERROR: No BrowserStack credentials found.", file=sys.stderr)
+                print("       Put BS_USERNAME / BS_ACCESS_KEY in "
+                      f"{os.path.join(SCRIPT_DIR, '.env')}", file=sys.stderr)
+                return 2
+
+            index_started = time.perf_counter()
+            print("=" * 78)
+            print("Enumerating BrowserStack projects...")
+            print("=" * 78)
+            projects = fetch_all_projects(auth_header, args.max_projects)
+            if not projects:
+                print("ERROR: No projects returned — cannot build an index.",
+                      file=sys.stderr)
+                return 2
+            print(f"  Found {len(projects)} project(s)")
+
+            index, index_stats = build_global_index(projects, auth_header, args.workers)
+            index_elapsed = time.perf_counter() - index_started
+            print_index_report(index_stats, index, index_elapsed)
+            save_index(index, projects, args.index_file)
+
+        if args.index_only:
+            return 0
+
+        # ---------------- Phase 3: modules ----------------
+        build_started = time.perf_counter()
+        if args.module:
+            modules = [normalize_module_name(args.module)]
+        else:
+            modules = discover_all_modules()
+            print()
+            print("=" * 70)
+            print(f"Processing all {len(modules)} modules against the global index")
+            print("=" * 70)
+
+        results = [process_module(m, index) for m in modules]
+        build_elapsed = time.perf_counter() - build_started
+
+        if len(results) > 1:
+            print_run_summary(results)
+        print_observed_mapping(results)
+
+        print()
+        print(f"Index fetch time : {format_duration(index_elapsed)}"
+              f"{' (cached — no fetch)' if index_elapsed == 0 else ''}")
+        print(f"Graph build time : {format_duration(build_elapsed)}")
+        return 0
+    finally:
+        print(f"Total time taken : {format_duration(time.perf_counter() - started)}")
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
