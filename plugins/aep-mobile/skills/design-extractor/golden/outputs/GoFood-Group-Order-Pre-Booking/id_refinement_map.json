@@ -1,0 +1,109 @@
+{
+  "refinements": [
+    {
+      "screen_id": "MPS",
+      "old_id": "MPS.offer_paymentsiccoupon_icon_you_container",
+      "suggested_id": "MPS.see_offers_promo_container",
+      "confidence": "high",
+      "rationale": "Label reads 'See offers' with coupon promo banner; generic component-property container name"
+    },
+    {
+      "screen_id": "MPS",
+      "old_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+      "suggested_id": "MPS.group_order_type_container",
+      "confidence": "high",
+      "rationale": "Navigates to LANDING; label is 'Group Order' order-type selector"
+    },
+    {
+      "screen_id": "MPS",
+      "old_id": "MPS.defaultfoodspotgrouporder_defaultfoodspotgrouporder_group_lbl",
+      "suggested_id": "MPS.group_name_header_lbl",
+      "confidence": "high",
+      "rationale": "Tap header area opens SHARED_CART; label shows group name (e.g. Pojay's Group Order)"
+    },
+    {
+      "screen_id": "MPS",
+      "old_id": "MPS.order_type_socialicaddcontact_icon_container",
+      "suggested_id": "MPS.invite_friends_container",
+      "confidence": "high",
+      "rationale": "Label reads 'Invite friends'; triggers share flow back to group landing"
+    },
+    {
+      "screen_id": "MPS",
+      "old_id": "MPS.screenshot_img",
+      "suggested_id": "MPS.share_screenshot_img",
+      "confidence": "medium",
+      "rationale": "Generic 'Screenshot' rectangle; ui_flow edges include Share to WA to CHAT"
+    },
+    {
+      "screen_id": "LANDING",
+      "old_id": "LANDING.content_you_can_invite_container",
+      "suggested_id": "LANDING.invite_limit_info_container",
+      "confidence": "high",
+      "rationale": "Label reads 'You can invite up to 7 persons'; navigates to MPS invite state"
+    },
+    {
+      "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "old_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list_2",
+      "suggested_id": "MERCHANT_PAGE_DETAIL_SCROLLED.secondary_sku_list_item_list",
+      "confidence": "high",
+      "rationale": "Duplicate SKU list instance; label names Iced Matcha Earl Jasmine item opening SKU_DETAIL"
+    },
+    {
+      "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "old_id": "MERCHANT_PAGE_DETAIL_SCROLLED.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn",
+      "suggested_id": "MERCHANT_PAGE_DETAIL_SCROLLED.loading_spinner_btn",
+      "confidence": "high",
+      "rationale": "Full-screen loading spinner instance; excessively long auto-generated component name"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "old_id": "SHARED_CART.content_content_title_defaultbusinessspottransaction_container",
+      "suggested_id": "SHARED_CART.edit_billing_summary_container",
+      "confidence": "high",
+      "rationale": "Label 'Everyone pays for their items' with edit icon; condition Edit billing to EDIT_BILLING"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "old_id": "SHARED_CART.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn",
+      "suggested_id": "SHARED_CART.loading_spinner_btn",
+      "confidence": "high",
+      "rationale": "Full-screen loading spinner on shared cart transitions"
+    },
+    {
+      "screen_id": "DIALOG",
+      "old_id": "DIALOG.card_button_buttoncircular_multimediaicclosepip_btn",
+      "suggested_id": "DIALOG.dialog_close_btn",
+      "confidence": "high",
+      "rationale": "Circular close-pip icon button dismisses dialog back to SHARED_CART"
+    },
+    {
+      "screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "old_id": "MERCHANT_PROFILE_REQUIRED.cell_horizontallayout_no_sugar_btn",
+      "suggested_id": "MERCHANT_PROFILE_REQUIRED.no_sugar_option_btn",
+      "confidence": "high",
+      "rationale": "Label reads 'No Sugar' customization option; navigates to SHARED_CART"
+    },
+    {
+      "screen_id": "EDIT_BILLING",
+      "old_id": "EDIT_BILLING.title_actionsicfareandbonus_icon_you_lbl",
+      "suggested_id": "EDIT_BILLING.pay_for_everyone_lbl",
+      "confidence": "high",
+      "rationale": "Label 'You pay for everyone' fare/billing radio selection"
+    },
+    {
+      "screen_id": "CHAT",
+      "old_id": "CHAT.message_bubble_avatar_bubble_container",
+      "suggested_id": "CHAT.group_order_share_bubble_container",
+      "confidence": "high",
+      "rationale": "Forwarded GoFood Group Order promo message bubble in chat share flow"
+    },
+    {
+      "screen_id": "LOADING",
+      "old_id": "LOADING.buttonprimary_indicatorspinner_btn",
+      "suggested_id": "LOADING.primary_loading_spinner_btn",
+      "confidence": "high",
+      "rationale": "Primary button with loading spinner; generic component-instance name"
+    }
+  ]
+}

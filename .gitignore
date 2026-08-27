@@ -19,3 +19,6 @@ plugins/aep-backend/.gbt_repo/
 
 # Personal Claude Code overrides (machine-specific paths, e.g. GBT_REPO_PATH)
 .claude/settings.local.json
+
+workdir/
+.vscode/settings.json
