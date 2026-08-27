@@ -90,16 +90,17 @@ and interruptions have a `seq` but no `n`, and they need screenshots too.
       "groups": ["\"driverTest\""],                     // verbatim from $TEST_GROUPS: literals keep
                                                         // their quotes, constants stay bare
       "testInfo": { "countryName": "ID", "projectId": "", "suiteId": "",
-                    "testCaseIds": ["5354919"], "owner": "ashish.sharma@gojek.com" },
+                    "testCaseIds": ["TC-766717"], "owner": "ashish.sharma@gojek.com" },
       "platformObserved": "Android",
-      "source": { "kind": "sdet_plan | written_list",
-                  "file": "..._sdet_plan.json", "scenarioRef": "...", "requirementRef": "..." },
+      "source": { "kind": "enriched_automation_plan | automation_plan | sdet_plan | written_list",
+                  "file": "enriched_automation_plan.json | ..._automation_plan_generator.json | ..._sdet_plan.json",
+                  "scenarioRef": "...", "requirementRef": "..." },
 
       // One entry per emitted line, in order. Reads and retries emit nothing (§6a).
       "lines": [
         { "code": "TapMind.setMockLocation(-6.2615, 106.8106);",
           "kind": "direct-api", "fromSeq": null, "note": "run context (§0)" },
-        { "code": "TapMind.performBackdoorLogin(\"get bike driver from TDP\");",
+        { "code": "TapMind.performBackdoorLogin(\"get me an onboarded Indonesia bike driver with loyalty enabled and update driver tier to GOLD\");",
           "kind": "direct-api", "fromSeq": 1, "note": "author step 1 — UI login bypassed by design" },
         { "code": "runStep(\"Skip the walkthrough if visible\");",
           "kind": "guard", "fromSeq": 2,

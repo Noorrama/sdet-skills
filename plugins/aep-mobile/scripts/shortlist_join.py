@@ -2,22 +2,24 @@
 """
 Deterministic join for the impact-shortlister skill.
 
-Takes the pre-build legacy regression candidate pool (SDET_PLAN rows where
-is_legacy_regression is true, enriched from regression_context when available)
-and the post-build change surface (change_context / dev_manifest / MR bootstrap),
-and does pure evidence matching: which candidates have a concrete link to what
-actually changed. Those become MUST_RUN with evidence.
+Takes the pre-build legacy regression candidate pool (SDET_PLAN scenario_list
+or automation_plan_generator.automation_scenarios, rows where is_legacy_regression
+is true, enriched from regression_context when available) and the post-build
+change surface (change_context / dev_manifest / MR bootstrap), and does pure
+evidence matching: which candidates have a concrete link to what actually
+changed. Those become MUST_RUN with evidence.
 
 Everything left over goes to review_queue for the calling agent to judge from
 title/steps against the change surface. No scoring service; no PLAN_SCENARIO_LINK
 auto-MUST_RUN — plan linkage is traceability only.
 
 Usage:
-  shortlist_join.py draft --plan <sdet_plan.json> \
+  shortlist_join.py draft --plan <sdet_plan.json|automation_plan_generator.json> \
       [--regression regression_context.json] [--change change_context.json] \
       [--manifest dev_manifest.json] [--out impact_shortlist.draft.json]
 
   shortlist_join.py patch-plan --shortlist <impact_shortlist.json> --plan <sdet_plan.json>
+      # optional, only on copies we own — never mutate another team's SDET plan
 
   shortlist_join.py --demo
 """
@@ -64,12 +66,40 @@ def regression_index(regression):
     return by_cn
 
 
+def is_automation_plan(plan):
+    return bool(plan.get("automation_scenarios")) and not plan.get("scenario_list")
+
+
+def plan_scenarios(plan):
+    """SDET plan `scenario_list`, or automation_plan_generator `automation_scenarios`.
+
+    APG uses `description` / `target_framework` where the plan uses
+    `csv_title_association` / `target_execution_framework`. Normalize so the rest
+    of this script can treat them the same.
+    """
+    rows = plan.get("scenario_list") or []
+    if rows:
+        return rows
+    out = []
+    for sc in plan.get("automation_scenarios") or []:
+        row = dict(sc)
+        row.setdefault("csv_title_association", sc.get("description") or sc.get("scenario_id"))
+        row.setdefault("target_execution_framework", sc.get("target_framework"))
+        out.append(row)
+    return out
+
+
+def plan_feature_key(plan):
+    fm = plan.get("feature_metadata") or {}
+    return fm.get("feature_key") or plan.get("epic_id")
+
+
 def build_pool(plan, regression):
     """Legacy-only pool: plan rows with is_legacy_regression true + existing_case_ref.
     Enrich title/steps/source_module from regression_context when the case id matches."""
     pool = {}
     reg = regression_index(regression)
-    for sc in plan.get("scenario_list", []):
+    for sc in plan_scenarios(plan):
         if not sc.get("is_legacy_regression"):
             continue
         cn = case_number(sc.get("existing_case_ref"))
@@ -285,12 +315,12 @@ def draft(plan, regression, change, manifest):
                 "source": cand["source"],
             })
 
-    fm = plan.get("feature_metadata", {})
+    fm = plan.get("feature_metadata") or {}
     return {
         "contract_version": CONTRACT_VERSION,
         "generated_at": now(),
         "feature_metadata": {
-            "feature_key": fm.get("feature_key"),
+            "feature_key": plan_feature_key(plan),
             "epic_ref": (change or manifest or {}).get("epic_ref"),
             "app": (change or manifest or {}).get("app"),
             "platform": (change or {}).get("platform"),
@@ -306,7 +336,7 @@ def draft(plan, regression, change, manifest):
              "requirement_ref": s.get("requirement_ref"),
              "priority_tier": s.get("priority_tier"),
              "target_execution_framework": s.get("target_execution_framework")}
-            for s in plan.get("scenario_list", []) if not s.get("is_legacy_regression")],
+            for s in plan_scenarios(plan) if not s.get("is_legacy_regression")],
     }
 
 
@@ -331,8 +361,9 @@ def cmd_draft(a):
     plan = load(a.plan)
     d = draft(plan, load(a.regression) if a.regression else None,
               load(a.change) if a.change else None, load(a.manifest) if a.manifest else None)
+    plan_key = "automation_plan" if is_automation_plan(plan) else "sdet_plan"
     d["inputs"] = {k: {"path": v, "present": bool(v and os.path.isfile(v))}
-                   for k, v in {"sdet_plan": a.plan, "regression_context": a.regression,
+                   for k, v in {plan_key: a.plan, "regression_context": a.regression,
                                 "change_context": a.change, "dev_manifest": a.manifest}.items() if v}
     with open(a.out, "w") as f:
         json.dump(d, f, indent=2)
@@ -376,6 +407,19 @@ def demo():
     assert "PLAN_SCENARIO_LINK" not in must["C111"]["reason_codes"]
     assert "C222" not in must and "C222" not in review
     assert len(d["new_scenarios_to_run"]) == 1
+
+    apg = {"epic_id": "demo", "automation_scenarios": [
+        {"scenario_id": "SC-001", "description": "old flow still works",
+         "is_legacy_regression": True, "existing_case_ref": "C111",
+         "priority_tier": "P0", "target_framework": "GMT_JAVA"},
+        {"scenario_id": "SC-002", "description": "brand new card",
+         "is_legacy_regression": False, "priority_tier": "P0",
+         "requirement_ref": "BR-1", "target_framework": "TAPMIND_NLP"}]}
+    d_apg = draft(apg, regression, change, None)
+    assert d_apg["candidate_pool_size"] == 1
+    assert d_apg["feature_metadata"]["feature_key"] == "demo"
+    assert d_apg["new_scenarios_to_run"][0]["csv_title_association"] == "brand new card"
+    assert d_apg["new_scenarios_to_run"][0]["target_execution_framework"] == "TAPMIND_NLP"
 
     final = {"contract_version": CONTRACT_VERSION, "generated_at": d["generated_at"],
              "extraction_status": "COMPLETE", "change_surface": d["change_surface"],

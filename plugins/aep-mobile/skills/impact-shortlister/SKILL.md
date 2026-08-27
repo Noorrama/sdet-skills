@@ -1,19 +1,20 @@
 ---
 name: mobile-impact-shortlister
-description: Post-build test selection. Takes the approved SDET_PLAN legacy regression rows (is_legacy_regression true + existing_case_ref), enriched from regression_context when available, and narrows them to the cases the merged code actually impacts by matching the change surface (change_context.json / dev_manifest.json / GitLab MR bootstrap) against each candidate's title/steps. Deterministic tier is pure evidence matching — no scoring service. Remainder gets one agent judgment pass. Emits impact_shortlist.json and appends a roll-up to SDET_PLAN.impact_shortlist. App-agnostic; selects, never generates.
+description: Post-build test selection. Takes legacy regression rows (is_legacy_regression true + existing_case_ref) from the SDET plan or *_automation_plan_generator.json, enriched from regression_context when available, and narrows them to the cases the merged code actually impacts by matching the change surface (change_context.json / dev_manifest.json / GitLab MR bootstrap) against each candidate's title/steps. Deterministic tier is pure evidence matching — no scoring service. Remainder gets one agent judgment pass. Emits impact_shortlist.json as a sidecar — does not mutate the SDET plan. App-agnostic; selects, never generates.
 ---
 
 # Mobile Impact Shortlister (post-build)
 
-The pre-build SDET plan marks **legacy regression candidates** (`is_legacy_regression: true` +
+The pre-build plan marks **legacy regression candidates** (`is_legacy_regression: true` +
 `existing_case_ref`). This skill answers the post-build question: **given the code that actually
 merged, which of those legacy cases do we still need to run?**
 
 ```
 pre-build                                     post-build (this skill)
 sdet-plan-generator  ──► SDET_PLAN ──────────┐
-  (legacy rows only)                         ├──► impact-shortlister ──► impact_shortlist.json
-regression-extractor ──► regression_context ─┤         + SDET_PLAN.impact_shortlist
+                 and/or                      ├──► impact-shortlister ──► impact_shortlist.json
+             *_automation_plan_generator.json│         (sidecar only — do not patch their plan)
+regression-extractor ──► regression_context ─┤
   (enrichment only)                            │
 code-change-extractor ─► change_context ─────┘
   OR GitLab MR bootstrap (testing / fallback)
@@ -33,7 +34,7 @@ id — it does **not** expand the pool. Partial-overlap refs (`is_legacy_regress
 
 | Input | Required | Source | What it contributes |
 |---|---|---|---|
-| `*sdet_plan.json` | **yes** | `sdet-plan-generator` | Legacy pool via `is_legacy_regression: true` + `existing_case_ref`; `new_scenarios_to_run` from non-legacy rows. |
+| `*sdet_plan.json` / `*SDET_plan.json` **or** `*_automation_plan_generator.json` | **one of them** | `sdet-plan-generator` | Legacy pool via `is_legacy_regression: true` + `existing_case_ref`; `new_scenarios_to_run` from non-legacy rows. APG uses `automation_scenarios[]` (automatable subset); the SDET plan uses `scenario_list[]` (full pool, including manual). Either is valid — join provenance lives on `impact_shortlist.json.inputs`. |
 | `regression_context.json` | strongly | `regression-extractor` | Enriches legacy candidates (title, steps, tapmind_steps, source_module). |
 | `change_context.json` | preferred | `code-change-extractor` | Change surface: files, screens, modules, flags, APIs, elements, CR risks. |
 | `dev_manifest.json` | fallback | dev agent | Same surface when change_context isn't ready. |
@@ -56,6 +57,7 @@ paths (`ProfileContainerFragment` → `PROFILE_CONTAINER`, etc.).
 ```
 python3 scripts/shortlist_join.py draft \
   --plan <feature>_sdet_plan.json \
+  # or --plan <feature>_automation_plan_generator.json \
   [--regression regression_context.json] \
   --change change_context.json \
   --out impact_shortlist.draft.json
@@ -71,14 +73,23 @@ Deterministic reason codes (any hit → `MUST_RUN`):
 **Not a reason code:** plan scenario link — traceability only, never auto-MUST_RUN.
 
 ### 3. Judge the review_queue
-For each remaining candidate, read title/steps vs. change surface and plan `scope_summary`:
+For each remaining candidate, read title/steps vs. the change surface. Use plan `scope_summary`
+when the SDET plan has it; APG does not — judge from scenario `description` /
+`mapped_user_flow` instead:
 - Plausibly exercises changed behavior → `SHOULD_RUN`, `AGENT_JUDGED_RELEVANT` + one-sentence explanation
 - Tenuous → `OPTIONAL`
 - No link → `deselected_tests`, `NO_IMPACT_SIGNAL` + explanation
 
-### 4. Compose final file + patch plan
-Merge draft `must_run` with judgments; validate against schema; patch plan roll-up via
-`shortlist_join.py patch-plan`.
+### 4. Compose the sidecar — do not mutate their SDET plan
+Merge draft `must_run` with judgments; validate against `schemas/impact_shortlist.schema.json`.
+
+**One required artifact:** `impact_shortlist.json` — why each case was chosen (`reason_codes`,
+`evidence`, `explanation`, `deselected_tests`) plus `inputs` pointing at the plan/APG file used.
+Downstream runners and the demo read this.
+
+Do **not** write `impact_shortlist` onto the other team's SDET plan (`additionalProperties: false`
+on their schema would reject it). Join is the sidecar `inputs` pointer. `shortlist_join.py
+patch-plan` stays in the script for copies we own; never run it on their plan.
 
 ---
 

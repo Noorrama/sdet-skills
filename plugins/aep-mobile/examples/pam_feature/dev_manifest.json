@@ -1,0 +1,299 @@
+{
+  "contract_version": "1.0.0",
+  "feature_key": "pam_8_levels_relaunch",
+  "epic_ref": "pam_8_levels_relaunch",
+  "app": "gojek-driver",
+  "platforms": ["android"],
+  "framework": "native",
+  "jira_ids": ["DRV-1981", "DRV-1982", "DRV-1983", "DRV-1984", "DRV-2017"],
+  "merge_requests": ["!13303", "!13326", "!13352", "!13354", "!13386"],
+  "screens": [
+    {
+      "screen_id": "PROFILE_PAGE",
+      "elements": [
+        {
+          "generated_logical_id": "PROFILE_PAGE.pam_banner_btn",
+          "android_locator": "com.gojek.partner:id/programEntrypoint",
+          "role": "button",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13303",
+            "file": "features/loyalty/implementation/src/main/res/layout/layout_pam_loyalty_entrypoint.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PROFILE_PAGE.pam_banner_title_label",
+          "android_locator": "com.gojek.partner:id/programTitle",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13303",
+            "file": "features/loyalty/implementation/src/main/res/layout/layout_pam_loyalty_entrypoint.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PROFILE_PAGE.cek_level_saya_btn",
+          "android_locator": "com.gojek.partner:id/myLevelEntrypoint",
+          "role": "button",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13303",
+            "file": "features/loyalty/implementation/src/main/res/layout/layout_pam_loyalty_entrypoint.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PROFILE_PAGE.recognition_badge_label",
+          "android_locator": "com.gojek.partner:id/programLevelBadge",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13303",
+            "file": "features/loyalty/implementation/src/main/res/layout/layout_pam_loyalty_entrypoint.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PROFILE_PAGE.program_subtitle_label",
+          "android_locator": "com.gojek.partner:id/programSubtitle",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13303",
+            "file": "features/loyalty/implementation/src/main/res/layout/layout_pam_loyalty_entrypoint.xml"
+          }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "giab_pam_revamp_enabled", "state": "on" }],
+      "apis_touched": [
+        {
+          "endpoint": "GET /v1/loyalty/summary",
+          "method": "GET",
+          "response": "{tier, badge, points}",
+          "error_codes": ["TIMEOUT", "UNAVAILABLE"]
+        }
+      ]
+    },
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "elements": [
+        {
+          "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.tier_list",
+          "android_locator": "com.gojek.partner:id/groupRecyclerView",
+          "role": "list",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13326",
+            "file": "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_content.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.tier_badge_btn",
+          "android_locator": "com.gojek.partner:id/badgeCard",
+          "role": "button",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13326",
+            "file": "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_badge.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.cek_level_saya_btn",
+          "android_locator": "com.gojek.partner:id/checkLevelButton",
+          "role": "button",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13326",
+            "file": "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_content.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.rewards_label",
+          "android_locator": "com.gojek.partner:id/textRewardLabel",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13326",
+            "file": "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_content.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.error_state_label",
+          "android_locator": "com.gojek.partner:id/lceState",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13326",
+            "file": "features/loyalty/implementation/src/main/res/layout/fragment_loyalty_catalogue.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.empty_state_label",
+          "android_locator": "com.gojek.partner:id/catalogueEmptyState",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13354",
+            "file": "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_content.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.target_list",
+          "android_locator": "com.gojek.partner:id/targetRecyclerView",
+          "role": "list",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13326",
+            "file": "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_content.xml"
+          }
+        },
+        {
+          "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.claimed_once_banner_label",
+          "android_locator": "com.gojek.partner:id/textClaimedOnceBanner",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13326",
+            "file": "features/loyalty/implementation/src/main/res/layout/pam_loyalty_catalogue_content.xml"
+          }
+        }
+      ],
+      "deep_links_added": ["gojekdriver://loyalty/catalogue"],
+      "flags_used": [{ "name": "giab_pam_revamp_enabled", "state": "on" }],
+      "apis_touched": [
+        {
+          "endpoint": "GET /v1/loyalty/info",
+          "method": "GET",
+          "response": "{tiers[], current_tier, metrics}",
+          "error_codes": ["TIMEOUT", "UNAVAILABLE"]
+        },
+        {
+          "endpoint": "GET /v2/loyalty/rewards",
+          "method": "GET",
+          "response": "{rewards[], eligibility}",
+          "error_codes": ["TIMEOUT", "LOAD_FAILED"]
+        }
+      ]
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "elements": [
+        {
+          "generated_logical_id": "LOYALTY_PAGE.pencapaian_saya_tab",
+          "android_locator": "com.gojek.partner:id/pam_tab_layout",
+          "role": "tab",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_layout_membership.xml"
+          }
+        },
+        {
+          "generated_logical_id": "LOYALTY_PAGE.year_selector_list",
+          "android_locator": "com.gojek.partner:id/yearRecyclerView",
+          "role": "list",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_pam_achievement_container.xml"
+          }
+        },
+        {
+          "generated_logical_id": "LOYALTY_PAGE.calendar_month_list",
+          "android_locator": "com.gojek.partner:id/monthRecyclerView",
+          "role": "list",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_pam_achievement_container.xml"
+          }
+        },
+        {
+          "generated_logical_id": "LOYALTY_PAGE.calendar_month_cell_btn",
+          "android_locator": "com.gojek.partner:id/monthCard",
+          "role": "button",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_achievement_month_item.xml"
+          }
+        },
+        {
+          "generated_logical_id": "LOYALTY_PAGE.empty_state_label",
+          "android_locator": "com.gojek.partner:id/achievementEmptyState",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_pam_achievement_container.xml"
+          }
+        },
+        {
+          "generated_logical_id": "LOYALTY_PAGE.poin_swadaya_label",
+          "android_locator": "com.gojek.partner:id/poin_swadaya_section",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_tier_details_container.xml"
+          }
+        },
+        {
+          "generated_logical_id": "LOYALTY_PAGE.manfaat_section_btn",
+          "android_locator": "com.gojek.partner:id/my_benefit_section",
+          "role": "button",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_layout_membership.xml"
+          }
+        },
+        {
+          "generated_logical_id": "LOYALTY_PAGE.mitra_juara_year_badge_label",
+          "android_locator": "com.gojek.partner:id/fleet_badge",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_tier_info_content.xml"
+          }
+        },
+        {
+          "generated_logical_id": "LOYALTY_PAGE.benefit_banner_title_label",
+          "android_locator": "com.gojek.partner:id/benefitTitle",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_pam_benefit_banner.xml"
+          }
+        },
+        {
+          "generated_logical_id": "LOYALTY_PAGE.eval_label",
+          "android_locator": "com.gojek.partner:id/evalLabel",
+          "role": "label",
+          "change_type": "added",
+          "provenance": {
+            "mr": "!13352",
+            "file": "features/loyalty/implementation/src/main/res/layout/loyalty_achievement_month_item.xml"
+          }
+        }
+      ],
+      "deep_links_added": [],
+      "flags_used": [{ "name": "giab_pam_revamp_enabled", "state": "on" }],
+      "apis_touched": [
+        {
+          "endpoint": "GET /v2/loyalty/progress",
+          "method": "GET",
+          "response": "{year, months[], mjg_count, start_month, end_month}",
+          "error_codes": ["TIMEOUT"]
+        },
+        {
+          "endpoint": "GET /v1/loyalty/progress",
+          "method": "GET",
+          "response": "{monthly_progress[], history[]}",
+          "error_codes": ["TIMEOUT"]
+        }
+      ]
+    }
+  ]
+}

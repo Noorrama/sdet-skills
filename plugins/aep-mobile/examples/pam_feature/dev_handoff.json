@@ -1,0 +1,206 @@
+{
+  "contract_version": "1.0.0",
+  "feature_key": "pam_8_levels_relaunch",
+  "epic_ref": "pam_8_levels_relaunch",
+  "app": "gojek-driver",
+  "platforms": ["android"],
+  "framework": "native",
+  "source": "sdet_plan.element_locator_handoff",
+  "demo_note": "Expected shopping list for code-change-extractor. Logical IDs the SDET plan requires; locators are NOT bound here — they come from dev_manifest.json after the build. Grounded in PAM MRs !13303, !13326, !13352, !13354, !13386.",
+  "jira_ids": ["DRV-1981", "DRV-1982", "DRV-1983", "DRV-1984", "DRV-2017"],
+  "merge_requests": ["!13303", "!13326", "!13352", "!13354", "!13386"],
+  "expected_deeplinks": [
+    {
+      "uri": "gojekdriver://loyalty/catalogue",
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "preconditions": ["giab_pam_revamp_enabled=on", "authenticated driver, Indonesia"]
+    }
+  ],
+  "expected_flags": [
+    {
+      "name": "giab_pam_revamp_enabled",
+      "required_state": "on",
+      "gates": "PAM 8 Levels banner on Profile + catalogue/membership surfaces"
+    }
+  ],
+  "cr_notes": [
+    {
+      "cr_note_id": "CR-01",
+      "mr": "!13303",
+      "area": "PROFILE_PAGE.cek_level_saya_btn",
+      "category": "localization",
+      "severity": "Medium",
+      "disposition": "becomes-scenario",
+      "note": "Danger flagged hardcoded string 'Cek level saya saat ini' in layout_pam_loyalty_entrypoint.xml. Verify the CTA still renders in id-ID and does not leak English."
+    },
+    {
+      "cr_note_id": "CR-02",
+      "mr": "!13352",
+      "area": "LOYALTY_PAGE.calendar_month_cell_btn",
+      "category": "localization",
+      "severity": "High",
+      "disposition": "becomes-scenario",
+      "note": "AchievementMonthAdapter uses hardcoded setText / number formatting without locale. Calendar month labels must render in Indonesian (Q1)."
+    },
+    {
+      "cr_note_id": "CR-03",
+      "mr": "!13326",
+      "area": "PAM_8_LEVELS_CATALOGUE",
+      "category": "theming",
+      "severity": "Medium",
+      "disposition": "acknowledged",
+      "note": "Reviewer asked for Aloha / adaptive color tokens (light/dark). Confirm catalogue still readable in dark mode."
+    },
+    {
+      "cr_note_id": "RISK-01",
+      "mr": "!13352",
+      "area": "LOYALTY_PAGE.last_period_progress_label",
+      "category": "copy-placeholder",
+      "severity": "Medium",
+      "disposition": "becomes-scenario",
+      "note": "RFC RISK-01: last_period_progress_label copy still a placeholder pending copywriter sign-off."
+    }
+  ],
+  "element_locator_handoff": [
+    {
+      "screen_id": "PROFILE_PAGE",
+      "element_role": "PAM 8 Levels banner tap target on Profile (opens catalogue)",
+      "generated_logical_id": "PROFILE_PAGE.pam_banner_btn",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PROFILE_PAGE",
+      "element_role": "PAM banner title (Apresiasi Mitra / 8 level Program)",
+      "generated_logical_id": "PROFILE_PAGE.pam_banner_title_label",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PROFILE_PAGE",
+      "element_role": "Cek level saya saat ini entry from Profile",
+      "generated_logical_id": "PROFILE_PAGE.cek_level_saya_btn",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PROFILE_PAGE",
+      "element_role": "Special recognition badge on the PAM banner (5th/10th year, Perintis, Legend)",
+      "generated_logical_id": "PROFILE_PAGE.recognition_badge_label",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "element_role": "Catalogue tier group list (Harapan / Andalan / Juara)",
+      "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.tier_list",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "element_role": "Tier badge card tap target",
+      "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.tier_badge_btn",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "element_role": "Cek level saya saat ini CTA on the catalogue",
+      "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.cek_level_saya_btn",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "element_role": "Rewards listing for the selected tier",
+      "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.rewards_label",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "element_role": "Loading / content / error state container (retry on API failure)",
+      "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.error_state_label",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "element_role": "Empty catalogue / benefits state",
+      "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.empty_state_label",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "element_role": "Target / metric row list for a selected tier",
+      "generated_logical_id": "PAM_8_LEVELS_CATALOGUE.target_list",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "element_role": "Pencapaian Saya tab on Loyalty Home",
+      "generated_logical_id": "LOYALTY_PAGE.pencapaian_saya_tab",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "element_role": "Year selector row (previous / current / next year)",
+      "generated_logical_id": "LOYALTY_PAGE.year_selector_list",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "element_role": "12-month yearly progress calendar",
+      "generated_logical_id": "LOYALTY_PAGE.calendar_month_list",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "element_role": "Single calendar month cell (start=green, end=red, missing='x')",
+      "generated_logical_id": "LOYALTY_PAGE.calendar_month_cell_btn",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "element_role": "Empty achievement state when no backfilled history",
+      "generated_logical_id": "LOYALTY_PAGE.empty_state_label",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "element_role": "Poin Swadaya label on Level Saya",
+      "generated_logical_id": "LOYALTY_PAGE.poin_swadaya_label",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "element_role": "Manfaat & Pencapaian Anda section entry",
+      "generated_logical_id": "LOYALTY_PAGE.manfaat_section_btn",
+      "priority": "P0",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "element_role": "Mitra Juara year badge when 12/12 MJG achieved",
+      "generated_logical_id": "LOYALTY_PAGE.mitra_juara_year_badge_label",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "element_role": "Benefit banner title on Pencapaian Saya",
+      "generated_logical_id": "LOYALTY_PAGE.benefit_banner_title_label",
+      "priority": "P1",
+      "accessibility_mapping_directives": {}
+    }
+  ]
+}

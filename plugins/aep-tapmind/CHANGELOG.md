@@ -1,5 +1,14 @@
 # aep-tapmind changelog
 
+## 1.0.1
+
+**`step-validation` input wiring only — device loop, capture, emit rules, and report renderer
+are unchanged.** Mode B now resolves the plan file in order: `enriched_automation_plan.json`
+(the automation ledger), then `*_automation_plan_generator.json`, then the SDET plan. TDP /
+`performBackdoorLogin` uses `test_data[].test_data_output[].test_buddy_prompt` verbatim when
+present; compose or ask only if that field is missing. `@TestInfo.testCaseIds` prefers
+`browserstack_case_id` over `existing_case_ref`. `automation_steps[]` are still used as written.
+
 ## 1.0.0
 
 **Extended `step-validation` to emit ready-to-paste TapMind mobile-test `@Test` methods.** A

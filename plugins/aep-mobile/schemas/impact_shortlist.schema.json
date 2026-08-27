@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "impact_shortlist",
-  "description": "Post-build impact shortlist. Narrows the pre-build regression candidate pool (regression_context.json + the approved SDET_PLAN's existing_case_ref links) down to the test cases the merged code actually impacts. The deterministic tier is pure evidence matching (shortlist_join.py) against the real change surface (change_context.json / dev_manifest.json); the fuzzy tier is judged directly by the calling agent from each candidate's title/steps against the change scope — no external scoring service. Sidecar file; a compact roll-up is appended to the SDET_PLAN under the top-level key 'impact_shortlist'. Automation binding (which exact GMT/TapMind method to invoke) is out of scope for this skill.",
+  "description": "Post-build impact shortlist. Narrows the pre-build regression candidate pool (regression_context.json + the approved SDET_PLAN's existing_case_ref links, or the automatable subset in *_automation_plan_generator.json) down to the test cases the merged code actually impacts. The deterministic tier is pure evidence matching (shortlist_join.py) against the real change surface (change_context.json / dev_manifest.json); the fuzzy tier is judged directly by the calling agent from each candidate's title/steps against the change scope — no external scoring service. Sidecar file only — do not write a roll-up onto another team's SDET plan. Automation binding (which exact GMT/TapMind method to invoke) is out of scope for this skill.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -51,14 +51,18 @@
 
     "inputs": {
       "type": "object",
-      "description": "Provenance of every artefact this shortlist was derived from. Absent/stale inputs are the single biggest cause of a wrong shortlist, so they are recorded, not assumed.",
-      "required": ["sdet_plan"],
+      "description": "Provenance of every artefact this shortlist was derived from. Absent/stale inputs are the single biggest cause of a wrong shortlist, so they are recorded, not assumed. Pass either the SDET plan or the automation-plan-generator file (or both).",
       "properties": {
         "sdet_plan": { "$ref": "#/definitions/input_ref" },
+        "automation_plan": { "$ref": "#/definitions/input_ref", "description": "*_automation_plan_generator.json — automatable subset of the SDET plan." },
         "regression_context": { "$ref": "#/definitions/input_ref" },
         "change_context": { "$ref": "#/definitions/input_ref" },
         "dev_manifest": { "$ref": "#/definitions/input_ref" }
-      }
+      },
+      "anyOf": [
+        { "required": ["sdet_plan"] },
+        { "required": ["automation_plan"] }
+      ]
     },
 
     "change_surface": {

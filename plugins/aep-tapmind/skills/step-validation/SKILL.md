@@ -1,6 +1,6 @@
 ---
 name: step-validation
-description: Run a list of written test steps — pasted by hand, or an SDET_PLAN scenario's automation_steps — against a real Android/iOS device via TapMind, report step by step exactly how each one was carried out (which resolved from the view hierarchy, which needed a vision fallback, a scroll or a retry, which extra steps had to be inserted, which transient screens were dismissed), and emit a ready-to-paste TapMind mobile-test @Test method built only from steps that actually ran. Use when someone hands over "here are my steps, they aren't working", asks to validate/verify/debug a written test-step list, or asks to turn an SDET plan into runnable tapmind-mobile-tests Java — not for open-ended exploration (that's goal-driven-exploration).
+description: Run a list of written test steps — pasted by hand, or a scenario's automation_steps from enriched_automation_plan.json, *_automation_plan_generator.json, or *_sdet_plan.json / *_SDET_plan.json — against a real Android/iOS device via TapMind, report step by step exactly how each one was carried out (which resolved from the view hierarchy, which needed a vision fallback, a scroll or a retry, which extra steps had to be inserted, which transient screens were dismissed), and emit a ready-to-paste TapMind mobile-test @Test method built only from steps that actually ran. Use when someone hands over "here are my steps, they aren't working", asks to validate/verify/debug a written test-step list, or asks to turn an SDET / automation / enriched plan into runnable tapmind-mobile-tests Java — not for open-ended exploration (that's goal-driven-exploration).
 ---
 
 # Step validation (TapMind)
@@ -41,12 +41,25 @@ The run's job is to find out which, and say so per step. So:
 **First, work out where the steps are coming from.** Two input modes:
 
 - **A — a written list.** Pasted in chat, or a file. Use it as given.
-- **B — an SDET plan.** The user names a `*_sdet_plan.json` (or a scenario in one). Read
-  `scenario_list[]`, pick the scenario, and **use its `automation_steps[]` as the step list** —
-  not `steps[]`, which is the manual-QA prose. `automation_steps` is already one action per line
-  in TapMind vocabulary, which is the shape this skill wants. Carry
-  `csv_title_association`, `requirement_ref`, `existing_case_ref`, `priority_tier`, `platform` and
-  `test_data` through as metadata for §6; they populate `@Test(description=…)` and `@TestInfo`.
+- **B — an automation ledger.** The user names a file, a folder, or a scenario. Resolve the
+  file in this order (first match wins; if they named a file, use that file):
+  1. **`enriched_automation_plan.json` / `*enriched_automation_plan.json`** — the ledger.
+     Same `automation_scenarios[]` as APG, plus `test_data[].test_data_output[].test_buddy_prompt`
+     and resolved `browserstack_case_id`. This is the primary input for running the suite.
+  2. **`*_automation_plan_generator.json`** — automatable subset, unenriched.
+  3. **`*_sdet_plan.json` / `*_SDET_plan.json`** — last resort.
+
+  | File | Array | Steps field |
+  |---|---|---|
+  | `enriched_automation_plan.json` | `automation_scenarios[]` | `automation_steps[]` |
+  | `*_automation_plan_generator.json` | `automation_scenarios[]` | `automation_steps[]` |
+  | `*_sdet_plan.json` / `*_SDET_plan.json` | `scenario_list[]` | `automation_steps[]` (not `steps[]`, which is manual-QA prose) |
+
+  `automation_steps` is already one action per line in TapMind vocabulary — **leave them as
+  written**. Carry `csv_title_association` (or APG `description`), `requirement_ref`,
+  `existing_case_ref`, `browserstack_case_id`, `priority_tier`, `platform` and `test_data`
+  through as metadata for §6; they populate `@Test(description=…)` and `@TestInfo`. Record
+  `source.kind` as `enriched_automation_plan`, `automation_plan`, or `sdet_plan` accordingly.
 
   **One scenario per run.** A plan holds many; validating several in one session breaks the linear
   `steps[]` spine and every counter in §5. If the user wants the whole plan, run the skill once
@@ -76,8 +89,24 @@ than guessing silently. Do not re-ask after this point.
 **Then the four run-context resolutions** — location, TDP test data, backdoor login, theme. These
 are identical to `goal-driven-exploration` §0; read
 `${CLAUDE_PLUGIN_ROOT}/skills/goal-driven-exploration/SKILL.md` §0 and follow it verbatim rather
-than reinventing it. Two step-validation-specific notes:
+than reinventing it. Three step-validation-specific notes:
 
+- **TDP / TestBuddy query comes from `test_buddy_prompt` when it exists.** Do not invent an
+  account. Resolve the `tdp_test_data_tool` message (and the `performBackdoorLogin` prompt) in
+  this order, then pass it **verbatim**:
+  1. **Primary — `test_data[].test_data_output[].test_buddy_prompt`.** Pick the fixture whose
+     `required_state` matches the scenario's `driver_type` / `country` / `platform` (e.g. SC-001
+     `driver_type: "2W"` → `fixture-driver-active-2w`, not the 4W fixture). Then take
+     `test_buddy_prompt` from that fixture's `test_data_output[]` (match `fixture_id` /
+     `scenario_id` when several outputs exist). Example for SC-001 2W:
+     `"get me an onboarded Indonesia bike driver with loyalty enabled and update driver tier to GOLD"`
+     That string is the only value sent to TDP / TestBuddy. Ignore `identification_steps`,
+     `tdp_request`, and operations — they are audit, not the query.
+  2. **Fallback — only when `test_buddy_prompt` is missing** (unenriched APG / SDET plan). Then
+     compose from that fixture's `description` + `required_state`. If `test_data[]` itself is
+     missing or empty, follow goal-driven-exploration §0 (ask the user). Do not compose a
+     prompt from scratch while a `test_buddy_prompt` exists.
+  Never emit raw tokens, phones, or account ids — emit the prompt, not what TDP returned.
 - **Backdoor login is still mandatory** and still happens *after* the TDP fetch. If step 1 of the
   author's list is "log in", that step is satisfied by the backdoor login — record it as
   `origin: "author"`, `verdict: "pass_with_deviation"`, deviation type `reworded-target`, and say
@@ -383,11 +412,11 @@ actually ran — never a placeholder:
 
 ```java
 TapMind.setMockLocation(-6.2615, 106.8106);
-TapMind.performBackdoorLogin("get bike driver from TDP");
+TapMind.performBackdoorLogin("get me an onboarded Indonesia bike driver with loyalty enabled and update driver tier to GOLD");
 ```
 
-**Never emit a literal credential, token, phone number or account id** — emit the TDP prompt that
-fetched the account, not what it returned. If the run used tokens from config, emit the
+**Never emit a literal credential, token, phone number or account id** — emit the `test_buddy_prompt`
+(or the TDP prompt that actually ran), not what TDP returned. If the run used tokens from config, emit the
 config-reading expression `$SAMPLE_TEST` uses, not the values.
 
 ### 6c. Phrasing rules for `runStep` lines
@@ -457,8 +486,9 @@ Both get `// verify once` and a `note`. Everything else is emitted clean.
 ### 6g. Wrap it in the module's own shape
 
 Read `$SAMPLE_TEST` from §0 and copy its annotations, imports, and try/catch shape. Fill
-`@TestInfo` `testCaseIds` from the SDET scenario's `existing_case_ref` when input mode B gave one;
-leave a field empty rather than inventing an id. Pick `groups` from `$TEST_GROUPS` — those strings
+`@TestInfo` `testCaseIds` from input mode B in this order: `browserstack_case_id` first
+(e.g. `"TC-766717"`), else `existing_case_ref`. Leave a field empty rather than inventing an id.
+Pick `groups` from `$TEST_GROUPS` — those strings
 are what CI selects on, so a guessed group means the test never runs there. Emit the method, not
 a whole file: the author already has a class.
 

@@ -20,11 +20,16 @@ fired); a second skill would have forked ~370 lines of device procedure and drif
 
 ## The four design calls
 
-**1. Input mode B — SDET plans.** Point the skill at a `*_sdet_plan.json`; it reads
-`scenario_list[]` and uses the scenario's **`automation_steps[]`** (already one action per line in
-TapMind vocabulary), not `steps[]` (manual-QA prose). `existing_case_ref`, `requirement_ref` and
-`platform` flow through into `@TestInfo`. One scenario per run — several in one session breaks the
-linear step spine and every counter in §5.
+**1. Input mode B — enriched / automation / SDET plans.** Resolve the file in this order:
+`enriched_automation_plan.json` (primary ledger), then `*_automation_plan_generator.json`, then
+`*_sdet_plan.json` / `*_SDET_plan.json`. It reads `automation_scenarios[]` or `scenario_list[]`
+and uses the scenario's **`automation_steps[]`** as written (already one action per line in
+TapMind vocabulary), not `steps[]` (manual-QA prose). TDP / backdoor-login prompt is
+`test_data[].test_data_output[].test_buddy_prompt` when present; compose from
+`description` + `required_state` or ask the user only if that field is missing.
+`@TestInfo.testCaseIds` uses `browserstack_case_id` first, else `existing_case_ref`.
+`requirement_ref` and `platform` also flow through. One scenario per run — several
+in one session breaks the linear step spine and every counter in §5.
 
 **2. One line per state-changing tool call, not per author step.** The MCP loop already makes
 exactly one call per action, and that is the same constraint `runStep` has: the server's system
