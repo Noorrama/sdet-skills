@@ -80,6 +80,8 @@ VERIFY_IN_STEP_RE = re.compile(
     r"^\s*\d*\.?\s*(verify|assert|check|confirm that|ensure that)\b", re.I
 )
 
+NUMBERED_LINE_RE = re.compile(r"^\s*\d+\.\s*", re.M)
+
 ANALYSIS_REQUIRED_SECTIONS = [
     r"##\s+Inputs\s+&\s+Open\s+Points",
     r"##\s+Section\s+0\s+[—\-]\s+Selected\s+Test\s+Coverage\s+Categories",
@@ -267,6 +269,57 @@ def validate_scenario_floor(
         )
 
 
+def _count_numbered_lines(text: str) -> int:
+    """Count lines that start with 'N. ' (numbered assertion/action lines)."""
+    if not text:
+        return 0
+    return sum(1 for line in text.split("\n") if NUMBERED_LINE_RE.match(line))
+
+
+def validate_csv_json_parity(
+    plan: dict[str, Any], csv_rows: list[dict[str, str]], errors: list[str]
+) -> None:
+    """CSV Steps / Expected Result must mirror JSON steps[] / expected_result (no summarization)."""
+    by_title = {
+        str(sc.get("csv_title_association") or "").strip(): sc
+        for sc in plan.get("scenario_list") or []
+    }
+    for i, row in enumerate(csv_rows, start=1):
+        title = (row.get("Title") or "").strip()
+        if not title:
+            continue
+        sc = by_title.get(title)
+        if not sc:
+            continue
+        short = title[:55]
+
+        json_steps = sc.get("steps") or []
+        csv_step_lines = _count_numbered_lines(row.get("Steps") or "")
+        json_step_count = len(json_steps)
+        if json_step_count > 0 and csv_step_lines != json_step_count:
+            errors.append(
+                f"CSV row {i} ({short}): Steps has {csv_step_lines} numbered line(s) "
+                f"but JSON steps[] has {json_step_count} — copy each steps[] entry as its own "
+                "numbered CSV line"
+            )
+
+        json_er = str(sc.get("expected_result") or "")
+        csv_er = row.get("Expected Result") or ""
+        json_er_n = _count_numbered_lines(json_er)
+        csv_er_n = _count_numbered_lines(csv_er)
+        if json_er_n > 0 and csv_er_n < json_er_n:
+            errors.append(
+                f"CSV row {i} ({short}): Expected Result has {csv_er_n} numbered line(s) "
+                f"but JSON expected_result has {json_er_n} — do not collapse or summarize; "
+                "copy scenario.expected_result verbatim to CSV Expected Result"
+            )
+        elif json_er_n > 0 and csv_er_n > json_er_n:
+            errors.append(
+                f"CSV row {i} ({short}): Expected Result has {csv_er_n} numbered lines "
+                f"but JSON expected_result has {json_er_n} — keep CSV in sync with JSON"
+            )
+
+
 def validate_steps_in_json(plan: dict[str, Any], errors: list[str]) -> None:
     for sc in plan.get("scenario_list") or []:
         title = str(sc.get("csv_title_association") or "")[:60]
@@ -346,7 +399,7 @@ def run_validation(args: argparse.Namespace) -> list[str]:
     else:
         checklist = build_checklist(prd, design=design, rfc=rfc, plan=plan)
 
-    validate_csv_format(args.csv, errors)
+    csv_rows = validate_csv_format(args.csv, errors)
     analysis_text = validate_analysis(args.analysis, errors)
     validate_json_schema(args.plan, args.schema, errors)
     validate_scenario_floor(plan, checklist, errors)
@@ -355,6 +408,7 @@ def run_validation(args: argparse.Namespace) -> list[str]:
     validate_telemetry(plan, prd, rfc, errors)
     validate_legacy_flags(plan, errors)
     validate_steps_in_json(plan, errors)
+    validate_csv_json_parity(plan, csv_rows, errors)
     if args.compliance:
         validate_compliance_sidecar(plan, args.compliance, errors)
 

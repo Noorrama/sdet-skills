@@ -31,6 +31,8 @@ validator (`scripts/validate_sdet_deliverables.py`) rejects them mechanically.
 |---|---|
 | `is_legacy_regression: true` without `existing_case_ref` | Regression dedup must be auditable |
 | `existing_case_ref` with `is_legacy_regression: false` | Contradictory legacy marking |
+| Collapsing JSON `expected_result` numbered lines into one CSV Expected Result paragraph | CSV Expected Result must be a verbatim copy of `scenario.expected_result` — same line count, same `\n` breaks |
+| CSV Expected Result line count < JSON `expected_result` line count | Summarization defect — compliance validator fails |
 | Verification lines inside JSON `steps[]` | Belongs in `expected_result` |
 | Invented deeplinks, flags, event names, API paths | Provenance rule |
 
