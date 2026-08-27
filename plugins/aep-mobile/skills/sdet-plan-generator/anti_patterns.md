@@ -34,6 +34,15 @@ validator (`scripts/validate_sdet_deliverables.py`) rejects them mechanically.
 | Verification lines inside JSON `steps[]` | Belongs in `expected_result` |
 | Invented deeplinks, flags, event names, API paths | Provenance rule |
 
+## FORBIDDEN — SYNC / BrowserStack upload
+
+| Anti-pattern | Why |
+|---|---|
+| Uploading rows with `is_legacy_regression: true` | Legacy cases already exist in BrowserStack from regression-extractor — re-upload creates duplicates |
+| Excluding Manual rows from BrowserStack upload when `is_legacy_regression: false` | Manual non-legacy cases still belong in TMS; only the automation plan excludes them |
+| Including Manual rows in `<feature_key>_automation_plan_generator.json` | Automation plan is Automatable-only |
+| Overwriting `existing_case_ref` with a newly uploaded `TC-*` id on a legacy scenario | The regression case owns that TMS entry |
+
 ## FORBIDDEN — analysis.md
 
 | Anti-pattern | Why |
