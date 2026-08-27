@@ -990,6 +990,29 @@ The human writes in the `### Feedback` block and re-invokes the skill. The LLM i
 
 Flat CSV for BrowserStack upload via BrowserStack MCP after human approval. Column names must match BrowserStack's import contract exactly.
 
+> **⚠ Generation guard — read this section before writing the CSV, every time.**
+>
+> This section is written last, after a long JSON generation pass. That makes it the most
+> likely place to drift from the spec — using JSON key names as column headers instead of
+> the BrowserStack import names, or omitting content columns because they were never in the
+> earlier summary CSV.
+>
+> Before writing a single CSV row:
+> 1. **Re-read this section in full.** Do not rely on memory of the JSON field names.
+> 2. **Use only the column names in the tables below** as CSV headers — never the JSON key
+>    names (`scenario_id`, `name`, `markets`, `test_type`, `priority`, `type_of_test`,
+>    `arrange`, `expected_result`). Those are the source fields; the column headers are
+>    different.
+> 3. **Write every column listed**, in the order listed. Omitting a content column
+>    (`Preconditions`, `Steps`, `Expected Result`) is a generation error — these fields
+>    exist in the plan JSON and must be projected into the CSV.
+> 4. **Derive `Expected Result` from `step_descriptions[].check`** (per-step), not from the
+>    top-level `expected_result` field. The 1:1 step-to-result numbering is mandatory.
+> 5. **`Execution Mode` value is `Automatable`**, not `Automated`. The spec's exact word.
+> 6. **`Tags` in tracking columns are pipe-separated** (`happy_path|P0`), not
+>    comma-separated — commas are reserved as the CSV delimiter inside quoted fields but
+>    confuse tag-filtering tools that split on commas.
+
 ### BrowserStack columns
 
 | CSV column | Maps from | Notes |
