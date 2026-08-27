@@ -878,26 +878,38 @@ Flattened CSV strictly matching squad project template headers:
   as a to-do list) and automation (which needs actions separated from assertions).
   Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write
   `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`).
-  This column is a direct 1-to-1 join of `scenario.steps[]`. A `steps[]` entry still carrying
+  This column is a direct 1-to-1 join of `scenario.steps[]`. Each JSON `steps[]` entry becomes
+  one numbered CSV line (add `1.`, `2.`, … prefixes when the JSON entries omit them). Row count
+  in CSV Steps must equal `len(scenario.steps[])`. A `steps[]` entry still carrying
   a Gherkin placeholder (`<Vehicle Type>`), third-person test-script phrasing, or a pure
   automation-scaffolding line (no on-screen tester action) is a defect to fix at the source.
   **A single high-level line that collapses a multi-action flow (e.g. "Complete the split bill
   creation") is equally a defect — each discrete tester action must be its own numbered step.**
-- `Expected Result`: Numbered sequential assertions inside double quotes with line breaks
-  (`\n`) after each statement. **ALL verifications live here, not in Steps.** Each assertion
-  corresponds to the action step at the same number — after step 3 (an action), expected
-  result 3 states what the tester should observe. **Write assertions using clean, declarative
-  NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`,
-  `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes
-  in user-friendly, non-technical language. **For boundary scenarios the assertion derives from
-  `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker
-  rather than a guessed outcome.** Every action step must have a corresponding verification —
-  a tester needs to know what to observe after each action, not just at the end. **Do NOT use
-  `—` (dash) as a placeholder for missing verifications.** If you cannot state what the tester
-  should observe after an action, that is a signal the action step is too granular or should be
-  merged with the next action. A sequence of 2+ consecutive `—` dashes in Expected Result is a
-  defect — restructure the steps so each action has a real observable outcome (e.g. "Verify
-  [screen/element] is visible", "Verify page loads", "Verify navigation succeeds").
+- `Expected Result`: **Verbatim copy of `scenario.expected_result` from the JSON plan** — same
+  numbered lines, same `\n` line breaks, same wording. This column is **not** a summary field.
+  Never collapse multiple numbered assertions into one paragraph, never drop intermediate
+  verifications, and never rephrase "1. Verify …\n2. Verify …\n3. Verify …" into a single
+  prose block — that breaks the 1-to-1 action↔assertion mapping manual testers and TMS import
+  rely on.
+
+  Format: numbered sequential assertions inside double quotes with line breaks (`\n`) after each
+  statement. **ALL verifications live here, not in Steps.** Each assertion corresponds to the
+  action step at the same number — after step 3 (an action), expected result 3 states what the
+  tester should observe. **Write assertions using clean, declarative NLP-style verification
+  commands** (e.g., `1. Verify "Confirm Account" is visible`, `2. Verify "Error: Code incorrect"
+  is visible`). Describe functional and telemetry outcomes in user-friendly, non-technical
+  language. **For boundary scenarios the assertion derives from `prd.boundary_conditions[].proposed_default`;
+  if it is absent, write an open-point marker rather than a guessed outcome.** Every action step
+  must have a corresponding verification — a tester needs to know what to observe after each
+  action, not just at the end. **Do NOT use `—` (dash) as a placeholder for missing verifications.**
+  If you cannot state what the tester should observe after an action, that is a signal the action
+  step is too granular or should be merged with the next action. A sequence of 2+ consecutive `—`
+  dashes in Expected Result is a defect — restructure the steps so each action has a real
+  observable outcome (e.g. "Verify [screen/element] is visible", "Verify page loads", "Verify
+  navigation succeeds").
+
+  **Pre-write check:** for every scenario, `count(numbered lines in CSV Expected Result)` must
+  equal `count(numbered lines in JSON expected_result)`. The compliance validator enforces this.
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`. **Resolution precedence: (1) `prd.applicable_platforms` (PRD is the scope authority), (2) else `rfc.scope.target_platforms`, (3) else infer from `design`.** One platform → `"Android"`/`"iOS"`; more than one → `"Cross-Platform"`. If PRD and RFC conflict, use PRD and raise it as a `prd_vs_rfc_gap` — never silently prefer one.
 - `Country v2`: MUST be derived from `prd.applicable_countries` (map ISO code → name, e.g. `ID`→`"Indonesia"`, `SG`→`"Singapore"`, `VN`→`"Vietnam"`). Never pick a country the inputs do not list. If `applicable_countries` has one entry, every row uses that country.
