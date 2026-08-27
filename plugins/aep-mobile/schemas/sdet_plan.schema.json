@@ -140,6 +140,7 @@
           },
           "is_legacy_regression": { "type": "boolean" },
           "existing_case_ref": { "type": "string", "description": "BrowserStack case id (e.g. 'C2879733') this scenario was found to duplicate or closely overlap, from the regression-extractor's regression_context.json. Set whenever is_legacy_regression is true because of a real match -- 'true' with no ref is a bare flag nobody can audit. Omit when the scenario is genuinely new (no existing case)." },
+          "browserstack_case_id": { "type": "string", "description": "Resolved BrowserStack Test Management case id for this scenario — stamped during SYNC upload (TC-XXXXXX) or copied from existing_case_ref / regression context. Omitted until SYNC runs; never set to null." },
           "automatable": { "type": "boolean" },
           "target_execution_framework": {
             "type": "string",

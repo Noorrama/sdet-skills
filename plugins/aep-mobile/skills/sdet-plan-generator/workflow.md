@@ -86,6 +86,14 @@ python3 -c "import json,jsonschema; jsonschema.validate(
   json.load(open('schemas/sdet_plan.schema.json')))"
 ```
 
+## Phase 8 — SYNC only (CSV feedback)
+
+1. Merge CSV → `<feature_key>_SDET_plan.json` (preserve `is_legacy_regression`, `existing_case_ref`, `test_data`, `automation_steps`)
+2. **BrowserStack upload:** all rows where `is_legacy_regression: false` (Manual + Automatable) — skip legacy only
+3. **Automation plan:** only rows where `execution_mode: Automatable` — Manual excluded even if uploaded to BS
+4. Stamp legacy ids from `existing_case_ref`; stamp new ids from upload response
+5. Emit `<feature_key>_automation_plan_generator.json` with full scenario carry-over
+
 ---
 
 See also: `anti_patterns.md`, `category_catalog.md`, full `SKILL.md`.
