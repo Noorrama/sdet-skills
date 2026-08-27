@@ -1,0 +1,403 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 1,
+  "generated_at": "2026-08-22T19:12:52.020172+00:00",
+  "_provenance": {
+    "scenario_gbt_context": "EMPTY (graph gap). The enricher returned no_endpoint_match for all 3 scenarios because the graph indexer did not resolve String.format(\"%s/gofood/meal-scheduler/v1/group-order-sessions\", GoFoodProperties.host) in CreateGroupOrderEndPoint.java. The summaries below were built by OPENING THE REAL FILES in the worktree, not from enrichment. Recorded so no reader mistakes this for graph output.",
+    "verified_endpoint_file": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateGroupOrderEndPoint.java",
+    "operator_decision": "Option A - extend the existing classes."
+  },
+  "method_summaries": [
+    {
+      "class": "CreateGroupOrderTests",
+      "path": "gofood/src/test/java/tests/GroupOrder/regression/CreateGroupOrderTests.java",
+      "methods": [
+        {
+          "method_name": "createSuccessGroupOrder",
+          "groups": [
+            "GoFoodCategories.GOFOOD_GROUP_ORDER"
+          ],
+          "parameters": [
+            "billingType"
+          ],
+          "flow": [
+            "getGroupOrderRequestBodyBuilder().createGroupOrderRequestBody(billingType, GO_RESTO_1)",
+            "groupOrderController.createGroupOrder(body, userId, bearerToken)",
+            "groupOrderController.leaveGroupOrder(id, bearerToken)"
+          ],
+          "assertions": [
+            {
+              "target": "response.id/name/restaurant_id/restaurant_name/billing_type/updated_at",
+              "assertion_type": "assertNotNull",
+              "expected": "non-null",
+              "via": "CreateAndUpdateGroupOrderResponse#assertCreateGroupOrder"
+            },
+            {
+              "target": "response.status",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderConstants.IN_PROGRESS",
+              "via": "CreateAndUpdateGroupOrderResponse#assertCreateGroupOrder"
+            },
+            {
+              "target": "response.max_participants",
+              "assertion_type": "assertEquals",
+              "expected": "\"8\"",
+              "via": "CreateAndUpdateGroupOrderResponse#assertCreateGroupOrder"
+            }
+          ],
+          "data_provider": {
+            "data_provider_class": "CreateGroupOrderTests",
+            "data_provider_method": "getBillingTypes"
+          }
+        },
+        {
+          "method_name": "createGOFailureWithInvalidBillingTypeAndRestoId",
+          "groups": [
+            "GoFoodCategories.GOFOOD_GROUP_ORDER"
+          ],
+          "parameters": [],
+          "flow": [
+            "createGroupOrderRequestBody(INVALID_BILLING_TYPE, INVALID_RESTO_ID)",
+            "groupOrderController.createGroupOrderFailure(...)"
+          ],
+          "assertions": [
+            {
+              "target": "failureResponse.errors[0].code",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.INVALID_BILLING_TYPE.getCode()"
+            },
+            {
+              "target": "failureResponse.errors[0].message_title",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.INVALID_BILLING_TYPE.getMessageTitle()"
+            },
+            {
+              "target": "failureResponse.errors[0].message",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.INVALID_BILLING_TYPE.getMessage()"
+            }
+          ]
+        },
+        {
+          "method_name": "createGOFailureForClosedResto",
+          "groups": [
+            "GoFoodCategories.GOFOOD_GROUP_ORDER"
+          ],
+          "parameters": [],
+          "flow": [
+            "createGroupOrderRequestBody(HOST_PAYS, GO_CLOSED_RESTO)",
+            "groupOrderController.createGroupOrderFailure(...)"
+          ],
+          "assertions": [
+            {
+              "target": "failureResponse.errors[0].code",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.CLOSED_RESTO_ERROR.getCode()"
+            },
+            {
+              "target": "failureResponse.errors[0].message_title",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.CLOSED_RESTO_ERROR.getMessageTitle()"
+            },
+            {
+              "target": "failureResponse.errors[0].message",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.CLOSED_RESTO_ERROR.getMessage()"
+            }
+          ]
+        },
+        {
+          "method_name": "createGOFailureForBlacklistedCustomer",
+          "groups": [
+            "GoFoodCategories.GOFOOD_GROUP_ORDER"
+          ],
+          "parameters": [],
+          "flow": [
+            "loginViaGoAuth(BLACKLISTED_CUSTOMER)",
+            "groupOrderController.createGroupOrderFailure(...)"
+          ],
+          "assertions": [
+            {
+              "target": "failureResponse.errors[0].code",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.BLACKLISTED_CUSTOMER_ERROR.getCode()"
+            },
+            {
+              "target": "failureResponse.errors[0].message_title",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.BLACKLISTED_CUSTOMER_ERROR.getMessageTitle()"
+            },
+            {
+              "target": "failureResponse.errors[0].message",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.BLACKLISTED_CUSTOMER_ERROR.getMessage()"
+            }
+          ]
+        },
+        {
+          "method_name": "createGOFailureForUserWithActiveGOSession",
+          "groups": [
+            "GoFoodCategories.GOFOOD_GROUP_ORDER"
+          ],
+          "parameters": [],
+          "flow": [
+            "createGroupOrder(...)",
+            "createGroupOrderFailure(... duplicate ...)",
+            "leaveGroupOrder(...)"
+          ],
+          "assertions": [
+            {
+              "target": "failureResponse.errors[0].code",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.ALREADY_ACTIVE_SESSION.getCode()"
+            },
+            {
+              "target": "failureResponse.errors[0].message_title",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.ALREADY_ACTIVE_SESSION.getMessageTitle()"
+            },
+            {
+              "target": "failureResponse.errors[0].message",
+              "assertion_type": "assertEquals",
+              "expected": "GroupOrderErrors.ALREADY_ACTIVE_SESSION.getMessage()"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "assertion_summaries": [
+    {
+      "assertion_class": "CreateAndUpdateGroupOrderResponse",
+      "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+      "methods": [
+        {
+          "assertion_method": "assertCreateGroupOrder",
+          "soft": false,
+          "asserts": [
+            {
+              "target": "id,name,restaurant_id,restaurant_name,billing_type,updated_at,has_joined,can_add_to_cart",
+              "assertion_type": "assertNotNull",
+              "expected": "non-null"
+            },
+            {
+              "target": "status",
+              "assertion_type": "assertEquals",
+              "expected": "IN_PROGRESS"
+            },
+            {
+              "target": "max_participants",
+              "assertion_type": "assertEquals",
+              "expected": "\"8\""
+            },
+            {
+              "target": "participants[].user_id",
+              "assertion_type": "assertNotNull",
+              "expected": "non-null"
+            }
+          ],
+          "called_by": [
+            "CreateGroupOrderTests#createSuccessGroupOrder",
+            "CreateGroupOrderTests#createGOFailureForUserWithActiveGOSession"
+          ],
+          "note": "static on the response class; NO social_group assertion exists today"
+        }
+      ]
+    },
+    {
+      "assertion_class": "GroupOrderErrors",
+      "path": "gofood/src/test/java/utils/GroupOrderErrors.java",
+      "methods": [
+        {
+          "assertion_method": "(enum of error constants)",
+          "soft": false,
+          "asserts": [
+            {
+              "target": "code/message_title/message",
+              "assertion_type": "constant lookup",
+              "expected": "per-constant"
+            }
+          ],
+          "called_by": [
+            "all four createGOFailure* methods"
+          ],
+          "note": "12 constants present; NO bad_request / mutually-exclusive-invite-fields constant exists"
+        }
+      ]
+    }
+  ],
+  "data_provider_summaries": [
+    {
+      "data_provider_class": "CreateGroupOrderTests",
+      "data_provider_method": "getBillingTypes",
+      "rows": [
+        {
+          "row_index": 0,
+          "values": [
+            "GroupOrderConstants.EVERYONE_PAYS_THEIR_OWN"
+          ]
+        },
+        {
+          "row_index": 1,
+          "values": [
+            "GroupOrderConstants.HOST_PAYS"
+          ]
+        },
+        {
+          "row_index": 2,
+          "values": [
+            "GroupOrderConstants.EVERYONE_PAYS_EQUALLY"
+          ]
+        }
+      ],
+      "rows_fully_parsed": true,
+      "note": "static Object[][]; no row sends invite_social_group_id - the builder cannot"
+    }
+  ],
+  "decisions": [
+    {
+      "scenario_id": "SC-GOFOODSGM5-001",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "verdict": "no_match",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "confidence": 0.85,
+      "signals": [
+        "endpoint layer exists and is reused: CreateGroupOrderEndPoint",
+        "createSuccessGroupOrder creates a session but cannot send invite_social_group_id - CreateGroupOrderRequestBody has only billing_type and restaurant_id",
+        "the social_group assertion holds ONLY when invite_social_group_id is sent, so it is NOT additive over the 3 existing provider rows - rule 4a therefore forbids assertion_add",
+        "no existing method asserts social_group or social_group_details",
+        "CORRECTION: DB-step unsatisfiability was originally flagged only on SC-002; it applies here too"
+      ],
+      "requires_new_test_class": false,
+      "requires_new_method": true,
+      "blocking_prerequisites": [
+        "add invite_social_group_id to CreateGroupOrderRequestBody",
+        "add an overload to GroupOrderRequestBodyBuilder.createGroupOrderRequestBody (currently 2 args)",
+        "add a social_group block to CreateAndUpdateGroupOrderResponse"
+      ],
+      "ambiguous_candidates": [],
+      "partial": true,
+      "unsatisfiable_expectations": [
+        "step 2: 'Read the session row in the meal scheduler DB ... social_group_details populated with source=MANUAL' - gofood/src/test/java/db contains only WaiterServiceQueries.java and NO GroupOrder test asserts DB state. The response-level social_group{id,name,profile_url,members_count} assertion IS satisfiable; the DB half is not."
+      ]
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-002",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "verdict": "assertion_add",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "createSuccessGroupOrder",
+      "data_provider_class": "CreateGroupOrderTests",
+      "data_provider_method": "getBillingTypes",
+      "new_row": [],
+      "assertion_change": null,
+      "assertion_add": {
+        "assertion_location": "assertion_helper",
+        "assertion_class": "CreateAndUpdateGroupOrderResponse",
+        "assertion_method": "assertCreateGroupOrder",
+        "addition": {
+          "target": "response.social_group",
+          "assertion_type": "assertNull",
+          "expected": "absent when invite_social_group_id was not sent",
+          "message": "\"social_group must be absent when no invite_social_group_id is supplied\""
+        },
+        "shared_with": [
+          "CreateGroupOrderTests#createGOFailureForUserWithActiveGOSession"
+        ],
+        "holds_for_all_callers": true,
+        "holds_for_all_provider_rows": true
+      },
+      "confidence": 0.72,
+      "signals": [
+        "createSuccessGroupOrder already performs exactly this request - the builder cannot send invite_social_group_id, so every existing call is the no-social-group case",
+        "the assertion is purely additive and holds for all 3 provider rows and both callers - rule 4a's assertion_add",
+        "CONFIDENCE CAPPED: step 2 also requires asserting the Gopay Social Groups stub was never called. No stub call-log facility was found in the gofood module, so that half is not satisfiable here"
+      ],
+      "requires_new_test_class": false,
+      "requires_new_method": false,
+      "partial": true,
+      "unsatisfiable_expectations": [
+        "step 2: 'No Get Group Details call was made' - needs a Gopay stub call-log assertion capability that does not exist in this module",
+        "step 1 (DB half): 'social_group_details is null in the DB' - same missing DB-assertion capability as SC-001."
+      ],
+      "ambiguous_candidates": [],
+      "traceability_note": "assertion_add means NO test method carries SC-GOFOODSGM5-002 or its requirement_ref. A regression surfaces as createSuccessGroupOrder failing, and a reader cannot trace that to this scenario. Rule 4a still prefers this over duplicating the method; the cost is real and belongs in the MR body so a reviewer can overrule it."
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-003",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "verdict": "no_match",
+      "target_class": "CreateGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "confidence": 0.8,
+      "signals": [
+        "flow matches createGOFailureWithInvalidBillingTypeAndRestoId exactly: createGroupOrderFailure + GroupOrderErrors code/title/message",
+        "but this is a NEW error condition (both invite fields sent) and GroupOrderErrors has no bad_request constant",
+        "the four existing failure methods have no data provider, so data_provider_new_row is unavailable",
+        "nothing existing changes, so not closest_match_modify"
+      ],
+      "requires_new_test_class": false,
+      "requires_new_method": true,
+      "blocking_prerequisites": [
+        "add invite_history_group_ids + invite_social_group_id to CreateGroupOrderRequestBody",
+        "add a GroupOrderErrors constant for the 400 bad_request contract"
+      ],
+      "ambiguous_candidates": [],
+      "partial": true,
+      "unsatisfiable_expectations": [
+        "step 1: 'Gopay is not called' - no Gopay stub call-log facility exists in the gofood module.",
+        "step 1: 'no session is created' - assertable only indirectly (e.g. a follow-up create succeeding rather than hitting ALREADY_ACTIVE_SESSION); there is no direct DB check available."
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "type": "graph_index_gap",
+      "detail": "CreateGroupOrderEndPoint builds its URL with String.format, so the indexer produced no Endpoint node for this route. All 4056 graph endpoints missed it while 32 files and 11 test classes exist on disk. Fix the indexer or the enricher will keep reporting this endpoint uncovered."
+    },
+    {
+      "type": "plan_routing_incorrect",
+      "detail": "Plan asks for package gofood.test.component.session / SocialGroupSessionComponentTest / SocialGroupSessionAssertions. Real convention is tests.GroupOrder.regression, class CreateGroupOrderTests extends base.GoFoodTestBase, assertions static on the response class plus the GroupOrderErrors enum. Placement is gbt-context-builder's call, not the plan's."
+    },
+    {
+      "type": "missing_capability",
+      "detail": "Two scenarios assert Gopay stub call-log state; no such facility found in the gofood module."
+    },
+    {
+      "type": "missing_capability",
+      "detail": "No DB-assertion capability for meal-scheduler/group-order in the gofood module: gofood/src/test/java/db holds only WaiterServiceQueries.java and every tests/GroupOrder class is API-only. All three scenarios have a DB expectation that therefore cannot be automated here."
+    },
+    {
+      "type": "verdict_correction_log",
+      "detail": "Claude's prose stated all three scenarios become new methods on CreateGroupOrderTests. That contradicted this artifact: SC-002 is assertion_add and needs NO new method. The artifact's verdict stands (rules 4a/4b/4c all satisfied); the prose was wrong. Net effect: 2 new methods, not 3."
+    }
+  ],
+  "_verdict_reconciliation": {
+    "plan_implied": {
+      "new_test_class": "SocialGroupSessionComponentTest (does not exist)",
+      "new_assertion_class": "SocialGroupSessionAssertions (does not exist)",
+      "new_methods": 3,
+      "assessment": "REJECTED - invents a class and package alongside 11 existing tests/GroupOrder classes"
+    },
+    "claude_prose": {
+      "new_methods": 3,
+      "assessment": "WRONG on SC-002 - contradicted this artifact"
+    },
+    "decision_maker": {
+      "new_test_class": null,
+      "new_methods": 2,
+      "assertion_additions": 1,
+      "assessment": "STANDS - option A, zero new classes"
+    },
+    "net": "2 new methods on CreateGroupOrderTests (SC-001, SC-003) + 1 additive assertion in CreateAndUpdateGroupOrderResponse#assertCreateGroupOrder (SC-002). All 3 scenarios are PARTIAL: every one has a DB or stub expectation this module cannot assert."
+  }
+}

@@ -1,0 +1,989 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 2,
+  "automation_scenarios": [
+    {
+      "scenario_id": "SC-GOFOODSGM5-004",
+      "requirement_ref": "rfc.validation_sequence[step-3] / rfc.business_logic[BL-13] / rfc.user_flows[Attach social group on session creation]",
+      "description": "Create session degrades gracefully when the Gopay call times out",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "gofood-meal-scheduler",
+      "module": "gofood",
+      "package": "gofood.test.component.session",
+      "test_class": "SocialGroupSessionComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldCreateSessionWithoutSocialGroupWhenGopayGetGroupDetailsTimesOut",
+      "assertion_class": "SocialGroupSessionAssertions",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "curl_reference": "curl -X POST http://localhost:8080/gofood/meal-scheduler/v1/group-order-sessions -H 'Authorization: Bearer {{FIX-GOFOODSG-002.bearerToken}}' -H 'Content-Type: application/json' -d '{\"billing_type\":\"EVERYONE_PAYS_EQUALLY\",\"restaurant_id\":\"{{FIX-GOFOODSG-001.restaurantId}}\",\"invite_social_group_id\":\"{{FIX-GOFOODSG-002.socialGroupId}}\"}'",
+      "step_descriptions": [
+        {
+          "step": 1,
+          "action": "Create a session passing a valid invite_social_group_id while Gopay times out",
+          "curl_reference": "curl -X POST \"{{MEAL_SCHEDULER_BASE_URL}}/gofood/meal-scheduler/v1/group-order-sessions\" -H \"Authorization: Bearer $ACCESS_TOKEN\" -d '{\"restaurant_id\":\"{restaurant_id}\",\"invite_social_group_id\":\"GT-{group_id}\"}'",
+          "expected_result": "Session is created successfully (2xx); no social_group in the response and social_group_details is null; no social_group_unavailable error is surfaced"
+        },
+        {
+          "step": 2,
+          "action": "Inspect the enqueued job list",
+          "curl_reference": null,
+          "expected_result": "send-social-group-chat-extension job is not enqueued"
+        }
+      ],
+      "test_data": [
+        {
+          "fixture_id": "FIX-GOFOODSG-001",
+          "description": "Restaurant enabled for GoFood group order, max_participants 8",
+          "required_state": {
+            "entity": "MERCHANT",
+            "category": "MERCHANT_GROUP_ORDER_ENABLED",
+            "count": 1,
+            "config": {
+              "group_order_enabled": true,
+              "max_participants": 8
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-004",
+              "fixture_id": "FIX-GOFOODSG-001",
+              "test_data_domain": "MERCHANT",
+              "test_data_type_signals": [
+                "GoFood merchant",
+                "Group order enabled",
+                "max_participants"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "get_supported_category returned zero candidates for the MERCHANT domain (a genuine no-match, not merely uncorroborated) against signals GoFood merchant / Group order enabled / max_participants. get_supported_operation likewise returned an empty operation list for this domain+description; the closest candidates in the live catalog (handle_merchant_info, gomerchant_get_merchant_info, handle_close_open_restaurant) are read-only or unrelated to enabling group-order support or setting a participant cap. MERCHANT has no populated knowledge bundle yet (references/index.md), so this identification cannot exceed medium confidence even if a category existed.",
+              "match_confidence": "medium"
+            }
+          ]
+        },
+        {
+          "fixture_id": "FIX-GOFOODSG-002",
+          "description": "Host customer with a GoPay account who is the ACTIVE OWNER of a GOTO social group with 3 ACTIVE members",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_GOPAY_SOCIAL_GROUP",
+            "count": 1,
+            "config": {
+              "social_group_type": "GOTO",
+              "caller_role": "OWNER",
+              "caller_membership_status": "ACTIVE",
+              "active_member_count": 3
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-004",
+              "fixture_id": "FIX-GOFOODSG-002",
+              "test_data_domain": "CUSTOMER",
+              "test_data_type_signals": [
+                "GoPay",
+                "Social Group",
+                "GOTO",
+                "Owner",
+                "Active Member"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "Matcher proposed CUSTOMER_WITH_GO_PAY based solely on the GoPay signal (candidates included CUSTOMER_WITH_SUBSCRIPTION, CUSTOMER_WITH_GOCORP, CUSTOMER_WITH_CC, CUSTOMER_WITH_30K_STATUS_STAR, CUSTOMER_WITH_SAVED_ADDRESS_POI/AOI, CUSTOMER_WITH_GO_PAY_COINS, CUSTOMER_WITH_PARTIAL_GO_PAY_COINS[_WALLET/_CC]); rejected under the validation gate because GOTO/FAMILY social-group ownership and membership state is entity state to be created, not a pool-selection attribute, and no token in the category name corroborates 'Social Group' / group type / role / membership-status signals. Operation catalog search (signals: Social Group, GOTO, Owner, Active Member) returned only group-order-SESSION operations (handle_group_order_create / _join / _leave / _remove_member / _mark_ready / _make_booking, all operationSource=pertamax) \u2014 none creates or attaches a persistent social group with a specified ownership/membership state. FIX-GOFOODSG-021's description implies social groups may be auto-generated by the system after a completed booking, which could be a viable provisioning path, but this is not an exposed TestBuddy/Pertamax operation and must be confirmed with the TDP/dev team before use.",
+              "match_confidence": "low"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "negative",
+        "reliability",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 60000
+      },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-005",
+      "requirement_ref": "rfc.validation_sequence[step-4] / rfc.business_logic[BL-13]",
+      "description": "Create session with a group id unknown to Gopay creates the session without a social group",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "gofood-meal-scheduler",
+      "module": "gofood",
+      "package": "gofood.test.component.session",
+      "test_class": "SocialGroupSessionComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldCreateSessionWithoutSocialGroupWhenGroupIdUnknownToGopay",
+      "assertion_class": "SocialGroupSessionAssertions",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "curl_reference": "curl -X POST http://localhost:8080/gofood/meal-scheduler/v1/group-order-sessions -H 'Authorization: Bearer {{FIX-GOFOODSG-003.bearerToken}}' -H 'Content-Type: application/json' -d '{\"billing_type\":\"EVERYONE_PAYS_EQUALLY\",\"restaurant_id\":\"{{FIX-GOFOODSG-001.restaurantId}}\",\"invite_social_group_id\":\"{{FIX-GOFOODSG-003.socialGroupId}}\"}'",
+      "step_descriptions": [
+        {
+          "step": 1,
+          "action": "Create a session with an unresolvable social group id",
+          "curl_reference": "curl -X POST \"{{MEAL_SCHEDULER_BASE_URL}}/gofood/meal-scheduler/v1/group-order-sessions\" -H \"Authorization: Bearer $ACCESS_TOKEN\" -d '{\"restaurant_id\":\"{restaurant_id}\",\"invite_social_group_id\":\"GT-does-not-exist\"}'",
+          "expected_result": "Session created (2xx) with no social group; no social_group_not_found error surfaced to the caller"
+        }
+      ],
+      "test_data": [
+        {
+          "fixture_id": "FIX-GOFOODSG-001",
+          "description": "Restaurant enabled for GoFood group order, max_participants 8",
+          "required_state": {
+            "entity": "MERCHANT",
+            "category": "MERCHANT_GROUP_ORDER_ENABLED",
+            "count": 1,
+            "config": {
+              "group_order_enabled": true,
+              "max_participants": 8
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-005",
+              "fixture_id": "FIX-GOFOODSG-001",
+              "test_data_domain": "MERCHANT",
+              "test_data_type_signals": [
+                "GoFood merchant",
+                "Group order enabled",
+                "max_participants"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "get_supported_category returned zero candidates for the MERCHANT domain (a genuine no-match, not merely uncorroborated) against signals GoFood merchant / Group order enabled / max_participants. get_supported_operation likewise returned an empty operation list for this domain+description; the closest candidates in the live catalog (handle_merchant_info, gomerchant_get_merchant_info, handle_close_open_restaurant) are read-only or unrelated to enabling group-order support or setting a participant cap. MERCHANT has no populated knowledge bundle yet (references/index.md), so this identification cannot exceed medium confidence even if a category existed.",
+              "match_confidence": "medium"
+            }
+          ]
+        },
+        {
+          "fixture_id": "FIX-GOFOODSG-003",
+          "description": "Host customer with a GoPay account and no saved social group",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_GOPAY_ACCOUNT",
+            "count": 1,
+            "config": {
+              "saved_social_group_count": 0
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-005",
+              "fixture_id": "FIX-GOFOODSG-003",
+              "test_data_domain": "CUSTOMER",
+              "test_data_type_signals": [
+                "GoPay",
+                "Linked Wallet",
+                "No Saved Social Group"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": "CUSTOMER_WITH_GO_PAY",
+                "test_data_operations": null,
+                "count": 1,
+                "tdp_request": {
+                  "test_data_domain": "CUSTOMER",
+                  "tdp_test_data_category": "CUSTOMER_WITH_GO_PAY"
+                }
+              },
+              "test_data_status": "TDP_SUPPORTED",
+              "test_buddy_prompt": "Create CUSTOMER_WITH_GO_PAY",
+              "identification_notes": "Plan candidate category 'CUSTOMER_WITH_GOPAY_ACCOUNT' does not exist in the TDP TestDataCategoryCustomer enum; nearest real, isEnabled category returned by the matcher and corroborated by the 'GoPay' signal is CUSTOMER_WITH_GO_PAY. Adopted verbatim; no gap-closing operation needed since the wallet-link is a pool attribute, not the amount.",
+              "match_confidence": "medium"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "negative",
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-006",
+      "requirement_ref": "rfc.validation_sequence[step-5] / rfc.business_logic[BL-13]",
+      "description": "Create session by a host who is not an ACTIVE social-group member creates the session without a social group",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "gofood-meal-scheduler",
+      "module": "gofood",
+      "package": "gofood.test.component.session",
+      "test_class": "SocialGroupSessionComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldCreateSessionWithoutSocialGroupWhenHostIsNotActiveMember",
+      "assertion_class": "SocialGroupSessionAssertions",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "curl_reference": "curl -X POST http://localhost:8080/gofood/meal-scheduler/v1/group-order-sessions -H 'Authorization: Bearer {{FIX-GOFOODSG-004.bearerToken}}' -H 'Content-Type: application/json' -d '{\"billing_type\":\"EVERYONE_PAYS_EQUALLY\",\"restaurant_id\":\"{{FIX-GOFOODSG-001.restaurantId}}\",\"invite_social_group_id\":\"{{FIX-GOFOODSG-004.socialGroupId}}\"}'",
+      "step_descriptions": [
+        {
+          "step": 1,
+          "action": "Create a session passing the social group id the host does not belong to",
+          "curl_reference": "curl -X POST \"{{MEAL_SCHEDULER_BASE_URL}}/gofood/meal-scheduler/v1/group-order-sessions\" -H \"Authorization: Bearer $ACCESS_TOKEN\" -d '{\"restaurant_id\":\"{restaurant_id}\",\"invite_social_group_id\":\"GT-{group_id}\"}'",
+          "expected_result": "Session created with no social group attached; no social_group_caller_not_member error surfaced"
+        }
+      ],
+      "test_data": [
+        {
+          "fixture_id": "FIX-GOFOODSG-001",
+          "description": "Restaurant enabled for GoFood group order, max_participants 8",
+          "required_state": {
+            "entity": "MERCHANT",
+            "category": "MERCHANT_GROUP_ORDER_ENABLED",
+            "count": 1,
+            "config": {
+              "group_order_enabled": true,
+              "max_participants": 8
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-006",
+              "fixture_id": "FIX-GOFOODSG-001",
+              "test_data_domain": "MERCHANT",
+              "test_data_type_signals": [
+                "GoFood merchant",
+                "Group order enabled",
+                "max_participants"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "get_supported_category returned zero candidates for the MERCHANT domain (a genuine no-match, not merely uncorroborated) against signals GoFood merchant / Group order enabled / max_participants. get_supported_operation likewise returned an empty operation list for this domain+description; the closest candidates in the live catalog (handle_merchant_info, gomerchant_get_merchant_info, handle_close_open_restaurant) are read-only or unrelated to enabling group-order support or setting a participant cap. MERCHANT has no populated knowledge bundle yet (references/index.md), so this identification cannot exceed medium confidence even if a category existed.",
+              "match_confidence": "medium"
+            }
+          ]
+        },
+        {
+          "fixture_id": "FIX-GOFOODSG-004",
+          "description": "Host customer who is not a member of the target GOTO social group",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_GOPAY_SOCIAL_GROUP",
+            "count": 1,
+            "config": {
+              "social_group_type": "GOTO",
+              "caller_membership_status": "NONE"
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-006",
+              "fixture_id": "FIX-GOFOODSG-004",
+              "test_data_domain": "CUSTOMER",
+              "test_data_type_signals": [
+                "GoPay",
+                "Social Group",
+                "GOTO",
+                "Not A Member"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "Matcher proposed CUSTOMER_WITH_GO_PAY based solely on the GoPay signal (candidates included CUSTOMER_WITH_SUBSCRIPTION, CUSTOMER_WITH_GOCORP, CUSTOMER_WITH_CC, CUSTOMER_WITH_30K_STATUS_STAR, CUSTOMER_WITH_SAVED_ADDRESS_POI/AOI, CUSTOMER_WITH_GO_PAY_COINS, CUSTOMER_WITH_PARTIAL_GO_PAY_COINS[_WALLET/_CC]); rejected under the validation gate because GOTO/FAMILY social-group ownership and membership state is entity state to be created, not a pool-selection attribute, and no token in the category name corroborates 'Social Group' / group type / role / membership-status signals. Operation catalog search (signals: Social Group, GOTO, Owner, Active Member) returned only group-order-SESSION operations (handle_group_order_create / _join / _leave / _remove_member / _mark_ready / _make_booking, all operationSource=pertamax) \u2014 none creates or attaches a persistent social group with a specified ownership/membership state. FIX-GOFOODSG-021's description implies social groups may be auto-generated by the system after a completed booking, which could be a viable provisioning path, but this is not an exposed TestBuddy/Pertamax operation and must be confirmed with the TDP/dev team before use.",
+              "match_confidence": "low"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "negative",
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-007",
+      "requirement_ref": "rfc.user_flows[Attach social group on session creation].steps[3] / REQ-4",
+      "description": "Create session with a social group enqueues the chat extension job",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "gofood-meal-scheduler",
+      "module": "gofood",
+      "package": "gofood.test.integration.session",
+      "test_class": "SocialGroupSessionIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldEnqueueChatExtensionJobWhenSessionCreatedWithSocialGroup",
+      "assertion_class": "SocialGroupSessionAssertions",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "curl_reference": "curl -X POST http://localhost:8080/gofood/meal-scheduler/v1/group-order-sessions -H 'Authorization: Bearer {{FIX-GOFOODSG-002.bearerToken}}' -H 'Content-Type: application/json' -d '{\"billing_type\":\"EVERYONE_PAYS_EQUALLY\",\"restaurant_id\":\"{{FIX-GOFOODSG-001.restaurantId}}\",\"invite_social_group_id\":\"{{FIX-GOFOODSG-002.socialGroupId}}\"}'",
+      "step_descriptions": [
+        {
+          "step": 1,
+          "action": "Create a session with invite_social_group_id",
+          "curl_reference": "curl -X POST \"{{MEAL_SCHEDULER_BASE_URL}}/gofood/meal-scheduler/v1/group-order-sessions\" -H \"Authorization: Bearer $ACCESS_TOKEN\" -d '{\"restaurant_id\":\"{restaurant_id}\",\"invite_social_group_id\":\"GT-{group_id}\"}'",
+          "expected_result": "Session created with the social group attached"
+        },
+        {
+          "step": 2,
+          "action": "Wait for the worker to drain the queue",
+          "curl_reference": null,
+          "expected_result": "Conversation service stub received one extension message targeting social_group_details.chat_channel_id"
+        }
+      ],
+      "test_data": [
+        {
+          "fixture_id": "FIX-GOFOODSG-001",
+          "description": "Restaurant enabled for GoFood group order, max_participants 8",
+          "required_state": {
+            "entity": "MERCHANT",
+            "category": "MERCHANT_GROUP_ORDER_ENABLED",
+            "count": 1,
+            "config": {
+              "group_order_enabled": true,
+              "max_participants": 8
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-007",
+              "fixture_id": "FIX-GOFOODSG-001",
+              "test_data_domain": "MERCHANT",
+              "test_data_type_signals": [
+                "GoFood merchant",
+                "Group order enabled",
+                "max_participants"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "get_supported_category returned zero candidates for the MERCHANT domain (a genuine no-match, not merely uncorroborated) against signals GoFood merchant / Group order enabled / max_participants. get_supported_operation likewise returned an empty operation list for this domain+description; the closest candidates in the live catalog (handle_merchant_info, gomerchant_get_merchant_info, handle_close_open_restaurant) are read-only or unrelated to enabling group-order support or setting a participant cap. MERCHANT has no populated knowledge bundle yet (references/index.md), so this identification cannot exceed medium confidence even if a category existed.",
+              "match_confidence": "medium"
+            }
+          ]
+        },
+        {
+          "fixture_id": "FIX-GOFOODSG-002",
+          "description": "Host customer with a GoPay account who is the ACTIVE OWNER of a GOTO social group with 3 ACTIVE members",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_GOPAY_SOCIAL_GROUP",
+            "count": 1,
+            "config": {
+              "social_group_type": "GOTO",
+              "caller_role": "OWNER",
+              "caller_membership_status": "ACTIVE",
+              "active_member_count": 3
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-007",
+              "fixture_id": "FIX-GOFOODSG-002",
+              "test_data_domain": "CUSTOMER",
+              "test_data_type_signals": [
+                "GoPay",
+                "Social Group",
+                "GOTO",
+                "Owner",
+                "Active Member"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "Matcher proposed CUSTOMER_WITH_GO_PAY based solely on the GoPay signal (candidates included CUSTOMER_WITH_SUBSCRIPTION, CUSTOMER_WITH_GOCORP, CUSTOMER_WITH_CC, CUSTOMER_WITH_30K_STATUS_STAR, CUSTOMER_WITH_SAVED_ADDRESS_POI/AOI, CUSTOMER_WITH_GO_PAY_COINS, CUSTOMER_WITH_PARTIAL_GO_PAY_COINS[_WALLET/_CC]); rejected under the validation gate because GOTO/FAMILY social-group ownership and membership state is entity state to be created, not a pool-selection attribute, and no token in the category name corroborates 'Social Group' / group type / role / membership-status signals. Operation catalog search (signals: Social Group, GOTO, Owner, Active Member) returned only group-order-SESSION operations (handle_group_order_create / _join / _leave / _remove_member / _mark_ready / _make_booking, all operationSource=pertamax) \u2014 none creates or attaches a persistent social group with a specified ownership/membership state. FIX-GOFOODSG-021's description implies social groups may be auto-generated by the system after a completed booking, which could be a viable provisioning path, but this is not an exposed TestBuddy/Pertamax operation and must be confirmed with the TDP/dev team before use.",
+              "match_confidence": "low"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "happy_path",
+        "provisional",
+        "P1"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-008",
+      "requirement_ref": "rfc.user_flows[Attach social group on existing session (happy path)] / in_scope#2 / REQ-1,REQ-2,REQ-4",
+      "description": "Attach a social group to an existing session end to end",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "gofood-meal-scheduler",
+      "module": "gofood",
+      "package": "gofood.test.integration.session",
+      "test_class": "SocialGroupSessionIntegrationTest",
+      "test_layer": "integration",
+      "method_name": "shouldAttachSocialGroupAndEnqueueAllJobsWhenInviteCalledOnSessionWithoutGroup",
+      "assertion_class": "SocialGroupSessionAssertions",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions/{id}/invite",
+      "curl_reference": "curl -X POST http://localhost:8080/gofood/meal-scheduler/v1/group-order-sessions/{{FIX-GOFOODSG-005.groupOrderSessionId}}/invite -H 'Authorization: Bearer {{FIX-GOFOODSG-002.bearerToken}}' -H 'Content-Type: application/json' -d '{\"invite_social_group_id\":\"{{FIX-GOFOODSG-002.socialGroupId}}\"}'",
+      "step_descriptions": [
+        {
+          "step": 1,
+          "action": "Call the Session invite API with invite_social_group_id",
+          "curl_reference": "curl -X POST \"{{MEAL_SCHEDULER_BASE_URL}}/gofood/meal-scheduler/v1/group-order-sessions/{session_id}/invite\" -H \"Authorization: Bearer $ACCESS_TOKEN\" -d '{\"invite_social_group_id\":\"GT-{group_id}\"}'",
+          "expected_result": "2xx; response is the session-details view carrying social_group{} and per-participant social_group_member"
+        },
+        {
+          "step": 2,
+          "action": "Read the session row",
+          "curl_reference": null,
+          "expected_result": "social_group_details written with source=MANUAL; social_group.members contains only ACTIVE Gopay members keyed by gojek user id"
+        },
+        {
+          "step": 3,
+          "action": "Inspect the job queue",
+          "curl_reference": null,
+          "expected_result": "delete-session-cache, publish-to-courier and send-chat-extension jobs are all enqueued"
+        },
+        {
+          "step": 4,
+          "action": "Read the courier payload",
+          "curl_reference": "curl \"{{MEAL_SCHEDULER_BASE_URL}}/gofood/meal-scheduler/group-orders/{customer_id}/{session_id}\" -H \"Authorization: Bearer $ACCESS_TOKEN\"",
+          "expected_result": "Courier payload carries the same social_group fields as the session-details response"
+        }
+      ],
+      "test_data": [
+        {
+          "fixture_id": "FIX-GOFOODSG-005",
+          "description": "IN_PROGRESS group order session with social_group_details null, host plus two participants",
+          "required_state": {
+            "entity": "BOOKING",
+            "category": "GROUP_ORDER_SESSION_IN_PROGRESS",
+            "count": 1,
+            "config": {
+              "session_status": "IN_PROGRESS",
+              "social_group_attached": false,
+              "participant_count": 3
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-008",
+              "fixture_id": "FIX-GOFOODSG-005",
+              "test_data_domain": "BOOKING",
+              "test_data_type_signals": [
+                "Group Order Session Create",
+                "Participant Join",
+                "Participant Join",
+                "IN_PROGRESS",
+                "No Social Group"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [
+                  {
+                    "operation": "handle_group_order_create",
+                    "operationSource": "pertamax",
+                    "operationMcpTool": "handle_group_order_create",
+                    "operationMcpToolDescription": "Primary Group Order flows: end to end, plus the most common single steps.",
+                    "operationSupported": true,
+                    "operationInput": {
+                      "phone_or_id": null,
+                      "restaurant_id": "{{FIX-GOFOODSG-001.restaurantId}}",
+                      "billing_type": null
+                    }
+                  },
+                  {
+                    "operation": "handle_group_order_join",
+                    "operationSource": "pertamax",
+                    "operationMcpTool": "handle_group_order_join",
+                    "operationMcpToolDescription": "Primary Group Order flows: end to end, plus the most common single steps.",
+                    "operationSupported": true,
+                    "operationInput": {
+                      "phone_or_id": null,
+                      "session_id": "<from handle_group_order_create output>"
+                    }
+                  },
+                  {
+                    "operation": "handle_group_order_join",
+                    "operationSource": "pertamax",
+                    "operationMcpTool": "handle_group_order_join",
+                    "operationMcpToolDescription": "Primary Group Order flows: end to end, plus the most common single steps.",
+                    "operationSupported": true,
+                    "operationInput": {
+                      "phone_or_id": null,
+                      "session_id": "<from handle_group_order_create output>"
+                    }
+                  }
+                ],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_OPERATION_FALLBACK",
+              "test_buddy_prompt": "handle_group_order_create and handle_group_order_join",
+              "identification_notes": "No TDP category exists for BOOKING/session state (call 1 returned zero candidates). handle_group_order_create followed by handle_group_order_join for each of the two additional participants (both pertamax, operationSupported) leaves the session IN_PROGRESS with no social group attached, matching the fixture exactly.",
+              "match_confidence": "medium"
+            }
+          ]
+        },
+        {
+          "fixture_id": "FIX-GOFOODSG-002",
+          "description": "Host customer with a GoPay account who is the ACTIVE OWNER of a GOTO social group with 3 ACTIVE members",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_GOPAY_SOCIAL_GROUP",
+            "count": 1,
+            "config": {
+              "social_group_type": "GOTO",
+              "caller_role": "OWNER",
+              "caller_membership_status": "ACTIVE",
+              "active_member_count": 3
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-008",
+              "fixture_id": "FIX-GOFOODSG-002",
+              "test_data_domain": "CUSTOMER",
+              "test_data_type_signals": [
+                "GoPay",
+                "Social Group",
+                "GOTO",
+                "Owner",
+                "Active Member"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "Matcher proposed CUSTOMER_WITH_GO_PAY based solely on the GoPay signal (candidates included CUSTOMER_WITH_SUBSCRIPTION, CUSTOMER_WITH_GOCORP, CUSTOMER_WITH_CC, CUSTOMER_WITH_30K_STATUS_STAR, CUSTOMER_WITH_SAVED_ADDRESS_POI/AOI, CUSTOMER_WITH_GO_PAY_COINS, CUSTOMER_WITH_PARTIAL_GO_PAY_COINS[_WALLET/_CC]); rejected under the validation gate because GOTO/FAMILY social-group ownership and membership state is entity state to be created, not a pool-selection attribute, and no token in the category name corroborates 'Social Group' / group type / role / membership-status signals. Operation catalog search (signals: Social Group, GOTO, Owner, Active Member) returned only group-order-SESSION operations (handle_group_order_create / _join / _leave / _remove_member / _mark_ready / _make_booking, all operationSource=pertamax) \u2014 none creates or attaches a persistent social group with a specified ownership/membership state. FIX-GOFOODSG-021's description implies social groups may be auto-generated by the system after a completed booking, which could be a viable provisioning path, but this is not an exposed TestBuddy/Pertamax operation and must be confirmed with the TDP/dev team before use.",
+              "match_confidence": "low"
+            }
+          ]
+        },
+        {
+          "fixture_id": "FIX-GOFOODSG-006",
+          "description": "Two customers with GoPay accounts who are session participants but not members of the social group",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_GOPAY_ACCOUNT",
+            "count": 2,
+            "config": {
+              "social_group_member": false
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-008",
+              "fixture_id": "FIX-GOFOODSG-006",
+              "test_data_domain": "CUSTOMER",
+              "test_data_type_signals": [
+                "GoPay",
+                "Linked Wallet",
+                "Not Social Group Member"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": "CUSTOMER_WITH_GO_PAY",
+                "test_data_operations": null,
+                "count": 2,
+                "tdp_request": {
+                  "test_data_domain": "CUSTOMER",
+                  "tdp_test_data_category": "CUSTOMER_WITH_GO_PAY"
+                }
+              },
+              "test_data_status": "TDP_SUPPORTED",
+              "test_buddy_prompt": "Create CUSTOMER_WITH_GO_PAY",
+              "identification_notes": "Plan candidate category 'CUSTOMER_WITH_GOPAY_ACCOUNT' does not exist in the TDP TestDataCategoryCustomer enum; nearest real, isEnabled category returned by the matcher and corroborated by the 'GoPay' signal is CUSTOMER_WITH_GO_PAY. Adopted verbatim; no gap-closing operation needed since the wallet-link is a pool attribute, not the amount.",
+              "match_confidence": "medium"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "happy_path",
+        "e2e",
+        "provisional",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-009",
+      "requirement_ref": "rfc.validation_sequence[step-1] / rfc.contracts.rest[POST .../invite].responses[400]",
+      "description": "Session invite with both invite fields is rejected",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "gofood-meal-scheduler",
+      "module": "gofood",
+      "package": "gofood.test.component.session",
+      "test_class": "SocialGroupSessionComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn400BadRequestWhenInviteCalledWithBothInviteFields",
+      "assertion_class": "SocialGroupSessionAssertions",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions/{id}/invite",
+      "curl_reference": "curl -X POST http://localhost:8080/gofood/meal-scheduler/v1/group-order-sessions/{{FIX-GOFOODSG-005.groupOrderSessionId}}/invite -H 'Authorization: Bearer {{FIX-GOFOODSG-002.bearerToken}}' -H 'Content-Type: application/json' -d '{\"invite_social_group_id\":\"{{FIX-GOFOODSG-002.socialGroupId}}\"}'",
+      "step_descriptions": [
+        {
+          "step": 1,
+          "action": "Call the invite API with both invite_history_group_ids and invite_social_group_id",
+          "curl_reference": "curl -X POST \"{{MEAL_SCHEDULER_BASE_URL}}/gofood/meal-scheduler/v1/group-order-sessions/{session_id}/invite\" -H \"Authorization: Bearer $ACCESS_TOKEN\" -d '{\"invite_history_group_ids\":[\"{history_group_id}\"],\"invite_social_group_id\":\"GT-{group_id}\"}'",
+          "expected_result": "HTTP 400 bad_request; session is unchanged and Gopay is not called"
+        }
+      ],
+      "test_data": [
+        {
+          "fixture_id": "FIX-GOFOODSG-005",
+          "description": "IN_PROGRESS group order session with social_group_details null, host plus two participants",
+          "required_state": {
+            "entity": "BOOKING",
+            "category": "GROUP_ORDER_SESSION_IN_PROGRESS",
+            "count": 1,
+            "config": {
+              "session_status": "IN_PROGRESS",
+              "social_group_attached": false,
+              "participant_count": 3
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-009",
+              "fixture_id": "FIX-GOFOODSG-005",
+              "test_data_domain": "BOOKING",
+              "test_data_type_signals": [
+                "Group Order Session Create",
+                "Participant Join",
+                "Participant Join",
+                "IN_PROGRESS",
+                "No Social Group"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [
+                  {
+                    "operation": "handle_group_order_create",
+                    "operationSource": "pertamax",
+                    "operationMcpTool": "handle_group_order_create",
+                    "operationMcpToolDescription": "Primary Group Order flows: end to end, plus the most common single steps.",
+                    "operationSupported": true,
+                    "operationInput": {
+                      "phone_or_id": null,
+                      "restaurant_id": "{{FIX-GOFOODSG-001.restaurantId}}",
+                      "billing_type": null
+                    }
+                  },
+                  {
+                    "operation": "handle_group_order_join",
+                    "operationSource": "pertamax",
+                    "operationMcpTool": "handle_group_order_join",
+                    "operationMcpToolDescription": "Primary Group Order flows: end to end, plus the most common single steps.",
+                    "operationSupported": true,
+                    "operationInput": {
+                      "phone_or_id": null,
+                      "session_id": "<from handle_group_order_create output>"
+                    }
+                  },
+                  {
+                    "operation": "handle_group_order_join",
+                    "operationSource": "pertamax",
+                    "operationMcpTool": "handle_group_order_join",
+                    "operationMcpToolDescription": "Primary Group Order flows: end to end, plus the most common single steps.",
+                    "operationSupported": true,
+                    "operationInput": {
+                      "phone_or_id": null,
+                      "session_id": "<from handle_group_order_create output>"
+                    }
+                  }
+                ],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_OPERATION_FALLBACK",
+              "test_buddy_prompt": "handle_group_order_create and handle_group_order_join",
+              "identification_notes": "No TDP category exists for BOOKING/session state (call 1 returned zero candidates). handle_group_order_create followed by handle_group_order_join for each of the two additional participants (both pertamax, operationSupported) leaves the session IN_PROGRESS with no social group attached, matching the fixture exactly.",
+              "match_confidence": "medium"
+            }
+          ]
+        },
+        {
+          "fixture_id": "FIX-GOFOODSG-002",
+          "description": "Host customer with a GoPay account who is the ACTIVE OWNER of a GOTO social group with 3 ACTIVE members",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_GOPAY_SOCIAL_GROUP",
+            "count": 1,
+            "config": {
+              "social_group_type": "GOTO",
+              "caller_role": "OWNER",
+              "caller_membership_status": "ACTIVE",
+              "active_member_count": 3
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-009",
+              "fixture_id": "FIX-GOFOODSG-002",
+              "test_data_domain": "CUSTOMER",
+              "test_data_type_signals": [
+                "GoPay",
+                "Social Group",
+                "GOTO",
+                "Owner",
+                "Active Member"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "Matcher proposed CUSTOMER_WITH_GO_PAY based solely on the GoPay signal (candidates included CUSTOMER_WITH_SUBSCRIPTION, CUSTOMER_WITH_GOCORP, CUSTOMER_WITH_CC, CUSTOMER_WITH_30K_STATUS_STAR, CUSTOMER_WITH_SAVED_ADDRESS_POI/AOI, CUSTOMER_WITH_GO_PAY_COINS, CUSTOMER_WITH_PARTIAL_GO_PAY_COINS[_WALLET/_CC]); rejected under the validation gate because GOTO/FAMILY social-group ownership and membership state is entity state to be created, not a pool-selection attribute, and no token in the category name corroborates 'Social Group' / group type / role / membership-status signals. Operation catalog search (signals: Social Group, GOTO, Owner, Active Member) returned only group-order-SESSION operations (handle_group_order_create / _join / _leave / _remove_member / _mark_ready / _make_booking, all operationSource=pertamax) \u2014 none creates or attaches a persistent social group with a specified ownership/membership state. FIX-GOFOODSG-021's description implies social groups may be auto-generated by the system after a completed booking, which could be a viable provisioning path, but this is not an exposed TestBuddy/Pertamax operation and must be confirmed with the TDP/dev team before use.",
+              "match_confidence": "low"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
+      "jira_ids": []
+    },
+    {
+      "scenario_id": "SC-GOFOODSGM5-010",
+      "requirement_ref": "rfc.validation_sequence[step-2] / rfc.business_logic[BL-1] / rfc.user_flows[Attach rejected \u2014 session already has a social group] / out_of_scope#2",
+      "description": "Session invite on a session that already has a social group returns social_group_already_attached",
+      "is_legacy_regression": false,
+      "is_dedup": false,
+      "target_framework": "GBT",
+      "service_name": "gofood-meal-scheduler",
+      "module": "gofood",
+      "package": "gofood.test.component.session",
+      "test_class": "SocialGroupSessionComponentTest",
+      "test_layer": "component",
+      "method_name": "shouldReturn422SocialGroupAlreadyAttachedWhenSessionAlreadyHasGroup",
+      "assertion_class": "SocialGroupSessionAssertions",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions/{id}/invite",
+      "curl_reference": "curl -X POST http://localhost:8080/gofood/meal-scheduler/v1/group-order-sessions/{{FIX-GOFOODSG-007.groupOrderSessionId}}/invite -H 'Authorization: Bearer {{FIX-GOFOODSG-002.bearerToken}}' -H 'Content-Type: application/json' -d '{\"invite_social_group_id\":\"{{FIX-GOFOODSG-002.socialGroupId}}\"}'",
+      "step_descriptions": [
+        {
+          "step": 1,
+          "action": "Call the invite API with a second, different social group id",
+          "curl_reference": "curl -X POST \"{{MEAL_SCHEDULER_BASE_URL}}/gofood/meal-scheduler/v1/group-order-sessions/{session_id}/invite\" -H \"Authorization: Bearer $ACCESS_TOKEN\" -d '{\"invite_social_group_id\":\"GT-{other_group_id}\"}'",
+          "expected_result": "HTTP 422 with error code social_group_already_attached"
+        },
+        {
+          "step": 2,
+          "action": "Re-read the session row",
+          "curl_reference": null,
+          "expected_result": "social_group_details still holds the original group id; no jobs were enqueued"
+        }
+      ],
+      "test_data": [
+        {
+          "fixture_id": "FIX-GOFOODSG-007",
+          "description": "IN_PROGRESS group order session with social_group_details attached, source MANUAL",
+          "required_state": {
+            "entity": "BOOKING",
+            "category": "GROUP_ORDER_SESSION_IN_PROGRESS",
+            "count": 1,
+            "config": {
+              "session_status": "IN_PROGRESS",
+              "social_group_attached": true,
+              "social_group_source": "MANUAL",
+              "participant_count": 3
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-010",
+              "fixture_id": "FIX-GOFOODSG-007",
+              "test_data_domain": "BOOKING",
+              "test_data_type_signals": [
+                "Group Order Session",
+                "IN_PROGRESS",
+                "Social Group Attached",
+                "MANUAL",
+                "Participant Join x2"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "handle_group_order_create accepts an invite_social_group_id, but that id must reference a pre-existing social group with the fixture's exact ownership/membership state (source MANUAL) \u2014 the same unprovisionable entity as FIX-GOFOODSG-002. Matcher proposed CUSTOMER_WITH_GO_PAY based solely on the GoPay signal (candidates included CUSTOMER_WITH_SUBSCRIPTION, CUSTOMER_WITH_GOCORP, CUSTOMER_WITH_CC, CUSTOMER_WITH_30K_STATUS_STAR, CUSTOMER_WITH_SAVED_ADDRESS_POI/AOI, CUSTOMER_WITH_GO_PAY_COINS, CUSTOMER_WITH_PARTIAL_GO_PAY_COINS[_WALLET/_CC]); rejected under the validation gate because GOTO/FAMILY social-group ownership and membership state is entity state to be created, not a pool-selection attribute, and no token in the category name corroborates 'Social Group' / group type / role / membership-status signals. Operation catalog search (signals: Social Group, GOTO, Owner, Active Member) returned only group-order-SESSION operations (handle_group_order_create / _join / _leave / _remove_member / _mark_ready / _make_booking, all operationSource=pertamax) \u2014 none creates or attaches a persistent social group with a specified ownership/membership state. FIX-GOFOODSG-021's description implies social groups may be auto-generated by the system after a completed booking, which could be a viable provisioning path, but this is not an exposed TestBuddy/Pertamax operation and must be confirmed with the TDP/dev team before use.",
+              "match_confidence": "low"
+            }
+          ]
+        },
+        {
+          "fixture_id": "FIX-GOFOODSG-002",
+          "description": "Host customer with a GoPay account who is the ACTIVE OWNER of a GOTO social group with 3 ACTIVE members",
+          "required_state": {
+            "entity": "CUSTOMER",
+            "category": "CUSTOMER_WITH_GOPAY_SOCIAL_GROUP",
+            "count": 1,
+            "config": {
+              "social_group_type": "GOTO",
+              "caller_role": "OWNER",
+              "caller_membership_status": "ACTIVE",
+              "active_member_count": 3
+            }
+          },
+          "response_fields_used": [],
+          "test_data_output": [
+            {
+              "scenario_id": "SC-GOFOODSGM5-010",
+              "fixture_id": "FIX-GOFOODSG-002",
+              "test_data_domain": "CUSTOMER",
+              "test_data_type_signals": [
+                "GoPay",
+                "Social Group",
+                "GOTO",
+                "Owner",
+                "Active Member"
+              ],
+              "test_data_details": {
+                "tdp_test_data_category": null,
+                "test_data_operations": [],
+                "count": 1,
+                "tdp_request": null
+              },
+              "test_data_status": "TDP_NOT_SUPPORTED",
+              "test_buddy_prompt": null,
+              "identification_notes": "Matcher proposed CUSTOMER_WITH_GO_PAY based solely on the GoPay signal (candidates included CUSTOMER_WITH_SUBSCRIPTION, CUSTOMER_WITH_GOCORP, CUSTOMER_WITH_CC, CUSTOMER_WITH_30K_STATUS_STAR, CUSTOMER_WITH_SAVED_ADDRESS_POI/AOI, CUSTOMER_WITH_GO_PAY_COINS, CUSTOMER_WITH_PARTIAL_GO_PAY_COINS[_WALLET/_CC]); rejected under the validation gate because GOTO/FAMILY social-group ownership and membership state is entity state to be created, not a pool-selection attribute, and no token in the category name corroborates 'Social Group' / group type / role / membership-status signals. Operation catalog search (signals: Social Group, GOTO, Owner, Active Member) returned only group-order-SESSION operations (handle_group_order_create / _join / _leave / _remove_member / _mark_ready / _make_booking, all operationSource=pertamax) \u2014 none creates or attaches a persistent social group with a specified ownership/membership state. FIX-GOFOODSG-021's description implies social groups may be auto-generated by the system after a completed booking, which could be a viable provisioning path, but this is not an exposed TestBuddy/Pertamax operation and must be confirmed with the TDP/dev team before use.",
+              "match_confidence": "low"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "negative",
+        "P0"
+      ],
+      "environments": [
+        "dev-cluster",
+        "staging-cluster"
+      ],
+      "execution_hints": {
+        "retry_count": 2,
+        "timeout_ms": 15000
+      },
+      "jira_ids": []
+    }
+  ],
+  "_scope": {
+    "requested": "first 10 scenarios",
+    "excluded_as_already_shipped": [
+      "SC-GOFOODSGM5-001",
+      "SC-GOFOODSGM5-002",
+      "SC-GOFOODSGM5-003"
+    ],
+    "excluded_reason": "Byte-identical to the scenarios generated in pass 1 and pushed on MR !21035 (branch automate/gofood-social-group-session-gofood-07edc3). Re-generating would duplicate those test methods.",
+    "in_scope": [
+      "SC-GOFOODSGM5-004",
+      "SC-GOFOODSGM5-005",
+      "SC-GOFOODSGM5-006",
+      "SC-GOFOODSGM5-007",
+      "SC-GOFOODSGM5-008",
+      "SC-GOFOODSGM5-009",
+      "SC-GOFOODSGM5-010"
+    ]
+  }
+}

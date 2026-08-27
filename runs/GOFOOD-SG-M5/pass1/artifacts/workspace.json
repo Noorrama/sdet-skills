@@ -1,0 +1,20 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 1,
+  "generated_at": "2026-08-22T18:57:30.905402+00:00",
+  "base_repo": "/Users/piyushsharma/agentPM/.gbt_repo",
+  "base_branch": "master",
+  "base_sha": "097a4882b81a749bd4aaa0bd32ec2ec32e516634",
+  "base_may_be_stale": false,
+  "branch": "automate/gofood-social-group-session-gofood-07edc3",
+  "worktree_path": "/Users/piyushsharma/skills/.gbt_worktrees/gofood-social-group-session-gofood-07edc3",
+  "gbt_repo": "/Users/piyushsharma/skills/.gbt_worktrees/gofood-social-group-session-gofood-07edc3",
+  "module": "gofood",
+  "module_root": "gofood",
+  "offline": false,
+  "warnings": [
+    "origin embeds a user:token credential in its URL (rule 5). Fetched via a credential-free remote 'gbtfetch' instead. The embedded credential should be rotated and removed from the remote URL."
+  ],
+  "todos": [],
+  "notes": "Worktree cut from master@097a4882 via credential-free remote. Base clone left on its original branch, untouched."
+}

@@ -1,0 +1,9 @@
+{
+  "iid": 21046,
+  "web_url": "https://source.golabs.io/qa/gojek-backend-tests/-/merge_requests/21046",
+  "title": "Draft: [GOFOOD-SG-M5] Add SC-028 join backfills missing ACTIVE social-group member ids",
+  "source_branch": "automate/gofood-social-group-join-backfill-gofood-sc028",
+  "target_branch": "automate/gofood-social-group-invite-gofood-ffd9c5",
+  "state": "opened",
+  "draft": true
+}

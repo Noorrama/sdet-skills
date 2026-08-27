@@ -1,0 +1,14 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 3,
+  "review": {
+    "pass": 3,
+    "status": "approved",
+    "reviewer": "piyush.sharma",
+    "at": "2026-08-24T09:58:07.757429+00:00",
+    "approval_source": "Operator instruction in chat: '/code-gen-orchestrator @enriched_automation_plan_nitin.json generate SC-GOFOODSGM5-028 scenario'. Scoped to that single scenario. Approval is the operator's chat instruction recorded verbatim, NOT a field on the artifact and NOT self-approval by the orchestrator.",
+    "per_scenario": {
+      "SC-GOFOODSGM5-028": "keep"
+    }
+  }
+}

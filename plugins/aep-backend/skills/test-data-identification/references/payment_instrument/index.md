@@ -23,6 +23,23 @@ card" signal, and it is owned entirely by the **Consumer** bundle
 (`../customer/index.md#tdp-customer-categories`) — there is no separate card object to look up
 underneath it.
 
+## Keywords seen in fixture descriptions (still no TDP entity behind them)
+
+`EPIC-1122/automation_plan.json` (a `wallet-service` card-save automation plan) is a concrete
+example of this gap in practice — its fixture `description`/`config` fields carry a full
+card-shaped vocabulary that still has no TDP model behind it: `cardNumber`, `expiryMonth`,
+`expiryYear`, `cvv`, `holderName`, `card_already_saved`, `saved_card_type`, `saved_card_number`,
+card `fingerprint` (`SHA256('<customerId>:<cardNumber>')`), Luhn-check validity, `vault-service`
+tokenisation (`POST /vault/v1/tokenise`), and the feature flag `payment.card_save.enabled`. None of
+these are `../customer/index.md` signals — they describe the *instrument*, not the account — and
+none of them resolve to a TDP category or operation; they document a `wallet-service`-owned
+Postgres table (`payment_cards`) and its own validation/tokenisation logic, entirely outside TDP.
+
+This is exactly the "fixture varies the instrument itself" case the Identification consequence
+below already calls out — a plan referencing this vocabulary stays `TDP_NOT_SUPPORTED` for the
+instrument-specific fields, with only the owning customer (`CUSTOMER_WITH_CC` via
+`../customer/index.md`) resolved through TDP.
+
 ## Identification consequence
 
 - **Never propose a `PAYMENT_INSTRUMENT_WITH_*`-style category or a `CardModel`-shaped record** —

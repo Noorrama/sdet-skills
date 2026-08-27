@@ -1,0 +1,78 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 3,
+  "started_at": "2026-08-24T09:52:00+00:00",
+  "finished_at": "2026-08-24T10:09:52.019690+00:00",
+  "stages": [
+    {
+      "stage": "gbt-context-builder",
+      "status": "completed",
+      "artifact": "runs/GOFOOD-SG-M5/pass3/gbt_context.json",
+      "detail": "repo_verified join endpoint; graph String.format gap same as create/invite"
+    },
+    {
+      "stage": "module_profile_lookup",
+      "status": "completed",
+      "skill": "gofood-api-test-writer"
+    },
+    {
+      "stage": "automation-plan-generator",
+      "status": "completed",
+      "artifact": "runs/GOFOOD-SG-M5/pass3/artifacts/automation_plan.json",
+      "detail": "scoped to SC-GOFOODSGM5-028 from enriched_automation_plan_nitin.json"
+    },
+    {
+      "stage": "test-data-generator",
+      "status": "completed",
+      "artifact": "runs/GOFOOD-SG-M5/pass3/artifacts/test_data.json",
+      "detail": "carried forward from plan test_data_output; FIX-006 TDP_SUPPORTED, FIX-002/007 TDP_NOT_SUPPORTED"
+    },
+    {
+      "stage": "merge_test_data_into_plan",
+      "status": "completed",
+      "detail": "automation_plan.test_data_payloads set from test_data.json, 3 entries"
+    },
+    {
+      "stage": "gbt-method-decision-maker",
+      "status": "completed",
+      "artifact": "runs/GOFOOD-SG-M5/pass3/artifacts/method_decisions.json",
+      "detail": "1 no_match"
+    },
+    {
+      "stage": "gbt-test-code-generator",
+      "status": "completed",
+      "artifact": "runs/GOFOOD-SG-M5/pass3/artifacts/codegen_manifest.json"
+    },
+    {
+      "stage": "test-code-validator",
+      "status": "completed",
+      "attempts": 1,
+      "artifact": "runs/GOFOOD-SG-M5/pass3/artifacts/validation_report.json"
+    }
+  ],
+  "fix_loop": {
+    "attempts_used": 0,
+    "budget": 2,
+    "fix_budget_exhausted": false
+  },
+  "final_validation": {
+    "passed": true,
+    "counts": {
+      "error": 0,
+      "warning": 0
+    }
+  },
+  "files_written": {
+    "created": 0,
+    "updated": 1
+  },
+  "blocked": false,
+  "reviewer_todos": [
+    "STACKED MR: target branch MUST be automate/gofood-social-group-invite-gofood-ffd9c5 (stacked on !21035), NOT master.",
+    "SC-028 disabled: needs a real GOTO social group attached to an IN_PROGRESS session (FIX-GOFOODSG-007/002). TDP cannot create a group or attach social_group_details source=MANUAL. GO_RESTO_1 already satisfies the restaurant half.",
+    "NOT ASSERTED (mechanism present, bakso group-order-session route missing): step 2 social_group_details.members map keys for joining participant + previously missing ACTIVE member. GenericUtils.fetchMealPlanBulkOrderDetailsFromDb covers meal-plan orders only; SocialGroup POJO has members_count only.",
+    "@TestInfo testCaseIds is TODO-SC-GOFOODSGM5-028 placeholder; projectId/suiteId/owner inherited from JoinGroupOrderTests siblings.",
+    "FIX-GOFOODSG-006 (TDP_SUPPORTED CUSTOMER_WITH_GO_PAY) acquired via poolingUtility.getTDPCustomer \u2014 the same pool API this class already uses."
+  ],
+  "notes": "Pass 3 generated SC-GOFOODSGM5-028 only: added VerifyJoinBackfillsMissingActiveSocialGroupMemberIds to existing JoinGroupOrderTests (reuse join stack). Method is enabled=false because FIX-GOFOODSG-002/007 cannot provision a session with social_group_details attached; FIX-006 uses poolingUtility.getTDPCustomer(CUSTOMER_WITH_GO_PAY). Step-2 members-map assert left as TODO \u2014 bakso meal-scheduler inspection pattern exists but no group-order-session route. Worktree automate/gofood-social-group-join-backfill-gofood-sc028 stacked on the pass-2 invite branch. Compile :gofood:compileTestJava passed. No MR created."
+}

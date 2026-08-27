@@ -1,0 +1,28 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 3,
+  "generated_at": "2026-08-24T09:58:07.757429+00:00",
+  "base_repo": "/Users/piyushsharma/agentPM/.gbt_repo",
+  "base_branch": "automate/gofood-social-group-invite-gofood-ffd9c5",
+  "base_sha": "08de87440dfac81945215ac8d4d7c8e77fa1bc56",
+  "base_may_be_stale": false,
+  "branch": "automate/gofood-social-group-join-backfill-gofood-sc028",
+  "worktree_path": "/Users/piyushsharma/skills/.gbt_worktrees/gofood-social-group-join-backfill-gofood-sc028",
+  "gbt_repo": "/Users/piyushsharma/skills/.gbt_worktrees/gofood-social-group-join-backfill-gofood-sc028",
+  "module": "gofood",
+  "module_root": "gofood",
+  "offline": false,
+  "stacked_on": {
+    "branch": "automate/gofood-social-group-invite-gofood-ffd9c5",
+    "mr": "pass2 invite branch (stacked on !21035)",
+    "sha": "08de87440dfac81945215ac8d4d7c8e77fa1bc56",
+    "why": "SC-028 needs invite_social_group_id create path to attach a social group before join-backfill; that lives on the pass-2 invite branch, not master."
+  },
+  "warnings": [
+    "MR target must be automate/gofood-social-group-invite-gofood-ffd9c5 (or its stack onto !21035), NOT master."
+  ],
+  "todos": [
+    "Rebase if the invite / session branches change in review."
+  ],
+  "notes": "Stacked pass-3 worktree on the pass-2 invite branch for SC-GOFOODSGM5-028."
+}
