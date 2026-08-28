@@ -15,6 +15,16 @@ description: >-
 # NLP test codegen (TapMind)
 
 Human guide (what to prepare, what runs, where files go): [README.md](README.md).
+Claude Code and Cursor both load these `SKILL.md` files — install notes:
+[plugin README](../../README.md).
+
+Plugin root for bash (Claude sets `CLAUDE_PLUGIN_ROOT`, Cursor sets `CURSOR_PLUGIN_ROOT`):
+
+```
+ROOT="$(bash "${CLAUDE_PLUGIN_ROOT:-${CURSOR_PLUGIN_ROOT:-${TAPMIND_PLUGIN_ROOT:?}}}/scripts/plugin-root.sh")"
+```
+
+Use `$ROOT` anywhere this skill used `${CLAUDE_PLUGIN_ROOT}`.
 
 Turn a plan of similar scenarios into a real `tapmind-mobile-tests` class and an MR.
 
@@ -111,8 +121,9 @@ Resolve the checkout in this order:
 Then:
 
 ```
-bash ${CLAUDE_PLUGIN_ROOT}/skills/step-validation/assets/module-profile.sh \
-  "$(bash ${CLAUDE_PLUGIN_ROOT}/skills/step-validation/assets/resolve-config.sh --path)" \
+ROOT="$(bash "${CLAUDE_PLUGIN_ROOT:-${CURSOR_PLUGIN_ROOT:-${TAPMIND_PLUGIN_ROOT:?}}}/scripts/plugin-root.sh")"
+bash "$ROOT/skills/step-validation/assets/module-profile.sh" \
+  "$(bash "$ROOT/skills/step-validation/assets/resolve-config.sh" --path)" \
   "$TAPMIND_TESTS_REPO"
 ```
 
@@ -162,7 +173,7 @@ module**. Do not invent transients. Mark every method `validation.mode: generate
 ### 4–5. Harvest and clone
 
 Read [references/sibling-emit.md](references/sibling-emit.md) and
-`${CLAUDE_PLUGIN_ROOT}/skills/step-validation/references/direct-api-map.md`.
+`$ROOT/skills/step-validation/references/direct-api-map.md`.
 
 The pioneer's `kind: guard` lines (Allow / Lewati / walkthrough) go into **every**
 sibling at the same relative position — after login, before the feature action —

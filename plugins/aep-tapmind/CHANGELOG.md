@@ -1,5 +1,12 @@
 # aep-tapmind changelog
 
+## 1.1.4
+
+**Cursor plugin manifest.** `aep-tapmind` now ships `.cursor-plugin/plugin.json`
+(`skills: ./skills/`) like `aep-mobile`, plus `scripts/plugin-root.sh` so bash
+resolves the plugin whether `CLAUDE_PLUGIN_ROOT`, `CURSOR_PLUGIN_ROOT`, or
+`TAPMIND_PLUGIN_ROOT` is set. Install notes: `plugins/aep-tapmind/README.md`.
+
 ## 1.1.3
 
 **`nlp-codegen` README.** QA/engineer guide covering prerequisites, pipeline

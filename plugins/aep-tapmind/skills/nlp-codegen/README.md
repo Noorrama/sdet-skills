@@ -28,6 +28,12 @@ You do **not** have to open or run this skill *inside* `tapmind-mobile-tests`. T
 
 Plugin: `aep-tapmind`. Path: `plugins/aep-tapmind/skills/nlp-codegen/`.
 
+**Cursor vs Claude:** the skill body is the same `SKILL.md`. Cursor did not discover this plugin
+until `.cursor-plugin/plugin.json` (v1.1.4). Install from the AEP marketplace as a Cursor
+plugin, or symlink all of `plugins/aep-tapmind/skills/*` into `.cursor/skills/` **and** set
+`TAPMIND_PLUGIN_ROOT` at the plugin root so sibling scripts still resolve. Full install:
+[plugin README](../../README.md).
+
 ---
 
 ## 3. Why this exists

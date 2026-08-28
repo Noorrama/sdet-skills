@@ -4,8 +4,8 @@ The pioneer `@Test` / `run.tapmindTest.lines[]` is the template. Each other
 scenario in the cluster is that template with a **delta** applied — not a
 fresh wrap of `automation_steps`.
 
-Read `${CLAUDE_PLUGIN_ROOT}/skills/step-validation/SKILL.md` §6 and
-`references/direct-api-map.md` for phrasing and the emit ladder. This file only
+Read `$ROOT/skills/step-validation/SKILL.md` §6 and
+`$ROOT/skills/step-validation/references/direct-api-map.md` for phrasing and the emit ladder. This file only
 covers what to copy vs replace.
 
 ## Shared (copy onto every sibling)
