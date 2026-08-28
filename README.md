@@ -62,7 +62,7 @@ plugins/
     skills/
       goal-driven-exploration/    # plain-English goal -> device run -> graph report
       step-validation/            # written steps -> device diagnosis + one @Test
-      nlp-codegen/                # plan -> one pioneer validation -> suite + MR
+      nlp-codegen/                # plan -> kb-only or one pioneer -> suite + MR
       charter-exploration/        # BrowserStack cases -> exploratory charters
 ```
 

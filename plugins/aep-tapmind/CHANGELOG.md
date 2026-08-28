@@ -1,5 +1,11 @@
 # aep-tapmind changelog
 
+## 1.1.6
+
+**`nlp-codegen` mode choice.** Ask once before any device work: knowledge-base-only
+(faster MR, no pioneer), reuse a pasted `@Test`, or device-pioneer (one
+step-validation per cluster). Do not start step-validation autonomously.
+
 ## 1.1.5
 
 **Cursor TapMind MCP + reload.** Documents `~/.cursor/mcp.json` (`mcp-remote` →

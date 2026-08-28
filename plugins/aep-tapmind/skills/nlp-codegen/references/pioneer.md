@@ -27,7 +27,8 @@ Inside one module, group with:
    Setup = `loginToDriver` / `loginToCustomer` / `openDeeplink` / mock-location /
    permission lines.
 
-Same destination + same stem = **one cluster** → **one pioneer device run**.
+Same destination + same stem = **one cluster** → **one** pioneer (device or
+reused `@Test`) **or** one kb-only reference scenario.
 Ten Driver BAM cases that all open the same BAM screen and differ on one
 assert = one cluster. Profile-banner entry vs catalogue deeplink to the same
 intro page stay together: login transients are shared; the entry action is the
@@ -65,6 +66,9 @@ Those are `origin: "interruption"` (or inserted) rows from the device. The
 pioneer is the cheapest way to observe them once and copy the `if visible`
 guards onto every sibling.
 
+**`kb-only` does not observe these.** Copy `if visible` only from tests already
+in `$MODULE`. Do not invent `Lewati`.
+
 It also yields:
 
 - Real rendered labels (`Lewati`, `Akun`, `Bulanan`) via `suggestedRewrite`
@@ -74,12 +78,16 @@ It also yields:
 
 ## Reuse beats a second device run
 
-Any of these, if they belong to the cluster's stem, **skip** step-validation:
+Any of these, if they belong to the cluster's stem, **skip** step-validation
+(`reuse-pioneer` or `kb-only`):
 
+- User chose **knowledge base only** — no device; reference scenario is a
+  phrasing template from the plan + module tests
 - A `@Test` the user pasted (see `examples.md`)
 - `trace.json` → `run.tapmindTest` from an earlier step-validation
 - An existing method in the module that already has the same login + feature
   deeplink / screen and `if visible` guards (`AgenticTests` PAM catalogue is
   this for PAM)
 
-Re-run only when nothing proven covers this cluster's login → feature stem.
+Run `device-pioneer` only when QA asked for it and nothing proven covers this
+cluster's login → feature stem.

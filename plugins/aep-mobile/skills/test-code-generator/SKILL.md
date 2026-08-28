@@ -38,8 +38,8 @@ Fast tier — **Composer 2.5** default; Sonnet for complex flows; escalate to Op
 ## Select scenarios
 Generate only where `automatable: true` **and** `is_legacy_regression: false` (new scenarios). Legacy
 scenarios are **updated**, not regenerated (see Dedup). Route by `target_execution_framework`:
-`TAPMIND_NLP` → invoke `aep-tapmind:nlp-codegen` (pioneer step-validation + sibling clone into
-`tapmind-mobile-tests`); `GMT_JAVA` → coded tests in this skill.
+`TAPMIND_NLP` → invoke `aep-tapmind:nlp-codegen` (asks kb-only vs reuse-pioneer vs
+one device pioneer, then writes `tapmind-mobile-tests`); `GMT_JAVA` → coded tests in this skill.
 
 ## Given strategy (the "Given" — Pillar 3 fallback hierarchy)
 1. **Deep link** from the plan's `preconditions_metadata.target_entry_deeplink` — jump straight to the screen.
@@ -78,10 +78,10 @@ Do **not** emit a broken test. Add the scenario to `deferred[]` with a reason wh
    `summary` (created/updated/skipped_legacy/deferred/unmapped_data_need/validated_on_device/needs_review/no_nlp_steps).
 
 ## Validated by construction (when a device is available)
-`TAPMIND_NLP` validation is owned by `nlp-codegen`: one pioneer scenario per similar-flow
-cluster is step-validated on device; siblings are `cloned_from_pioneer`. Do not drive every
-NLP case on a device from this skill. GMT coded stays `mode: "generated"` unless a device
-run is explicitly requested. Offline NLP (no device, no proven `@Test`) sets `mode: "generated"`.
+`TAPMIND_NLP` validation is owned by `nlp-codegen`: QA chooses kb-only (`generated`),
+reuse-pioneer, or one device pioneer per similar-flow cluster (`cloned_from_pioneer` /
+`validated_on_device`). Do not drive every NLP case on a device from this skill. GMT coded
+stays `mode: "generated"` unless a device run is explicitly requested.
 
 ## Self-heal (Phase B)
 Wrapped in the self-heal loop: generate → run on device farm → observe → fix (locators/waits) → retry.

@@ -2,14 +2,14 @@
 name: nlp-codegen
 description: >-
   Generate TapMind NLP @Test methods into tapmind-mobile-tests from an
-  enriched_automation_plan / automation plan / SDET plan plus change_context,
-  by step-validating ONE representative scenario per similar-flow cluster and
-  cloning the rest from that proven template (including transient-screen
-  guards the plan never listed). Use when asked to generate NLP test cases,
-  write tapmind-mobile-tests Java, raise an MR for Driver BAM / PAM / a
-  feature's automatable scenarios, or skip running step-validation on every
-  case. Not for diagnosing a single broken step list (that's step-validation)
-  and not for open-ended exploration (that's goal-driven-exploration).
+  enriched_automation_plan / automation plan / SDET plan plus change_context.
+  Default is to ASK whether to skip the device (knowledge-base only, faster MR)
+  or step-validate ONE pioneer scenario per similar-flow cluster (or reuse a
+  pasted proven @Test). Use when asked to generate NLP test cases, write
+  tapmind-mobile-tests Java, raise an MR, skip pioneer / skip step-validation,
+  or knowledge-base-only codegen. Not for diagnosing a single broken step list
+  (that's step-validation) and not for open-ended exploration
+  (that's goal-driven-exploration).
 ---
 
 # NLP test codegen (TapMind)
@@ -28,14 +28,42 @@ Use `$ROOT` anywhere this skill used `${CLAUDE_PLUGIN_ROOT}`.
 
 Turn a plan of similar scenarios into a real `tapmind-mobile-tests` class and an MR.
 
-**This skill orchestrates; it does not re-implement the device loop.** Per cluster it
-invokes `aep-tapmind:step-validation` **once**, on a representative (pioneer) scenario.
-That run is what discovers walkthroughs, permission dialogs, and real labels — none of
-which come from the PDG / automation JSON. Sibling tests are cloned from the proven
-`@Test`, not independently guessed.
+**This skill orchestrates; it does not re-implement the device loop.** A device
+pioneer is **optional**. QA chooses the mode (see §0). Knowledge-base-only is
+faster and still uses the plan, `change_context`, existing module tests, and
+step-validation emit rules — it will not discover `Allow` / `Lewati` unless
+those already exist in the knowledge base.
 
-Do **not** run step-validation on every scenario. Ten Driver BAM cases with the same
-login → home → feature stem cost **one** device run, not ten.
+If they opt into a device pioneer: **one** `step-validation` per similar-flow
+cluster, then clone siblings. Never validate every scenario.
+
+## 0. Mode — ask once, before any device work
+
+Do **not** start step-validation autonomously.
+
+If the user already chose in the prompt, obey and do not re-ask:
+
+| They said… | Mode |
+|---|---|
+| “skip pioneer”, “no device”, “knowledge base only”, “just raise the MR”, “I don’t have time” | **`kb-only`** |
+| Pasted a `@Test` / `trace.json` / “use this as the pioneer” | **`reuse-pioneer`** |
+| “run pioneer”, “validate first”, “step-validation on one case” | **`device-pioneer`** |
+
+If they said nothing, **ask once** (recommend `kb-only` when they sound rushed):
+
+```
+How should I generate the NLP tests?
+
+1. Knowledge base only (faster) — plan + change_context + existing tapmind-mobile-tests
+   + step-validation phrasing rules. No device. MR still happens. Transients like
+   Allow/Lewati are copied only if they already exist in that module's tests.
+2. Reuse a pioneer — paste a proven @Test or point at a step-validation report.
+3. Device pioneer — step-validate ONE representative case, then clone the rest
+   (discovers Allow/Lewati). Needs TapMind MCP + a device.
+```
+
+Then proceed. Record the mode on the class/ledger (`validation.mode`:
+`generated` | `cloned_from_pioneer` | `validated_on_device`).
 
 ## Token discipline
 
@@ -68,9 +96,10 @@ The SDET plan *consumed* it when scenarios were generated; it does **not** embed
 `screens[]` / `ui_flow[]` / per-element `label`. `unmapped_extractor_data.design`
 is only leftover fields that did not map, not a recoverable design file. PAM's
 SDET plan even records `design_context.screens` as DEGRADED/empty. Visible
-strings for NLP come from, in order: pioneer device / pasted `@Test`, then
-plan `automation_steps` / `expected_result` (unquoted if never resolved), then
-existing module tests. Missing `design_context.json` is normal — continue.
+strings for NLP come from, in order: pioneer device / pasted `@Test` (when
+those modes ran), then existing module tests (quoted labels already proven),
+then plan `automation_steps` / `expected_result` (**unquoted** if never
+resolved on device). Missing `design_context.json` is normal — continue.
 
 Select scenarios with `target_framework` / `target_execution_framework` = `TAPMIND_NLP`
 (or unset + `execution_mode: Automatable`). Skip `deferred` / `manual` / empty
@@ -85,9 +114,10 @@ do not re-run the device for that cluster.
 Copy this checklist:
 
 ```
+- [ ] 0. Mode: kb-only | reuse-pioneer | device-pioneer (ask unless already stated)
 - [ ] 1. Resolve plan + change_context + module
-- [ ] 2. Cluster scenarios; pick one pioneer per cluster; echo both
-- [ ] 3. Pioneer: reuse proven @Test / trace, else invoke step-validation
+- [ ] 2. Cluster scenarios; pick one pioneer / reference per cluster; echo both
+- [ ] 3. Pioneer only if mode is reuse-pioneer or device-pioneer
 - [ ] 4. Harvest shared template (setup + guards + rewritten labels)
 - [ ] 5. Emit sibling methods from the template + each scenario's delta
 - [ ] 6. Write one class into the module; compile
@@ -136,8 +166,8 @@ annotations, imports, `extends`, groups, try/catch.
 
 ### 2. Cluster + pioneer
 
-Read [references/pioneer.md](references/pioneer.md). Echo to the user **before**
-the device run:
+Read [references/pioneer.md](references/pioneer.md). Echo the cluster **before**
+any device work (even in `kb-only`, so they see the grouping):
 
 ```
 Cluster C1 (destination PAM_8_LEVELS_CATALOGUE): SC-001, SC-002, … SC-010
@@ -145,15 +175,16 @@ Cluster C1 (destination PAM_8_LEVELS_CATALOGUE): SC-001, SC-002, … SC-010
   siblings: SC-001 … (delta = profile-banner entry vs deeplink)
 ```
 
-One cluster ⇒ one step-validation. Disjoint destinations ⇒ one pioneer each.
-Do not pick silently.
+`kb-only`: still pick a “reference” scenario (longest stem) as the **phrasing
+template** from the plan + module tests — do not invoke step-validation.
+Disjoint destinations ⇒ one reference / pioneer each. Do not pick silently.
 
-### 3. Pioneer run
+### 3. Pioneer / knowledge-base emit
 
-**Reuse if the user already has a proven method** (pasted Java, `trace.json`
-`run.tapmindTest`, or a report's TapMind-test tab). That method *is* the template.
+**`reuse-pioneer`:** the pasted `@Test` / `trace.json` `run.tapmindTest` / report
+tab **is** the template. Do not re-run the device for that cluster.
 
-Otherwise invoke `aep-tapmind:step-validation` in a sub-agent:
+**`device-pioneer`:** invoke `aep-tapmind:step-validation` in a sub-agent:
 
 - Input mode B, **that one scenario only**.
 - Pre-answer location, `test_buddy_prompt` (verbatim from the fixture whose
@@ -165,10 +196,13 @@ Otherwise invoke `aep-tapmind:step-validation` in a sub-agent:
 If the pioneer **STOPPED**, do not clone a half-flow. Fix that scenario (or pick
 the next-best in the cluster) and re-run. A stopped pioneer poisons every sibling.
 
-No device and no proven `@Test`: fall back to offline emit
-([references/sibling-emit.md](references/sibling-emit.md) §offline). Harvest
-`if visible` guards only from `$SAMPLE_TEST` / sibling tests **already in that
-module**. Do not invent transients. Mark every method `validation.mode: generated`.
+**`kb-only`:** skip the device. Emit from the knowledge base
+([references/sibling-emit.md](references/sibling-emit.md) §offline): plan
+`automation_steps`, `change_context` screens/deeplinks, `test_buddy_prompt`,
+direct-api map, `$SAMPLE_TEST` house style, and `if visible` guards **only**
+from tests already in `$MODULE`. Do not invent `Lewati` / `Allow`. Mark every
+method `validation.mode: generated`. Still raise the MR. Tell QA this is
+unverified on device; they can run `device-pioneer` later on one flaky method.
 
 ### 4–5. Harvest and clone
 
@@ -177,14 +211,18 @@ Read [references/sibling-emit.md](references/sibling-emit.md) and
 
 The pioneer's `kind: guard` lines (Allow / Lewati / walkthrough) go into **every**
 sibling at the same relative position — after login, before the feature action —
-whether or not the plan listed them. That is the whole point of the pioneer.
+whether or not the plan listed them. That is the whole point of a device /
+reused pioneer.
+
+In **`kb-only`**, copy guards only from `$MODULE` tests that share this login
+stem. If none exist, emit none.
 
 Each sibling keeps its own delta: extra tap, different assertion, different
 deeplink / `test_buddy_prompt` / flags. Do not copy the pioneer's unique asserts.
 
 Phrasing, quoting, and direct-API vs `runStep` follow step-validation §6. Quote
-only labels the pioneer resolved at the hierarchy rung; plan English that never
-ran stays **unquoted**.
+only labels a device/reused pioneer resolved at the hierarchy rung, or labels
+already quoted in `$MODULE` tests. Plan English that never ran stays **unquoted**.
 
 ### 6. Write the class
 

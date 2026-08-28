@@ -41,8 +41,8 @@ POST-BUILD (dev shares the build)
         │                                            match + one agent judgment pass, no scoring
         │                                            service; roll-up appended to sdet_plan.impact_shortlist)
         ▼
-  test-code-generator   → TAPMIND_NLP → aep-tapmind:nlp-codegen (one pioneer device run,
-                          clone siblings into tapmind-mobile-tests); GMT_JAVA stays here
+  test-code-generator   → TAPMIND_NLP → aep-tapmind:nlp-codegen (kb-only or one pioneer,
+                          then suite in tapmind-mobile-tests); GMT_JAVA stays here
                           (test data wired via test-data-provisioner → TestBuddy)
 ```
 Shared at both stages: **test-data-provisioner** (TestBuddy → GBT fallback → synthetic).

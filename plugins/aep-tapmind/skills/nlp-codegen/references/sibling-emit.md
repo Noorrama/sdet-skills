@@ -59,12 +59,15 @@ Verb-first lines. One verb per `runStep`. `scroll`, not `swipe`, to reveal
 content. Prefer `TapMind.scrollToText` / `TapMind.scroll(Direction.RIGHT)` when
 the pioneer used the direct API.
 
-## Offline fallback (no device, no proven `@Test`)
+## Offline / knowledge-base-only (`kb-only`)
 
-Still emit. Harvest guards **only** from existing tests in `$MODULE` that share
-this app's login stem. If the module has no such guards, emit none — don't
-guess `Lewati`. Mark `validation.mode: generated`. Recommend a pioneer
-step-validation as follow-up.
+QA chose skip-device, or there is no device and no proven `@Test`. Still emit
+and still raise the MR.
+
+Harvest guards **only** from existing tests in `$MODULE` that share this app's
+login stem. If the module has no such guards, emit none — don't guess `Lewati`.
+Mark `validation.mode: generated`. They can run `device-pioneer` later on one
+method if a sibling flakes.
 
 ## Ledger (optional)
 
