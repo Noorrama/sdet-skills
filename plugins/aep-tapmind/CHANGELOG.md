@@ -1,5 +1,44 @@
 # aep-tapmind changelog
 
+## 1.1.3
+
+**`nlp-codegen` README.** QA/engineer guide covering prerequisites, pipeline
+slot vs `test-code-generator`, clustering, design-context limits, shallow clone,
+and GitLab MR auth — `skills/nlp-codegen/README.md`.
+
+## 1.1.2
+
+**`nlp-codegen` clarifications.** Clusters are similar-flow groups inside one
+module (not Driver-vs-GoFood). `design_context.json` is optional Figma copy —
+the SDET plan cannot reconstruct it. If `tapmind-mobile-tests` is not on disk,
+shallow-clone `aep/tapmind-mobile-tests` (`--depth 1`); do not require the
+skill to be run from that repo.
+
+## 1.1.1
+
+**`nlp-codegen` MR step is GitLab-explicit.** No numeric project id is stored —
+the target is the `tapmind-mobile-tests` checkout's `origin`
+(`aep/tapmind-mobile-tests` on `source.golabs.io`). Opening the MR needs
+`GITLAB_TOKEN` / `glab auth` with write scopes; if missing, the skill commits
+and prints `git push` + `glab mr create` instead of guessing GitHub or a token.
+
+## 1.1.0
+
+**New skill: `nlp-codegen`.** Generates TapMind NLP `@Test` methods into
+`tapmind-mobile-tests` from an enriched / automation / SDET plan plus
+`change_context`, without running step-validation on every scenario.
+
+Per similar-flow cluster (e.g. ten Driver BAM cases that share login → feature
+and differ on one assertion) it step-validates **one** pioneer scenario, harvests
+the proven method — including `if visible` transients the plan JSON never listed
+(`Tap 'Allow'…`, `Tap 'Lewati'…`) — and clones the siblings from that template.
+Then writes one class in the module's house style and opens an MR scoped to that
+module.
+
+Orchestrates; does not fork the device loop. Reuses `step-validation`'s
+`module-profile.sh` and `direct-api-map.md`. A pasted proven `@Test` or
+`trace.json` skips the device run for that cluster.
+
 ## 1.0.1
 
 **`step-validation` input wiring only — device loop, capture, emit rules, and report renderer

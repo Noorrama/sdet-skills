@@ -37,8 +37,9 @@ Fast tier — **Composer 2.5** default; Sonnet for complex flows; escalate to Op
 
 ## Select scenarios
 Generate only where `automatable: true` **and** `is_legacy_regression: false` (new scenarios). Legacy
-scenarios are **updated**, not regenerated (see Dedup). Route by `target_execution_framework`
-(`TAPMIND_NLP` → NLP; `GMT_JAVA` → coded).
+scenarios are **updated**, not regenerated (see Dedup). Route by `target_execution_framework`:
+`TAPMIND_NLP` → invoke `aep-tapmind:nlp-codegen` (pioneer step-validation + sibling clone into
+`tapmind-mobile-tests`); `GMT_JAVA` → coded tests in this skill.
 
 ## Given strategy (the "Given" — Pillar 3 fallback hierarchy)
 1. **Deep link** from the plan's `preconditions_metadata.target_entry_deeplink` — jump straight to the screen.
@@ -47,6 +48,9 @@ scenarios are **updated**, not regenerated (see Dedup). Route by `target_executi
    Never generate raw home-screen tap-walks. No deep link **and** no macro → defer (see below).
 
 ## Process (per selected scenario)
+**If routed `TAPMIND_NLP`:** invoke `aep-tapmind:nlp-codegen` and stop — do not wrap
+`automation_steps` here. Remaining steps apply to `GMT_JAVA` only.
+
 1. **Given:** resolve via the hierarchy above; record `given_strategy` + `deep_link`/`nav_macro_fallback`.
 2. **Setup:** emit `mock_location` + `backdoor_login` (TDP user) via the house-style helpers.
 3. **Elements:** bind element labels from `automation_steps[]` → real locators from `change_context` (android=resource-id, ios=accessibilityId, flutter=Key/Semantics). Never hard-code inline locators.
@@ -74,9 +78,10 @@ Do **not** emit a broken test. Add the scenario to `deferred[]` with a reason wh
    `summary` (created/updated/skipped_legacy/deferred/unmapped_data_need/validated_on_device/needs_review/no_nlp_steps).
 
 ## Validated by construction (when a device is available)
-Drive the emitted NLP on a real device (BrowserStack/emulator), keep only steps that PASS, and record
-`validation: { mode: "validated_on_device", result, steps_validated, steps_repaired }`. Offline
-generation sets `mode: "generated"` so consumers know it's unverified.
+`TAPMIND_NLP` validation is owned by `nlp-codegen`: one pioneer scenario per similar-flow
+cluster is step-validated on device; siblings are `cloned_from_pioneer`. Do not drive every
+NLP case on a device from this skill. GMT coded stays `mode: "generated"` unless a device
+run is explicitly requested. Offline NLP (no device, no proven `@Test`) sets `mode: "generated"`.
 
 ## Self-heal (Phase B)
 Wrapped in the self-heal loop: generate → run on device farm → observe → fix (locators/waits) → retry.
