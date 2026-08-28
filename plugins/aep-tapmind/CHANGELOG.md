@@ -1,5 +1,11 @@
 # aep-tapmind changelog
 
+## 1.1.5
+
+**Cursor TapMind MCP + reload.** Documents `~/.cursor/mcp.json` (`mcp-remote` →
+`http://localhost:7777/mcp`) and how to reload skills vs MCP in Cursor Desktop
+(Reload Window + new chat). Plugin README.
+
 ## 1.1.4
 
 **Cursor plugin manifest.** `aep-tapmind` now ships `.cursor-plugin/plugin.json`

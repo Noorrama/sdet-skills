@@ -48,7 +48,57 @@ Same `SKILL.md` files. Install **one** of these (keep the plugin tree — skills
 
 Restart Cursor after install. Invoke by name (`nlp-codegen`, `step-validation`) or in natural language (“generate the TapMind NLP tests and raise the MR”).
 
-TapMind **MCP** (Appium session tools) is separate: configure it in Cursor Settings → MCP if you need a pioneer device run. Codegen without a device still works if you paste a proven `@Test`.
+## TapMind MCP (Cursor Desktop)
+
+Skills are instructions. Pioneer device runs need the **TapMind MCP** server on `localhost:7777`.
+
+User-level config (all Cursor projects): `~/.cursor/mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "tapmind": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:7777/mcp"]
+    }
+  }
+}
+```
+
+The TapMind HTTP MCP process must already be listening on port **7777**. `mcp-remote` is only a bridge. If 7777 is down, Cursor shows `tapmind` as failed until you start the server and reload MCP.
+
+## Reload so Cursor picks up new skills and MCP
+
+These are **two different layers**. Reloading one does not always reload the other.
+
+### MCP (`tapmind`)
+
+1. Confirm the TapMind server is up: `http://localhost:7777/mcp`.
+2. **Cursor Settings → MCP** — you should see `tapmind`. Use the refresh/retry control on that row if it is red.
+3. If it still fails: **Cmd+Shift+P** → **Developer: Reload Window**.
+4. Last resort: quit Cursor fully (Cmd+Q) and reopen.
+
+A new agent chat after reload is required before tools like `start_appium_session` appear. An already-open chat keeps the old tool list.
+
+### Skills (`nlp-codegen`, `step-validation`, …)
+
+Cursor reads skills at **session start**. Editing `SKILL.md` on disk is not enough while a chat is running.
+
+| How you installed | How to pick up updates |
+|---|---|
+| Project `.cursor/skills/` symlinks into this repo | `git pull` (or save local edits) → **Developer: Reload Window** → **new chat** |
+| Personal `~/.cursor/skills/` | Same: reload window + new chat. Keep `TAPMIND_PLUGIN_ROOT` pointed at `plugins/aep-tapmind` |
+| Cursor plugin (`aep-tapmind`) | Bump already happened in `.cursor-plugin/plugin.json`. Disable/enable the plugin or reload window. If it still serves an old copy, remove and re-add the plugin source |
+
+Do **not** rely on `~/.claude/plugins/cache/aep/aep-tapmind/…` — that is Claude Code’s cache, not Cursor’s skill loader.
+
+**Fast path after changing skills in this repo:**
+
+```
+Cmd+Shift+P → Developer: Reload Window
+```
+
+Then start a **new** Agent chat and mention `nlp-codegen` (or “generate TapMind NLP tests”).
 
 Plugin root for scripts:
 
