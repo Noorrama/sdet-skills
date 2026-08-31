@@ -1,18 +1,20 @@
 {
   "refinements": [
     {
-      "screen_id": "SHARED_CART",
-      "old_id": "SHARED_CART.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
-      "suggested_id": "SHARED_CART.quantity_stepper_btn",
-      "confidence": "high",
-      "rationale": "Element is a quantity stepper control (minus/plus) for dish quantity adjustment, not a generic minus button"
-    },
-    {
       "screen_id": "CHECKOUT",
       "old_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
-      "suggested_id": "CHECKOUT.quantity_stepper_btn",
+      "suggested_id": "CHECKOUT.discounted_sku_minus_btn",
+      "source_ref": "16619:182120",
       "confidence": "high",
-      "rationale": "Element is a quantity stepper control (minus/plus) for dish quantity adjustment on checkout screen, not a generic minus button"
+      "rationale": "Minus stepper on discounted SKU row at checkout; triggers checkout state change when promo limit reached"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "old_id": "SHARED_CART.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+      "suggested_id": "SHARED_CART.cart_item_minus_btn",
+      "source_ref": "16619:181363",
+      "confidence": "high",
+      "rationale": "Minus stepper on shared cart item row; label includes promo limit validation note"
     }
   ]
 }

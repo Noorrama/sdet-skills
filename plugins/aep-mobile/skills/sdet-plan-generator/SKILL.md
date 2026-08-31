@@ -431,7 +431,11 @@ Expand scenarios across:
      entry screen (a `flowStartingPoints` entry, or a screen already resolved by an earlier rung)
      to this scenario's target `screen_id`. Prefer `confidence: "EXPLICIT"` edges. Turn each edge
      into a step using the trigger element's `label` (never its raw `element_id` — e.g. `Tap
-     "8 level Program Apresiasi Mitra"`, not `Tap PROFILE_PAGE.pam_entry_btn`). A path that only
+     "8 level Program Apresiasi Mitra"`, not `Tap PROFILE_PAGE.pam_entry_btn`). When
+     `trigger_source_ref` is present on an edge, use it to resolve the trigger element's `label`
+     via `screens[].elements[].source_ref` (required when multiple edges share the same canonical
+     `trigger_element_id`). When several edges share `trigger_element_id`, each edge is still a
+     distinct checklist path if `to_source_ref` or `condition` differs. A path that only
      reaches an intermediate screen is a partial answer — carry it forward and let rung 3 supply
      the missing segment (see *Reconciling two sources* below).
   3. **Regression corpus navigation (`regression_context.json`).** Search

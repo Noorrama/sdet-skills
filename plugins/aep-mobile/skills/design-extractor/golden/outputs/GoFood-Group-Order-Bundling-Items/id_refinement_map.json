@@ -2,45 +2,27 @@
   "refinements": [
     {
       "screen_id": "MPS",
-      "old_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
-      "suggested_id": "MPS.order_type_btn",
+      "old_id": "MPS.merchant_profile_sku_sku_list",
+      "suggested_id": "MPS.meal_pack_sku_list",
+      "source_ref": "14090:117610",
       "confidence": "high",
-      "rationale": "Element label reads 'Order type default/food/spot/group_order' and triggers navigation to Landing screen - this is the order type selection button"
+      "rationale": "Label/state disambiguation for duplicate 14090:117610: Merchant Profile / SKU / SKU List v3 Meal Pack Fore Coffee Cream Bundle 2 Iced M"
     },
     {
       "screen_id": "MPS",
       "old_id": "MPS.merchant_profile_sku_sku_list",
-      "suggested_id": "MPS.bundle_sku_list",
+      "suggested_id": "MPS.meal_pack_sku_list_2",
+      "source_ref": "14107:118961",
       "confidence": "high",
-      "rationale": "Element label shows 'Merchant Profile / SKU / SKU List v3 Meal Pack Fore Coffee Cream Bundle' - this is the bundle SKU list, not a generic merchant profile list"
+      "rationale": "Label/state disambiguation for duplicate 14107:118961: Merchant Profile / SKU / SKU List v3 Meal Pack Fore Coffee Cream Bundle 2 Iced M"
     },
     {
       "screen_id": "MPS",
-      "old_id": "MPS.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn",
-      "suggested_id": "MPS.loading_spinner",
-      "confidence": "medium",
-      "rationale": "Element is a full-screen loading spinner (indicator/spinner/full_screen), not an interactive button - triggers transition to next MPS screen after loading"
-    },
-    {
-      "screen_id": "SHARED_CART",
-      "old_id": "SHARED_CART.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl",
-      "suggested_id": "SHARED_CART.edit_cart_btn",
+      "old_id": "MPS.merchant_profile_sku_sku_list",
+      "suggested_id": "MPS.b1g1_sku_list",
+      "source_ref": "14107:118963",
       "confidence": "high",
-      "rationale": "Element label shows 'navigation/16/ic_edit icon Edit' - this is the edit cart button, not a generic label"
-    },
-    {
-      "screen_id": "CHECKOUT",
-      "old_id": "CHECKOUT.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl",
-      "suggested_id": "CHECKOUT.edit_checkout_btn",
-      "confidence": "high",
-      "rationale": "Element label shows 'navigation/16/ic_edit icon Edit' - this is the edit checkout button, not a generic label"
-    },
-    {
-      "screen_id": "DISH_DETAILS_4_ITEMS",
-      "old_id": "DISH_DETAILS_4_ITEMS.content_text_label_meal_container",
-      "suggested_id": "DISH_DETAILS_4_ITEMS.quantity_stepper",
-      "confidence": "medium",
-      "rationale": "Edge condition says 'Plus / minus' - this triggers quantity adjustment, so the trigger element is a stepper control, not a generic container"
+      "rationale": "Label/state disambiguation for duplicate 14107:118963: Merchant Profile / SKU / SKU List v3 Buy 1 Get 1 Fore Coffee Time B1G1 1 Iced Di"
     }
   ]
 }

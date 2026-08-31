@@ -1,0 +1,161 @@
+[
+  {
+    "element_id": "BUNDLING_FULL_DATA.add_to_cart_btn",
+    "quality": "GOOD",
+    "screen_id": "BUNDLING_FULL_DATA",
+    "source_ref": "14090:118814"
+  },
+  {
+    "element_id": "BUNDLING_FULL_DATA.custom_btn",
+    "quality": "GOOD",
+    "screen_id": "BUNDLING_FULL_DATA",
+    "source_ref": "14090:116293"
+  },
+  {
+    "element_id": "CHECKOUT.checkout_content_cell_horizontallayout_container",
+    "quality": "BAD",
+    "screen_id": "CHECKOUT",
+    "source_ref": "14107:120091"
+  },
+  {
+    "element_id": "CHECKOUT.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl",
+    "quality": "BAD",
+    "screen_id": "CHECKOUT",
+    "source_ref": "14107:120150"
+  },
+  {
+    "element_id": "DISH_DETAILS_4_ITEMS.content_text_label_meal_container",
+    "quality": "GOOD",
+    "screen_id": "DISH_DETAILS_4_ITEMS",
+    "source_ref": "14107:119528"
+  },
+  {
+    "element_id": "DISH_DETAILS_4_ITEMS.content_text_label_meal_container",
+    "quality": "GOOD",
+    "screen_id": "DISH_DETAILS_4_ITEMS",
+    "source_ref": "17351:141630"
+  },
+  {
+    "element_id": "DISH_DETAILS_4_ITEMS.price_loading_indicatorspinner_lbl",
+    "quality": "BAD",
+    "screen_id": "DISH_DETAILS_4_ITEMS",
+    "source_ref": "15959:86912"
+  },
+  {
+    "element_id": "DISH_DETAILS_4_ITEMS.price_stepper_quantity_lbl",
+    "quality": "GOOD",
+    "screen_id": "DISH_DETAILS_4_ITEMS",
+    "source_ref": "14107:119569"
+  },
+  {
+    "element_id": "LANDING.content_content_text_pojays_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "18833:91904"
+  },
+  {
+    "element_id": "LANDING.create_invite_friends_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "14090:111409"
+  },
+  {
+    "element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_btn",
+    "quality": "GOOD",
+    "screen_id": "MERCHANT_PROFILE_REQUIRED",
+    "source_ref": "14090:118427"
+  },
+  {
+    "element_id": "MERCHANT_PROFILE_REQUIRED.cell_horizontallayout_no_sugar_btn",
+    "quality": "BAD",
+    "screen_id": "MERCHANT_PROFILE_REQUIRED",
+    "source_ref": "14090:118409"
+  },
+  {
+    "element_id": "MPS.activity_view_iphone_sheet_btn",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "14090:112124"
+  },
+  {
+    "element_id": "MPS.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "15959:86802"
+  },
+  {
+    "element_id": "MPS.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "14090:117610",
+    "source_refs": [
+      "14090:117610",
+      "14107:118961",
+      "14107:118963"
+    ]
+  },
+  {
+    "element_id": "MPS.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "14107:118961",
+    "source_refs": [
+      "14090:117610",
+      "14107:118961",
+      "14107:118963"
+    ]
+  },
+  {
+    "element_id": "MPS.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "14107:118963",
+    "source_refs": [
+      "14090:117610",
+      "14107:118961",
+      "14107:118963"
+    ]
+  },
+  {
+    "element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "16321:130508"
+  },
+  {
+    "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14090:111898"
+  },
+  {
+    "element_id": "MPS.view_group_cart_btn",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "14107:119618"
+  },
+  {
+    "element_id": "SHARED_CART.go_to_checkout_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "14107:119893"
+  },
+  {
+    "element_id": "SHARED_CART.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl",
+    "quality": "BAD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "14107:119657"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "14107:119629"
+  },
+  {
+    "element_id": "SHIMMER.shimmer_content_image_indicatorshimmer_container",
+    "quality": "BAD",
+    "screen_id": "SHIMMER",
+    "source_ref": "14090:116246"
+  }
+]

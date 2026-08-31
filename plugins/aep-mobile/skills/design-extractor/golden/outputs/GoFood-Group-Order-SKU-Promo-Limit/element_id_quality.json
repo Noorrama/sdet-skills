@@ -1,0 +1,50 @@
+[
+  {
+    "element_id": "CHECKOUT.checkout_content_cell_horizontallayout_container",
+    "quality": "BAD",
+    "screen_id": "CHECKOUT",
+    "source_ref": "16619:181674"
+  },
+  {
+    "element_id": "CHECKOUT.checkout_content_cell_horizontallayout_container",
+    "quality": "BAD",
+    "screen_id": "CHECKOUT",
+    "source_ref": "16619:182176"
+  },
+  {
+    "element_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+    "quality": "BAD",
+    "screen_id": "CHECKOUT",
+    "source_ref": "16619:182120"
+  },
+  {
+    "element_id": "MPS.view_group_cart_btn",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "16619:181395"
+  },
+  {
+    "element_id": "SHARED_CART.go_to_checkout_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "16619:181467"
+  },
+  {
+    "element_id": "SHARED_CART.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+    "quality": "BAD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "16619:181363"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "16616:180952"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "16619:181404"
+  }
+]
