@@ -7,6 +7,7 @@ this file is the non-skippable spine every model must follow.
 
 1. Load schemas: `schemas/sdet_plan.schema.json`, `schemas/scenario.schema.json`
 2. Require `prd_context.json` + `design_context.json` (record gaps if partial)
+2a. Load `task_context.json` if present (the PRIMARY DRIVER from `task-extractor`; optional — formerly `plan_context.json`). It supplies the AC coverage floor (`epics[].user_stories[].acceptance_criteria[]`), test hooks (`epics[].test_hooks[]`, `type: deeplink|flag-override|state-injection`, URI in `invoke`), per-task `observable_state`, `flag_keys[]`, and `traceability[]`/`blocking_dependencies[]`. Carry its `blocking_issues[]` (e.g. a story with no ACs) and `testability_gaps[]` straight into the gap analysis.
 3. Inherit all upstream `extraction_notes[]`
 4. Invoke **regression-extractor** (BrowserStack MCP) — hard stop if MCP unavailable
 5. Build checklist:
@@ -58,6 +59,7 @@ python3 scripts/validate_sdet_deliverables.py \
   --analysis <feature_key>_analysis.md \
   [--design design_context.json] \
   [--rfc rfc_context.json] \
+  [--task task_context.json] \
   --checklist coverage_checklist.json \
   --compliance <feature_key>_compliance_report.json
 ```
