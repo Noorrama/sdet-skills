@@ -18,9 +18,45 @@ methods may be emitted.
 Do **not** re-implement Memgraph enrichment for NLP-only flows unless comparing against coded
 coverage; the scan below is TapMind-specific and file-based.
 
+## Scenario approval gate (run first — before coverage scan)
+
+NLP generate, verify, and suite convert apply **only** to approved scenarios. This matches
+`gbt-test-code-generator` rule 1a. On enriched plans (e.g. `enriched_automation_plan_v6.json`),
+TDP fixture output is provisioned only for `status: "approved"` scenarios — generating for
+`draft` scenarios produces unrunnable tests (null `test_data_output`, unresolved `{{FIX-…}}`).
+
+Resolve per scenario, **first hit wins**:
+
+| Source | Generate when | Otherwise |
+|---|---|---|
+| `run.json` → `review.per_scenario[<scenario_id>]` | `"keep"` | Skip — `reason: not_approved` |
+| Scenario `status` or `approval_status` (when plan carries per-scenario status) | `"approved"` | Skip — `reason: not_approved` (`draft`, `changes_requested`, etc.) |
+| Plan top-level `status` only (no per-scenario status on **any** scenario) | `"approved"` | Skip all — plan not approved |
+| None of the above | — | Skip — `reason: no_approval_record` |
+
+**Enriched-plan rule:** when scenarios carry their own `status` field, **each row is judged
+independently**. Plan-level `"status": "draft"` does **not** block scenarios whose own
+`status` is `"approved"`. Example: `GOFOOD-SG-M5` with plan `draft` and 3 scenarios
+`approved` → generate **only those 3**, skip the 57 `draft`.
+
+**Fail closed:** missing `review.per_scenario` entry is not implicit keep. `draft` is not
+“generate anyway”.
+
+### TDP readiness (enriched plans with `test_data[]`)
+
+After approval passes, before prompt generate:
+
+| Check | Skip when |
+|---|---|
+| `curl_reference` / steps use `{{FIX-xxx.field}}` | Fixture `test_data_output` is null/empty **and** no row in plan `test_data_payloads` for `FIX-xxx` |
+| Enriched output present | Prefer fixtures with `test_data_status: TDP_SUPPORTED`; `TDP_OPERATION_FALLBACK` may run but flag `NEEDS_REVIEW` on primary actor fixtures |
+
+Skip reason: `tdp_not_ready`. Do not invent bearer tokens or merchant ids.
+
 ## Pipeline step: NLP coverage scan (before prompt generate)
 
-For every scenario with `is_dedup: false` and not tagged `deferred` / `skip` / `manual`:
+For every scenario that passed **approval + TDP** gates, with `is_dedup: false` and not tagged
+`deferred` / `skip` / `manual`:
 
 ### 1. Resolve target files
 
@@ -99,19 +135,13 @@ NLP test does not `exact_match` a new negative scenario.
 }
 ```
 
-## Review gate (same fail-closed rules as coded)
+## Review gate (suite convert / repo write)
 
-Before suite convert or writing Java to disk, resolve per-scenario approval:
-
-| Source | Approved when |
-|---|---|
-| `run.json` → `review.per_scenario[<scenario_id>]` | `"keep"` |
-| Scenario `status` / `approval_status` | `"approved"` |
-| Plan top-level `status` | `"approved"` (all scenarios without per-row entry) |
-| None present | **Skip** — absence is not approval |
+Re-check the same approval resolution above before writing Java to disk. No second standard —
+the table in **Scenario approval gate** is authoritative.
 
 Record skips in `nlp_suite_tests.json` / manifest with `reason`:
-`not_approved` | `exact_match` | `is_dedup` | `undecidable`.
+`not_approved` | `no_approval_record` | `tdp_not_ready` | `exact_match` | `is_dedup` | `undecidable`.
 
 ## Dedup layers (do not conflate)
 
@@ -139,7 +169,8 @@ Every non-generated scenario must appear under `skipped[]`:
 ```json
 {"scenario_id": "SC-007", "reason": "exact_match", "detail": "FooTest#testBar already has TapMind steps"}
 {"scenario_id": "SC-008", "reason": "is_dedup", "detail": "dedup-generator canonical SC-001"}
-{"scenario_id": "SC-009", "reason": "not_approved", "detail": "missing from review.per_scenario"}
+{"scenario_id": "SC-009", "reason": "not_approved", "detail": "scenario status is draft"}
+{"scenario_id": "SC-010", "reason": "tdp_not_ready", "detail": "FX-SG-HOST-OWNER-01 test_data_output null"}
 ```
 
 ## Definition of done (coverage)

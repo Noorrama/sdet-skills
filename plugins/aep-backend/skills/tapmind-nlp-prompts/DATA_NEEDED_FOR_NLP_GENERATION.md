@@ -27,8 +27,9 @@ Go from automation scenario data → real `runStep`/`assertStep` prompts → MCP
 | Class / method | `…package` / `…test_class` / `…method_name` | suite convert |
 | Fixtures / tags / TestInfo | plan + suite context | as before |
 | Existing NLP coverage | GBT repo scan (`NLP_COVERAGE.md`) | `exact_match` skip / `partial_match` append |
-| Review approval | `run.json` per-scenario | fail-closed before repo write |
+| Review approval | Scenario `status` / `run.json` (`NLP_COVERAGE.md`) | **Only `approved` scenarios** — TDP on enriched plans |
 | Plan dedup | `is_dedup` from `dedup-generator` | skip before scan |
+| TDP fixtures | `test_data_output` / `test_data_payloads` | skip `tdp_not_ready` when `{{FIX-…}}` unresolved |
 
 ## MCP usage (two tools only)
 
