@@ -14,13 +14,13 @@
           "field": { "type": "string", "description": "JSON path of the unresolved field, e.g. business_requirements[3].target_module. Use 'ENVIRONMENT' for install/tool failures not tied to one field." },
           "reason": { "type": "string", "description": "Why it could not be resolved, citing the source section checked." },
           "action": { "type": "string", "description": "What a human must do to close the gap." },
-          "severity": { "type": "string", "enum": ["BLOCKING", "DEGRADED", "INFO"], "description": "BLOCKING = schema-required field absent. DEGRADED = resolved without normal grounding. INFO = optional content genuinely absent from the source." }
+          "severity": { "type": "string", "enum": ["BLOCKING", "DEGRADED", "WARN", "INFO"], "description": "BLOCKING = schema-required field absent. DEGRADED = resolved without normal grounding. WARN = structural inconsistency detected but output emitted (e.g. connector parity drift). INFO = optional content genuinely absent from the source." }
         }
       }
     },
     "app": {
       "type": "string",
-      "enum": ["gojek-consumer", "gojek-driver", "gofood-merchant", "gopay-consumer", "gopay-merchant"],
+      "enum": ["gojek-consumer", "gojek-driver", "gofood-consumer", "gofood-merchant", "gopay-consumer", "gopay-merchant"],
       "description": "ADDITION. App this context belongs to. Optional, but sdet-plan-generator keys off it to match contexts for a run, so omitting it in a multi-app split defeats the split."
     },
     "design_source": {
@@ -194,6 +194,10 @@
             "type": "string",
             "pattern": "^[A-Z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$",
             "description": "The element that triggers the transition. OMIT the key entirely for a frame-to-frame connector with no identifiable trigger — never emit null, and never invent a token to satisfy the schema."
+          },
+          "trigger_source_ref": {
+            "type": "string",
+            "description": "ADDITION. Figma node id of the element layer that triggered this transition. Present when trigger_element_id is set. Disambiguates canonical element_ids shared across state-variant twins (multiple screens[].elements[] rows with the same element_id but different source_ref). Join key for automation: match trigger_source_ref to screens[].elements[].source_ref."
           },
           "to_screen_id": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
           "condition": { "type": "string", "description": "The connector's label (standard #4). For a contracted branch this is COMPOSED, not copied: '<decision question> — <value>' (e.g. 'Does user have GoPay+? — YES'), with any label on the connector into the decision kept in front via ' / '. Empty string means unconditional." },

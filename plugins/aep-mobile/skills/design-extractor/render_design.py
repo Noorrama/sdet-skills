@@ -23,11 +23,12 @@ import math
 import os
 import sys
 import uuid
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
 
 
 OUTPUT_SUFFIX = "_render.html"
 PREPROCESS_SUFFIX = "_pre-process.json"
+INVENTORY_SUFFIX = "_inventory.json"
 
 
 def _collapse_text_subtree(node):
@@ -230,7 +231,14 @@ def build_screen_connector_maps(root, screens):
             counts["totalConnectorCount"] += 1
             counts["incomingConnectorCount"] += 1
 
-    return nodeIdToScreen, screenConnectorCount, screenNodes, flowRelevantIds, contextualNodeIdToScreen
+    return (
+        nodeIdToScreen,
+        screenConnectorCount,
+        screenNodes,
+        flowRelevantIds,
+        contextualNodeIdToScreen,
+        reactionCandidates,
+    )
 
 
 def _collect_relevant_nodes(node, offset_x, offset_y, relevant_ids, out):
@@ -544,7 +552,7 @@ def associate_contextual_info(screens, candidates):
 
 
 def resolve_endpoint(endpoint, screens, index, contextual_node_id_to_screen):
-    """Return the screen id for a connector endpoint, plus whether it was snapped.
+    """Return the screen id, snap flag, and resolution method for a connector endpoint.
 
     Resolution order:
       1. The endpoint node id itself is a screen.
@@ -554,24 +562,26 @@ def resolve_endpoint(endpoint, screens, index, contextual_node_id_to_screen):
          (via `contextual_node_id_to_screen`, from `build_screen_connector_maps`).
       4. Snap to the nearest screen by distance (using the explicit position or
          the node center).
+
+    method is one of: direct_screen, ancestor, contextual, distance_snap, unresolved.
     """
     endpoint_id = endpoint.get("endpointNodeId")
     position = endpoint.get("position")
     screen_ids = {s["id"] for s in screens}
 
     if not screens:
-        return None, False
+        return None, False, "unresolved"
 
     # Direct hit.
     if endpoint_id in screen_ids:
-        return endpoint_id, False
+        return endpoint_id, False, "direct_screen"
 
     # Ancestor hit.
     if endpoint_id in index:
         ancestor_id = endpoint_id
         while ancestor_id:
             if ancestor_id in screen_ids:
-                return ancestor_id, True
+                return ancestor_id, True, "ancestor"
             ancestor_id = index[ancestor_id].get("parent_id")
 
     # Contextual-info hit: the endpoint is a label/annotation, not a
@@ -579,7 +589,7 @@ def resolve_endpoint(endpoint, screens, index, contextual_node_id_to_screen):
     # annotates.
     contextual_screen_id = contextual_node_id_to_screen.get(endpoint_id)
     if contextual_screen_id:
-        return contextual_screen_id, True
+        return contextual_screen_id, True, "contextual"
 
     # Distance-based snap. Connector positions are relative to the endpoint node.
     point = None
@@ -599,9 +609,143 @@ def resolve_endpoint(endpoint, screens, index, contextual_node_id_to_screen):
         dist = point_to_bbox_distance(px, py, nearest)
         threshold = max(500, nearest["width"] * 1.5)
         if dist <= threshold:
-            return nearest["id"], True
+            return nearest["id"], True, "distance_snap"
 
-    return None, False
+    return None, False, "unresolved"
+
+
+def resolve_node_screen(node_id, screens, index, node_id_to_screen, contextual_node_id_to_screen):
+    """Return the screen id and resolution method for an inventory element node.
+
+    Resolution order:
+      1. Precomputed subtree assignment (`node_id_to_screen` from
+         `build_screen_connector_maps`).
+      2. Same fallback chain as `resolve_endpoint`: direct screen id, ancestor
+         walk, contextual map, nearest-screen distance snap.
+
+    method is one of: subtree, contextual, distance_snap, unresolved.
+    direct_screen and ancestor hits from `resolve_endpoint` are reported as
+    subtree for inventory audit consistency.
+    """
+    screen_id = node_id_to_screen.get(node_id)
+    if screen_id:
+        return screen_id, "subtree"
+
+    endpoint = {"endpointNodeId": node_id}
+    screen_id, _snapped, method = resolve_endpoint(
+        endpoint, screens, index, contextual_node_id_to_screen,
+    )
+    if method in ("direct_screen", "ancestor"):
+        method = "subtree"
+    return screen_id, method
+
+
+def _connector_endpoint_detail(endpoint, index):
+    """Build the start/end detail block for a connector inventory record."""
+    endpoint_id = endpoint.get("endpointNodeId")
+    node = index.get(endpoint_id, {})
+    detail = {
+        "endpoint_node_id": endpoint_id,
+        "endpoint_node_type": node.get("type"),
+        "endpoint_node_name": node.get("name", ""),
+    }
+    position = endpoint.get("position")
+    if position:
+        detail["position"] = {"x": position["x"], "y": position["y"]}
+    return detail
+
+
+def build_connector_inventory(connectors, screens, index, contextual_node_id_to_screen):
+    """Build a canonical connector list with resolution metadata for each connector."""
+    screen_ids = {s["id"] for s in screens}
+    inventory = []
+
+    for c in connectors:
+        c_id = c.get("id")
+        start = c.get("connectorStart", {})
+        end = c.get("connectorEnd", {})
+        text = c.get("text", {}).get("characters", "") if c.get("text") else ""
+        start_cap = c.get("connectorStartStrokeCap", "")
+        end_cap = c.get("connectorEndStrokeCap", "")
+
+        start_id = start.get("endpointNodeId")
+        end_id = end.get("endpointNodeId")
+        start_node = index.get(start_id)
+        end_node = index.get(end_id)
+        start_is_screen = start_id in screen_ids
+        end_is_screen = end_id in screen_ids
+        start_is_section = start_node and start_node["type"] == "SECTION"
+        end_is_section = end_node and end_node["type"] == "SECTION"
+        start_is_contextual = start_id in contextual_node_id_to_screen
+        end_is_contextual = end_id in contextual_node_id_to_screen
+
+        record = {
+            "id": c_id,
+            "label": text,
+            "start": _connector_endpoint_detail(start, index),
+            "end": _connector_endpoint_detail(end, index),
+            "stroke_caps": {"start": start_cap, "end": end_cap},
+            "resolution": {},
+        }
+
+        if start_is_screen and end_is_screen:
+            record["resolution"] = {
+                "status": "SCREEN_EDGE",
+                "from_screen_id": start_id,
+                "to_screen_id": end_id,
+                "from_method": "direct_screen",
+                "to_method": "direct_screen",
+                "snapped": False,
+            }
+        elif start_is_section or end_is_section or start_is_contextual or end_is_contextual:
+            from_id, from_snapped, from_method = resolve_endpoint(
+                start, screens, index, contextual_node_id_to_screen,
+            )
+            to_id, to_snapped, to_method = resolve_endpoint(
+                end, screens, index, contextual_node_id_to_screen,
+            )
+            if from_id and to_id:
+                record["resolution"] = {
+                    "status": "SCREEN_EDGE",
+                    "from_screen_id": from_id,
+                    "to_screen_id": to_id,
+                    "from_method": from_method,
+                    "to_method": to_method,
+                    "snapped": from_snapped or to_snapped,
+                }
+            else:
+                record["resolution"] = {
+                    "status": "UNRESOLVED",
+                    "from_screen_id": from_id,
+                    "to_screen_id": to_id,
+                    "from_method": from_method,
+                    "to_method": to_method,
+                    "snapped": False,
+                    "reason": "could not resolve section/contextual-attached connector to a screen",
+                }
+        elif start_id in index and end_id in index:
+            record["resolution"] = {
+                "status": "ORIGINAL_EDGE",
+                "from_screen_id": None,
+                "to_screen_id": None,
+                "from_method": None,
+                "to_method": None,
+                "snapped": False,
+            }
+        else:
+            record["resolution"] = {
+                "status": "UNRESOLVED",
+                "from_screen_id": None,
+                "to_screen_id": None,
+                "from_method": None,
+                "to_method": None,
+                "snapped": False,
+                "reason": "one or both original endpoints not found",
+            }
+
+        inventory.append(record)
+
+    return inventory
 
 
 def snap_connectors(connectors, screens, index, contextual_node_id_to_screen):
@@ -615,88 +759,336 @@ def snap_connectors(connectors, screens, index, contextual_node_id_to_screen):
     Connectors whose endpoints are already screens are kept as-is. All other
     connectors are rendered between their original endpoints.
     """
+    inventory = build_connector_inventory(connectors, screens, index, contextual_node_id_to_screen)
     screen_edges = []
     original_edges = []
     unresolved = []
-    screen_ids = {s["id"] for s in screens}
 
-    for c in connectors:
-        c_id = c.get("id")
-        start = c.get("connectorStart", {})
-        end = c.get("connectorEnd", {})
-        text = c.get("text", {}).get("characters", "") if c.get("text") else ""
-        start_cap = c.get("connectorStartStrokeCap", "")
-        end_cap = c.get("connectorEndStrokeCap", "")
-        cap_info = {"start_cap": start_cap, "end_cap": end_cap}
+    for c in inventory:
+        c_id = c["id"]
+        res = c["resolution"]
+        cap_info = {
+            "start_cap": c["stroke_caps"]["start"],
+            "end_cap": c["stroke_caps"]["end"],
+        }
+        label = c.get("label", "")
+        start_id = c["start"]["endpoint_node_id"]
+        end_id = c["end"]["endpoint_node_id"]
 
-        start_id = start.get("endpointNodeId")
-        end_id = end.get("endpointNodeId")
-        start_node = index.get(start_id)
-        end_node = index.get(end_id)
-        start_is_screen = start_id in screen_ids
-        end_is_screen = end_id in screen_ids
-        start_is_section = start_node and start_node["type"] == "SECTION"
-        end_is_section = end_node and end_node["type"] == "SECTION"
-        start_is_contextual = start_id in contextual_node_id_to_screen
-        end_is_contextual = end_id in contextual_node_id_to_screen
-
-        if start_is_screen and end_is_screen:
+        if res["status"] == "SCREEN_EDGE":
             screen_edges.append({
+                "id": c_id,
+                "from": res["from_screen_id"],
+                "to": res["to_screen_id"],
+                "original_from": start_id,
+                "original_to": end_id,
+                "snapped": res["snapped"],
+                "from_snapped": res["from_method"] != "direct_screen",
+                "to_snapped": res["to_method"] != "direct_screen",
+                "label": label,
+                **cap_info,
+            })
+        elif res["status"] == "ORIGINAL_EDGE":
+            original_edges.append({
                 "id": c_id,
                 "from": start_id,
                 "to": end_id,
-                "original_from": start_id,
-                "original_to": end_id,
-                "snapped": False,
-                "from_snapped": False,
-                "to_snapped": False,
-                "label": text,
+                "label": label,
                 **cap_info,
             })
-        elif start_is_section or end_is_section or start_is_contextual or end_is_contextual:
-            from_id, from_snapped = resolve_endpoint(start, screens, index, contextual_node_id_to_screen)
-            to_id, to_snapped = resolve_endpoint(end, screens, index, contextual_node_id_to_screen)
-            if from_id and to_id:
-                screen_edges.append({
-                    "id": c_id,
-                    "from": from_id,
-                    "to": to_id,
-                    "original_from": start_id,
-                    "original_to": end_id,
-                    "snapped": from_snapped or to_snapped,
-                    "from_snapped": from_snapped,
-                    "to_snapped": to_snapped,
-                    "label": text,
-                    **cap_info,
-                })
-            else:
-                unresolved.append({
-                    "id": c_id,
-                    "original_from": start_id,
-                    "original_to": end_id,
-                    "reason": "could not resolve section/contextual-attached connector to a screen",
-                    **cap_info,
-                })
         else:
-            # Render as-is between the original endpoints if both are known.
-            if start_id in index and end_id in index:
-                original_edges.append({
-                    "id": c_id,
-                    "from": start_id,
-                    "to": end_id,
-                    "label": text,
-                    **cap_info,
-                })
-            else:
-                unresolved.append({
-                    "id": c_id,
-                    "original_from": start_id,
-                    "original_to": end_id,
-                    "reason": "one or both original endpoints not found",
-                    **cap_info,
-                })
+            unresolved.append({
+                "id": c_id,
+                "original_from": start_id,
+                "original_to": end_id,
+                "reason": res.get("reason", "unresolved"),
+                **cap_info,
+            })
 
-    return screen_edges, original_edges, unresolved
+    return screen_edges, original_edges, unresolved, inventory
+
+
+def build_flow_audit(screens, connector_inventory, entry_points):
+    """Build reachability graph and validation checks from connector inventory."""
+    screen_ids = {s["id"] for s in screens}
+    entry_point_screen_ids = [ep["id"] for ep in entry_points if ep["id"] in screen_ids]
+
+    graph = defaultdict(list)
+    incoming = defaultdict(set)
+    outgoing = defaultdict(set)
+
+    for c in connector_inventory:
+        res = c["resolution"]
+        if res["status"] != "SCREEN_EDGE":
+            continue
+        from_id = res.get("from_screen_id")
+        to_id = res.get("to_screen_id")
+        if from_id in screen_ids and to_id in screen_ids:
+            graph[from_id].append(to_id)
+            outgoing[from_id].add(to_id)
+            incoming[to_id].add(from_id)
+
+    reachability_map = {}
+    queue = deque()
+    for eid in entry_point_screen_ids:
+        reachability_map[eid] = 0
+        queue.append(eid)
+
+    while queue:
+        current = queue.popleft()
+        for nxt in graph.get(current, []):
+            if nxt not in reachability_map:
+                reachability_map[nxt] = reachability_map[current] + 1
+                queue.append(nxt)
+
+    reachable_screen_ids = sorted(reachability_map.keys())
+    unreachable_screen_ids = sorted(screen_ids - set(reachable_screen_ids))
+    isolated_screen_ids = sorted(
+        sid for sid in screen_ids
+        if not incoming.get(sid) and not outgoing.get(sid)
+    )
+
+    by_status = Counter(c["resolution"]["status"] for c in connector_inventory)
+    total = len(connector_inventory)
+    unresolved_count = by_status.get("UNRESOLVED", 0)
+    unreachable_count = len(unreachable_screen_ids)
+
+    checks = [
+        {
+            "id": "connectors_fully_resolved",
+            "passed": unresolved_count == 0,
+            "detail": f"{unresolved_count} of {total} connectors unresolved",
+        },
+        {
+            "id": "all_screens_reachable",
+            "passed": unreachable_count == 0,
+            "detail": (
+                f"{unreachable_count} of {len(screen_ids)} screens unreachable "
+                "from entry points via screen-to-screen edges"
+            ),
+        },
+    ]
+
+    return {
+        "entry_point_screen_ids": entry_point_screen_ids,
+        "graph": {k: sorted(v) for k, v in sorted(graph.items())},
+        "reachable_screen_ids": reachable_screen_ids,
+        "unreachable_screen_ids": unreachable_screen_ids,
+        "isolated_screen_ids": isolated_screen_ids,
+        "connector_resolution": {
+            "total": total,
+            "by_status": dict(by_status),
+            "all_resolved": unresolved_count == 0,
+        },
+        "checks": checks,
+        "_reachability_map": reachability_map,
+    }
+
+
+def build_screen_inventory(screens, screen_context, screen_connector_count, entry_points, reachability_map):
+    """Build per-screen inventory records with connector counts and reachability."""
+    entry_reasons = {ep["id"]: ep["reason"] for ep in entry_points}
+    records = []
+
+    for s in screens:
+        sid = s["id"]
+        ctx = screen_context.get(sid, {})
+        counts = screen_connector_count.get(sid, {})
+        is_entry = ctx.get("is_entry_point", False)
+        records.append({
+            "id": sid,
+            "name": s.get("name", ""),
+            "geometry": {
+                "x": s.get("x", 0),
+                "y": s.get("y", 0),
+                "width": s.get("width", 0),
+                "height": s.get("height", 0),
+                "abs_x": s.get("abs_x", 0),
+                "abs_y": s.get("abs_y", 0),
+            },
+            "parent_id": s.get("parent_id"),
+            "is_entry_point": is_entry,
+            "entry_reason": entry_reasons.get(sid) if is_entry else None,
+            "connector_counts": {
+                "total": counts.get("totalConnectorCount", 0),
+                "outgoing": counts.get("outgoingConnectorCount", 0),
+                "incoming": counts.get("incomingConnectorCount", 0),
+            },
+            "contextual_information_ids": [
+                c["id"] for c in s.get("contextual_informations", [])
+            ],
+            "reachability": {
+                "reachable_from_entry": sid in reachability_map,
+                "hop_distance": reachability_map.get(sid),
+            },
+        })
+
+    return records
+
+
+def build_elements_inventory(
+    index,
+    text_cache,
+    flow_relevant_ids,
+    contextual_node_id_to_screen,
+    connectors,
+    reaction_candidates,
+    node_id_to_screen,
+    screens,
+):
+    """Build inventory of flow-relevant and contextual-annotation elements."""
+    all_ids = set(index.keys())
+    element_ids = set(flow_relevant_ids) | set(contextual_node_id_to_screen.keys())
+
+    connector_roles = defaultdict(set)
+    for c in connectors:
+        start_id = c.get("connectorStart", {}).get("endpointNodeId")
+        end_id = c.get("connectorEnd", {}).get("endpointNodeId")
+        if start_id:
+            connector_roles[start_id].add("connector_start")
+        if end_id:
+            connector_roles[end_id].add("connector_end")
+
+    reaction_map = defaultdict(list)
+    has_reactions = set()
+    for node_id, reactions in reaction_candidates:
+        for reaction in reactions:
+            destination_id = reaction.get("action", {}).get("destinationId")
+            trigger = reaction.get("trigger", {}).get("type", "")
+            resolves = bool(destination_id and destination_id in all_ids)
+            reaction_map[node_id].append({
+                "trigger": trigger,
+                "destination_id": destination_id,
+                "destination_resolves": resolves,
+            })
+            if resolves:
+                has_reactions.add(node_id)
+
+    records = []
+    for node_id in sorted(element_ids):
+        node = index.get(node_id)
+        if not node:
+            continue
+
+        classification = (
+            "FLOW_RELEVANT" if node_id in flow_relevant_ids else "CONTEXTUAL_ANNOTATION"
+        )
+        screen_id, screen_resolution_method = resolve_node_screen(
+            node_id,
+            screens,
+            index,
+            node_id_to_screen,
+            contextual_node_id_to_screen,
+        )
+
+        roles = []
+        if node_id in connector_roles:
+            roles.append("connector_endpoint")
+            roles.extend(sorted(connector_roles[node_id]))
+        if node_id in has_reactions:
+            roles.append("has_reactions")
+
+        record = {
+            "id": node_id,
+            "type": node.get("type"),
+            "name": node.get("name", ""),
+            "label": text_cache.get(node_id, ""),
+            "screen_id": screen_id,
+            "screen_resolution_method": screen_resolution_method,
+            "classification": classification,
+            "roles": roles,
+            "geometry": {
+                "abs_x": node.get("abs_x", 0),
+                "abs_y": node.get("abs_y", 0),
+                "width": node.get("width", 0),
+                "height": node.get("height", 0),
+            },
+        }
+        if node_id in reaction_map:
+            record["reactions"] = reaction_map[node_id]
+        records.append(record)
+
+    return records
+
+
+def build_inventory(
+    input_path,
+    file_name,
+    screens,
+    screen_context,
+    screen_connector_count,
+    entry_points,
+    connector_inventory,
+    index,
+    text_cache,
+    flow_relevant_ids,
+    contextual_node_id_to_screen,
+    connectors,
+    reaction_candidates,
+    node_id_to_screen,
+):
+    """Assemble the full inventory sidecar dict."""
+    flow_audit = build_flow_audit(screens, connector_inventory, entry_points)
+    reachability_map = flow_audit.pop("_reachability_map")
+
+    screen_records = build_screen_inventory(
+        screens, screen_context, screen_connector_count, entry_points, reachability_map,
+    )
+    element_records = build_elements_inventory(
+        index,
+        text_cache,
+        flow_relevant_ids,
+        contextual_node_id_to_screen,
+        connectors,
+        reaction_candidates,
+        node_id_to_screen,
+        screens,
+    )
+
+    screen_element_groups = defaultdict(lambda: {"flow": [], "contextual": []})
+    for element in element_records:
+        screen_id = element.get("screen_id")
+        if not screen_id:
+            continue
+        bucket = (
+            "flow"
+            if element["classification"] == "FLOW_RELEVANT"
+            else "contextual"
+        )
+        screen_element_groups[screen_id][bucket].append(element["id"])
+
+    for screen_record in screen_records:
+        sid = screen_record["id"]
+        groups = screen_element_groups.get(sid, {"flow": [], "contextual": []})
+        screen_record["flow_element_ids"] = sorted(groups["flow"])
+        screen_record["contextual_element_ids"] = sorted(groups["contextual"])
+
+    elements_without_screen = sum(1 for e in element_records if e.get("screen_id") is None)
+    by_status = flow_audit["connector_resolution"]["by_status"]
+    return {
+        "metadata": {
+            "input_path": input_path,
+            "file_name": file_name,
+            "generated_by": "render_design.py",
+            "inventory_version": 1,
+        },
+        "summary": {
+            "screens_total": len(screen_records),
+            "elements_total": len(element_records),
+            "connectors_total": len(connector_inventory),
+            "connectors_resolved_screen_edge": by_status.get("SCREEN_EDGE", 0),
+            "connectors_resolved_original_edge": by_status.get("ORIGINAL_EDGE", 0),
+            "connectors_unresolved": by_status.get("UNRESOLVED", 0),
+            "entry_points": len(entry_points),
+            "reachable_screens": len(flow_audit["reachable_screen_ids"]),
+            "unreachable_screens": len(flow_audit["unreachable_screen_ids"]),
+            "elements_without_screen": elements_without_screen,
+        },
+        "screens": screen_records,
+        "elements": element_records,
+        "connectors": connector_inventory,
+        "flow_audit": flow_audit,
+    }
 
 
 def infer_entry_points(screens, edges, flow_starting_points, index, text_cache, screen_connector_count):
@@ -1132,10 +1524,11 @@ JS = """
 def preprocess(input_path, flatten=True):
     """Read the golden input and run the full spatial analysis pass.
 
-    Returns a dictionary containing the full node tree, the flat spatial index,
-    all derived screens/edges/entry points, and the lightweight rendering context.
-    This replaces the previous in-memory-only pipeline so every intermediate
-    result is persisted to disk.
+    Returns a tuple of (preprocess_dict, inventory_dict). The preprocess dict
+    contains the full node tree, the flat spatial index, all derived
+    screens/edges/entry points, and the lightweight rendering context. The
+    inventory dict is a separate audit sidecar with screens, elements,
+    connectors, and flow validation checks.
 
     `flatten` controls whether the tree-simplification passes run: collapsing
     each screen down to its flow-relevant content (see
@@ -1160,7 +1553,7 @@ def preprocess(input_path, flatten=True):
     candidates = collect_contextual_info_candidates(index, screens, text_cache)
     associate_contextual_info(screens, candidates)
 
-    _, screen_connector_count, screen_nodes, flow_relevant_ids, contextual_node_id_to_screen = (
+    node_id_to_screen, screen_connector_count, screen_nodes, flow_relevant_ids, contextual_node_id_to_screen, reaction_candidates = (
         build_screen_connector_maps(root, screens)
     )
 
@@ -1172,7 +1565,9 @@ def preprocess(input_path, flatten=True):
             collect_connectors(child)
     collect_connectors(root)
 
-    edges, original_edges, unresolved = snap_connectors(connectors, screens, index, contextual_node_id_to_screen)
+    edges, original_edges, unresolved, connector_inventory = snap_connectors(
+        connectors, screens, index, contextual_node_id_to_screen,
+    )
 
 
     flow_starting_points = data.get("prototype", {}).get("flowStartingPoints", [])
@@ -1230,7 +1625,24 @@ def preprocess(input_path, flatten=True):
         "original_edges": original_edges,
         "unresolved": unresolved,
         "entry_points": entry_points,
-    }
+        "node_id_to_screen": node_id_to_screen,
+        "contextual_node_id_to_screen": contextual_node_id_to_screen,
+    }, build_inventory(
+        input_path=input_path,
+        file_name=data.get("file", {}).get("name", "Figma Render"),
+        screens=stripped_screens,
+        screen_context=screen_context,
+        screen_connector_count=screen_connector_count,
+        entry_points=entry_points,
+        connector_inventory=connector_inventory,
+        index=stripped_index,
+        text_cache=text_cache,
+        flow_relevant_ids=flow_relevant_ids,
+        contextual_node_id_to_screen=contextual_node_id_to_screen,
+        connectors=connectors,
+        reaction_candidates=reaction_candidates,
+        node_id_to_screen=node_id_to_screen,
+    )
 
 
 def render_html(preprocess_path, output_path):
@@ -1383,14 +1795,30 @@ def main():
 
     input_stem = os.path.splitext(os.path.basename(input_path))[0]
     preprocess_path = os.path.join(workdir, input_stem + PREPROCESS_SUFFIX)
+    inventory_path = os.path.join(workdir, input_stem + INVENTORY_SUFFIX)
     output_path = os.path.join(workdir, input_stem + OUTPUT_SUFFIX)
 
     if run_preprocess:
-        pp = preprocess(input_path, flatten=not args.full)
+        pp, inventory = preprocess(input_path, flatten=not args.full)
         os.makedirs(os.path.dirname(preprocess_path), exist_ok=True)
         with open(preprocess_path, "w", encoding="utf-8") as f:
             json.dump(pp, f, ensure_ascii=False, separators=(",", ":"))
         print(f"Wrote {preprocess_path}")
+        with open(inventory_path, "w", encoding="utf-8") as f:
+            json.dump(inventory, f, ensure_ascii=False, separators=(",", ":"))
+        print(f"Wrote {inventory_path}")
+        summary = inventory["summary"]
+        print(
+            f"Inventory: {summary['screens_total']} screens, "
+            f"{summary['elements_total']} elements, "
+            f"{summary['connectors_total']} connectors "
+            f"({summary['connectors_resolved_screen_edge']} screen-edge, "
+            f"{summary['connectors_resolved_original_edge']} original, "
+            f"{summary['connectors_unresolved']} unresolved), "
+            f"{summary['entry_points']} entry points, "
+            f"{summary['reachable_screens']} reachable, "
+            f"{summary['unreachable_screens']} unreachable"
+        )
 
     if run_render:
         stats = render_html(preprocess_path, output_path)
