@@ -25,11 +25,13 @@ Never rewrite a gRPC step into a fake REST prompt just to make generation succee
 automation_plan.json  (+ test_data_payloads when fixtures present)
         │
         ▼
- P. Prerequisites — dedup-generator (method mode) already run; review gate if writing to repo
+ P. Prerequisites — dedup-generator (method mode); plan carries per-scenario status + TDP for approved rows
         │
         ▼
- 0. NLP coverage scan → nlp_method_decisions.json (NLP_COVERAGE.md)
-    Skip exact_match / method_name_collision / undecidable before prompt work
+ 0. Scenario approval gate — only status: approved (NLP_COVERAGE.md); skip draft / tdp_not_ready
+        │
+        ▼
+ 0a. NLP coverage scan → nlp_method_decisions.json — skip exact_match / collision / undecidable
         │
         ▼
  0b. If any grpcurl steps: GET https://<host>/v1/grpc/targets (host from CONTROL_PLANE.md)
@@ -37,7 +39,7 @@ automation_plan.json  (+ test_data_payloads when fixtures present)
      Optional: GET /v1/grpc/static-proto/aliases when reflection disabled
         │
         ▼
- 1. Filter scenarios (is_dedup / deferred / skip / manual / exact_match / not_approved)
+ 1. Filter scenarios (not_approved / tdp_not_ready / is_dedup / exact_match / deferred / skip / manual)
         │
         ▼
  2. Generate prompts[] for every remaining step (grammar in SKILL.md §§2–10)
@@ -60,13 +62,16 @@ automation_plan.json  (+ test_data_payloads when fixtures present)
 
 ## 1. Scenario filter
 
+Apply in order — first match wins:
+
 | Condition | Action |
 |---|---|
+| Not approved per `NLP_COVERAGE.md` (`status` ≠ `approved`, no `keep` in `run.json`) | Skip — `reason: not_approved` |
+| Required fixture `{{FIX-…}}` unresolved (null `test_data_output`, no `test_data_payloads`) | Skip — `reason: tdp_not_ready` |
 | `is_dedup: true` | Skip — `reason: is_dedup` |
 | `nlp_method_decisions` → `exact_match` | Skip — `reason: exact_match` |
 | `nlp_method_decisions` → `method_name_collision` | Skip + flag `NEEDS_REVIEW` |
 | `nlp_method_decisions` → `undecidable` | Skip — `reason: undecidable` |
-| Not approved per `NLP_COVERAGE.md` review gate | Skip — `reason: not_approved` |
 | tag `deferred` / `skip` / `manual` | Skip (record reason) |
 | tag `provisional` / `underspecified` or expected_result contains `TBD` | Generate + mark assertions provisional; flag `NEEDS_REVIEW` on weak verifies |
 | `partial_match` | Generate **delta** prompts only; suite convert append-only |

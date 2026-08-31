@@ -51,7 +51,7 @@ NLP generation reuses the same upstream gates where they apply. Mapping:
 | `dedup-generator` | Honour `is_dedup: true` on plan |
 | `gbt-method-decision-maker` | `NLP_COVERAGE.md` → `nlp_method_decisions.json` |
 | `gbt-test-code-generator` skip `exact_match` | Skip scenarios already covered by `TapMind.runStep` |
-| `gbt-test-code-generator` approval gate | Same `run.json` per-scenario rules |
+| `gbt-test-code-generator` approval gate | Scenario `status: approved` first (`NLP_COVERAGE.md`) |
 | Module profile + Endpoint/Client/Controller | `module` (PDG) + `service_name` + plain-English prompts |
 | `test-data-generator` payloads | `saveMemory` + `saved <key>` before steps |
 | Compile + `test-code-validator` | MCP verify + optional execute + §8.1.1 body check |
@@ -135,11 +135,16 @@ Per `automation_scenarios[]` entry, read:
 | gRPC alias | `GET /v1/grpc/targets` — match grpcurl host:port; or `# alias:` in curl |
 | Steps | `step_descriptions[]` → `step`, `action`, `expected_result`, optional `curl_reference` |
 | Fixtures | `test_data[].fixture_id`, `required_state`, later `response_fields_used` |
-| Modifiers | `tags[]`, `execution_hints`, `is_dedup` |
+| Modifiers | `tags[]`, `execution_hints`, `is_dedup`, **`status`** / `approval_status` |
 | Suite meta (when present in plan/context) | `groups`, `test_info` / `countryName`, `projectId`, `suiteId`, `testCaseIds`, `owner` |
+| TDP (enriched plans) | `test_data[].test_data_output`, plan `test_data_payloads[]` |
 
-Skip when `is_dedup: true`, `nlp_method_decisions` says `exact_match`, not approved per
-`NLP_COVERAGE.md`, or tags include `deferred` / `skip` / `manual`.
+**Generate only when** the scenario passes the approval gate in `NLP_COVERAGE.md` (`status:
+"approved"` or equivalent). Skip all other scenarios — on enriched plans, TDP exists only for
+approved rows. Plan-level `"status": "draft"` does not override per-scenario `"approved"`.
+
+Skip when `is_dedup: true`, `nlp_method_decisions` says `exact_match`, failed approval/TDP
+gates, or tags include `deferred` / `skip` / `manual`.
 
 If suite meta is missing, leave `@TestInfo` fields as empty strings / empty arrays — do **not** invent BrowserStack/TestRail IDs.
 
