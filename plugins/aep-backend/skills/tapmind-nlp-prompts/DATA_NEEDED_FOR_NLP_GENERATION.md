@@ -55,7 +55,7 @@ On HTTP/MCP connectivity failure → ask user to connect to respective VPN and r
 
 | File | Role |
 |---|---|
-| `SKILL.md` | Grammar + generation §G + NLP vs coded |
+| `SKILL.md` | Grammar + generation §G + pipeline parity |
 | `GENERATION.md` | Pipeline |
 | `NLP_COVERAGE.md` | Dedup / existing TapMind test scan + approval gate |
 | `CONTROL_PLANE.md` | Hosts, Swagger, MCP vs HTTP, VPN |

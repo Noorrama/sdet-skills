@@ -2,8 +2,8 @@
 
 Companion to `GENERATION.md`. The coded path (`gbt-method-decision-maker` →
 `gbt-test-code-generator`) already refuses to duplicate existing `@Test` methods. This skill
-must do the same for **`TapMind.runStep` / `TapMind.assertStep`** tests — otherwise NLP
-generation looks easier on paper but ships redundant methods.
+must do the same for **`TapMind.runStep` / `TapMind.assertStep`** tests — otherwise redundant
+methods may be emitted.
 
 ## Upstream skills (run before NLP generate)
 

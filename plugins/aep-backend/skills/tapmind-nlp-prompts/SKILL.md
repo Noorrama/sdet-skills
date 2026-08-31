@@ -42,15 +42,13 @@ Pipeline detail: `GENERATION.md`. Coverage / dedup: `NLP_COVERAGE.md`. Control p
 
 ---
 
-## NLP vs coded GBT (why this path exists)
+## Pipeline parity with coded GBT
 
-Coded generation (`gbt-test-code-generator`) is the **rival** — more layers, more fabricate
-risk, longer fix loops. NLP generation must be **faster to author** while matching coded
-**gates** (dedup, approval, no duplicate methods).
+NLP generation reuses the same upstream gates where they apply. Mapping:
 
 | Coded skill | NLP equivalent |
 |---|---|
-| `dedup-generator` | Same — honour `is_dedup: true` on plan |
+| `dedup-generator` | Honour `is_dedup: true` on plan |
 | `gbt-method-decision-maker` | `NLP_COVERAGE.md` → `nlp_method_decisions.json` |
 | `gbt-test-code-generator` skip `exact_match` | Skip scenarios already covered by `TapMind.runStep` |
 | `gbt-test-code-generator` approval gate | Same `run.json` per-scenario rules |
@@ -58,11 +56,9 @@ risk, longer fix loops. NLP generation must be **faster to author** while matchi
 | `test-data-generator` payloads | `saveMemory` + `saved <key>` before steps |
 | Compile + `test-code-validator` | MCP verify + optional execute + §8.1.1 body check |
 
-**NLP-only extras (coded cannot do easily):** grpcurl → §3.8 in one line; verify-only steps
-(§3.4); poll overload (§3.2); Redis/DB/Kafka §3.5 without new Java infra.
-
-**Not duplicated here:** Memgraph enrichment, assertion-helper blast-radius edits, data-provider
-row surgery — those stay coded. NLP adds **new** coverage or **append-only** `runStep` lines.
+Memgraph enrichment, assertion-helper edits, and data-provider row changes remain in the
+coded path. NLP suite convert is **create** or **append-only** `runStep` lines per
+`NLP_COVERAGE.md`.
 
 ---
 
