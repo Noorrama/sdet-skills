@@ -13,6 +13,7 @@ Usage:
     --analysis <feature>_analysis.md \\
     [--design design_context.json] \\
     [--rfc rfc_context.json] \\
+    [--task task_context.json] \\
     [--checklist coverage_checklist.json] \\
     [--schema schemas/sdet_plan.schema.json]
 """
@@ -375,6 +376,91 @@ def validate_compliance_sidecar(
         errors.append("compliance_report.json missing balance.action_taken")
 
 
+_OUT_OF_SCOPE_RE = re.compile(
+    r"out[\s-]?of[\s-]?scope|blocked|deferred|not\s+covered|"
+    r"backend[\s-]?only|admin[\s-]?only|different\s+milestone|fast[\s-]?follow",
+    re.IGNORECASE,
+)
+
+
+def _prd_req_ids(prd: dict[str, Any]) -> list[str]:
+    ids = []
+    for b in prd.get("business_requirements") or []:
+        rid = b.get("req_id")
+        if rid and rid not in ids:
+            ids.append(rid)
+    return ids
+
+
+def _task_context_req_ids(task_ctx: dict[str, Any]) -> set[str]:
+    """Every PRD requirement id the task tree claims to satisfy."""
+    ids: set[str] = set()
+    for epic in task_ctx.get("epics") or []:
+        for story in epic.get("user_stories") or []:
+            rid = story.get("requirement_id")
+            if rid:
+                ids.add(rid)
+    for row in task_ctx.get("traceability") or []:
+        rid = row.get("requirement_id")
+        if rid:
+            ids.add(rid)
+    return ids
+
+
+def _excused_in_analysis(req_id: str, analysis_text: str) -> bool:
+    """A gap is auditable-excused only if analysis.md names the req_id on a
+    line that also states it is out of scope / blocked / deferred."""
+    for line in analysis_text.splitlines():
+        if req_id in line and _OUT_OF_SCOPE_RE.search(line):
+            return True
+    return False
+
+
+def validate_requirement_traceability(
+    prd: dict[str, Any],
+    plan: dict[str, Any],
+    task_ctx: dict[str, Any],
+    analysis_text: str,
+    errors: list[str],
+) -> None:
+    """PRD is the source of truth for the coverage floor. Every PRD req_id must
+    (a) be picked up by a story in task_context and (b) be covered by >=1 scenario
+    in the SDET plan. An uncovered req_id is excused only when analysis.md documents
+    it as out-of-scope/blocked/deferred.
+
+    Opt-in and fully backward-compatible: this whole gate runs ONLY when a
+    task_context is supplied (--task). With no task_context, behaviour is
+    unchanged from before this check existed."""
+    if not task_ctx:
+        return
+    prd_ids = _prd_req_ids(prd)
+    if not prd_ids:
+        return  # nothing to trace against
+
+    # (a) PRD -> task_context
+    task_ids = _task_context_req_ids(task_ctx)
+    for rid in prd_ids:
+        if rid not in task_ids and not _excused_in_analysis(rid, analysis_text):
+            errors.append(
+                f"Requirement traceability: PRD req_id '{rid}' has no user story "
+                f"in task_context (task generation did not cover it). Add a story "
+                f"with requirement_id '{rid}', or document it as out-of-scope in analysis.md."
+            )
+
+    # (b) PRD -> sdet_plan scenarios
+    refs = " , ".join(
+        str(sc.get("requirement_ref") or "") for sc in plan.get("scenario_list") or []
+    )
+    for rid in prd_ids:
+        covered = re.search(rf"(?<![\w-]){re.escape(rid)}(?![\w-])", refs) is not None
+        if not covered and not _excused_in_analysis(rid, analysis_text):
+            errors.append(
+                f"Requirement coverage: PRD req_id '{rid}' is not referenced by any scenario's "
+                f"requirement_ref in the SDET plan. Add >=1 scenario for it, or document it as "
+                f"out-of-scope/blocked in analysis.md."
+            )
+
+
 def run_validation(args: argparse.Namespace) -> list[str]:
     errors: list[str] = []
 
@@ -393,6 +479,7 @@ def run_validation(args: argparse.Namespace) -> list[str]:
     plan = _load_json(args.plan)
     rfc = _load_json(args.rfc) if args.rfc and args.rfc.is_file() else {}
     design = _load_json(args.design) if args.design and args.design.is_file() else {}
+    task_ctx = _load_json(args.task) if args.task and args.task.is_file() else {}
 
     if args.checklist and args.checklist.is_file():
         checklist = _load_json(args.checklist)
@@ -403,6 +490,7 @@ def run_validation(args: argparse.Namespace) -> list[str]:
     analysis_text = validate_analysis(args.analysis, errors)
     validate_json_schema(args.plan, args.schema, errors)
     validate_scenario_floor(plan, checklist, errors)
+    validate_requirement_traceability(prd, plan, task_ctx, analysis_text, errors)
     validate_e2e(plan, checklist, errors)
     validate_balance(plan, analysis_text, errors)
     validate_telemetry(plan, prd, rfc, errors)
@@ -423,6 +511,7 @@ def main() -> int:
     parser.add_argument("--analysis", required=True, type=Path)
     parser.add_argument("--design", type=Path)
     parser.add_argument("--rfc", type=Path)
+    parser.add_argument("--task", type=Path, help="task_context.json (PRIMARY DRIVER) — enables PRD→task_context→plan requirement traceability")
     parser.add_argument("--checklist", type=Path)
     parser.add_argument("--compliance", type=Path, help="Optional compliance_report.json")
     parser.add_argument(

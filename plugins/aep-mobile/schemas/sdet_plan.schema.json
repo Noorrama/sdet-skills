@@ -29,7 +29,7 @@
         "prd": { "type": "object", "description": "prd_context fields not represented elsewhere." },
         "rfc": { "type": "object", "description": "rfc_context fields not represented elsewhere." },
         "design": { "type": "object", "description": "design_context fields not represented elsewhere." },
-        "plan": { "type": "object", "description": "plan_context fields not represented elsewhere." }
+        "plan": { "type": "object", "description": "task_context (a.k.a. plan_context) fields not represented elsewhere." }
       },
       "additionalProperties": true
     },

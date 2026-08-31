@@ -6,7 +6,7 @@ description: Ingests pre-build contexts (plan, prd, design, rfc) to perform cros
 # Mobile SDET Plan Generator
 
 ## Purpose
-Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_context`, `rfc_context`) during implementation planning to generate 4 standardized pre-build deliverables:
+Aggregates upstream extractor contexts (`task_context`, `prd_context`, `design_context`, `rfc_context`) during implementation planning to generate 4 standardized pre-build deliverables:
 1. `<feature_key>_SDET_plan.json` (Machine-readable master execution contract)
 2. `<feature_key>_analysis.md` (Human-readable Markdown QA analysis asset)
 3. `<feature_key>_test_cases.csv` (TMS bulk-import format — **15-column squad template only**)
@@ -41,6 +41,7 @@ Full spine: **`workflow.md`**. Anti-patterns: **`anti_patterns.md`**. TMS header
      --analysis <feature_key>_analysis.md \
      [--design design_context.json] \
      [--rfc rfc_context.json] \
+     [--task task_context.json] \
      --checklist coverage_checklist.json \
      [--compliance <feature_key>_compliance_report.json]
    ```
@@ -52,7 +53,14 @@ Full spine: **`workflow.md`**. Anti-patterns: **`anti_patterns.md`**. TMS header
 
 ## Input Contracts
 
-- **`plan_context.json`**: Change surface, test hooks (`method:deeplink`, `hook_id`), feature flags, observable states.
+- **`task_context.json`** (the PRIMARY DRIVER, from `task-extractor`; formerly referred to here as `plan_context.json`): the task-generation tree and its planned change surface. Read fields at their real paths:
+  - **Tree & coverage floor**: `epics[].user_stories[].acceptance_criteria[]` (each `{acceptance_criteria_id, description}`) — the per-AC happy-path floor. `epics[].user_stories[].requirement_id` ties a story back to the PRD `req_id`.
+  - **Test hooks**: `epics[].test_hooks[]`, each `{hook_id, type, target, invoke}` where `type ∈ {deeplink, flag-override, state-injection}` and the deeplink URI / flag-set / state-injection recipe is in `invoke` (there is **no** `method` field).
+  - **Observable state**: `epics[].user_stories[].tasks[].observable_state` `{success_signal, failure_signal}` — per task, not a top-level `observable_states` block.
+  - **Flags**: `epics[].flag_keys[]` `{key, default}` — not `feature_flags`.
+  - **Change surface**: per-epic `change_summary`, `target_modules`, `screens_touched`, `view_models`, `new_components`.
+  - **Sequencing & gaps**: `traceability[]` (task→story→requirement→AC→screen), `blocking_dependencies[]` (cross-track edges), plus `testability_gaps[]` / `blocking_issues[]` / `open_questions[]` the extractor already surfaced — fold these into cross-stage gap analysis rather than re-deriving them.
+  - Everything here is **planned** (pre-build), not confirmed code — treat `new_components`/`view_models`/`screens_touched` as intent to reconcile against design, not as ground truth.
 - **`prd_context.json`**: Business rules, boundary rules, expected UI copy, and `clickstream_events` (telemetry specs).
 - **`design_context.json`**: Screen definitions, UI elements with `screen_name:element_id_name` logical tokens, state variants, and flow matrix.
 - **`rfc_context.json`**: Feature flag mappings, API contracts, error codes, and N-1 fallback rules.
@@ -75,7 +83,7 @@ what was not covered.
 2. **Required contexts.** `prd_context.json` and `design_context.json`. Either missing → carry
    on with what remains and add a `NEEDS_ANSWER` note: *"generated without <name> — requirement
    coverage / screen coverage is unverified"*. Set `extraction_status: PARTIAL`.
-3. **Optional contexts.** `rfc_context.json` and `plan_context.json` may legitimately be
+3. **Optional contexts.** `rfc_context.json` and `task_context.json` may legitimately be
    absent (no RFC, no impl plan) → `FYI` note, that is a normal run, not a problem. A file that exists but
    **fails its schema** is different: use what parses, and raise a `NEEDS_ANSWER` note naming the
    file and the validation error. Never silently downgrade malformed to absent.
@@ -299,10 +307,10 @@ Flow:
 **Scope rule:** generate scenarios **only** for selected categories — EXCEPT the Hard Coverage Rules below, which always apply (every P0 requirement and every `boundary_conditions` entry keeps ≥1 scenario regardless of selection).
 
 ### 1. Ingest & Coverage Gates
-- Ingest and aggregate whatever context inputs are provided (`plan_context`, `prd_context`, `design_context`, `rfc_context`).
-- **Optional Input Absence Handling** (applies to `plan_context.json` and `rfc_context.json` only — `prd_context.json` and `design_context.json` are required, see Preflight step 2). If an *optional* context is not provided, **do NOT fail execution.** Drive the generation with whatever inputs are given:
-  - If `plan_context.json` is absent, proceed with `prd_context.json` and `design_context.json` as the baseline.
-  - State the missing contexts clearly as a limitation inside the `<feature_key>_analysis.md` report (e.g., *"plan_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
+- Ingest and aggregate whatever context inputs are provided (`task_context`, `prd_context`, `design_context`, `rfc_context`).
+- **Optional Input Absence Handling** (applies to `task_context.json` and `rfc_context.json` only — `prd_context.json` and `design_context.json` are required, see Preflight step 2). If an *optional* context is not provided, **do NOT fail execution.** Drive the generation with whatever inputs are given:
+  - If `task_context.json` is absent, proceed with `prd_context.json` and `design_context.json` as the baseline.
+  - State the missing contexts clearly as a limitation inside the `<feature_key>_analysis.md` report (e.g., *"task_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
   - A missing context also means its Category Catalog triggers simply cannot fire (no failure) — those categories fall through to the extras tiers.
   - **Absent is not the same as malformed.** A context file that exists but fails its schema gets a `NEEDS_ANSWER` note naming the file and the validation error (Preflight step 3) — never a silent fall-through to "treat as absent", which drops coverage the QA believes they have.
 - **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and emit at least the required scenario(s) before doing anything else. Model-independence depends on this being a mechanical loop:
@@ -369,8 +377,8 @@ Expand scenarios across:
   Steps 1–4 must exist before step 5 and the Extras below are expanded. Negative and edge
   coverage complements the business suite; it never substitutes for it.
 - **Mobile Extras**: Generates mobile-specific scenarios (deep-link navigation, regional variants, feature flag toggles) and applies **Conditional Mobile-Native Interruption Rules** to ensure test suites remain highly focused and are only generated when technically valid. These rules are the `interruption_*` / `local_data_migration` / `permission` detection triggers surfaced in Step 0 — only expand a category the gate selected:
-  - **Network Loss / API Timeout**: Inject a poor-network or server-timeout scenario *only* if `rfc_context.json` declares active `api_contract_changes` or `plan_context.json` specifies `observable_states` (API success/failure signals). Skip if the touchpoint screen is entirely static/local.
-  - **App Backgrounding & Process Death**: Inject a backgrounding/kill-and-restore state preservation scenario *only* if the screens in `design_context.json` contain interactive elements (inputs, forms, toggles) or view models are active in `plan_context.json`. Skip on purely static/read-only informational screens.
+  - **Network Loss / API Timeout**: Inject a poor-network or server-timeout scenario *only* if `rfc_context.json` declares active `api_contract_changes` or any `task_context.json` task carries an `observable_state` (API success/failure signals). Skip if the touchpoint screen is entirely static/local.
+  - **App Backgrounding & Process Death**: Inject a backgrounding/kill-and-restore state preservation scenario *only* if the screens in `design_context.json` contain interactive elements (inputs, forms, toggles) or any epic in `task_context.json` lists `view_models`. Skip on purely static/read-only informational screens.
   - **Local Storage & DB Migration**: Inject an N-1 upgrade and schema migration scenario *only* if `rfc_context.json` defines active `local_data_changes` (e.g. SQLite, Room, CoreData, or SharedPrefs modifications).
   - **Runtime Permission Toggles**: Inject parallel Permission Granted vs Permission Denied scenarios *only* if `rfc_context.json` declares new or modified `permissions_required`.
   - **Platform variance**: Only meaningful when the feature resolves to **more than one** target
@@ -404,8 +412,9 @@ Expand scenarios across:
   1. **Test hook / deep link — check all three deep-link sources, in this order.** A deep link is
      the ideal rung: one `Open deeplink "<uri>"` step replaces a whole tap chain. Three sources
      carry them; the target screen is resolved by the **first** that names it:
-     a. `plan_context.json` test hooks (`method: deeplink` / `hook_id`) — the primary source of
-        *test* hooks, when an impl plan was supplied.
+     a. `task_context.json` test hooks — `epics[].test_hooks[]` where `type == "deeplink"`, taking
+        the URI verbatim from that hook's `invoke` field (keyed by `hook_id`) — the primary source of
+        *test* hooks, when a task_context was supplied.
      b. `rfc.navigation_changes[].deep_link` — a non-null deep link whose destination screen
         matches (a deep link the RFC itself introduces for the new feature).
      c. **`regression_context.deeplink_dictionary`** — the repo's extracted deeplink dictionary
@@ -501,7 +510,7 @@ Expand scenarios across:
      now-normalized path is still auditable back to the repo-confirmed original.
      - **Cross-case corroboration for login/session preambles.** The most common reachability gap
        isn't the target screen, it's getting to an authenticated starting state at all. If
-       `plan_context` has no login/state-injection hook, look for a leading step-subsequence
+       `task_context` has no login/state-injection hook, look for a leading step-subsequence
        shared identically across **3 or more independent** `regression_tests[].navigation`
        entries for this app (e.g. a repeated "login via backdoor → skip walkthrough → dismiss
        vehicle card → tap profile icon" prefix). A sequence corroborated across that many
@@ -530,7 +539,7 @@ Expand scenarios across:
      but the gap stays visible instead of being papered over with an assumed arrival.
 
   This ladder is feature-agnostic by construction: it never depends on this being a loyalty
-  feature, a payments flow, or any specific app — it only depends on which of `plan_context`,
+  feature, a payments flow, or any specific app — it only depends on which of `task_context`,
   `rfc.navigation_changes`, `regression_context.deeplink_dictionary`, `design_context.ui_flow`,
   and `regression_context.navigation` actually resolved something, the same fields every run of
   this generator already has (or explicitly lacks) by Preflight.
@@ -598,7 +607,7 @@ Expand scenarios across:
 As the single integration point, the generator must actively compute the following cross-stage gaps:
 - **`prd_vs_figma_gaps`**: Cross-reference `prd_context.json` with `design_context.json`. Check `business_requirements[].context_screen` against Figma `screens[].screen_id`. Identify missing screens/frames, text copy mismatches, or personas with no design representation.
 - **`prd_vs_rfc_gaps`**: Cross-reference `prd_context.json` with `rfc_context.json`. Compare PRD `feature_flags` against the RFC `experimentation_matrix` (finding flag key typos, missing defaults, or status mismatches). Verify business rule conditions align with RFC error codes or API paths.
-- **`rfc_vs_impl_plan_gaps`**: Cross-reference `rfc_context.json` with the Implementation `plan_context.json`. Check if RFC architectural risks, local migrations, offline strategies, or required permissions are accounted for in the implementation's screens touched, view models, and components.
+- **`rfc_vs_impl_plan_gaps`**: Cross-reference `rfc_context.json` with the Implementation `task_context.json`. Check if RFC architectural risks, local migrations, offline strategies, or required permissions are accounted for in the implementation's screens touched, view models, and components.
 - **`element_locator_handoff`**: Map `screen_name:element_id_name` logical tokens to cross-platform accessibility attributes (`android_resource_id`, `ios_accessibility_identifier`, `flutter_key`). Only populate these fields if the matching locator values are provided by the upstream design/development context; do not use placeholders or "UNRESOLVED" strings.
 
 ### 4. Coverage Self-Audit Gate (MANDATORY — run before writing any output file)
@@ -820,7 +829,7 @@ A human-readable Markdown asset automatically generated for engineering leads de
      section entirely (do not render an empty table).
 
 3. **Section 1: Missing Input Context:**
-   - If any input context (like `plan_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).
+   - If any input context (like `task_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).
 
 4. **Section 2: Cross-Stage Gap Analysis:**
    - **PRD vs Figma Gaps Table:** Must contain columns: `Req` (Requirement ID), `Severity` (`CRITICAL_BLOCKER` or `WARNING`), and `Gap` (highly detailed, context-aware analysis of broken prototype links, un-designed flows, dynamic text copy verification requirements).
@@ -937,7 +946,7 @@ python3 scripts/validate_sdet_deliverables.py \
   --plan <feature_key>_SDET_plan.json \
   --csv <feature_key>_test_cases.csv \
   --analysis <feature_key>_analysis.md \
-  [--design design_context.json] [--rfc rfc_context.json] \
+  [--design design_context.json] [--rfc rfc_context.json] [--task task_context.json] \
   [--checklist coverage_checklist.json] \
   [--compliance <feature_key>_compliance_report.json]
 ```
@@ -1215,7 +1224,7 @@ only when Step 0 needs it.
   audit, not left to model judgment. Never rebalance by deleting negative coverage — the only
   legal fix is generating the business coverage that was missed.
 - **Baseline Determinism**: `fe_baseline` scenarios are curated hygiene, NOT input-derived requirements — stamp `source: "fe_baseline"` and note in `analysis.md` that expected behavior needs PM/dev confirmation. Never present them as spec-backed requirements.
-- **Contract Adherence**: Fail explicitly if *all* context files are missing or if essential keys within provided contexts are missing. However, do NOT fail if individual files (like `plan_context.json` or `rfc_context.json`) are absent; instead, proceed with the inputs that are provided, noting the missing contexts in `<feature_key>_analysis.md`.
+- **Contract Adherence**: Fail explicitly if *all* context files are missing or if essential keys within provided contexts are missing. However, do NOT fail if individual files (like `task_context.json` or `rfc_context.json`) are absent; instead, proceed with the inputs that are provided, noting the missing contexts in `<feature_key>_analysis.md`.
 - **Format Precision**: Outputs must strictly conform to `sdet_plan.schema.json` and the 15-column squad CSV schema without altering column headers or ordering.
 - **Frontend Focus**: Test cases/scenarios must be generated *exclusively* for Frontend (FE) context (e.g., client-side UI, mobile views, offline transitions, local error copy, and client-side telemetry verifications). Do not generate backend-only validation or server-side test cases.
 - **Navigation Resolution**: every scenario's `steps[]` must reach its screen (including the

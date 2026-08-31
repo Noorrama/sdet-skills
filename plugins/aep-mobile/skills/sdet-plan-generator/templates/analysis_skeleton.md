@@ -21,7 +21,7 @@
 | prd_context.json | | |
 | rfc_context.json | | |
 | design_context.json | | |
-| plan_context.json | | |
+| task_context.json | | |
 | regression_context.json | | |
 
 ### Open Points

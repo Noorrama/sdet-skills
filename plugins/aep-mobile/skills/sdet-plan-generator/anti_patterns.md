@@ -65,6 +65,7 @@ python3 scripts/validate_sdet_deliverables.py \
   --analysis <feature_key>_analysis.md \
   [--design design_context.json] \
   [--rfc rfc_context.json] \
+  [--task task_context.json] \
   [--checklist coverage_checklist.json] \
   [--compliance <feature_key>_compliance_report.json]
 ```
