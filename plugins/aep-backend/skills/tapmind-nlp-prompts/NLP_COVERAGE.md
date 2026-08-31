@@ -5,19 +5,6 @@ Companion to `GENERATION.md`. The coded path (`gbt-method-decision-maker` →
 must do the same for **`TapMind.runStep` / `TapMind.assertStep`** tests — otherwise NLP
 generation looks easier on paper but ships redundant methods.
 
-## Why NLP should beat coded (design intent)
-
-| Coded GBT cost | NLP advantage |
-|---|---|
-| Endpoint → Client → Controller → DTO → Assertion layers | One English sentence per step |
-| Module profile + 4-step reuse protocol | Plan fields `module` / `service_name` pin PDG |
-| Fabricating controller methods is a top failure mode | No fabricated Java calls — planner routes |
-| Data-provider row vs new method judgement | Extra scenario → extra `runStep` lines in same method |
-| Compile + validator fix loops | MCP verify + optional execute before suite convert |
-
-NLP wins on **speed and surface area**, not on skipping gates. Reuse the same upstream
-artifacts (`automation_plan.json`, dedup flags, review approval, fixtures).
-
 ## Upstream skills (run before NLP generate)
 
 | Skill | Required? | NLP use |
