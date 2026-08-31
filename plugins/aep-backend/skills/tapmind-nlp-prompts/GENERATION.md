@@ -1,7 +1,7 @@
 # Generation pipeline — automation_plan → suite TapMind test
 
 Companion to `SKILL.md` §G. Control plane hosts, allowed HTTP APIs, and VPN rules:
-`CONTROL_PLANE.md`.
+`CONTROL_PLANE.md`. Coverage / dedup parity with coded GBT: **`NLP_COVERAGE.md`**.
 
 ## Intent vs tool routing
 
@@ -22,40 +22,55 @@ Never rewrite a gRPC step into a fake REST prompt just to make generation succee
 ## Pipeline
 
 ```
-automation_plan.json
+automation_plan.json  (+ test_data_payloads when fixtures present)
         │
         ▼
- 0. If any grpcurl steps: GET https://<host>/v1/grpc/targets (host from CONTROL_PLANE.md)
-    → host:port → rpc_alias map. On failure → VPN message; stop guessing.
-    Optional: GET /v1/grpc/static-proto/aliases when reflection disabled
+ P. Prerequisites — dedup-generator (method mode) already run; review gate if writing to repo
         │
         ▼
- 1. Filter scenarios (skip is_dedup / deferred / skip / manual)
+ 0. NLP coverage scan → nlp_method_decisions.json (NLP_COVERAGE.md)
+    Skip exact_match / method_name_collision / undecidable before prompt work
         │
         ▼
- 2. Generate prompts[] for every step (grammar in SKILL.md §§2–10)
+ 0b. If any grpcurl steps: GET https://<host>/v1/grpc/targets (host from CONTROL_PLANE.md)
+     → host:port → rpc_alias map. On failure → VPN message; stop guessing.
+     Optional: GET /v1/grpc/static-proto/aliases when reflection disabled
+        │
+        ▼
+ 1. Filter scenarios (is_dedup / deferred / skip / manual / exact_match / not_approved)
+        │
+        ▼
+ 2. Generate prompts[] for every remaining step (grammar in SKILL.md §§2–10)
         │
         ▼
  3. Sequential verify — tapmind_verify_prompt({ prompt, productGroup, targetServiceId, dryRunLlm }), one call per prompt
         │  rewrites → update prompts[] → re-verify
+        │  no REST op → NEEDS_REVIEW (ingest only when user explicitly asks — CONTROL_PLANE.md)
         ▼
  4. Sequential execute — tapmind_run_nlp_command one prompt at a time
         │  step1 → capture conversationId → pass on steps 2…N
+        │  400 invalid_request_body → SKILL.md §8.1.1 before blaming memory
         ▼
  5. Suite convert — @Test / @TestInfo + TapMind.runStep / assertStep lines
+    partial_match → append lines only (NLP_COVERAGE.md)
         │
         ▼
-   nlp_suite_tests.json  (+ optional .java snippets / report trace)
+   nlp_suite_tests.json + skipped[] manifest (+ optional .java snippets / report trace)
 ```
 
 ## 1. Scenario filter
 
 | Condition | Action |
 |---|---|
-| `is_dedup: true` | Skip |
+| `is_dedup: true` | Skip — `reason: is_dedup` |
+| `nlp_method_decisions` → `exact_match` | Skip — `reason: exact_match` |
+| `nlp_method_decisions` → `method_name_collision` | Skip + flag `NEEDS_REVIEW` |
+| `nlp_method_decisions` → `undecidable` | Skip — `reason: undecidable` |
+| Not approved per `NLP_COVERAGE.md` review gate | Skip — `reason: not_approved` |
 | tag `deferred` / `skip` / `manual` | Skip (record reason) |
 | tag `provisional` / `underspecified` or expected_result contains `TBD` | Generate + mark assertions provisional; flag `NEEDS_REVIEW` on weak verifies |
-| otherwise | Generate |
+| `partial_match` | Generate **delta** prompts only; suite convert append-only |
+| otherwise (`no_match`) | Generate full prompts + new method |
 
 ## 2. Prompt generation rules (generic)
 
@@ -191,9 +206,15 @@ Empty owner → `owner = ""`. Empty ids → `testCaseIds = {}` only if the suite
 
 ### Artifact: `nlp_suite_tests.json`
 
+Include top-level `skipped[]` (every filtered scenario — see `NLP_COVERAGE.md`) and optional
+`nlp_method_decisions` ref path.
+
 ```json
 {
   "epic_id": "<from automation_plan>",
+  "skipped": [
+    {"scenario_id": "SC-007", "reason": "exact_match", "detail": "FooTest#testBar"}
+  ],
   "scenarios": [
     {
       "scenario_id": "SC-…",
@@ -230,9 +251,12 @@ Report skill (separate) can render PAM-style `trace.json` / `report.html` from e
 
 ## 6. Definition of done (per scenario)
 
+- [ ] `nlp_method_decisions.json` verdict recorded before generate
 - [ ] `prompts[]` length matches runnable steps (non-NEEDS_REVIEW)
 - [ ] Verify pass (per-prompt calls) clean or residual flags documented
 - [ ] If executed: one shared `conversationId`; memory refs resolve
 - [ ] `@Test` description matches scenario intent
 - [ ] `@TestInfo` only contains real suite IDs (or explicit empties)
 - [ ] `tapmindTest.lines` are drop-in Java statements
+- [ ] Skipped scenarios appear in manifest `skipped[]` with reason
+- [ ] No `exact_match` scenario emitted as a new method

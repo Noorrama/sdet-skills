@@ -26,6 +26,9 @@ Go from automation scenario data → real `runStep`/`assertStep` prompts → MCP
 | PDG / service | `…module` / `…service_name` | MCP `productGroup` / `targetServiceId` |
 | Class / method | `…package` / `…test_class` / `…method_name` | suite convert |
 | Fixtures / tags / TestInfo | plan + suite context | as before |
+| Existing NLP coverage | GBT repo scan (`NLP_COVERAGE.md`) | `exact_match` skip / `partial_match` append |
+| Review approval | `run.json` per-scenario | fail-closed before repo write |
+| Plan dedup | `is_dedup` from `dedup-generator` | skip before scan |
 
 ## MCP usage (two tools only)
 
@@ -52,7 +55,8 @@ On HTTP/MCP connectivity failure → ask user to connect to respective VPN and r
 
 | File | Role |
 |---|---|
-| `SKILL.md` | Grammar + generation §G |
+| `SKILL.md` | Grammar + generation §G + pipeline parity |
 | `GENERATION.md` | Pipeline |
+| `NLP_COVERAGE.md` | Dedup / existing TapMind test scan + approval gate |
 | `CONTROL_PLANE.md` | Hosts, Swagger, MCP vs HTTP, VPN |
-| `DATA_NEEDED_FOR_NLP_GENERATION.md` | This field map |
+| `DATA_NEEDED_FOR_NLP_GENERATION.md` | Field map |

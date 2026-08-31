@@ -9,7 +9,10 @@ description: >-
   verify-only steps / grpc / grpcurl / grpc.invoke / rpc_alias, OR when given
   automation_plan.json (or sdet_plan
   step_descriptions) to generate prompts, batch-verify them, run steps
-  via MCP, and emit corrected suite test methods. This is the actual
+  via MCP, and emit corrected suite test methods. Before generating, scan
+  for existing TapMind.runStep tests (NLP_COVERAGE.md) so only missing
+  scenarios are emitted — same dedup discipline as gbt-test-code-generator.
+  This is the actual
   TapMind SDK grammar — not the Allure `@Step("Given/When/Then ...")`
   labels used by backend-test-code-generator.
 ---
@@ -34,7 +37,28 @@ real TapMind control-plane SDK, and for **generating suite-ready tests** from
 | **Verify + run** | After generate, using backend MCP TapMind tools | Corrected `prompts[]` + per-step verdicts |
 | **Suite convert** | After prompts are verified (and optionally run) | Java method with `@Test` / `@TestInfo` + `runStep`/`assertStep` lines |
 
-Pipeline detail: `GENERATION.md`. Control plane access: `CONTROL_PLANE.md`. Grammar: §§2–10 below.
+Pipeline detail: `GENERATION.md`. Coverage / dedup: `NLP_COVERAGE.md`. Control plane:
+`CONTROL_PLANE.md`. Grammar: §§0–10 below.
+
+---
+
+## Pipeline parity with coded GBT
+
+NLP generation reuses the same upstream gates where they apply. Mapping:
+
+| Coded skill | NLP equivalent |
+|---|---|
+| `dedup-generator` | Honour `is_dedup: true` on plan |
+| `gbt-method-decision-maker` | `NLP_COVERAGE.md` → `nlp_method_decisions.json` |
+| `gbt-test-code-generator` skip `exact_match` | Skip scenarios already covered by `TapMind.runStep` |
+| `gbt-test-code-generator` approval gate | Same `run.json` per-scenario rules |
+| Module profile + Endpoint/Client/Controller | `module` (PDG) + `service_name` + plain-English prompts |
+| `test-data-generator` payloads | `saveMemory` + `saved <key>` before steps |
+| Compile + `test-code-validator` | MCP verify + optional execute + §8.1.1 body check |
+
+Memgraph enrichment, assertion-helper edits, and data-provider row changes remain in the
+coded path. NLP suite convert is **create** or **append-only** `runStep` lines per
+`NLP_COVERAGE.md`.
 
 ---
 
@@ -114,9 +138,16 @@ Per `automation_scenarios[]` entry, read:
 | Modifiers | `tags[]`, `execution_hints`, `is_dedup` |
 | Suite meta (when present in plan/context) | `groups`, `test_info` / `countryName`, `projectId`, `suiteId`, `testCaseIds`, `owner` |
 
-Skip when `is_dedup: true` or tags include `deferred` / `skip` / `manual`.
+Skip when `is_dedup: true`, `nlp_method_decisions` says `exact_match`, not approved per
+`NLP_COVERAGE.md`, or tags include `deferred` / `skip` / `manual`.
 
 If suite meta is missing, leave `@TestInfo` fields as empty strings / empty arrays — do **not** invent BrowserStack/TestRail IDs.
+
+### G.1.5 Coverage scan (before G.2)
+
+Run **`NLP_COVERAGE.md`** on the target module test tree. Write `nlp_method_decisions.json`.
+Do not generate prompts for `exact_match` scenarios. For `partial_match`, generate only delta
+steps. Never overwrite a non-TapMind method that already occupies `method_name`.
 
 ### G.2 Generate all prompts first (no MCP)
 
@@ -256,12 +287,19 @@ Also emit machine form for reports / downstream generators (`tapmindTest`):
 
 Return per scenario (not free-form prose):
 
-1. `prompts[]` — ordered NLP strings (post-verify if MCP was used)
-2. `correctedSteps[]` — if any rewrites/inserts
-3. `tapmindTest` — suite metadata + convertible `lines[]`
-4. Optional Java snippet: annotations + method signature + body lines
+1. `nlp_method_decisions` verdict (or reference to shared file)
+2. `prompts[]` — ordered NLP strings (post-verify if MCP was used)
+3. `correctedSteps[]` — if any rewrites/inserts
+4. `tapmindTest` — suite metadata + convertible `lines[]` (`action`: `create` | `append`)
+5. `skipped[]` at batch level — every filtered scenario with reason
+6. Optional Java snippet: annotations + method signature + body lines
 
 Consumers (`test-code-generator`, report skill) drop `lines[]` into the method body mechanically.
+
+**Ingest (outside pipeline):** when verify returns no matching REST operation, flag
+`NEEDS_REVIEW`. If the user explicitly asks to ingest, use MCP `tapmind_ingest_curl` (requires
+`curl` + `promptExample` + `serviceId` + `productGroup`) or `tapmind_ingest_openapi`, then
+re-run verify — never auto-ingest during generate.
 
 ---
 
