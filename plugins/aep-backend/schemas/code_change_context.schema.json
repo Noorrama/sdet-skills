@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "code_change_context",
-  "description": "Post-build signal extracted from the aggregated Epic/Story MR diffs (all services), noise-filtered to behaviour that affects tests. Consumed by sdet-plan-generator Pass 2 and automation-plan-generator. The optional `reconciliation` object holds the diff-vs-baseline findings and is populated ONLY when a baseline (sdet_plan.json, or a Jira task/story's ACs) is supplied; it is null/absent for extraction-only runs. Every extracted item SHOULD carry `service` (the GitLab project it came from) so multi-service Epics stay disambiguated.",
+  "description": "Post-build signal extracted from the aggregated Epic/Story MR diffs (all services), noise-filtered to behaviour that affects tests. Consumed by sdet-plan-generator Code-change-context mode and automation-plan-generator. The optional `reconciliation` object holds the diff-vs-baseline findings and is populated ONLY when a baseline (sdet_plan.json, or a Jira task/story's ACs) is supplied; it is null/absent for extraction-only runs. Every extracted item SHOULD carry `service` (the GitLab project it came from) so multi-service Epics stay disambiguated.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -204,7 +204,7 @@
             "blocking": {
               "type": "integer",
               "minimum": 0,
-              "description": "Count of items with blocking:true — triage before Pass 2 / automation."
+              "description": "Count of items with blocking:true — triage before the Code-change-context run / automation."
             }
           }
         },
@@ -441,7 +441,7 @@
         },
         "impacted_scenarios": {
           "type": "array",
-          "description": "Existing baseline scenarios the diff touches — the modify/reuse/deprecate shortlist for Pass 2.",
+          "description": "Existing baseline scenarios the diff touches — the modify/reuse/deprecate shortlist for sdet-plan-generator Code-change-context mode.",
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -479,7 +479,7 @@
         },
         "suggested_scenarios": {
           "type": "array",
-          "description": "Net-new coverage the diff implies. HINTS for sdet-plan-generator Pass 2 — never authored scenario ids (use SUG-###).",
+          "description": "Net-new coverage the diff implies. HINTS for sdet-plan-generator Code-change-context mode — never authored scenario ids (use SUG-###).",
           "items": {
             "type": "object",
             "additionalProperties": false,

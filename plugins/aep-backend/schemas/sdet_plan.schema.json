@@ -22,9 +22,9 @@
     "generation_mode": {
       "type": "string",
       "enum": [
-        "pass1",
-        "pass2",
-        "retrigger",
+        "upstream_context",
+        "code_change_context",
+        "doc_change_context",
         "review"
       ],
       "description": "Mode of the last run that wrote this file"
@@ -108,7 +108,7 @@
               "RFC",
               "PRD",
               "CODE_DIFF",
-              "RETRIGGER",
+              "DOC_CHANGE",
               "REVIEW"
             ],
             "description": "Origin of the scenario requirement"
@@ -120,9 +120,9 @@
           "generated_by_mode": {
             "type": "string",
             "enum": [
-              "pass1",
-              "pass2",
-              "retrigger",
+              "upstream_context",
+              "code_change_context",
+              "doc_change_context",
               "review"
             ],
             "description": "Which pipeline mode CREATED this scenario. Set once at creation; never overwritten."
@@ -150,11 +150,11 @@
           },
           "change_reason": {
             "type": "string",
-            "description": "One sentence \u2014 what changed and why. Set by retrigger and review modes."
+            "description": "One sentence \u2014 what changed and why. Set by doc_change_context and review modes."
           },
           "is_delta": {
             "type": "boolean",
-            "description": "true for pass2 / retrigger / review-added scenarios"
+            "description": "true for code_change_context / doc_change_context / review-added scenarios"
           },
           "is_legacy_regression": {
             "type": "boolean",
@@ -360,6 +360,65 @@
             "type": "boolean",
             "default": false,
             "description": "true when this scenario is a NEAR duplicate \u2014 overlapping but not identical, so it is surfaced for a human rather than flagged outright. Never auto-flag a near duplicate as is_dedup; automation-plan-generator does NOT skip on this field, so a near duplicate still becomes a test method unless a reviewer converts it."
+          },
+          "code_reconciled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set true by Code-change-context mode when a code_change_context.reconciliation finding binds to this scenario. NEVER merged with human_corrected: llm_quality measures the generator against HUMAN judgement, and folding a code-diff correction into human_modified would score the generator down for the code diverging from the RFC it generated from."
+          },
+          "code_reconciliation_types": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "string",
+              "enum": [
+                "confirmed",
+                "field_change",
+                "deprecated",
+                "blocked_by_code_gap",
+                "conflict_pending",
+                "new_from_diff"
+              ]
+            },
+            "description": "What each Code-change-context run did to this scenario. 'confirmed' = the diff agrees, no content changed. 'conflict_pending' = the finding contradicts an A source or was blocking:true, so it was held for a human. 'blocked_by_code_gap' = cannot pass yet (stub dependency or missing flag)."
+          },
+          "code_change_round": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "0 until a Code-change-context run touches this scenario; incremented per run that binds a finding to it. Parallel to review_round, never the same counter."
+          },
+          "code_refs": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "mr": {
+                  "type": "string"
+                },
+                "service": {
+                  "type": "string"
+                },
+                "file": {
+                  "type": "string"
+                },
+                "class": {
+                  "type": "string"
+                },
+                "line": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "condition": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Provenance copied from the finding's code_ref so a reviewer can click through to the diff line."
           }
         }
       }
@@ -647,7 +706,7 @@
         "approved"
       ],
       "default": "draft",
-      "description": "Human approval gate for this plan as a whole. The GENERATOR always writes 'draft' and must never write 'approved' \u2014 only a person sets that, after reading the plan and its analysis document. 'in_review' = a reviewer has picked it up. 'changes_requested' = feedback was written into the qa_analysis.md Feedback block and a Review-mode run is pending. 'approved' = cleared to flow downstream. ANY run that changes scenario content \u2014 pass2, retrigger, review \u2014 resets this to 'draft'. An approval attaches to the content that was read, not to the filename. A per-scenario `status` also exists on scenarios[] with the same four approval values plus 'deprecated'. INVARIANT: root may not be 'approved' while any scenario is still 'draft' or 'in_review' \u2014 an approved plan holding unreviewed scenarios is ambiguous. They sit at different levels so they never collide in JSON, but read the path carefully."
+      "description": "Human approval gate for this plan as a whole. The GENERATOR always writes 'draft' and must never write 'approved' \u2014 only a person sets that, after reading the plan and its analysis document. 'in_review' = a reviewer has picked it up. 'changes_requested' = feedback was written into the qa_analysis.md Feedback block and a Review-mode run is pending. 'approved' = cleared to flow downstream. ANY run that changes scenario content \u2014 code_change_context, doc_change_context, review \u2014 resets this to 'draft'. An approval attaches to the content that was read, not to the filename. A per-scenario `status` also exists on scenarios[] with the same four approval values plus 'deprecated'. INVARIANT: root may not be 'approved' while any scenario is still 'draft' or 'in_review' \u2014 an approved plan holding unreviewed scenarios is ambiguous. They sit at different levels so they never collide in JSON, but read the path carefully."
     },
     "approved_by": {
       "type": [

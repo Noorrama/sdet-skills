@@ -38,7 +38,7 @@ Fast tier — Haiku. Escalate to a reasoning model when the PRD has an undecided
 - What decisions are still open? Does the comment thread resolve, clarify, or leave them open?
 - What is explicitly out of scope — and does any later section contradict that?
 
-**Pass 2 — Extract into the schema, keeping traceability.** Give every requirement, criterion, and decision a stable id and cross-link them (`story_ref`, `requirement_ref`, `related_open_decision`). Traceability is what lets the SDET plan prove coverage and lets a re-trigger patch only the affected scenarios. When a value is unstated, conflicting, or unverifiable, **record it in `needs_clarification` — never invent it.**
+**Pass 2 — Extract into the schema, keeping traceability.** Give every requirement, criterion, and decision a stable id and cross-link them (`story_ref`, `requirement_ref`, `related_open_decision`). Traceability is what lets the SDET plan prove coverage and lets a doc-change-context run patch only the affected scenarios. When a value is unstated, conflicting, or unverifiable, **record it in `needs_clarification` — never invent it.**
 
 ## What to extract
 
