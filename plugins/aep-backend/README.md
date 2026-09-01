@@ -9,7 +9,7 @@ aep-backend/
   README.md                        ← this guide
   schemas/                         ← JSON Schema validators for every context/output
     prd_context · rfc_context · tasks_context · regression_context
-    code_change_context · doc_change_context
+    code_change_context (embeds reconciliation) · doc_change_context
     sdet_plan · automation_plan · test_data_manifest · test_data_requests · validation_report
   skills/                          ← 13 SKILL.md files
     prd-extractor · rfc-extractor · tasks-extractor · regression-extractor
@@ -47,9 +47,16 @@ PRE-BUILD (parallel with dev implementation)
   sdet-plan-generator [re-trigger] → patch affected scenarios only → delta review
 
 POST-BUILD (Epic reaches QA Ready)
-  code-change-extractor  → code_change_context.json (GitLab unified diff + CR notes)
+  code-change-extractor  ← Jira Epic/Story/Task key
+        │  Phase 1  discover MR links across every service (Atlassian MCP)
+        │  Phase 2  fetch per-service diffs vs merge-base + CR notes (GitLab REST / glab)
+        │  Phase 3  extract → code_change_context.json (per service, noise-filtered)
+        │  Phase 4  reconcile vs a baseline (sdet_plan.json OR a Jira task/story's ACs)
+        →   code_change_context.json.reconciliation (embedded) + code_diff_report.md
+             (error-code mismatches · contract changes · info gaps · suggested tests)
+             reconciliation is null when no baseline is supplied (extraction-only)
         ▼
-  sdet-plan-generator [Pass 2] → delta scenarios from CR signals
+  sdet-plan-generator [Pass 2] → delta scenarios from the extracted + reconciled signal
         │
   dedup-generator [scenario mode]
         │
@@ -187,8 +194,13 @@ Or naturally in conversation:
    → approve → BrowserStack upload
    → gaps found → regenerate → re-review
 
-4. Post-build: share GitLab diff
-   → code-change-extractor + sdet-plan-generator Pass 2 → delta review
+4. Post-build: give the Epic (or Story/Task) Jira key
+   → code-change-extractor discovers the MR links, fetches per-service diffs,
+     extracts code_change_context.json, and (if a baseline is supplied — sdet_plan.json
+     OR a Jira task/story's ACs) reconciles into its embedded reconciliation object
+     → code_change_context.json + code_diff_report.md (triage at the QA-Ready gate)
+   → sdet-plan-generator Pass 2 → delta review
+   (needs GITLAB_TOKEN + GITLAB_HOST, or an authenticated glab, to fetch diffs)
 
 5. Approved → automation-plan-generator → SDET reviews automation plan
 
