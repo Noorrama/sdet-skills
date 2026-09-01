@@ -55,6 +55,7 @@ automation_plan.json  (+ test_data_payloads when fixtures present)
         ▼
  5. Suite convert — @Test / @TestInfo + TapMind.runStep / assertStep lines
     partial_match → append lines only (NLP_COVERAGE.md)
+    dedupe repeated steps → sharedHelpers + helper-call (FIXTURE_REUSE.md)
         │
         ▼
    nlp_suite_tests.json + skipped[] manifest (+ optional .java snippets / report trace)
@@ -204,10 +205,22 @@ Empty owner → `owner = ""`. Empty ids → `testCaseIds = {}` only if the suite
 
 | kind | When |
 |---|---|
-| `direct-api` | `saveMemory`, TDP helpers, non-NLP SDK setup |
-| `step` | `TapMind.runStep("…")` |
+| `direct-api` | `saveMemory`, non-NLP SDK setup |
+| `fixture-call` / `helper-call` | `provision…();` / `create…();` / `fetch…();` — shared helper on `*TapMindTestBase` |
+| `step` | Scenario-specific `TapMind.runStep("…")` |
 | `assert` | `TapMind.assertStep("…", "…")` |
 | `guard` | Inserted conditional / interruption handling from a live run |
+
+### Shared helpers (batch suite convert)
+
+When converting **2+** scenarios for one module/class, **fingerprint all prompts** in the
+batch (exact match and shared prefix before `| verify:`). Extract duplicates to
+`protected void …()` on the existing `*TapMindTestBase`.
+
+Types: fixture/TDP, auth bundle, resource create, resource fetch, multi-step prefix.
+
+See **`FIXTURE_REUSE.md`**. Per-test bodies compose helpers; only scenario-specific tail
+steps and verifies stay inline.
 
 ### Artifact: `nlp_suite_tests.json`
 
