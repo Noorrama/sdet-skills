@@ -1,6 +1,6 @@
 ---
 name: backend-code-change-extractor
-description: Post-build backend code-diff skill. Starts from a Jira Epic/Story/Task, discovers the GitLab MR links across every service, fetches each MR's diff (three-dot vs merge-base) + CR notes, and does two jobs into ONE artifact — code_change_context.json. (1) EXTRACT noise-filtered testable signal (new/changed endpoints, validation rules, error mappings, DB/enum/proto/flag/auth/dependency changes) — each tagged with its service. (2) When a baseline is supplied (an sdet_plan.json, or a Jira task/story's ACs), RECONCILE the diff against it into the embedded `reconciliation` object + a human code_diff_report.md — error-code mismatches (code returns a code no scenario asserts, or 409 where a scenario expects 422), contract changes with the scenarios they impact, information gaps the baseline missed, and suggested net-new tests. With no baseline the `reconciliation` object is null (extraction-only). Feeds sdet-plan-generator Pass 2 and automation-plan-generator. Use when the user says "diff the Epic MRs", "code diff", "reconcile the diff against the plan/task", "what changed vs our scenarios", or runs post-build QA on merged code.
+description: Post-build backend code-diff skill. Starts from a Jira Epic/Story/Task, discovers the GitLab MR links across every service, fetches each MR's diff (three-dot vs merge-base) + CR notes, and does two jobs into ONE artifact — code_change_context.json. (1) EXTRACT noise-filtered testable signal (new/changed endpoints, validation rules, error mappings, DB/enum/proto/flag/auth/dependency changes) — each tagged with its service. (2) When a baseline is supplied (an sdet_plan.json, or a Jira task/story's ACs), RECONCILE the diff against it into the embedded `reconciliation` object + a human code_diff_report.md — error-code mismatches (code returns a code no scenario asserts, or 409 where a scenario expects 422), contract changes with the scenarios they impact, information gaps the baseline missed, and suggested net-new tests. With no baseline the `reconciliation` object is null (extraction-only). Feeds sdet-plan-generator Code-change-context mode and automation-plan-generator. Use when the user says "diff the Epic MRs", "code diff", "reconcile the diff against the plan/task", "what changed vs our scenarios", or runs post-build QA on merged code.
 ---
 
 # Backend Code Change Extractor (post-build code-diff + reconciliation)
@@ -10,10 +10,10 @@ At post-build, **the merged code is ground truth**. This skill produces **one JS
 1. `code_change_context.json` — the **extracted** testable surface, per service, **with an embedded `reconciliation` object**. The reconciliation is populated only when a baseline is supplied (an `sdet_plan.json`, or a Jira task/story's ACs); otherwise it is `null` (extraction-only). This is the single downstream contract.
 2. `code_diff_report.md` — the human-facing view of the reconciliation: what the tests expect vs what the code does, and the gaps to close.
 
-**Boundary — this skill surfaces facts; it does not author plan scenarios.** `sdet-plan-generator Pass 2` still writes the delta scenarios and `existing_case_ref`/`regression_action` on the plan. Reconciliation gives Pass 2 pre-matched signal (`impacted_scenarios[]`, `suggested_scenarios[]`) and gives a human the mismatch report to triage at the QA-Ready gate.
+**Boundary — this skill surfaces facts; it does not author plan scenarios.** `sdet-plan-generator` Code-change-context mode still writes the delta scenarios and `existing_case_ref`/`regression_action` on the plan. Reconciliation gives that mode pre-matched signal (`impacted_scenarios[]`, `suggested_scenarios[]`) and gives a human the mismatch report to triage at the QA-Ready gate.
 
 **Downstream consumers**
-- `sdet-plan-generator Pass 2` — reads `code_change_context.json` (delta scenarios) and its `reconciliation.impacted_scenarios[]` / `reconciliation.suggested_scenarios[]`.
+- `sdet-plan-generator` Code-change-context mode — reads `code_change_context.json` (delta scenarios) and its `reconciliation.impacted_scenarios[]` / `reconciliation.suggested_scenarios[]`.
 - `automation-plan-generator` — reads exact class names, packages, `curl_reference`.
 
 ## Model
@@ -133,10 +133,10 @@ New/removed endpoints, request/response field add/remove/type/required changes, 
 Behaviour the diff reveals that the plan/RFC/PRD did not account for: a feature flag whose default differs from what the plan assumed, a new auth/header requirement, a boundary value (13–19 digits, 5000 ms timeout) not in any scenario, a new downstream dependency needing a mock, a DB constraint (`UNIQUE (customer_id, fingerprint)`) implying a duplicate-path test. Record `category`, `detail` (what the code does), `expected_from` (rfc/prd/plan/none), and `gap` (what the author must now decide/assert).
 
 ### D. Impacted existing scenarios → `impacted_scenarios[]`
-The modify/reuse/deprecate shortlist Pass 2 acts on. `suggested_action: modify` **requires** `change_required` — name the assertion that becomes insufficient, not merely "affected". Link back to the ECM-/CC-/IG- ids.
+The modify/reuse/deprecate shortlist the Code-change-context mode acts on. `suggested_action: modify` **requires** `change_required` — name the assertion that becomes insufficient, not merely "affected". Link back to the ECM-/CC-/IG- ids.
 
 ### E. Suggested new tests → `suggested_scenarios[]`
-Signals with no covering scenario become **hints** (never `SC-` ids — use `SUG-###`). Give `name`, `test_layer`, `priority_hint`, `tags` (negative/boundary/flag_on/flag_off/…), `source_signal`, `owning_team` (canonical_id from `team_registry.json`), and a `curl_reference`. Pass 2 owns the final scenario.
+Signals with no covering scenario become **hints** (never `SC-` ids — use `SUG-###`). Give `name`, `test_layer`, `priority_hint`, `tags` (negative/boundary/flag_on/flag_off/…), `source_signal`, `owning_team` (canonical_id from `team_registry.json`), and a `curl_reference`. The Code-change-context mode owns the final scenario.
 
 **Priority hint heuristic:** `P0` when the uncovered path is a money/state-mutating failure or a flag that gates the whole endpoint; `P1` for other negative/boundary paths; `P2` for cosmetic/response-shape additions.
 
@@ -180,7 +180,7 @@ Keep it factual. Do not editorialize who was "wrong".
 - If a field appears in both a new endpoint and a validation rule, extract it in both places.
 - Every error code in the diff must appear in exactly one `error_code_mismatches[]` row (even `matched`) — that is the coverage proof.
 - **Never hardcode or echo the GitLab token**; it is read from `GITLAB_TOKEN` by the fetch script only.
-- Do not write `SC-` ids — suggestions are `SUG-###`; only Pass 2 mints scenario ids.
+- Do not write `SC-` ids — suggestions are `SUG-###`; only sdet-plan-generator mints scenario ids.
 - If **no baseline** is supplied, set `reconciliation: null` (extraction-only) — do not fabricate a baseline. If a baseline is supplied but incomplete, prefer `info_gaps` / `unresolved` over guessing.
 
 ## Validate

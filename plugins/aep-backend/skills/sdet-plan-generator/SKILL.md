@@ -1,6 +1,6 @@
 ---
 name: backend-sdet-plan-generator
-description: Generate the backend SDET test plan from extracted context files. Four modes: Pass 1 (full generation), Pass 2 (code delta), Re-trigger (doc change), Review (human feedback via qa_analysis.md). Outputs sdet_plan.json, qa_analysis.md, and sdet_testcases.csv. RFC drives completeness, PRD drives priority, Tasks drive classification, regression drives deduplication.
+description: Generate the backend SDET test plan from extracted context files. Four modes: Upstream-context (full generation from the extracted upstream context), Code-change-context (post-build reconciliation against the merged diff, including code_change_context.reconciliation), Doc-change-context (upstream doc change), Review (human feedback via qa_analysis.md). Outputs sdet_plan.json, qa_analysis.md, and sdet_testcases.csv. RFC drives completeness, PRD drives priority, Tasks drive classification, regression drives deduplication.
 ---
 
 # Backend SDET Plan Generator
@@ -14,9 +14,9 @@ Reasoning tier — Opus
 
 | Mode | Trigger | Inputs | Output scope |
 |---|---|---|---|
-| Pass 1 | Pre-build, first run | prd + rfc + tasks + regression context | Full scenario set |
-| Pass 2 | Post-build, Epic QA Ready | All Pass 1 inputs + `code_change_context` | Delta scenarios only (`is_delta: true`) |
-| Re-trigger | Upstream doc changed | Existing `sdet_plan.json` + `doc_change_context` + human feedback | Patch affected scenarios only |
+| Upstream-context | Pre-build, first run | prd + rfc + tasks + regression context | Full scenario set |
+| Code-change-context | Post-build, Epic QA Ready | All Upstream-context inputs + `code_change_context` (incl. its `reconciliation` object) | Confirm, patch and extend against the merged diff; delta scenarios `is_delta: true` |
+| Doc-change-context | Upstream doc changed | Existing `sdet_plan.json` + `doc_change_context` + human feedback | Patch affected scenarios only |
 | Review | Human feedback written in `qa_analysis.md` | Existing `sdet_plan.json` + `qa_analysis.md` (feedback section filled) | Apply human corrections; add/modify/deprecate scenarios |
 
 ## Mode detection — determined by file presence
@@ -26,20 +26,22 @@ Check in **priority order** — use the first match:
 | Priority | Check | Mode |
 |---|---|---|
 | 1 (highest) | `sdet_plan.json` present + `qa_analysis.md` present + `### Feedback` section in `qa_analysis.md` has content beyond the placeholder | **Review** — apply human feedback; other change files deferred until review is incorporated |
-| 2 | `sdet_plan.json` absent | **Pass 1** — generate full scenario set |
-| 3 | `sdet_plan.json` present + `doc_change_context.json` present | **Re-trigger** — patch affected scenarios only |
-| 4 | `sdet_plan.json` present + `code_change_context.json` present | **Pass 2** — delta only, do not regenerate existing scenarios |
+| 2 | `sdet_plan.json` absent | **Upstream-context** — generate full scenario set |
+| 3 | `sdet_plan.json` present + `doc_change_context.json` present | **Doc-change-context** — patch affected scenarios only |
+| 4 | `sdet_plan.json` present + `code_change_context.json` present | **Code-change-context** — reconcile against the merged diff; do not regenerate unaffected scenarios |
 | 5 (error) | `sdet_plan.json` present + no feedback and no change files | **Error** — surface: "sdet_plan.json already exists. Write feedback in qa_analysis.md ## Human Review section, or provide code_change_context.json / doc_change_context.json." |
 
 **Detecting Review mode:** Read `qa_analysis.md`. Find the `## Human Review` → `### Feedback` block. If it contains any text other than the placeholder comment `<!-- add feedback here -->`, trigger Review mode.
 
 If `doc_change_context.json` or `code_change_context.json` is also present when Review mode is triggered: run Review first. After clearing the feedback section, the next invocation picks up the remaining change file. Note this in qa_analysis.md.
 
-If both `code_change_context.json` and `doc_change_context.json` are present (no review feedback): prefer **Re-trigger** (priority 3). Note that a Pass 2 run is also pending.
+If both `code_change_context.json` and `doc_change_context.json` are present (no review feedback): prefer **Doc-change-context** (priority 3). Note that a Code-change-context run is also pending.
 
-Set `generation_mode` in the sdet_plan.json root to the detected mode: `pass1` | `pass2` | `retrigger` | `review`.
+If more than one `code_change_context*.json` is present, use the one whose `extraction_date` is latest and name the file used in qa_analysis.md. A file whose name is not exactly `code_change_context.json` does not trigger the mode — say so rather than silently reading a copy.
 
-## Stage 1 — Upstream Service Check / DoR gate (ALWAYS FIRST; on pass, continue to Pass 1)
+Set `generation_mode` in the sdet_plan.json root to the detected mode: `upstream_context` | `code_change_context` | `doc_change_context` | `review`.
+
+## Stage 1 — Upstream Service Check / DoR gate (ALWAYS FIRST; on pass, continue to Upstream-context)
 
 Run before anything else — before reading the files for content, before the team-scope
 question, before any generation. Collect every failure — do not stop at the first — so the
@@ -96,7 +98,7 @@ area* via the Blocking gates section, never the run.
 | `prd_context.json` | `acceptance_criteria[]` (incl. `verifiable` flag), `user_flows[]` + `failure_states[]`, `requirements[]`, `boundary_values[]`, `boundary_conditions[]`, `error_codes[]`, `feature_flags[]`, `non_functional_requirements[]`, `risk_areas[]`, `open_decisions[]` (blocking gate), `needs_clarification[]` (blocking gate), `comment_resolutions[]` (`implication_for_sdet`), `rollout_plan.phases[].variants`, `in_scope`, `out_of_scope` |
 | `tasks_context.json` | `test_layer` at **story and task** level (authoritative — see below), `api_contract` (authoritative endpoint + schema), `validation_gates[]` (ordered gate chain with `is_remote`), `validation_constraints` (implementation confirmation), `canonical_team_id`, `external_systems[]`, `non_functional_targets[].has_backend_surface`, `preconditions` (contributing). **Never** `priority`. |
 | `regression_context.json` (the resolver's `scope.json`) | Existing coverage in the blast radius, scoped by **service** not feature. Read `testCases[]` (id + name), `resolvedServices[]` (`testGroups`/`testClasses` for the signoff run), `unresolvedServices[]`, `unmatchedTestCaseIds[]` and `browserstack.status`. Field names are camelCase. |
-| `code_change_context.json` | Pass 2 only — new endpoints, new error mappings, new validation rules not in RFC |
+| `code_change_context.json` | Code-change-context mode. **Read the whole file, not a subset.** Extraction arrays: `new_endpoints`, `changed_endpoints`, `validation_rules`, `error_mappings`, `db_changes`, `new_enums`, `dependency_changes`, `auth_changes`, `feature_flags`, `proto_changes`. Plus `reconciliation` — `baseline_type`, `sdet_plan_ref`, `error_code_mismatches[]`, `contract_changes[]`, `info_gaps[]`, `impacted_scenarios[]`, `suggested_scenarios[]`, `unresolved[]`. `code-change-extractor` has always emitted `reconciliation`; a reader that skips it discards the pre-matched signal it exists to carry. |
 | `qa_analysis.md` | Review mode — read the `## Human Review → ### Feedback` section for human corrections. Also read in all modes to preserve the Human Review section when regenerating. |
 | `team_registry.json` | Canonical team resolution — maps free-form PRD/RFC team names and dashboard PDG labels to stable `canonical_id`, `code_module`, and `regression_id_prefix`. Read once at startup before scenario generation begins. |
 
@@ -372,10 +374,15 @@ Priority comes from `prd_context` priority and PRD risk severity, escalated by `
 - `api_contract.request_fields + response_fields` → authoritative schema; use for precondition field names in step_descriptions
 - `validation_constraints[]` → confirms RFC rules are implemented; adds implementation-specific error code strings as C input — does not override `validation_sequence` rule order or logic
 
-**READ FROM `code_change_context` (C) — Pass 2 only:**
-- New endpoints not in RFC → new component scenarios; flag as `rfc_gap`
+**READ FROM `code_change_context` (C) — Code-change-context mode only:**
+- New endpoints not in RFC → new scenarios; flag as `rfc_gap`
 - New error handling → new negative scenarios
 - New feature flags → new flag-state scenarios
+- DB, dependency, enum, auth and proto changes → new scenarios where nothing asserts them
+- `reconciliation.impacted_scenarios[]` → the confirm / patch / deprecate shortlist, **after** the Job 0 binding gate
+- `reconciliation.suggested_scenarios[]` → net-new hints; this skill mints the `SC-` id, the extractor never does
+
+**Still C, not A.** The diff never overrides `tasks_context.api_contract` or `rfc_context.validation_sequence` on its own — see the Job 2 gate.
 
 ## Conflict resolution
 
@@ -654,12 +661,14 @@ For each flag:
 **in_scope cross-check** — after generating all scenarios:
 - Every item in `in_scope[]` must map to at least one generated scenario; flag unmapped items in qa_analysis.md
 
-### Pass 2 — code_change_context (C)
+### Code-change-context — code_change_context (C)
 
-- New endpoint not in RFC → component scenario + `rfc_gap` flag
+- New endpoint not in RFC → scenario + `rfc_gap` flag
 - New validation rule not in RFC → scenario + `rfc_gap` flag
 - New error mapping → negative scenario
-- All Pass 2 scenarios: `is_delta: true`
+- DB column/table, dependency, enum, auth or proto change nothing asserts → scenario + `rfc_gap` flag
+- All scenarios this mode mints: `generated_by_mode: "code_change_context"`, `is_delta: true`, `source: CODE_DIFF`
+- Full rules, including the binding gate and the auto-apply gate, are in **Code-change-context mode rules**
 
 ## Regression disposition — classify against existing coverage before writing a scenario
 
@@ -861,7 +870,7 @@ Once `sdet_plan.json` is written and approved by a human:
 > **Emit every field listed here explicitly, including the ones whose value is `null`, `false` or a default.** JSON Schema `default:` is annotation only — no validator injects it — so a field the generator does not write is simply absent, and every downstream consumer then has to distinguish "absent" from "not yet set". Write the key.
 
 Schema root:
-- `feature_name`, `plan_version`, `generation_mode: pass1|pass2|retrigger|review`, `created_at`, `updated_at`
+- `feature_name`, `plan_version`, `generation_mode: upstream_context|code_change_context|doc_change_context|review`, `created_at`, `updated_at`
 - `status: draft|in_review|changes_requested|approved` — **always write `draft`**; see Approval gate. With `approved_by: null` and `approved_at: null`.
 - `teams_in_scope[]` — every resolved team with `canonical_id`, `raw_name`, `matched_via`, `code_module`, `regression_id_prefix`, `browserstack_project`, `is_primary`, `included`. Includes teams the human excluded at the scope gate.
 - `regression_selection: {test_groups[], test_classes[], case_ids[], rationale} | null` — the signoff run, copied from `regression_context.resolvedServices[]`. `null` when no regression context was available.
@@ -872,11 +881,11 @@ Schema root:
   - `scenario_id`, `name` (`Verify …` — see *Writing scenarios an engineer can execute*), `description`
   - `test_layer: component|integration|e2e`
   - `priority: P0|P1|P2`
-  - `source: RFC|PRD|CODE_DIFF|RETRIGGER|REVIEW`, `source_ref`
-  - `generated_by_mode: pass1|pass2|retrigger|review` — which execution mode **created** this scenario. Set once at creation; never overwritten. `review` = scenario added purely from human review feedback (not present in any automated pass).
+  - `source: RFC|PRD|CODE_DIFF|DOC_CHANGE|REVIEW`, `source_ref`
+  - `generated_by_mode: upstream_context|code_change_context|doc_change_context|review` — which execution mode **created** this scenario. Set once at creation; never overwritten. `review` = scenario added purely from human review feedback; `code_change_context` = scenario minted from the merged diff; `doc_change_context` = scenario added because an upstream document changed.
   - `review_round: integer` — which review round last touched this scenario. `0` = not yet reviewed. Incremented on every Review-mode run that modifies or creates the scenario. Unmodified scenarios retain their current `review_round`.
   - `provisional: boolean` — true when `approach_finalised: false` or `edge_case.inferred: true`
-  - `is_delta: boolean` — true for pass2, retrigger, and review-added scenarios (shorthand for `generated_by_mode != pass1`; kept for downstream tool compatibility)
+  - `is_delta: boolean` — true for code_change_context, doc_change_context, and review-added scenarios (shorthand for `generated_by_mode != upstream_context`; kept for downstream tool compatibility)
   - `is_legacy_regression`, `is_dedup`
   - `test_type: string[]` — BrowserStack TestType. **Multi-select array** — collect all applicable values (see CSV section). Minimum one entry; never null or empty.
   - `execution_mode: Automatable|Manual` — BrowserStack Execution Mode. `Manual` for scenarios tagged `deferred` or `underspecified`; `Automatable` for all others.
@@ -886,16 +895,20 @@ Schema root:
   - `regression_action: none|reuse|modify` — disposition against existing coverage. `none` unless a regression match was made.
   - `existing_case_ref: string | null` — the matched BrowserStack case id, verbatim. Never `is_legacy_regression: true` without it.
   - `existing_test_ref: object | null` — `{class, method, file_path, case_numbers[], change_required}`. Required when `regression_action` is `modify`; `null` otherwise, and `null` is the only correct value when the regression context carries no method linkage.
-  - `change_reason: string` — set by retrigger and review modes only.
+  - `change_reason: string` — set by doc_change_context and review modes only.
   - `dedup_reason: string` — set by `dedup-generator`, not here.
   - `step_descriptions[]` — `step`, `action`, `curl_reference`, `expected_result`. Target 4–6 steps per scenario (see Scenario granularity). Every `expected_result` is a concrete assertion phrased as `Verify …`. `action` is imperative and, when it reads state rather than calling a service, **names the artifact it reads** — see *Writing scenarios an engineer can execute*. Steps and expected results are 1:1.
   - `preconditions[]`, `fixture_ids[]`
   - `scenario_group: string` — key shared by scenarios that rest on the **same Arrange**: the same precondition state and the same triggering call, differing only in the data row exercised. A test-design fact, not an automation instruction — it applies equally to `Manual` scenarios, where it tells a human tester which cases can be executed back-to-back off one setup. A scenario with no sibling gets its own unique key. Format: `{feature_component}-{behaviour}`, e.g. `chatextension-terminal-status`. Downstream consumers decide what to do with the grouping; see `automation-plan-generator` for how it maps to test methods.
-  - `browserstack_test_id: string | null` — BrowserStack's own id for this scenario, assigned when the plan is uploaded through the BrowserStack MCP. **Emit `null` at generation time and never author a value.** The sync writes it back after upload, which is what makes the plan round-trippable: re-running Review or Pass 2 can then update the existing case instead of creating a duplicate. Do not confuse it with `existing_testcase_ids[]` — that names cases which existed *before* this plan; this names the case *this* scenario became.
+  - `browserstack_test_id: string | null` — BrowserStack's own id for this scenario, assigned when the plan is uploaded through the BrowserStack MCP. **Emit `null` at generation time and never author a value.** The sync writes it back after upload, which is what makes the plan round-trippable: re-running Review or Code-change-context can then update the existing case instead of creating a duplicate. Do not confuse it with `existing_testcase_ids[]` — that names cases which existed *before* this plan; this names the case *this* scenario became.
   - `existing_testcase_ids: string[]` — BrowserStack case ids (e.g. `TC-302383`) that this scenario extends, replaces, or re-runs under a new flag state. Populated from `regression_context.json` when present; empty otherwise. Rendered into the `Preconditions` block as `Existing regression case:` and consumed downstream for `@TestInfo(testCaseIds={...})`. Do **not** invent ids — leave empty when `regression_context.json` is absent.
   - `tags[]` — `happy_path|negative|boundary|flag_on|flag_off|e2e|load|concurrency|security|reliability|compliance|nfr|deferred|underspecified|provisional`
   - `human_corrected: boolean` — `false` at generation time. Set to `true` in Review mode when the scenario is modified or deprecated by human feedback. Never reset to false. For scenarios with `generated_by_mode: "review"`, this is implicitly `true` (the scenario is itself a human addition) but the field is still set explicitly.
   - `human_correction_types: string[]` — empty at generation. Appended per review round with the type of correction applied: `"field_change"` (one or more fields corrected), `"deprecated"` (LLM generated an incorrect/duplicate scenario), `"missed_scenario"` (LLM failed to generate this; set on review-added scenarios). Multiple rounds may push multiple entries.
+  - `code_reconciled: boolean` — `false` at generation. Set `true` by Code-change-context mode when any code-diff finding binds to this scenario. **Never merged with `human_corrected`** — see Provenance in the Code-change-context mode rules.
+  - `code_reconciliation_types: string[]` — empty at generation. Appended per code-change run: `"confirmed"`, `"field_change"`, `"deprecated"`, `"blocked_by_code_gap"`, `"conflict_pending"`, `"new_from_diff"`.
+  - `code_change_round: integer` — `0` until a Code-change-context run touches the scenario; incremented per run that binds a finding to it.
+  - `code_refs: object[]` — `{mr, service, file, class, line, condition}` copied from the finding's `code_ref`, so a reviewer can click through to the diff line. Empty at generation.
 - `coverage_summary` — `total`, `by_layer`, `by_priority`, `rfc_steps_covered`, `rfc_steps_total`, `rfc_gaps[]`
 - `llm_quality` — updated after each Review run; tracks LLM generation accuracy:
   - `auto_approved: integer` — scenarios not touched by any review round
@@ -927,13 +940,13 @@ Two levels exist because a plan is reviewed case by case: a reviewer may approve
 | `changes_requested` | feedback is written in the `qa_analysis.md` Feedback block; a Review-mode run is pending |
 | `approved` | cleared to flow to `automation-plan-generator` |
 
-**Any run that changes scenario content resets `status` to `draft` at BOTH levels** — the plan root, and every scenario whose content that run actually changed. Scenarios the run left untouched keep their approval. Pass2, retrigger and review all qualify. An approval attaches to the content a person actually read, not to the filename. Set `approved_by` and `approved_at` to null at the same time; a plan whose `updated_at` is later than its `approved_at` has been edited since approval and the approval is stale.
+**Any run that changes scenario content resets `status` to `draft` at BOTH levels** — the plan root, and every scenario whose content that run actually changed. Scenarios the run left untouched keep their approval. Code-change-context, doc-change-context and review all qualify. An approval attaches to the content a person actually read, not to the filename. Set `approved_by` and `approved_at` to null at the same time; a plan whose `updated_at` is later than its `approved_at` has been edited since approval and the approval is stale.
 
 Keep this consistent with the `**Status:**` line in the `qa_analysis.md` Human Review block — the markdown is what the reviewer edits, the JSON field is what downstream tooling gates on. They must not disagree.
 
 ## Output → qa_analysis.md
 
-`qa_analysis.md` is a **living document** — the generated analysis sections are above a `---` divider; the `## Human Review` section below the divider is written once and preserved across all subsequent regenerations (Pass 2, Re-trigger). Never overwrite the Human Review section during generation.
+`qa_analysis.md` is a **living document** — the generated analysis sections are above a `---` divider; the `## Human Review` section below the divider is written once and preserved across all subsequent regenerations (Code-change-context, Doc-change-context). Never overwrite the Human Review section during generation.
 
 ### Generated sections (above `---`)
 
@@ -954,10 +967,17 @@ Human-readable summary for SDET + PM review gate:
 - **Team scope** — the full `teams_in_scope[]` table with each team's module, regression prefix and BrowserStack project, which team is primary, the scope the human confirmed at the gate, and an **excluded-by-scope table** naming every scenario dropped for team reasons with its `owning_team`, entry point and what it covered. An excluded scenario that leaves no trace here is indistinguishable from a coverage gap.
 - **Coverage ledger** — the full table with every unmapped row and its stated reason. This is the section a reviewer scans to find what the plan does not cover, so unmapped rows belong here in full rather than summarised.
 - **Completeness sweep results** — how many scenarios or steps each of the four sweeps contributed. A sweep contributing zero is a signal it was skipped, not that the feature had nothing to find.
+- **Code-change reconciliation** (Code-change-context runs only) — the MR ids, services and `extraction_date` read, and which `code_change_context*.json` file was used. Then, in this order:
+  1. **Binding table** — every finding id with the scenario id the extractor named, the scenario ids actually bound, and `bound_by` (`id` / `behaviour` / `unbound`). State plainly whether `reconciliation.sdet_plan_ref` resolved to this plan; when it did not, say that every id was rebound by behaviour and why that was necessary.
+  2. **Counts** — confirmations, auto-applied, conflicts pending, deprecated, scenarios minted, suggestions skipped as already covered.
+  3. **Conflicts pending** — one row per finding held back by the Job 2 gate, quoting *both* sides: what the code does, and what the A source (`tasks_context.api_contract` / `rfc_context.validation_sequence` / PRD AC) says. This is the table a human arbitrates from, so neither side may be paraphrased away.
+  4. **Blocked by code gap** — scenarios that cannot pass yet because the diff shows a stub dependency or a missing flag, with the `info_gaps` id.
+  5. **Out of this MR's scope** — `unresolved[reason: "diff_unavailable"]` entries, stated as *not* coverage gaps.
+  6. **Unbound findings** — findings no scenario in this plan asserts, which are real coverage gaps.
 
 ### Human Review section (below `---`, written once, never regenerated)
 
-Append this block when first generating `qa_analysis.md`. On subsequent Pass 1/2/Re-trigger runs, preserve it verbatim — do not regenerate it.
+Append this block when first generating `qa_analysis.md`. On subsequent Upstream-context, Code-change-context or Doc-change-context runs, preserve it verbatim — do not regenerate it.
 
 ```markdown
 ---
@@ -1055,7 +1075,7 @@ Existing regression case: <TC-xxxxxx from existing_testcase_ids>
 | CSV column | Maps from | Purpose |
 |---|---|---|
 | `test_layer` | `test_layer` | component / integration / e2e — for filtering in CI |
-| `generated_by_mode` | `generated_by_mode` | pass1 / pass2 / retrigger — audit trail |
+| `generated_by_mode` | `generated_by_mode` | upstream_context / code_change_context / doc_change_context — audit trail |
 | `is_delta` | `is_delta` | Filter new scenarios from existing in PR reviews |
 | `is_legacy_regression` | `is_legacy_regression` | Flag pre-existing covered scenarios |
 | `source_ref` | `source_ref` | Traceability back to RFC step / PRD AC |
@@ -1120,39 +1140,154 @@ In cases 2 and 3, record the assumption in `qa_analysis.md` and ask the human re
 
 `reliability` and `concurrency` describe *what adverse condition* the scenario sets up, not that it measures a performance target. A retry-exhaustion or lost-update test is functional. Only a scenario asserting a throughput or latency number is `performance`.
 
-## Pass 2 rules
+## Code-change-context mode rules
 
-Do not regenerate the full plan. Append delta scenarios only.
+Reads the post-build code diff and reconciles the plan against what was actually merged. This mode
+**replaces the former Pass 2** — Pass 2 read only four of the file's arrays and had no branch that could
+touch an existing scenario, so the `reconciliation` object that `code-change-extractor` has always emitted
+had no consumer.
 
-**Delta matching — skip if already covered:**
+The mode does five jobs, strictly in order. Job 0 is a safety gate: skip it and the rest of the mode will
+corrupt scenarios.
 
-For each item in `code_change_context.json`, check whether an existing scenario in `sdet_plan.json` already covers it:
+### Job 0 — Bind the reconciliation to THIS plan before reading a single finding
 
-| code_change_context item | Match criterion | If matched | If not matched |
-|---|---|---|---|
-| New endpoint | `(method + path)` appears in any scenario's `step_descriptions[].curl_reference` or `endpoint` | Skip | Generate new scenario |
-| New error code | Error code string appears in any scenario's `step_descriptions[].expected_result` | Skip | Generate new negative scenario |
-| New validation rule | Rule description closely matches any scenario's `step_descriptions[].action` or `expected_result` | Skip | Generate new scenario + flag as `rfc_gap` |
-| New feature flag | Flag name appears in any scenario's `tags[]` (flag_on / flag_off pair) | Skip | Generate flag_on + flag_off pair |
+`reconciliation.impacted_scenarios[].scenario_id` and `error_code_mismatches[].expected_in_plan.scenario_id`
+are ids **from whatever baseline the extractor was pointed at**, which is very often not the plan in this run
+directory. Scenario ids are sequential per plan, so a stale baseline does not fail loudly — it silently
+addresses a different scenario that happens to hold the same number.
 
-All generated scenarios: `generated_by_mode: "pass2"`, `is_delta: true`.
-Flag code-diff items that have no RFC match with `source: CODE_DIFF` and add to `coverage_summary.rfc_gaps[]`.
+| Check | Action |
+|---|---|
+| `reconciliation` is `null` or `{}` | Extraction-only run, no baseline. Skip Jobs 1, 2 and 4; run Job 3 over the extraction arrays only. Note it in qa_analysis.md. |
+| `reconciliation.baseline_type != "sdet_plan"` | The diff was reconciled against an automation plan or a Jira task, not against test design. **Every scenario id is unbound.** Rebind by behaviour. |
+| `reconciliation.sdet_plan_ref` does not resolve to the `sdet_plan.json` being updated | **Every scenario id is unverified.** Rebind by behaviour. Never trust the number. |
+| `sdet_plan_ref` does resolve to this file | Ids may be bound directly, but still verify each one (below) before applying. |
 
-## Re-trigger rules
+**Verify every id even on a matching ref.** For each finding, compare the finding's `reason` /
+`change_required` / `resolution` against the target scenario's `name` and its
+`step_descriptions[].expected_result`. If the scenario does not assert the behaviour the finding is talking
+about, the id is wrong regardless of what `sdet_plan_ref` says.
+
+**Rebinding by behaviour.** Match the finding's `resolution` and `change_required` text against
+`scenarios[].step_descriptions[].expected_result` and `scenarios[].name`. Bind to **every** scenario that
+asserts the affected behaviour — a single contract change routinely touches many scenarios, and the
+extractor's shortlist is a sample of the baseline it saw, never a complete list for this plan.
+
+Record the outcome on every finding and print it as a binding table in qa_analysis.md:
+
+| `bound_by` | Meaning |
+|---|---|
+| `id` | `sdet_plan_ref` resolved to this plan **and** the named scenario asserts the behaviour |
+| `behaviour` | Rebound by assertion text; record both the id the extractor gave and the ids actually bound |
+| `unbound` | No scenario in this plan asserts the behaviour — a coverage gap, not a no-op |
+
+**An `unbound` finding is never silently dropped.** It goes to `coverage_summary.rfc_gaps[]` and to the
+binding table. A finding the plan has no scenario for is the most interesting kind.
+
+### Job 1 — Confirmations
+
+`impacted_scenarios[].suggested_action: "reuse"`, and `error_code_mismatches[].disposition` of `covered` or
+`matched`, mean the code agrees with the plan. **Change no scenario content.** On each bound scenario set
+`code_reconciled: true`, append `"confirmed"` to `code_reconciliation_types[]`, and increment
+`code_change_round`. Because no content changed, `status` is **not** reset — an approval a human already gave
+survives a confirmation.
+
+Confirmations are the cheapest signal in the file and worth reporting prominently: they are the scenarios a
+merged MR has already validated the design of.
+
+### Job 2 — Impacted scenarios, gated by the ownership contract
+
+`code_change_context` is a **C** source in every row of the A/C matrix. A merged MR is evidence of what was
+built, not authority over what should have been built. That distinction decides whether a finding may be
+applied automatically:
+
+| The finding contradicts… | Action |
+|---|---|
+| Nothing — the plan left the value unspecified, or the code fills in a detail the plan guessed at | **Auto-apply.** Update the step or assertion, set `change_reason` quoting the finding id, set `code_reconciled: true`, append `"field_change"`, reset that scenario's `status` to `draft`. |
+| An **A** source — `tasks_context.api_contract`, `rfc_context.validation_sequence`, `rfc_context.business_logic`, `prd_context` acceptance criteria or priority | **Do not apply.** Set the scenario's `status` to `changes_requested`, append `"conflict_pending"`, and record a `code_conflict` entry naming both sides. A human arbitrates. |
+| Any finding with `blocking: true` | **Never auto-apply**, whatever it contradicts. Always `changes_requested`. |
+
+`suggested_action: "deprecate"` sets `status: "deprecated"` and `change_reason`. **Never delete** — the
+human decides final removal.
+
+**Why the gate matters.** A partially-built feature reports its own incompleteness as a contract change. A
+view that has not yet been given `members_count`, a dependency still wired to a stub, a flag that lands in a
+later MR — all three look identical to a genuine contract change from inside one diff. Auto-applying them
+would delete the very assertions that are supposed to fail until the work is finished.
+
+### Job 3 — Net-new scenarios
+
+Run the delta-matching skip test first for every candidate; a suggestion already covered is skipped **with a
+recorded reason**, never dropped silently.
+
+| Source | Rule |
+|---|---|
+| `reconciliation.suggested_scenarios[]` | Mint a real `SC-` id (the extractor may only emit `SUG-###`). Honour `test_layer`, `priority_hint`, `tags`, `owning_team`, `curl_reference`; apply every standard derivation — `test_type`, `execution_mode`, `markets`, `type_of_test`, `scenario_group`, the `preconditions` block. |
+| `new_endpoints[]` | `(method + path)` absent from every `step_descriptions[].curl_reference` → new scenario + `rfc_gap` |
+| `error_mappings[]` | Error code string absent from every `expected_result` → new negative scenario |
+| `validation_rules[]` | Rule not asserted by any scenario → new scenario + `rfc_gap` |
+| `feature_flags[]` | Flag name absent from every `tags[]` → flag_on + flag_off pair |
+| `changed_endpoints[]` | `what_changed` / `new_contract` describes behaviour no scenario asserts → new scenario |
+| `db_changes[]` | A column, table or migration no scenario asserts → new persistence scenario; a **column set** differing from `rfc_context.db_schema_changes` is a contract conflict, not just a gap |
+| `dependency_changes[]` | A new client, method or `needs_mock: true` dependency no scenario drives → new integration scenario |
+| `new_enums[]` · `auth_changes[]` · `proto_changes[]` | Same test: absent from every assertion → new scenario |
+
+The last five rows are the arrays the former Pass 2 never read. They are where DB shape drift and stubbed
+dependencies hide.
+
+Every scenario this job mints: `generated_by_mode: "code_change_context"`, `is_delta: true`,
+`source: "CODE_DIFF"`, `status: "draft"`, `code_reconciled: true`, `code_reconciliation_types: ["new_from_diff"]`,
+and `code_refs[]` copied from the finding's `code_ref`. Items with no RFC match also go to
+`coverage_summary.rfc_gaps[]`.
+
+### Job 4 — Information gaps and unresolved entries
+
+| Input | Action |
+|---|---|
+| `info_gaps[category: "dependency"]` reporting a stub or hardcoded client | Every scenario that drives the real dependency is **not runnable yet**. Append `"blocked_by_code_gap"` to `code_reconciliation_types[]` and list them in qa_analysis.md. Leaving them `Automatable` with no note tells an automation agent to write tests that cannot pass. |
+| `info_gaps[category: "feature_flag"]` reporting no flag in the diff | The `flag_off` half of every flag pair cannot pass. Mark the same way. |
+| `info_gaps` of any other category | Record against the bound scenarios; auto-apply only under the Job 2 gate. |
+| `unresolved[reason: "diff_unavailable"]` | **Not a gap.** The MR simply did not touch those endpoints. Record as out-of-MR-scope so nobody reads it as missing coverage. |
+| `unresolved[reason: "no_sdet_plan"]` | The extractor had no baseline; treat as Job 0's null-reconciliation path. |
+
+### Provenance — never merged with human review
+
+This mode writes its own fields and **must not touch** `human_corrected` or `human_correction_types`:
+
+| Field | Meaning |
+|---|---|
+| `code_reconciled: boolean` | `false` at generation; `true` once any code-diff finding bound to this scenario |
+| `code_reconciliation_types: string[]` | `confirmed` · `field_change` · `deprecated` · `blocked_by_code_gap` · `conflict_pending` · `new_from_diff` |
+| `code_change_round: integer` | `0` until the first code-change run touches the scenario; incremented per run |
+| `code_refs[]` | `{mr, service, file, class, line, condition}` copied from the finding's `code_ref` — lets a reviewer click through to the diff line |
+
+`llm_quality.llm_accuracy_pct` measures how well the generator's output matched **human** judgement. Folding
+a code-diff correction into `human_modified` would score the generator down because the code diverged from
+the RFC it was told to generate from — the opposite of what happened. Keep the two axes separate.
+
+### Approval gate
+
+Reset root `status` to `draft` (with `approved_by` and `approved_at` null) if **any** scenario's content
+changed. A run consisting only of confirmations changes nothing and leaves the root alone. Scenarios this run
+did not touch keep the approval they had.
+
+
+## Doc-change-context rules
 
 Do not regenerate unaffected scenarios. Patch only what the doc change touched.
 
 **Scenario matching — find what to patch:**
 
-Re-trigger uses `source_ref` on each existing scenario to trace back to the source AC, flow, or validation step. When `doc_change_context.json` reports a change:
+Doc-change-context mode uses `source_ref` on each existing scenario to trace back to the source AC, flow, or validation step. When `doc_change_context.json` reports a change:
 
 | doc_change_context item | Find affected scenarios by | Action |
 |---|---|---|
-| AC modified | `source_ref` contains the AC ID | Update step_descriptions, assertions, preconditions. Set `generated_by_mode: "retrigger"`, add `change_reason`. |
+| AC modified | `source_ref` contains the AC ID | Update step_descriptions, assertions, preconditions. Set `generated_by_mode: "doc_change_context"`, add `change_reason`. |
 | AC removed | `source_ref` contains the AC ID | Set `status: "deprecated"`, add `change_reason`. Do not delete — human reviewer decides final removal. |
-| AC added | No existing match | Generate new scenario. `generated_by_mode: "retrigger"`, `is_delta: true`. |
-| Flow changed | `source_ref` contains the flow name | Update outcome assertion and steps. Set `generated_by_mode: "retrigger"`, add `change_reason`. |
-| Validation step changed | `source_ref` contains the step ref | Update constraint / failure_code assertions. Set `generated_by_mode: "retrigger"`, add `change_reason`. |
+| AC added | No existing match | Generate new scenario. `generated_by_mode: "doc_change_context"`, `is_delta: true`. |
+| Flow changed | `source_ref` contains the flow name | Update outcome assertion and steps. Set `generated_by_mode: "doc_change_context"`, add `change_reason`. |
+| Validation step changed | `source_ref` contains the step ref | Update constraint / failure_code assertions. Set `generated_by_mode: "doc_change_context"`, add `change_reason`. |
 
 `change_reason` field: one sentence stating what changed and why the scenario was updated, e.g. "AC-003 updated: error code changed from 409 to 422 per PRD v2".
 
@@ -1243,7 +1378,9 @@ This preserves the full audit trail in the same file the human is reading. The L
 
 ## Log
 
-Total scenarios, RFC coverage %, gaps count, blocked gaps count, provisional count, delta count (Pass 2/Re-trigger).
+Total scenarios, RFC coverage %, gaps count, blocked gaps count, provisional count, delta count (Code-change-context/Doc-change-context).
+
+On a Code-change-context run also log: findings read, bound by id, rebound by behaviour, unbound; confirmations; auto-applied; conflicts pending; deprecated; scenarios minted; suggestions skipped as already covered; scenarios marked blocked_by_code_gap.
 
 Also log the granularity metrics, so drift back to one-assertion-per-scenario is visible:
 - mean `step_descriptions` per scenario — **expect 4–6**; below 3 means the granularity rule was not applied
@@ -1259,7 +1396,7 @@ Reject and regroup if any of these hold:
 - more than 20% of scenarios have exactly 1 step
 - `status` is anything other than `draft` on a freshly generated plan — at the root **or** on any scenario; the generator never approves its own output
 - root `status` is `approved` while any scenario sits at `draft` or `in_review` — violates the two-level invariant
-- a pass2, retrigger or review run left `status` at `approved` — at the root, or on a scenario whose content that run changed — instead of resetting it to `draft`
+- a code_change_context, doc_change_context or review run left `status` at `approved` — at the root, or on a scenario whose content that run changed — instead of resetting it to `draft`
 - `scenario_group` is missing on any scenario, or every scenario has a unique one (it was not derived from the Arrange)
 - any scenario has `is_legacy_regression: true` with no `existing_case_ref`
 - any scenario has `regression_action: "modify"` with no `existing_test_ref`, or an `existing_test_ref` whose `change_required` is empty
@@ -1280,3 +1417,12 @@ Reject and regroup if any of these hold:
 - any ordered validation step followed by an external call lacks a dependency-not-invoked assertion
 - any two scenarios share a fixture set, a trigger, and a precondition but differ only in which field they assert — those must be merged
 - `Steps` and `Expected Result` line counts differ for any scenario
+- **Code-change-context mode only:**
+- any `reconciliation` finding left `bound_by: "unbound"` with no `coverage_summary.rfc_gaps[]` entry
+- any finding with `blocking: true` that was auto-applied instead of set to `changes_requested`
+- any finding applied by id while `reconciliation.sdet_plan_ref` does not resolve to this plan
+- any scenario whose `code_reconciled` is `true` with an empty `code_reconciliation_types[]`
+- `human_corrected` or `human_correction_types[]` changed by this mode — it must never write them
+- any `suggested_scenarios[]` entry neither minted as a scenario nor recorded as skipped with a reason
+- a scenario minted from the diff without `source: CODE_DIFF`, or carrying a `SUG-` id instead of a minted `SC-` id
+- `generation_mode` left at `upstream_context` after a code-change run
