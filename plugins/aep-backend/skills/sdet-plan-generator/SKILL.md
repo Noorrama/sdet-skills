@@ -1229,18 +1229,44 @@ insufficient.
   existing folder, including when only one exists, because folder semantics (what content
   belongs where) is a judgement call this skill has no way to infer. Nothing is cached between
   runs; ask again next time unless the human says otherwise.
-- **`priority` vocabulary — ask if this project's convention isn't already stated in the
-  conversation.** The tool's own field description states valid values are per-project. Default
-  assumption is the platform's own `Critical`/`High`/`Medium`/`Low`, but confirm rather than
-  assume when in doubt — some projects use their own convention (a literal `P1`/`P2`/`P3` scale
-  has been seen in practice, mapped from this skill's own `P0`/`P1`/`P2` as a severity-preserving
-  shift — `P0→P1`, `P1→P2`, `P2→P3` — not a label match).
-- **`case_type` and `custom_fields` — omit rather than guess, with a hedge.** No tool lists a
-  project's configured case types or custom fields. Omit `case_type` entirely (the tool
-  explicitly supports this — the project default applies), and for any value that would have
-  gone into `custom_fields` (e.g. `Country v2`, `TestType`, `Execution Mode`), fold it into
-  `tags[]` as well regardless of whether `custom_fields` is attempted — that way the value
-  survives even if a speculative field-name guess is wrong or silently ignored.
+- **`priority` — send the plan's `P0`/`P1`/`P2` string verbatim. Never shift or relabel it.**
+  The tool's own field description states valid values are per-project, which invites
+  translating to the platform default (`Critical`/`High`/`Medium`/`Low`) or guessing a shifted
+  scale (`P0→P1`, assuming the target starts at `P1` not `P0`) — **both were tried and both were
+  wrong** for the one project confirmed so far (human-corrected 2026-09-01: the project's own
+  `priority` field takes `P0`/`P1`/`P2` directly, no translation). Default to the direct,
+  unmapped pass-through; only deviate if something concrete says otherwise — the call is
+  rejected, or a human who can see the BrowserStack UI says the project uses different labels.
+- **`case_type` — still omit; no tool discovers valid per-project values.** The project default
+  applies automatically (observed default: `"Regression"`).
+- **`custom_fields` — attempt confirmed names, never assume the rest exist.** Confirmed live
+  against one project (human-corrected 2026-09-01, after an initial upload wrongly omitted all
+  of them on the assumption none existed — the create response's `custom_fields: []` reflected
+  only what was *sent*, not what the project has configured):
+  - `Country v2` — from `markets[]`, e.g. `["Indonesia"]`.
+  - `Platform` — constant `"Backend"`.
+  - `Execution Mode` — **depends on `execution_mode`, sent verbatim.** `Automatable`/`Manual`
+    needs no translation; the custom field uses this skill's own vocabulary exactly.
+  - `TapMind Automated` — **ignore. Never send this field, under any value.** This skill has no
+    TapMind linkage data for any scenario it generates; its project default (`false`) is left
+    to sit as the project's own concern, not something this skill has an opinion on.
+
+  **`"Type of Test Case"` was tried and rejected — do not attempt it again without a
+  human-confirmed exact name.** `updateTestCase` reported success and `last_updated_at`
+  advanced, but a live read afterward showed no such field landed — the four above were
+  unchanged. The tool's own success message is not proof a specific field took effect; only a
+  live read is. `type_of_test` (and `test_type[]`, never attempted as a custom field at all)
+  stay hedged into `tags[]` (`type_of_test:functional`, `test_type:smoke`/`test_type:story`) —
+  that is the *only* confirmed home for these two values on this project, not a fallback held in
+  reserve.
+
+  Send the confirmed fields on the `createTestCase` call itself rather than a separate update;
+  verify via a live read after regardless (the case-creation response does not reliably echo
+  defaulted custom fields — a second read is what surfaced `Execution Mode` defaulting to the
+  wrong value once, on the one field this skill didn't explicitly set at create time). If a
+  *different* project's response shows even these confirmed names come back empty or rejected,
+  fall back to the `tags[]` hedge for that project specifically — the fallback is per-project,
+  not a global default once one project is confirmed.
 
 ### What actually uploads — create-or-update, never a diff
 
@@ -1275,10 +1301,12 @@ parameter at all. Use this table for MCP calls specifically:
 | `description` | `description` | verbatim — this parameter exists but the CSV mapping never captured it; genuinely additive here |
 | `step_descriptions[]` | `test_case_steps[]` (`{step, result}`) | `step` = `action`; append the `curl_reference` as a second line on `step` when non-null (the real shape has no separate curl field — dropping it silently loses the "how do you run this" detail); `result` = `expected_result` |
 | `preconditions[]` | `preconditions` (joined string) | newline-join; append `Existing regression case: <id>` per entry in `existing_testcase_ids[]` when non-empty |
-| `priority` (`P0`/`P1`/`P2`) | `priority` | via this project's confirmed vocabulary — ask if not already stated, see resolution above |
-| `tags[]` | `tags` | direct array; also carries the `custom_fields` hedge values when those are unconfirmed for this project |
-| `execution_mode` | `automation_status: "not_automated"` | **constant, always**, regardless of `Automatable`/`Manual` — this field means "has test code been written yet," a different axis than execution feasibility; matches the CSV's own `Backend Automation Status: Not Automated` convention at first upload |
-| `markets[]`, `type_of_test`, `"Backend"` platform constant | `custom_fields` (speculative) + `tags[]` (hedge) | see the case_type/custom_fields resolution above |
+| `priority` (`P0`/`P1`/`P2`) | `priority` | **verbatim, no mapping** — see resolution above; never shift or relabel |
+| `tags[]` | `tags` | direct array; also carries the `type_of_test`/`test_type[]` hedge (`"Type of Test Case"` was tried as a custom field and confirmed rejected — this is their only home, not a fallback) |
+| `execution_mode` | `automation_status: "not_automated"` **and** `custom_fields: {"Execution Mode": <verbatim>}` | two different destinations for the same plan field, not a conflict — `automation_status` means "has test code been written yet" (always `not_automated` at first upload, matching the CSV's `Backend Automation Status: Not Automated`); the confirmed custom field `Execution Mode` means "can this be automated at all" and takes `Automatable`/`Manual` verbatim, same vocabulary as the plan's own |
+| `markets[]` | `custom_fields: {"Country v2": [...]}` | confirmed field name — send the array as-is |
+| `"Backend"` platform constant | `custom_fields: {"Platform": "Backend"}` | confirmed field name |
+| `type_of_test` | `tags[]` only | `"Type of Test Case"` tried as a custom field and confirmed rejected (silent no-op — the update call reported success, a live read showed it never landed); `tags[]` is the confirmed mechanism, not a hedge pending confirmation |
 | — | `case_type` | omit unless confirmed for this project (see above) |
 | — | `owner`, `issues`, `issue_tracker` | omit — no plan field carries an email or issue-tracker id |
 | — | `status` (BrowserStack's own case review-status: `active`/`draft`/`in_review`/`outdated`/`rejected`) | **do not confuse with the plan's `scenarios[].status` approval field** — unrelated concepts sharing a name; never set from plan data |
@@ -1330,6 +1358,12 @@ After the upload attempt — whether it fully succeeded, partially succeeded, or
 - Never claim a create or update succeeded without a corresponding successful MCP response — a
   fabricated success is worse than a stated failure.
 - If any update failed, name it in `qa_analysis.md` even though `unsynced_count` cannot carry it.
+- Never conclude a project has no configured custom fields from a `createTestCase` response
+  showing `custom_fields: []` — that reflects only what was *sent*, not what the project has
+  configured or defaults to. A live `listTestCases`/read call is what actually confirms
+  presence or absence; skipping it on this exact assumption is what produced a wrong
+  `Execution Mode` value and two omitted fields (`Country v2`, `Platform`) on the first upload
+  this rule exists because of.
 
 ## Code-change-context mode rules
 
