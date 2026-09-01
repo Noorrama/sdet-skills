@@ -120,7 +120,7 @@
         "regression_id_prefix": "GOFOOD-"
       },
       "pods": ["Discovery", "Booking", "foodfulfillment", "Growth", "EXPANSION", "Group Order", "FOOD_FULFILMENT", "Rewards & Promotion"],
-      "browserstack_project": "gofood-backend"
+      "browserstack_project": "PR-40"
     },
 
     {
