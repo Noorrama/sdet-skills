@@ -1,6 +1,10 @@
 {
   "epic_id": "EPIC-1122",
-  "mr_ids": ["MR-STORY-1233", "MR-STORY-1234", "MR-STORY-1235"],
+  "mr_ids": [
+    "MR-STORY-1233",
+    "MR-STORY-1234",
+    "MR-STORY-1235"
+  ],
   "extraction_date": "2026-08-06",
   "new_endpoints": [
     {
@@ -61,10 +65,26 @@
     }
   ],
   "error_mappings": [
-    {"error_code": "MISSING_FIELD",       "http_status": 400, "condition": "Required field absent or cardNumber format invalid"},
-    {"error_code": "INVALID_EXPIRY",      "http_status": 400, "condition": "Card expiry date is in the past"},
-    {"error_code": "DUPLICATE_CARD",      "http_status": 409, "condition": "SHA-256 fingerprint already saved for this customer"},
-    {"error_code": "SERVICE_UNAVAILABLE", "http_status": 503, "condition": "Vault service unavailable or timed out after 5000ms"}
+    {
+      "error_code": "MISSING_FIELD",
+      "http_status": 400,
+      "condition": "Required field absent or cardNumber format invalid"
+    },
+    {
+      "error_code": "INVALID_EXPIRY",
+      "http_status": 400,
+      "condition": "Card expiry date is in the past"
+    },
+    {
+      "error_code": "DUPLICATE_CARD",
+      "http_status": 409,
+      "condition": "SHA-256 fingerprint already saved for this customer"
+    },
+    {
+      "error_code": "SERVICE_UNAVAILABLE",
+      "http_status": 503,
+      "condition": "Vault service unavailable or timed out after 5000ms"
+    }
   ],
   "db_changes": [
     {
@@ -78,7 +98,9 @@
         "token VARCHAR(128) NOT NULL",
         "created_at TIMESTAMP NOT NULL default NOW()"
       ],
-      "constraints": ["UNIQUE (customer_id, fingerprint)"],
+      "constraints": [
+        "UNIQUE (customer_id, fingerprint)"
+      ],
       "rollback": "DROP TABLE payment_cards"
     }
   ],
@@ -90,11 +112,17 @@
       "endpoint": "POST /vault/v1/tokenise",
       "call_class": "VaultClient",
       "call_method": "tokenise",
-      "request_body": {"cardNumber": "string"},
-      "success_response": {"token": "string"},
+      "request_body": {
+        "cardNumber": "string"
+      },
+      "success_response": {
+        "token": "string"
+      },
       "timeout_ms": 5000,
       "retry_count": 1,
-      "failure_response": {"error": "SERVICE_UNAVAILABLE"},
+      "failure_response": {
+        "error": "SERVICE_UNAVAILABLE"
+      },
       "failure_http_status": 503,
       "no_db_write_on_failure": true
     }
@@ -117,5 +145,149 @@
       "default_production": "OFF"
     }
   ],
-  "proto_changes": []
+  "proto_changes": [],
+  "reconciliation": {
+    "baseline_type": "sdet_plan",
+    "sdet_plan_ref": "examples/EPIC-1122/sdet_plan.json",
+    "reconciled_at": "2026-08-06T09:40:00Z",
+    "summary": {
+      "error_code_mismatches": 4,
+      "contract_changes": 0,
+      "info_gaps": 0,
+      "impacted_scenarios": 0,
+      "suggested_scenarios": 2,
+      "blocking": 0
+    },
+    "error_code_mismatches": [
+      {
+        "id": "ECM-001",
+        "type": "matched",
+        "service": "wallet-service",
+        "error_code": "MISSING_FIELD",
+        "http_status": 400,
+        "code_ref": {
+          "service": "wallet-service",
+          "class": "CardValidationService",
+          "condition": "Required field absent or cardNumber format invalid"
+        },
+        "expected_in_plan": {
+          "scenario_id": "SC-EPIC1122-002",
+          "asserted": "HTTP 400 {\"error\": \"MISSING_FIELD\", \"field\": \"cardNumber\"}"
+        },
+        "disposition": "covered",
+        "impacted_scenarios": [
+          "SC-EPIC1122-002",
+          "SC-EPIC1122-003",
+          "SC-EPIC1122-004",
+          "SC-EPIC1122-005",
+          "SC-EPIC1122-021"
+        ],
+        "blocking": false,
+        "resolution": "Code returns HTTP 400 {\"error\":\"MISSING_FIELD\"} for missing/invalid required fields; SC-EPIC1122-002/003/004/005/021 assert it — covered."
+      },
+      {
+        "id": "ECM-002",
+        "type": "matched",
+        "service": "wallet-service",
+        "error_code": "INVALID_EXPIRY",
+        "http_status": 400,
+        "code_ref": {
+          "service": "wallet-service",
+          "class": "CardValidationService",
+          "condition": "Card expiry date is in the past"
+        },
+        "expected_in_plan": {
+          "scenario_id": "SC-EPIC1122-006",
+          "asserted": "HTTP 400 {\"error\": \"INVALID_EXPIRY\"}"
+        },
+        "disposition": "covered",
+        "impacted_scenarios": [
+          "SC-EPIC1122-006",
+          "SC-EPIC1122-007"
+        ],
+        "blocking": false,
+        "resolution": "Code returns HTTP 400 {\"error\":\"INVALID_EXPIRY\"} for past expiry; SC-EPIC1122-006/007 assert it — covered."
+      },
+      {
+        "id": "ECM-003",
+        "type": "matched",
+        "service": "wallet-service",
+        "error_code": "DUPLICATE_CARD",
+        "http_status": 409,
+        "code_ref": {
+          "service": "wallet-service",
+          "class": "CardService",
+          "condition": "SHA-256 fingerprint already saved for this customer"
+        },
+        "expected_in_plan": {
+          "scenario_id": "SC-EPIC1122-008",
+          "asserted": "HTTP 409 {\"error\": \"DUPLICATE_CARD\"}"
+        },
+        "disposition": "covered",
+        "impacted_scenarios": [
+          "SC-EPIC1122-008",
+          "SC-EPIC1122-011"
+        ],
+        "blocking": false,
+        "resolution": "Code returns HTTP 409 {\"error\":\"DUPLICATE_CARD\"} on duplicate fingerprint; SC-EPIC1122-008/011 assert it — covered."
+      },
+      {
+        "id": "ECM-004",
+        "type": "matched",
+        "service": "wallet-service",
+        "error_code": "SERVICE_UNAVAILABLE",
+        "http_status": 503,
+        "code_ref": {
+          "service": "wallet-service",
+          "class": "VaultClient",
+          "condition": "Vault service unavailable or timed out after 5000ms"
+        },
+        "expected_in_plan": {
+          "scenario_id": "SC-EPIC1122-009",
+          "asserted": "HTTP 503 {\"error\": \"SERVICE_UNAVAILABLE\"}"
+        },
+        "disposition": "covered",
+        "impacted_scenarios": [
+          "SC-EPIC1122-009",
+          "SC-EPIC1122-016"
+        ],
+        "blocking": false,
+        "resolution": "Code returns HTTP 503 {\"error\":\"SERVICE_UNAVAILABLE\"} on vault failure/timeout; SC-EPIC1122-009/016 assert it — covered."
+      }
+    ],
+    "contract_changes": [],
+    "info_gaps": [],
+    "impacted_scenarios": [],
+    "suggested_scenarios": [
+      {
+        "suggest_id": "SUG-001",
+        "name": "Missing Client-ID header is rejected before card processing",
+        "test_layer": "component",
+        "priority_hint": "P1",
+        "tags": [
+          "negative",
+          "security"
+        ],
+        "source_signal": "auth_changes[Client-ID]",
+        "rationale": "New required header with no coverage; a request missing Client-ID must be rejected without touching validation, vault, or DB.",
+        "owning_team": "gopay",
+        "curl_reference": "curl -X POST {host}/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"{card}\",\"expiryMonth\":12,\"expiryYear\":2030,\"cvv\":\"123\"}'"
+      },
+      {
+        "suggest_id": "SUG-002",
+        "name": "Vault failure leaves no row in payment_cards",
+        "test_layer": "integration",
+        "priority_hint": "P0",
+        "tags": [
+          "negative",
+          "reliability"
+        ],
+        "source_signal": "dependency_changes[vault-service].no_db_write_on_failure",
+        "rationale": "no_db_write_on_failure is a code guarantee with no asserting scenario; a regression that writes the row on the failure path would go undetected because the 503 response would still be correct.",
+        "owning_team": "gopay",
+        "curl_reference": "curl -X POST {host}/payment/v1/cards -H 'Authorization: Bearer {token}' -H 'Client-ID: {client_id}' -H 'Content-Type: application/json' -d '{\"cardNumber\":\"{card}\",\"expiryMonth\":12,\"expiryYear\":2030,\"cvv\":\"123\"}'"
+      }
+    ],
+    "unresolved": []
+  }
 }

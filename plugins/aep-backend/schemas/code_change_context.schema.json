@@ -1,22 +1,604 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "code_change_context",
+  "description": "Post-build signal extracted from the aggregated Epic/Story MR diffs (all services), noise-filtered to behaviour that affects tests. Consumed by sdet-plan-generator Pass 2 and automation-plan-generator. The optional `reconciliation` object holds the diff-vs-baseline findings and is populated ONLY when a baseline (sdet_plan.json, or a Jira task/story's ACs) is supplied; it is null/absent for extraction-only runs. Every extracted item SHOULD carry `service` (the GitLab project it came from) so multi-service Epics stay disambiguated.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["epic_id", "mr_ids", "extraction_date"],
+  "required": [
+    "epic_id",
+    "mr_ids",
+    "extraction_date"
+  ],
   "properties": {
-    "epic_id": { "type": "string" },
-    "mr_ids": { "type": "array", "items": { "type": "string" } },
-    "extraction_date": { "type": "string" },
-    "new_endpoints": { "type": "array", "items": { "type": "object" } },
-    "changed_endpoints": { "type": "array", "items": { "type": "object" } },
-    "validation_rules": { "type": "array", "items": { "type": "object" } },
-    "error_mappings": { "type": "array", "items": { "type": "object" } },
-    "db_changes": { "type": "array", "items": { "type": "object" } },
-    "new_enums": { "type": "array", "items": { "type": "object" } },
-    "dependency_changes": { "type": "array", "items": { "type": "object" } },
-    "auth_changes": { "type": "array", "items": { "type": "object" } },
-    "feature_flags": { "type": "array", "items": { "type": "object" } },
-    "proto_changes": { "type": "array", "items": { "type": "object" } }
+    "epic_id": {
+      "type": "string"
+    },
+    "mr_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "MR identifiers or URLs aggregated for this run. Richer per-MR detail lives in `mr_links[]`."
+    },
+    "extraction_date": {
+      "type": "string"
+    },
+    "source_issue": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "The Jira issue the MRs were discovered from (epic/story/task), or the feature key when MRs came from a GitLab filter.",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "mr_links": {
+      "type": "array",
+      "description": "One entry per discovered MR, with the service it belongs to and its merge state.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string",
+            "description": "GitLab project path, e.g. go-food/meal-scheduler."
+          },
+          "service": {
+            "type": "string",
+            "description": "Service / repo name — the last path segment."
+          },
+          "iid": {
+            "type": [
+              "string",
+              "integer"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "description": "opened | merged | closed."
+          },
+          "story_ref": {
+            "type": "string",
+            "description": "Jira child issue this MR was linked from."
+          },
+          "target_branch": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Distinct services touched across all MRs."
+    },
+    "new_endpoints": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Each item SHOULD carry `service`. Typical fields: method/protocol, route/rpc, controller/handler class, request/response types, curl_reference, introduced_in."
+    },
+    "changed_endpoints": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Typical fields: method, route, service, what_changed, previous_contract, new_contract."
+    },
+    "validation_rules": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Typical fields: field, rule, error_code, http_status, class, layer, service, story_ref."
+    },
+    "error_mappings": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Typical fields: error_code, http_status/kind, condition, exception, service."
+    },
+    "db_changes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "new_enums": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "dependency_changes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "auth_changes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "feature_flags": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "proto_changes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "reconciliation": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "description": "Diff-vs-baseline findings. null (or {}) when no baseline was supplied — the run was extraction-only. When a baseline IS supplied, populate the fields below. No field is required so an empty {} is valid; populated arrays' items are shape-checked.",
+      "properties": {
+        "baseline_type": {
+          "type": "string",
+          "enum": [
+            "sdet_plan",
+            "automation_plan",
+            "jira_task",
+            "none"
+          ],
+          "description": "What the diff was reconciled against. 'sdet_plan' = test design; 'automation_plan' = approved automation scenarios (concrete endpoints/curl/checks/fixtures); 'jira_task' = a ticket's ACs; 'none' = extraction-only."
+        },
+        "sdet_plan_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Path to the sdet_plan.json reconciled against, or null when the baseline is a Jira task/story's ACs (then see source_issue) or none."
+        },
+        "reconciled_at": {
+          "type": "string",
+          "description": "UTC ISO-8601."
+        },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "error_code_mismatches": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "contract_changes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "info_gaps": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "impacted_scenarios": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "suggested_scenarios": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "blocking": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Count of items with blocking:true — triage before Pass 2 / automation."
+            }
+          }
+        },
+        "error_code_mismatches": {
+          "type": "array",
+          "description": "Every error code / HTTP status the diff produces, joined against what the baseline asserts.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "type",
+              "service",
+              "error_code",
+              "disposition",
+              "resolution"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "ECM-### stable within this object."
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "code_uncovered",
+                  "scenario_stale",
+                  "status_mismatch",
+                  "matched"
+                ]
+              },
+              "service": {
+                "type": "string"
+              },
+              "error_code": {
+                "type": "string"
+              },
+              "http_status": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "code_ref": {
+                "$ref": "#/definitions/CodeRef"
+              },
+              "expected_in_plan": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "scenario_id": {
+                    "type": "string"
+                  },
+                  "asserted": {
+                    "type": "string"
+                  }
+                }
+              },
+              "mismatch": {
+                "type": "string"
+              },
+              "disposition": {
+                "type": "string",
+                "enum": [
+                  "new_negative_scenario",
+                  "modify_scenario",
+                  "info_only",
+                  "covered"
+                ]
+              },
+              "impacted_scenarios": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "blocking": {
+                "type": "boolean",
+                "default": false
+              },
+              "resolution": {
+                "type": "string",
+                "description": "The CONCRETE resolved value derived from the diff: what it IS now (when the plan left it unspecified), what a field/RPC was renamed TO, or what an error code/message was updated TO. The skill MUST drop any finding for which no concrete resolution can be stated from the diff — never emit a bare 'verify/confirm/unspecified'."
+              }
+            }
+          }
+        },
+        "contract_changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "service",
+              "change_type",
+              "regression_action",
+              "resolution"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "service": {
+                "type": "string"
+              },
+              "endpoint": {
+                "type": "string"
+              },
+              "change_type": {
+                "type": "string",
+                "enum": [
+                  "new_endpoint",
+                  "removed_endpoint",
+                  "request_field",
+                  "response_field",
+                  "type_change",
+                  "required_change",
+                  "proto_field",
+                  "proto_rpc",
+                  "enum_value",
+                  "header",
+                  "status_change"
+                ]
+              },
+              "field": {
+                "type": "string"
+              },
+              "before": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "after": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "code_ref": {
+                "$ref": "#/definitions/CodeRef"
+              },
+              "impacted_scenarios": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "regression_action": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "reuse",
+                  "modify"
+                ]
+              },
+              "note": {
+                "type": "string"
+              },
+              "blocking": {
+                "type": "boolean",
+                "default": false
+              },
+              "resolution": {
+                "type": "string",
+                "description": "The CONCRETE resolved value derived from the diff: what it IS now (when the plan left it unspecified), what a field/RPC was renamed TO, or what an error code/message was updated TO. The skill MUST drop any finding for which no concrete resolution can be stated from the diff — never emit a bare 'verify/confirm/unspecified'."
+              }
+            }
+          }
+        },
+        "info_gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "category",
+              "detail",
+              "resolution"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "feature_flag",
+                  "auth",
+                  "boundary",
+                  "validation",
+                  "dependency",
+                  "db_change",
+                  "config",
+                  "other"
+                ]
+              },
+              "service": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              },
+              "expected_from": {
+                "type": "string",
+                "enum": [
+                  "rfc",
+                  "prd",
+                  "plan",
+                  "none"
+                ]
+              },
+              "gap": {
+                "type": "string"
+              },
+              "code_ref": {
+                "$ref": "#/definitions/CodeRef"
+              },
+              "blocking": {
+                "type": "boolean",
+                "default": false
+              },
+              "resolution": {
+                "type": "string",
+                "description": "The CONCRETE resolved value derived from the diff: what it IS now (when the plan left it unspecified), what a field/RPC was renamed TO, or what an error code/message was updated TO. The skill MUST drop any finding for which no concrete resolution can be stated from the diff — never emit a bare 'verify/confirm/unspecified'."
+              }
+            }
+          }
+        },
+        "impacted_scenarios": {
+          "type": "array",
+          "description": "Existing baseline scenarios the diff touches — the modify/reuse/deprecate shortlist for Pass 2.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "scenario_id",
+              "suggested_action",
+              "reason"
+            ],
+            "properties": {
+              "scenario_id": {
+                "type": "string"
+              },
+              "suggested_action": {
+                "type": "string",
+                "enum": [
+                  "modify",
+                  "reuse",
+                  "deprecate"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              },
+              "change_required": {
+                "type": "string"
+              },
+              "related_findings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "suggested_scenarios": {
+          "type": "array",
+          "description": "Net-new coverage the diff implies. HINTS for sdet-plan-generator Pass 2 — never authored scenario ids (use SUG-###).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "suggest_id",
+              "name",
+              "source_signal",
+              "rationale"
+            ],
+            "properties": {
+              "suggest_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "test_layer": {
+                "type": "string",
+                "enum": [
+                  "component",
+                  "integration",
+                  "e2e"
+                ]
+              },
+              "priority_hint": {
+                "type": "string",
+                "enum": [
+                  "P0",
+                  "P1",
+                  "P2"
+                ]
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source_signal": {
+                "type": "string"
+              },
+              "rationale": {
+                "type": "string"
+              },
+              "owning_team": {
+                "type": "string"
+              },
+              "curl_reference": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "field",
+              "reason",
+              "blocking"
+            ],
+            "properties": {
+              "field": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "missing_from_source",
+                  "ambiguous",
+                  "no_sdet_plan",
+                  "diff_unavailable"
+                ]
+              },
+              "detail": {
+                "type": "string"
+              },
+              "blocking": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CodeRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Where in the diff this fact came from — enables an SDET to click straight to the line.",
+      "properties": {
+        "mr": {
+          "type": "string"
+        },
+        "service": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        },
+        "class": {
+          "type": "string"
+        },
+        "line": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "condition": {
+          "type": "string"
+        }
+      }
+    }
   }
 }
