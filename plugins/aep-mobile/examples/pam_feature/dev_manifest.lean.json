@@ -1,0 +1,27 @@
+{
+  "contract_version": "1.1.0-nlp",
+  "feature_key": "pam_8_levels_relaunch",
+  "epic_ref": "pam_8_levels_relaunch",
+  "app": "gojek-driver",
+  "platforms": ["android"],
+  "framework": "native",
+  "jira_ids": ["DRV-1981", "DRV-1982", "DRV-1983", "DRV-1984", "DRV-2017"],
+  "merge_requests": ["!13303", "!13326", "!13352", "!13354", "!13386"],
+  "screens": [
+    {
+      "screen_id": "PROFILE_PAGE",
+      "deep_links_added": [],
+      "flags_used": [{ "name": "giab_pam_revamp_enabled", "state": "on" }]
+    },
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "deep_links_added": ["gojekdriver://loyalty/catalogue"],
+      "flags_used": [{ "name": "giab_pam_revamp_enabled", "state": "on" }]
+    },
+    {
+      "screen_id": "LOYALTY_PAGE",
+      "deep_links_added": [],
+      "flags_used": [{ "name": "giab_pam_revamp_enabled", "state": "on" }]
+    }
+  ]
+}

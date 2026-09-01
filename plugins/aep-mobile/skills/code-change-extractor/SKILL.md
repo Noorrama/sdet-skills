@@ -1,6 +1,6 @@
 ---
 name: mobile-code-change-extractor
-description: Post-build. For an EPIC, reads the dev's structured manifest (preferred) or the raw GitLab MR diff, verifies it against the expected logical-ID shopping list (dev_handoff.json first, else SDET_PLAN.element_locator_handoff), and emits two artifacts — change_context.json (the changed surface: screens, logical element_id → real per-platform locators, deep links, API shapes, flags, analytics, app↔API version, reviewer edge cases) and id_compliance.json (the stable-ID gate: did the dev bind every required locator/deep link). Scenario fields may come from *_automation_plan_generator.json (preferred for automatable cases) or the full SDET plan. App-agnostic; framework/vocabulary come from config. Feeds test-code-generator, not scenario generation.
+description: Post-build. For an EPIC, reads the dev's structured manifest (preferred) or the raw GitLab MR diff, verifies it against the expected logical-ID shopping list on the earlier-stage plan (*_automation_plan_generator.json preferred, else *sdet_plan.json / *SDET_plan.json — element_locator_handoff + scenario deeplinks/flags), and emits two artifacts — change_context.json (the changed surface: screens, logical element_id → real per-platform locators, deep links, API shapes, flags, analytics, app↔API version, reviewer edge cases) and compliance.json (the stable-ID gate: did the dev bind every required locator/deep link). Do not read or require dev_handoff.json. App-agnostic; framework/vocabulary come from config. Feeds test-code-generator, not scenario generation.
 ---
 
 # Mobile Code-Change Extractor (post-build; all 5 GoTo apps)
@@ -11,7 +11,7 @@ and to **gate** that the dev actually implemented what the plan required.
 
 **Two outputs, one skill:**
 1. `change_context.json` — what was built (locators, deep links, APIs, flags, analytics, CR risks).
-2. `id_compliance.json` — the stable-ID gate (PASS/FAIL + what's missing/renamed).
+2. `compliance.json` — the stable-ID gate (PASS/FAIL + what's missing/renamed). Never write `id_compliance.json`.
 
 ## Config
 `config/<app>.json` → `locator_keys` (android=`resource-id`, ios=`accessibilityId`, optional flutter=`Key/Semantics`),
@@ -28,17 +28,17 @@ and to **gate** that the dev actually implemented what the plan required.
    plus shopping-list `screen_id`). Module names come from `rfc_context.scope.affected_modules`
    when an RFC was supplied — that field is **not** on the SDET plan. Hunks outside the EPIC's
    scenarios are ignored.
-3. **Shopping list (expected logical IDs)** — the reference the gate checks the built code against.
-   Do **not** write this list into someone else's SDET plan. Resolve in this order:
-   1. **`dev_handoff.json`** if present — `element_locator_handoff[]` (logical IDs, locators unbound)
-      plus `expected_deeplinks` / `expected_flags` / `cr_notes`.
-   2. Else SDET plan `element_locator_handoff` (often empty until design/dev fill it).
-4. **Scenario fields** (automation steps, fixtures, deeplinks, flags, screens). Accept **either**
-   file; prefer the automatable subset when both exist:
+3. **Earlier-stage plan (required for the gate)** — shopping list + scenario fields.
+   Do **not** read `dev_handoff.json` (ignore it if a leftover file is on disk). Do **not**
+   write this list back into the plan. Accept **either** file; prefer the automatable subset
+   when both exist:
    - **`*_automation_plan_generator.json`** → `automation_scenarios[]` (same `automation_steps`,
-     `preconditions_metadata`, `mapped_user_flow`, `test_data` as the plan, without manual/noise rows).
-   - Else **`*sdet_plan.json` / `*SDET_plan.json`** → `scenario_list[]`.
-   From each scenario read:
+     `preconditions_metadata`, `mapped_user_flow`, `test_data` as the plan, without manual/noise rows)
+     and `element_locator_handoff` when that field is on the APG.
+   - Else **`*sdet_plan.json` / `*SDET_plan.json`** → `scenario_list[]` + `element_locator_handoff`
+     (often empty until design/dev fill it).
+   From the plan read:
+   - `element_locator_handoff[]` → expected logical IDs (locators unbound) the gate checks against.
    - `preconditions_metadata.target_entry_deeplink` + `active_experiment_flags` → expected deep links/flags.
    - `automation_steps[]` → labels used in TapMind NLP. A label with no locator match is a `NO_LOCATOR` gap.
    - `test_data[]` → fixtures (`fixture_id`, `required_state`, `provision`, `sensitive`). Carry
@@ -48,7 +48,7 @@ and to **gate** that the dev actually implemented what the plan required.
    *Filename:* match by suffix (`*_automation_plan_generator.json`, `*sdet_plan.json` /
    `*SDET_plan.json`) or by `feature_metadata.feature_key` / `epic_id`. Never a hardcoded
    `sdet_plan.json`.
-5. **MR review comments** (CR notes) — reviewer edge cases. `dev_handoff.json.cr_notes` counts.
+4. **MR review comments** (CR notes) — reviewer edge cases from the GitLab MR, not a sidecar file.
 
 ## Model
 Fast tier — Haiku / Composer 2.5. Locator extraction is deterministic where a manifest exists.
@@ -61,19 +61,20 @@ Fast tier — Haiku / Composer 2.5. Locator extraction is deterministic where a 
 - `routes`/deeplinks, `api` (endpoint + request/response + error_codes), `flags` (names) + `feature_flags` (name + `state_at_merge`), `analytics`, `app_api_version` (incl. N-1), `review_summary` (approval_state, review_iterations).
 - `cr_risks[]` — id, area, category, suggested_test, severity, disposition (becomes-scenario / becomes-bug / acknowledged).
 - Routing/readiness (when derivable): `pdg`, `test_repo`, `module_path`, `scoped_to_modules`, `ready_jira_ids`.
-- `id_compliance` — inline `{ status, ref }` pointer to the gate result.
+- `id_compliance` — inline `{ status, ref }` pointer to the gate result (`ref` must be `compliance.json`).
 
-### 2. `id_compliance.json` (→ `schemas/id_compliance.schema.json`)
-The stable-ID gate. `status` (PASS/FAIL), `missing_ids`, `renamed_ids` (expected vs found),
+### 2. `compliance.json` (→ `schemas/id_compliance.schema.json`)
+The stable-ID gate. Write this filename only — not `id_compliance.json`. Schema is unchanged.
+`status` (PASS/FAIL), `missing_ids`, `renamed_ids` (expected vs found),
 `missing_deeplinks`, `reject_codes`. This is what CI blocks on.
 
 ## Rules
-- **Stable-ID gate:** every element in the shopping list (`dev_handoff.json` or the plan's
-  `element_locator_handoff`) must have a real locator in the built code. Do not look for P0 on
-  the handoff (`priority_tier` lives on the scenario). Missing → `id_compliance.status = FAIL` +
+- **Stable-ID gate:** every element in the plan's `element_locator_handoff` must have a real
+  locator in the built code. Do not look for P0 on the handoff (`priority_tier` lives on the
+  scenario). Missing → `id_compliance.status = FAIL` +
   `MISSING_STABLE_ID` (never infer brittle XPath/text). Renamed → `RENAMED_ID`.
 - **Deep-link/flag gate:** each `target_entry_deeplink` / `active_experiment_flags` the scenarios
-  declare (or `dev_handoff.expected_deeplinks` / `expected_flags`) must be present in the code;
+  declare must be present in the code;
   absent deep link → `MISSING_DEEPLINK` (test falls back to nav-macro).
 - **Beyond the shopping list:** the dev often builds elements the design/plan missed. Capture those
   in `change_context.elements` anyway (with `change_type: added`) so QA can still test them — this

@@ -18,7 +18,7 @@ It does **not** run step-validation on every scenario.
 
 ## 1. One-paragraph summary
 
-After the SDET / enriched plan and `change_context.json` exist, you ask the agent to generate TapMind NLP tests. It **asks** (unless you already said) whether to skip the device. Knowledge-base-only: compile the best `runStep` / `assertStep` lines from the plan, screens/deeplinks, existing module tests, and step-validation phrasing rules, then MR. If you opt into a pioneer: it groups similar flows, step-validates **one** case, copies `if visible` transients onto the rest, writes one Java class into the right module, compiles, and opens the MR.
+After the plan folder and `change_context.json` exist, you ask the agent to generate TapMind NLP tests. If the folder has no `enriched_automation_plan.json`, it runs `test-data-identification` on the APG or SDET file first. It **asks** (unless you already said) whether to skip the device. Knowledge-base-only: compile the best `runStep` / `assertStep` lines from the plan, screens/deeplinks, existing module tests, and step-validation phrasing rules, then MR. If you opt into a pioneer: it groups similar flows, step-validates **one** case, copies `if visible` transients onto the rest, writes one Java class into the right module, compiles, and opens the MR.
 
 You do **not** have to open or run this skill *inside* `tapmind-mobile-tests`. That repo is only the **write target**. If it is not on disk, the skill shallow-clones it.
 
@@ -66,7 +66,7 @@ Those only show up on a device. Running **one** case that still logs in is enoug
 ```
 PRD / design / RFC / tasks
         ↓
-SDET plan  →  automation plan  →  enriched_automation_plan.json
+SDET plan  →  automation plan  →  [test-data-identification]  →  enriched_automation_plan.json
         ↓
 Dev build  →  code-change-extractor  →  change_context.json
         ↓
@@ -77,7 +77,7 @@ Code generation
    GMT_JAVA     →  test-code-generator (coded tests)
 ```
 
-Earlier stages already decided app, screens, deeplinks, TDP prompts, and BrowserStack ids. This skill does not invent those.
+Earlier stages already decided app, screens, deeplinks, and BrowserStack ids. TDP prompts live on the **enriched** plan (`test_data[].test_data_output[].test_buddy_prompt`). If you only have an APG or SDET file, `nlp-codegen` calls `aep-backend:test-data-identification` to write `enriched_automation_plan.json` next to it, then continues. It does not invent those prompts itself.
 
 ---
 
@@ -87,9 +87,9 @@ Earlier stages already decided app, screens, deeplinks, TDP prompts, and Browser
 
 At least one of these (first match wins unless you name a file):
 
-1. **`enriched_automation_plan.json`** — preferred. Has `automation_steps`, `test_buddy_prompt`, `browserstack_case_id`.
-2. `*_automation_plan_generator.json`
-3. `*_sdet_plan.json` / `*_SDET_plan.json`
+1. **`enriched_automation_plan.json`** — preferred. Has `automation_steps`, `test_buddy_prompt`, `browserstack_case_id`. Used as-is; identification is **not** re-run.
+2. `*_automation_plan_generator.json` — unenriched. The skill **must** call `aep-backend:test-data-identification` first and wait for `enriched_automation_plan.json` in the same folder. It does not codegen from the APG directly.
+3. `*_sdet_plan.json` / `*_SDET_plan.json` — same: identify first, then codegen from the new enriched file.
 
 Plus, strongly preferred:
 
@@ -110,6 +110,7 @@ A typical folder looks like `PAM_08_FINAL/`: plan + `change_context.json` + opti
 | Need | Why |
 |---|---|
 | Agent with `aep-tapmind` installed (this skill visible) | So `nlp-codegen` can be invoked |
+| `aep-backend` + TestBuddy MCP | Only when the folder has no enriched plan — identification needs both to write `enriched_automation_plan.json` |
 | SSH to `source.golabs.io` **or** `GITLAB_TOKEN` | Clone `tapmind-mobile-tests` if it is not local; push the branch |
 | `GITLAB_TOKEN` or `glab auth` with **`api` + `write_repository`**, `GITLAB_HOST=source.golabs.io` | **Open the MR**. A read-only token (`GITLAB_READ_TOKEN_FOR_AGENT`) is not enough |
 | TapMind server + a device (local or BrowserStack) | Only for **device-pioneer**. Skip for knowledge-base-only / reuse-pioneer |
@@ -131,7 +132,9 @@ A typical folder looks like `PAM_08_FINAL/`: plan + `change_context.json` + opti
 
 From any workspace (plan folder, `aep/skills`, Cursor chat):
 
-> Generate the TapMind NLP tests from `<path-to-folder-or-enriched_automation_plan.json>` and raise the MR.
+> Generate the TapMind NLP tests from `<path-to-folder-or-plan.json>` and raise the MR.
+
+An APG or SDET file is enough — the skill will produce `enriched_automation_plan.json` if it is missing.
 
 Useful extras:
 
@@ -148,7 +151,9 @@ If you did not already pick a mode, the agent **asks once**. It should still **e
 
 ### Step 1 — Resolve inputs and module
 
-Reads the plan + `change_context`. Selects `TAPMIND_NLP` / automatable scenarios. Skips empty steps, manual, deferred. New → CREATE. Legacy with an existing `@TestInfo` id → UPDATE or SKIP (no third copy).
+Reads the plan + `change_context`. If the plan is an APG or SDET file (no `*enriched_automation_plan.json` in the folder), **stops and runs `aep-backend:test-data-identification`** against that file. Identification writes `enriched_automation_plan.json` next to the input. Codegen then uses that file. If identification aborts (TestBuddy down, no fixtures), **stop** — do not emit Java from the unenriched plan.
+
+Selects `TAPMIND_NLP` / automatable scenarios. Skips empty steps, manual, deferred. New → CREATE. Legacy with an existing `@TestInfo` id → UPDATE or SKIP (no third copy).
 
 Finds `tapmind-mobile-tests`:
 
@@ -215,7 +220,8 @@ If there is no write token / `glab` login: **stop after the local commit** and p
 
 | Source | Required? | Used for |
 |---|---|---|
-| Enriched / APG / SDET plan | **Yes** (one of them) | Scenarios, `automation_steps`, TDP prompts, BS ids, locale, flags, `mapped_user_flow` |
+| Enriched plan | **Yes** (produced on the fly if you only have APG / SDET) | Scenarios, `automation_steps`, TDP prompts, BS ids, locale, flags, `mapped_user_flow` |
+| APG / SDET plan | Input to identification when no enriched file exists | Same scenarios; no `test_buddy_prompt` until identification runs |
 | `change_context.json` | Strongly preferred | Screen ids, deeplinks, flags, locators |
 | `design_context.json` | Optional | Figma `elements[].label` / `ui_flow` if present |
 | SDET plan as “hidden design” | **No** | Cannot reconstruct Figma screens or copy |
@@ -262,6 +268,8 @@ Proven pioneer shape (guards are the point): see [`examples.md`](examples.md).
 | Situation | What the skill does |
 |---|---|
 | No plan file | Stop and ask |
+| APG or SDET only (no enriched file) | Call `aep-backend:test-data-identification`; then use the new `enriched_automation_plan.json` |
+| Identification aborts (TestBuddy down / no fixtures) | **Stop.** Do not codegen from the unenriched APG / SDET |
 | No `change_context` | Continue if screens/deeplinks are on the plan; ask if module/deeplink cannot be derived |
 | No `design_context` | Continue |
 | No `tapmind-mobile-tests` on disk | Shallow clone; if that fails, stop and ask |

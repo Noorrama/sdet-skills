@@ -1,5 +1,15 @@
 # aep-tapmind changelog
 
+## 1.1.7
+
+**`nlp-codegen` always uses an enriched plan.** If the folder has no
+`enriched_automation_plan.json` and the user only sent an APG or SDET file,
+invoke `aep-backend:test-data-identification` first and write the enriched
+file next to the input. Do not emit Java from the unenriched ledger. If
+identification aborts (TestBuddy down, no fixtures), stop. An existing
+enriched file is used as-is — identification is not re-run.
+`test-data-provisioner` is not this step (it returns a handle, not the plan).
+
 ## 1.1.6
 
 **`nlp-codegen` mode choice.** Ask once before any device work: knowledge-base-only

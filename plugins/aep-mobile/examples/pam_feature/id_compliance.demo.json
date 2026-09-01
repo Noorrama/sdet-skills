@@ -1,0 +1,24 @@
+{
+  "contract_version": "1.1.0-nlp",
+  "demo_note": "Teaching file for the demo slide — not the live PAM result. Real PAM is PASS after we treat plan '/loyalty/catalogue' and shipped 'gojekdriver://loyalty/catalogue' as the same hook. This FAIL shows what QA reads when the URI drifted.",
+  "app": "gojek-driver",
+  "epic_ref": "pam_8_levels_relaunch",
+  "platform": "android",
+  "status": "FAIL",
+  "compared_against": {
+    "planned_from": "sdet_plan.preconditions_metadata",
+    "shipped_from": "dev_manifest.lean.json"
+  },
+  "missing_deeplinks": [],
+  "changed_deeplinks": [
+    {
+      "screen_id": "PAM_8_LEVELS_CATALOGUE",
+      "planned": "gojekdriver://loyalty/home",
+      "shipped": "gojekdriver://loyalty/catalogue"
+    }
+  ],
+  "missing_flags": [],
+  "changed_flags": [],
+  "extra_screens": [],
+  "reject_codes": ["CHANGED_DEEPLINK"]
+}

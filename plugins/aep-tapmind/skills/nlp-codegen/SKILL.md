@@ -2,14 +2,15 @@
 name: nlp-codegen
 description: >-
   Generate TapMind NLP @Test methods into tapmind-mobile-tests from an
-  enriched_automation_plan / automation plan / SDET plan plus change_context.
-  Default is to ASK whether to skip the device (knowledge-base only, faster MR)
-  or step-validate ONE pioneer scenario per similar-flow cluster (or reuse a
-  pasted proven @Test). Use when asked to generate NLP test cases, write
-  tapmind-mobile-tests Java, raise an MR, skip pioneer / skip step-validation,
-  or knowledge-base-only codegen. Not for diagnosing a single broken step list
-  (that's step-validation) and not for open-ended exploration
-  (that's goal-driven-exploration).
+  enriched_automation_plan plus change_context. If only an automation plan or
+  SDET plan is given, invoke aep-backend:test-data-identification first so
+  enriched_automation_plan.json exists. Default is to ASK whether to skip the
+  device (knowledge-base only, faster MR) or step-validate ONE pioneer scenario
+  per similar-flow cluster (or reuse a pasted proven @Test). Use when asked to
+  generate NLP test cases, write tapmind-mobile-tests Java, raise an MR, skip
+  pioneer / skip step-validation, or knowledge-base-only codegen. Not for
+  diagnosing a single broken step list (that's step-validation) and not for
+  open-ended exploration (that's goal-driven-exploration).
 ---
 
 # NLP test codegen (TapMind)
@@ -82,6 +83,10 @@ file, use that file:
 2. `*_automation_plan_generator.json`
 3. `*_sdet_plan.json` / `*_SDET_plan.json`
 
+**Codegen always reads an enriched plan.** If the match is an APG or SDET
+file, invoke identification **before** clustering or Java emit (see
+**§1a**). Do not emit from an unenriched ledger.
+
 Also resolve, when present:
 
 | Artifact | Used for |
@@ -115,7 +120,8 @@ Copy this checklist:
 
 ```
 - [ ] 0. Mode: kb-only | reuse-pioneer | device-pioneer (ask unless already stated)
-- [ ] 1. Resolve plan + change_context + module
+- [ ] 1. Resolve plan; if not enriched, invoke test-data-identification
+- [ ] 1b. change_context + module
 - [ ] 2. Cluster scenarios; pick one pioneer / reference per cluster; echo both
 - [ ] 3. Pioneer only if mode is reuse-pioneer or device-pioneer
 - [ ] 4. Harvest shared template (setup + guards + rewritten labels)
@@ -123,6 +129,41 @@ Copy this checklist:
 - [ ] 6. Write one class into the module; compile
 - [ ] 7. Open an MR in tapmind-mobile-tests scoped to that module
 ```
+
+### 1a. Enrich when `enriched_automation_plan.json` is missing
+
+| On disk | Action |
+|---|---|
+| `*enriched_automation_plan.json` present | Use it. Do **not** re-run identification. |
+| Only `*_automation_plan_generator.json` (or the user named that file) | Invoke identification with **that file** as the input plan. |
+| Only `*_sdet_plan.json` / `*_SDET_plan.json` | Invoke identification with **that file** (inline `test_data[]` is a valid input). |
+| No plan at all | Stop and ask. |
+
+How to invoke:
+
+- Skill: `aep-backend:test-data-identification` (folder
+  `test-data-identification`). Read and follow that skill — do **not**
+  re-implement catalog calls here.
+- Run it in a **sub-agent**. Parent keeps only the output path of
+  `enriched_automation_plan.json` and whether the run aborted. Not
+  `identification_steps`, manifests, or catalog dumps.
+- Write the enriched file **next to the input plan** (same folder). Never
+  edit the APG / SDET file in place. Never write it into `aep/skills`.
+- Pass the resolved APG or SDET path as the approved plan. Identification
+  already accepts per-scenario `test_data[]` (`fixture_id` + `description`
+  + `required_state`).
+
+When identification **aborts** (TestBuddy down, no fixtures, unparseable
+plan): **stop**. Do not emit Java from the unenriched APG / SDET. Tell QA
+to restore TestBuddy or drop in an existing `enriched_automation_plan.json`.
+
+When identification **succeeds**: set the plan to the new
+`enriched_automation_plan.json` and continue from clustering. Fixtures
+with `test_buddy_prompt: null` stay on the later compose-or-ask fallback
+— do not invent a prompt here.
+
+`aep-mobile:test-data-provisioner` is **not** this step. It returns a data
+handle; it does not write the enriched plan.
 
 ### 1. Module (and locating `tapmind-mobile-tests`)
 
@@ -309,6 +350,7 @@ Don't force-push. Don't touch other modules.
 | Open-ended explore a flow | `goal-driven-exploration` |
 | GMT Appium+TestNG coded tests | `aep-mobile:mobile-test-code-generator` |
 | Backend API `runStep` grammar | `aep-backend:backend-tapmind-nlp-prompts` |
+| Enriched plan / `test_buddy_prompt` from an APG or SDET file | `aep-backend:test-data-identification` (this skill **calls** it when the enriched file is missing; it does not identify itself) |
 
 ## Model
 

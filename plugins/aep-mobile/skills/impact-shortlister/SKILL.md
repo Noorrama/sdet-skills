@@ -39,7 +39,7 @@ id — it does **not** expand the pool. Partial-overlap refs (`is_legacy_regress
 | `change_context.json` | preferred | `code-change-extractor` | Change surface: files, screens, modules, flags, APIs, elements, CR risks. |
 | `dev_manifest.json` | fallback | dev agent | Same surface when change_context isn't ready. |
 | GitLab MR **changes** API | bootstrap | GitLab | Testing/fallback: union `changed_files` across EPIC MRs → bootstrap change surface. |
-| `id_compliance.json` | optional | `code-change-extractor` | FAIL widens agent judgments (see guardrails). |
+| `compliance.json` | optional | `code-change-extractor` | FAIL widens agent judgments (see guardrails). Accept leftover `id_compliance.json` as the same file. |
 
 ---
 
