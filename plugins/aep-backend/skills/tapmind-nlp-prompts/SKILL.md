@@ -37,8 +37,8 @@ real TapMind control-plane SDK, and for **generating suite-ready tests** from
 | **Verify + run** | After generate, using backend MCP TapMind tools | Corrected `prompts[]` + per-step verdicts |
 | **Suite convert** | After prompts are verified (and optionally run) | Java method with `@Test` / `@TestInfo` + `runStep`/`assertStep` lines |
 
-Pipeline detail: `GENERATION.md`. Coverage / dedup: `NLP_COVERAGE.md`. Control plane:
-`CONTROL_PLANE.md`. Grammar: §§0–10 below.
+Pipeline detail: `GENERATION.md`. Coverage / dedup: `NLP_COVERAGE.md`. Fixture reuse:
+`FIXTURE_REUSE.md`. Control plane: `CONTROL_PLANE.md`. Grammar: §§0–10 below.
 
 ---
 
@@ -258,7 +258,7 @@ Example (from a validated suite scenario):
 |---|---|
 | Action / poll / tool | `TapMind.runStep("<prompt>");` or with pdg/service/polling overloads (§3.2, §3.6) |
 | Final assertion focus | `TapMind.assertStep("<prompt>", "<failure message>");` when a custom message helps |
-| Setup (secrets / fixtures) | `saveMemory(...)` / TDP resolve **before** prompts that need `saved <key>` |
+| Setup / repeated steps | `provision…()` / `create…()` / `fetch…()` helpers on `*TapMindTestBase` — `FIXTURE_REUSE.md` |
 | Inserted guards from run | Extra `runStep(...)` lines with `kind: guard` in the ledger |
 
 Also emit machine form for reports / downstream generators (`tapmindTest`):
@@ -377,6 +377,21 @@ public void tapMindSetup(Method method) throws Exception {
 ```
 
 When every test in the class uses TapMind, a shared base class with that `@BeforeMethod` is fine.
+
+### 1.5 Shared step helpers (reuse common patterns)
+
+Do **not** paste the same `runStep` into every `@Test` — TDP fixtures **or any repeated
+step** (auth headers, create session, fetch details, gRPC preamble). Extract to **`protected`
+methods on the module `*TapMindTestBase`**. Details: **`FIXTURE_REUSE.md`** (step & fixture reuse).
+
+```java
+provisionDefaultCustomer();
+createGroupOrderSessionEveryonPaysEqually();
+TapMind.runStep("Verify social_group is absent …");  // scenario-specific only
+```
+
+Suite convert: fingerprint prompts across the batch; emit `sharedHelpers[]` + `helper-call`
+lines for duplicates and shared prefixes — not repeated strings per method.
 
 ### 1.2 When to use TapMind vs keep Java
 
@@ -848,3 +863,4 @@ Two independent mechanisms — know which one applies to your API:
 | Relying on `tapmind_verify_prompt` PASS as proof the create body is complete | Run once and inspect Request Body / curl in the log | Verify checks planner routing; sparse body_defaults merge only shows up at execute time. |
 | Raw grpcurl command as the prompt | §3.8 `call mcp grpc grpc.invoke for rpc_alias: …` | Planner expects structured gRPC grammar, not a shell grpcurl line. |
 | Guessing `rpc_alias` from hostname substring | Lookup `GET /v1/grpc/targets` by host:port | Unregistered alias fails at invoke time. |
+| Same `runStep` or shared step prefix in every `@Test` | `provision…()` / `create…()` / `fetch…()` on `*TapMindTestBase` | Any repeated pattern — not only TDP. `FIXTURE_REUSE.md`. |

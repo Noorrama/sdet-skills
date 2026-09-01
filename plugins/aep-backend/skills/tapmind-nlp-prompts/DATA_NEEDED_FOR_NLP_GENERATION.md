@@ -59,5 +59,6 @@ On HTTP/MCP connectivity failure → ask user to connect to respective VPN and r
 | `SKILL.md` | Grammar + generation §G + pipeline parity |
 | `GENERATION.md` | Pipeline |
 | `NLP_COVERAGE.md` | Dedup / existing TapMind test scan + approval gate |
+| `FIXTURE_REUSE.md` | Shared step & fixture helpers — dedupe any repeated runStep pattern |
 | `CONTROL_PLANE.md` | Hosts, Swagger, MCP vs HTTP, VPN |
 | `DATA_NEEDED_FOR_NLP_GENERATION.md` | Field map |
