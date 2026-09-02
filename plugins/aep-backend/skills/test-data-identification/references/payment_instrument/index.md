@@ -45,9 +45,11 @@ instrument-specific fields, with only the owning customer (`CUSTOMER_WITH_CC` vi
 - **Never propose a `PAYMENT_INSTRUMENT_WITH_*`-style category or a `CardModel`-shaped record** —
   neither exists in this codebase.
 - A fixture whose signal is purely payment-instrument state (a specific card type, an expired card,
-  a not-yet-saved card) is `TDP_NOT_SUPPORTED` unless a live TestBuddy/Pertamax tool independently
+  a not-yet-saved card) is `TDP_PARTIAL` when the *holder* still comes from a real Consumer
+  category (`CUSTOMER_WITH_CC`) and only the instrument state is unserved, and `TDP_NOT_SUPPORTED`
+  only when nothing is served — unless a live TestBuddy/Pertamax/GBT tool independently
   exposes card creation/association (per the parent skill's worked example: `CREATE_CREDIT_CARD` →
-  `ADD_CREDIT_CARD_TO_USER`, `TDP_HYBRID_FALLBACK`) — verify that tool actually exists in the live
+  `ADD_CREDIT_CARD_TO_USER`, `TESTBUDDY_HYBRID_FALLBACK`) — verify that tool actually exists in the live
   MCP inventory before citing it; do not assume it from the SKILL.md example alone.
 - A fixture whose signal is really "a customer who pays by card" (no card-specific state under
   test) is **not** this domain — it's `CUSTOMER_WITH_CC` via `../customer/index.md`. Route there

@@ -86,7 +86,7 @@ fetch; don't add a customer-creation step by default just because a booking scen
 4. **A merchant is never a TDP pool fetch.** Unlike Customer and Driver, there is no
    `TestDataCategoryMerchant`-style enum and no `/aep/test-data-generator/get` pool for merchants —
    see [food/index.md](food/index.md#merchant--not-a-tdp-managed-entity). Don't propose a merchant
-   category; route merchant-only signals through `TDP_OPERATION_FALLBACK` or
+   category; route merchant-only signals through `TESTBUDDY_OPERATION_FALLBACK` or
    `TDP_NOT_SUPPORTED` per the parent skill's decision table.
 5. **Wallet top-ups still apply per entity.** Both workflows inherit the account-vs-wallet-amount
    split from the Consumer/Driver bundles (`../customer/index.md`,

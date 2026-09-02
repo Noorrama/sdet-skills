@@ -56,7 +56,7 @@ Identification consequence, per the parent skill's decision table
   uncorroborated driver category would (`../../driver/index.md`'s ~379-candidate warning).
 - A fixture whose *only* unmet signal is merchant state (e.g. "an in-operation-hours merchant", "a
   merchant with pooling supported" — `../../test_data_domains.md` § MERCHANT) routes to
-  `TDP_OPERATION_FALLBACK` if a live merchant-lookup operation exists, or `TDP_NOT_SUPPORTED` with
+  `TESTBUDDY_OPERATION_FALLBACK` if a live merchant-lookup operation exists, or `TDP_NOT_SUPPORTED` with
   `missing_operations` naming the gap, otherwise. Do not silently substitute a hardcoded/example
   `merchantId` — that is inventing an identifier, prohibited by the parent skill's guardrails.
 

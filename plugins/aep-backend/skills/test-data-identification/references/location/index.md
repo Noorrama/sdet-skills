@@ -63,8 +63,9 @@ domain's `Stop location`, `Route distance`, `Pickup`, `Drop`, `Coordinates` sign
   (`../driver/index.md`) plus the polygon tag/`add-polygon` operation, not a standalone LOCATION
   record.
 - A fixture naming **pickup/drop coordinates, route distance, or standalone stop locations** → no
-  TDP category or operation exists; route to `TDP_OPERATION_FALLBACK` only if a live
-  TestBuddy/Pertamax location tool is confirmed in the MCP inventory, else `TDP_NOT_SUPPORTED` —
+  TDP category or operation exists; route to `TESTBUDDY_OPERATION_FALLBACK` only if a live
+  TestBuddy/Pertamax/GBT location tool is confirmed in the MCP inventory; `TDP_PARTIAL` when the
+  service area resolves and only the route/stop geometry is unserved, else `TDP_NOT_SUPPORTED` —
   per the parent skill's worked example (`FETCH_LOCATION`), verify the tool is real before citing
   it, don't assume it from that example.
 

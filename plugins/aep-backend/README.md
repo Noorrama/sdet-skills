@@ -114,8 +114,13 @@ The test-data-generation stage has two halves — **identify**, then **provision
 | Provision | `test-data-generator` (→ `test-data-provision`) | `test_data_requests.json` / live entities via TestBuddy | Code-generation or Phase B CI execution time |
 
 Identification decides, per fixture: Test Data Domain → real TDP category → the ordered operation
-sequence closing the gap → `test_data_status` (`TDP_SUPPORTED` · `TDP_HYBRID_FALLBACK` ·
-`TDP_OPERATION_FALLBACK` · `TDP_COMPLETE_FALLBACK`) → the TestBuddy prompt. It never provisions and
+sequence closing the gap → `test_data_status` (`TDP_SUPPORTED` · `TESTBUDDY_SUPPORTED` ·
+`TESTBUDDY_HYBRID_FALLBACK` · `TESTBUDDY_OPERATION_FALLBACK` · `TDP_PARTIAL` ·
+`TDP_NOT_SUPPORTED`) → the TestBuddy prompt. Support is resolved in one fixed order — TDP →
+TestBuddy → Pertamax → GBT — and the status records how far down it the fixture got: fully served by
+a TDP category match, fully served by TestBuddy, partly served with the rest built from Pertamax/GBT
+operations, built entirely from those operations, partly served with an operation no tier fulfils
+(`TDP_PARTIAL`), or served by nothing at all (`TDP_NOT_SUPPORTED`). It never provisions and
 never invents a category or operation name — both come from the TestBuddy MCP catalog tools
 (`TestDataAgent_get_supported_category`, `TestDataAgent_generate_testbuddy_prompt`; a
 `get_supported_operations` counterpart is not shipped yet, so operations fall back to the live
