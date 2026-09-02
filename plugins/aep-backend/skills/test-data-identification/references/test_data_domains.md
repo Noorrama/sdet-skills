@@ -61,11 +61,7 @@ copied here. The category/operation columns below are *illustrative shapes only*
 ### LOCATION
 - **Owns:** geographic test data — pickup/drop points, stops, route distance, service areas, polygons as data (not as a driver association).
 - **Signals:** `Static pooling`, `Stop location`, `Route distance`, `Service area`, `Pickup`, `Drop`, `Coordinates`.
-- **Note:** frequently `TDP_OPERATION_FALLBACK` — locations are fetched by operation rather than held as categories.
-
-### DB_INFRA — not a TDP domain
-Testcontainers, migration and schema fixtures (`required_state.entity: DB_INFRA` in the automation
-plan). **Skip these**: no domain, no category, no record. Count them as `skipped_db_infra`.
+- **Note:** frequently `TESTBUDDY_OPERATION_FALLBACK` — locations are fetched by operation rather than held as categories.
 
 ## Disambiguation quick rules
 

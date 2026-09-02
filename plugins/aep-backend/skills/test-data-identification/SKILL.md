@@ -1,6 +1,8 @@
 ---
 name: backend-test-data-identification
-description: Identify, classify and associate every test-data fixture in the approved automation_plan.json with a Test Data Domain, a real TDP category, and the operation sequence needed to close the gap. Calls the TestBuddy MCP (TestDataAgent_get_supported_category / TestDataAgent_generate_testbuddy_prompt) and validates every returned category against the fixture's own signals — the matcher never reports a no-match, so an uncorroborated category is rejected rather than trusted. Never invents category or operation names. Emits test_data_manifest.json plus an enriched automation_plan.json carrying test_data_output per fixture. Identification only — it provisions nothing; test-data-provision consumes its output.
+description: Identify, classify and associate every test-data fixture in the approved automation_plan.json with a Test Data Domain, a real TDP category, and the operation sequence needed to close the gap. Calls the TestBuddy MCP (TestDataAgent_get_supported_category / TestDataAgent_generate_testbuddy_prompt) and validates every returned category against the fixture's own signals — the matcher is unstable across calls and returns a nearest match rather than admitting a miss, so an uncorroborated category is rejected rather than trusted. Never invents category or operation names. Emits test_data_manifest.json plus an enriched automation_plan.json carrying test_data_output per fixture. Identification only — it provisions nothing; test-data-provision consumes its output.
+version: 1
+model: sonnet
 ---
 
 # Backend Test Data Identification
@@ -30,7 +32,7 @@ here, no create/mutate tool is called. It reads catalogs and writes a plan.
 | `references/sequence/sequence.md` | **Operation authority** — every Consumer/Driver function as an ordered call sequence, plus the composite booking flow. Use it for sequencing instead of inferring order. |
 | `references/test_data_domains.md` | Domain vocabulary — still consulted for cross-domain disambiguation rules even though every domain now has a bundle |
 | TestBuddy MCP → `TestDataAgent_get_supported_category` | Best-match TDP category for a domain + signal set, plus `candidates[]` and a ready-made `TDP_Request`. Returns a nearest match always — see the validation gate. |
-| TestBuddy MCP → `TestDataAgent_get_supported_operation` | Operation catalog for a domain + signal set. Federates TestBuddy's own `<Domain>Agent_*` tools and Pertamax features; returns names, `operationSupported`, and descriptions. Prefer a TestBuddy/TDP tool, fall back to Pertamax. |
+| TestBuddy MCP → `TestDataAgent_get_supported_operation` | Operation catalog for a domain + signal set. Federates TestBuddy's own `<Domain>Agent_*` tools and Pertamax features; returns matched operations in `test_data_operations[]` plus the full `candidates[]` inventory. Resolve in the fixed order TDP → TestBuddy → Pertamax → GBT, taking the first tier that serves the operation. |
 | TestBuddy MCP → `TestDataAgent_generate_testbuddy_prompt` | Turns a resolved category into the prompt TestBuddy will execute |
 
 If the plan carries fixtures inline as per-scenario `test_data[]` (the RFC's illustrative shape)
@@ -80,7 +82,14 @@ leaving the previous run's files intact beats replacing them with a partial. Emi
 with the failed check, and stop.
 
 ## Model
-Fast tier — Haiku. The work is catalog lookup plus semantic match; only operation sequencing reasons.
+**Sonnet** (`model: sonnet` in the frontmatter). Not a fast-tier task: the catalog lookups are the
+cheap part, and everything around them is judgement. The validation gate has to reject a category
+the signals do not corroborate, against a matcher that is unstable across calls and returns `null`
+without meaning it; the operation lookup under-matches, so an empty result must be checked against
+its own `candidates[]` before it becomes a recorded gap; the six-status table turns on
+partial-vs-no coverage and on telling an absent state from an open one; and operation sequencing has
+to respect documented dependency order. Each of those is a place where a fast model's
+plausible-looking answer becomes a silent mis-provision downstream.
 
 ## MCP contract — the three calls
 
@@ -97,19 +106,29 @@ singular `category` and the lowercase `testbuddy`; the RFC's spellings do not re
 - Calls 1 and 2 are **read-only catalog lookups** — they identify what TDP can serve; they neither reserve nor create anything. Note that *provisioning* tools in the same server (`DriverAgent_get_driver_data`, `CustomerAgent_get_customer_data`, …) allocate from the shared TDP pool — never call those here.
 - **Operations cross domain boundaries; categories do not.** A `CUSTOMER` fixture needing a card is category `CUSTOMER_WITH_*` from the CUSTOMER catalog plus `CREATE_CREDIT_CARD` / `ADD_CREDIT_CARD_TO_USER` from the PAYMENT_INSTRUMENT catalog. Look up operations in every domain a leftover signal touches, keep `test_data_domain` as the primary entity, and never widen the category search beyond that domain.
 - `test_data_status` is a *conclusion* of calls 1 and 2 (see the decision table), never an independent guess.
-- Call 3 runs only once 1 and 2 have settled, so the prompt describes the final plan. Skip it for `TDP_NOT_SUPPORTED` — there is nothing TestBuddy can execute — and write `test_buddy_prompt: null`.
+- Call 3 runs only once 1 and 2 have settled, so the prompt describes the final plan. Skip it for `TDP_NOT_SUPPORTED` — there is nothing TestBuddy can execute — and write `test_buddy_prompt: null`. Do run it for `TDP_PARTIAL`: the covered part is executable, and the prompt should describe only that part.
 - **Batch by domain.** Call 1 is LLM-backed and slow — measured 33–91s per call against a 379-candidate DRIVER catalog. Resolve one category per distinct `(domain, signal-set)`, reuse it across every fixture and scenario sharing that set, and allow a timeout of at least 120s. The per-`(scenario, fixture)` fan-out applies to *records*, never to calls.
 - **On tool failure, stop that fixture** — record it in `unidentified_fixtures[]` with `reason: CATALOG_UNAVAILABLE`. Never substitute a remembered or plausible-looking category/operation name for a failed lookup.
-- Until call 2 ships, resolve operations from two grounded sources: `references/sequence/sequence.md` for **which** function and **in what order** (it catalogs every Consumer/Driver function as a call sequence, plus the composite booking flow where both wallets are topped up before the booking is created), and the live `<Domain>Agent_*` tool inventory for **whether a callable tool exists**. Mark `operationSupported: false` unless the tool exists. Never invent an operation name; a capability in neither source is a `missing_operations` entry, not an operation.
+- Call 2 is live (verified against TestBuddy: it matches against the Pertamax operation catalog and returns `operation`, `operationSupported`, `category`, `operationInput` and `description`). Use `references/sequence/sequence.md` for **which** function and **in what order** (it catalogs every Consumer/Driver function as a call sequence, plus the composite booking flow where both wallets are topped up before the booking is created), and the live `<Domain>Agent_*` inventory to confirm a callable tool exists. Mark `operationSupported: false` unless the tool exists. Never invent an operation name; a capability in neither source is a `missing_operations` entry, not an operation.
+- **Call 2 under-matches: check `candidates[]` before concluding a gap.** Verified: a BOOKING fixture returned `handle_group_order_create` / `handle_group_order_join`, while a sibling fixture with near-identical signals returned `test_data_operations: []` even though the same handlers sat in its own `candidates[]`. An empty match is therefore not proof of absence. Before recording a missing operation, check whether a plausible operation appears in `candidates[]`; if it does, re-query with tighter signals and record both attempts in `identification_steps` rather than reporting a capability gap the catalog does not actually have.
 - **Don't emit an operation the pool already satisfies.** Per the bundles, TDP pre-provisions by category, so a linked wallet, a default balance, or a saved address that comes with the category needs no operation. Operations exist only to close the gap the category leaves.
 
-### Validation gate — call 1 never reports "no match"
+### Validation gate — the matcher's answer is a candidate, not an answer
 
-`get_supported_category` always returns its nearest match out of the whole catalog. It has no
-no-match answer. Verified: `["progressing_yearly_mjg"]` and `["baseline_driver"]` both returned
+`get_supported_category` usually returns its nearest match out of the whole catalog rather than
+admitting a miss. Verified: `["progressing_yearly_mjg"]` and `["baseline_driver"]` both returned
 `DRIVER__ID__CAR`, a category neither signal mentions, out of 379 candidates. Taking the response at
 face value would silently mis-provision every fixture whose state TDP does not model, and would make
-`TDP_OPERATION_FALLBACK` unreachable.
+`TESTBUDDY_OPERATION_FALLBACK` unreachable.
+
+It is **not** guaranteed to return a match, and it is **not stable across calls.** Verified against
+TestBuddy on a CUSTOMER plan: a domain with no catalog at all (`MERCHANT`, `BOOKING`) returns
+`tdp_test_data_category: null` with `candidates: []`; and one identical signal set
+(`["GoPay","GOTO Social Group","MEMBER","ACTIVE membership"]`) returned `CUSTOMER_WITH_SUBSCRIPTION`
+on one call and `null` on the next. So neither a returned category **nor** a `null` is evidence on
+its own — corroborate a category through the gate below, and treat a `null` as "no category this
+call", not as proof that TDP cannot serve the fixture. When a `null` decides a status, say so in
+`identification_steps` so a re-run can revisit it.
 
 So treat `tdp_test_data_category` as a **candidate, not an answer**. Corroborate it against the
 signal→token vocabulary in the domain bundle (`references/<domain>/index.md`) — not against tokens
@@ -124,7 +143,7 @@ you infer. Accept only when:
 
 On reject, set `tdp_test_data_category: null`, record the returned value and the top few
 `candidates[]` as an `identification_steps` entry so the reviewer can see what the matcher proposed, and let
-the decision table place the fixture in `TDP_OPERATION_FALLBACK` or `TDP_NOT_SUPPORTED`. Set
+the decision table place the fixture in `TESTBUDDY_OPERATION_FALLBACK` or `TDP_NOT_SUPPORTED`. Set
 `match_confidence: low` on every accepted-but-unanimous-signal case so it still reaches review.
 
 ### TDP_Request / TDP_Payload
@@ -193,10 +212,10 @@ read through the same knowledge, then produce `test_data_type_signals[]`.
 | `test_data_domain` | Fixture details (`description` + `required_state`) resolved via `references/index.md` — its domain table and statement-reading procedure; `test_data_domains.md` for domains with no bundle. |
 | `test_data_type_signals[]` | Atomic state signals lifted from `description` + `required_state` — one signal per concept, wording taken from the fixture where possible (`"Bike"`, `"4w"`, `"SDF"`, `"Polygon"`, `"non jabo"`, `"Linked Wallet"`). These signals, not the prose, drive the category and operation lookups. **Signal, not state:** a description carries entity state *and* harness setup; only entity state becomes a signal (see the exclusion rule below).  |
 | `test_data_details.tdp_test_data_category` | Best match returned by `TestDataAgent_get_supported_category(test_data_domain, test_data_type_signals, description)`, **then passed through the validation gate**. Verbatim from the response when accepted; `null` when rejected or when the call fails. `required_state.category` from the plan is likewise a **candidate, not an answer** (see below). |
-| `test_data_details.test_data_operations[]` | For every signal the chosen category does **not** already satisfy, the operation that closes it — from `get_supported_operations` once shipped, else from the live `<Domain>Agent_*` tool inventory — ordered (see sequencing rules). `null` when the category satisfies everything. `[]` when a needed operation is unsupported. |
+| `test_data_details.test_data_operations[]` | For every signal the chosen category does **not** already satisfy, the operation that closes it — from `get_supported_operation`, confirmed against the live `<Domain>Agent_*` tool inventory — ordered (see sequencing rules). `null` when the category satisfies everything. Carries only the *supported* operations; unfulfilled ones go to `missing_operations` and drive `TDP_PARTIAL` / `TDP_NOT_SUPPORTED`. |
 | `test_data_details.count` | `required_state.count`, default `1`. |
 | `test_data_status` | Decision table below. |
-| `test_buddy_prompt` | `TestDataAgent_generate_testbuddy_prompt` on the resolved category — TestBuddy owns the wording, this skill does not compose it by hand. `null` for `TDP_NOT_SUPPORTED` or a rejected category. |
+| `test_buddy_prompt` | `TestDataAgent_generate_testbuddy_prompt` on the resolved category — TestBuddy owns the wording, this skill does not compose it by hand. `null` for `TDP_NOT_SUPPORTED` or a rejected category; generated for `TDP_PARTIAL`, covering only the served part. |
 | `test_data_details.tdp_request` | `TDP_Request` from call 1, carried through verbatim. `null` when the category is rejected. Provisioning prefers this over the prose prompt. |
 | `identification_steps[]` | **Ordered list of short sentences** — what the agent actually did for this fixture, one entry per action, in the order taken. Not free-form prose and not a summary. |
 | `match_confidence` | `high` / `medium` / `low` for the domain + category match. `low` routes the fixture to human review before provisioning. |
@@ -221,7 +240,7 @@ a category, or an operation:
 
 - **Mock / stub state** — "vault-service stubbed to return HTTP 503", "6000ms fixed delay". WireMock setup, not data. (`automation-plan-generator` already rules that `mock_setup` is never a fixture.)
 - **Feature flags** — "flag payment.card_save.enabled=OFF". Spring test context / flag override.
-- **Container and migration state** — Testcontainers, Flyway. These arrive as `entity: DB_INFRA` and the whole fixture is skipped.
+- **Container and migration state** — Testcontainers, Flyway, topic seeding. Harness setup owned by `test-code-generator`, so it yields no signal, category or operation of its own.
 - **Assertion expectations** — the expected status code or error code.
 
 A fixture whose description is *only* harness setup still has entity state underneath ("customer
@@ -266,7 +285,7 @@ category or a missing operation from this list alone, without opening `run_log.j
   "Plan proposed CUSTOMER_WITH_WALLET_RECHARGE, which the catalog does not contain — substituted the returned category.",
   "Decomposed into 3 capabilities: acquire Customer, Wallet recharge, Ride booking.",
   "Resolved Wallet recharge to CustomerAgent_recharge_customer_gopay (TestBuddy preferred over Pertamax handle_gopay_wallet_topup).",
-  "Concluded TDP_HYBRID_FALLBACK: category covers the entity, operations close the rest."
+  "Concluded TESTBUDDY_HYBRID_FALLBACK: category covers the entity, operations close the rest (TDP_PARTIAL had the recharge been unfulfilled)."
 ]
 ```
 
@@ -278,13 +297,47 @@ Rules:
 
 ### Status decision table
 
-| TDP category match | Gap-closing operations | `test_data_status` | `test_data_operations` |
+Resolution is attempted in one fixed order — **TDP → TestBuddy → Pertamax → GBT** — and the status
+records both how far down that order the fixture got and whether anything was left unserved:
+
+| TDP / TestBuddy support | Gap-closing operations | `test_data_status` | `test_data_operations` |
 |---|---|---|---|
-| A TDP category covers the full required state | none needed | `TDP_SUPPORTED` | `null` |
-| No TDP category, but a TestBuddy agent tool serves the entity directly | none needed | `TESTBUDDY_SUPPORTED` | `null` |
-| Partial support in TDP **or** TestBuddy | all supported (via MCP: TestBuddy or Pertamax) | `TDP_HYBRID_FALLBACK` | ordered `[...]` |
-| No category matches | all supported | `TDP_OPERATION_FALLBACK` | ordered `[...]`, category `null` |
-| Required state not covered | one or more unsupported | `TDP_NOT_SUPPORTED` | `[]` |
+| A TDP category matched by `get_supported_category` covers the full required state | none needed | `TDP_SUPPORTED` | `null` |
+| No TDP category, but the operation is served end-to-end by a TestBuddy agent tool | none needed | `TESTBUDDY_SUPPORTED` | `null` |
+| **Partial** support in TDP **or** TestBuddy | the rest all supported via the Pertamax or GBT tool | `TESTBUDDY_HYBRID_FALLBACK` | ordered `[...]` |
+| **No** support in TDP or TestBuddy | the whole state built by supported operations via the Pertamax or GBT tool | `TESTBUDDY_OPERATION_FALLBACK` | ordered `[...]`, category `null` |
+| **Partial** support in TDP **or** TestBuddy | one or more **unfulfilled by every tier** | `TDP_PARTIAL` | the supported ones, ordered |
+| No support in TDP, TestBuddy, Pertamax **or** GBT | nothing fulfilled | `TDP_NOT_SUPPORTED` | `[]` |
+
+Read the table as two questions, in this order:
+
+1. **Did TDP or TestBuddy cover the whole required state?** Yes → one of the two *supported*
+   statuses. `TDP_SUPPORTED` when a category match carries it, `TESTBUDDY_SUPPORTED` when a
+   TestBuddy tool does.
+2. **If coverage was partial or absent, is every remaining operation fulfilled by some tier?**
+   All fulfilled → `TESTBUDDY_HYBRID_FALLBACK` (partial coverage) or
+   `TESTBUDDY_OPERATION_FALLBACK` (no coverage). Something unfulfilled → `TDP_PARTIAL` if
+   TDP/TestBuddy still covered part of it, `TDP_NOT_SUPPORTED` if they covered nothing.
+
+**`TDP_PARTIAL` vs `TDP_NOT_SUPPORTED` is the coverage question, not the gap question.** Both have
+an operation no tool fulfils; they differ in whether anything is still obtainable.
+`TDP_PARTIAL` says *provisioning can get you part of the way* — the category or TestBuddy tool is
+real and usable, and a named operation is missing — so the fixture is a candidate for a manual
+top-up or a TDP backlog item. `TDP_NOT_SUPPORTED` says *nothing here is served at all*. Never
+collapse a partially-covered fixture into `TDP_NOT_SUPPORTED`: it discards a real category and tells
+the reviewer the wrong thing about why the fixture is blocked. Either way the unfulfilled names go to
+`unidentified_fixtures[].missing_operations`.
+
+**Mixed tiers are a fallback, not a supported status.** A supported status requires *no gap left to
+close*. When the entity comes from one tier and the remaining signals are closed by a lower tier — a
+TDP category plus a `CustomerAgent_*` TestBuddy operation, or a TestBuddy entity plus a Pertamax
+operation — the status is `TESTBUDDY_HYBRID_FALLBACK`. So non-empty `test_data_operations` alongside
+`TDP_SUPPORTED`/`TESTBUDDY_SUPPORTED` is a contradiction: fix the status.
+
+**An absent state is not an open gap.** A signal asserting that something is *not* there — "no saved
+social group", "not a member", "no linked card" — is satisfied by any pool entity that lacks it, and
+needs no operation. Do not treat it as an uncovered signal; doing so pushes a fully-served fixture
+into `TDP_PARTIAL`. Only a state that must be *made true* generates an operation.
 
 The status is a **conclusion of the two catalog lookups**, never a guess: derive it from what
 `get_supported_category` returned **and survived the validation gate**, plus what the operation
@@ -308,12 +361,12 @@ Every operation carries where it comes from, so provisioning knows which client 
 | Field | Value |
 |---|---|
 | `operation` | The logical operation name (e.g. `CREATE_CREDIT_CARD`, `ASSIGN_POLYGON`) |
-| `operationSource` | `tdp` · `testbuddy` · `pertamax` — the two callable MCP tools today are TestBuddy and Pertamax. `gbt` is planned for a later stage; do not emit it until a GBT MCP server is reachable. |
+| `operationSource` | `tdp` · `testbuddy` · `pertamax` · `gbt` — always resolved in that order, taking the first tier that serves the operation. Emit a tier only when `operationMcpTool` resolves to a tool that exists in its live inventory. |
 | `operationMcpTool` | The exact MCP tool/feature that performs it (e.g. `CustomerAgent_recharge_customer_gopay`, `handle_set_gopay_pin`). `null` when unresolved. |
 | `operationMcpToolDescription` | The tool's own description, carried through verbatim so reviewers and provisioning see its contract without re-querying |
 | `operationSupported` | `true` only when `operationMcpTool` resolves to a tool that exists |
 
-- **`operationSupported: true` only when the operation actually exists** — in `get_supported_operations` once shipped, else in the live `<Domain>Agent_*` tool inventory. If a required step is missing from the catalog, the fixture becomes `TDP_NOT_SUPPORTED` with `test_data_operations: []`, and the missing names go to `unidentified_fixtures[].missing_operations` so the gap is actionable for the TDP team.
+- **`operationSupported: true` only when the operation actually exists** — in `get_supported_operation`, else in the live `<Domain>Agent_*` tool inventory. If a required step exists in no tier of TDP → TestBuddy → Pertamax → GBT, its name goes to `unidentified_fixtures[].missing_operations` so the gap is actionable for the TDP team, and the fixture becomes `TDP_PARTIAL` (TDP/TestBuddy covered part) or `TDP_NOT_SUPPORTED` (they covered nothing).
 
 ### Worked examples
 
@@ -321,20 +374,37 @@ Every operation carries where it comes from, so provisioning knows which client 
 → domain `CUSTOMER`, signals `["Active", "Linked Wallet"]`, category `CUSTOMER_WITH_GO_PAY` covers both
 → `TDP_SUPPORTED`, operations `null`.
 
+**Fully served by TestBuddy** — *"An existing completed booking for this customer"*
+→ domain `BOOKING`, no TDP category pools bookings, but a `BookingAgent_*` TestBuddy tool serves the
+entity directly and leaves no signal uncovered
+→ `TESTBUDDY_SUPPORTED`, operations `null`. (Verify the tool in the live inventory first — if it does
+not exist, this is `TESTBUDDY_OPERATION_FALLBACK` or `TDP_NOT_SUPPORTED`, never an assumed category.)
+
 **Category plus operations** — *"A valid Visa card not previously saved by this user"*, `{card_type: VISA, is_expired: false, already_saved: false}`
 → domain `PAYMENT_INSTRUMENT`, the customer comes from `CUSTOMER_WITH_GO_PAY` but the card does not
-→ `TDP_HYBRID_FALLBACK`, operations `CREATE_CREDIT_CARD {cardType: Visa}` → `ADD_CREDIT_CARD_TO_USER {userType: customer}`.
+→ `TESTBUDDY_HYBRID_FALLBACK`, operations `CREATE_CREDIT_CARD {cardType: Visa}` → `ADD_CREDIT_CARD_TO_USER {userType: customer}`.
 
 **Lookup then assign** — *"A Bike driver with positive wallet balance associated with a polygon"*
 → domain `DRIVER`, category `DRIVER__ID__BIKE`, the polygon association is not part of the category
-→ `TDP_HYBRID_FALLBACK`, operations `IDENTIFY_POLYGON {polygonCollectionId: daily_income_delivery}` → `ASSIGN_POLYGON {polygonId: <from IDENTIFY_POLYGON>}`.
+→ `TESTBUDDY_HYBRID_FALLBACK`, operations `IDENTIFY_POLYGON {polygonCollectionId: daily_income_delivery}` → `ASSIGN_POLYGON {polygonId: <from IDENTIFY_POLYGON>}`.
 
 **No category, operations only** — *"6 stop locations by route distance in service area 3"*
-→ domain `LOCATION`, no category matches, `FETCH_LOCATION` is supported
-→ `TDP_OPERATION_FALLBACK`, category `null`, operations `[FETCH_LOCATION {...}]`.
+→ domain `LOCATION`, no category matches and no TestBuddy tool serves it; `FETCH_LOCATION` is
+supported by the Pertamax tool
+→ `TESTBUDDY_OPERATION_FALLBACK`, category `null`, operations `[FETCH_LOCATION {...}]` with
+`operationSource: pertamax`.
+
+**Partial coverage, open gap** — *"A GoPay host who is the ACTIVE OWNER of a social group with 3 ACTIVE members"*
+→ domain `CUSTOMER`, `CUSTOMER_WITH_GO_PAY` covers the wallet, but no tier fulfils the group
+ownership and membership-count state
+→ `TDP_PARTIAL`, category `CUSTOMER_WITH_GO_PAY`, operations `[]` (nothing supported to order),
+`test_buddy_prompt` covering the customer only, fixture listed in `unidentified_fixtures[]` with the
+unfulfilled operations. **Not** `TDP_NOT_SUPPORTED` — the category is real and provisioning can
+still obtain the customer.
 
 **Dead end** — *"A Bike driver who has opted into and started a shift"*
-→ domain `DRIVER`, no category carries shift state and no shift operation exists in the catalog
+→ domain `DRIVER`, no category carries shift state and no shift operation exists in TDP, TestBuddy,
+Pertamax or GBT
 → `TDP_NOT_SUPPORTED`, operations `[]`, `test_buddy_prompt: null`, fixture listed in
 `unidentified_fixtures[]` with `missing_operations: ["OPT_INTO_SHIFT", "START_SHIFT"]`.
 
@@ -344,7 +414,7 @@ Every operation carries where it comes from, so provisioning knows which client 
 - `epic_id`, `manifest_version`, `source_plan_version`, `identified_at`
 - `records[]` — one `test_data_output` object per `(scenario_id, fixture_id)`
 - `unidentified_fixtures[]` — `fixture_id`, `scenario_ids[]`, `reason` (`NO_DOMAIN_MATCH` | `NO_CATEGORY_MATCH` | `UNSUPPORTED_OPERATION` | `CATALOG_UNAVAILABLE`), `missing_operations[]`
-- `identification_summary` — per-status counts, `unidentified`, `skipped_db_infra`, `needs_human_review[]`, `domains_seen[]`
+- `identification_summary` — per-status counts, `unidentified`, `needs_human_review[]`, `domains_seen[]`
 
 **2 → `enriched_automation_plan.json`** (write as a new file; never edit the input plan in place)
 For each fixture, write the records to a **`test_data_output` field on the fixture itself**, as a
@@ -378,15 +448,57 @@ plan.
 the enriched plan is a provisioning contract that downstream stages consume, and debug data there is
 noise; and a fixture used by 14 scenarios would carry 14 identical copies of its own audit.
 
-Scope each entry with `fixture_id`; omit it for run-level setup steps (knowledge load, catalog reads).
+Scope each entry with `fixture_id`; omit it only for genuinely run-level setup steps (knowledge
+load, `tools/list`).
+
+### Every fixture gets its own complete trail
+
+**Batching is a call-level optimisation, never a logging one.** Resolving one category per distinct
+`(domain, signal-set)` means N fixtures share one MCP call — but the log still owes each of those N
+fixtures its own ordered trail. Attributing the call to whichever fixture happened to trigger it and
+leaving the rest silent is the failure this section exists to prevent: a reviewer looking up
+`FX-SG-MEMBER-ACTIVE-02` finds nothing and cannot tell whether it was identified, skipped, or
+dropped.
+
+So for a fixture whose answer came from a shared call, record a **`reuse_batch_result`** entry naming
+the batch it reused and the fixture that made the call. The expensive call is still logged once; the
+*decision* is logged per fixture.
+
+Per fixture, in order, the trail must show:
+
+| `action` | Records |
+|---|---|
+| `resolve_domain` | The domain assigned, and which knowledge file decided it |
+| `extract_signals` | The emitted `test_data_type_signals[]`, in dependency order |
+| `get_supported_category` **or** `reuse_batch_result` | A fresh call (with candidate count and elapsed ms), or the batch key + originating fixture it reused |
+| `validate_gate` | ACCEPT with the corroborating token, or REJECT with the uncorroborated ones |
+| `get_supported_operation` **or** `reuse_batch_result` | Same split as the category lookup |
+| `check_candidates` | Only when the operation match came back empty — whether a plausible operation sat in `candidates[]` (an under-match) or genuinely nothing did |
+| `resolve_status` | The status, and the table row that produced it |
+| `generate_prompt` | The prompt call, or why it was skipped |
+
+**Completeness invariant:** every fixture in the plan appears in `run_log.json` at least once, with
+no exceptions — every fixture is identified. A fixture with no entries is a defect in the log, not a
+fixture with nothing to say. Check the count before writing the file:
+`distinct fixture_ids in run_log == fixtures in plan`.
 
 | `step` | `fixture_id` | `action` | `target` | `result` |
 |---|---|---|---|---|
 | 1 | — | `read_knowledge` | `references/customer/index.md` | 8 categories, 2 disabled |
-| 2 | — | `read_operation_catalog` | TestBuddy `tools/list` | 47 tools |
-| 3 | FIX-001 | `get_supported_category` | `TestDataAgent_get_supported_category` | `CUSTOMER_WITH_GO_PAY`, 15 candidates, 16435ms |
-| 4 | FIX-001 | `validate_gate` | knowledge vocabulary + `isEnabled` | ACCEPT: corroborated by `GO_PAY` |
-| 5 | FIX-001 | `resolve_status` | decision table | `TDP_HYBRID_FALLBACK` |
+| 2 | — | `read_operation_catalog` | TestBuddy `tools/list` | 54 tools |
+| 3 | FIX-001 | `resolve_domain` | `references/index.md` domain table | `CUSTOMER` — wallet state, consumer-side |
+| 4 | FIX-001 | `extract_signals` | description + `required_state` | `["GoPay","Active","Linked Wallet"]` |
+| 5 | FIX-001 | `get_supported_category` | `TestDataAgent_get_supported_category` | `CUSTOMER_WITH_GO_PAY`, 15 candidates, 34212ms |
+| 6 | FIX-001 | `validate_gate` | knowledge vocabulary + `isEnabled` | ACCEPT: `GO_PAY` corroborated by "GoPay" |
+| 7 | FIX-001 | `get_supported_operation` | `TestDataAgent_get_supported_operation` | 1 supported: `CustomerAgent_recharge_customer_gopay` |
+| 8 | FIX-001 | `resolve_status` | decision table row 3 | `TESTBUDDY_HYBRID_FALLBACK` |
+| 9 | FIX-001 | `generate_prompt` | `TestDataAgent_generate_testbuddy_prompt` | prompt generated, 41s |
+| 10 | FIX-002 | `resolve_domain` | `references/index.md` domain table | `CUSTOMER` — same statement shape as FIX-001 |
+| 11 | FIX-002 | `extract_signals` | description + `required_state` | `["GoPay","Active","Linked Wallet"]` — identical set |
+| 12 | FIX-002 | `reuse_batch_result` | batch `CUSTOMER\|GoPay\|\|Active\|\|Linked Wallet` (called for FIX-001) | reused `CUSTOMER_WITH_GO_PAY`; no second call made |
+| 13 | FIX-002 | `validate_gate` | knowledge vocabulary + `isEnabled` | ACCEPT: `GO_PAY` corroborated by "GoPay" |
+| 14 | FIX-002 | `resolve_status` | decision table row 3 | `TESTBUDDY_HYBRID_FALLBACK` |
+| 15 | FIX-003 | `resolve_status` | decision table row 6 | `TDP_NOT_SUPPORTED` — no category, no operation in any tier |
 
 `actual_test_data` is **not populated by this stage** — provisioning owns it, and per the RFC it
 stays absent from identification output entirely.
@@ -399,18 +511,17 @@ stays absent from identification output entirely.
 - **Never invent identifiers or values** — polygon IDs, customer IDs, service-area IDs come from `required_state` / `config` / a preceding operation's output.
 - **No secrets or PII anywhere** — signals and prompts carry categories and states only. Never a real card number, token, phone number or account number. Sensitive states are described, not populated.
 - **Identification only** — call no create, mutate, lease or recharge tool. Provisioning is `test-data-provision`.
-- Skip fixtures with `required_state.entity: DB_INFRA` — Testcontainers / migration fixtures are not TDP-served. Count them as `skipped_db_infra`.
 - One record per `(scenario_id, fixture_id)`; the same fixture reused across scenarios produces one record per scenario, all under that fixture's single `output`.
 - `test_data_type_signals[]` must be traceable to the fixture text — do not enrich the fixture with state the plan never asked for.
 - `count` never exceeds what `required_state.count` states; default `1`, never `0`.
-- The status enum is exactly the **five** values in the decision table. `TDP_HYBRID_SUPPORTED` and `TDP_COMPLETE_FALLBACK` are **superseded** — they appear only in older RFC sample JSON and must never be emitted. Map them to `TDP_HYBRID_FALLBACK` and `TDP_NOT_SUPPORTED` if encountered in an input.
+- The status enum is exactly the **six** values in the decision table, and the order behind them is always TDP → TestBuddy → Pertamax → GBT. `TDP_HYBRID_FALLBACK`, `TDP_OPERATION_FALLBACK`, `TDP_HYBRID_SUPPORTED` and `TDP_COMPLETE_FALLBACK` are **superseded** — they appear only in earlier manifests and older RFC sample JSON, and must never be emitted. On input, map `TDP_HYBRID_FALLBACK` / `TDP_HYBRID_SUPPORTED` → `TESTBUDDY_HYBRID_FALLBACK`, `TDP_OPERATION_FALLBACK` → `TESTBUDDY_OPERATION_FALLBACK`, `TDP_COMPLETE_FALLBACK` → `TDP_NOT_SUPPORTED`.
 
 ## Re-identification
 
 Re-runs are the norm, not the exception — the upstream plan changes as scenarios are added.
 
 - Triggered when `automation_plan.json` changes. Diff on `(fixture_id, description, required_state)`: re-identify changed and new fixtures only, carry unchanged records forward, drop records for removed fixtures.
-- Also re-run fixtures currently in a fallback status when the TDP catalog gains categories or operations — yesterday's `TDP_OPERATION_FALLBACK` may be today's `TDP_SUPPORTED`.
+- Also re-run fixtures currently in a fallback, `TDP_PARTIAL` or `TDP_NOT_SUPPORTED` status when the TDP catalog gains categories or operations — yesterday's `TESTBUDDY_OPERATION_FALLBACK` may be today's `TDP_SUPPORTED`, and a `TDP_PARTIAL` closes as soon as its `missing_operations` ship. Because the matcher is not stable across calls, also re-run a `null`-category fixture before treating it as a standing TDP gap.
 - Bump `manifest_version` and set `source_plan_version` on every run.
 
 ## Output flow
@@ -423,5 +534,5 @@ Goes to the SDET review gate together with the automation plan. Fixtures in
 Re-validate the enriched plan against `schemas/automation_plan.schema.json`.
 
 ## Log
-N fixtures identified; per-status counts (supported / hybrid / operation / complete fallback);
-N unidentified with reasons; N low-confidence for review; N skipped (DB_INFRA); domains seen.
+N fixtures identified; per-status counts (`TDP_SUPPORTED` / `TESTBUDDY_SUPPORTED` / `TESTBUDDY_HYBRID_FALLBACK` / `TESTBUDDY_OPERATION_FALLBACK` / `TDP_PARTIAL` / `TDP_NOT_SUPPORTED`);
+N unidentified with reasons; N low-confidence for review; domains seen.
