@@ -1,6 +1,6 @@
 ---
 name: backend-sdet-plan-generator
-description: Generate the backend SDET test plan from extracted context files. Four modes: Upstream-context (full generation from the extracted upstream context), Code-change-context (post-build reconciliation against the merged diff, including code_change_context.reconciliation), Doc-change-context (upstream doc change), Review (human feedback via qa_analysis.md). Outputs sdet_plan.json, qa_analysis.md, and sdet_testcases.csv. RFC drives completeness, PRD drives priority, Tasks drive classification, regression drives deduplication.
+description: Generate the backend SDET test plan from extracted context files. Four modes: Upstream-context (full generation from the extracted upstream context), Code-change-context (post-build reconciliation against the merged diff, including code_change_context.reconciliation), Doc-change-context (upstream doc change), Review (human feedback via qa_analysis.md). Plus BrowserStack sync — a post-approval upload layered on top of any mode, always confirmed with the user first, never a fifth mode. Outputs sdet_plan.json, qa_analysis.md, and sdet_testcases.csv. RFC drives completeness, PRD drives priority, Tasks drive classification, regression drives deduplication.
 ---
 
 # Backend SDET Plan Generator
@@ -19,6 +19,8 @@ Reasoning tier — Opus
 | Doc-change-context | Upstream doc changed | Existing `sdet_plan.json` + `doc_change_context` + human feedback | Patch affected scenarios only |
 | Review | Human feedback written in `qa_analysis.md` | Existing `sdet_plan.json` + `qa_analysis.md` (feedback section filled) | Apply human corrections; add/modify/deprecate scenarios |
 
+**BrowserStack sync is not a fifth mode.** It never generates, patches or reviews a scenario — it only uploads ones already `approved` and writes tracking fields back. It layers on top of any of the four modes above and on the no-op "already exists" state; see `## BrowserStack sync` after the CSV output section.
+
 ## Mode detection — determined by file presence
 
 Check in **priority order** — use the first match:
@@ -29,7 +31,8 @@ Check in **priority order** — use the first match:
 | 2 | `sdet_plan.json` absent | **Upstream-context** — generate full scenario set |
 | 3 | `sdet_plan.json` present + `doc_change_context.json` present | **Doc-change-context** — patch affected scenarios only |
 | 4 | `sdet_plan.json` present + `code_change_context.json` present | **Code-change-context** — reconcile against the merged diff; do not regenerate unaffected scenarios |
-| 5 (error) | `sdet_plan.json` present + no feedback and no change files | **Error** — surface: "sdet_plan.json already exists. Write feedback in qa_analysis.md ## Human Review section, or provide code_change_context.json / doc_change_context.json." |
+| 5 | `sdet_plan.json` present + no feedback and no change files + root `status: approved` + at least one scenario eligible for BrowserStack sync (see `## BrowserStack sync`) | **BrowserStack sync check** — ask the user; on "no" or no answer, fall through to priority 6 |
+| 6 (error) | `sdet_plan.json` present + no feedback and no change files + (root not `approved`, or nothing eligible, or the priority-5 ask was declined) | **Error** — surface: "sdet_plan.json already exists. Write feedback in qa_analysis.md ## Human Review section, or provide code_change_context.json / doc_change_context.json." |
 
 **Detecting Review mode:** Read `qa_analysis.md`. Find the `## Human Review` → `### Feedback` block. If it contains any text other than the placeholder comment `<!-- add feedback here -->`, trigger Review mode.
 
@@ -40,6 +43,8 @@ If both `code_change_context.json` and `doc_change_context.json` are present (no
 If more than one `code_change_context*.json` is present, use the one whose `extraction_date` is latest and name the file used in qa_analysis.md. A file whose name is not exactly `code_change_context.json` does not trigger the mode — say so rather than silently reading a copy.
 
 Set `generation_mode` in the sdet_plan.json root to the detected mode: `upstream_context` | `code_change_context` | `doc_change_context` | `review`.
+
+**An explicit user request to upload/sync to BrowserStack overrides this table entirely** — check the `## BrowserStack sync` eligibility gate directly rather than waiting to land on priority 5. It still refuses outright if root `status != "approved"`; being asked directly does not lower that bar.
 
 ## Stage 1 — Upstream Service Check / DoR gate (ALWAYS FIRST; on pass, continue to Upstream-context)
 
@@ -962,7 +967,7 @@ Human-readable summary for SDET + PM review gate:
 - LLM generation quality (after first Review run): auto-approved count, human-modified, human-deprecated, human-added, accuracy %
 - **Granularity check** — mean steps per scenario, count of 1-step scenarios, scenarios exceeding 3 fixtures, and the `scenario_group`-to-scenario ratio (see Log). Call out explicitly if the plan drifted toward one-assertion-per-scenario.
 - **Market assumption** — which market(s) were set and on what basis, flagged for confirmation whenever they were inferred rather than read from `tasks_context.environments`.
-- **BrowserStack sync** — after a sync has run, how many scenarios carry a `browserstack_test_id` and how many are still null, with the project they landed in. Before the first sync, state plainly that none are tracked yet.
+- **BrowserStack sync** — after a sync has run, how many scenarios carry a `browserstack_test_id` and how many are still null, with the project they landed in and `synced_at`. List every scenario this run created and every one it updated by id, and — since the JSON schema has no slot for it — name every **update failure** explicitly here (a scenario that already had an id whose push failed; `unsynced_count` only ever catches creates that stayed null). If eligible scenarios spanned more than one team's project, name the other project(s) and how many scenarios are waiting for a separate run. Before the first sync, state plainly that none are tracked yet.
 - **Regression disposition** — counts by `regression_action`, a table of every `modify` scenario with its case id, target class/method and required change, and the `regression_selection` contents. When `regression_context.json` was unavailable, say so in one line rather than printing an empty table.
 - **Team scope** — the full `teams_in_scope[]` table with each team's module, regression prefix and BrowserStack project, which team is primary, the scope the human confirmed at the gate, and an **excluded-by-scope table** naming every scenario dropped for team reasons with its `owning_team`, entry point and what it covered. An excluded scenario that leaves no trace here is indistinguishable from a coverage gap.
 - **Coverage ledger** — the full table with every unmapped row and its stated reason. This is the section a reviewer scans to find what the plan does not cover, so unmapped rows belong here in full rather than summarised.
@@ -1139,6 +1144,226 @@ In cases 2 and 3, record the assumption in `qa_analysis.md` and ask the human re
 | All other scenarios — including `reliability`, `concurrency`, `security`, `compliance` | `functional` |
 
 `reliability` and `concurrency` describe *what adverse condition* the scenario sets up, not that it measures a performance target. A retry-exhaustion or lost-update test is functional. Only a scenario asserting a throughput or latency number is `performance`.
+
+## BrowserStack sync — post-approval upload, always asks first
+
+Wired into this skill, not a separate tool or a fifth generation mode. It changes tracking
+fields only — `browserstack_test_id` per scenario and root `browserstack_sync` — never scenario
+content, `status`, `generated_by_mode`, or `review_round`. A sync is not a review round.
+
+Triggered two ways, both landing on the same eligibility gate and the same ask:
+1. **Explicit request** — the user directly asks to upload or sync to BrowserStack, at any
+   point, in any mode.
+2. **Detected opportunity** — Mode detection priority 5: no feedback, no change files, root
+   already `approved`, and eligible work exists.
+
+### Eligibility gate — check before asking anything
+
+Sync is available only when root `status == "approved"`. This is the *same* Approval gate
+invariant already defined above — not a separate bar, and not one an explicit request can
+lower. If root `status != "approved"`, say so plainly (*"root status is `{status}`; BrowserStack
+sync is available only once a human sets it to approved"*) and stop — do not ask the
+confirmation question below.
+
+Given root `approved`, a scenario is **eligible this run** when its own `status == "approved"`
+**and** it is owned by the team whose project this run targets (see routing, below). Eligible
+work exists when at least one scenario matches.
+
+If nothing is eligible — because no scenario is approved yet, or every approved scenario for
+this project already carries a `browserstack_test_id` and there is nothing left to push — say so
+and stop. Do not ask the confirmation question with nothing behind it.
+
+### Always ask before doing anything else
+
+Never upload without an explicit yes, on any invocation, in any mode. When eligible work
+exists, ask something equivalent to:
+
+> `{N}` approved scenario(s) are ready for `{browserstack_project}` — `{C}` new, `{U}` to
+> update. Upload now?
+
+A "no" or no answer ends the check for this invocation — generation, or the priority-6 error,
+continues exactly as if sync had never been considered. This question is asked **every time**
+eligible work exists; a prior "no" is never remembered as a standing decision, because new
+scenarios reach `approved` between runs and each run's set of eligible scenarios can differ.
+
+### Routing — one project per sync run
+
+The schema's `browserstack_sync` holds one `project`, not a list — **one sync run targets one
+BrowserStack project.** Resolve which:
+- If every eligible scenario shares one `owning_team`, target that team's `browserstack_project`
+  from `teams_in_scope[]` — no need to ask which.
+- If eligible scenarios span more than one `owning_team`, name the projects and their scenario
+  counts, and ask which project this run targets. Scenarios for the other project(s) are counted
+  in `unsynced_count` (below) and left for a separate run — never push a foreign-owned scenario
+  into the primary team's project to avoid a second ask.
+
+### Resolving project_identifier, folder_id, and this project's BrowserStack conventions
+
+**`team_registry.json` is the only source for `project_identifier` — no separate mapping
+file.** Read `teams_in_scope[].browserstack_project` (or the registry entry directly). Validate
+its *shape* only: it must match `PR-<digits>` (e.g. `PR-40`). No live call is made to confirm
+it further and nothing else is consulted.
+
+- **Matches the shape → trust it and proceed.** Pass it straight through to
+  `createTestCase`/`updateTestCase` as `project_identifier`.
+- **Does not match (empty, a slug like `"gofood-backend"`, or any form other than
+  `PR-<digits>`) → reject the upload outright.** Do not ask the user to type a correction, do
+  not attempt a live lookup, do not guess a variant spelling — there is no
+  `listProjects`-equivalent tool to fall back on, so a malformed value is a data problem to fix
+  at the source (`team_registry.json`), the same way a missing DoR-gate file is: name the exact
+  field and value that failed the shape check, and stop before asking anything else.
+
+**`PR-<number>` is also TestRail's own project-id format — worth knowing, not a gate to
+enforce.** TestRail-sourced `PR-###` values already exist elsewhere in this pipeline's data
+(regression context files carry a `projectId` in this exact shape, distinguishable by a
+`caseIdNamespace: "testrail"` field and plain-numeric case ids rather than `TC-xxxxxx`). The
+shape check above cannot tell a TestRail id from a BrowserStack one — both look identical — so
+if an upload targets a project that turns out to be wrong, a mismatched `caseIdNamespace`
+elsewhere in the same data is the first place to look, not evidence the shape check itself is
+insufficient.
+
+- **`folder_id` — always ask the user when not already known.** Nothing resolves this
+  automatically: call `listFolders(project_identifier)` (and one level of sub-folders) first,
+  present the real folder tree with case counts, and let the human pick an existing one or
+  choose to create a new one via `createProjectOrFolder` — never default to an arbitrary
+  existing folder, including when only one exists, because folder semantics (what content
+  belongs where) is a judgement call this skill has no way to infer. Nothing is cached between
+  runs; ask again next time unless the human says otherwise.
+- **`priority` — send the plan's `P0`/`P1`/`P2` string verbatim. Never shift or relabel it.**
+  The tool's own field description states valid values are per-project, which invites
+  translating to the platform default (`Critical`/`High`/`Medium`/`Low`) or guessing a shifted
+  scale (`P0→P1`, assuming the target starts at `P1` not `P0`) — **both were tried and both were
+  wrong** for the one project confirmed so far (human-corrected 2026-09-01: the project's own
+  `priority` field takes `P0`/`P1`/`P2` directly, no translation). Default to the direct,
+  unmapped pass-through; only deviate if something concrete says otherwise — the call is
+  rejected, or a human who can see the BrowserStack UI says the project uses different labels.
+- **`case_type` — still omit; no tool discovers valid per-project values.** The project default
+  applies automatically (observed default: `"Regression"`).
+- **`custom_fields` — attempt confirmed names, never assume the rest exist.** Confirmed live
+  against one project (human-corrected 2026-09-01, after an initial upload wrongly omitted all
+  of them on the assumption none existed — the create response's `custom_fields: []` reflected
+  only what was *sent*, not what the project has configured):
+  - `Country v2` — from `markets[]`, e.g. `["Indonesia"]`.
+  - `Platform` — constant `"Backend"`.
+  - `Execution Mode` — **depends on `execution_mode`, sent verbatim.** `Automatable`/`Manual`
+    needs no translation; the custom field uses this skill's own vocabulary exactly.
+  - `TapMind Automated` — **ignore. Never send this field, under any value.** This skill has no
+    TapMind linkage data for any scenario it generates; its project default (`false`) is left
+    to sit as the project's own concern, not something this skill has an opinion on.
+
+  **`"Type of Test Case"` was tried and rejected — do not attempt it again without a
+  human-confirmed exact name.** `updateTestCase` reported success and `last_updated_at`
+  advanced, but a live read afterward showed no such field landed — the four above were
+  unchanged. The tool's own success message is not proof a specific field took effect; only a
+  live read is. `type_of_test` (and `test_type[]`, never attempted as a custom field at all)
+  stay hedged into `tags[]` (`type_of_test:functional`, `test_type:smoke`/`test_type:story`) —
+  that is the *only* confirmed home for these two values on this project, not a fallback held in
+  reserve.
+
+  Send the confirmed fields on the `createTestCase` call itself rather than a separate update;
+  verify via a live read after regardless (the case-creation response does not reliably echo
+  defaulted custom fields — a second read is what surfaced `Execution Mode` defaulting to the
+  wrong value once, on the one field this skill didn't explicitly set at create time). If a
+  *different* project's response shows even these confirmed names come back empty or rejected,
+  fall back to the `tags[]` hedge for that project specifically — the fallback is per-project,
+  not a global default once one project is confirmed.
+
+### What actually uploads — create-or-update, never a diff
+
+Filter to scenarios where `status == "approved"` **at the scenario level** — never by root
+status alone. A root-approved plan can still hold `changes_requested` or `deprecated`
+scenarios; neither uploads, ever, regardless of team or project.
+
+For each eligible scenario, in `scenario_id` order:
+
+| `browserstack_test_id` | Action |
+|---|---|
+| `null` | **Create.** Map fields per the table below — this is a *different* shape from the CSV export, not a re-use of it. |
+| already set | **Update** the existing case by that id. Push current content unconditionally — this is an idempotent upsert, not a diff against a remembered prior state (the schema carries no per-scenario "last synced" marker to diff against, and none should be added: `additionalProperties: false` on both the scenario and `browserstack_sync` objects is deliberate). Never create a second case for the same scenario. `updateTestCase` has no `folder_id` parameter — an already-synced case cannot be relocated between folders through this tool; a routing change after first sync needs a deliberate create-new/deprecate-old decision, not attempted here. |
+
+**Discover the BrowserStack MCP's actual tool names and parameter shapes at run time — do not
+hard-code a guess.** MCP server tool names and field shapes vary by version; load the connected
+server's real tool schemas before the first call. If no BrowserStack MCP tool is available when
+the user says yes, say so plainly and stop — never fabricate a result or claim a case was
+created or updated.
+
+### Field mapping — `sdet_plan.json` scenario → `createTestCase` / `updateTestCase`
+
+**This is not the CSV mapping.** The CSV's `## Output → sdet_testcases.csv` column contract is
+a separate, flatter shape for BrowserStack's *file import*; the MCP tool's own parameters are
+structured differently (a `test_case_steps[]` array rather than two newline-joined columns, a
+single `priority` string rather one styled for a spreadsheet cell) and some plan fields have no
+parameter at all. Use this table for MCP calls specifically:
+
+| Plan field | → parameter | Notes |
+|---|---|---|
+| `name` | `name` | verbatim |
+| `description` | `description` | verbatim — this parameter exists but the CSV mapping never captured it; genuinely additive here |
+| `step_descriptions[]` | `test_case_steps[]` (`{step, result}`) | `step` = `action`; append the `curl_reference` as a second line on `step` when non-null (the real shape has no separate curl field — dropping it silently loses the "how do you run this" detail); `result` = `expected_result` |
+| `preconditions[]` | `preconditions` (joined string) | newline-join; append `Existing regression case: <id>` per entry in `existing_testcase_ids[]` when non-empty |
+| `priority` (`P0`/`P1`/`P2`) | `priority` | **verbatim, no mapping** — see resolution above; never shift or relabel |
+| `tags[]` | `tags` | direct array; also carries the `type_of_test`/`test_type[]` hedge (`"Type of Test Case"` was tried as a custom field and confirmed rejected — this is their only home, not a fallback) |
+| `execution_mode` | `automation_status: "not_automated"` **and** `custom_fields: {"Execution Mode": <verbatim>}` | two different destinations for the same plan field, not a conflict — `automation_status` means "has test code been written yet" (always `not_automated` at first upload, matching the CSV's `Backend Automation Status: Not Automated`); the confirmed custom field `Execution Mode` means "can this be automated at all" and takes `Automatable`/`Manual` verbatim, same vocabulary as the plan's own |
+| `markets[]` | `custom_fields: {"Country v2": [...]}` | confirmed field name — send the array as-is |
+| `"Backend"` platform constant | `custom_fields: {"Platform": "Backend"}` | confirmed field name |
+| `type_of_test` | `tags[]` only | `"Type of Test Case"` tried as a custom field and confirmed rejected (silent no-op — the update call reported success, a live read showed it never landed); `tags[]` is the confirmed mechanism, not a hedge pending confirmation |
+| — | `case_type` | omit unless confirmed for this project (see above) |
+| — | `owner`, `issues`, `issue_tracker` | omit — no plan field carries an email or issue-tracker id |
+| — | `status` (BrowserStack's own case review-status: `active`/`draft`/`in_review`/`outdated`/`rejected`) | **do not confuse with the plan's `scenarios[].status` approval field** — unrelated concepts sharing a name; never set from plan data |
+
+**Fields with no BrowserStack destination at all — CSV/JSON-only, never attempted here:**
+`test_layer`, `generated_by_mode`, `is_delta`, `is_legacy_regression`, `source_ref`,
+`human_corrected`, `human_correction_types`, `owning_team`. These are explicitly the CSV's own
+"internal tracking columns appended after BrowserStack columns" — the skill's own structure
+already signals they were never meant to leave the CSV/JSON.
+
+### Writing results back
+
+After the upload attempt — whether it fully succeeded, partially succeeded, or failed entirely:
+
+1. Write `browserstack_test_id` on every scenario that was created this run; leave it `null` on
+   any that failed to create. Scenarios that were updated keep the id they already had.
+2. Write root `browserstack_sync` using exactly its existing schema shape — `project`,
+   `suite_id`, `synced_at`, `synced_count`, `unsynced_count`. This **replaces** the prior sync
+   record; it is the latest sync's summary, not an accumulating history.
+   - `synced_count` — scenarios that hold a valid `browserstack_test_id` as of *this* run:
+     new creates plus successful updates. (Broader than the field's literal wording — "received
+     a browserstack_test_id" — because the schema has no separate counter for updates; recording
+     updates only in prose and not in this count would make the JSON undercount every run after
+     the first.)
+   - `unsynced_count` — approved scenarios still carrying `browserstack_test_id: null` after this
+     run: create failures, plus any eligible-but-different-project scenarios left for a separate
+     run. An **update failure** (case already had an id; the push failed) does not flip the id to
+     null, so it is *not* caught by this count — name it explicitly in `qa_analysis.md` instead
+     (next step). Do not let a clean `unsynced_count: 0` be read as "zero failures" when an update
+     failure exists nowhere else to be seen.
+3. **Regenerate `sdet_testcases.csv`** so it reflects the now-populated `browserstack_test_id`
+   column — the CSV section already documents this column as *"populated only when the CSV is
+   re-exported after a sync."* This is that re-export.
+4. Update the `qa_analysis.md` BrowserStack sync section (below) with this run's create/update/
+   failure detail — the JSON stays to its terse closed schema; the narrative gap (especially
+   update failures, which the schema cannot represent) belongs there.
+5. **Never touch `scenarios[].status`, root `status`, `generated_by_mode`, or `review_round`.**
+
+### BrowserStack sync only — self-check
+
+- Never upload a scenario whose `status != "approved"`.
+- Never call create for a scenario that already carries a `browserstack_test_id`.
+- Never proceed past the eligibility gate without asking the user this specific invocation.
+- Never pass a `project_identifier` that doesn't match `PR-<digits>` to any BrowserStack
+  call — reject the upload and name the exact field/value instead of guessing or asking for a
+  correction.
+- Never write `browserstack_test_id` or `browserstack_sync` from any mode *other than* this
+  sync — the generator writes `null` at generation, always; only this action assigns a value.
+- Never claim a create or update succeeded without a corresponding successful MCP response — a
+  fabricated success is worse than a stated failure.
+- If any update failed, name it in `qa_analysis.md` even though `unsynced_count` cannot carry it.
+- Never conclude a project has no configured custom fields from a `createTestCase` response
+  showing `custom_fields: []` — that reflects only what was *sent*, not what the project has
+  configured or defaults to. A live `listTestCases`/read call is what actually confirms
+  presence or absence; skipping it on this exact assumption is what produced a wrong
+  `Execution Mode` value and two omitted fields (`Country v2`, `Platform`) on the first upload
+  this rule exists because of.
 
 ## Code-change-context mode rules
 
@@ -1382,6 +1607,8 @@ Total scenarios, RFC coverage %, gaps count, blocked gaps count, provisional cou
 
 On a Code-change-context run also log: findings read, bound by id, rebound by behaviour, unbound; confirmations; auto-applied; conflicts pending; deprecated; scenarios minted; suggestions skipped as already covered; scenarios marked blocked_by_code_gap.
 
+On a BrowserStack sync, log instead: root status at the eligibility check; eligible scenario count and how many teams'/projects' worth; whether the user was asked and their answer; project targeted; created count; updated count; failed-create count; failed-update count (the one the JSON schema cannot carry); final `synced_count` / `unsynced_count` written to `browserstack_sync`.
+
 Also log the granularity metrics, so drift back to one-assertion-per-scenario is visible:
 - mean `step_descriptions` per scenario — **expect 4–6**; below 3 means the granularity rule was not applied
 - count of 1-step scenarios — expect near zero
@@ -1426,3 +1653,10 @@ Reject and regroup if any of these hold:
 - any `suggested_scenarios[]` entry neither minted as a scenario nor recorded as skipped with a reason
 - a scenario minted from the diff without `source: CODE_DIFF`, or carrying a `SUG-` id instead of a minted `SC-` id
 - `generation_mode` left at `upstream_context` after a code-change run
+- **BrowserStack sync only:**
+- a scenario was uploaded whose `status != "approved"`
+- a create was called for a scenario that already carried a `browserstack_test_id`
+- the confirmation question was skipped for any invocation that had eligible work
+- `browserstack_test_id` or root `browserstack_sync` was written by a mode other than the sync itself
+- an update failure exists with no corresponding line in `qa_analysis.md`
+- more than one team's project had eligible scenarios and this run pushed to more than one project, or picked one without asking
