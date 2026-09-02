@@ -1,8 +1,9 @@
 # Step & fixture reuse — shared helpers
 
-Companion to `GENERATION.md` §5 and `SKILL.md` §1.5 / §G.4. Avoid copying the same
-`TapMind.runStep(...)` lines into every `@Test`. Applies to **any** repeated step — TDP
-fixtures, auth preambles, create/fetch flows, gRPC invokes — not only TDP.
+Companion to `GENERATION.md` §5 and `SKILL.md` §G.B.4 / §1.5. Avoid copying the same
+`TapMind.runStep(...)` lines into every `@Test`. Applies to **both intake paths** after TDP
+is resolved, and to **any** repeated step — TDP fixtures, auth preambles, create/fetch flows,
+gRPC invokes — not only TDP.
 
 ## Problem (observed in gofood `tests/tapmind_backend/`)
 
