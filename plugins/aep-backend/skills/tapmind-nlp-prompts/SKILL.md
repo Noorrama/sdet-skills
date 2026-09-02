@@ -7,11 +7,12 @@ description: >-
   @TestInfo. Use when the user is writing/debugging a TapMind prompt,
   mentions TapMind / runStep / assertStep / bind_select / "entry where" /
   verify-only steps / grpc / grpcurl / grpc.invoke / rpc_alias, OR when given
-  automation_plan.json (or sdet_plan
-  step_descriptions) to generate prompts, batch-verify them, run steps
-  via MCP, and emit corrected suite test methods. Before generating, scan
-  for existing TapMind.runStep tests (NLP_COVERAGE.md) so only missing
-  scenarios are emitted — same dedup discipline as gbt-test-code-generator.
+  automation_plan.json, existing Java tests, BrowserStack test-case steps, a test-case sheet,
+  or sdet_plan step_descriptions to generate prompts, batch-verify them,
+  run steps via MCP, and emit corrected suite test methods. Two intake
+  paths (plan vs code/test-case) merge into one shared NLP core — see §G.
+  Before generating, scan for existing TapMind.runStep tests
+  (NLP_COVERAGE.md) so only missing scenarios are emitted.
   This is the actual
   TapMind SDK grammar — not the Allure `@Step("Given/When/Then ...")`
   labels used by backend-test-code-generator.
@@ -32,13 +33,14 @@ real TapMind control-plane SDK, and for **generating suite-ready tests** from
 
 | Mode | When | Output |
 |---|---|---|
-| **Reference** | Hand-writing / debugging one prompt | Corrected prompt string(s) using §§0–10 (rewrite grpcurl → §3.8). On `400 invalid_request_body`, apply §8.1.1 sparse-body checklist before blaming memory. |
-| **Generate** | Given `automation_plan.json` (preferred) or `sdet_plan` steps | Ordered `prompts[]` per `scenario_id` |
-| **Verify + run** | After generate, using backend MCP TapMind tools | Corrected `prompts[]` + per-step verdicts |
-| **Suite convert** | After prompts are verified (and optionally run) | Java method with `@Test` / `@TestInfo` + `runStep`/`assertStep` lines |
+| **Reference** | Hand-writing / debugging one prompt | Corrected prompt string(s) using §§0–10 (rewrite grpcurl → §3.8). On `400 invalid_request_body`, apply §8.1.1 sparse-body checklist before blaming memory. Artifact path §G.A.2 — no plan approval gate. |
+| **Generate** | Plan (`automation_plan.json`) **or** artifact (Java / BS steps / `sdet_plan`) | Ordered `prompts[]` per scenario or target method |
+| **Verify + run** | After generate — **both paths** | Corrected `prompts[]` + per-step verdicts via MCP |
+| **Suite convert** | After prompts verified (and optionally run) — **both paths** | Java method with `@Test` / `@TestInfo` + `runStep`/`assertStep` lines |
 
-Pipeline detail: `GENERATION.md`. Coverage / dedup: `NLP_COVERAGE.md`. Fixture reuse:
-`FIXTURE_REUSE.md`. Control plane: `CONTROL_PLANE.md`. Grammar: §§0–10 below.
+**Intake paths:** §G.A (reference + TDP differ) → **shared core** §G.B (coverage, grammar,
+registry, MCP, suite convert). Detail: `GENERATION.md`. Coverage: `NLP_COVERAGE.md`.
+Fixture reuse: `FIXTURE_REUSE.md`. Control plane: `CONTROL_PLANE.md`. Grammar: §§0–10 below.
 
 ---
 
@@ -51,7 +53,7 @@ NLP generation reuses the same upstream gates where they apply. Mapping:
 | `dedup-generator` | Honour `is_dedup: true` on plan |
 | `gbt-method-decision-maker` | `NLP_COVERAGE.md` → `nlp_method_decisions.json` |
 | `gbt-test-code-generator` skip `exact_match` | Skip scenarios already covered by `TapMind.runStep` |
-| `gbt-test-code-generator` approval gate | Scenario `status: approved` first (`NLP_COVERAGE.md`) |
+| `gbt-test-code-generator` approval gate | Plan path only — scenario `status: approved` (`NLP_COVERAGE.md`) |
 | Module profile + Endpoint/Client/Controller | `module` (PDG) + `service_name` + plain-English prompts |
 | `test-data-generator` payloads | `saveMemory` + `saved <key>` before steps |
 | Compile + `test-code-validator` | MCP verify + optional execute + §8.1.1 body check |
@@ -120,9 +122,36 @@ over HTTP; target may be unregistered.
 
 ---
 
-## G. Generation mode — automation suite → TapMind test
+## G. Generation mode — two intake paths, one NLP core
 
-### G.1 Inputs (prefer `automation_plan.json`)
+### G.0 Path overview
+
+```
+                    ┌─ Plan-driven (§G.A.1) ── approval + enriched TDP
+  Intake (varies) ──┤
+                    └─ Artifact-driven (§G.A.2) ── infer TDP from code/steps
+
+                              ▼ merge
+
+  Shared core (§G.B) ── coverage scan → prompts → registry/Swagger → MCP verify/run → suite convert
+```
+
+| Stage | Plan-driven | Artifact-driven |
+|---|---|---|
+| **Reference** | `automation_plan.json` — `scenario_id`, `step_descriptions`, fixtures | Existing `@Test`, BrowserStack steps, RestAssured/setup, or single prompt |
+| **TDP** | `test_buddy_prompt` / `test_data_output`; skip `tdp_not_ready` | Infer from setup/helpers/curl; `NEEDS_REVIEW` if `saved <key>` unresolved |
+| **Approval** | `status: approved` or `run.json` `keep` | User intent — no plan status gate |
+| **Coverage scan** | Same — `NLP_COVERAGE.md` | Same |
+| **Prompt grammar** | Same — §§2–10 | Same |
+| **Registry / Swagger** | Same — `CONTROL_PLANE.md` | Same |
+| **MCP verify + run** | Same | Same |
+| **Suite convert** | Same — `FIXTURE_REUSE.md` | Same — preserve existing `@TestInfo` when migrating |
+
+---
+
+### G.A Intake (varies by path)
+
+#### G.A.1 Plan-driven — `automation_plan.json`
 
 Per `automation_scenarios[]` entry, read:
 
@@ -134,46 +163,109 @@ Per `automation_scenarios[]` entry, read:
 | API | `endpoint`, scenario-level `curl_reference` (prefer over step curl — FIX-scoped) |
 | gRPC alias | `GET /v1/grpc/targets` — match grpcurl host:port; or `# alias:` in curl |
 | Steps | `step_descriptions[]` → `step`, `action`, `expected_result`, optional `curl_reference` |
-| Fixtures | `test_data[].fixture_id`, `required_state`, later `response_fields_used` |
+| Fixtures | `test_data[].fixture_id`, `required_state`, `response_fields_used` |
 | Modifiers | `tags[]`, `execution_hints`, `is_dedup`, **`status`** / `approval_status` |
-| Suite meta (when present in plan/context) | `groups`, `test_info` / `countryName`, `projectId`, `suiteId`, `testCaseIds`, `owner` |
-| TDP (enriched plans) | `test_data[].test_data_output`, plan `test_data_payloads[]` |
+| Suite meta | `existing_testcase_ids[]` + `browserstack_test_id` — both propagated from `sdet_plan`, often empty/null pre-sync. No `countryName`/`projectId`/`suiteId`/`owner`/`groups` field exists on the plan. |
+| TDP (enriched) | `test_data[].test_data_output`, plan `test_data_payloads[]` |
 
-**Generate only when** the scenario passes the approval gate in `NLP_COVERAGE.md` (`status:
-"approved"` or equivalent). Skip all other scenarios — on enriched plans, TDP exists only for
-approved rows. Plan-level `"status": "draft"` does not override per-scenario `"approved"`.
+**Gates (plan only):** generate only when `status: "approved"` (or `run.json` `keep`). Skip
+`draft`, `tdp_not_ready`, `is_dedup`, plan tags `deferred` / `skip` / `manual`. Plan-level
+`"status": "draft"` does **not** override per-scenario `"approved"`. See `NLP_COVERAGE.md`.
 
-Skip when `is_dedup: true`, `nlp_method_decisions` says `exact_match`, failed approval/TDP
-gates, or tags include `deferred` / `skip` / `manual`.
+**TDP:** use `test_buddy_prompt` from `test_data_output` when present; prefer
+`TDP_SUPPORTED`; `TDP_OPERATION_FALLBACK` may run with `NEEDS_REVIEW` on primary fixtures.
+Skip when `{{FIX-…}}` is unresolved (`tdp_not_ready`).
 
-If suite meta is missing, leave `@TestInfo` fields as empty strings / empty arrays — do **not** invent BrowserStack/TestRail IDs.
+Set `tapmindTest.source.kind` → `"automation_plan"`.
 
-### G.1.5 Coverage scan (before G.2)
+If suite meta is missing, leave `@TestInfo` empty — do **not** invent BrowserStack/TestRail IDs.
+
+#### G.A.2 Artifact-driven — code / test case / reference
+
+Use when the user points at an **existing test**, **BrowserStack case**, a **test-case sheet**
+(e.g. `sdet_testcases.csv` — `Id`/`Title`/`Preconditions`/`Steps`/`Expected Result` columns,
+same shape as a BrowserStack case pre-upload), **`sdet_plan` steps without enrichment**, or a
+**single prompt** to fix — not a batch from an enriched plan.
+
+| Need | Source |
+|---|---|
+| Target method | User path, `@TestInfo.testCaseIds`, or class#method |
+| Steps | Normalize to `action` + `expected_result`: RestAssured calls, `@Step`, BS step text, sheet `Steps`/`Expected Result` columns (1:1 numbered), or prompt under edit |
+| Setup / TDP | `@BeforeMethod`, helpers, `CustomerHelper`, inline tokens, curl `Authorization`, sheet `Preconditions` column |
+| Pinning | Existing `runStep(..., pdg, service)`, test package/module, or user |
+| Suite meta | **Preserve** from existing class when migrating — do not overwrite known `@TestInfo` |
+| Coded coverage | Existing non-TapMind `@Test` on same endpoint — primary signal for migration |
+
+**No plan approval gate.** User request = intent to generate / convert / fix.
+
+**TDP inference (artifact path):**
+
+| Signal | Action |
+|---|---|
+| Step/curl needs bearer token or entity id | Add TDP `runStep` or call existing `*TapMindTestBase` helper |
+| Existing Java setup provisions data | Convert to helper + TDP `runStep`, or keep `saveMemory(env)` (§7) |
+| `saved <key>` referenced with no prior save in method/base | Flag `NEEDS_REVIEW: unresolved_data_dependency` — do not invent ids |
+| Hardcoded token/id in coded test | Flag `NEEDS_REVIEW: migrate_to_tdp` — §7 |
+| Enriched `test_buddy_prompt` available (hybrid) | May reuse buddy prompt even without plan batch |
+
+**Normalize coded tests before §G.B:** extract HTTP/gRPC calls → action prompts; Java/AssertJ
+asserts → `| verify:` or §3.4 verify-only; shared setup → helper candidates (`FIXTURE_REUSE.md`).
+
+Set `tapmindTest.source.kind` → `"coded_migration"` | `"browserstack_case"` | `"reference"` |
+`"sdet_plan"`.
+
+**Reference mode** (one prompt): apply §§0–10 + MCP verify if asked; add TDP only when the
+prompt references unsaved memory keys.
+
+#### G.A.3 Upstream prerequisites (by path)
+
+| Skill | Plan-driven | Artifact-driven |
+|---|---|---|
+| `dedup-generator` | Yes — honour `is_dedup` | No |
+| `test-data-generator` + payloads | When plan has `{{FIX-…}}` | Optional — runtime TDP via `runStep` |
+| `run.json` / approval | Yes for batch suite write | No — explicit user intent |
+| Read target Java file | Optional (coverage) | **Yes** when migrating coded test |
+| `gbt-method-decision-maker` | **Yes, primary** — reuse `method_decisions.json` (`NLP_COVERAGE.md`) | Useful — detect coded `exact_match` |
+
+---
+
+### G.B Shared NLP core (both paths)
+
+#### G.B.1 Coverage scan (before prompt generate)
 
 Run **`NLP_COVERAGE.md`** on the target module test tree. Write `nlp_method_decisions.json`.
-Do not generate prompts for `exact_match` scenarios. For `partial_match`, generate only delta
-steps. Never overwrite a non-TapMind method that already occupies `method_name`.
 
-### G.2 Generate all prompts first (no MCP)
+**Lookup anchors** (path-specific, scan logic same):
 
-For each scenario, emit an ordered `prompts[]` (one string per step) using the grammar in §§2–10:
+| Path | Primary keys |
+|---|---|
+| Plan | `scenario_id`, plan `method_name`, plan `existing_testcase_ids[]` / `browserstack_test_id` |
+| Artifact | `@TestInfo.testCaseIds`, existing method name, endpoint from coded test |
 
-0. If any step has a grpcurl `curl_reference`, `GET https://<control-plane-host>/v1/grpc/targets`
-   once (per batch; host from `CONTROL_PLANE.md`) and build host:port → alias map. On HTTP
-   failure → VPN message; do not guess aliases.
-1. Prefer scenario-level `curl_reference` + `test_data` for placeholders (`{{FIX-xxx.field}}` → natural **`saved <field>`** after fixture / `saveMemory` bind — see §4).
-2. Classify each step (generic — not domain-specific):
-   - `curl_reference` starts with `grpcurl` → §3.8 gRPC invoke
-   - non-empty HTTP curl → §3.1 API action `| verify: …`
-   - Redis/Kafka/DB verbs + no curl → §3.5
-   - re-check same resource (HTTP or gRPC), no new curl/request → §3.4 verify-only
-   - wait/poll or e2e+reliability wait → §3.2 (must include fetch — §3.1 action or full §3.8)
-   - stub/queue/log inspect with no TapMind grammar → omit from runnable prompts; flag `NEEDS_REVIEW`
-3. First-touch vs repeat-touch by resource + step order (§3.4).
-4. Track memory keys across the list — never invent a name not saved earlier. Reference bound keys as **`saved <key>`**, not `${memory.<key>}` (§4).
-5. Unknown scalar vs array shape → flag; do not guess `save $.path` vs `entry where`.
+Do not generate for `exact_match`. For `partial_match`, delta steps only. Never overwrite a
+non-TapMind method that occupies `method_name`. Flag `NEEDS_REVIEW: coded_coverage_exists` when
+migrating and coded test already covers the scenario.
 
-Output shape after generate:
+#### G.B.2 Generate all prompts first (no MCP)
+
+For each accepted target, emit ordered `prompts[]` using grammar §§2–10:
+
+0. If any step has grpcurl `curl_reference`, `GET …/v1/grpc/targets` once per batch
+   (`CONTROL_PLANE.md`). On HTTP failure → VPN message; do not guess aliases.
+1. Resolve placeholders: plan `{{FIX-xxx.field}}` → **`saved <field>`** after TDP/helper bind;
+   artifact path → same after inferred setup (§4).
+2. Classify each step:
+   - grpcurl → §3.8
+   - HTTP curl / clear HTTP action → §3.1 `| verify: …`
+   - Redis/Kafka/DB → §3.5
+   - Same resource re-check → §3.4 verify-only
+   - wait/poll → §3.2 (must include fetch)
+   - no TapMind grammar → omit; flag `NEEDS_REVIEW`
+3. First-touch vs repeat-touch (§3.4).
+4. Track memory keys — **`saved <key>`**, not `${memory.<key>}` (§4).
+5. Unknown scalar vs array → flag; do not guess `save $.path` vs `entry where`.
+
+Output shape:
 
 ```json
 {
@@ -185,13 +277,14 @@ Output shape after generate:
 }
 ```
 
-### G.3 Verify one prompt at a time, then run one-by-one
+(`scenario_id` optional on artifact path — use method name or testCaseId as manifest key.)
 
-Use **only** MCP tools `tapmind_verify_prompt` and `tapmind_run_nlp_command` (see
-`CONTROL_PLANE.md`). Do not use `grpc_invoke`, ingest, postgres, or redis MCP tools in this
-pipeline.
+#### G.B.3 Verify one prompt at a time, then run one-by-one
 
-**Verify (sequential):** `tapmind_verify_prompt` — one `prompt` string per call:
+Use **only** MCP `tapmind_verify_prompt` and `tapmind_run_nlp_command` (`CONTROL_PLANE.md`).
+Do not use `grpc_invoke`, ingest, postgres, or redis MCP in this pipeline.
+
+**Verify (sequential):** one prompt per call:
 
 ```json
 {
@@ -202,109 +295,79 @@ pipeline.
 }
 ```
 
-Apply that call's `corrected_test_prompt` / `corrected_verify_prompt` → update `prompts[i]` →
-re-verify that prompt until clean or flag `NEEDS_REVIEW` (response `status:
-"NEEDS_CLARIFICATION"` + `clarifying_question`). The response's `declared_bindings` also lists
-the memory keys the planner actually resolved for that step (`saved <key>` / `${memory.x}`) —
-cross-check against your own memory-key tracking (§4) rather than assuming.
+Apply `corrected_test_prompt` / `corrected_verify_prompt` → re-verify until clean or
+`NEEDS_REVIEW`. Cross-check `declared_bindings` against memory-key tracking (§4).
 
-> If a batch overload (`prompts: string[]`) is ever exposed on the MCP tool, prefer it — one
-> call per scenario's full list lets the planner see the whole sequence + memory names at once,
-> which catches cross-step issues that one-at-a-time verification can't.
+**Execute (sequential):** `tapmind_run_nlp_command` — reuse `conversationId` from step 1.
 
-**Execute (sequential):** `tapmind_run_nlp_command` — one prompt at a time. Reuse
-`conversationId` from step 1 on steps 2…N.
+If `no tool_call.target` → `GET /v1/grpc/targets`; flag `NEEDS_REVIEW` if unregistered.
+If REST verify shows no matching op → `NEEDS_REVIEW` — check `GET /v1/targets`; ingest only
+when user explicitly asks.
 
-If execute fails with `no tool_call.target` or missing gRPC routing → `GET /v1/grpc/targets` via
-HTTP on the same environment host; flag `NEEDS_REVIEW` if alias/host is not registered.
+Record `correctedSteps[]`: `{ n, text, change: "reworded"|"inserted", was, why }`.
 
-Record corrections as `correctedSteps[]`: `{ n, text, change: "reworded"|"inserted", was, why }`.
+#### G.B.4 Suite convert — `@Test` / `@TestInfo` + step lines
 
-### G.4 Suite convert — `@Test` / `@TestInfo` + step lines
+After prompts are finalized (verified, optionally executed), convert to a suite method.
 
-After prompts are finalized (verified, and optionally executed), convert into a suite method.
-
-**Annotation contract** (emit exactly this shape; fill from plan/suite meta):
+**Annotation contract:**
 
 ```java
 @Test(description = "<scenario description>", groups = {"<group>"})
 @TestInfo(countryName = "<COUNTRY>", projectId = "<PROJECT>", suiteId = "<SUITE>", testCaseIds = {"<ID>"}, owner = "<email-or-empty>")
 ```
 
-Example (from a validated suite scenario):
-
-```java
-@Test(description = "PAM 8 Levels catalogue presents monthly, yearly and special recognition (8 levels), not only monthly performance", groups = {"driverTest"})
-@TestInfo(countryName = "INDONESIA", projectId = "MARKETPLACE_DRIVER_PLATFORM", suiteId = "DRIVER_APP_FRONTEND", testCaseIds = {"C5542965"}, owner = "")
-```
-
 **Field mapping**
 
-| Annotation | Source |
-|---|---|
-| `@Test.description` | `description` (fallback: scenario name / `requirement_ref`) |
-| `@Test.groups` | suite `groups` if present; else derive from `tags` / `test_layer` (e.g. `"driverTest"`, `"P0"`) — never invent product suite names |
-| `@TestInfo.countryName` | suite / tasks context |
-| `@TestInfo.projectId` | suite / tasks context |
-| `@TestInfo.suiteId` | suite / tasks context |
-| `@TestInfo.testCaseIds` | suite / BrowserStack / TestRail IDs when known; else `{}` |
-| `@TestInfo.owner` | suite owner or `""` |
-| method name | `method_name` |
-| class / package | `test_class`, `package` |
+| Annotation | Plan-driven source | Artifact-driven source |
+|---|---|---|
+| `@Test.description` | `description` / `requirement_ref` | Preserve existing or derive from test intent |
+| `@Test.groups` | `tags[]` / `test_layer` (no plan `groups` field) | Preserve existing groups |
+| `@TestInfo.testCaseIds` | `existing_testcase_ids[]` + `browserstack_test_id` (often empty/null pre-sync) | Preserve existing `@TestInfo.testCaseIds` |
+| `@TestInfo.countryName` / `projectId` / `suiteId` / `owner` | No plan field — leave empty, do not invent | **Preserve** from existing class when present |
+| method name | `method_name` | Existing method name when migrating |
+| class / package | `test_class`, `package` | Existing class when migrating |
 
-**Method body conversion** (from finalized `prompts[]` + any MCP run corrections):
+**Method body conversion**
 
 | Prompt role | Java line |
 |---|---|
-| Action / poll / tool | `TapMind.runStep("<prompt>");` or with pdg/service/polling overloads (§3.2, §3.6) |
-| Final assertion focus | `TapMind.assertStep("<prompt>", "<failure message>");` when a custom message helps |
-| Setup / repeated steps | `provision…()` / `create…()` / `fetch…()` helpers on `*TapMindTestBase` — `FIXTURE_REUSE.md` |
-| Inserted guards from run | Extra `runStep(...)` lines with `kind: guard` in the ledger |
+| Action / poll / tool | `TapMind.runStep("…");` or pdg/service/polling overloads |
+| Final assertion | `TapMind.assertStep("…", "…");` when helpful |
+| Setup / repeated steps | `provision…()` / `create…()` / `fetch…()` on `*TapMindTestBase` |
+| Inserted guards | Extra `runStep(...)` with `kind: guard` |
 
-Also emit machine form for reports / downstream generators (`tapmindTest`):
+Machine form (`tapmindTest`):
 
 ```json
 {
   "className": "<test_class>",
   "methodName": "<method_name>",
-  "package": "<package>",
-  "description": "<@Test description>",
-  "groups": ["\"<group>\""],
-  "testInfo": {
-    "countryName": "…",
-    "projectId": "…",
-    "suiteId": "…",
-    "testCaseIds": ["…"],
-    "owner": ""
-  },
   "source": {
-    "kind": "automation_plan",
-    "scenarioRef": "<scenario_id>",
-    "requirementRef": "<requirement_ref>"
+    "kind": "automation_plan | coded_migration | browserstack_case | reference | sdet_plan",
+    "scenarioRef": "<scenario_id or testCaseId>",
+    "requirementRef": "<requirement_ref or empty>"
   },
   "lines": [
-    { "code": "TapMind.runStep(\"…\");", "kind": "step", "fromStep": 1 }
+    { "code": "TapMind.runStep(\"…\");", "kind": "step", "fromStep": 1 },
+    { "code": "provisionHostNoGroupAndGroupOrderMerchant();", "kind": "helper-call" }
   ]
 }
 ```
 
-### G.5 Output contract (generation mode)
+#### G.B.5 Output contract
 
-Return per scenario (not free-form prose):
+Return per target (not free-form prose):
 
-1. `nlp_method_decisions` verdict (or reference to shared file)
-2. `prompts[]` — ordered NLP strings (post-verify if MCP was used)
-3. `correctedSteps[]` — if any rewrites/inserts
-4. `tapmindTest` — suite metadata + convertible `lines[]` (`action`: `create` | `append`)
-5. `skipped[]` at batch level — every filtered scenario with reason
-6. Optional Java snippet: annotations + method signature + body lines
+1. `nlp_method_decisions` verdict (or ref to shared file)
+2. `prompts[]` — post-verify if MCP used
+3. `correctedSteps[]` — if any rewrites
+4. `tapmindTest` — metadata + `lines[]` (`action`: `create` | `append`)
+5. `skipped[]` — every filtered scenario/target with reason
+6. Optional Java snippet
 
-Consumers (`test-code-generator`, report skill) drop `lines[]` into the method body mechanically.
-
-**Ingest (outside pipeline):** when verify returns no matching REST operation, flag
-`NEEDS_REVIEW`. If the user explicitly asks to ingest, use MCP `tapmind_ingest_curl` (requires
-`curl` + `promptExample` + `serviceId` + `productGroup`) or `tapmind_ingest_openapi`, then
-re-run verify — never auto-ingest during generate.
+**Ingest (outside pipeline, both paths):** flag `NEEDS_REVIEW` when verify shows no REST op.
+Ingest only on explicit user request (`tapmind_ingest_curl` / `tapmind_ingest_openapi`).
 
 ---
 
