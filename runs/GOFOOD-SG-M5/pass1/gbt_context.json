@@ -1,0 +1,191 @@
+{
+  "source": {
+    "graph_probed_at": "2026-08-22T19:22:17.054012+00:00",
+    "graph_available": true,
+    "graph_node_count": 378479,
+    "built_for_module": "gofood",
+    "source_kind": "repo_verified",
+    "note": "Every path below was opened on disk. The enricher's graph returned no Endpoint node for this route (String.format URL, indexer gap), so layer verdicts come from direct repo verification - gbt-context-builder rule 4: never emit a path you have not verified."
+  },
+  "module": "gofood",
+  "module_root": "gofood",
+  "packages": {
+    "test": "tests.GroupOrder.regression",
+    "test_confidence": "verified",
+    "main": "serviceEndpoints.groupOrder",
+    "main_confidence": "verified"
+  },
+  "endpoints": [
+    {
+      "api": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "method": "POST",
+      "path": "/gofood/meal-scheduler/v1/group-order-sessions",
+      "normalized_path": "/gofood/meal-scheduler/v1/group-order-sessions",
+      "exists_in_graph": false,
+      "exists_on_disk": true,
+      "match_quality": "exact_on_disk",
+      "service": "mealScheduler",
+      "decisions": {
+        "endpoint": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateGroupOrderEndPoint.java",
+          "class_name": "CreateGroupOrderEndPoint",
+          "reason": "implements IServiceEndpoint; url() = String.format(\"%s/gofood/meal-scheduler/v1/group-order-sessions\", GoFoodProperties.host), POST. Verified on disk - the graph missed it because the indexer did not resolve the format string."
+        },
+        "client": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/clients/mealScheduler/GroupOrderClient.java",
+          "class_name": "GroupOrderClient",
+          "reason": "createGroupOrder(body,userId,bearerToken) already wraps the endpoint"
+        },
+        "controller": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/controllers/GroupOrder/GroupOrderController.java",
+          "class_name": "GroupOrderController",
+          "reason": "createGroupOrder + createGroupOrderFailure both present"
+        },
+        "response": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+          "class_name": "CreateAndUpdateGroupOrderResponse",
+          "reason": "reused; needs an additive social_group block"
+        },
+        "test_base": {
+          "decision": "reuse",
+          "path": "gofood/src/test/java/base/GoFoodTestBase.java",
+          "class_name": "GoFoodTestBase",
+          "reason": "exposes groupOrderController; every GroupOrder test extends it"
+        },
+        "test": {
+          "decision": "reuse",
+          "path": "gofood/src/test/java/tests/GroupOrder/regression/CreateGroupOrderTests.java",
+          "class_name": "CreateGroupOrderTests",
+          "reason": "5 existing methods on this endpoint - add methods here, do NOT create a sibling"
+        },
+        "assertion": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+          "class_name": "CreateAndUpdateGroupOrderResponse",
+          "reason": "gofood asserts statically on the response class plus the utils/GroupOrderErrors enum - there is no <Svc>Assertions class in this module"
+        },
+        "data_provider": {
+          "decision": "reuse",
+          "path": "gofood/src/test/java/tests/GroupOrder/regression/CreateGroupOrderTests.java",
+          "class_name": "CreateGroupOrderTests",
+          "reason": "@DataProvider(\"BillingTypes\") is declared in-class, not in a separate provider class"
+        },
+        "helper": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/requestbodybuilders/groupOrder/GroupOrderRequestBodyBuilder.java",
+          "class_name": "GroupOrderRequestBodyBuilder",
+          "reason": "request bodies are built here; needs an overload for the invite fields"
+        }
+      }
+    }
+  ],
+  "existing_matches": {
+    "POST /gofood/meal-scheduler/v1/group-order-sessions": {
+      "exists": true,
+      "source": "repo_verified",
+      "matches": [
+        {
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateGroupOrderEndPoint.java",
+          "role": "endpoint"
+        },
+        {
+          "path": "gofood/src/main/java/clients/mealScheduler/GroupOrderClient.java",
+          "role": "client"
+        },
+        {
+          "path": "gofood/src/main/java/controllers/GroupOrder/GroupOrderController.java",
+          "role": "controller"
+        },
+        {
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+          "role": "response"
+        },
+        {
+          "path": "gofood/src/test/java/base/GoFoodTestBase.java",
+          "role": "test_base"
+        },
+        {
+          "path": "gofood/src/test/java/tests/GroupOrder/regression/CreateGroupOrderTests.java",
+          "role": "test"
+        },
+        {
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+          "role": "assertion"
+        },
+        {
+          "path": "gofood/src/test/java/tests/GroupOrder/regression/CreateGroupOrderTests.java",
+          "role": "data_provider"
+        },
+        {
+          "path": "gofood/src/main/java/requestbodybuilders/groupOrder/GroupOrderRequestBodyBuilder.java",
+          "role": "helper"
+        }
+      ]
+    }
+  },
+  "exemplars": {
+    "test": [
+      {
+        "path": "gofood/src/test/java/tests/GroupOrder/regression/CreateGroupOrderCartErrorScenariosTests.java"
+      }
+    ],
+    "endpoint": [
+      {
+        "path": "gofood/src/main/java/serviceEndpoints/groupOrder/UpdateGroupOrderEndPoint.java"
+      }
+    ]
+  },
+  "module_profile_skill": "",
+  "module_profile_substitute": "gofood-api-test-writer",
+  "shared_files_to_update": [
+    {
+      "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateGroupOrderRequestBody.java",
+      "why": "add invite_social_group_id + invite_history_group_ids (today: billing_type, restaurant_id only)"
+    },
+    {
+      "path": "gofood/src/main/java/requestbodybuilders/groupOrder/GroupOrderRequestBodyBuilder.java",
+      "why": "overload createGroupOrderRequestBody for the invite fields"
+    },
+    {
+      "path": "gofood/src/main/java/serviceEndpoints/groupOrder/CreateAndUpdateGroupOrderResponse.java",
+      "why": "add social_group block + additive assertNull in assertCreateGroupOrder (SC-002)"
+    },
+    {
+      "path": "gofood/src/test/java/utils/GroupOrderErrors.java",
+      "why": "add the 400 bad_request constant for mutually-exclusive invite fields (SC-003)"
+    },
+    {
+      "path": "gofood/src/test/java/constants/GroupOrderConstants.java",
+      "why": "dummy social-group / history-group id constants with TODOs"
+    }
+  ],
+  "dependency_impact": {
+    "dependent_modules": [],
+    "direct_test_files": [],
+    "impact_score": 0,
+    "computed_from": "not_computed"
+  },
+  "constraints_applied": [],
+  "unresolved_endpoints": [],
+  "gaps": [
+    {
+      "type": "graph_index_gap",
+      "ref": "POST /gofood/meal-scheduler/v1/group-order-sessions",
+      "detail": "Absent from all 4056 graph Endpoint nodes; present on disk. String.format URL not resolved by the indexer."
+    },
+    {
+      "type": "module_profile_absent",
+      "ref": "gofood",
+      "detail": "No gbt-module-gofood profile. Used gofood-api-test-writer plus direct exemplar reading; orchestrator warns output quality drops without a profile."
+    },
+    {
+      "type": "no_assertion_class",
+      "ref": "gofood",
+      "detail": "gofood has no <Svc>Assertions class; assertions are static on response classes plus the GroupOrderErrors enum. The plan's SocialGroupSessionAssertions does not fit this module."
+    }
+  ]
+}

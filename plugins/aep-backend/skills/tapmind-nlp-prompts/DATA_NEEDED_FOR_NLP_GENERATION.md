@@ -1,58 +1,85 @@
-# NLP Step Generation — Data Needed & Skill Changes
+# NLP Step Generation — Data Needed (both intake paths)
 
-Scope: `tapmind-nlp-prompts` generation / verify / suite-convert modes.
-Primary input is **`automation_plan.json`**. See `SKILL.md` §G, `GENERATION.md`, and
-`CONTROL_PLANE.md`.
+Scope: `tapmind-nlp-prompts` generate / verify / suite-convert. See `SKILL.md` §G,
+`GENERATION.md`, `NLP_COVERAGE.md`, `CONTROL_PLANE.md`.
 
 ## Why
 
-Go from automation scenario data → real `runStep`/`assertStep` prompts → MCP verify → MCP run
-→ suite Java with `@Test` / `@TestInfo`.
+Intake (plan or artifact) → normalize steps → TDP decision → shared NLP core → suite Java.
 
-## Data needed per scenario
+## Path selection
 
-| Data | Preferred source | Grammar / suite use |
+| Path | Primary input | TDP source | Approval |
+|---|---|---|---|
+| **Plan-driven** | `automation_plan.json` | `test_data_output`, `test_buddy_prompt`, `test_data_payloads` | `status: approved` / `run.json` |
+| **Artifact-driven** | Java `@Test`, BS steps, `sdet_plan`, single prompt | Infer from setup/code/curl | User intent |
+
+After intake merges, **all rows below marked "Both"** apply identically.
+
+## Data needed — plan-driven
+
+| Data | Source | Use |
 |---|---|---|
-| Action text | `automation_scenarios[].step_descriptions[].action` | §3.1 action |
-| Expected result | `…step_descriptions[].expected_result` | §3.1 verify / §3.4 |
-| Step order | `…step_descriptions[].step` | first-touch vs verify-only |
-| Step curl (optional) | `…step_descriptions[].curl_reference` | grpcurl → §3.8 |
-| Scenario curl (preferred) | `automation_scenarios[].curl_reference` | FIX-scoped HTTP or grpcurl |
-| gRPC rpc_alias | HTTP `GET /v1/grpc/targets` on control plane host | §3.8 |
-| gRPC service / method | grpcurl `Service/Method` | §3.8 |
-| gRPC request body | grpcurl `-d` JSON | §3.8 `request:` |
-| Static proto | HTTP `GET /v1/grpc/static-proto/aliases` | when reflection off |
-| Control plane host | `environments[]` / user / tasks context | `CONTROL_PLANE.md` |
-| PDG / service | `…module` / `…service_name` | MCP `productGroup` / `targetServiceId` |
-| Class / method | `…package` / `…test_class` / `…method_name` | suite convert |
-| Fixtures / tags / TestInfo | plan + suite context | as before |
+| Action / expected | `step_descriptions[]` | §3.1 / §3.4 |
+| Scenario curl | `curl_reference` | FIX placeholders → `saved <field>` |
+| Fixtures | `test_data[]` | TDP buddy prompt |
+| Approval | `status`, `run.json` | Gate before generate |
+| Plan dedup | `is_dedup` | Skip |
+| TDP enrichment | `test_data_output`, `test_data_payloads` | `tdp_not_ready` skip |
+| Class / method / PDG | plan fields | Suite convert |
+| Suite meta | `existing_testcase_ids[]` + `browserstack_test_id` (no `countryName`/`projectId`/`suiteId`/`owner` on plan) | `@TestInfo.testCaseIds`; rest left empty |
 
-## MCP usage (two tools only)
+## Data needed — artifact-driven
 
-| Phase | Tool | Notes |
+| Data | Source | Use |
 |---|---|---|
-| Verify | `tapmind_verify_prompt` | One prompt per call; REST and gRPC §3.8 |
-| Execute | `tapmind_run_nlp_command` | One prompt per call; reuse `conversationId` |
+| Target method | User path / `testCaseIds` | Coverage anchor |
+| Steps | RestAssured, `@Step`, BS text | Normalize → action + expected |
+| Setup | `@BeforeMethod`, helpers, inline ids | TDP inference |
+| PDG / service | package, existing `runStep(..., pdg, service)` | MCP pinning |
+| Suite meta | **Existing class** | Preserve `@TestInfo` |
+| Coded test body | Java file | Migration source; coded cross-check |
 
-## HTTP usage (registry lookup — not MCP)
+## Data needed — shared core (both paths)
 
-| Phase | Endpoint | Host |
+| Data | Source | Use |
 |---|---|---|
-| gRPC alias | `GET /v1/grpc/targets` | `tapmind-backend-i.golabs.io` or `-q.golabs.io` |
-| Static proto | `GET /v1/grpc/static-proto/aliases` | same |
-| REST targets | `GET /v1/targets` | same |
-| Schema check | `POST /v1/verify/schema` | explicit validation only (§9) |
+| gRPC rpc_alias | `GET /v1/grpc/targets` | §3.8 |
+| REST targets | `GET /v1/targets` | Missing spec diagnosis |
+| Static proto | `GET /v1/grpc/static-proto/aliases` | reflection off |
+| Control plane host | `CONTROL_PLANE.md` | Registry + MCP |
+| Existing NLP coverage | repo scan (`NLP_COVERAGE.md`) | exact_match / partial_match |
+| Prompt grammar | SKILL.md §§2–10 | Generate |
+| MCP verify / run | `tapmind_verify_prompt`, `tapmind_run_nlp_command` | Validate + execute |
+| Shared helpers | `FIXTURE_REUSE.md` | Dedupe setup lines |
 
-Swagger: `https://<host>/swagger-ui/index.html` — allowed controllers listed in
-`CONTROL_PLANE.md`. **Do not** call ingest, database, or cache controllers.
+## MCP usage (two tools only — both paths)
 
-On HTTP/MCP connectivity failure → ask user to connect to respective VPN and retry.
+| Phase | Tool |
+|---|---|
+| Verify | `tapmind_verify_prompt` |
+| Execute | `tapmind_run_nlp_command` |
+
+## HTTP usage (registry — both paths)
+
+| Endpoint | Use |
+|---|---|
+| `GET /v1/grpc/targets` | gRPC alias map |
+| `GET /v1/targets` | REST service map / missing op check |
+| `GET /v1/grpc/static-proto/aliases` | Static proto |
+| Swagger UI | Human-readable spec inventory |
+
+**Do not** call ingest, database, or cache controllers. Ingest only on explicit user request.
+
+On connectivity failure → VPN message (`CONTROL_PLANE.md`).
 
 ## Skill files
 
 | File | Role |
 |---|---|
-| `SKILL.md` | Grammar + generation §G |
-| `GENERATION.md` | Pipeline |
-| `CONTROL_PLANE.md` | Hosts, Swagger, MCP vs HTTP, VPN |
-| `DATA_NEEDED_FOR_NLP_GENERATION.md` | This field map |
+| `SKILL.md` | Grammar + §G dual paths |
+| `GENERATION.md` | Pipeline fork/merge |
+| `NLP_COVERAGE.md` | Path-specific gates + shared coverage scan |
+| `FIXTURE_REUSE.md` | Shared helpers (both paths) |
+| `CONTROL_PLANE.md` | MCP + Swagger (both paths) |
+| `DATA_NEEDED_FOR_NLP_GENERATION.md` | This file |

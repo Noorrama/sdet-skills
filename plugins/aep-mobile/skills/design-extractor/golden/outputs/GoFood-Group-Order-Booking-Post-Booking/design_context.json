@@ -1,0 +1,2414 @@
+{
+  "extraction_status": "INCOMPLETE",
+  "extraction_gaps": [
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (19803:139295): 4 inventory flow_element_id(s) not found in screen subtree: 19790:137485, 19800:139231, 19800:139249, 19800:139258.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (19803:139834): 1 inventory flow_element_id(s) not found in screen subtree: 19800:139243.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (10886:36332): 2 inventory flow_element_id(s) not found in screen subtree: 11750:75029, 13056:83186.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (11750:75591): 1 inventory flow_element_id(s) not found in screen subtree: 13056:83220.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (11809:77537): 1 inventory flow_element_id(s) not found in screen subtree: 19998:131961.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (18837:92533): 1 inventory flow_element_id(s) not found in screen subtree: 18839:94366.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen AOS (13053:82808): 1 inventory flow_element_id(s) not found in screen subtree: 17824:143315.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen AOS (10941:19948): 2 inventory flow_element_id(s) not found in screen subtree: 10966:40910, 13056:83179.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen AOS (12212:87601): 1 inventory flow_element_id(s) not found in screen subtree: 12212:87090.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen AOS (12212:87992): 1 inventory flow_element_id(s) not found in screen subtree: 12212:87097.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen AOS (12214:88339): 1 inventory flow_element_id(s) not found in screen subtree: 12212:87104.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen AOS (12214:88722): 1 inventory flow_element_id(s) not found in screen subtree: 12214:88721.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen AOS (12214:91831): 1 inventory flow_element_id(s) not found in screen subtree: 12214:92304.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (18837:93401): 1 inventory flow_element_id(s) not found in screen subtree: 18839:94348.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (18839:95085): 1 inventory flow_element_id(s) not found in screen subtree: 18839:95595.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (18842:96277): 1 inventory flow_element_id(s) not found in screen subtree: 18842:96802.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen CHECKOUT (18842:97272): 1 inventory flow_element_id(s) not found in screen subtree: 18842:97837.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen COLP_NO_UNLOCKED_PROMOS (14712:104220): 1 inventory flow_element_id(s) not found in screen subtree: 14712:111915.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen AOS (13056:83245): 1 inventory flow_element_id(s) not found in screen subtree: 17824:143418.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen HOMESCREEN (12339:105231): 1 inventory flow_element_id(s) not found in screen subtree: 12339:105230.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen HOMESCREEN (12342:106747): 1 inventory flow_element_id(s) not found in screen subtree: 12342:106746.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "screens",
+      "reason": "Screen MPS (11890:35070): 1 inventory flow_element_id(s) not found in screen subtree: 11890:37831.",
+      "action": "Check inventory/preprocess version skew or pruned node_tree coverage for this screen.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Export scope is 'selection': connectors leaving the selected frames are not present, so ui_flow coverage cannot be verified.",
+      "action": "Re-export the full page to get a complete flow graph.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Connector 12214:92347 could not be resolved to a screen-to-screen edge: could not resolve section/contextual-attached connector to a screen.",
+      "action": "Check connector endpoints in Figma; re-attach to the target screen frame.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Connector 12214:92352 could not be resolved to a screen-to-screen edge: could not resolve section/contextual-attached connector to a screen.",
+      "action": "Check connector endpoints in Figma; re-attach to the target screen frame.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Connector 12214:92357 could not be resolved to a screen-to-screen edge: could not resolve section/contextual-attached connector to a screen.",
+      "action": "Check connector endpoints in Figma; re-attach to the target screen frame.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Connector 12214:92362 could not be resolved to a screen-to-screen edge: could not resolve section/contextual-attached connector to a screen.",
+      "action": "Check connector endpoints in Figma; re-attach to the target screen frame.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Connector 12214:92367 could not be resolved to a screen-to-screen edge: could not resolve section/contextual-attached connector to a screen.",
+      "action": "Check connector endpoints in Figma; re-attach to the target screen frame.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Connector 12214:92372 could not be resolved to a screen-to-screen edge: could not resolve section/contextual-attached connector to a screen.",
+      "action": "Check connector endpoints in Figma; re-attach to the target screen frame.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Connector 13056:83229 could not be resolved to a screen-to-screen edge: could not resolve section/contextual-attached connector to a screen.",
+      "action": "Check connector endpoints in Figma; re-attach to the target screen frame.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Connector 12464:56417 could not be resolved to a screen-to-screen edge: could not resolve section/contextual-attached connector to a screen.",
+      "action": "Check connector endpoints in Figma; re-attach to the target screen frame.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow",
+      "reason": "Connector 12465:65819 could not be resolved to a screen-to-screen edge: could not resolve section/contextual-attached connector to a screen.",
+      "action": "Check connector endpoints in Figma; re-attach to the target screen frame.",
+      "severity": "INFO"
+    }
+  ],
+  "visual_analysis_scratchpad": "[auto] 90 screen frame(s) detected, 24 connector edge(s) resolved. Scope: selection. Review _render.html for visual confirmation. Element extraction uses inventory flow_element_ids when available (inventory: yes).",
+  "project_context": {
+    "overall_ambiguity_rating": "LOW",
+    "blocking_issues": []
+  },
+  "app": "gofood-merchant",
+  "design_source": {
+    "file_name": "GoFood Group Order",
+    "page_name": "    ↪ MVP - Group Order [v5.46]",
+    "scope": "selection",
+    "exported_at": "2026-08-25T09:37:34.308Z",
+    "max_depth": 30,
+    "node_count": 22854,
+    "truncated_count": 0,
+    "has_geometry": true,
+    "truncated_nodes": []
+  },
+  "screens": [
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "19790:138693",
+      "source_refs": [
+        "19790:138693"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.checkout_content_cell_content_container",
+          "source_ref": "19790:138693",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Checkout Content cell Content default/food/mini_spot/active_good_food_is_coming default/food/mini_spot/active_good_food_is_coming default/food/mini_spot/active_good_food_is_coming Delivery Change Sect",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Checkout - No promo Changes | Host - Checkout timeout | Flow Flow Ellipse 1 Exceed the checkout timeout (15 mins)? YES"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "19803:139295",
+      "source_refs": [
+        "19803:139295"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "estimate_expired | No changes in group items Existing | Purchase and deliver now"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "19803:139834",
+      "source_refs": [
+        "19803:139834"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.ok_got_it_btn",
+          "source_ref": "19803:140432",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Ok, got it",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "cart_mismatch | Group items changes New screen | Host - Checkout timeout"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "19823:143185",
+      "source_refs": [
+        "19823:143185"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.shared_cart_content_content_container",
+          "source_ref": "19823:143185",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Shared cart Content Content Title Text Your items Content Title Text Text Pojay (You) Label Host Choosing items... Text 33.000 1 item divider Item Content Iced Dirty Matchapresso Sugar Level: Normal S",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Note Note Click OK, got it\nDismiss tray\nClose the checkout page | Group cart - Loading Existing | Host - Checkout timeout"
+    },
+    {
+      "screen_id": "RECEIPT",
+      "screen_name": "Receipt",
+      "source_ref": "13717:72204",
+      "source_refs": [
+        "13717:72204"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Existing flow\n→ Goes to Checkout page with all items | Differentiator | Only respective user’s items will be shown in the previously purchased section"
+    },
+    {
+      "screen_id": "RECEIPT",
+      "screen_name": "Receipt",
+      "source_ref": "14177:140854",
+      "source_refs": [
+        "14177:140854"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Existing flow\n→ Goes to Checkout page with all items | Differentiator | Only respective user’s items will be shown in the previously purchased section"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "10886:36332",
+      "source_refs": [
+        "10886:36332"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "GO SKU list (with user section) | Purchase mode cannot be changed | Regular estimate"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "11750:74962",
+      "source_refs": [
+        "11750:74962"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.backdropcard_backdropbackground_slot_slot_btn",
+          "source_ref": "11750:75161",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "backdrop_card .backdrop/Background Slot Slot Check more promos .backdrop/Slot 3 navigation/24/ic_next icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Existing promo progress nudge | Billing method, cannot be changed in CO | GO SKU list (with user section)"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "11750:75591",
+      "source_refs": [
+        "11750:75591"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.backdropcard_backdropbackground_slot_slot_btn",
+          "source_ref": "11750:75790",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "backdrop_card .backdrop/Background Slot Slot Check more promos .backdrop/Slot 3 navigation/24/ic_next icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.purchase_and_deliver_now_btn",
+          "source_ref": "11750:75799",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Purchase and deliver now",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Existing promo progress nudge | Billing method, cannot be changed in CO | Existing SKU component in Checkout\n\nHost can edit all items"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "11809:77537",
+      "source_refs": [
+        "11809:77537"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": true,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.checkout_content_cell_content_container",
+          "source_ref": "11809:77537",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Checkout Content cell Content default/food/mini_spot/active_good_food_is_coming default/food/mini_spot/active_good_food_is_coming default/food/mini_spot/active_good_food_is_coming Delivery Change Sect",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.purchase_and_deliver_now_btn",
+          "source_ref": "11809:77763",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Purchase and deliver now",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.backdropcard_backdropbackground_slot_slot_btn",
+          "source_ref": "11809:78078",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "backdrop_card .backdrop/Background Slot Slot Check more promos .backdrop/Slot 3 navigation/24/ic_next icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.add_btn",
+          "source_ref": "19998:132098",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Add",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Tap change payment method will open payment widget tray. Cash is not allowed → Cash option will be r | Checkout - With promo Changes | Loading IMG Content Text Promo duo Text 89.000 104.000 button/secondary indicator/spinner"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "13717:67602",
+      "source_refs": [
+        "13717:67602"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Fit screen Changes | Checkout - Group Order | Host - Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "18837:92533",
+      "source_refs": [
+        "18837:92533"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+          "source_ref": "18837:92622",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "_properties/gofood/dish/action stepper _properties/stepper actions/24/ic_minus 2 _properties/stepper actions/24/ic_plus",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "_properties/gofood/dish/action stepper _properties/stepper actions/24/ic_minus 1 _properties/stepper | Remove member’s item Changes | Remove item without affecting cart discount"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "18839:94507",
+      "source_refs": [
+        "18839:94507"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+          "source_ref": "18839:94573",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "_properties/gofood/dish/action stepper _properties/stepper actions/24/ic_minus 1 _properties/stepper actions/24/ic_plus",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "_properties/gofood/dish/action stepper _properties/stepper actions/24/ic_minus 1 _properties/stepper | Remove host item Changes | Remove item without affecting cart discount"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "18842:95669",
+      "source_refs": [
+        "18842:95669"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+          "source_ref": "18842:95735",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "_properties/gofood/dish/action stepper _properties/stepper actions/24/ic_minus 1 _properties/stepper actions/24/ic_plus",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn_2",
+          "source_ref": "18842:95762",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "_properties/gofood/dish/action stepper _properties/stepper actions/24/ic_minus 2 _properties/stepper actions/24/ic_plus",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Remove item Changes | Remove item affecting cart discount | Host - Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "18842:96883",
+      "source_refs": [
+        "18842:96883"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.divider_btn",
+          "source_ref": "18842:96945",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "divider",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Only host’s item remaining Existing | Remove item affecting cart discount | Host - Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "13053:82808",
+      "source_refs": [
+        "13053:82808"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "AOS.header_text_processing_your_container",
+          "source_ref": "13053:82811",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Header Text Processing your purchase... The resto will receive your purchase soon ETA Arrival in Text 30-40 mins Label On time",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Default Changes | Variant | Section tile logo Change logo & color logo Jago 17.300"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "10941:19948",
+      "source_refs": [
+        "10941:19948"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "AOS.section_tile_logo_change_container",
+          "source_ref": "12657:58626",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Section tile logo Change logo & color logo Jago 17.300",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "AOS.cell_horizontallayout_text_pojay_container",
+          "source_ref": "12827:60896",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "cell horizontal_layout Text Pojay (You) (Host) 1 item Text 18.700 navigation/16/ic_expand_more icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Pre acceptance Changes | Order details cell horizontal_layout Group purchase details cell horizontal_layout default/business/ | Order details cell horizontal_layout Group purchase details cell horizontal_layout default/business/"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12212:87111",
+      "source_refs": [
+        "12212:87111"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Order accepted Changes | Active order screen | Host - Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12212:87601",
+      "source_refs": [
+        "12212:87601"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Driver assigned Changes | Active order screen | Host - Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12212:87992",
+      "source_refs": [
+        "12212:87992"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Driver waiting at resto Changes | Active order screen | Host - Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12214:88339",
+      "source_refs": [
+        "12214:88339"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Delivering the food Changes | Active order screen | Host - Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12214:88722",
+      "source_refs": [
+        "12214:88722"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Already near Changes | Active order screen | Host - Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12214:91831",
+      "source_refs": [
+        "12214:91831"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Arrived Changes | Active order screen | Host - Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "DRAFT",
+      "screen_name": "Draft",
+      "source_ref": "20488:109877",
+      "source_refs": [
+        "20488:109877"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Existing rating widget | Existing resto card in reorder shuffle | Only respective user’s items will be shown in the previously purchased section"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "12346:118609",
+      "source_refs": [
+        "12346:118609"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Existing rating widget | Existing resto card in reorder shuffle | Home - Rating widget Existing"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "12346:119094",
+      "source_refs": [
+        "12346:119094"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+          "source_ref": "12346:119172",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "Home / Shuffle / Reorder v2 Comforting usuals See all Grid Vertical Card Image Right View Resto Name Fore Coffee (Kopi), Pondok Indah Rating ETA Rating actions/16/ic_rate icon 4.8 (900+) 30-40 min Rat",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Only respective user’s items will be shown in the previously purchased section | Existing resto card in reorder shuffle | Home - Reorder shuffle Existing"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "12346:119977",
+      "source_refs": [
+        "12346:119977"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.mps_sku_listing_iteration_container",
+          "source_ref": "12346:119977",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "MPS SKU listing iteration Section Text Previously purchased divider more than 5 SKU Horizontal default IMG Text Iced Dirty Matchapresso Info 40.000  Price 33.000 Label Promo Action Add Customizable Ra",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Differentiator | Only respective user’s items will be shown in the previously purchased section | MPS - Prev purchased section Changes"
+    },
+    {
+      "screen_id": "GOFOOD_HISTORY",
+      "screen_name": "GoFood history",
+      "source_ref": "12378:64057",
+      "source_refs": [
+        "12378:64057"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "GOFOOD_HISTORY.repeat_btn",
+          "source_ref": "12390:64959",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Repeat",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Differentiator | Existing flow\n→ Goes to Checkout page with all items | GoFood history Changes"
+    },
+    {
+      "screen_id": "GOJEK_HISTORY",
+      "screen_name": "Gojek history",
+      "source_ref": "12657:62448",
+      "source_refs": [
+        "12657:62448"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "GOJEK_HISTORY.repeat_btn",
+          "source_ref": "12709:62616",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Repeat",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Gojek history Existing | Gojek - Post booking | Host - Post Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "GOJEK_HISTORY",
+      "screen_name": "Gojek history",
+      "source_ref": "14322:143112",
+      "source_refs": [
+        "14322:143112"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Gojek history Existing | Gojek - Post booking | Host - Post Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "GOJEK_HISTORY",
+      "screen_name": "Gojek history",
+      "source_ref": "12998:79746",
+      "source_refs": [
+        "12998:79746"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "GOJEK_HISTORY.img_img",
+          "source_ref": "12998:79806",
+          "type": "RECTANGLE",
+          "role": "IMAGE",
+          "label": "IMG_9374",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Gojek history details Changes | Toast Existing | Gojek - Post booking"
+    },
+    {
+      "screen_id": "GOJEK_HISTORY",
+      "screen_name": "Gojek history",
+      "source_ref": "13717:68201",
+      "source_refs": [
+        "13717:68201"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Scroll Changes | Gojek - Post booking | Host - Post Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "CHAT",
+      "screen_name": "Chat",
+      "source_ref": "13056:87140",
+      "source_refs": [
+        "13056:87140"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHAT.lets_get_something_tasty_lbl",
+          "source_ref": "13056:87162",
+          "type": "TEXT",
+          "role": "LABEL",
+          "label": "Let's get something tasty together from Fore Coffee (Kopi), Pondok Indah with Group Order GoFood. Just choose the dish and it'll come in one delivery.\nhttps://gofood.groupbuy/099e3das",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Outside App - WA | Host - Click link | Host - Post Booking Experience [Everyone pays for themselves]"
+    },
+    {
+      "screen_id": "SWITCH_RESTO_DIALOG",
+      "screen_name": "Switch resto dialog",
+      "source_ref": "13116:130846",
+      "source_refs": [
+        "13116:130846"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SWITCH_RESTO_DIALOG.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "13116:130882",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card .properties/cards/dialog/header_style default/food/spot_hero/change_merchant default/food/spot_hero/change_merchant default/food/spot_h",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Confirmation - Dialog card Existing | If GO member tries to repeat order while current GO is in checkout by the host. | Order details cell horizontal_layout Group purchase details cell horizontal_layout default/business/"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "18961:139703",
+      "source_refs": [
+        "18961:139703"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "HOMESCREEN.banner_banner_container",
+          "source_ref": "18961:139775",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Banner 2:1 Banner",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Toast Existing | If GO member tries to repeat order while current GO is in checkout by the host. | Order details cell horizontal_layout Group purchase details cell horizontal_layout default/business/"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "18837:93401",
+      "source_refs": [
+        "18837:93401"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": true,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Confirmation - Dialog card New screen | COLP | Loading IMG Content Text Promo duo Text 89.000 104.000 button/secondary indicator/spinner"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "18839:95085",
+      "source_refs": [
+        "18839:95085"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": true,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Confirmation - Dialog card New screen | COLP | Promo applied Changes"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "18842:96277",
+      "source_refs": [
+        "18842:96277"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Confirmation - Dialog card Existing | Promo details - Not eligible before applied Existing | Loading IMG Content Text Promo duo Text 89.000 104.000 button/secondary indicator/spinner"
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "18842:97272",
+      "source_refs": [
+        "18842:97272"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Confirmation - Dialog card Existing | Promo details - Eligible before applied Existing | Order details cell horizontal_layout Group purchase details cell horizontal_layout default/business/"
+    },
+    {
+      "screen_id": "CHAT",
+      "screen_name": "Chat",
+      "source_ref": "13056:87256",
+      "source_refs": [
+        "13056:87256"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHAT.message_bubble_bubble_forward_container",
+          "source_ref": "13056:87261",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Message bubble Bubble Forward ico-24-forward Tail Attachment Preview File Text GoFood Group Buy - Discount 50% GoFood your favorite foods together with friend and family hassle-free with saver deliver",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Host click the link in WA while order is on going will go to AOS | Outside App - WA | Host - Click link"
+    },
+    {
+      "screen_id": "GO_PROMO_DETAILS",
+      "screen_name": "GO Promo details",
+      "source_ref": "18858:103252",
+      "source_refs": [
+        "18858:103252"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "GO_PROMO_DETAILS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "18858:103381",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Host click the link in WA while order is on going will go to AOS | Promo details - Not eligible before applied Existing | Promo details in Checkout"
+    },
+    {
+      "screen_id": "GO_PROMO_DETAILS",
+      "screen_name": "GO Promo details",
+      "source_ref": "18858:104311",
+      "source_refs": [
+        "18858:104311"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "GO_PROMO_DETAILS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "18858:104938",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Promo details - Eligible before applied Existing | Promo details in Checkout | Host click the link in WA while order is on going will go to AOS"
+    },
+    {
+      "screen_id": "GO_PROMO_DETAILS",
+      "screen_name": "GO Promo details",
+      "source_ref": "18858:105302",
+      "source_refs": [
+        "18858:105302"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Promo details - Applied Existing | Promo details in Checkout | Group Order offers in COLP."
+    },
+    {
+      "screen_id": "COLP_NO_UNLOCKED_PROMOS",
+      "screen_name": "COLP - No unlocked promos",
+      "source_ref": "14712:104220",
+      "source_refs": [
+        "14712:104220"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "COLP_NO_UNLOCKED_PROMOS.frame_add_xxk_more_container",
+          "source_ref": "14712:104280",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Frame 3126020 Add xxk more to use this promo",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Multiple unlock promos Changes | COLP | ❌ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n✅ Member"
+    },
+    {
+      "screen_id": "COLP_MULTIPLE_UNLOCKED_PROMOS",
+      "screen_name": "COLP - Multiple unlocked promos",
+      "source_ref": "14724:111938",
+      "source_refs": [
+        "14724:111938"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "COLP_MULTIPLE_UNLOCKED_PROMOS.frame_youll_save_k_container",
+          "source_ref": "14724:111994",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Frame 3126020 You’ll save 56k",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group Order offers in COLP. | Multiple unlock promos Changes | COLP"
+    },
+    {
+      "screen_id": "COLP_MULTIPLE_UNLOCKED_PROMOS",
+      "screen_name": "COLP - Multiple unlocked promos",
+      "source_ref": "18858:106173",
+      "source_refs": [
+        "18858:106173"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group Order offers in COLP. | Promo applied Changes | COLP"
+    },
+    {
+      "screen_id": "GO_PROMO_DETAILS",
+      "screen_name": "GO Promo details",
+      "source_ref": "18858:105864",
+      "source_refs": [
+        "18858:105864"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "GO_PROMO_DETAILS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "18858:105993",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Promo details - Not eligible before applied Existing | ❌ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n✅ Member | Group Order offers in COLP."
+    },
+    {
+      "screen_id": "GO_PROMO_DETAILS",
+      "screen_name": "GO Promo details",
+      "source_ref": "18858:102959",
+      "source_refs": [
+        "18858:102959"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "GO_PROMO_DETAILS.card_button_buttoncircular_multimediaicclosepip_btn",
+          "source_ref": "18858:103088",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "card button button/circular multimedia/24/ic_close_pip icon card",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Promo details - Eligible before applied Existing | ❌ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n✅ Member | Push notification"
+    },
+    {
+      "screen_id": "GO_PROMO_DETAILS",
+      "screen_name": "GO Promo details",
+      "source_ref": "18858:102591",
+      "source_refs": [
+        "18858:102591"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Promo details - Applied Existing | ❌ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n✅ Member | Push notification"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "13056:83245",
+      "source_refs": [
+        "13056:83245"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Default Changes | Variant | Push notification"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12413:54774",
+      "source_refs": [
+        "12413:54774"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "AOS.section_tile_logo_change_container",
+          "source_ref": "12947:75211",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Section tile logo Change logo & color logo Text Text Jago 40.300 Text Alert icon Include other members' payment",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "In-app info - Host pay for member first Changes | Member low GoPay balance | Push notification"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12464:55380",
+      "source_refs": [
+        "12464:55380"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Scroll Changes | Member low GoPay balance | Section tile logo Change logo & color logo Text Text Jago 40.300 Text Alert icon Include other membe"
+    },
+    {
+      "screen_id": "GOJEK_HISTORY",
+      "screen_name": "Gojek history",
+      "source_ref": "13793:73480",
+      "source_refs": [
+        "13793:73480"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Multi line payment method | Gojek history details Changes | Member - Post Booking Experience [Everyone pays for their items] - M1"
+    },
+    {
+      "screen_id": "HOME",
+      "screen_name": "Home",
+      "source_ref": "29407:351645",
+      "source_refs": [
+        "29407:351645"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "❌ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n✅ Member | Section tile logo Change logo & color logo Text Text Jago 40.300 Text Alert icon Include other membe | Section Text tile logo Change logo & color logo Text Text Jago 20.300 Text Alert icon Include "
+    },
+    {
+      "screen_id": "MOLP",
+      "screen_name": "MOLP",
+      "source_ref": "21025:113215",
+      "source_refs": [
+        "21025:113215"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "❌ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n❌ Member count\n❌ All member has item ✅ MOV\n✅ Member | Section tile logo Change logo & color logo Text Text Jago 40.300 Text Alert icon Include other membe | Section Text tile logo Change logo & color logo Text Text Jago 20.300 Text Alert icon Include "
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "11841:82939",
+      "source_refs": [
+        "11841:82939"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+          "source_ref": "11841:83010",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "Home / Shuffle / Reorder v2 Comforting usuals See all Grid Vertical Card Image Right View Resto Name Fore Coffee (Kopi), Pondok Indah Rating ETA Rating actions/16/ic_rate icon 4.8 (900+) 30-40 min Rat",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Home Changes | Member view - Host still checkout | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "GOFOOD_SCREEN",
+      "screen_name": "GoFood screen / Listing",
+      "source_ref": "11841:87604",
+      "source_refs": [
+        "11841:87604"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [
+        "Listing"
+      ],
+      "state_kinds": [
+        "OTHER"
+      ],
+      "elements": [
+        {
+          "element_id": "GOFOOD_SCREEN.buttonprimary_view_group_cart_btn",
+          "source_ref": "11841:87943",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "button/primary View group cart Delivery from Fore Coffee (Kopi), Jakarta Selatan .properties/button/label/contextual/right 3 jago/24/ic_shared icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Listing Changes | Member view - Host still checkout | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11020:56382",
+      "source_refs": [
+        "11020:56382"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.check_my_items_btn",
+          "source_ref": "11020:57125",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Check my items",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.content_defaultfoodspotherogrouporderabouttoco_defaultfoodspotherogrouporderabouttoco_the_container",
+          "source_ref": "11020:57136",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Content default/food/spot_hero/grouporder_about_to_co default/food/spot_hero/grouporder_about_to_co The Host is checking out If you want to add or edit items, ask the Host to go back to menu. Content ",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group buy - Host checkout New screen | Member view - Host still checkout | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "11007:47417",
+      "source_refs": [
+        "11007:47417"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.shared_cart_top_navbar_container",
+          "source_ref": "11007:47417",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Shared cart Top navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content button/circular navigation/24",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.navbar_status_bar_dynamic_btn",
+          "source_ref": "19961:126860",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "navbar status bar 9:41 Dynamic Island StatusBar-dynamicIsland TrueDepth camera FaceTime camera Right Side Signal, Wifi, Battery _StatusBar-battery content button/circular navigation/24/ic_back icon ri",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group buy - Host checkout New screen | Member view - Host still checkout | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "11020:56231",
+      "source_refs": [
+        "11020:56231"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Group buy - Host checkout New screen | Member view - Host still checkout | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "12339:105231",
+      "source_refs": [
+        "12339:105231"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Widget - Relayed to resto Existing | Member view - Order placed | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "12342:105805",
+      "source_refs": [
+        "12342:105805"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Widget - Resto prepare Existing | Member view - Order placed | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "12342:106294",
+      "source_refs": [
+        "12342:106294"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Widget - Driver waiting at resto Existing | Member view - Order placed | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "12342:106747",
+      "source_refs": [
+        "12342:106747"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Widget - Driver otw Existing | Member view - Order placed | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "12342:107240",
+      "source_refs": [
+        "12342:107240"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Widget - Food delivered Existing | Member view - Order placed | Member - Booking Experience [Everyone pays for their items]"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "13056:84793",
+      "source_refs": [
+        "13056:84793"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Existing rating widget | Existing resto card in reorder shuffle | Home - Rating widget Existing"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "13056:84882",
+      "source_refs": [
+        "13056:84882"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+          "source_ref": "13056:84953",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "Home / Shuffle / Reorder v2 Comforting usuals See all Grid Vertical Card Image Right View Resto Name Fore Coffee (Kopi), Pondok Indah Rating ETA Rating actions/16/ic_rate icon 4.8 (900+) 30-40 min Rat",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "All items from the group order will be shown in the previously purchased section | Existing resto card in reorder shuffle | Home - Reorder shuffle Existing"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "13056:84965",
+      "source_refs": [
+        "13056:84965"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+          "source_ref": "13056:85167",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "page_control/scroll_pagination 1st 2nd 3rd 4th",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Differentiator | All items from the group order will be shown in the previously purchased section | MPS - Prev purchased section Changes"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "13056:85178",
+      "source_refs": [
+        "13056:85178"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Differentiator | Existing flow\n→ Goes to Checkout page with all items | GoFood history Changes"
+    },
+    {
+      "screen_id": "GOJEK_HISTORY",
+      "screen_name": "Gojek history",
+      "source_ref": "13056:84644",
+      "source_refs": [
+        "13056:84644"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "GOJEK_HISTORY.card_sep_content_resto_container",
+          "source_ref": "13056:84646",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Card 21 Sep, 11:00 Content Resto image Content Fore Coffee (Kopi), Pondok Indah Text label/16/ic_correct icon Food delivered 1 Iced Dirty Matchapresso, 1 Iced Matcha Butter Salt Cream Content Rp59.000",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Existing flow\n→ Goes to Checkout page with all items | Gojek history Existing | Gojek - Post booking"
+    },
+    {
+      "screen_id": "GOJEK_HISTORY",
+      "screen_name": "Gojek history",
+      "source_ref": "13056:84660",
+      "source_refs": [
+        "13056:84660"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "GOJEK_HISTORY.img_img",
+          "source_ref": "13056:84662",
+          "type": "RECTANGLE",
+          "role": "IMAGE",
+          "label": "IMG_9374",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Existing flow\n→ Goes to Checkout page with all items | Gojek history details Changes | Gojek - Post booking"
+    },
+    {
+      "screen_id": "CHAT",
+      "screen_name": "Chat",
+      "source_ref": "13056:86858",
+      "source_refs": [
+        "13056:86858"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "CHAT.lets_get_something_tasty_lbl",
+          "source_ref": "13056:86883",
+          "type": "TEXT",
+          "role": "LABEL",
+          "label": "Let's get something tasty together from Fore Coffee (Kopi), Pondok Indah with Group Order GoFood. Just choose the dish and it'll come in one delivery.\nhttps://gofood.groupbuy/099e3das",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Group Buy - Share WA | Member - Click link | Member - Post Booking Experience [Everyone pays for their items] - M1"
+    },
+    {
+      "screen_id": "ADD",
+      "screen_name": "Add/ Edit notes",
+      "source_ref": "11841:89515",
+      "source_refs": [
+        "11841:89515"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [
+        "Edit notes"
+      ],
+      "state_kinds": [
+        "OTHER"
+      ],
+      "elements": [
+        {
+          "element_id": "ADD.save_btn",
+          "source_ref": "11841:89622",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Save",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Non variant - Notes Existing | Member edit item → And then host goes to checkout | Member add items/ create group order from other resto - Host still Checkout"
+    },
+    {
+      "screen_id": "EDIT_VARIANT",
+      "screen_name": "Edit variant",
+      "source_ref": "11841:90390",
+      "source_refs": [
+        "11841:90390"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "EDIT_VARIANT.update_cart_btn",
+          "source_ref": "11841:90417",
+          "type": "TEXT",
+          "role": "BUTTON",
+          "label": "Update cart - 33.000",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Non variant - Notes Existing | Member edit item → And then host goes to checkout | Member add items/ create group order from other resto - Host still Checkout"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "11841:90077",
+      "source_refs": [
+        "11841:90077"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.shared_cart_content_content_container",
+          "source_ref": "11841:90077",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Shared cart Content Content Title Text Your items Content Title Avatar S Text Text Sifra Label label/16/ic_correct icon Done choosing items Text 33.000 1 item divider Item x1 Content Iced Matcha Butte",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Non variant - Notes Existing | Member edit item → And then host goes to checkout"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "13717:70700",
+      "source_refs": [
+        "13717:70700"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": ""
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12657:58704",
+      "source_refs": [
+        "12657:58704"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Pre acceptance Changes | Active order screen - Everyone pays for their own items | Non variant - Notes Existing"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12657:58833",
+      "source_refs": [
+        "12657:58833"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Order accepted Changes | Active order screen - Everyone pays for their own items | Non variant - Notes Existing"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12657:58962",
+      "source_refs": [
+        "12657:58962"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Driver assigned Changes | Active order screen - Everyone pays for their own items | Non variant - Notes Existing"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12657:59097",
+      "source_refs": [
+        "12657:59097"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Driver waiting at resto Changes | Active order screen - Everyone pays for their own items | Non variant - Notes Existing"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12657:59362",
+      "source_refs": [
+        "12657:59362"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Delivering the food Changes | Active order screen - Everyone pays for their own items | Non variant - Notes Existing"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12657:59503",
+      "source_refs": [
+        "12657:59503"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Already near Changes | Active order screen - Everyone pays for their own items | Non variant - Notes Existing"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12657:59233",
+      "source_refs": [
+        "12657:59233"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Arrived Changes | Active order screen - Everyone pays for their own items | Non variant - Notes Existing"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "20997:112050",
+      "source_refs": [
+        "20997:112050"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Pre acceptance Changes | Active order screen - Everyone pays for their own items | Non variant - Notes Existing"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "screen_name": "Homescreen",
+      "source_ref": "11890:34630",
+      "source_refs": [
+        "11890:34630"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+          "source_ref": "11890:34701",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "Home / Shuffle / Reorder v2 Comforting usuals See all Grid Vertical Card Image Right View Resto Name Fore Coffee (Kopi), Pondok Indah Rating ETA Rating actions/16/ic_rate icon 4.8 (900+) 30-40 min Rat",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Home Changes | Member add items/ create group order from other resto - Host still Checkout"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "11890:35070",
+      "source_refs": [
+        "11890:35070"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.mps_sku_listing_iteration_container",
+          "source_ref": "11890:35070",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "MPS SKU listing iteration Section Text Coffee divider Merchant Profile / SKU / SKU List v3 Coffee Double Shot Iced Shaken Espresso 56.000 Right view SKU Image Add Customizable divider Merchant Profile",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.merchant_profile_sku_sku_list",
+          "source_ref": "11890:35076",
+          "type": "INSTANCE",
+          "role": "LIST",
+          "label": "Merchant Profile / SKU / SKU List v3 Coffee Double Shot Iced Shaken Espresso 56.000 Right view SKU Image Add Customizable",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+          "source_ref": "16321:129970",
+          "type": "FRAME",
+          "role": "CONTAINER",
+          "label": "Order type default/food/spot/group_order default/food/spot/group_order Group Group Order navigation/16/ic_next_ios icon",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Note Note This is applied also for other scenarios, such as\nClick re-order from Gojek/ GoFood histor | MPS Existing | Member add items/ create group order from other resto - Host still Checkout"
+    },
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "19313:108255",
+      "source_refs": [
+        "19313:108255"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [
+        {
+          "element_id": "MPS.toast_labelicwrong_icon_unable_btn",
+          "source_ref": "19313:108859",
+          "type": "INSTANCE",
+          "role": "BUTTON",
+          "label": "toast label/24/ic_wrong icon Unable to switch resto. Your current group order is being checked out. Ok",
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "Non variant - Notes Existing | Member add items/ create group order from other resto - Host still Checkout"
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12657:61336",
+      "source_refs": [
+        "12657:61336"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "In-app info - Host pay for participant first New screen | Push notification | Notification - Collapsed Clear Glass Glass Effect Icon Your GoPay balance insufficient The Host has "
+    },
+    {
+      "screen_id": "AOS",
+      "screen_name": "AOS",
+      "source_ref": "12657:61467",
+      "source_refs": [
+        "12657:61467"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Scroll New screen | Participant low GoPay balance | Push notification"
+    },
+    {
+      "screen_id": "GOJEK_HISTORY",
+      "screen_name": "Gojek history",
+      "source_ref": "13056:86631",
+      "source_refs": [
+        "13056:86631"
+      ],
+      "node_class": "SCREEN",
+      "classified_by": "GEOMETRY",
+      "entry_point": false,
+      "screen_states": [],
+      "state_kinds": [],
+      "elements": [],
+      "screen_notes": "Gojek history details Changes | Push notification | Notification - Collapsed Clear Glass Glass Effect Icon Your GoPay balance insufficient The Host has "
+    }
+  ],
+  "ui_flow": [
+    {
+      "from_screen_id": "ENTRY",
+      "to_screen_id": "CHECKOUT",
+      "to_source_ref": "18839:95085",
+      "condition": "",
+      "navigation_kind": "ENTRY",
+      "edge_source": "ENTRY_TOPOLOGY",
+      "confidence": "INFERRED",
+      "source_ref": "18839:95085"
+    },
+    {
+      "from_screen_id": "ENTRY",
+      "to_screen_id": "CHECKOUT",
+      "to_source_ref": "11809:77537",
+      "condition": "",
+      "navigation_kind": "ENTRY",
+      "edge_source": "ENTRY_TOPOLOGY",
+      "confidence": "INFERRED",
+      "source_ref": "11809:77537"
+    },
+    {
+      "from_screen_id": "ENTRY",
+      "to_screen_id": "CHECKOUT",
+      "to_source_ref": "18837:93401",
+      "condition": "",
+      "navigation_kind": "ENTRY",
+      "edge_source": "ENTRY_TOPOLOGY",
+      "confidence": "INFERRED",
+      "source_ref": "18837:93401"
+    },
+    {
+      "from_screen_id": "CHECKOUT",
+      "to_screen_id": "CHECKOUT",
+      "from_source_ref": "11809:77537",
+      "to_source_ref": "11750:75591",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14733:112206",
+      "trigger_element_id": "CHECKOUT.checkout_content_cell_content_container"
+    },
+    {
+      "from_screen_id": "CHECKOUT",
+      "to_screen_id": "GO_PROMO_DETAILS",
+      "from_source_ref": "11750:75591",
+      "to_source_ref": "18858:104311",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "18858:105001",
+      "trigger_element_id": "CHECKOUT.backdropcard_backdropbackground_slot_slot_btn"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "CHECKOUT",
+      "from_source_ref": "19823:143185",
+      "to_source_ref": "19803:139834",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "19808:141680",
+      "trigger_element_id": "SHARED_CART.shared_cart_content_content_container"
+    },
+    {
+      "from_screen_id": "CHECKOUT",
+      "to_screen_id": "GO_PROMO_DETAILS",
+      "from_source_ref": "11750:74962",
+      "to_source_ref": "18858:103252",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "18858:102934",
+      "trigger_element_id": "CHECKOUT.backdropcard_backdropbackground_slot_slot_btn"
+    },
+    {
+      "from_screen_id": "AOS",
+      "to_screen_id": "CHECKOUT",
+      "from_source_ref": "13053:82808",
+      "to_source_ref": "11809:77537",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11809:78326",
+      "trigger_element_id": "AOS.header_text_processing_your_container"
+    },
+    {
+      "from_screen_id": "AOS",
+      "to_screen_id": "CHAT",
+      "from_source_ref": "13053:82808",
+      "to_source_ref": "13056:87256",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13056:87662",
+      "trigger_element_id": "AOS.header_text_processing_your_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "HOMESCREEN",
+      "from_source_ref": "12346:119977",
+      "to_source_ref": "12346:119094",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "12657:62454",
+      "trigger_element_id": "MPS.mps_sku_listing_iteration_container"
+    },
+    {
+      "from_screen_id": "GOJEK_HISTORY",
+      "to_screen_id": "GOJEK_HISTORY",
+      "from_source_ref": "12998:79746",
+      "to_source_ref": "12657:62448",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13056:84108",
+      "trigger_element_id": "GOJEK_HISTORY.img_img"
+    },
+    {
+      "from_screen_id": "GOJEK_HISTORY",
+      "to_screen_id": "CHAT",
+      "from_source_ref": "12998:79746",
+      "to_source_ref": "13056:87140",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13056:87130",
+      "trigger_element_id": "GOJEK_HISTORY.img_img"
+    },
+    {
+      "from_screen_id": "SWITCH_RESTO_DIALOG",
+      "to_screen_id": "GOFOOD_HISTORY",
+      "from_source_ref": "13116:130846",
+      "to_source_ref": "12378:64057",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13116:131079",
+      "trigger_element_id": "SWITCH_RESTO_DIALOG.card_button_buttoncircular_multimediaicclosepip_btn"
+    },
+    {
+      "from_screen_id": "SWITCH_RESTO_DIALOG",
+      "to_screen_id": "GOJEK_HISTORY",
+      "from_source_ref": "13116:130846",
+      "to_source_ref": "12657:62448",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13116:131084",
+      "trigger_element_id": "SWITCH_RESTO_DIALOG.card_button_buttoncircular_multimediaicclosepip_btn"
+    },
+    {
+      "from_screen_id": "HOMESCREEN",
+      "to_screen_id": "GOJEK_HISTORY",
+      "from_source_ref": "18961:139703",
+      "to_source_ref": "12657:62448",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "18961:140125",
+      "trigger_element_id": "HOMESCREEN.banner_banner_container"
+    },
+    {
+      "from_screen_id": "COLP_NO_UNLOCKED_PROMOS",
+      "to_screen_id": "GO_PROMO_DETAILS",
+      "from_source_ref": "14712:104220",
+      "to_source_ref": "18858:105864",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "18858:106167",
+      "trigger_element_id": "COLP_NO_UNLOCKED_PROMOS.frame_add_xxk_more_container"
+    },
+    {
+      "from_screen_id": "COLP_MULTIPLE_UNLOCKED_PROMOS",
+      "to_screen_id": "GO_PROMO_DETAILS",
+      "from_source_ref": "14724:111938",
+      "to_source_ref": "18858:102959",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "18858:102953",
+      "trigger_element_id": "COLP_MULTIPLE_UNLOCKED_PROMOS.frame_youll_save_k_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHARED_CART",
+      "from_source_ref": "11020:56382",
+      "to_source_ref": "11007:47417",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11841:87972",
+      "trigger_element_id": "MPS.content_defaultfoodspotherogrouporderabouttoco_defaultfoodspotherogrouporderabouttoco_the_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "HOMESCREEN",
+      "from_source_ref": "11020:56382",
+      "to_source_ref": "11841:82939",
+      "condition": "User visit\nthe same resto",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11841:88054",
+      "trigger_element_id": "MPS.content_defaultfoodspotherogrouporderabouttoco_defaultfoodspotherogrouporderabouttoco_the_container"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "MPS",
+      "from_source_ref": "11007:47417",
+      "to_source_ref": "11020:56382",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11020:57157",
+      "trigger_element_id": "SHARED_CART.shared_cart_top_navbar_container"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "GOFOOD_SCREEN",
+      "from_source_ref": "11007:47417",
+      "to_source_ref": "11841:87604",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11841:87967",
+      "trigger_element_id": "SHARED_CART.shared_cart_top_navbar_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "HOMESCREEN",
+      "from_source_ref": "13056:84965",
+      "to_source_ref": "13056:84882",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13056:85177",
+      "trigger_element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn"
+    },
+    {
+      "from_screen_id": "GOJEK_HISTORY",
+      "to_screen_id": "GOJEK_HISTORY",
+      "from_source_ref": "13056:84660",
+      "to_source_ref": "13056:84644",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13056:84786",
+      "trigger_element_id": "GOJEK_HISTORY.img_img"
+    },
+    {
+      "from_screen_id": "GOJEK_HISTORY",
+      "to_screen_id": "CHAT",
+      "from_source_ref": "13056:84660",
+      "to_source_ref": "13056:86858",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "13056:86989",
+      "trigger_element_id": "GOJEK_HISTORY.img_img"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "EDIT_VARIANT",
+      "from_source_ref": "11841:90077",
+      "to_source_ref": "11841:90390",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11841:90588",
+      "trigger_element_id": "SHARED_CART.shared_cart_content_content_container"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "ADD",
+      "from_source_ref": "11841:90077",
+      "to_source_ref": "11841:89515",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11841:90593",
+      "trigger_element_id": "SHARED_CART.shared_cart_content_content_container"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "HOMESCREEN",
+      "from_source_ref": "11890:35070",
+      "to_source_ref": "11890:34630",
+      "condition": "",
+      "navigation_kind": "NAVIGATE",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "11890:36490",
+      "trigger_element_id": "MPS.mps_sku_listing_iteration_container"
+    }
+  ]
+}

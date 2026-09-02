@@ -6,7 +6,7 @@ description: Ingests pre-build contexts (plan, prd, design, rfc) to perform cros
 # Mobile SDET Plan Generator
 
 ## Purpose
-Aggregates upstream extractor contexts (`plan_context`, `prd_context`, `design_context`, `rfc_context`) during implementation planning to generate 4 standardized pre-build deliverables:
+Aggregates upstream extractor contexts (`task_context`, `prd_context`, `design_context`, `rfc_context`) during implementation planning to generate 4 standardized pre-build deliverables:
 1. `<feature_key>_SDET_plan.json` (Machine-readable master execution contract)
 2. `<feature_key>_analysis.md` (Human-readable Markdown QA analysis asset)
 3. `<feature_key>_test_cases.csv` (TMS bulk-import format — **15-column squad template only**)
@@ -41,6 +41,7 @@ Full spine: **`workflow.md`**. Anti-patterns: **`anti_patterns.md`**. TMS header
      --analysis <feature_key>_analysis.md \
      [--design design_context.json] \
      [--rfc rfc_context.json] \
+     [--task task_context.json] \
      --checklist coverage_checklist.json \
      [--compliance <feature_key>_compliance_report.json]
    ```
@@ -52,7 +53,14 @@ Full spine: **`workflow.md`**. Anti-patterns: **`anti_patterns.md`**. TMS header
 
 ## Input Contracts
 
-- **`plan_context.json`**: Change surface, test hooks (`method:deeplink`, `hook_id`), feature flags, observable states.
+- **`task_context.json`** (the PRIMARY DRIVER, from `task-extractor`; formerly referred to here as `plan_context.json`): the task-generation tree and its planned change surface. Read fields at their real paths:
+  - **Tree & coverage floor**: `epics[].user_stories[].acceptance_criteria[]` (each `{acceptance_criteria_id, description}`) — the per-AC happy-path floor. `epics[].user_stories[].requirement_id` ties a story back to the PRD `req_id`.
+  - **Test hooks**: `epics[].test_hooks[]`, each `{hook_id, type, target, invoke}` where `type ∈ {deeplink, flag-override, state-injection}` and the deeplink URI / flag-set / state-injection recipe is in `invoke` (there is **no** `method` field).
+  - **Observable state**: `epics[].user_stories[].tasks[].observable_state` `{success_signal, failure_signal}` — per task, not a top-level `observable_states` block.
+  - **Flags**: `epics[].flag_keys[]` `{key, default}` — not `feature_flags`.
+  - **Change surface**: per-epic `change_summary`, `target_modules`, `screens_touched`, `view_models`, `new_components`.
+  - **Sequencing & gaps**: `traceability[]` (task→story→requirement→AC→screen), `blocking_dependencies[]` (cross-track edges), plus `testability_gaps[]` / `blocking_issues[]` / `open_questions[]` the extractor already surfaced — fold these into cross-stage gap analysis rather than re-deriving them.
+  - Everything here is **planned** (pre-build), not confirmed code — treat `new_components`/`view_models`/`screens_touched` as intent to reconcile against design, not as ground truth.
 - **`prd_context.json`**: Business rules, boundary rules, expected UI copy, and `clickstream_events` (telemetry specs).
 - **`design_context.json`**: Screen definitions, UI elements with `screen_name:element_id_name` logical tokens, state variants, and flow matrix.
 - **`rfc_context.json`**: Feature flag mappings, API contracts, error codes, and N-1 fallback rules.
@@ -75,7 +83,7 @@ what was not covered.
 2. **Required contexts.** `prd_context.json` and `design_context.json`. Either missing → carry
    on with what remains and add a `NEEDS_ANSWER` note: *"generated without <name> — requirement
    coverage / screen coverage is unverified"*. Set `extraction_status: PARTIAL`.
-3. **Optional contexts.** `rfc_context.json` and `plan_context.json` may legitimately be
+3. **Optional contexts.** `rfc_context.json` and `task_context.json` may legitimately be
    absent (no RFC, no impl plan) → `FYI` note, that is a normal run, not a problem. A file that exists but
    **fails its schema** is different: use what parses, and raise a `NEEDS_ANSWER` note naming the
    file and the validation error. Never silently downgrade malformed to absent.
@@ -299,10 +307,10 @@ Flow:
 **Scope rule:** generate scenarios **only** for selected categories — EXCEPT the Hard Coverage Rules below, which always apply (every P0 requirement and every `boundary_conditions` entry keeps ≥1 scenario regardless of selection).
 
 ### 1. Ingest & Coverage Gates
-- Ingest and aggregate whatever context inputs are provided (`plan_context`, `prd_context`, `design_context`, `rfc_context`).
-- **Optional Input Absence Handling** (applies to `plan_context.json` and `rfc_context.json` only — `prd_context.json` and `design_context.json` are required, see Preflight step 2). If an *optional* context is not provided, **do NOT fail execution.** Drive the generation with whatever inputs are given:
-  - If `plan_context.json` is absent, proceed with `prd_context.json` and `design_context.json` as the baseline.
-  - State the missing contexts clearly as a limitation inside the `<feature_key>_analysis.md` report (e.g., *"plan_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
+- Ingest and aggregate whatever context inputs are provided (`task_context`, `prd_context`, `design_context`, `rfc_context`).
+- **Optional Input Absence Handling** (applies to `task_context.json` and `rfc_context.json` only — `prd_context.json` and `design_context.json` are required, see Preflight step 2). If an *optional* context is not provided, **do NOT fail execution.** Drive the generation with whatever inputs are given:
+  - If `task_context.json` is absent, proceed with `prd_context.json` and `design_context.json` as the baseline.
+  - State the missing contexts clearly as a limitation inside the `<feature_key>_analysis.md` report (e.g., *"task_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
   - A missing context also means its Category Catalog triggers simply cannot fire (no failure) — those categories fall through to the extras tiers.
   - **Absent is not the same as malformed.** A context file that exists but fails its schema gets a `NEEDS_ANSWER` note naming the file and the validation error (Preflight step 3) — never a silent fall-through to "treat as absent", which drops coverage the QA believes they have.
 - **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and emit at least the required scenario(s) before doing anything else. Model-independence depends on this being a mechanical loop:
@@ -369,8 +377,8 @@ Expand scenarios across:
   Steps 1–4 must exist before step 5 and the Extras below are expanded. Negative and edge
   coverage complements the business suite; it never substitutes for it.
 - **Mobile Extras**: Generates mobile-specific scenarios (deep-link navigation, regional variants, feature flag toggles) and applies **Conditional Mobile-Native Interruption Rules** to ensure test suites remain highly focused and are only generated when technically valid. These rules are the `interruption_*` / `local_data_migration` / `permission` detection triggers surfaced in Step 0 — only expand a category the gate selected:
-  - **Network Loss / API Timeout**: Inject a poor-network or server-timeout scenario *only* if `rfc_context.json` declares active `api_contract_changes` or `plan_context.json` specifies `observable_states` (API success/failure signals). Skip if the touchpoint screen is entirely static/local.
-  - **App Backgrounding & Process Death**: Inject a backgrounding/kill-and-restore state preservation scenario *only* if the screens in `design_context.json` contain interactive elements (inputs, forms, toggles) or view models are active in `plan_context.json`. Skip on purely static/read-only informational screens.
+  - **Network Loss / API Timeout**: Inject a poor-network or server-timeout scenario *only* if `rfc_context.json` declares active `api_contract_changes` or any `task_context.json` task carries an `observable_state` (API success/failure signals). Skip if the touchpoint screen is entirely static/local.
+  - **App Backgrounding & Process Death**: Inject a backgrounding/kill-and-restore state preservation scenario *only* if the screens in `design_context.json` contain interactive elements (inputs, forms, toggles) or any epic in `task_context.json` lists `view_models`. Skip on purely static/read-only informational screens.
   - **Local Storage & DB Migration**: Inject an N-1 upgrade and schema migration scenario *only* if `rfc_context.json` defines active `local_data_changes` (e.g. SQLite, Room, CoreData, or SharedPrefs modifications).
   - **Runtime Permission Toggles**: Inject parallel Permission Granted vs Permission Denied scenarios *only* if `rfc_context.json` declares new or modified `permissions_required`.
   - **Platform variance**: Only meaningful when the feature resolves to **more than one** target
@@ -404,8 +412,9 @@ Expand scenarios across:
   1. **Test hook / deep link — check all three deep-link sources, in this order.** A deep link is
      the ideal rung: one `Open deeplink "<uri>"` step replaces a whole tap chain. Three sources
      carry them; the target screen is resolved by the **first** that names it:
-     a. `plan_context.json` test hooks (`method: deeplink` / `hook_id`) — the primary source of
-        *test* hooks, when an impl plan was supplied.
+     a. `task_context.json` test hooks — `epics[].test_hooks[]` where `type == "deeplink"`, taking
+        the URI verbatim from that hook's `invoke` field (keyed by `hook_id`) — the primary source of
+        *test* hooks, when a task_context was supplied.
      b. `rfc.navigation_changes[].deep_link` — a non-null deep link whose destination screen
         matches (a deep link the RFC itself introduces for the new feature).
      c. **`regression_context.deeplink_dictionary`** — the repo's extracted deeplink dictionary
@@ -431,7 +440,11 @@ Expand scenarios across:
      entry screen (a `flowStartingPoints` entry, or a screen already resolved by an earlier rung)
      to this scenario's target `screen_id`. Prefer `confidence: "EXPLICIT"` edges. Turn each edge
      into a step using the trigger element's `label` (never its raw `element_id` — e.g. `Tap
-     "8 level Program Apresiasi Mitra"`, not `Tap PROFILE_PAGE.pam_entry_btn`). A path that only
+     "8 level Program Apresiasi Mitra"`, not `Tap PROFILE_PAGE.pam_entry_btn`). When
+     `trigger_source_ref` is present on an edge, use it to resolve the trigger element's `label`
+     via `screens[].elements[].source_ref` (required when multiple edges share the same canonical
+     `trigger_element_id`). When several edges share `trigger_element_id`, each edge is still a
+     distinct checklist path if `to_source_ref` or `condition` differs. A path that only
      reaches an intermediate screen is a partial answer — carry it forward and let rung 3 supply
      the missing segment (see *Reconciling two sources* below).
   3. **Regression corpus navigation (`regression_context.json`).** Search
@@ -497,7 +510,7 @@ Expand scenarios across:
      now-normalized path is still auditable back to the repo-confirmed original.
      - **Cross-case corroboration for login/session preambles.** The most common reachability gap
        isn't the target screen, it's getting to an authenticated starting state at all. If
-       `plan_context` has no login/state-injection hook, look for a leading step-subsequence
+       `task_context` has no login/state-injection hook, look for a leading step-subsequence
        shared identically across **3 or more independent** `regression_tests[].navigation`
        entries for this app (e.g. a repeated "login via backdoor → skip walkthrough → dismiss
        vehicle card → tap profile icon" prefix). A sequence corroborated across that many
@@ -526,7 +539,7 @@ Expand scenarios across:
      but the gap stays visible instead of being papered over with an assumed arrival.
 
   This ladder is feature-agnostic by construction: it never depends on this being a loyalty
-  feature, a payments flow, or any specific app — it only depends on which of `plan_context`,
+  feature, a payments flow, or any specific app — it only depends on which of `task_context`,
   `rfc.navigation_changes`, `regression_context.deeplink_dictionary`, `design_context.ui_flow`,
   and `regression_context.navigation` actually resolved something, the same fields every run of
   this generator already has (or explicitly lacks) by Preflight.
@@ -594,7 +607,7 @@ Expand scenarios across:
 As the single integration point, the generator must actively compute the following cross-stage gaps:
 - **`prd_vs_figma_gaps`**: Cross-reference `prd_context.json` with `design_context.json`. Check `business_requirements[].context_screen` against Figma `screens[].screen_id`. Identify missing screens/frames, text copy mismatches, or personas with no design representation.
 - **`prd_vs_rfc_gaps`**: Cross-reference `prd_context.json` with `rfc_context.json`. Compare PRD `feature_flags` against the RFC `experimentation_matrix` (finding flag key typos, missing defaults, or status mismatches). Verify business rule conditions align with RFC error codes or API paths.
-- **`rfc_vs_impl_plan_gaps`**: Cross-reference `rfc_context.json` with the Implementation `plan_context.json`. Check if RFC architectural risks, local migrations, offline strategies, or required permissions are accounted for in the implementation's screens touched, view models, and components.
+- **`rfc_vs_impl_plan_gaps`**: Cross-reference `rfc_context.json` with the Implementation `task_context.json`. Check if RFC architectural risks, local migrations, offline strategies, or required permissions are accounted for in the implementation's screens touched, view models, and components.
 - **`element_locator_handoff`**: Map `screen_name:element_id_name` logical tokens to cross-platform accessibility attributes (`android_resource_id`, `ios_accessibility_identifier`, `flutter_key`). Only populate these fields if the matching locator values are provided by the upstream design/development context; do not use placeholders or "UNRESOLVED" strings.
 
 ### 4. Coverage Self-Audit Gate (MANDATORY — run before writing any output file)
@@ -816,7 +829,7 @@ A human-readable Markdown asset automatically generated for engineering leads de
      section entirely (do not render an empty table).
 
 3. **Section 1: Missing Input Context:**
-   - If any input context (like `plan_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).
+   - If any input context (like `task_context.json` or `rfc_context.json`) is absent, list it and detail the exact consequences (e.g., missing test hooks, uncomputed gaps, unpopulated platform-specific locator attributes in JSON).
 
 4. **Section 2: Cross-Stage Gap Analysis:**
    - **PRD vs Figma Gaps Table:** Must contain columns: `Req` (Requirement ID), `Severity` (`CRITICAL_BLOCKER` or `WARNING`), and `Gap` (highly detailed, context-aware analysis of broken prototype links, un-designed flows, dynamic text copy verification requirements).
@@ -878,26 +891,38 @@ Flattened CSV strictly matching squad project template headers:
   as a to-do list) and automation (which needs actions separated from assertions).
   Never use long, vague prose or technical automation/logical IDs (e.g., do NOT write
   `Tap WELCOME_PAGE.TAP_BUTTON_CTA`; instead, write `Tap "Daftar Program Affiliate"`).
-  This column is a direct 1-to-1 join of `scenario.steps[]`. A `steps[]` entry still carrying
+  This column is a direct 1-to-1 join of `scenario.steps[]`. Each JSON `steps[]` entry becomes
+  one numbered CSV line (add `1.`, `2.`, … prefixes when the JSON entries omit them). Row count
+  in CSV Steps must equal `len(scenario.steps[])`. A `steps[]` entry still carrying
   a Gherkin placeholder (`<Vehicle Type>`), third-person test-script phrasing, or a pure
   automation-scaffolding line (no on-screen tester action) is a defect to fix at the source.
   **A single high-level line that collapses a multi-action flow (e.g. "Complete the split bill
   creation") is equally a defect — each discrete tester action must be its own numbered step.**
-- `Expected Result`: Numbered sequential assertions inside double quotes with line breaks
-  (`\n`) after each statement. **ALL verifications live here, not in Steps.** Each assertion
-  corresponds to the action step at the same number — after step 3 (an action), expected
-  result 3 states what the tester should observe. **Write assertions using clean, declarative
-  NLP-style verification commands** (e.g., `1. Verify "Confirm Account" is visible`,
-  `2. Verify "Error: Code incorrect" is visible`). Describe functional and telemetry outcomes
-  in user-friendly, non-technical language. **For boundary scenarios the assertion derives from
-  `prd.boundary_conditions[].proposed_default`; if it is absent, write an open-point marker
-  rather than a guessed outcome.** Every action step must have a corresponding verification —
-  a tester needs to know what to observe after each action, not just at the end. **Do NOT use
-  `—` (dash) as a placeholder for missing verifications.** If you cannot state what the tester
-  should observe after an action, that is a signal the action step is too granular or should be
-  merged with the next action. A sequence of 2+ consecutive `—` dashes in Expected Result is a
-  defect — restructure the steps so each action has a real observable outcome (e.g. "Verify
-  [screen/element] is visible", "Verify page loads", "Verify navigation succeeds").
+- `Expected Result`: **Verbatim copy of `scenario.expected_result` from the JSON plan** — same
+  numbered lines, same `\n` line breaks, same wording. This column is **not** a summary field.
+  Never collapse multiple numbered assertions into one paragraph, never drop intermediate
+  verifications, and never rephrase "1. Verify …\n2. Verify …\n3. Verify …" into a single
+  prose block — that breaks the 1-to-1 action↔assertion mapping manual testers and TMS import
+  rely on.
+
+  Format: numbered sequential assertions inside double quotes with line breaks (`\n`) after each
+  statement. **ALL verifications live here, not in Steps.** Each assertion corresponds to the
+  action step at the same number — after step 3 (an action), expected result 3 states what the
+  tester should observe. **Write assertions using clean, declarative NLP-style verification
+  commands** (e.g., `1. Verify "Confirm Account" is visible`, `2. Verify "Error: Code incorrect"
+  is visible`). Describe functional and telemetry outcomes in user-friendly, non-technical
+  language. **For boundary scenarios the assertion derives from `prd.boundary_conditions[].proposed_default`;
+  if it is absent, write an open-point marker rather than a guessed outcome.** Every action step
+  must have a corresponding verification — a tester needs to know what to observe after each
+  action, not just at the end. **Do NOT use `—` (dash) as a placeholder for missing verifications.**
+  If you cannot state what the tester should observe after an action, that is a signal the action
+  step is too granular or should be merged with the next action. A sequence of 2+ consecutive `—`
+  dashes in Expected Result is a defect — restructure the steps so each action has a real
+  observable outcome (e.g. "Verify [screen/element] is visible", "Verify page loads", "Verify
+  navigation succeeds").
+
+  **Pre-write check:** for every scenario, `count(numbered lines in CSV Expected Result)` must
+  equal `count(numbered lines in JSON expected_result)`. The compliance validator enforces this.
 - `Execution Mode`: `"Automatable"` or `"Manual"`
 - `Platform`: `"Android"`, `"iOS"`, or `"Cross-Platform"`. **Resolution precedence: (1) `prd.applicable_platforms` (PRD is the scope authority), (2) else `rfc.scope.target_platforms`, (3) else infer from `design`.** One platform → `"Android"`/`"iOS"`; more than one → `"Cross-Platform"`. If PRD and RFC conflict, use PRD and raise it as a `prd_vs_rfc_gap` — never silently prefer one.
 - `Country v2`: MUST be derived from `prd.applicable_countries` (map ISO code → name, e.g. `ID`→`"Indonesia"`, `SG`→`"Singapore"`, `VN`→`"Vietnam"`). Never pick a country the inputs do not list. If `applicable_countries` has one entry, every row uses that country.
@@ -921,7 +946,7 @@ python3 scripts/validate_sdet_deliverables.py \
   --plan <feature_key>_SDET_plan.json \
   --csv <feature_key>_test_cases.csv \
   --analysis <feature_key>_analysis.md \
-  [--design design_context.json] [--rfc rfc_context.json] \
+  [--design design_context.json] [--rfc rfc_context.json] [--task task_context.json] \
   [--checklist coverage_checklist.json] \
   [--compliance <feature_key>_compliance_report.json]
 ```
@@ -976,7 +1001,7 @@ The skill supports a two-way synchronization flow to allow human QA to review, r
        - `automatable: false`
        - `source: "qa_added"`
        - All standard properties parsed from the CSV columns.
-     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `mapped_user_flow`, `test_data`, `unmapped_extractor_data`, `clickstream_events`, `coverage_category`, `source`, `requirement_ref`, the top-level `coverage_categories` / `coverage_audit` blocks, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them.
+     - **Preserve Un-mapped Context Metadata:** Advanced technical properties inside `<feature_key>_SDET_plan.json` (such as `is_legacy_regression`, `existing_case_ref`, `mapped_user_flow`, `test_data`, `unmapped_extractor_data`, `clickstream_events`, `coverage_category`, `source`, `requirement_ref`, the top-level `coverage_categories` / `coverage_audit` blocks, or specific `target_execution_framework` metadata) which do not exist in the flat 15-column CSV layout **must be preserved verbatim** for existing scenarios. Do not delete or overwrite them — especially `is_legacy_regression` and `existing_case_ref`, which gate BrowserStack upload skip.
      - **Re-run the Step 4 Coverage Self-Audit** after merging and refresh the `coverage_audit` block, so QA-added/removed rows keep the coverage proof accurate.
      - **Update Timestamps:** Automatically update the `updated_at` timestamp in `<feature_key>_SDET_plan.json` to reflect the synchronization event.
    - **Then upload to BrowserStack and emit the automation plan.** After the merge, run the
@@ -993,9 +1018,10 @@ The skill supports a two-way synchronization flow to allow human QA to review, r
 It does NOT run during GENERATE mode — generation produces the CSV for the first time; there is
 nothing to upload yet.
 
-After the SYNC merge completes, upload the finalised test cases to BrowserStack Test Management
-and stamp the returned case IDs back into `<feature_key>_SDET_plan.json` before emitting the
-automation plan.
+After the SYNC merge completes, upload **only new scenarios** to BrowserStack Test Management
+and stamp case IDs back into `<feature_key>_SDET_plan.json` before emitting the automation plan.
+**Never re-upload legacy regression cases** — they already exist in BrowserStack from the
+regression-extractor.
 
 ### 1. Resolve Upload Target (project + folder)
 
@@ -1014,72 +1040,156 @@ Use the first source that resolves — do not search all BrowserStack projects:
 4. **Project unresolvable** (module not in the map, or `browserstack_project: null`) → ask the
    user for the BrowserStack project identifier. Do not guess a `PR-` id.
 
-### 2. Upload Test Cases
+### 2. Partition scenarios — two different filters
 
-Use the BrowserStack MCP tool `createTestCasesFromFile` with the finalised
-`<feature_key>_test_cases.csv` and the resolved project + folder.
+BrowserStack upload and automation-plan emission use **different inclusion rules**. Do not
+conflate them.
+
+| Output | Include when | Exclude when |
+|--------|--------------|--------------|
+| **BrowserStack upload** | `is_legacy_regression: false` — **all** non-legacy rows (Manual **and** Automatable) | `is_legacy_regression: true` — already in BrowserStack from regression-extractor |
+| **Automation plan** (`<feature_key>_automation_plan_generator.json`) | Post-sync `execution_mode` = **Automatable** (case-insensitive) | Manual execution mode **and** any scenario not marked automatable |
+
+**BrowserStack upload partition** (after SYNC, read `<feature_key>_SDET_plan.json`):
+
+| Partition | Condition | BrowserStack action |
+|-----------|-----------|---------------------|
+| **Legacy (skip upload)** | `is_legacy_regression: true` | **Do not upload.** Case already exists in BrowserStack. Stamp `browserstack_case_id` from `existing_case_ref` (required when legacy — validator enforces this). |
+| **Upload-eligible** | `is_legacy_regression: false` | **Upload regardless of Execution Mode** — Manual and Automatable non-legacy rows both go to BrowserStack. Receive new `TC-XXXXXX` ids from `createTestCasesFromFile`. |
+
+**Hard rule:** a scenario with `is_legacy_regression: true` must **never** appear in the file
+passed to `createTestCasesFromFile`, even if its row is present in `<feature_key>_test_cases.csv`.
+Re-uploading regression-extractor cases creates duplicate TMS entries and breaks dedup.
+
+A Manual, non-legacy scenario **is upload-eligible** — QA still needs it in BrowserStack TMS even
+though it will not appear in the automation plan.
+
+If a legacy scenario is missing `existing_case_ref`, do not upload it — add a `NEEDS_ANSWER`
+note naming the scenario. Manual non-legacy scenarios still upload normally.
+
+### 3. Build upload CSV (all non-legacy scenarios)
+
+Write a temporary upload CSV containing **only upload-eligible rows** — filter
+`<feature_key>_test_cases.csv` to titles whose synced SDET scenario has
+`is_legacy_regression: false`. **Do not filter by Execution Mode** — Manual and Automatable
+non-legacy rows both belong in this file. Keep the same 15-column squad headers; drop legacy
+rows entirely.
+
+### 4. Upload Test Cases
+
+Use the BrowserStack MCP tool `createTestCasesFromFile` with the **filtered upload CSV** (not the
+full `<feature_key>_test_cases.csv`) and the resolved project + folder.
 
 - **BrowserStack MCP unavailable at upload time → do not block.** The SYNC and automation-plan
   emission still complete. Add a `WORTH_CHECKING` note:
   *"BrowserStack upload skipped — MCP unavailable. Run the aep-mobile-setup skill, then re-run SYNC
   to upload and stamp case IDs."*
-  Scenarios that already carry a `browserstack_case_id` from regression context keep it;
-  new scenarios simply omit the field (never set it to `null`).
+  Legacy scenarios still get `browserstack_case_id` from `existing_case_ref`; upload-eligible
+  scenarios omit the field until a later SYNC run (never set it to `null`).
 
-### 3. Stamp Case IDs
+### 5. Stamp Case IDs
 
-`createTestCasesFromFile` returns the created case identifiers (e.g. `TC-XXXXXX`). Map each
-returned ID back to its scenario by matching on `csv_title_association` (the title column is the
-join key between the CSV rows and the returned results).
+`createTestCasesFromFile` returns the created case identifiers (e.g. `TC-XXXXXX`) **only for
+upload-eligible rows**. Map each returned ID back to its scenario by matching on
+`csv_title_association` (the title column is the join key).
 
-- Write `browserstack_case_id` into each matched scenario in `<feature_key>_SDET_plan.json`.
-- Existing regression cases already carry a `browserstack_case_id` from
-  `regression_context.json` (e.g. `C2879733`) — **keep the original ID**, do not overwrite.
-  Only stamp new IDs onto scenarios that don't already have one.
-- Scenarios with no BS ID (upload failed or not applicable) simply **omit** the field — never
-  set it to `null`.
+**Legacy scenarios (skipped upload):**
+- Set `browserstack_case_id` = `existing_case_ref` verbatim (e.g. `C2879733`, `TC-302383`).
+- Do **not** overwrite with a newly uploaded id — the regression case already owns that TMS entry.
+
+**Upload-eligible scenarios:**
+- Write the returned `TC-XXXXXX` into `browserstack_case_id` on each matched scenario.
+- Scenarios with no BS ID after upload (upload failed, skipped, or not yet attempted) **omit**
+  `browserstack_case_id` on the SDET plan — the automation-plan emission assigns
+  `TC-PENDING-<scenario_id>` placeholders there instead. Never set the field to `null`.
+
 - Update `<feature_key>_SDET_plan.json`'s `updated_at` timestamp.
 
-### 4. Summary
+### 6. Summary
 
-Print a one-line summary: *"Uploaded N test cases to BrowserStack project PR-XXX / folder
-<feature_key>. M existing cases kept their original IDs."*
+Print a one-line summary: *"Uploaded N test cases to BrowserStack (all non-legacy — Manual +
+Automatable). M legacy cases skipped (kept existing ids). K scenarios still awaiting ids."*
 
 ---
 
 ## Automation-Plan-Generator emission (Test-Data-Generation handoff)
 When the QA feeds the edited CSV back, the point of the round-trip is to produce the handoff the
-Backend QA Test-Data-Generation RFC consumes. Emit `<feature_key>_automation_plan_generator.json`
+downstream test-data and test-code stages consume. Emit `<feature_key>_automation_plan_generator.json`
 conforming to `schemas/automation_plan_generator.schema.json`.
 
-**Build from the synced JSON, never from the raw CSV.** The CSV has no test-data column, so the
-fixtures only exist in `<feature_key>_SDET_plan.json`. Order of operations: SYNC the CSV into the
-JSON first (above), then emit from that merged JSON. The JSON is the single source of truth; the
-CSV only carried the QA's column edits.
+**Build from the synced JSON, never from the raw CSV.** The CSV has no `test_data` or
+`automation_steps` columns — those live only in `<feature_key>_SDET_plan.json`. Order of
+operations: SYNC the CSV into the JSON first (above), run BrowserStack upload (or record skip),
+then emit from that merged JSON. The synced SDET plan is the single source of truth; the CSV
+only carried the QA's 15-column edits.
 
-**Filter.** Include a scenario **only if its post-sync `execution_mode` matches `Automatable`
-(case-insensitive — `automatable`, `AUTOMATABLE`, `Automatable` all qualify).** Manual scenarios
-stay in the SDET plan and are omitted from the automation plan. (For a purely backend consumer
-you may additionally scope to `execution_scope` ∈ {`BACKEND_ONLY`, `END_TO_END`}; state it if
-you do.)
+**Filter — Automatable only (distinct from BrowserStack upload).** Include a scenario in
+`<feature_key>_automation_plan_generator.json` **only if** its post-sync `execution_mode` matches
+`Automatable` (case-insensitive). Manual scenarios are uploaded to BrowserStack (when non-legacy)
+but **excluded from the automation plan** — they stay in the SDET plan / TMS only.
 
-**Field mapping** (SDET scenario → automation_scenario):
+**Full scenario carry-over — not a slim projection.** Each `automation_scenarios[]` entry must
+contain the **entire automatable scenario** from the synced SDET plan, not just `test_data` and
+metadata stubs. Downstream code generation needs the steps to build runnable tests. A row that
+only carries `description`, `test_data`, and `browserstack_case_id` is **incomplete and wrong**.
+
+**Required fields on every automation_scenario** (copy verbatim from the synced SDET scenario
+unless noted):
 - `scenario_id` — assign `SC-001`, `SC-002`… in scenario order; **reuse the same id on
   re-generation** so downstream references stay valid.
-- `requirement_ref` → `requirement_ref`; `csv_title_association` → `description`;
-  `is_legacy_regression` → `is_legacy_regression`; `target_execution_framework` →
-  `target_framework` (verbatim); `execution_scope` → `execution_scope`;
-  `preconditions_metadata.target_environment` → `environments`.
-- **`test_data` is carried straight across** — copy each fixture's `fixture_id`, `description`,
-  `required_state` (and `entity`/`dynamic_conditions`/`count` if present) **verbatim**. Do NOT
-  re-derive `required_state` here; it was already assembled at generation time. Emit the
-  identification INPUT only — never add `test_data_output`, that is the test-data stage's job.
-- `epic_id` — the EPIC/Jira id from `feature_metadata` if present, else `feature_key`.
-- `browserstack_case_id` — the real BrowserStack case identifier. For regression cases this is
-  the existing ID from `regression_context.json` (e.g. `C2879733`); for newly uploaded cases
-  this is the `TC-XXXXXX` returned by `createTestCasesFromFile`. Carry verbatim from the
-  scenario's `browserstack_case_id` field. **Omit entirely** when the scenario has no BS ID —
-  never emit `null`.
+- `requirement_ref`, `description` (from `csv_title_association`), `is_legacy_regression`,
+  `existing_case_ref` (when present), `target_framework` (from `target_execution_framework`),
+  `execution_scope`, `execution_mode`, `priority_tier`, `platform`, `country`, `driver_type`
+  (when present), `automation_status`, `test_case_type`, `coverage_category`, `source`.
+- **`steps[]`** — manual tester actions, verbatim from the synced scenario (same content as the
+  CSV Steps column after SYNC).
+- **`automation_steps[]`** — consolidated TapMind-dialect sequence, verbatim from the synced
+  scenario. **Never omit.** Empty array only when the scenario genuinely has nothing to automate.
+  If QA edited `steps[]`/`expected_result` in the CSV and SYNC updated the JSON but
+  `automation_steps[]` is stale or absent, **regenerate `automation_steps[]`** from the merged
+  steps + expected_result using the Step 2 automation_steps rules before emitting.
+- **`expected_result`** — numbered verifications, verbatim from the synced scenario.
+- **`preconditions_metadata`**, **`mapped_user_flow`**, **`clickstream_events`** — carry verbatim
+  when present on the SDET scenario; omit only when the SDET scenario omits them.
+- **`test_data[]`** — copy each fixture's full object (`fixture_id`, `description`,
+  `required_state`, `entity`, `type_signals`, `dynamic_conditions`, `count`, `source_refs`,
+  `provision`, `sensitive`) **verbatim**. Do NOT re-derive `required_state` here. Emit the
+  identification INPUT only — never add `test_data_output`.
+- `environments` — from `preconditions_metadata.target_environment` (wrap in array, e.g.
+  `["QA"]`).
+
+**BrowserStack case IDs — always present, never omitted:**
+Resolve in this order for each automatable scenario:
+1. **`is_legacy_regression: true`** → copy `existing_case_ref` to `browserstack_case_id`;
+   `browserstack_case_id_status: "resolved_regression"`. These were **never uploaded** this run
+   — the id comes from the regression-extractor's existing BrowserStack case.
+2. **`browserstack_case_id` already stamped on the SDET scenario** (from this SYNC upload run for
+   a non-legacy scenario) → carry verbatim; `browserstack_case_id_status: "resolved_upload"`.
+3. **No real id** (upload skipped, failed, or not yet attempted for a new non-legacy scenario) →
+   emit `browserstack_case_id: "TC-PENDING-<scenario_id>"` (e.g. `TC-PENDING-SC-003`);
+   `browserstack_case_id_status: "placeholder"`. **Never omit the field. Never emit `null`.**
+
+**Always emit `browserstack_id_summary`** at the plan root:
+```json
+"browserstack_id_summary": {
+  "upload_attempted": true,
+  "upload_skipped_reason": "",
+  "legacy_skipped_count": 5,
+  "upload_eligible_count": 31,
+  "resolved_count": 12,
+  "placeholder_count": 19,
+  "scenarios_skipped_as_legacy": ["SC-001", "SC-002"],
+  "scenarios_with_resolved_ids": ["SC-003", "SC-004"],
+  "scenarios_with_placeholder_ids": ["SC-005", "SC-006"]
+}
+```
+When upload was skipped, set `upload_attempted: false`, state `upload_skipped_reason`, and list
+which scenarios got real ids (legacy regression vs upload) vs placeholders. Print a one-line
+summary in the reply: *"Automation plan: N scenarios — X legacy (existing ids, not uploaded),
+Y uploaded, Z placeholders."*
+
+**Plan root:** `epic_id` from `feature_metadata` (EPIC/Jira id if present, else `feature_key`);
+`generated_from` = the SDET plan filename.
 
 **Backend-only fields** (`service_name`, `package`, `test_class`, `assertion_class`, `endpoint`,
 `curl_reference`) — a mobile SDET plan does not carry these. **Never fabricate them.** Emit them
@@ -1114,7 +1224,7 @@ only when Step 0 needs it.
   audit, not left to model judgment. Never rebalance by deleting negative coverage — the only
   legal fix is generating the business coverage that was missed.
 - **Baseline Determinism**: `fe_baseline` scenarios are curated hygiene, NOT input-derived requirements — stamp `source: "fe_baseline"` and note in `analysis.md` that expected behavior needs PM/dev confirmation. Never present them as spec-backed requirements.
-- **Contract Adherence**: Fail explicitly if *all* context files are missing or if essential keys within provided contexts are missing. However, do NOT fail if individual files (like `plan_context.json` or `rfc_context.json`) are absent; instead, proceed with the inputs that are provided, noting the missing contexts in `<feature_key>_analysis.md`.
+- **Contract Adherence**: Fail explicitly if *all* context files are missing or if essential keys within provided contexts are missing. However, do NOT fail if individual files (like `task_context.json` or `rfc_context.json`) are absent; instead, proceed with the inputs that are provided, noting the missing contexts in `<feature_key>_analysis.md`.
 - **Format Precision**: Outputs must strictly conform to `sdet_plan.schema.json` and the 15-column squad CSV schema without altering column headers or ordering.
 - **Frontend Focus**: Test cases/scenarios must be generated *exclusively* for Frontend (FE) context (e.g., client-side UI, mobile views, offline transitions, local error copy, and client-side telemetry verifications). Do not generate backend-only validation or server-side test cases.
 - **Navigation Resolution**: every scenario's `steps[]` must reach its screen (including the

@@ -1,0 +1,7 @@
+{
+  "iid": 21035,
+  "web_url": "https://source.golabs.io/qa/gojek-backend-tests/-/merge_requests/21035",
+  "title": "Draft: [GOFOOD-SG-M5] Add social-group session component tests for POST /gofood/meal-scheduler/v1/group-order-sessions",
+  "source_branch": "automate/gofood-social-group-session-gofood-07edc3",
+  "target_branch": "master"
+}

@@ -5,6 +5,13 @@ merchant**, and a **driver** is required to fulfil (pick up and deliver) it. Thi
 longer chain than Transport (`../transport/index.md`'s Customer → Driver) because the order cannot
 exist without knowing which merchant it was placed against.
 
+## Keywords
+
+`ORDER`, `FOOD`, `GOFOOD`, `MERCHANT`, `GROUP_ORDER`, `BOOKING`, `DELIVERY`, `MERCHANT_ACCEPTED`,
+`OTW_PICKUP`, order-number prefix `F-` — see [../index.md](../index.md#examples) for where each
+token is grounded (TDP `BookingState`, TestBuddy's `handle_group_order_*`/`handle_gofood_*` tools,
+GBT's `gofood/src/test/java/tests/GroupOrder/**` suite).
+
 ## Required entities, in order
 
 | Step | Entity | Why it must come first |

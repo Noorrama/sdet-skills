@@ -1,13 +1,29 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "automation_plan_generator",
-  "description": "Handoff contract emitted by sdet-plan-generator (EMIT_AUTOMATION_PLAN mode) for the downstream Test-Data-Generation stage defined in the Backend QA Test-Data Generation RFC. Mirrors that RFC's automation-plan-generator INPUT shape (pre-enrichment — the test-data stage later adds test_data_output). The RFC owns the canonical contract, so this schema is intentionally permissive (additionalProperties allowed) and pins only the fields the emission must always carry.",
+  "description": "Handoff contract emitted by sdet-plan-generator (SYNC / EMIT_AUTOMATION_PLAN mode) for the downstream Test-Data-Generation and test-code-generator stages. Carries the full automatable scenario payload from the synced SDET plan — steps, automation_steps, test_data, and BrowserStack case IDs (real or placeholder). Only scenarios with execution_mode Automatable appear here; Manual non-legacy scenarios are uploaded to BrowserStack separately but excluded from this file. The test-data stage later appends test_data_output; this schema is pre-enrichment.",
   "type": "object",
   "required": ["epic_id", "automation_scenarios"],
   "additionalProperties": true,
   "properties": {
     "epic_id": { "type": "string", "description": "From feature_metadata (the EPIC/Jira id if present, else the feature_key)." },
     "generated_from": { "type": "string", "description": "Source SDET plan filename this was emitted from, e.g. 'birthday_reward_SDET_plan.json'. Provenance for re-generation." },
+    "browserstack_id_summary": {
+      "type": "object",
+      "description": "Roll-up of BrowserStack case ID resolution across all automation_scenarios. Always emit so downstream knows which IDs are real vs placeholder.",
+      "additionalProperties": true,
+      "properties": {
+        "upload_attempted": { "type": "boolean" },
+        "upload_skipped_reason": { "type": "string", "description": "Plain-language reason when upload was not attempted or failed, e.g. 'BrowserStack MCP unavailable'." },
+        "resolved_count": { "type": "integer", "description": "Scenarios carrying a real BrowserStack case id (uploaded or pre-existing regression id)." },
+        "placeholder_count": { "type": "integer", "description": "Scenarios whose browserstack_case_id is a TC-PENDING-<scenario_id> placeholder." },
+        "legacy_skipped_count": { "type": "integer", "description": "Legacy regression scenarios (is_legacy_regression: true) excluded from BrowserStack upload — ids taken from existing_case_ref." },
+        "upload_eligible_count": { "type": "integer", "description": "Non-legacy scenarios uploaded or eligible for BrowserStack (Manual + Automatable, is_legacy_regression: false)." },
+        "scenarios_skipped_as_legacy": { "type": "array", "items": { "type": "string" }, "description": "scenario_id values with is_legacy_regression: true — not uploaded, existing_case_ref used." },
+        "scenarios_with_resolved_ids": { "type": "array", "items": { "type": "string" }, "description": "scenario_id values with real BrowserStack ids." },
+        "scenarios_with_placeholder_ids": { "type": "array", "items": { "type": "string" }, "description": "scenario_id values still awaiting BrowserStack upload." }
+      }
+    },
     "emit_notes": {
       "type": "array",
       "description": "Open points from the emission itself — most commonly a backend field the mobile SDET plan could not supply. Same spirit as extraction_notes: never fabricated, always surfaced.",
@@ -25,19 +41,79 @@
     },
     "automation_scenarios": {
       "type": "array",
-      "description": "Only scenarios whose (post-sync) Execution Mode is Automatable. Manual scenarios stay in the SDET plan and are excluded here.",
+      "description": "Only scenarios whose (post-sync) execution_mode is Automatable. Manual scenarios (even when uploaded to BrowserStack) are excluded. Legacy regression scenarios with Automatable execution mode may appear here with resolved_regression BrowserStack ids but were not re-uploaded.",
       "items": {
         "type": "object",
-        "required": ["scenario_id", "requirement_ref", "description", "target_framework", "test_data", "environments"],
+        "required": [
+          "scenario_id",
+          "requirement_ref",
+          "description",
+          "target_framework",
+          "steps",
+          "automation_steps",
+          "expected_result",
+          "test_data",
+          "environments",
+          "browserstack_case_id",
+          "browserstack_case_id_status"
+        ],
         "additionalProperties": true,
         "properties": {
           "scenario_id": { "type": "string", "description": "Stable id (e.g. SC-001), assigned in scenario order. Reused on re-generation so downstream references stay valid." },
           "requirement_ref": { "type": "string" },
           "description": { "type": "string", "description": "From the scenario's csv_title_association / title." },
           "is_legacy_regression": { "type": "boolean" },
+          "existing_case_ref": { "type": "string", "description": "Pre-existing regression case id from regression_context (e.g. C2879733), carried verbatim when present." },
           "is_dedup": { "type": "boolean" },
-          "target_framework": { "type": "string", "description": "The scenario's target_execution_framework, verbatim (e.g. TAPMIND_NLP, GMT_JAVA). Backend consumers may map to their own value." },
+          "target_framework": { "type": "string", "description": "The scenario's target_execution_framework, verbatim (e.g. TAPMIND_NLP, GMT_JAVA)." },
           "execution_scope": { "type": "string", "enum": ["FRONTEND_ONLY", "BACKEND_ONLY", "END_TO_END"] },
+          "execution_mode": { "type": "string", "description": "Post-sync execution mode from the SDET plan (should be Automatable for every row here)." },
+          "priority_tier": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "platform": { "type": "string" },
+          "country": { "type": "string" },
+          "driver_type": { "type": "string" },
+          "automation_status": { "type": "string" },
+          "test_case_type": { "type": "string" },
+          "coverage_category": { "type": "string" },
+          "source": { "type": "string", "enum": ["input_derived", "feature_adjacent", "fe_baseline", "qa_added"] },
+          "steps": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Manual tester action steps, copied verbatim from the synced SDET scenario (same content as the CSV Steps column)."
+          },
+          "automation_steps": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Consolidated TapMind-dialect action+verification sequence for code generation, copied verbatim from the synced SDET scenario. Empty array only when the scenario genuinely has nothing to automate."
+          },
+          "expected_result": {
+            "type": "string",
+            "description": "Numbered verification assertions, copied verbatim from the synced SDET scenario (same content as the CSV Expected Result column)."
+          },
+          "preconditions_metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Carried verbatim from the SDET scenario — environment, locale, flags, deeplink."
+          },
+          "mapped_user_flow": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Carried verbatim from the SDET scenario when present."
+          },
+          "clickstream_events": {
+            "type": "array",
+            "items": { "type": "object" },
+            "description": "Carried verbatim from the SDET scenario when present."
+          },
+          "browserstack_case_id": {
+            "type": "string",
+            "description": "Real BrowserStack case id when resolved (TC-XXXXXX from upload, or C2879733-style from regression context / existing_case_ref). When upload was skipped or not yet run for a new scenario, emit TC-PENDING-<scenario_id> (e.g. TC-PENDING-SC-003) — never omit, never null."
+          },
+          "browserstack_case_id_status": {
+            "type": "string",
+            "enum": ["resolved_upload", "resolved_regression", "placeholder"],
+            "description": "resolved_upload = returned by createTestCasesFromFile this run; resolved_regression = pre-existing id from regression context or existing_case_ref; placeholder = TC-PENDING-* because upload was skipped or not yet attempted."
+          },
           "service_name": { "type": "string", "description": "Backend-only. Present only when the SDET plan actually carries it; omitted (with an emit_note) otherwise. Never fabricated." },
           "module": { "type": "string" },
           "package": { "type": "string", "description": "Backend-only. See service_name." },
@@ -47,7 +123,7 @@
           "curl_reference": { "type": "string", "description": "Backend-only. See service_name." },
           "test_data": {
             "type": "array",
-            "description": "The identification INPUT for the test-data stage. Carried directly from the SDET scenario's test_data[] — fixture_id, description, and required_state. The test-data stage appends test_data_output; do not add it here.",
+            "description": "The identification INPUT for the test-data stage. Carried directly from the SDET scenario's test_data[] — fixture_id, description, required_state, type_signals, dynamic_conditions, source_refs. The test-data stage appends test_data_output; do not add it here.",
             "items": {
               "type": "object",
               "required": ["fixture_id", "description"],
@@ -55,10 +131,14 @@
               "properties": {
                 "fixture_id": { "type": "string" },
                 "description": { "type": "string" },
-                "required_state": { "type": "array", "items": { "type": "object" }, "description": "Array of state blocks, verbatim from the SDET fixture. Each block carries its own \"entity\" plus that entity's static attributes. Carried as-is — never re-derived here." },
+                "required_state": { "type": ["array", "object"], "description": "Verbatim from the SDET fixture — array of state blocks or object form, never re-derived here." },
                 "entity": { "type": "string" },
-                "dynamic_conditions": { "type": "array", "items": { "type": "object" }, "description": "Carried through from the SDET fixture — temporal/relational/selection needs that are not static attributes." },
-                "count": { "type": "integer" }
+                "type_signals": { "type": "array", "items": { "type": "string" } },
+                "dynamic_conditions": { "type": "array", "items": { "type": "object" } },
+                "count": { "type": "integer" },
+                "source_refs": { "type": "array", "items": { "type": "string" } },
+                "provision": { "type": "string" },
+                "sensitive": { "type": "boolean" }
               }
             }
           },

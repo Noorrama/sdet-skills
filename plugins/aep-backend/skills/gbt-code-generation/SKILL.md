@@ -24,6 +24,23 @@ existing gojek-backend-tests (GBT) repository.
 3. Do NOT duplicate code. If EXISTING MATCHES show the endpoint/client/controller
    already exists, REUSE it — add only the new test method(s) and reuse the
    existing test's prerequisites/setup and data-provider flow.
+   - ONE ENDPOINT, ONE TEST CLASS. This rule's reuse applies to the helper layers
+     (endpoint/client/controller), which legitimately hold many endpoints. It does
+     NOT apply to test classes: a scenario whose endpoint differs in method or path
+     from the class you were pointed at gets its OWN test class in that class's
+     directory, named for its endpoint. Use the sibling as the structural template
+     and call its controller for setup.
+   - EXTENDING AN EXISTING API MEANS THE WHOLE REQUEST CHAIN. When a case adds a
+     field to an already-automated endpoint, walk request model → body builder →
+     endpoint → client → controller → response model → assertion helper → data
+     provider, and report what you did to each in `notes`, including what you left
+     unchanged and why. Two specific traps: a failure-path controller method pins
+     ONE expected status, so a new 400-validation path needs an overload that takes
+     the expected status (never loosen it to `assertTrue(a || b)`); and a DTO whose
+     class-level Lombok `@Builder` sits beside a hand-written constructor breaks the
+     moment you add a third field — delete the unused constructor rather than
+     demoting `@Builder` onto a new one. Full detail in
+     `backend-automation/references/extending-an-existing-api.md`.
 4. Order of work: component (per-API) first, then integration, then end-to-end.
 5. Implement assertions from each case's expected output. For API/component tests
    ALSO assert: response status, the presence and values of the documented
@@ -63,8 +80,21 @@ duplicate resource; boundary conditions.
 ## Quality checks (verify before emitting)
 Workflow completeness (every dependency API exists), data isolation (tests run
 independently), idempotency (repeated runs succeed), parallel-safe (no shared
-mutable state), environment independence (no hardcoded values), stability (no
-timing-based assertions).
+mutable state), stability (no timing-based assertions).
+
+**Environment correctness** deserves its own check, because it fails silently —
+green on QA, 404 on integration. Every provisioned entity id (restaurant,
+merchant, customer, group, offer, voucher batch) must resolve through the
+module's per-environment mechanism: an `I<Domain>Constants` +
+`<Domain>Constants{Qa,Int,Uat}` family, a per-environment properties file, or a
+runtime pool helper. Add a getter AND an implementation in every environment
+class — a missing one should be a compile error. Only environment-INdependent
+values belong in a shared constants class: enum/protocol literals, locale and
+country headers, and deliberately-invalid ids that resolve nowhere by design.
+Keep the public constant name clean — an unprovisioned value gets a placeholder
+and a `// TODO:` inside the per-environment implementation, never a `DUMMY_`
+prefix on the constant. See
+`backend-automation/references/environment-specific-test-data.md`.
 
 ## File placement / package conventions
 Place new test files under the SELECTED module, in the SAME source directory and

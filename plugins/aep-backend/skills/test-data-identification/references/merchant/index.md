@@ -14,6 +14,13 @@ ground what *does* exist — so identification never invents one.
   signals listed in `../test_data_domains.md` (`GoFood merchant`, `Pooling supported`, `In operation
   hours`, `Closed`, `Menu`, `Outlet`) have no corresponding code.
 
+## Signal vocabulary
+
+"Restaurant" is MERCHANT-domain wording — a fixture describing a restaurant (e.g. "Restaurant
+enabled for GoFood group order, max_participants 8") is a merchant fixture, not a workflow/booking
+or session-entity fixture, even though the same gap above still applies: it lands in
+`TESTBUDDY_OPERATION_FALLBACK`/`TDP_NOT_SUPPORTED`, never an invented `MERCHANT_WITH_*` category.
+
 ## What exists instead, and why it doesn't count
 
 | Code | What it actually is | Why it isn't a merchant entity |

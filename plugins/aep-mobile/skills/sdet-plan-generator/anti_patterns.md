@@ -31,8 +31,19 @@ validator (`scripts/validate_sdet_deliverables.py`) rejects them mechanically.
 |---|---|
 | `is_legacy_regression: true` without `existing_case_ref` | Regression dedup must be auditable |
 | `existing_case_ref` with `is_legacy_regression: false` | Contradictory legacy marking |
+| Collapsing JSON `expected_result` numbered lines into one CSV Expected Result paragraph | CSV Expected Result must be a verbatim copy of `scenario.expected_result` — same line count, same `\n` breaks |
+| CSV Expected Result line count < JSON `expected_result` line count | Summarization defect — compliance validator fails |
 | Verification lines inside JSON `steps[]` | Belongs in `expected_result` |
 | Invented deeplinks, flags, event names, API paths | Provenance rule |
+
+## FORBIDDEN — SYNC / BrowserStack upload
+
+| Anti-pattern | Why |
+|---|---|
+| Uploading rows with `is_legacy_regression: true` | Legacy cases already exist in BrowserStack from regression-extractor — re-upload creates duplicates |
+| Excluding Manual rows from BrowserStack upload when `is_legacy_regression: false` | Manual non-legacy cases still belong in TMS; only the automation plan excludes them |
+| Including Manual rows in `<feature_key>_automation_plan_generator.json` | Automation plan is Automatable-only |
+| Overwriting `existing_case_ref` with a newly uploaded `TC-*` id on a legacy scenario | The regression case owns that TMS entry |
 
 ## FORBIDDEN — analysis.md
 
@@ -54,6 +65,7 @@ python3 scripts/validate_sdet_deliverables.py \
   --analysis <feature_key>_analysis.md \
   [--design design_context.json] \
   [--rfc rfc_context.json] \
+  [--task task_context.json] \
   [--checklist coverage_checklist.json] \
   [--compliance <feature_key>_compliance_report.json]
 ```

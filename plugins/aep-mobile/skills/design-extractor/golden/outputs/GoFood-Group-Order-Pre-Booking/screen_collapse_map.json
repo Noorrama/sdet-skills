@@ -1,0 +1,541 @@
+{
+  "auto_collapsed": [
+    {
+      "screen_id": "SNIPPET",
+      "frame_ids": [
+        "11022:57180",
+        "19123:112565"
+      ],
+      "tier": "AUTO",
+      "signals": []
+    }
+  ],
+  "candidates": [
+    {
+      "screen_id": "CHAT",
+      "frame_ids": [
+        "10882:26560",
+        "10886:37401",
+        "11750:71372"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Chat"
+      ],
+      "outgoing_summary": {
+        "10882:26560": [
+          "CHAT"
+        ],
+        "10886:37401": [
+          "MPS"
+        ],
+        "11750:71372": [
+          "MPS"
+        ]
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "DIALOG",
+      "frame_ids": [
+        "10885:32974",
+        "10886:33142",
+        "10886:33588",
+        "10886:35728",
+        "10889:50959",
+        "10894:55072",
+        "11343:65017",
+        "11600:32059",
+        "11600:33146",
+        "12152:61380",
+        "12152:61476",
+        "16045:108530"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Dialog"
+      ],
+      "outgoing_summary": {
+        "10885:32974": [
+          "SHARED_CART"
+        ],
+        "10886:33142": [
+          "SHARED_CART"
+        ],
+        "10886:33588": [
+          "SHARED_CART"
+        ],
+        "10886:35728": [
+          "SHARED_CART"
+        ],
+        "10889:50959": [
+          "SHARED_CART"
+        ],
+        "10894:55072": [
+          "SHARED_CART"
+        ],
+        "11343:65017": [],
+        "11600:32059": [
+          "SHARED_CART"
+        ],
+        "11600:33146": [],
+        "12152:61380": [],
+        "12152:61476": [],
+        "16045:108530": []
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "HOMESCREEN",
+      "frame_ids": [
+        "10918:16815",
+        "11010:47577",
+        "11015:52168",
+        "11598:39173",
+        "11602:28188",
+        "11602:55819",
+        "11602:56644",
+        "11604:58549"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Homescreen"
+      ],
+      "outgoing_summary": {
+        "10918:16815": [],
+        "11010:47577": [
+          "MPS"
+        ],
+        "11015:52168": [
+          "CHAT"
+        ],
+        "11598:39173": [
+          "MPS"
+        ],
+        "11602:28188": [
+          "CHAT"
+        ],
+        "11602:55819": [],
+        "11602:56644": [
+          "HOMESCREEN"
+        ],
+        "11604:58549": []
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "LANDING",
+      "frame_ids": [
+        "10950:27992",
+        "11015:52600",
+        "11034:57535",
+        "11598:36417",
+        "11598:37830",
+        "11598:40350",
+        "11598:40661",
+        "11602:28688",
+        "11602:28832",
+        "11604:60555",
+        "11750:71072",
+        "12246:95117",
+        "13056:83577"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Landing"
+      ],
+      "outgoing_summary": {
+        "10950:27992": [
+          "DIALOG",
+          "LANDING",
+          "SNIPPET"
+        ],
+        "11015:52600": [],
+        "11034:57535": [],
+        "11598:36417": [
+          "MPS"
+        ],
+        "11598:37830": [
+          "MPS"
+        ],
+        "11598:40350": [
+          "LANDING"
+        ],
+        "11598:40661": [
+          "LANDING",
+          "MPS"
+        ],
+        "11602:28688": [
+          "LANDING"
+        ],
+        "11602:28832": [],
+        "11604:60555": [
+          "MPS"
+        ],
+        "11750:71072": [
+          "LOADING"
+        ],
+        "12246:95117": [],
+        "13056:83577": [
+          "MPS"
+        ]
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "MPS",
+      "frame_ids": [
+        "10882:10702",
+        "10882:10914",
+        "10882:25524",
+        "10882:26695",
+        "10886:34997",
+        "10886:37535",
+        "10889:46904",
+        "10889:47826",
+        "10889:48614",
+        "10889:51002",
+        "10889:51733",
+        "10960:32736",
+        "11011:48756",
+        "11016:53084",
+        "11017:54628",
+        "11194:60756",
+        "11196:61535",
+        "11598:36771",
+        "11598:39622",
+        "11604:59805",
+        "11653:63490",
+        "11750:72049",
+        "11974:58748",
+        "11982:59497",
+        "11982:60205",
+        "11982:60938",
+        "11982:61646",
+        "12011:65591",
+        "12011:66277",
+        "12108:59421",
+        "13034:73997",
+        "15173:185526"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "MPS"
+      ],
+      "outgoing_summary": {
+        "10882:10702": [
+          "MPS"
+        ],
+        "10882:10914": [
+          "LANDING",
+          "MOLP"
+        ],
+        "10882:25524": [
+          "CHAT",
+          "MPS"
+        ],
+        "10882:26695": [
+          "MPS"
+        ],
+        "10886:34997": [
+          "MPS",
+          "SHARED_CART"
+        ],
+        "10886:37535": [
+          "MPS"
+        ],
+        "10889:46904": [
+          "MPS"
+        ],
+        "10889:47826": [
+          "HOMESCREEN",
+          "MERCHANT_PAGE_DETAIL_SCROLLED"
+        ],
+        "10889:48614": [],
+        "10889:51002": [
+          "DIALOG"
+        ],
+        "10889:51733": [],
+        "10960:32736": [
+          "HOMESCREEN",
+          "MERCHANT_PAGE_DETAIL_SCROLLED",
+          "SHARED_CART"
+        ],
+        "11011:48756": [
+          "MPS"
+        ],
+        "11016:53084": [],
+        "11017:54628": [],
+        "11194:60756": [],
+        "11196:61535": [],
+        "11598:36771": [
+          "LANDING"
+        ],
+        "11598:39622": [
+          "LANDING",
+          "MPS"
+        ],
+        "11604:59805": [
+          "LANDING"
+        ],
+        "11653:63490": [],
+        "11750:72049": [],
+        "11974:58748": [
+          "SHIMMER"
+        ],
+        "11982:59497": [
+          "SHIMMER"
+        ],
+        "11982:60205": [
+          "SHIMMER"
+        ],
+        "11982:60938": [
+          "LANDING"
+        ],
+        "11982:61646": [],
+        "12011:65591": [],
+        "12011:66277": [],
+        "12108:59421": [
+          "LANDING"
+        ],
+        "13034:73997": [],
+        "15173:185526": []
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+      "frame_ids": [
+        "10882:29367",
+        "10882:30369",
+        "10889:49416",
+        "10889:49858",
+        "11809:76729",
+        "15827:71999"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Merchant Page Detail - Scrolled"
+      ],
+      "outgoing_summary": {
+        "10882:29367": [
+          "MERCHANT_PAGE_DETAIL_SCROLLED",
+          "MERCHANT_PROFILE_REQUIRED",
+          "SHARED_CART",
+          "SKU_DETAIL"
+        ],
+        "10882:30369": [
+          "MERCHANT_PAGE_DETAIL_SCROLLED",
+          "MERCHANT_PROFILE_REQUIRED",
+          "SHARED_CART",
+          "SKU_DETAIL"
+        ],
+        "10889:49416": [
+          "MERCHANT_PAGE_DETAIL_SCROLLED",
+          "SHARED_CART"
+        ],
+        "10889:49858": [
+          "SHARED_CART"
+        ],
+        "11809:76729": [],
+        "15827:71999": [
+          "MERCHANT_PAGE_DETAIL_SCROLLED"
+        ]
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "frame_ids": [
+        "11598:41072",
+        "11598:42100",
+        "11600:28790",
+        "11809:77177"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Merchant Profile - Required"
+      ],
+      "outgoing_summary": {
+        "11598:41072": [
+          "MERCHANT_PAGE_DETAIL_SCROLLED",
+          "MERCHANT_PROFILE_REQUIRED"
+        ],
+        "11598:42100": [],
+        "11600:28790": [
+          "SHARED_CART"
+        ],
+        "11809:77177": []
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "SKU_DETAIL",
+      "frame_ids": [
+        "15827:71488",
+        "15827:72458"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "SKU detail"
+      ],
+      "outgoing_summary": {
+        "15827:71488": [
+          "MERCHANT_PAGE_DETAIL_SCROLLED"
+        ],
+        "15827:72458": [
+          "MERCHANT_PROFILE_REQUIRED"
+        ]
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "frame_ids": [
+        "10882:30851",
+        "10882:31110",
+        "10883:32172",
+        "10883:32345",
+        "10885:32631",
+        "10885:32818",
+        "10889:50317",
+        "10889:50558",
+        "10889:50733",
+        "10894:52473",
+        "10894:54549",
+        "10894:54771",
+        "10901:56106",
+        "11017:54785",
+        "11192:60540",
+        "11600:29242",
+        "11600:29708",
+        "11600:32884",
+        "15277:70829",
+        "15277:71016",
+        "15645:69437",
+        "15651:69684",
+        "15673:69907",
+        "15745:73286",
+        "15745:73520",
+        "15838:85271",
+        "19534:109975"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Shared cart"
+      ],
+      "outgoing_summary": {
+        "10882:30851": [
+          "EDIT_BILLING"
+        ],
+        "10882:31110": [
+          "SHARED_CART"
+        ],
+        "10883:32172": [],
+        "10883:32345": [],
+        "10885:32631": [],
+        "10885:32818": [
+          "DIALOG"
+        ],
+        "10889:50317": [
+          "MERCHANT_PAGE_DETAIL_SCROLLED"
+        ],
+        "10889:50558": [],
+        "10889:50733": [],
+        "10894:52473": [],
+        "10894:54549": [],
+        "10894:54771": [],
+        "10901:56106": [
+          "DIALOG"
+        ],
+        "11017:54785": [],
+        "11192:60540": [
+          "MPS",
+          "SHARED_CART"
+        ],
+        "11600:29242": [],
+        "11600:29708": [
+          "MPS"
+        ],
+        "11600:32884": [],
+        "15277:70829": [],
+        "15277:71016": [],
+        "15645:69437": [],
+        "15651:69684": [
+          "DIALOG"
+        ],
+        "15673:69907": [
+          "SHARED_CART"
+        ],
+        "15745:73286": [
+          "DIALOG"
+        ],
+        "15745:73520": [
+          "DIALOG"
+        ],
+        "15838:85271": [
+          "SHARED_CART"
+        ],
+        "19534:109975": [
+          "DIALOG"
+        ]
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "SHIMMER",
+      "frame_ids": [
+        "10966:36905",
+        "12137:60238",
+        "12137:60539"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Shimmer"
+      ],
+      "outgoing_summary": {
+        "10966:36905": [
+          "LANDING"
+        ],
+        "12137:60238": [
+          "LANDING"
+        ],
+        "12137:60539": [
+          "LANDING"
+        ]
+      },
+      "recommendation": "keep_split"
+    }
+  ],
+  "decisions": []
+}

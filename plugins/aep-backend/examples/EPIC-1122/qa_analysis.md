@@ -1,6 +1,6 @@
 # QA Analysis — EPIC-1122: Save Payment-Method API
 
-> **Generation mode:** Pass 1 (pre-build)  
+> **Generation mode:** Upstream-context (pre-build)  
 > **Plan version:** v1  
 > **Date:** 2026-08-06  
 > **SDET + PM review gate — approve before proceeding to automation-plan-generator**

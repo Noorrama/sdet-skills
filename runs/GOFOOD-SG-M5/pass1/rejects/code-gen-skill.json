@@ -1,0 +1,48 @@
+{
+  "stage": "code-gen-skill",
+  "failed_at": "automation-plan-test-enricher (stage 2)",
+  "reason": "enrichment_unusable",
+  "detail": "All 3 non-dedup scenarios returned an error from stage 2. Orchestrator reject table: 'Every non-is_dedup scenario came back from step 2 with an error in scenario_gbt_context.'",
+  "upstream_reject": {
+    "enricher_stderr": "0 enriched, 3 errored, 3 total -> runs/GOFOOD-SG-M5/pass1/artifacts/automation_plan_enriched.json",
+    "per_scenario_errors": [
+      {
+        "scenario_id": "SC-GOFOODSGM5-001",
+        "error": "no_endpoint_match: 0 rows for endpoint='/gofood/meal-scheduler/v1/group-order-sessions' with module(s) ['gofood', 'gofood-meal-scheduler', 'gofood_meal_scheduler']"
+      },
+      {
+        "scenario_id": "SC-GOFOODSGM5-002",
+        "error": "no_endpoint_match: 0 rows for endpoint='/gofood/meal-scheduler/v1/group-order-sessions' with module(s) ['gofood', 'gofood-meal-scheduler', 'gofood_meal_scheduler']"
+      },
+      {
+        "scenario_id": "SC-GOFOODSGM5-003",
+        "error": "no_endpoint_match: 0 rows for endpoint='/gofood/meal-scheduler/v1/group-order-sessions' with module(s) ['gofood', 'gofood-meal-scheduler', 'gofood_meal_scheduler']"
+      }
+    ]
+  },
+  "diagnosis": {
+    "graph": "bolt://10.27.76.76:7687 reachable; 378,479 nodes; 4,056 Endpoint nodes; indexed from branch 'addGBTIndexer' of gojek-backend-tests",
+    "query_works": "PROVEN. Ran the enricher's own endpoint_context.cypher with module='gofood' against a real graph endpoint ('/mpp/merchant/recommended_packages/{rpId}') and it returned 1 row with a populated endpoint_file. The query and the bindings are fine.",
+    "root_cause": "The target endpoint genuinely does not exist in the graph. 0 of 4,056 Endpoint paths contain 'group-order-sessions', and 0 contain '/gofood/meal-scheduler/v1/group-order-sessions'. This is a NEW endpoint with zero existing GBT test coverage.",
+    "why_this_is_a_conflict": "The enricher encodes 0-rows as error:'no_endpoint_match'. The orchestrator's rule 4b says an error means 'could not resolve' -> undecidable, while EMPTY LISTS mean 'matched, nothing found' -> a genuinely uncovered endpoint that must become no_match/requires_new_test_class and DOES get generated. This run is semantically the second case but is encoded as the first, so enrichment_unusable fires on a case rule 4b explicitly says the pipeline exists to fix.",
+    "why_not_proceed_anyway": "Rule 4b forbids it in terms: 'never collapse an error into an empty list to keep the pipeline moving'. Reinterpreting the enricher's error as empty-lists is exactly that, and is the orchestrator's job to refuse, not to decide."
+  },
+  "secondary_finding": {
+    "issue": "module matching in endpoint_context.cypher is a substring test (`WHERE def.path CONTAINS module`), not a module-boundary match.",
+    "evidence": "module='gofood' matched app-platform/src/main/java/promotech/restidioms/promotech/recommendedpackage/gofoodandgopay/getRp/GetRpDetailsEndPoint.java - a file in the app-platform module whose PATH happens to contain 'gofood'.",
+    "consequence": "For a real match this can attribute another module's endpoint to gofood, which would send codegen to reuse a class outside the target module. Did not affect this run's outcome (0 rows either way), but worth fixing.",
+    "owner": "automation-plan-test-enricher - not changed here; the orchestrator does not edit a stage's query."
+  },
+  "options_for_the_operator": [
+    "A) Confirm the endpoint is new and genuinely uncovered, then have the enricher emit empty lists (not an error) for the 0-row case so rule 4b's uncovered-endpoint path engages and stage 5 rules it no_match / requires_new_test_class: true. This is the fix that matches intent.",
+    "B) Re-index the graph if /gofood/meal-scheduler/v1/group-order-sessions is expected to be present - the graph is pinned to branch 'addGBTIndexer', which may predate the endpoint.",
+    "C) Proceed knowing every scenario will be treated as a brand-new test class. Only safe once A or B confirms there is genuinely nothing to reuse - which the diagnosis above supports but does not, on its own, authorise."
+  ],
+  "remediation": "Pick A, B or C above. To resume after A or B: re-run stage 2 (automation-plan-test-enricher) with PLAN=runs/GOFOOD-SG-M5/pass1/artifacts/automation_plan.json; the workspace from stage 0 is intact and reusable.",
+  "workspace_left_in_place": {
+    "worktree": "/Users/piyushsharma/skills/.gbt_worktrees/gofood-social-group-session-gofood-07edc3",
+    "branch": "automate/gofood-social-group-session-gofood-07edc3",
+    "note": "Not torn down - gbt-workspace-prep rule 7: a failed run stays inspectable."
+  },
+  "mr_url": ""
+}

@@ -22,7 +22,7 @@ copied here. The category/operation columns below are *illustrative shapes only*
 
 ### CUSTOMER
 - **Owns:** consumer accounts and their account-level state — verification/KYC level, activation status, linked wallet, segments, saved addresses, tokens.
-- **Signals:** `Active`, `Verified`, `First-time user`, `Linked Wallet`, `GoPay`, `Segment`, `Saved address`, `Blocked`, `account_status`, `wallet_linked`.
+- **Signals:** `Active`, `Verified`, `First-time user`, `Linked Wallet`, `GoPay`, `Segment`, `Saved address`, `Blocked`, `account_status`, `wallet_linked`, `Host`, `Participant`/`participants`, `Member`.
 - **Category shape:** `CUSTOMER_WITH_*`.
 - **Operation shape:** add-to-segment, refresh token, edit saved address.
 
@@ -35,7 +35,7 @@ copied here. The category/operation columns below are *illustrative shapes only*
 
 ### MERCHANT
 - **Owns:** merchant/outlet entities — vertical, pooling support, operating hours, catalogue/menu availability.
-- **Signals:** `GoFood merchant`, `Pooling supported`, `In operation hours`, `Closed`, `Menu`, `Outlet`.
+- **Signals:** `GoFood merchant`, `Restaurant`, `Pooling supported`, `In operation hours`, `Closed`, `Menu`, `Outlet`.
 
 ### PAYMENT_INSTRUMENT
 - **Owns:** the instrument itself — cards, bank accounts, linked third-party payment methods; validity, expiry, tokenisation/saved state.

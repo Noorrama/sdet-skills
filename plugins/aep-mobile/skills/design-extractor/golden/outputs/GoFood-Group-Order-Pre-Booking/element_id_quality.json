@@ -1,0 +1,1202 @@
+[
+  {
+    "element_id": "CHAT.input_bar_input_bar_input",
+    "quality": "GOOD",
+    "screen_id": "CHAT",
+    "source_ref": "10886:37436"
+  },
+  {
+    "element_id": "CHAT.message_bubble_avatar_bubble_container",
+    "quality": "DUPLICATE",
+    "screen_id": "CHAT",
+    "source_ref": "10886:37406",
+    "source_refs": [
+      "10886:37406",
+      "11750:71377"
+    ]
+  },
+  {
+    "element_id": "CHAT.message_bubble_avatar_bubble_container",
+    "quality": "DUPLICATE",
+    "screen_id": "CHAT",
+    "source_ref": "11750:71377",
+    "source_refs": [
+      "10886:37406",
+      "11750:71377"
+    ]
+  },
+  {
+    "element_id": "CHAT.message_bubble_bubble_forward_container",
+    "quality": "GOOD",
+    "screen_id": "CHAT",
+    "source_ref": "10882:26565"
+  },
+  {
+    "element_id": "DIALOG.billing_methods_info_lbl",
+    "quality": "GOOD",
+    "screen_id": "DIALOG",
+    "source_ref": "11343:65357"
+  },
+  {
+    "element_id": "DIALOG.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "DIALOG",
+    "source_ref": "11600:32061",
+    "source_refs": [
+      "11600:32061",
+      "12051:74223",
+      "12052:76007"
+    ]
+  },
+  {
+    "element_id": "DIALOG.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "DIALOG",
+    "source_ref": "12051:74223",
+    "source_refs": [
+      "11600:32061",
+      "12051:74223",
+      "12052:76007"
+    ]
+  },
+  {
+    "element_id": "DIALOG.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "DIALOG",
+    "source_ref": "12052:76007",
+    "source_refs": [
+      "11600:32061",
+      "12051:74223",
+      "12052:76007"
+    ]
+  },
+  {
+    "element_id": "DIALOG.delete_group_btn",
+    "quality": "GOOD",
+    "screen_id": "DIALOG",
+    "source_ref": "12061:79777"
+  },
+  {
+    "element_id": "DIALOG.dialog_content_card_button_container",
+    "quality": "DUPLICATE",
+    "screen_id": "DIALOG",
+    "source_ref": "10885:32974",
+    "source_refs": [
+      "10885:32974",
+      "10886:33588",
+      "10886:35728",
+      "10889:50959"
+    ]
+  },
+  {
+    "element_id": "DIALOG.dialog_content_card_button_container",
+    "quality": "DUPLICATE",
+    "screen_id": "DIALOG",
+    "source_ref": "10886:33588",
+    "source_refs": [
+      "10885:32974",
+      "10886:33588",
+      "10886:35728",
+      "10889:50959"
+    ]
+  },
+  {
+    "element_id": "DIALOG.dialog_content_card_button_container",
+    "quality": "DUPLICATE",
+    "screen_id": "DIALOG",
+    "source_ref": "10886:35728",
+    "source_refs": [
+      "10885:32974",
+      "10886:33588",
+      "10886:35728",
+      "10889:50959"
+    ]
+  },
+  {
+    "element_id": "DIALOG.dialog_content_card_button_container",
+    "quality": "DUPLICATE",
+    "screen_id": "DIALOG",
+    "source_ref": "10889:50959",
+    "source_refs": [
+      "10885:32974",
+      "10886:33588",
+      "10886:35728",
+      "10889:50959"
+    ]
+  },
+  {
+    "element_id": "DIALOG.dialog_content_content_title_container",
+    "quality": "GOOD",
+    "screen_id": "DIALOG",
+    "source_ref": "10894:55072"
+  },
+  {
+    "element_id": "DIALOG.remove_btn",
+    "quality": "GOOD",
+    "screen_id": "DIALOG",
+    "source_ref": "12061:79754"
+  },
+  {
+    "element_id": "DIALOG.yes_leave_group_btn",
+    "quality": "GOOD",
+    "screen_id": "DIALOG",
+    "source_ref": "12052:75322"
+  },
+  {
+    "element_id": "EDIT_BILLING.edit_billing_card_button_container",
+    "quality": "GOOD",
+    "screen_id": "EDIT_BILLING",
+    "source_ref": "10882:28296"
+  },
+  {
+    "element_id": "EDIT_BILLING.title_actionsicfareandbonus_icon_you_lbl",
+    "quality": "BAD",
+    "screen_id": "EDIT_BILLING",
+    "source_ref": "12054:76450"
+  },
+  {
+    "element_id": "HOMESCREEN.buttonprimary_items_delivery_from_btn",
+    "quality": "GOOD",
+    "screen_id": "HOMESCREEN",
+    "source_ref": "11010:47742"
+  },
+  {
+    "element_id": "HOMESCREEN.buttonprimary_view_group_cart_btn",
+    "quality": "GOOD",
+    "screen_id": "HOMESCREEN",
+    "source_ref": "11602:56723"
+  },
+  {
+    "element_id": "HOMESCREEN.comforting_usuals_see_all_lbl",
+    "quality": "GOOD",
+    "screen_id": "HOMESCREEN",
+    "source_ref": "10918:16887"
+  },
+  {
+    "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+    "quality": "GOOD",
+    "screen_id": "HOMESCREEN",
+    "source_ref": "11011:48597"
+  },
+  {
+    "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+    "quality": "GOOD",
+    "screen_id": "HOMESCREEN",
+    "source_ref": "11598:39244"
+  },
+  {
+    "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+    "quality": "GOOD",
+    "screen_id": "HOMESCREEN",
+    "source_ref": "11602:56715"
+  },
+  {
+    "element_id": "LANDING.billing_methods_info_lbl",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "12054:76356"
+  },
+  {
+    "element_id": "LANDING.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "BAD",
+    "screen_id": "LANDING",
+    "source_ref": "11647:63032"
+  },
+  {
+    "element_id": "LANDING.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "BAD",
+    "screen_id": "LANDING",
+    "source_ref": "11647:63179"
+  },
+  {
+    "element_id": "LANDING.content_content_text_pojays_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "10957:29101"
+  },
+  {
+    "element_id": "LANDING.content_content_text_pojays_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "16777:195413"
+  },
+  {
+    "element_id": "LANDING.content_content_text_pojays_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "16777:196116"
+  },
+  {
+    "element_id": "LANDING.content_you_can_invite_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11598:37987"
+  },
+  {
+    "element_id": "LANDING.create_invite_friends_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "10950:28051"
+  },
+  {
+    "element_id": "LANDING.create_invite_friends_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11710:65399"
+  },
+  {
+    "element_id": "LANDING.create_invite_friends_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11740:69666"
+  },
+  {
+    "element_id": "LANDING.create_invite_friends_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "13056:83735"
+  },
+  {
+    "element_id": "LANDING.join_group_order_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11598:40369"
+  },
+  {
+    "element_id": "LANDING.join_group_order_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11598:40680"
+  },
+  {
+    "element_id": "LANDING.join_group_order_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11750:71091"
+  },
+  {
+    "element_id": "LANDING.join_group_order_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "12335:101047"
+  },
+  {
+    "element_id": "LANDING.landing_content_artwork_assets_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11598:36417"
+  },
+  {
+    "element_id": "LANDING.landing_content_artwork_assets_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11598:40350"
+  },
+  {
+    "element_id": "LANDING.landing_content_artwork_assets_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11598:40661"
+  },
+  {
+    "element_id": "LANDING.landing_content_artwork_assets_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11602:28688"
+  },
+  {
+    "element_id": "LANDING.landing_content_artwork_assets_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11604:60555"
+  },
+  {
+    "element_id": "LANDING.landing_content_join_group_container",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11750:71072"
+  },
+  {
+    "element_id": "LANDING.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "10950:28009"
+  },
+  {
+    "element_id": "LANDING.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "12335:101334"
+  },
+  {
+    "element_id": "LANDING.title_learn_more_about_lbl",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "10960:29171"
+  },
+  {
+    "element_id": "LANDING.title_paymentsiccard_icon_text_lbl",
+    "quality": "GOOD",
+    "screen_id": "LANDING",
+    "source_ref": "11598:40798"
+  },
+  {
+    "element_id": "LOADING.buttonprimary_indicatorspinner_btn",
+    "quality": "BAD",
+    "screen_id": "LOADING",
+    "source_ref": "11750:72307"
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.content_view_group_cart_items_container",
+    "quality": "GOOD",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10882:30501"
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn",
+    "quality": "BAD",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "15827:72430"
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10882:29938",
+    "source_refs": [
+      "10882:29938",
+      "10882:29940",
+      "10882:31321",
+      "10889:49426",
+      "10889:49868",
+      "11598:40972",
+      "11602:55763",
+      "11809:76737"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10882:29940",
+    "source_refs": [
+      "10882:29938",
+      "10882:29940",
+      "10882:31321",
+      "10889:49426",
+      "10889:49868",
+      "11598:40972",
+      "11602:55763",
+      "11809:76737"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10882:31321",
+    "source_refs": [
+      "10882:29938",
+      "10882:29940",
+      "10882:31321",
+      "10889:49426",
+      "10889:49868",
+      "11598:40972",
+      "11602:55763",
+      "11809:76737"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10889:49426",
+    "source_refs": [
+      "10882:29938",
+      "10882:29940",
+      "10882:31321",
+      "10889:49426",
+      "10889:49868",
+      "11598:40972",
+      "11602:55763",
+      "11809:76737"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10889:49868",
+    "source_refs": [
+      "10882:29938",
+      "10882:29940",
+      "10882:31321",
+      "10889:49426",
+      "10889:49868",
+      "11598:40972",
+      "11602:55763",
+      "11809:76737"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "11598:40972",
+    "source_refs": [
+      "10882:29938",
+      "10882:29940",
+      "10882:31321",
+      "10889:49426",
+      "10889:49868",
+      "11598:40972",
+      "11602:55763",
+      "11809:76737"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "11602:55763",
+    "source_refs": [
+      "10882:29938",
+      "10882:29940",
+      "10882:31321",
+      "10889:49426",
+      "10889:49868",
+      "11598:40972",
+      "11602:55763",
+      "11809:76737"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "11809:76737",
+    "source_refs": [
+      "10882:29938",
+      "10882:29940",
+      "10882:31321",
+      "10889:49426",
+      "10889:49868",
+      "11598:40972",
+      "11602:55763",
+      "11809:76737"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10889:49554"
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10882:30819",
+    "source_refs": [
+      "10882:30819",
+      "10889:49549",
+      "10897:56087"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10889:49549",
+    "source_refs": [
+      "10882:30819",
+      "10889:49549",
+      "10897:56087"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10897:56087",
+    "source_refs": [
+      "10882:30819",
+      "10889:49549",
+      "10897:56087"
+    ]
+  },
+  {
+    "element_id": "MERCHANT_PAGE_DETAIL_SCROLLED.view_group_cart_items_btn",
+    "quality": "GOOD",
+    "screen_id": "MERCHANT_PAGE_DETAIL_SCROLLED",
+    "source_ref": "10882:30502"
+  },
+  {
+    "element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_btn",
+    "quality": "GOOD",
+    "screen_id": "MERCHANT_PROFILE_REQUIRED",
+    "source_ref": "11598:41091"
+  },
+  {
+    "element_id": "MERCHANT_PROFILE_REQUIRED.cell_horizontallayout_no_sugar_btn",
+    "quality": "BAD",
+    "screen_id": "MERCHANT_PROFILE_REQUIRED",
+    "source_ref": "11600:28799"
+  },
+  {
+    "element_id": "MERCHANT_PROFILE_REQUIRED.cell_ice_level_required_btn",
+    "quality": "GOOD",
+    "screen_id": "MERCHANT_PROFILE_REQUIRED",
+    "source_ref": "11809:77189"
+  },
+  {
+    "element_id": "MERCHANT_PROFILE_REQUIRED.merchant_profile_required_card_container",
+    "quality": "GOOD",
+    "screen_id": "MERCHANT_PROFILE_REQUIRED",
+    "source_ref": "11598:42100"
+  },
+  {
+    "element_id": "MERCHANT_PROFILE_REQUIRED.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD",
+    "screen_id": "MERCHANT_PROFILE_REQUIRED",
+    "source_ref": "11598:41073"
+  },
+  {
+    "element_id": "MOLP.molp_navbar_status_bar_container",
+    "quality": "GOOD",
+    "screen_id": "MOLP",
+    "source_ref": "14712:105037"
+  },
+  {
+    "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "11013:49702",
+    "source_refs": [
+      "11013:49702",
+      "12108:59795",
+      "13034:74157",
+      "15173:186346",
+      "15731:72073",
+      "15731:72355"
+    ]
+  },
+  {
+    "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "12108:59795",
+    "source_refs": [
+      "11013:49702",
+      "12108:59795",
+      "13034:74157",
+      "15173:186346",
+      "15731:72073",
+      "15731:72355"
+    ]
+  },
+  {
+    "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "13034:74157",
+    "source_refs": [
+      "11013:49702",
+      "12108:59795",
+      "13034:74157",
+      "15173:186346",
+      "15731:72073",
+      "15731:72355"
+    ]
+  },
+  {
+    "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "15173:186346",
+    "source_refs": [
+      "11013:49702",
+      "12108:59795",
+      "13034:74157",
+      "15173:186346",
+      "15731:72073",
+      "15731:72355"
+    ]
+  },
+  {
+    "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "15731:72073",
+    "source_refs": [
+      "11013:49702",
+      "12108:59795",
+      "13034:74157",
+      "15173:186346",
+      "15731:72073",
+      "15731:72355"
+    ]
+  },
+  {
+    "element_id": "MPS.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "15731:72355",
+    "source_refs": [
+      "11013:49702",
+      "12108:59795",
+      "13034:74157",
+      "15173:186346",
+      "15731:72073",
+      "15731:72355"
+    ]
+  },
+  {
+    "element_id": "MPS.content_view_group_cart_container",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "11653:64747"
+  },
+  {
+    "element_id": "MPS.defaultfoodspotgrouporder_defaultfoodspotgrouporder_group_lbl",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14909:168793"
+  },
+  {
+    "element_id": "MPS.fore_matcha_club_lbl",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "10966:38926"
+  },
+  {
+    "element_id": "MPS.fore_matcha_club_lbl",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "11982:60208"
+  },
+  {
+    "element_id": "MPS.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "10886:35005",
+    "source_refs": [
+      "10886:35005",
+      "10889:51008",
+      "11598:39628",
+      "11982:59503"
+    ]
+  },
+  {
+    "element_id": "MPS.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "10889:51008",
+    "source_refs": [
+      "10886:35005",
+      "10889:51008",
+      "11598:39628",
+      "11982:59503"
+    ]
+  },
+  {
+    "element_id": "MPS.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "11598:39628",
+    "source_refs": [
+      "10886:35005",
+      "10889:51008",
+      "11598:39628",
+      "11982:59503"
+    ]
+  },
+  {
+    "element_id": "MPS.merchant_profile_sku_sku_list",
+    "quality": "DUPLICATE",
+    "screen_id": "MPS",
+    "source_ref": "11982:59503",
+    "source_refs": [
+      "10886:35005",
+      "10889:51008",
+      "11598:39628",
+      "11982:59503"
+    ]
+  },
+  {
+    "element_id": "MPS.mps_card_share_with_container",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "10889:46904"
+  },
+  {
+    "element_id": "MPS.mps_content_offer_bar_container",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "10960:32736"
+  },
+  {
+    "element_id": "MPS.mps_sku_listing_iteration_container",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "11974:58748"
+  },
+  {
+    "element_id": "MPS.mps_sku_listing_iteration_container",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "11982:60938"
+  },
+  {
+    "element_id": "MPS.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "10882:25698"
+  },
+  {
+    "element_id": "MPS.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "14919:171733"
+  },
+  {
+    "element_id": "MPS.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "14919:171945"
+  },
+  {
+    "element_id": "MPS.offer_bar_section_promo_container",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "14909:170281"
+  },
+  {
+    "element_id": "MPS.offer_bar_voucher_merchant_container",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "10966:34818"
+  },
+  {
+    "element_id": "MPS.offer_paymentsiccoupon_icon_you_container",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "10882:10894"
+  },
+  {
+    "element_id": "MPS.offer_paymentsiccoupon_icon_you_container",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "10886:35203"
+  },
+  {
+    "element_id": "MPS.ok_got_it_btn",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "12108:59797"
+  },
+  {
+    "element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "10882:11048"
+  },
+  {
+    "element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14909:169846"
+  },
+  {
+    "element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14909:170059"
+  },
+  {
+    "element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14909:170275"
+  },
+  {
+    "element_id": "MPS.order_type_socialicaddcontact_icon_container",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14903:167481"
+  },
+  {
+    "element_id": "MPS.order_type_socialicaddcontact_icon_container",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14909:171108"
+  },
+  {
+    "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "10882:11119"
+  },
+  {
+    "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "10966:38340"
+  },
+  {
+    "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14909:169878"
+  },
+  {
+    "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14909:170091"
+  },
+  {
+    "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+    "quality": "BAD",
+    "screen_id": "MPS",
+    "source_ref": "14909:170523"
+  },
+  {
+    "element_id": "MPS.promo_label_offer_logo_lbl",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "14884:166524"
+  },
+  {
+    "element_id": "MPS.screenshot_img",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "14630:76727"
+  },
+  {
+    "element_id": "MPS.section_resto_card_text_container",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "14909:170882"
+  },
+  {
+    "element_id": "MPS.share_with_lbl",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "14630:76726"
+  },
+  {
+    "element_id": "MPS.tooltip_arrow_content_eating_btn",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "10882:10913"
+  },
+  {
+    "element_id": "MPS.yes_go_ahead_btn",
+    "quality": "GOOD",
+    "screen_id": "MPS",
+    "source_ref": "11013:50288"
+  },
+  {
+    "element_id": "SHARED_CART.add_items_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10889:50389"
+  },
+  {
+    "element_id": "SHARED_CART.content_add_items_go_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10886:33435"
+  },
+  {
+    "element_id": "SHARED_CART.content_add_items_go_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10901:56203"
+  },
+  {
+    "element_id": "SHARED_CART.content_add_items_go_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "11192:60608"
+  },
+  {
+    "element_id": "SHARED_CART.content_add_items_go_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "11600:29824"
+  },
+  {
+    "element_id": "SHARED_CART.content_content_title_defaultbusinessspottransaction_container",
+    "quality": "BAD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10933:47374"
+  },
+  {
+    "element_id": "SHARED_CART.delete_group_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10882:30872"
+  },
+  {
+    "element_id": "SHARED_CART.go_to_checkout_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10886:33437"
+  },
+  {
+    "element_id": "SHARED_CART.go_to_checkout_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10886:33473"
+  },
+  {
+    "element_id": "SHARED_CART.go_to_checkout_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10901:56205"
+  },
+  {
+    "element_id": "SHARED_CART.indicatorspinnerfullscreen_atomsindicatorspinnerbig_indicatorspinner_btn",
+    "quality": "BAD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15277:71003"
+  },
+  {
+    "element_id": "SHARED_CART.leave_group_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "11602:57182"
+  },
+  {
+    "element_id": "SHARED_CART.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "11192:60559"
+  },
+  {
+    "element_id": "SHARED_CART.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15645:69440"
+  },
+  {
+    "element_id": "SHARED_CART.propertiescommonchipstextstyle_navigationicedit_icon_edit_lbl",
+    "quality": "BAD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "11600:27723"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "DUPLICATE",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10882:31110",
+    "source_refs": [
+      "10882:31110",
+      "10889:50317",
+      "10894:52473",
+      "11600:29708",
+      "15651:69684",
+      "15745:73286",
+      "15745:73520",
+      "15838:85271"
+    ]
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "DUPLICATE",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10889:50317",
+    "source_refs": [
+      "10882:31110",
+      "10889:50317",
+      "10894:52473",
+      "11600:29708",
+      "15651:69684",
+      "15745:73286",
+      "15745:73520",
+      "15838:85271"
+    ]
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "DUPLICATE",
+    "screen_id": "SHARED_CART",
+    "source_ref": "10894:52473",
+    "source_refs": [
+      "10882:31110",
+      "10889:50317",
+      "10894:52473",
+      "11600:29708",
+      "15651:69684",
+      "15745:73286",
+      "15745:73520",
+      "15838:85271"
+    ]
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "DUPLICATE",
+    "screen_id": "SHARED_CART",
+    "source_ref": "11600:29708",
+    "source_refs": [
+      "10882:31110",
+      "10889:50317",
+      "10894:52473",
+      "11600:29708",
+      "15651:69684",
+      "15745:73286",
+      "15745:73520",
+      "15838:85271"
+    ]
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "DUPLICATE",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15651:69684",
+    "source_refs": [
+      "10882:31110",
+      "10889:50317",
+      "10894:52473",
+      "11600:29708",
+      "15651:69684",
+      "15745:73286",
+      "15745:73520",
+      "15838:85271"
+    ]
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "DUPLICATE",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15745:73286",
+    "source_refs": [
+      "10882:31110",
+      "10889:50317",
+      "10894:52473",
+      "11600:29708",
+      "15651:69684",
+      "15745:73286",
+      "15745:73520",
+      "15838:85271"
+    ]
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "DUPLICATE",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15745:73520",
+    "source_refs": [
+      "10882:31110",
+      "10889:50317",
+      "10894:52473",
+      "11600:29708",
+      "15651:69684",
+      "15745:73286",
+      "15745:73520",
+      "15838:85271"
+    ]
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "DUPLICATE",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15838:85271",
+    "source_refs": [
+      "10882:31110",
+      "10889:50317",
+      "10894:52473",
+      "11600:29708",
+      "15651:69684",
+      "15745:73286",
+      "15745:73520",
+      "15838:85271"
+    ]
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_top_navbar_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15277:70829"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_top_navbar_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15277:71016"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_top_navbar_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15645:69437"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_top_navbar_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "15673:69907"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_top_navbar_container",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "19534:109975"
+  },
+  {
+    "element_id": "SHARED_CART.title_text_remove_member_lbl",
+    "quality": "GOOD",
+    "screen_id": "SHARED_CART",
+    "source_ref": "11600:29069"
+  },
+  {
+    "element_id": "SHIMMER.shimmer_content_asset_content_container",
+    "quality": "GOOD",
+    "screen_id": "SHIMMER",
+    "source_ref": "10966:36905"
+  },
+  {
+    "element_id": "SHIMMER.shimmer_content_asset_content_container",
+    "quality": "GOOD",
+    "screen_id": "SHIMMER",
+    "source_ref": "12137:60238"
+  },
+  {
+    "element_id": "SHIMMER.shimmer_content_asset_content_container",
+    "quality": "GOOD",
+    "screen_id": "SHIMMER",
+    "source_ref": "12137:60539"
+  },
+  {
+    "element_id": "SKU_DETAIL.add_to_cart_btn",
+    "quality": "GOOD",
+    "screen_id": "SKU_DETAIL",
+    "source_ref": "15827:71524"
+  },
+  {
+    "element_id": "SKU_DETAIL.add_to_cart_btn",
+    "quality": "GOOD",
+    "screen_id": "SKU_DETAIL",
+    "source_ref": "15827:72488"
+  },
+  {
+    "element_id": "SKU_DETAIL.image_image_img",
+    "quality": "BAD",
+    "screen_id": "SKU_DETAIL",
+    "source_ref": "15827:72463"
+  },
+  {
+    "element_id": "SKU_DETAIL.overlay_img",
+    "quality": "BAD",
+    "screen_id": "SKU_DETAIL",
+    "source_ref": "15827:71489"
+  },
+  {
+    "element_id": "SNIPPET.snippet_navbar_status_bar_container",
+    "quality": "GOOD",
+    "screen_id": "SNIPPET",
+    "source_ref": "11022:57180"
+  }
+]

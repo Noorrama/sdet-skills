@@ -1,0 +1,28 @@
+{
+  "refinements": [
+    {
+      "screen_id": "MPS",
+      "old_id": "MPS.merchant_profile_sku_sku_list",
+      "suggested_id": "MPS.meal_pack_sku_list",
+      "source_ref": "14090:117610",
+      "confidence": "high",
+      "rationale": "Label/state disambiguation for duplicate 14090:117610: Merchant Profile / SKU / SKU List v3 Meal Pack Fore Coffee Cream Bundle 2 Iced M"
+    },
+    {
+      "screen_id": "MPS",
+      "old_id": "MPS.merchant_profile_sku_sku_list",
+      "suggested_id": "MPS.meal_pack_sku_list_2",
+      "source_ref": "14107:118961",
+      "confidence": "high",
+      "rationale": "Label/state disambiguation for duplicate 14107:118961: Merchant Profile / SKU / SKU List v3 Meal Pack Fore Coffee Cream Bundle 2 Iced M"
+    },
+    {
+      "screen_id": "MPS",
+      "old_id": "MPS.merchant_profile_sku_sku_list",
+      "suggested_id": "MPS.b1g1_sku_list",
+      "source_ref": "14107:118963",
+      "confidence": "high",
+      "rationale": "Label/state disambiguation for duplicate 14107:118963: Merchant Profile / SKU / SKU List v3 Buy 1 Get 1 Fore Coffee Time B1G1 1 Iced Di"
+    }
+  ]
+}

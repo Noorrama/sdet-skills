@@ -1,0 +1,116 @@
+{
+  "source": {
+    "graph_probed_at": "2026-08-24T09:58:07.757429+00:00",
+    "graph_available": true,
+    "graph_node_count": 378479,
+    "built_for_module": "gofood",
+    "source_kind": "repo_verified",
+    "note": "Join endpoint uses String.format URL; prior enricher runs returned no_endpoint_match. Layer verdicts from direct repo verification on the pass-3 worktree."
+  },
+  "module": "gofood",
+  "module_root": "gofood",
+  "module_profile_skill": "",
+  "module_profile_substitute": "gofood-api-test-writer",
+  "packages": {
+    "test": "tests.GroupOrder.regression",
+    "test_confidence": "verified",
+    "main": "serviceEndpoints.groupOrder",
+    "main_confidence": "verified"
+  },
+  "endpoints": [
+    {
+      "api": "POST /gofood/meal-scheduler/v1/group-order-sessions/{id}/join",
+      "method": "POST",
+      "path": "/gofood/meal-scheduler/v1/group-order-sessions/{id}/join",
+      "normalized_path": "/gofood/meal-scheduler/v1/group-order-sessions/{id}/join",
+      "exists_in_graph": false,
+      "exists_on_disk": true,
+      "match_quality": "exact_on_disk",
+      "service": "mealScheduler",
+      "decisions": {
+        "endpoint": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/GroupOrderJoinEndpoint.java",
+          "class_name": "GroupOrderJoinEndpoint",
+          "reason": "implements IServiceEndpoint; url() = String.format(\"%s/gofood/meal-scheduler/v1/group-order-sessions/%s/join\", host, sessionId), POST. Verified on disk."
+        },
+        "client": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/clients/mealScheduler/GroupOrderClient.java",
+          "class_name": "GroupOrderClient",
+          "reason": "joinGroupOrder(sessionId, ownerId, consumerAccessToken) already wraps the endpoint"
+        },
+        "controller": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/controllers/GroupOrder/GroupOrderController.java",
+          "class_name": "GroupOrderController",
+          "reason": "joinGroupOrder + joinGroupOrderFailure both present; getGroupOrderDetails available for post-join re-read"
+        },
+        "response": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/GroupOrderJoinResponse.java",
+          "class_name": "GroupOrderJoinResponse",
+          "reason": "existing join response POJO with assertGroupOrderJoin"
+        },
+        "test_base": {
+          "decision": "reuse",
+          "path": "gofood/src/test/java/base/GoFoodTestBase.java",
+          "class_name": "GoFoodTestBase",
+          "reason": "exposes groupOrderController; every GroupOrder test extends it"
+        },
+        "test": {
+          "decision": "reuse",
+          "path": "gofood/src/test/java/tests/GroupOrder/regression/JoinGroupOrderTests.java",
+          "class_name": "JoinGroupOrderTests",
+          "reason": "4 existing methods on this endpoint - add methods here, do NOT create SocialGroupSessionIntegrationTest (plan name; does not exist)"
+        },
+        "assertion": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/GroupOrderJoinResponse.java",
+          "class_name": "GroupOrderJoinResponse",
+          "reason": "gofood asserts statically on the response class - no <Svc>Assertions class"
+        },
+        "data_provider": {
+          "decision": "reuse",
+          "path": "gofood/src/test/java/tests/GroupOrder/regression/JoinGroupOrderTests.java",
+          "class_name": "JoinGroupOrderTests",
+          "reason": "no separate @DataProvider for join happy path"
+        },
+        "helper": {
+          "decision": "reuse",
+          "path": "gofood/src/main/java/requestbodybuilders/groupOrder/GroupOrderRequestBodyBuilder.java",
+          "class_name": "GroupOrderRequestBodyBuilder",
+          "reason": "createGroupOrderRequestBody 3-arg overload already supports invite_social_group_id for session setup"
+        }
+      }
+    }
+  ],
+  "existing_matches": {
+    "POST /gofood/meal-scheduler/v1/group-order-sessions/{id}/join": {
+      "exists": true,
+      "source": "repo_verified",
+      "matches": [
+        {
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/GroupOrderJoinEndpoint.java",
+          "role": "endpoint"
+        },
+        {
+          "path": "gofood/src/main/java/clients/mealScheduler/GroupOrderClient.java",
+          "role": "client"
+        },
+        {
+          "path": "gofood/src/main/java/controllers/GroupOrder/GroupOrderController.java",
+          "role": "controller"
+        },
+        {
+          "path": "gofood/src/main/java/serviceEndpoints/groupOrder/GroupOrderJoinResponse.java",
+          "role": "response"
+        },
+        {
+          "path": "gofood/src/test/java/tests/GroupOrder/regression/JoinGroupOrderTests.java",
+          "role": "test"
+        }
+      ]
+    }
+  }
+}
