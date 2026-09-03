@@ -209,7 +209,7 @@ same shape as a BrowserStack case pre-upload), **`sdet_plan` steps without enric
 | Enriched `test_buddy_prompt` available (hybrid) | May reuse buddy prompt even without plan batch |
 
 **Normalize coded tests before §G.B:** extract HTTP/gRPC calls → action prompts; Java/AssertJ
-asserts → `| verify:` or §3.4 verify-only; shared setup → helper candidates (`FIXTURE_REUSE.md`).
+asserts → separate §3.4 verify-only prompts (§3.1.1); shared setup → helper candidates (`FIXTURE_REUSE.md`).
 
 Set `tapmindTest.source.kind` → `"coded_migration"` | `"browserstack_case"` | `"reference"` |
 `"sdet_plan"`.
@@ -254,16 +254,19 @@ For each accepted target, emit ordered `prompts[]` using grammar §§2–10:
    (`CONTROL_PLANE.md`). On HTTP failure → VPN message; do not guess aliases.
 1. Resolve placeholders: plan `{{FIX-xxx.field}}` → **`saved <field>`** after TDP/helper bind;
    artifact path → same after inferred setup (§4).
-2. Classify each step:
-   - grpcurl → §3.8
-   - HTTP curl / clear HTTP action → §3.1 `| verify: …`
+2. Classify each step and **split execute vs verify** (§3.1.1 — default for generation):
+   - grpcurl → §3.8 action prompt (optional bare success `| verify: status is OK` only)
+   - HTTP curl / clear HTTP action → §3.1 action (+ optional bare success `| verify: HTTP 2xx`)
+   - Then **one** §3.4 verify-only prompt with all detail asserts from `expected_result`
    - Redis/Kafka/DB → §3.5
-   - Same resource re-check → §3.4 verify-only
-   - wait/poll → §3.2 (must include fetch)
+   - Same resource re-check (already fetched) → §3.4 only (still one prompt)
+   - wait/poll → §3.2 (must include fetch; keep poll assert on the fetch prompt)
    - no TapMind grammar → omit; flag `NEEDS_REVIEW`
 3. First-touch vs repeat-touch (§3.4).
 4. Track memory keys — **`saved <key>`**, not `${memory.<key>}` (§4).
 5. Unknown scalar vs array → flag; do not guess `save $.path` vs `entry where`.
+6. **Do not** emit `action | verify: status + full body fields…` mega-prompts.
+7. **Do not** emit multiple consecutive verify-only prompts after one execute — see §3.1.1.
 
 Output shape:
 
@@ -489,10 +492,11 @@ REST body for `POST /v1/runs/verifyPrompt` (MCP `tapmind_verify_prompt` wraps on
 
 | # | Purpose | Phrasing / SDK signature | Example |
 |---|---|---|---|
-| 1 | Standard action + optional check | `runStep("<action> \| verify: <check>")` | `runStep("Get a customer from TDP");` |
+| 1 | Standard action (execute) | `runStep("<action>")` — saves OK; optional bare success `| verify: HTTP 2xx` | `runStep("Create a CASH booking and save $.order_number as orderNumber \| verify: HTTP 2xx");` |
+| 1b | Detail asserts (verify-only) | **One** `runStep("Verify …")` on prior execute evidence | All body/field checks in that single prompt |
 | 2 | Poll until a state changes | `runStep(prompt, maxAttempts, intervalMs)` | `runStep("fetch booking ... verify status is confirmed", 5, 3000);` |
-| 3 | Search a list & save a value | `save <field> from the <list> entry where <field> equals <value> as <var>` | `runStep("Get payment options with intent EWALLET_QR_COINS and save token from the payment_options entry where type equals GOPAY_WALLET as gopayWalletToken");` |
-| 4 | Verify-only (reuse previous response) | Starts with `verify`/`assert`/`validate`/`check`/`expect` | `runStep("Verify booking status is CONFIRMED");` |
+| 3 | Search a list & save a value | `save <field> from the <list> entry where <field> equals <value> as <var>` | `runStep("Get payment options … and save token from the payment_options entry where type equals GOPAY_WALLET as gopayWalletToken");` |
+| 4 | Verify-only (reuse previous response) | Starts with `verify`/`assert`/`validate`/`check`/`expect` | `runStep("Verify booking status is CONFIRMED and $.order_number is not null");` |
 | 5 | Direct DB / Redis / Kafka call | `run query ...` / `run redis ...` / `produce to kafka ...` / `consume from kafka ...` | `runStep("Run redis GET 'driver:active_session:123'");` |
 | 6 | Pin to a specific PDG / service | `runStep(prompt, pdg)` / `runStep(prompt, pdg, targetServiceId)` | `runStep("Get driver details", "transport-pdg", "driver-service");` |
 | 7 | Assert with a custom failure message | `assertStep(prompt, failureMessage)` | `assertStep("Verify status is 200", "Order creation failed!");` |
@@ -502,18 +506,22 @@ REST body for `POST /v1/runs/verifyPrompt` (MCP `tapmind_verify_prompt` wraps on
 
 ## 3. Detailed guide by call type
 
-### 3.1 Standard action + optional inline check
+### 3.1 Standard action (execute)
 
 ```
-<action description> | verify: <what to check>
+<action description> [and save $.path as <name>] [| verify: HTTP 2xx]
 ```
 ```java
 runStep("Get a customer from TDP");
-runStep("Create a CASH booking | verify: status is 200 and $.order_number starts with 'RB-'");
+runStep("Create a CASH booking and save $.order_number as orderNumber | verify: HTTP 2xx");
 ```
-> If there's no `verify` clause, the step still runs but asserts nothing — it will PASS even
-> if the call errors. Only add `verify` when you actually want this step to fail on a bad
-> response.
+
+**Generation default:** keep detailed body/schema asserts **off** the action line — use §3.1.1.
+Optional bare success on the action (`| verify: HTTP 2xx` / `status is 200` / gRPC `status is OK`)
+is allowed so the success check shares the same run as the execute evidence.
+
+> An action with **no** success `| verify:` and **no** following verify-only prompt asserts
+> nothing — the call can error and the step still PASS.
 
 **Saving a plain top-level field (not inside a list):** just say `save $.path as <name>` — do
 **not** use "entry where" here, that phrase is only for searching inside an array (§3.3).
@@ -525,6 +533,57 @@ runStep("Get a customer from TDP and save $.data.customer_id as custId");
 Match the phrasing to the actual data shape: scalar/top-level field → `save $.path as name`;
 value inside a list → `entry where field equals value` (§3.3). Using the wrong one for the
 shape you actually have is a common source of a prompt silently not parsing as intended.
+
+### 3.1.1 Split execute vs detail verify (required for generation)
+
+Control plane (`SyncRunPipeline.hasReusableEvidence`): verify-only reuses
+`conversation.lastVerdict().executionTraces()` — evidence from the **last run that still
+carries execution traces**. Safe documented pattern: **one execute → one verify-only**.
+
+**Forbidden in generation:** chaining multiple verify-only prompts after one execute
+(`Verify HTTP 2xx` then `Verify $.field…`). The second+ verify-only is unreliable against
+oracle evidence binding (verify-only does not re-fetch; it re-judges last verdict traces).
+
+For each happy-path API step, emit **exactly 2 prompts**:
+
+| Order | Prompt role | Form | Example |
+|---|---|---|---|
+| 1 | **Execute (+ optional success)** | §3.1 / §3.8 (+ saves). Bare success `| verify:` OK | `Create … and save $.order_number as orderNumber \| verify: HTTP 2xx` |
+| 2 | **Detail (one verify-only)** | §3.4 — **all** body / field / business asserts in **this one** prompt | `Verify $.order_number starts with 'RB-' and booking status is CONFIRMED` |
+
+```java
+// Preferred — TWO prompts
+runStep("Create a CASH booking and save $.order_number as orderNumber | verify: HTTP 2xx");
+runStep("Verify $.order_number starts with 'RB-' and booking status is CONFIRMED");
+```
+
+Alternative (success folded into the single detail verify-only):
+
+```java
+runStep("Create a CASH booking and save $.order_number as orderNumber");
+runStep("Verify HTTP 2xx and $.order_number starts with 'RB-' and booking status is CONFIRMED");
+```
+
+**Why split execute from detail:** MCP runs one prompt per call. Mega-prompt
+`action | verify: 2xx and $.a and $.b` hides whether the call or a field assert failed.
+
+**Why not execute → success verify-only → detail verify-only:** second verify-only can fail or
+mis-bind — put success on the execute line **or** inside the **same** detail verify-only.
+
+| `expected_result` | Emit |
+|---|---|
+| Success + field checks | Execute (+ optional `\| verify: HTTP 2xx`); **one** verify-only with all fields |
+| Success status only | Execute with `\| verify: HTTP 2xx` — no second prompt |
+| Negative / expected error | Execute; **one** verify-only `Verify status is 4xx and …` |
+| Setup / TDP / helper | Execute-only; no scenario detail verifies on helpers |
+
+```java
+// BAD — multiple consecutive verify-only after one execute
+runStep("Create a CASH booking");
+runStep("Verify HTTP 2xx");
+runStep("Verify $.order_number starts with 'RB-'");
+runStep("Verify booking status is CONFIRMED");
+```
 
 ### 3.2 Polling / retry (`runStep(prompt, maxAttempts, intervalMs)`)
 
@@ -588,8 +647,10 @@ runStep("verify payment_options contains an entry with type GOPAY_WALLET");
 
 **Later steps** must reuse the exact `as <name>`:
 ```java
-runStep("Set default payment option with body token as saved gopayWalletToken | verify: status is 200 and success is true",
+runStep("Set default payment option with body token as saved gopayWalletToken",
     "gopay", "payment-options-service");
+runStep("Verify HTTP 2xx");
+runStep("Verify success is true");
 ```
 
 ### 3.4 Verify-only steps (reuse the previous response, no re-fetch)
@@ -599,13 +660,20 @@ response, start the prompt with one of these five words:
 
 **`verify` / `assert` / `validate` / `check` / `expect`**
 
+Default after an execute step (§3.1.1): **exactly one** verify-only prompt with all remaining
+asserts (include HTTP 2xx here only if it was not already on the execute line).
+
 ```java
-runStep("Create a CASH booking");                                   // Step 1: makes the call
-runStep("Verify the booking status is CONFIRMED and $.order_number is not null"); // Step 2: checks it, no new call
+runStep("Create a CASH booking and save $.order_number as orderNumber | verify: HTTP 2xx");
+runStep("Verify the booking status is CONFIRMED and $.order_number is not null"); // one detail prompt
 ```
 > The prompt **must start directly** with one of those 5 words. `"Please verify..."` or
 > `"Can you check..."` will NOT be treated as verify-only — TapMind will plan it as a brand-new
 > API call and may re-fetch (possibly getting different data).
+
+> **Do not** chain `Verify HTTP 2xx` then another `Verify $.field…` — verify-only reuses
+> `lastVerdict.executionTraces()`; multiple consecutive verify-only prompts after one execute
+> are forbidden in generation (§3.1.1).
 
 ### 3.5 Direct tool execution (DB / Redis / Kafka)
 
@@ -626,11 +694,14 @@ via HTTP `GET /v1/grpc/targets` on the control plane host (`CONTROL_PLANE.md`) b
 the prompt. Verify and run the prompt only through `tapmind_verify_prompt` /
 `tapmind_run_nlp_command` — not direct gRPC MCP.
 
-**Template:**
+**Template (generation default):**
 
 ```
-call mcp grpc grpc.invoke for rpc_alias: <alias> service: <fq.service> Method: <Method> request: <json> [| verify: <checks>]
+call mcp grpc grpc.invoke for rpc_alias: <alias> service: <fq.service> Method: <Method> request: <json> [| verify: status is OK]
 ```
+
+Then §3.1.1: **one** detail verify-only with remaining field asserts. Do **not** chain
+`Verify status is OK` as its own prompt then another verify-only for fields.
 
 **grpcurl → prompt parsing:**
 
@@ -662,7 +733,8 @@ With save (same rules as HTTP §3.1 / §3.3):
 ```java
 runStep("call mcp grpc grpc.invoke for rpc_alias: gami-orbit-grpc service: orbit.v1.RewardService "
     + "Method: InitTaskProgress request: {\"user_id\":\"saved userId\",\"group_id\":\"1\",\"task_ids\":[\"2\",\"4\"]} "
-    + "and save $.progress_id as progressId");
+    + "and save $.progress_id as progressId | verify: status is OK");
+runStep("Verify $.progress_id is not null");
 ```
 
 **After the invoke clause, HTTP rules apply unchanged:**
@@ -918,7 +990,9 @@ Two independent mechanisms — know which one applies to your API:
 | `runStep("Verify status is 200", 5, 2000)` (polling a verify-only prompt) | `runStep("fetch order details ... and verify status is 200", 5, 2000)` | Verify-only prompts don't re-fetch, so polling just re-checks the same stale response. |
 | Asserting `vehicle_type` on a "Get a customer/driver from TDP" step | Only assert `accessToken` / `customerId` / `driverId` | Other fields aren't in the TDP response — see §5. |
 | Pasting a raw secret into the prompt string | `saveMemory(...)` first, then `saved <key>` in the prompt | See §7. |
-| Loading strict assertions onto a shared setup step (e.g. a "create booking" step other scenarios also reuse as a precondition) | Keep setup steps assertion-free (or a bare `status is 200`); put the detailed checks in the dedicated verify-only step for that specific scenario | Over-asserting a shared step breaks reuse by other scenarios (e.g. negative tests) that need that same step's evidence to look different. |
+| Loading strict assertions onto a shared setup step (e.g. a "create booking" step other scenarios also reuse as a precondition) | Keep setup steps assertion-free; put success on execute or in the single detail verify-only (§3.1.1) | Over-asserting a shared step breaks reuse by other scenarios (e.g. negative tests) that need that same step's evidence to look different. |
+| `Create … \| verify: HTTP 2xx and $.a is X and $.b is Y` (one mega-prompt) | Execute (+ optional `\| verify: HTTP 2xx`); then **one** `Verify $.a is X and $.b is Y` (§3.1.1) | Combined mega-prompts hide which check failed. |
+| Execute then `Verify HTTP 2xx` then another `Verify $.field…` | Put success on execute **or** in the same detail verify-only — never chain verify-onlys | Verify-only reuses `lastVerdict.executionTraces()`; second+ verify-only after one execute is unreliable. |
 | `data.whatsapp_templates.provider is X` (dotted path into a list) | `whatsapp_templates contains an entry with provider X` | Same "entry" rule as above — a scalar dotted path can't reach into a list. |
 | One generic field name (e.g. "template_name = X") when the schema actually needs the value on several nested/cross-referenced fields | Name each real field path explicitly: `arrayA[0].key = X, arrayB[1].key = X, ...` | A generic/wrapper field name only overrides an exact key match — nested or cross-referenced fields with different key names silently keep spec-example defaults instead of erroring. See §8.1. |
 | `templates[0].id/en/default = saved …` without `templates[0].channel = whatsapp` (or equivalent required siblings) | Whole-object phrasing **or** name every required field including constants — see §8.1.1 | Indexed overrides can emit a **sparse** object; body_defaults may not fill `channel` / category / components → API `400 missing channel` (or similar). |

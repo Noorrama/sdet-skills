@@ -9,14 +9,27 @@ prefix; Redis/DB/Kafka use §3.5. See `SKILL.md` → **Intent vs tool routing**.
 
 | Plan signal | Generation action |
 |---|---|
-| REST / HTTP (curl or OpenAPI-backed) | Intent §3.1 / §3.4 — planner routes to `rest.invoke` when op is ingested |
-| `curl_reference` starts with `grpcurl` | §3.8 — resolve `rpc_alias` from `GET /v1/grpc/targets` |
-| Same gRPC method re-check | §3.4 verify-only |
-| Poll / wait on gRPC state | §3.2 — repeat full §3.8 fetch |
+| REST / HTTP (curl or OpenAPI-backed) | §3.1 execute (+ optional `\| verify: HTTP 2xx`) → **one** §3.4 detail verify-only |
+| `curl_reference` starts with `grpcurl` | §3.8 invoke (+ optional `\| verify: status is OK`) → **one** detail §3.4 |
+| Same gRPC/HTTP resource re-check | §3.4 verify-only (no new execute) |
+| Poll / wait on gRPC/HTTP state | §3.2 — repeat full fetch; keep poll condition on fetch prompt |
 | Redis / DB / Kafka | §3.5 prefixes only |
 | Stub / call-log with no tool grammar | `NEEDS_REVIEW` |
 
 Never rewrite a gRPC step into a fake REST prompt.
+
+### Execute vs detail verify split (required)
+
+For each happy-path API step, `prompts[]` must contain **at most 2** prompts:
+
+1. **Execute** — action (+ `save … as`) + optional bare success `| verify: HTTP 2xx` / `status is OK`
+2. **Detail** — **one** §3.4 verify-only with all field/business asserts from `expected_result`
+
+**Forbidden:** `execute` → `Verify HTTP 2xx` → `Verify $.a` → `Verify $.b` (multiple verify-only).
+Verify-only reuses `lastVerdict.executionTraces()` (`SyncRunPipeline`); chaining verify-only
+after one execute is unreliable. See `SKILL.md` §3.1.1.
+
+Negative expected status: execute, then **one** verify-only for error status/message.
 
 ## Pipeline
 
@@ -84,12 +97,16 @@ Apply in order — first match wins:
 
 | Signal | Form |
 |---|---|
-| grpcurl | §3.8 |
-| HTTP curl / HTTP action | §3.1 `\| verify:` |
+| grpcurl | §3.8 execute (+ optional `\| verify: status is OK`) → **one** detail §3.4 |
+| HTTP curl / HTTP action | §3.1 execute (+ optional `\| verify: HTTP 2xx`) → **one** detail §3.4 |
 | redis / kafka / db | §3.5 |
-| Same resource re-check | §3.4 verify-only |
-| wait / poll | §3.2 with fetch |
+| Same resource re-check | §3.4 verify-only only |
+| wait / poll | §3.2 with fetch (exception: assert may stay on poll fetch) |
 | no TapMind grammar | `NEEDS_REVIEW` |
+
+**Forbidden in generation:**
+- Mega-prompt `action | verify: status + full body fields…`
+- Multiple consecutive verify-only after one execute (§3.1.1)
 
 ### Memory & secrets
 
@@ -179,6 +196,9 @@ Batch convert: fingerprint prompts → `sharedHelpers[]` (`FIXTURE_REUSE.md`).
 
 - [ ] `nlp_method_decisions.json` verdict recorded
 - [ ] Path-specific intake gates passed (or documented skip)
+- [ ] Happy-path API steps: execute (+ optional bare success) → **one** detail verify-only (§3.1.1)
+- [ ] No mega-prompt `action | verify: status + body fields…`
+- [ ] No chain of multiple verify-only prompts after one execute
 - [ ] `prompts[]` length matches runnable steps
 - [ ] Verify pass or flags documented
 - [ ] If executed: shared `conversationId`; memory refs resolve
