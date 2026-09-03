@@ -101,7 +101,7 @@ Setup steps:
 
 3. Restart your editor (Cursor or Claude Code).
 
-4. Re-run mobile-context-extraction (setup-only) to verify.
+4. Re-run mobile-sdet-plan-generator (setup-only) to verify.
 ```
 
 Do NOT attempt to edit the user's config files or install the MCP server
@@ -122,6 +122,6 @@ BrowserStack MCP        ✓ / ✗  (needed for regression / SDET upload)
 
 If everything passes: `All dependencies satisfied. You're ready to use aep-mobile skills.`
 
-If BrowserStack MCP fails: `BrowserStack MCP is needed only for regression-extractor and SDET-plan upload. If you're only running the prd/rfc/design/task extractors you can ignore this; otherwise fix the ✗ above and re-run mobile-context-extraction (setup-only).`
+If BrowserStack MCP fails: `BrowserStack MCP is needed only for regression-extractor and SDET-plan upload. If you're only running the prd/rfc/design/task extractors you can ignore this; otherwise fix the ✗ above and re-run mobile-sdet-plan-generator (setup-only).`
 
-If only python/jsonschema fails: `Fix the items marked ✗ above, then re-run mobile-context-extraction (setup-only).`
+If only python/jsonschema fails: `Fix the items marked ✗ above, then re-run mobile-sdet-plan-generator (setup-only).`

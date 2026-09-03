@@ -1,7 +1,7 @@
 # Mobile QA skills — Agentic PDLC (all 5 GoTo apps)
 
 A production skill set for the **frontend / mobile** QA track, reusable across **Gojek Consumer,
-Gojek Driver, GoFood Merchant, GoPay Consumer, GoPay Merchant**. Three entry-point skills plus one
+Gojek Driver, GoFood Merchant, GoPay Consumer, GoPay Merchant**. Two entry-point skills plus one
 shared test-data skill; extraction/generation logic lives in model-pinned `agents/`.
 **App-agnostic** — each app is a config file, not a fork.
 
@@ -15,9 +15,8 @@ mobile-qa-skills/
     _template.json              ← copy per app (driver, gofood-merchant, gopay-consumer, gopay-merchant)
   schemas/                      ← JSON-schema validators for every context/output
     prd_context · design_context · rfc_context · plan_context · change_context · scenario · data_handle
-  skills/                       ← 4 user-facing SKILL.md (orchestrators + shared TDP)
-    mobile-context-extraction · mobile-sdet-plan-generator · mobile-postbuild
-    test-data-provisioner
+  skills/                       ← 3 user-facing SKILL.md (2 orchestrators + shared TDP)
+    mobile-sdet-plan-generator · mobile-postbuild · test-data-provisioner
   agents/                       ← model-pinned subagents (Claude Code: sonnet / opus)
     prd-extractor · rfc-extractor · design-extractor · task-extractor
     regression-extractor · setup · sdet-plan-runner
@@ -29,7 +28,8 @@ mobile-qa-skills/
 ## Pipeline & run order
 ```
 PRE-BUILD
-  /mobile-context-extraction     (setup preflight, then parallel extractors)
+  /mobile-sdet-plan-generator    (setup → parallel extractors → human loop;
+                                  computation in sdet-plan-runner @ opus)
     prd-extractor        → prd_context.json
     design-extractor     → design_context.json        (frontend-primary)
     rfc-extractor        → rfc_context.json            (optional — skip if no RFC)
@@ -37,8 +37,7 @@ PRE-BUILD
     regression-extractor → regression_context.json     (BrowserStack; skip if MCP down)
         │
         ▼
-  /mobile-sdet-plan-generator    (human loop here; computation in sdet-plan-runner @ opus)
-        → sdet_plan.json + analysis.md + test_cases.csv
+        sdet-plan-runner → sdet_plan.json + analysis.md + test_cases.csv
         │
    ── HUMAN REVIEW GATE (SDET / Feature Lead; CSV edits → SYNC) ──
         ▼
@@ -117,7 +116,7 @@ claude plugin install aep-mobile@aep
 ```
 
 Then ask to **check aep-mobile dependencies** (or *"Run aep-mobile-setup and tell me what
-is missing"*) — that routes to `mobile-context-extraction`, which runs the preflight first
+is missing"*) — that routes to `mobile-sdet-plan-generator`, which runs the preflight first
 and stops if you only asked for setup.
 
 ### Cursor
@@ -144,7 +143,7 @@ and stops if you only asked for setup.
    ```
 
 3. Restart Cursor.
-4. Ask the agent to **check aep-mobile dependencies** (same `mobile-context-extraction`
+4. Ask the agent to **check aep-mobile dependencies** (same `mobile-sdet-plan-generator`
    setup-only path). python3 + jsonschema are needed by every skill; **BrowserStack MCP**
    is needed only by `regression-extractor` and SDET-plan upload, which hard-stop without
    it — the prd/rfc/design/task extractors run fine without it.
@@ -161,17 +160,16 @@ Then restart your editor. In Cursor, reinstall or refresh the plugin if skills d
 
 ### Using the skills
 
-Skills auto-trigger from their description. Four user-facing commands:
+Skills auto-trigger from their description. Three user-facing commands:
 
 | Command | What it does |
 |---|---|
-| `mobile-context-extraction` | Preflight + parallel PRD/RFC/design/task/regression extractors |
-| `mobile-sdet-plan-generator` | Human-gated SDET plan (GENERATE → review → SYNC) |
+| `mobile-sdet-plan-generator` | Setup + parallel extractors + human-gated SDET plan (GENERATE → review → SYNC) |
 | `mobile-postbuild` | Sequential code-change → impact-shortlist → test-code |
 | `mobile-test-data-provisioner` | Shared TestBuddy provisioner (not folded into post-build) |
 
 Or naturally in conversation:
-> *"Extract the PRD context for this mobile feature"* → `mobile-context-extraction` (fires prd-extractor; skips missing inputs)
-> *"Generate the SDET plan"* → `mobile-sdet-plan-generator`
-> *"Run aep-mobile-setup and tell me what is missing"* → `mobile-context-extraction` (setup-only; stops after the preflight table)
+> *"Extract the PRD context for this mobile feature"* → `mobile-sdet-plan-generator` (fires prd-extractor; skips missing inputs; stops if you only asked to extract)
+> *"Generate the SDET plan"* → `mobile-sdet-plan-generator` (extracts first, then GENERATE)
+> *"Run aep-mobile-setup and tell me what is missing"* → `mobile-sdet-plan-generator` (setup-only; stops after the preflight table)
 > *"The build is in — generate the tests"* → `mobile-postbuild`

@@ -193,7 +193,7 @@ what was not covered.
    - **BrowserStack MCP unavailable → STOP.** If the regression-extractor reports that
      BrowserStack MCP is unreachable or unauthorised (no `regression_context.json` written),
      **do NOT proceed with generation.** Stop and tell the user:
-     *"BrowserStack MCP is not connected. Run mobile-context-extraction (setup-only) for setup steps, then re-run."*
+     *"BrowserStack MCP is not connected. Run mobile-sdet-plan-generator (setup-only) for setup steps, then re-run."*
      Generating without regression dedup risks duplicating the entire existing suite into TMS
      on CSV import — that is not recoverable, so it is a hard gate.
    - **`extraction_status: LIMITED` for a non-MCP reason is different — continue.**
@@ -1102,7 +1102,7 @@ full `<feature_key>_test_cases.csv`) and the resolved project + folder.
 
 - **BrowserStack MCP unavailable at upload time → do not block.** The SYNC and automation-plan
   emission still complete. Add a `WORTH_CHECKING` note:
-  *"BrowserStack upload skipped — MCP unavailable. Run mobile-context-extraction (setup-only), then re-run SYNC
+  *"BrowserStack upload skipped — MCP unavailable. Run mobile-sdet-plan-generator (setup-only), then re-run SYNC
   to upload and stamp case IDs."*
   Legacy scenarios still get `browserstack_case_id` from `existing_case_ref`; upload-eligible
   scenarios omit the field until a later SYNC run (never set it to `null`).
