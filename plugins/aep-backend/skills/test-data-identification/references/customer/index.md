@@ -35,7 +35,7 @@ From `TestDataCategoryCustomer.java` (`(value, isEnabled, paymentMode)`):
 | `VANILLA` | ✅ | `CASH` | no payment-instrument mention; default/plain customer |
 | `CUSTOMER_WITH_CC` | ✅ | `card` | "saved card", "credit card", "CC" |
 | `CUSTOMER_WITH_GO_PAY` | ✅ | `GOPAY_WALLET` | "gopay", "linked wallet", "e-wallet" |
-| `Customer_With_Go_Pay_coins` | ❌ disabled | `GOPAY_COINS` | "gopay coins" — not currently served; treat as `TDP_COMPLETE_FALLBACK` |
+| `Customer_With_Go_Pay_coins` | ❌ disabled | `GOPAY_COINS` | "gopay coins" — not currently served; treat as `TDP_NOT_SUPPORTED` |
 | `Customer_With_Partial_Go_Pay_coins` | ❌ disabled | `GOPAY_COINS` | "partial gopay coins" — same caveat |
 | `CUSTOMER_WITH_GOCORP` | ✅ | `GOCORP` | "gocorp", "corporate account" |
 | `CUSTOMER_WITH_SAVED_ADDRESS_POI` | ✅ | `CASH` | "saved address", "point of interest", "POI" |

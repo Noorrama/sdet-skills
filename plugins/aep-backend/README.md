@@ -1,7 +1,7 @@
 # Backend QA Skills — Agentic PDLC
 
 A production skill set for the **backend / API** QA track across GoTo services.
-Covers the full agentic PDLC pipeline: pre-build scenario planning, post-build code generation, and upstream doc re-trigger.
+Covers the full agentic PDLC pipeline: pre-build scenario planning, post-build code generation, and upstream doc doc-change-context.
 
 ## Folder layout
 ```
@@ -9,7 +9,7 @@ aep-backend/
   README.md                        ← this guide
   schemas/                         ← JSON Schema validators for every context/output
     prd_context · rfc_context · tasks_context · regression_context
-    code_change_context · doc_change_context
+    code_change_context (embeds reconciliation) · doc_change_context
     sdet_plan · automation_plan · test_data_manifest · test_data_requests · validation_report
   skills/                          ← 13 SKILL.md files
     prd-extractor · rfc-extractor · tasks-extractor · regression-extractor
@@ -30,7 +30,7 @@ PRE-BUILD (parallel with dev implementation)
   regression-extractor   → regression_context.json  (existing coverage)
         │
         ▼
-  sdet-plan-generator [Pass 1]
+  sdet-plan-generator [Upstream-context]
         → <feature>_sdet_plan.json + <feature>_qa_analysis.md + <feature>_testcases.csv
         │
   dedup-generator [scenario mode] → flags duplicate scenarios
@@ -44,12 +44,19 @@ PRE-BUILD (parallel with dev implementation)
   doc-delta-extractor → doc_change_context.json
         │  Human Feedback gate (SDET + PM confirm scope)
         ▼
-  sdet-plan-generator [re-trigger] → patch affected scenarios only → delta review
+  sdet-plan-generator [doc-change-context] → patch affected scenarios only → delta review
 
 POST-BUILD (Epic reaches QA Ready)
-  code-change-extractor  → code_change_context.json (GitLab unified diff + CR notes)
+  code-change-extractor  ← Jira Epic/Story/Task key
+        │  Phase 1  discover MR links across every service (Atlassian MCP)
+        │  Phase 2  fetch per-service diffs vs merge-base + CR notes (GitLab REST / glab)
+        │  Phase 3  extract → code_change_context.json (per service, noise-filtered)
+        │  Phase 4  reconcile vs a baseline (sdet_plan.json OR a Jira task/story's ACs)
+        →   code_change_context.json.reconciliation (embedded) + code_diff_report.md
+             (error-code mismatches · contract changes · info gaps · suggested tests)
+             reconciliation is null when no baseline is supplied (extraction-only)
         ▼
-  sdet-plan-generator [Pass 2] → delta scenarios from CR signals
+  sdet-plan-generator [Code-change-context] → confirm / patch / extend from the extracted + reconciled signal
         │
   dedup-generator [scenario mode]
         │
@@ -91,7 +98,7 @@ POST-BUILD (Epic reaches QA Ready)
 - **Dedup has two distinct modes** — scenario-level (after sdet-plan-generator) and method-level (in code lane after automation-plan-generator). Same skill, different inputs and scopes.
 - **Parallel code lanes** — test-data-generator and test-code-generator run in parallel after automation plan approval; fixtures resolved at execution time (Phase B CI), not embedded in code.
 - **Identify before provision** — test-data-identification is a pure planning step (catalog lookups only, nothing created). Splitting it from provisioning means a data gap surfaces at the automation-plan review gate instead of as a test failure at execution time, and re-identification is cheap when the plan changes.
-- **Re-trigger path** — upstream doc changes go through doc-delta-extractor + human feedback confirmation before sdet-plan-generator re-runs; does not re-run full extractors.
+- **Doc-change-context path** — upstream doc changes go through doc-delta-extractor + human feedback confirmation before sdet-plan-generator re-runs; does not re-run full extractors.
 
 ## Model tiers
 - Reasoning (Opus): **sdet-plan-generator** only (~1/Epic).
@@ -107,8 +114,13 @@ The test-data-generation stage has two halves — **identify**, then **provision
 | Provision | `test-data-generator` (→ `test-data-provision`) | `test_data_requests.json` / live entities via TestBuddy | Code-generation or Phase B CI execution time |
 
 Identification decides, per fixture: Test Data Domain → real TDP category → the ordered operation
-sequence closing the gap → `test_data_status` (`TDP_SUPPORTED` · `TDP_HYBRID_FALLBACK` ·
-`TDP_OPERATION_FALLBACK` · `TDP_COMPLETE_FALLBACK`) → the TestBuddy prompt. It never provisions and
+sequence closing the gap → `test_data_status` (`TDP_SUPPORTED` · `TESTBUDDY_SUPPORTED` ·
+`TESTBUDDY_HYBRID_FALLBACK` · `TESTBUDDY_OPERATION_FALLBACK` · `TDP_PARTIAL` ·
+`TDP_NOT_SUPPORTED`) → the TestBuddy prompt. Support is resolved in one fixed order — TDP →
+TestBuddy → Pertamax → GBT — and the status records how far down it the fixture got: fully served by
+a TDP category match, fully served by TestBuddy, partly served with the rest built from Pertamax/GBT
+operations, built entirely from those operations, partly served with an operation no tier fulfils
+(`TDP_PARTIAL`), or served by nothing at all (`TDP_NOT_SUPPORTED`). It never provisions and
 never invents a category or operation name — both come from the TestBuddy MCP catalog tools
 (`TestDataAgent_get_supported_category`, `TestDataAgent_generate_testbuddy_prompt`; a
 `get_supported_operations` counterpart is not shipped yet, so operations fall back to the live
@@ -172,7 +184,7 @@ Skills auto-trigger based on their description. You can also invoke them explici
 Or naturally in conversation:
 > *"Extract the RFC context from this RFC doc"* → triggers `backend-rfc-extractor`
 > *"Generate the SDET plan for this feature"* → triggers `backend-sdet-plan-generator`
-> *"The PRD was updated, re-trigger the plan"* → triggers `backend-doc-delta-extractor`
+> *"The PRD was updated, doc-change-context the plan"* → triggers `backend-doc-delta-extractor`
 
 ### Running the pipeline end to end
 
@@ -180,15 +192,20 @@ Or naturally in conversation:
 1. Share PRD + RFC + TASKS.md with Claude
    → prd-extractor, rfc-extractor, tasks-extractor, regression-extractor run
 
-2. sdet-plan-generator (Pass 1) produces:
+2. sdet-plan-generator (Upstream-context) produces:
    → <feature>_sdet_plan.json + qa_analysis.md + testcases.csv
 
 3. SDET + PM review the plan in Claude
    → approve → BrowserStack upload
    → gaps found → regenerate → re-review
 
-4. Post-build: share GitLab diff
-   → code-change-extractor + sdet-plan-generator Pass 2 → delta review
+4. Post-build: give the Epic (or Story/Task) Jira key
+   → code-change-extractor discovers the MR links, fetches per-service diffs,
+     extracts code_change_context.json, and (if a baseline is supplied — sdet_plan.json
+     OR a Jira task/story's ACs) reconciles into its embedded reconciliation object
+     → code_change_context.json + code_diff_report.md (triage at the QA-Ready gate)
+   → sdet-plan-generator Code-change-context → delta review
+   (needs GITLAB_TOKEN + GITLAB_HOST, or an authenticated glab, to fetch diffs)
 
 5. Approved → automation-plan-generator → SDET reviews automation plan
 

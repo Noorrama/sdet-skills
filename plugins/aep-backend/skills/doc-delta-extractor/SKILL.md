@@ -1,6 +1,6 @@
 ---
 name: backend-doc-delta-extractor
-description: Extract what changed between two versions of a PRD, RFC, or Task Breakdown MD into doc_change_context.json. Used when an upstream document is updated mid-sprint. Produces a human-reviewable delta before sdet-plan-generator is re-triggered. This is the re-trigger path for doc changes — distinct from Post-Build Pass 2 which handles code diffs.
+description: Extract what changed between two versions of a PRD, RFC, or Task Breakdown MD into doc_change_context.json. Used when an upstream document is updated mid-sprint. Produces a human-reviewable delta before sdet-plan-generator is re-triggered. This is the doc-change-context path for doc changes — distinct from the Post-Build Code-change-context mode which handles code diffs.
 ---
 
 # Backend Doc Delta Extractor
@@ -47,7 +47,7 @@ Schema root structure:
 - `human_feedback_summary` must be factual and plain English: what changed and the test impact.
 - `scenarios_to_deprecate` does not delete — it flags. SDET confirms deprecation at the human review gate.
 
-## Re-trigger path
+## Doc-change-context path
 Present `human_feedback_summary` to SDET + PM for confirmation **before** re-triggering `sdet-plan-generator`.
 
 ## Validate

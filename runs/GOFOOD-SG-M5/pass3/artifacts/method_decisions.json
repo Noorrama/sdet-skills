@@ -1,0 +1,132 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 3,
+  "generated_at": "2026-08-24T09:58:07.757429+00:00",
+  "_provenance": {
+    "enrichment": "repo_verified join endpoint; JoinGroupOrderTests has 4 methods, none cover social-group members-map backfill on join",
+    "base": "stacked on pass-2 invite branch"
+  },
+  "method_summaries": [
+    {
+      "class": "JoinGroupOrderTests",
+      "path": "gofood/src/test/java/tests/GroupOrder/regression/JoinGroupOrderTests.java",
+      "methods": [
+        {
+          "method_name": "VerifySuccessJoinGroupOrder",
+          "groups": [
+            "GOFOOD_GROUP_ORDER"
+          ],
+          "parameters": [],
+          "flow": [
+            "groupOrderController.createGroupOrder",
+            "groupOrderController.joinGroupOrder",
+            "groupOrderController.leaveGroupOrder"
+          ],
+          "assertions": [
+            {
+              "target": "joinResponse",
+              "assertion_type": "assertGroupOrderJoin",
+              "expected": "join succeeded"
+            },
+            {
+              "target": "billing_type",
+              "assertion_type": "assertEquals",
+              "expected": "HOST_PAYS"
+            },
+            {
+              "target": "restaurant_id",
+              "assertion_type": "assertEquals",
+              "expected": "GO_RESTO_1"
+            }
+          ]
+        },
+        {
+          "method_name": "VerifyFailureWhenJoinDeletedGroupOrder",
+          "groups": [
+            "GOFOOD_GROUP_ORDER"
+          ],
+          "parameters": [],
+          "flow": [
+            "createGroupOrder",
+            "leaveGroupOrder",
+            "joinGroupOrderFailure"
+          ],
+          "assertions": [
+            {
+              "target": "errors[0].code",
+              "assertion_type": "assertEquals",
+              "expected": "DELETED_GROUP_ORDER"
+            }
+          ]
+        },
+        {
+          "method_name": "VerifyJoinFailureResponseWhenLimitBreached",
+          "groups": [
+            "GOFOOD_GROUP_ORDER"
+          ],
+          "parameters": [],
+          "flow": [
+            "createGroupOrder",
+            "joinGroupOrder x7",
+            "joinGroupOrderFailure"
+          ],
+          "assertions": [
+            {
+              "target": "errors[0].code",
+              "assertion_type": "assertEquals",
+              "expected": "PARTICIPANTS_LIMIT_EXCEEDED"
+            }
+          ]
+        },
+        {
+          "method_name": "VerifyJoinFailureWhenMemberIsInOtherGroupOrder",
+          "groups": [
+            "GOFOOD_GROUP_ORDER"
+          ],
+          "parameters": [],
+          "flow": [
+            "create+join session1",
+            "create session2",
+            "joinGroupOrderFailure session2"
+          ],
+          "assertions": [
+            {
+              "target": "errors[0].code",
+              "assertion_type": "assertEquals",
+              "expected": "JOIN_FAILURE_ACTIVE_SESSION"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "data_provider_summaries": [],
+  "decisions": [
+    {
+      "scenario_id": "SC-GOFOODSGM5-028",
+      "endpoint": "POST /gofood/meal-scheduler/v1/group-order-sessions/{id}/join",
+      "verdict": "no_match",
+      "target_class": "JoinGroupOrderTests",
+      "target_method": "",
+      "data_provider_class": "",
+      "data_provider_method": "",
+      "new_row": [],
+      "assertion_change": null,
+      "requires_new_test_class": false,
+      "ambiguous_candidates": [],
+      "confidence": 0.95,
+      "requires_new_method": true,
+      "partial": false,
+      "signals": [
+        "VerifySuccessJoinGroupOrder covers join happy path but does not attach a social group or assert social_group_details.members backfill",
+        "scenario expects keys for joining participant AND previously missing ACTIVE social-group member ids in the members map",
+        "no existing join method mentions social_group or members map"
+      ],
+      "unsatisfiable_expectations": [
+        "step 2: social_group_details.members map keys \u2014 bakso meal-scheduler DB inspection pattern exists (GenericUtils.fetchMealPlanBulkOrderDetailsFromDb) but no bakso group-order-session route; SocialGroup POJO has members_count only, not members map"
+      ],
+      "recommendation": "Add a new method on JoinGroupOrderTests. Disable until FIX-GOFOODSG-007/002 can provision a session with social_group attached. TODO the members-map DB assert (bakso route gap)."
+    }
+  ],
+  "gaps": []
+}

@@ -6,7 +6,7 @@
 set -euo pipefail
 
 target="${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-main}"
-git fetch --depth=100 origin "$target"
+git fetch --unshallow origin "$target"
 base="origin/$target"
 
 changed_files=$(git diff --name-only "$base...HEAD" -- plugins)

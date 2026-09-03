@@ -1,7 +1,7 @@
 {
   "feature_name": "Save Payment-Method API (EPIC-1122)",
   "plan_version": "v1",
-  "generation_mode": "pass1",
+  "generation_mode": "upstream_context",
   "canonical_team_id": "payments",
   "code_module": "payments",
   "created_at": "2026-08-06T00:00:00Z",
@@ -15,7 +15,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-9 / REQ-001 / AC-001",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Regression",
         "Smoke"
@@ -76,7 +76,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-2 / REQ-002 / AC-002",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Regression"
       ],
@@ -121,7 +121,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-2 / REQ-002",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -165,7 +165,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-2 / REQ-002",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -209,7 +209,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-2 / REQ-002",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -253,7 +253,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-4 / REQ-004 / AC-004",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Regression"
       ],
@@ -297,7 +297,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-4 / REQ-004 / AC-005",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Regression"
       ],
@@ -341,7 +341,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-6 / REQ-003 / AC-003",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Regression"
       ],
@@ -398,7 +398,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-7 / NFR-003",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -456,7 +456,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:step-1 / RFC-78:feature-flags",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -508,7 +508,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:edge-concurrent / RFC-78:risk-areas",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Non-FCT",
         "Story"
@@ -563,7 +563,7 @@
       "priority": "P0",
       "source": "PRD",
       "source_ref": "REQ-005 / NFR-002 / AC-006",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Non-FCT",
         "Story"
@@ -628,7 +628,7 @@
       "priority": "P1",
       "source": "RFC",
       "source_ref": "RFC-78:edge-boundary / RFC-78:step-3",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -673,7 +673,7 @@
       "priority": "P1",
       "source": "RFC",
       "source_ref": "RFC-78:edge-boundary / RFC-78:step-3",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -718,7 +718,7 @@
       "priority": "P1",
       "source": "RFC",
       "source_ref": "RFC-78:edge-boundary / RFC-78:step-4",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -763,7 +763,7 @@
       "priority": "P0",
       "source": "RFC",
       "source_ref": "RFC-78:timeout / RFC-78:step-7 / NFR-003",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Non-FCT",
         "Story"
@@ -829,7 +829,7 @@
       "priority": "P0",
       "source": "PRD",
       "source_ref": "STORY-1233:AC-1 / RFC-78:db-schema",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -893,7 +893,7 @@
       "priority": "P0",
       "source": "PRD",
       "source_ref": "STORY-1233:AC-3",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -944,7 +944,7 @@
       "priority": "P1",
       "source": "PRD",
       "source_ref": "STORY-1233:AC-4",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -995,7 +995,7 @@
       "priority": "P1",
       "source": "PRD",
       "source_ref": "STORY-1233:AC-5",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -1046,7 +1046,7 @@
       "priority": "P1",
       "source": "RFC",
       "source_ref": "RFC-78:step-3",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Story"
       ],
@@ -1091,7 +1091,7 @@
       "priority": "P1",
       "source": "PRD",
       "source_ref": "NFR-001",
-      "generated_by_mode": "pass1",
+      "generated_by_mode": "upstream_context",
       "test_type": [
         "Non-FCT",
         "Story"

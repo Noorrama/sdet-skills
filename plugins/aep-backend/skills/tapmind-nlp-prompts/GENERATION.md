@@ -1,7 +1,6 @@
-# Generation pipeline — automation_plan → suite TapMind test
+# Generation pipeline — two intake paths, one NLP core
 
-Companion to `SKILL.md` §G. Control plane hosts, allowed HTTP APIs, and VPN rules:
-`CONTROL_PLANE.md`.
+Companion to `SKILL.md` §G. Control plane: `CONTROL_PLANE.md`. Coverage: **`NLP_COVERAGE.md`**.
 
 ## Intent vs tool routing
 
@@ -11,101 +10,95 @@ prefix; Redis/DB/Kafka use §3.5. See `SKILL.md` → **Intent vs tool routing**.
 | Plan signal | Generation action |
 |---|---|
 | REST / HTTP (curl or OpenAPI-backed) | Intent §3.1 / §3.4 — planner routes to `rest.invoke` when op is ingested |
-| `curl_reference` starts with `grpcurl` | §3.8 — resolve `rpc_alias` from `GET /v1/grpc/targets` (host:port match) |
-| Same gRPC method re-check, no new request | §3.4 verify-only starter word |
-| Poll / wait on gRPC state | §3.2 — must repeat full §3.8 fetch, not verify-only |
-| Redis / DB / Kafka | §3.5 prefixes only (TapMind requires them today as tool selectors) |
-| Stub / queue / call-log inspect with no tool | `NEEDS_REVIEW` — same honesty rule |
+| `curl_reference` starts with `grpcurl` | §3.8 — resolve `rpc_alias` from `GET /v1/grpc/targets` |
+| Same gRPC method re-check | §3.4 verify-only |
+| Poll / wait on gRPC state | §3.2 — repeat full §3.8 fetch |
+| Redis / DB / Kafka | §3.5 prefixes only |
+| Stub / call-log with no tool grammar | `NEEDS_REVIEW` |
 
-Never rewrite a gRPC step into a fake REST prompt just to make generation succeed.
+Never rewrite a gRPC step into a fake REST prompt.
 
 ## Pipeline
 
 ```
-automation_plan.json
-        │
-        ▼
- 0. If any grpcurl steps: GET https://<host>/v1/grpc/targets (host from CONTROL_PLANE.md)
-    → host:port → rpc_alias map. On failure → VPN message; stop guessing.
-    Optional: GET /v1/grpc/static-proto/aliases when reflection disabled
-        │
-        ▼
- 1. Filter scenarios (skip is_dedup / deferred / skip / manual)
-        │
-        ▼
- 2. Generate prompts[] for every step (grammar in SKILL.md §§2–10)
-        │
-        ▼
- 3. Sequential verify — tapmind_verify_prompt({ prompt, productGroup, targetServiceId, dryRunLlm }), one call per prompt
-        │  rewrites → update prompts[] → re-verify
-        ▼
- 4. Sequential execute — tapmind_run_nlp_command one prompt at a time
-        │  step1 → capture conversationId → pass on steps 2…N
-        ▼
- 5. Suite convert — @Test / @TestInfo + TapMind.runStep / assertStep lines
-        │
-        ▼
-   nlp_suite_tests.json  (+ optional .java snippets / report trace)
+                         ┌── Plan: automation_plan.json (+ test_data_payloads)
+  INTAKE (varies) ───────┤
+                         └── Artifact: Java @Test / BS steps / sdet_plan / single prompt
+                                    │
+                    Plan gates ─────┤ status approved, tdp_not_ready, is_dedup
+                    Artifact gates ─┤ infer TDP, unresolved_data_dependency
+                                    ▼
+              SHARED CORE (both paths)
+                                    │
+         0a. NLP coverage scan → nlp_method_decisions.json
+                                    │
+         0b. GET /v1/grpc/targets (if grpcurl steps) — VPN on failure
+                                    │
+         1. Filter (exact_match / collision / deferred / skip / manual)
+                                    │
+         2. Generate prompts[] — grammar SKILL.md §§2–10
+                                    │
+         3. Sequential verify — tapmind_verify_prompt (one prompt per call)
+                                    │  no REST op → NEEDS_REVIEW; GET /v1/targets
+         4. Sequential execute — tapmind_run_nlp_command; reuse conversationId
+                                    │  400 invalid_request_body → §8.1.1
+         5. Suite convert — @Test / @TestInfo + runStep; FIXTURE_REUSE helpers
+                                    │
+         nlp_suite_tests.json + skipped[] (+ optional .java)
 ```
 
-## 1. Scenario filter
+## 1. Scenario filter (path-aware)
 
-| Condition | Action |
-|---|---|
-| `is_dedup: true` | Skip |
-| tag `deferred` / `skip` / `manual` | Skip (record reason) |
-| tag `provisional` / `underspecified` or expected_result contains `TBD` | Generate + mark assertions provisional; flag `NEEDS_REVIEW` on weak verifies |
-| otherwise | Generate |
+Apply in order — first match wins:
 
-## 2. Prompt generation rules (generic)
+| Condition | Path | Action |
+|---|---|---|
+| Not approved (`status` ≠ `approved`, no `run.json` `keep`) | Plan | Skip — `not_approved` |
+| Required `{{FIX-…}}` unresolved | Plan | Skip — `tdp_not_ready` |
+| `saved <key>` with no setup source | Artifact | Skip — `unresolved_data_dependency` |
+| `is_dedup: true` | Plan | Skip — `is_dedup` |
+| `exact_match` in `nlp_method_decisions` | Both | Skip — `exact_match` |
+| `method_name_collision` | Both | Skip + `NEEDS_REVIEW` |
+| `undecidable` | Both | Skip — `undecidable` |
+| tag `deferred` / `skip` / `manual` | Plan | Skip |
+| `partial_match` | Both | Delta prompts only; append-only convert |
+| otherwise | Both | Full prompts + create or migrate |
 
-### Prefer scenario curl + fixtures
+## 2. Prompt generation rules (generic — both paths)
 
-- Scenario-level `curl_reference` uses `{{FIX-xxx.fieldName}}` — after fixture bind / `saveMemory`, reference as natural **`saved fieldName`** (not `${memory.fieldName}`).
-- Step-level curl may still use `$ACCESS_TOKEN` / `{session_id}` — treat as intent only when scenario curl exists.
+### Prefer scenario curl + fixtures (plan) or extracted curl (artifact)
+
+- Plan: `{{FIX-xxx.fieldName}}` → **`saved fieldName`** after TDP/helper bind.
+- Artifact: extract from RestAssured/coded test or step curl; same memory rules (§4).
 - `module` → PDG; `service_name` → `targetServiceId` / `runStep(..., pdg, service)`.
 
-### gRPC alias resolution (HTTP only — not MCP)
+### gRPC alias resolution (HTTP only — both paths)
 
-Before generating §3.8 prompts, call control plane HTTP (see `CONTROL_PLANE.md`):
-
-1. `GET https://tapmind-backend-i.golabs.io/v1/grpc/targets` (integration) or
-   `GET https://tapmind-backend-q.golabs.io/v1/grpc/targets` (QA).
-2. Parse grpcurl host and port from `curl_reference`.
-3. Match to alias (exact host+port; respect `-plaintext` → tls false).
-4. Optional override: first line `# alias: gami-orbit-grpc` in `curl_reference`.
-5. If no match → flag `NEEDS_REVIEW: no rpc_alias for <host>:<port>`.
-6. If HTTP unreachable / `INTERNAL_ERROR` → **Please connect to the respective VPN** and retry.
-
-When `reflection_enabled: false`, read `GET /v1/grpc/static-proto/aliases`.
-
-**Conversion alone does not need MCP** — grpcurl → §3.8 string is local + HTTP lookup.
+1. `GET https://tapmind-backend-i.golabs.io/v1/grpc/targets` (integration) or `-q` (QA).
+2. Match grpcurl host:port → alias.
+3. Optional: `# alias: …` first line in `curl_reference`.
+4. No match → `NEEDS_REVIEW: no rpc_alias for <host>:<port>`.
+5. HTTP unreachable → VPN message (`CONTROL_PLANE.md`).
 
 ### Step classifier
 
 | Signal | Form |
 |---|---|
-| `curl_reference` starts with `grpcurl` | §3.8 `call mcp grpc grpc.invoke for rpc_alias: …` |
-| Non-empty HTTP curl (or clear HTTP action) | §3.1 `<action> \| verify: <expected>` |
-| Action mentions redis | §3.5 `Run redis …` |
-| Action mentions kafka produce/consume | §3.5 kafka prefix |
-| Action is DB row/table/query read | §3.5 `Run query … on DB '…'` |
-| Same resource re-check, no new curl/request, prior step was HTTP or gRPC fetch | §3.4 verify-only starter word |
-| Wait / poll / drain queue (e2e/reliability) | §3.2 polling overload; must include fetch (§3.1 or §3.8) |
-| Stub call-log / job-queue inspect with no tool grammar | Do not emit runnable prompt; `NEEDS_REVIEW` |
+| grpcurl | §3.8 |
+| HTTP curl / HTTP action | §3.1 `\| verify:` |
+| redis / kafka / db | §3.5 |
+| Same resource re-check | §3.4 verify-only |
+| wait / poll | §3.2 with fetch |
+| no TapMind grammar | `NEEDS_REVIEW` |
 
-### Memory
+### Memory & secrets
 
-Walk prompts in order. Only reference a key if an earlier prompt has `save … as x` or setup called `saveMemory("x", …)`. **Emit `saved x`** (or `as saved x` / `equals saved x` / `from the saved x`) — do **not** default to `${memory.x}` in generated prompts. Planner expands `saved x` → `${memory.x}` internally. Unresolvable placeholders → flag, do not invent names.
+Walk prompts in order. Emit **`saved x`** — not `${memory.x}`. Unresolvable → flag.
+Secrets: `saveMemory` first (§7).
 
-### Secrets
+## 3. Verify (sequential — MCP only — both paths)
 
-Never inline tokens/secrets into prompts. `saveMemory` from env / fixture first, then `saved <key>` in the prompt (§7).
-
-## 3. Verify (sequential — MCP only)
-
-Use **`tapmind_verify_prompt` only** — one prompt per call (`CONTROL_PLANE.md`). Do not use
-ingest MCP tools when verify shows no matching REST operation; flag `NEEDS_REVIEW` instead.
+Use **`tapmind_verify_prompt` only** (`CONTROL_PLANE.md`).
 
 ```json
 {
@@ -116,113 +109,79 @@ ingest MCP tools when verify shows no matching REST operation; flag `NEEDS_REVIE
 }
 ```
 
-- Apply that call's `corrected_test_prompt` / `corrected_verify_prompt` into `correctedSteps` (`change: "reworded"`).
-- `status: "NEEDS_CLARIFICATION"` + `clarifying_question` → flag `NEEDS_REVIEW`, don't guess.
-- gRPC: verify §3.8 prompt through this same MCP tool — not `grpc_invoke`.
+- Apply corrections → re-verify until clean or `NEEDS_REVIEW`.
+- gRPC: verify §3.8 through this tool — not `grpc_invoke`.
+- No matching REST op: `GET /v1/targets` via Swagger; flag missing spec — do not auto-ingest.
 
-If a batch overload (`prompts: string[]`) is ever exposed on the MCP tool, prefer it.
+## 4. Execute (sequential — MCP only — both paths)
 
-## 4. Execute (sequential — MCP only)
+Use **`tapmind_run_nlp_command` only**. Reuse `conversationId`.
 
-Use **`tapmind_run_nlp_command` only** — one prompt per call. gRPC §3.8 prompts execute here;
-the planner routes to `grpc.invoke` internally.
+On `no tool_call.target` → `GET /v1/grpc/targets`. On `400 invalid_request_body` → §8.1.1.
 
-```json
-{
-  "command": "<prompts[i]>",
-  "pdg": "<module>",
-  "targetServiceId": "<service_name>",
-  "conversationId": "<from previous step, omit on first>"
-}
-```
+## 5. Suite convert (both paths)
 
-| Step | conversationId |
-|---|---|
-| First | omit / null — capture id from response |
-| Later | **must** pass the same id |
-
-On `no tool_call.target` or gRPC routing errors → `GET /v1/grpc/targets` over HTTP; if alias
-missing, flag `NEEDS_REVIEW` (target registration is admin/user action).
-
-Failures → reword or insert setup (`change: "inserted"`) → re-verify → continue with same
-`conversationId` when possible. Do not call postgres/redis/ingest MCP tools as workarounds.
-
-## 5. Suite convert
-
-### Annotations (exact shape)
+### Annotations
 
 ```java
 @BeforeMethod(alwaysRun = true)
 public void tapMindSetup(Method method) throws Exception {
-    TapMind.setUp(method); // PDG from PDG env (CI); tapmind.pdg property only if env unset
+    TapMind.setUp(method);
 }
 
 @Test(description = "…", groups = {"…", "TAPMIND"})
 @TestInfo(countryName = "…", projectId = "…", suiteId = "…", testCaseIds = {"…"}, owner = "…")
 public void <method_name>() throws Exception {
-    // TapMind.runStep lines only — do not repeat setUp(String testId) when BeforeMethod uses setUp(method)
+    // runStep / helper-call lines
 }
 ```
 
-Do not invent `projectId` / `suiteId` / `testCaseIds`. Do **not** duplicate BS case ids in
-`TapMind.setUp("<bs-case-id>")` when `@TestInfo(testCaseIds=…)` is already present unless
-traceability in TapMind logs is explicitly required (see SKILL.md §1.1). Use ids from the target
-suite only — never copy case ids from another module's tests.
-Empty owner → `owner = ""`. Empty ids → `testCaseIds = {}` only if the suite annotation allows; otherwise omit IDs until known.
+- **Plan path:** fill `@TestInfo` from plan/suite context or empty.
+- **Artifact path:** preserve existing `@TestInfo` when migrating.
 
 ### Line kinds
 
 | kind | When |
 |---|---|
-| `direct-api` | `saveMemory`, TDP helpers, non-NLP SDK setup |
-| `step` | `TapMind.runStep("…")` |
+| `direct-api` | `saveMemory`, non-NLP SDK setup |
+| `helper-call` | `provision…();` / `create…();` / `fetch…();` |
+| `step` | Scenario-specific `TapMind.runStep("…")` |
 | `assert` | `TapMind.assertStep("…", "…")` |
-| `guard` | Inserted conditional / interruption handling from a live run |
+| `guard` | Inserted from live run |
+
+Batch convert: fingerprint prompts → `sharedHelpers[]` (`FIXTURE_REUSE.md`).
 
 ### Artifact: `nlp_suite_tests.json`
 
 ```json
 {
-  "epic_id": "<from automation_plan>",
+  "epic_id": "<from plan or context>",
+  "intake_path": "plan | artifact",
+  "skipped": [],
   "scenarios": [
     {
       "scenario_id": "SC-…",
       "status": "generated | verified | executed | partial | skipped",
       "prompts": ["…"],
-      "correctedSteps": [],
       "tapmindTest": {
-        "package": "…",
-        "className": "…",
-        "methodName": "…",
-        "description": "…",
-        "groups": ["\"…\""],
-        "testInfo": {
-          "countryName": "…",
-          "projectId": "…",
-          "suiteId": "…",
-          "testCaseIds": [],
-          "owner": ""
-        },
         "source": {
-          "kind": "automation_plan",
-          "scenarioRef": "SC-…",
-          "requirementRef": "…"
+          "kind": "automation_plan | coded_migration | browserstack_case | reference | sdet_plan",
+          "scenarioRef": "…"
         },
         "lines": []
-      },
-      "flags": []
+      }
     }
   ]
 }
 ```
 
-Report skill (separate) can render PAM-style `trace.json` / `report.html` from execute evidence + this artifact.
+## 6. Definition of done (per target — both paths)
 
-## 6. Definition of done (per scenario)
-
-- [ ] `prompts[]` length matches runnable steps (non-NEEDS_REVIEW)
-- [ ] Verify pass (per-prompt calls) clean or residual flags documented
-- [ ] If executed: one shared `conversationId`; memory refs resolve
-- [ ] `@Test` description matches scenario intent
-- [ ] `@TestInfo` only contains real suite IDs (or explicit empties)
-- [ ] `tapmindTest.lines` are drop-in Java statements
+- [ ] `nlp_method_decisions.json` verdict recorded
+- [ ] Path-specific intake gates passed (or documented skip)
+- [ ] `prompts[]` length matches runnable steps
+- [ ] Verify pass or flags documented
+- [ ] If executed: shared `conversationId`; memory refs resolve
+- [ ] `@TestInfo` preserved (artifact) or honestly empty (plan)
+- [ ] `tapmindTest.lines` are drop-in Java
+- [ ] Skipped targets in manifest `skipped[]`

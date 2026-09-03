@@ -22,9 +22,9 @@
     "generation_mode": {
       "type": "string",
       "enum": [
-        "pass1",
-        "pass2",
-        "retrigger",
+        "upstream_context",
+        "code_change_context",
+        "doc_change_context",
         "review"
       ],
       "description": "Mode of the last run that wrote this file"
@@ -108,7 +108,7 @@
               "RFC",
               "PRD",
               "CODE_DIFF",
-              "RETRIGGER",
+              "DOC_CHANGE",
               "REVIEW"
             ],
             "description": "Origin of the scenario requirement"
@@ -120,9 +120,9 @@
           "generated_by_mode": {
             "type": "string",
             "enum": [
-              "pass1",
-              "pass2",
-              "retrigger",
+              "upstream_context",
+              "code_change_context",
+              "doc_change_context",
               "review"
             ],
             "description": "Which pipeline mode CREATED this scenario. Set once at creation; never overwritten."
@@ -150,11 +150,11 @@
           },
           "change_reason": {
             "type": "string",
-            "description": "One sentence \u2014 what changed and why. Set by retrigger and review modes."
+            "description": "One sentence \u2014 what changed and why. Set by doc_change_context and review modes."
           },
           "is_delta": {
             "type": "boolean",
-            "description": "true for pass2 / retrigger / review-added scenarios"
+            "description": "true for code_change_context / doc_change_context / review-added scenarios"
           },
           "is_legacy_regression": {
             "type": "boolean",
@@ -162,10 +162,15 @@
           },
           "is_dedup": {
             "type": "boolean",
-            "description": "true when scenario duplicates an existing regression test; skipped by automation-plan-generator"
+            "description": "true when this scenario duplicates ANOTHER SCENARIO IN THIS SAME PLAN. Written by dedup-generator (scenario mode), which reads only the plan and has no access to existing coverage. Do NOT use it for 'already covered by an existing regression test' \u2014 that is regression_action: 'reuse' plus existing_case_ref, written by sdet-plan-generator from regression_context.json. Both cause automation-plan-generator to skip the scenario, but they answer different questions and have different owners."
           },
           "dedup_reason": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "Why this scenario was flagged is_dedup, naming the canonical scenario it duplicates (e.g. 'same arrange and outcome as SC-006'). Required whenever is_dedup is true \u2014 a bare flag is unauditable. Set by dedup-generator, never by sdet-plan-generator."
           },
           "test_type": {
             "type": "array",
@@ -350,6 +355,70 @@
                 "description": "What must change in the existing test and why. REQUIRED when regression_action is 'modify'. Name the assertion that becomes insufficient, not merely that the test is affected."
               }
             }
+          },
+          "is_near_dedup": {
+            "type": "boolean",
+            "default": false,
+            "description": "true when this scenario is a NEAR duplicate \u2014 overlapping but not identical, so it is surfaced for a human rather than flagged outright. Never auto-flag a near duplicate as is_dedup; automation-plan-generator does NOT skip on this field, so a near duplicate still becomes a test method unless a reviewer converts it."
+          },
+          "code_reconciled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set true by Code-change-context mode when a code_change_context.reconciliation finding binds to this scenario. NEVER merged with human_corrected: llm_quality measures the generator against HUMAN judgement, and folding a code-diff correction into human_modified would score the generator down for the code diverging from the RFC it generated from."
+          },
+          "code_reconciliation_types": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "string",
+              "enum": [
+                "confirmed",
+                "field_change",
+                "deprecated",
+                "blocked_by_code_gap",
+                "conflict_pending",
+                "new_from_diff"
+              ]
+            },
+            "description": "What each Code-change-context run did to this scenario. 'confirmed' = the diff agrees, no content changed. 'conflict_pending' = the finding contradicts an A source or was blocking:true, so it was held for a human. 'blocked_by_code_gap' = cannot pass yet (stub dependency or missing flag)."
+          },
+          "code_change_round": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "0 until a Code-change-context run touches this scenario; incremented per run that binds a finding to it. Parallel to review_round, never the same counter."
+          },
+          "code_refs": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "mr": {
+                  "type": "string"
+                },
+                "service": {
+                  "type": "string"
+                },
+                "file": {
+                  "type": "string"
+                },
+                "class": {
+                  "type": "string"
+                },
+                "line": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "condition": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Provenance copied from the finding's code_ref so a reviewer can click through to the diff line."
           }
         }
       }
@@ -436,7 +505,78 @@
       }
     },
     "dedup_report": {
-      "type": "object"
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "description": "Written by dedup-generator, not by sdet-plan-generator. Records what the dedup pass examined and concluded, so a reviewer can audit a flag without re-deriving it.",
+      "required": [
+        "mode",
+        "total_scenarios",
+        "flagged_as_dedup",
+        "groups"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "scenario",
+            "method"
+          ]
+        },
+        "total_scenarios": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "flagged_as_dedup": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "flagged_as_near_dedup": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "condition_key": {
+          "type": "string",
+          "description": "How 'same input condition' was computed for this run \u2014 records the operationalization so two runs can be compared."
+        },
+        "outcome_key": {
+          "type": "string",
+          "description": "How 'same expected outcome' was compared (e.g. exact-set)."
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "canonical_scenario_id",
+              "duplicates",
+              "reason"
+            ],
+            "properties": {
+              "canonical_scenario_id": {
+                "type": "string"
+              },
+              "duplicates": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "reason": {
+                "type": "string"
+              },
+              "near": {
+                "type": "boolean",
+                "description": "true when the group was surfaced as near-duplicate rather than flagged"
+              }
+            }
+          }
+        }
+      }
     },
     "teams_in_scope": {
       "type": "array",
@@ -566,7 +706,7 @@
         "approved"
       ],
       "default": "draft",
-      "description": "Human approval gate for this plan as a whole. The GENERATOR always writes 'draft' and must never write 'approved' \u2014 only a person sets that, after reading the plan and its analysis document. 'in_review' = a reviewer has picked it up. 'changes_requested' = feedback was written into the qa_analysis.md Feedback block and a Review-mode run is pending. 'approved' = cleared to flow downstream. ANY run that changes scenario content \u2014 pass2, retrigger, review \u2014 resets this to 'draft'. An approval attaches to the content that was read, not to the filename. A per-scenario `status` also exists on scenarios[] with the same four approval values plus 'deprecated'. INVARIANT: root may not be 'approved' while any scenario is still 'draft' or 'in_review' \u2014 an approved plan holding unreviewed scenarios is ambiguous. They sit at different levels so they never collide in JSON, but read the path carefully."
+      "description": "Human approval gate for this plan as a whole. The GENERATOR always writes 'draft' and must never write 'approved' \u2014 only a person sets that, after reading the plan and its analysis document. 'in_review' = a reviewer has picked it up. 'changes_requested' = feedback was written into the qa_analysis.md Feedback block and a Review-mode run is pending. 'approved' = cleared to flow downstream. ANY run that changes scenario content \u2014 code_change_context, doc_change_context, review \u2014 resets this to 'draft'. An approval attaches to the content that was read, not to the filename. A per-scenario `status` also exists on scenarios[] with the same four approval values plus 'deprecated'. INVARIANT: root may not be 'approved' while any scenario is still 'draft' or 'in_review' \u2014 an approved plan holding unreviewed scenarios is ambiguous. They sit at different levels so they never collide in JSON, but read the path carefully."
     },
     "approved_by": {
       "type": [

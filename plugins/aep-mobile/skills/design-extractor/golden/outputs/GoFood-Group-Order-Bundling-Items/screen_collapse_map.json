@@ -1,0 +1,103 @@
+{
+  "auto_collapsed": [
+    {
+      "screen_id": "DISH_DETAILS_4_ITEMS",
+      "frame_ids": [
+        "14107:119525",
+        "15959:86870",
+        "17351:141627"
+      ],
+      "tier": "AUTO",
+      "signals": []
+    }
+  ],
+  "candidates": [
+    {
+      "screen_id": "BUNDLING_FULL_DATA",
+      "frame_ids": [
+        "14090:116262",
+        "14090:118735"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Bundling - Full data"
+      ],
+      "outgoing_summary": {
+        "14090:116262": [
+          "MERCHANT_PROFILE_REQUIRED"
+        ],
+        "14090:118735": [
+          "MPS"
+        ]
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "MPS",
+      "frame_ids": [
+        "14090:111412",
+        "14090:111628",
+        "14090:111833",
+        "14090:111955",
+        "14090:117604",
+        "14107:118955",
+        "15959:86239"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "MPS"
+      ],
+      "outgoing_summary": {
+        "14090:111412": [
+          "LANDING"
+        ],
+        "14090:111628": [],
+        "14090:111833": [],
+        "14090:111955": [
+          "MPS"
+        ],
+        "14090:117604": [
+          "SHIMMER"
+        ],
+        "14107:118955": [
+          "DISH_DETAILS_4_ITEMS",
+          "SHARED_CART"
+        ],
+        "15959:86239": [
+          "MPS"
+        ]
+      },
+      "recommendation": "keep_split"
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "frame_ids": [
+        "14107:119629",
+        "14107:119843"
+      ],
+      "tier": "AMBIGUOUS",
+      "signals": [
+        "divergent_outgoing_targets"
+      ],
+      "raw_names": [
+        "Shared cart"
+      ],
+      "outgoing_summary": {
+        "14107:119629": [
+          "DISH_DETAILS_4_ITEMS"
+        ],
+        "14107:119843": [
+          "CHECKOUT"
+        ]
+      },
+      "recommendation": "keep_split"
+    }
+  ],
+  "decisions": []
+}

@@ -44,7 +44,9 @@ Pool-entity enum: `TestDataCategory.java` — `VOUCHER("voucher")` is a recogniz
   directly to `getVoucherDataByServiceTypeAndCountryCode` — `TDP_SUPPORTED`.
 - A fixture naming a **specific promo code, redemption status, or usage-limit boundary** ("an
   expired SAVE20 voucher already redeemed once") has no corresponding field anywhere in
-  `VoucherModel` — this is `TDP_NOT_SUPPORTED` (or `TDP_OPERATION_FALLBACK` if a TestBuddy/Pertamax
+  `VoucherModel` — this is `TDP_PARTIAL` when the voucher **batch** still resolves and only the
+  per-voucher state is unserved, `TDP_NOT_SUPPORTED` when nothing resolves (or
+  `TESTBUDDY_OPERATION_FALLBACK` if a TestBuddy/Pertamax/GBT
   tool separately exposes promo-lifecycle operations), not a gap to paper over with an invented
   field. Record the specific missing concept (e.g. `redemption_state`) in `missing_operations`.
 - `voucherBatchType` is a token to corroborate against, the same way `isEnabled` corroborates a

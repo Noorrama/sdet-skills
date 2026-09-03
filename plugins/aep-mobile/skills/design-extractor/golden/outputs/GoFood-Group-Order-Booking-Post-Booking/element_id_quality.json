@@ -1,0 +1,134 @@
+[
+  {
+    "element_id": "ADD.save_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "AOS.header_text_processing_your_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "CHAT.lets_get_something_tasty_lbl",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "CHAT.message_bubble_bubble_forward_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "CHECKOUT.add_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "CHECKOUT.backdropcard_backdropbackground_slot_slot_btn",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "CHECKOUT.checkout_content_cell_content_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "CHECKOUT.divider_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "CHECKOUT.ok_got_it_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "CHECKOUT.propertiesgofooddishaction_stepper_propertiesstepper_actionsicminus_btn_2",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "CHECKOUT.purchase_and_deliver_now_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "COLP_MULTIPLE_UNLOCKED_PROMOS.frame_youll_save_k_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "COLP_NO_UNLOCKED_PROMOS.frame_add_xxk_more_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "EDIT_VARIANT.update_cart_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "GOFOOD_HISTORY.repeat_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "GOFOOD_SCREEN.buttonprimary_view_group_cart_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "GOJEK_HISTORY.card_sep_content_resto_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "GOJEK_HISTORY.img_img",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "GOJEK_HISTORY.repeat_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "GO_PROMO_DETAILS.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "HOMESCREEN.banner_banner_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "HOMESCREEN.home_shuffle_reorder_v_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.check_my_items_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.content_defaultfoodspotherogrouporderabouttoco_defaultfoodspotherogrouporderabouttoco_the_container",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "MPS.merchant_profile_sku_sku_list",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.mps_sku_listing_iteration_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "MPS.order_type_defaultfoodspotgrouporder_defaultfoodspotgrouporder_container",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "MPS.pagecontrolscrollpagination_st_nd_rd_th_btn",
+    "quality": "BAD"
+  },
+  {
+    "element_id": "SHARED_CART.navbar_status_bar_dynamic_btn",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_content_content_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "SHARED_CART.shared_cart_top_navbar_container",
+    "quality": "GOOD"
+  },
+  {
+    "element_id": "SWITCH_RESTO_DIALOG.card_button_buttoncircular_multimediaicclosepip_btn",
+    "quality": "BAD"
+  }
+]

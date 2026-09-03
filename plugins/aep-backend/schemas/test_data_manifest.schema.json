@@ -93,19 +93,27 @@
           "type": "integer",
           "minimum": 0
         },
-        "tdp_hybrid_fallback": {
+        "testbuddy_supported": {
           "type": "integer",
           "minimum": 0
         },
-        "tdp_operation_fallback": {
+        "testbuddy_hybrid_fallback": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "testbuddy_operation_fallback": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tdp_partial": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tdp_not_supported": {
           "type": "integer",
           "minimum": 0
         },
         "unidentified": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "skipped_db_infra": {
           "type": "integer",
           "minimum": 0
         },
@@ -121,14 +129,6 @@
           "items": {
             "type": "string"
           }
-        },
-        "testbuddy_supported": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "tdp_not_supported": {
-          "type": "integer",
-          "minimum": 0
         }
       }
     },
@@ -206,11 +206,12 @@
           "enum": [
             "TDP_SUPPORTED",
             "TESTBUDDY_SUPPORTED",
-            "TDP_HYBRID_FALLBACK",
-            "TDP_OPERATION_FALLBACK",
+            "TESTBUDDY_HYBRID_FALLBACK",
+            "TESTBUDDY_OPERATION_FALLBACK",
+            "TDP_PARTIAL",
             "TDP_NOT_SUPPORTED"
           ],
-          "description": "TDP_SUPPORTED = fully served by a TDP category. TESTBUDDY_SUPPORTED = served by a TestBuddy agent tool rather than a TDP pool category. TDP_HYBRID_FALLBACK = partial support in TDP/TestBuddy plus supported operations (via MCP: Pertamax/GBT). TDP_OPERATION_FALLBACK = no TDP category, but supported operations can build the state. TDP_NOT_SUPPORTED = no category and at least one required operation unsupported (formerly TDP_COMPLETE_FALLBACK)."
+          "description": "Resolution is always attempted in the fixed order TDP -> TestBuddy -> Pertamax -> GBT; the status names how far down that order the fixture got, and whether anything was left unserved. TDP_SUPPORTED = fully supported by TDP: a category returned by get_supported_category matches and covers the whole required state. TESTBUDDY_SUPPORTED = fully supported by TestBuddy: no TDP category applies but the operation is served end-to-end by a TestBuddy agent tool. TESTBUDDY_HYBRID_FALLBACK = partial support in TDP/TestBuddy plus the rest closed by supported operations via the Pertamax or GBT tool. TESTBUDDY_OPERATION_FALLBACK = no support in TDP or TestBuddy; the state is built entirely from supported operations via the Pertamax or GBT tool. TDP_PARTIAL = TDP or TestBuddy performs part of the required state, but the remaining operation is fulfilled by no tool in the order -- partial coverage with an open gap, distinct from TDP_NOT_SUPPORTED because provisioning can still obtain the covered part. TDP_NOT_SUPPORTED = no operation is fulfilled by any tool (TDP, TestBuddy, Pertamax or GBT); nothing is served (supersedes TDP_COMPLETE_FALLBACK)."
         },
         "test_data_details": {
           "type": "object",
@@ -225,14 +226,14 @@
                 "string",
                 "null"
               ],
-              "description": "Exact category name returned by get_supported_categories. null when no category matches (TDP_OPERATION_FALLBACK). Never invented."
+              "description": "Exact category name returned by get_supported_categories. null when no TDP category matches (TESTBUDDY_SUPPORTED, TESTBUDDY_OPERATION_FALLBACK, TDP_NOT_SUPPORTED). Never invented."
             },
             "test_data_operations": {
               "type": [
                 "array",
                 "null"
               ],
-              "description": "Ordered operation sequence that closes the gap between the category and required_state. null when the category alone satisfies the fixture. [] when the gap needs an operation TDP/TestBuddy does not support (TDP_COMPLETE_FALLBACK) — the missing names go to unidentified_fixtures[].missing_operations.",
+              "description": "Ordered operation sequence that closes the gap between the category and required_state. null when the category alone satisfies the fixture (TDP_SUPPORTED / TESTBUDDY_SUPPORTED). Only supported operations appear here; when the gap needs an operation no tier of TDP -> TestBuddy -> Pertamax -> GBT supports, the unfulfilled names go to unidentified_fixtures[].missing_operations and the status becomes TDP_PARTIAL (something was still covered) or TDP_NOT_SUPPORTED (nothing was).",
               "items": {
                 "type": "object",
                 "additionalProperties": false,
@@ -250,9 +251,10 @@
                     "enum": [
                       "tdp",
                       "testbuddy",
-                      "pertamax"
+                      "pertamax",
+                      "gbt"
                     ],
-                    "description": "Which system exposes this operation, and therefore which client provisioning calls. Only TestBuddy and Pertamax MCP servers are callable today; a 'gbt' source is planned for a later stage and must not be emitted until that server exists."
+                    "description": "Which system exposes this operation, and therefore which client provisioning calls. Resolution order is fixed: tdp, then testbuddy, then pertamax, then gbt -- take the first tier that serves the operation. Emit a tier only when operationMcpTool resolves to a tool that exists in that tier's live inventory."
                   },
                   "operationMcpTool": {
                     "type": [
@@ -291,7 +293,7 @@
             "string",
             "null"
           ],
-          "description": "Prompt TestBuddy can execute to produce this data. Generated via the generate_testBuddy_prompt MCP tool. null for TDP_COMPLETE_FALLBACK."
+          "description": "Prompt TestBuddy can execute to produce this data. Generated via the generate_testBuddy_prompt MCP tool. null for TDP_NOT_SUPPORTED. Generated for TDP_PARTIAL, covering only the part TDP/TestBuddy can serve."
         },
         "match_confidence": {
           "type": "string",

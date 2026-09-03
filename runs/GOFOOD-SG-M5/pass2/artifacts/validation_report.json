@@ -1,0 +1,19 @@
+{
+  "epic_id": "GOFOOD-SG-M5",
+  "pass": 2,
+  "attempt": 1,
+  "generated_at": "2026-08-23T18:57:03.288171+00:00",
+  "passed": true,
+  "blocked": false,
+  "counts": {
+    "error": 0,
+    "warning": 0
+  },
+  "violations": [],
+  "implicated_files": [],
+  "compile": {
+    "passed": true,
+    "command": "./gradlew :gofood:compileTestJava",
+    "attempts": 1
+  }
+}
