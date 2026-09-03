@@ -15,15 +15,16 @@ TapMind.runStep("Get CUSTOMER_WITH_GO_PAY and save accessToken as hostNoGroupBea
 TapMind.runStep("Get me a merchant enabled for GoFood group order and save restaurantId as restaurantId", "TDP");
 ```
 
-**Non-TDP patterns (same shape, different verify):**
+**Non-TDP patterns (same execute prefix; verifies must stay out of helpers — §3.1.1):**
 
 ```java
-// Auth preamble repeated on every markdown test
-TapMind.runStep("Call redemption API with header Authorization: saved customerToken and header User-ID: saved customerId for scenario … | verify: …");
+// Auth preamble repeated on every markdown test — execute only in helper
+TapMind.runStep("Call redemption API with header Authorization: saved customerToken and header User-ID: saved customerId for scenario …");
 
-// Group-order flow prefix shared across lifecycle tests
-TapMind.runStep("Create a group order session with billing_type EVERYONE_PAYS_EQUALLY, restaurant_id saved restaurantId, header Authorization: saved hostNoGroupBearerToken and save $.id as sessionId | verify: …");
-TapMind.runStep("Get group order session details for saved sessionId with header Authorization: saved hostNoGroupBearerToken | verify: …");
+// Group-order flow prefix shared across lifecycle tests — execute + save only
+TapMind.runStep("Create a group order session with billing_type EVERYONE_PAYS_EQUALLY, restaurant_id saved restaurantId, header Authorization: saved hostNoGroupBearerToken and save $.id as sessionId");
+TapMind.runStep("Get group order session details for saved sessionId with header Authorization: saved hostNoGroupBearerToken");
+// Success gate + detail verifies stay in the @Test method, not the helper
 ```
 
 `GoFoodTapMindTestBase` centralises `setUp` / `tearDown` — **repeated step sequences belong

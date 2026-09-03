@@ -20,7 +20,7 @@ After intake merges, **all rows below marked "Both"** apply identically.
 
 | Data | Source | Use |
 |---|---|---|
-| Action / expected | `step_descriptions[]` | §3.1 / §3.4 |
+| Action / expected | `step_descriptions[]` | §3.1 execute (+ optional success) + **one** §3.4 detail verify-only |
 | Scenario curl | `curl_reference` | FIX placeholders → `saved <field>` |
 | Fixtures | `test_data[]` | TDP buddy prompt |
 | Approval | `status`, `run.json` | Gate before generate |

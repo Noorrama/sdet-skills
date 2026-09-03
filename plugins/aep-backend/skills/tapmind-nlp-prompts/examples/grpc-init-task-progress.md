@@ -23,13 +23,22 @@ If curl fails → connect to respective VPN and retry (`CONTROL_PLANE.md`).
 
 Override without lookup: `# alias: gami-orbit-grpc` as first line of curl_reference.
 
-## Step 2 — Generated prompt (local conversion, §3.8)
+## Step 2 — Generated prompts (§3.8 + §3.1.1)
+
+**Two prompts max** — success on the execute line; detail in **one** verify-only.
+Do **not** chain `Verify status is OK` then another `Verify $.field…`.
 
 ```
 call mcp grpc grpc.invoke for rpc_alias: gami-orbit-grpc service: orbit.v1.RewardService Method: InitTaskProgress request: {"user_id":"8427051","group_id":"1","task_ids":["2","4"]} | verify: status is OK
 ```
 
-## Step 3 — Verify (MCP: tapmind_verify_prompt only)
+Optional detail (single verify-only — all field asserts here):
+
+```
+Verify $.progress_id is not null
+```
+
+## Step 3 — Verify each prompt (MCP: tapmind_verify_prompt only)
 
 ```json
 {
@@ -40,13 +49,27 @@ call mcp grpc grpc.invoke for rpc_alias: gami-orbit-grpc service: orbit.v1.Rewar
 }
 ```
 
+Then the detail verify-only (if any) as a separate MCP verify call.
+
 ## Step 4 — Execute (MCP: tapmind_run_nlp_command only)
+
+Execute the invoke (+ success) first; capture `conversationId`; then execute the **one** detail
+verify-only with the same `conversationId` so it reuses `lastVerdict.executionTraces()`.
 
 ```json
 {
-  "command": "<same prompt string>",
+  "command": "<execute prompt with | verify: status is OK>",
   "pdg": "<pdg>",
   "targetServiceId": "<service_name>"
+}
+```
+
+```json
+{
+  "command": "Verify $.progress_id is not null",
+  "pdg": "<pdg>",
+  "targetServiceId": "<service_name>",
+  "conversationId": "<from previous step>"
 }
 ```
 
