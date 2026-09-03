@@ -1,5 +1,82 @@
 # aep-tapmind changelog
 
+## 1.1.7
+
+**`nlp-codegen` always uses an enriched plan.** If the folder has no
+`enriched_automation_plan.json` and the user only sent an APG or SDET file,
+invoke `aep-backend:test-data-identification` first and write the enriched
+file next to the input. Do not emit Java from the unenriched ledger. If
+identification aborts (TestBuddy down, no fixtures), stop. An existing
+enriched file is used as-is — identification is not re-run.
+`test-data-provisioner` is not this step (it returns a handle, not the plan).
+
+## 1.1.6
+
+**`nlp-codegen` mode choice.** Ask once before any device work: knowledge-base-only
+(faster MR, no pioneer), reuse a pasted `@Test`, or device-pioneer (one
+step-validation per cluster). Do not start step-validation autonomously.
+
+## 1.1.5
+
+**Cursor TapMind MCP + reload.** Documents `~/.cursor/mcp.json` (`mcp-remote` →
+`http://localhost:7777/mcp`) and how to reload skills vs MCP in Cursor Desktop
+(Reload Window + new chat). Plugin README.
+
+## 1.1.4
+
+**Cursor plugin manifest.** `aep-tapmind` now ships `.cursor-plugin/plugin.json`
+(`skills: ./skills/`) like `aep-mobile`, plus `scripts/plugin-root.sh` so bash
+resolves the plugin whether `CLAUDE_PLUGIN_ROOT`, `CURSOR_PLUGIN_ROOT`, or
+`TAPMIND_PLUGIN_ROOT` is set. Install notes: `plugins/aep-tapmind/README.md`.
+
+## 1.1.3
+
+**`nlp-codegen` README.** QA/engineer guide covering prerequisites, pipeline
+slot vs `test-code-generator`, clustering, design-context limits, shallow clone,
+and GitLab MR auth — `skills/nlp-codegen/README.md`.
+
+## 1.1.2
+
+**`nlp-codegen` clarifications.** Clusters are similar-flow groups inside one
+module (not Driver-vs-GoFood). `design_context.json` is optional Figma copy —
+the SDET plan cannot reconstruct it. If `tapmind-mobile-tests` is not on disk,
+shallow-clone `aep/tapmind-mobile-tests` (`--depth 1`); do not require the
+skill to be run from that repo.
+
+## 1.1.1
+
+**`nlp-codegen` MR step is GitLab-explicit.** No numeric project id is stored —
+the target is the `tapmind-mobile-tests` checkout's `origin`
+(`aep/tapmind-mobile-tests` on `source.golabs.io`). Opening the MR needs
+`GITLAB_TOKEN` / `glab auth` with write scopes; if missing, the skill commits
+and prints `git push` + `glab mr create` instead of guessing GitHub or a token.
+
+## 1.1.0
+
+**New skill: `nlp-codegen`.** Generates TapMind NLP `@Test` methods into
+`tapmind-mobile-tests` from an enriched / automation / SDET plan plus
+`change_context`, without running step-validation on every scenario.
+
+Per similar-flow cluster (e.g. ten Driver BAM cases that share login → feature
+and differ on one assertion) it step-validates **one** pioneer scenario, harvests
+the proven method — including `if visible` transients the plan JSON never listed
+(`Tap 'Allow'…`, `Tap 'Lewati'…`) — and clones the siblings from that template.
+Then writes one class in the module's house style and opens an MR scoped to that
+module.
+
+Orchestrates; does not fork the device loop. Reuses `step-validation`'s
+`module-profile.sh` and `direct-api-map.md`. A pasted proven `@Test` or
+`trace.json` skips the device run for that cluster.
+
+## 1.0.1
+
+**`step-validation` input wiring only — device loop, capture, emit rules, and report renderer
+are unchanged.** Mode B now resolves the plan file in order: `enriched_automation_plan.json`
+(the automation ledger), then `*_automation_plan_generator.json`, then the SDET plan. TDP /
+`performBackdoorLogin` uses `test_data[].test_data_output[].test_buddy_prompt` verbatim when
+present; compose or ask only if that field is missing. `@TestInfo.testCaseIds` prefers
+`browserstack_case_id` over `existing_case_ref`. `automation_steps[]` are still used as written.
+
 ## 1.0.0
 
 **Extended `step-validation` to emit ready-to-paste TapMind mobile-test `@Test` methods.** A

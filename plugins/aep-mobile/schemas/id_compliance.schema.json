@@ -3,7 +3,7 @@
   "title": "id_compliance (the stable-ID gate; CI blocks on this)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["app", "epic_ref", "status"],
+  "required": ["app", "epic_ref", "status", "gap_filled_ids"],
   "properties": {
     "contract_version": { "type": "string" },
     "app": { "type": "string" },
@@ -36,11 +36,16 @@
       "items": { "type": "string" },
       "description": "elements the dev bound that the design/plan shopping-list missed (informational)"
     },
+    "automation_step_gaps": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Element labels used in automation_steps[] NLP that have no matching locator in the built code. Distinct from missing_ids — these are NLP-sequence references not in the element_locator_handoff shopping list."
+    },
     "reject_codes": {
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["MISSING_STABLE_ID", "RENAMED_ID", "MISSING_DEEPLINK", "UNDOCUMENTED_RESPONSE_SHAPE", "UNRESOLVED_CHANGES_REQUESTED"]
+        "enum": ["MISSING_STABLE_ID", "RENAMED_ID", "MISSING_DEEPLINK", "UNDOCUMENTED_RESPONSE_SHAPE", "UNRESOLVED_CHANGES_REQUESTED", "AUTOMATION_STEP_NO_LOCATOR"]
       }
     }
   }

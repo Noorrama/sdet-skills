@@ -61,6 +61,9 @@ plugins/
     .claude-plugin/plugin.json
     skills/
       goal-driven-exploration/    # plain-English goal -> device run -> graph report
+      step-validation/            # written steps -> device diagnosis + one @Test
+      nlp-codegen/                # plan -> kb-only or one pioneer -> suite + MR
+      charter-exploration/        # BrowserStack cases -> exploratory charters
 ```
 
 Add a new plugin directory under `plugins/` (with its own `.claude-plugin/plugin.json`)

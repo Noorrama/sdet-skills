@@ -22,3 +22,5 @@ plugins/aep-backend/.gbt_repo/
 
 workdir/
 .vscode/settings.json
+
+.env

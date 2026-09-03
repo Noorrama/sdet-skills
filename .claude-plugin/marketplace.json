@@ -23,7 +23,7 @@
     {
       "name": "aep-tapmind",
       "source": "./plugins/aep-tapmind",
-      "description": "TapMind MCP squad's skills — goal-driven exploratory testing, written-step validation, and BrowserStack-derived exploratory charters on real devices via the TapMind MCP tools"
+      "description": "TapMind MCP squad's skills — goal-driven exploratory testing, written-step validation, NLP test codegen into tapmind-mobile-tests, and BrowserStack-derived exploratory charters on real devices via the TapMind MCP tools"
     }
   ]
 }

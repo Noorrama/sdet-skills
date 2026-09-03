@@ -132,7 +132,7 @@
     },
     "id_compliance": {
       "type": "object", "additionalProperties": false,
-      "description": "inline pointer to the id_compliance.json gate result",
+      "description": "inline pointer to the compliance.json gate result (legacy folders may still name the file id_compliance.json)",
       "properties": {
         "status": { "type": "string", "enum": ["PASS", "FAIL"] },
         "ref": { "type": "string" }

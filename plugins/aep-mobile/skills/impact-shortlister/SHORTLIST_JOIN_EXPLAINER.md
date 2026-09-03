@@ -35,9 +35,9 @@ regression-extractor ──► regression_context     │
                             Agent judgment on review_queue
                                       │
                                       ▼
-                            impact_shortlist.json  (final)
+                            impact_shortlist.json  (final sidecar)
                                       │
-                            patch-plan → SDET plan roll-up
+                            do not patch their SDET plan
 ```
 
 **Division of labour**
@@ -56,7 +56,7 @@ regression-extractor ──► regression_context     │
 
 | File | Required | Role |
 |------|----------|------|
-| `<feature>_sdet_plan.json` | **Yes** | Legacy pool: rows with `is_legacy_regression: true` + `existing_case_ref` |
+| `<feature>_sdet_plan.json` **or** `*_automation_plan_generator.json` | **One of them** | Legacy pool: rows with `is_legacy_regression: true` + `existing_case_ref`. APG uses `automation_scenarios[]`. |
 | `regression_context.json` | Strongly recommended | Enriches candidates (title, steps, automation metadata) — **does not expand pool** |
 | `change_context.json` | Preferred (production) | What merged: files, screens, modules, locators, flags, APIs, CR risks |
 | `dev_manifest.json` | Fallback only | Used if `change_context.json` is not ready yet |
@@ -70,8 +70,7 @@ Impact-shortlister normally reads **`change_context.json`**, not `dev_manifest.j
 | Artifact | Contents |
 |----------|----------|
 | `impact_shortlist.draft.json` | `must_run`, `review_queue`, `new_scenarios_to_run`, `change_surface` |
-| `impact_shortlist.json` | Final shortlist after agent completes review (includes `deselected_tests`) |
-| SDET plan `impact_shortlist` block | Compact roll-up (counts, tiers, run buckets) via `patch-plan` |
+| `impact_shortlist.json` | Final shortlist after agent completes review (includes `deselected_tests`). Join via `inputs`. |
 
 ---
 
@@ -81,17 +80,15 @@ Impact-shortlister normally reads **`change_context.json`**, not `dev_manifest.j
 # 1. Deterministic draft (agent finishes the rest)
 python3 scripts/shortlist_join.py draft \
   --plan <feature>_sdet_plan.json \
+  # or --plan <feature>_automation_plan_generator.json \
   --regression regression_context.json \
   --change change_context.json \
   --out impact_shortlist.draft.json
 
-# 2. Append roll-up to SDET plan
-python3 scripts/shortlist_join.py patch-plan \
-  --shortlist impact_shortlist.json \
-  --plan <feature>_sdet_plan.json
-
-# 3. Self-check
+# 2. Self-check
 python3 scripts/shortlist_join.py --demo
+
+# patch-plan exists but must not be run on another team's SDET plan
 ```
 
 ---
@@ -199,8 +196,7 @@ The script intentionally stops at the draft. The impact-shortlister agent:
    - **Plausibly related** → `SHOULD_RUN` + `AGENT_JUDGED_RELEVANT` + one-sentence explanation
    - **Weakly related** → `OPTIONAL` + explanation
    - **No link** → `deselected_tests` + `NO_IMPACT_SIGNAL` + explanation
-3. Writes final `impact_shortlist.json`
-4. Runs `patch-plan` to update the SDET plan roll-up
+3. Writes final `impact_shortlist.json` (sidecar). Do **not** run `patch-plan` on another team's SDET plan.
 
 ---
 

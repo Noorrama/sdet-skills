@@ -59,7 +59,7 @@
               "backdoor_login": { "type": "string" }
             }
           },
-          "given_strategy": { "type": "string", "description": "deep_link | api_injection_then_deeplink | nav_macro" },
+          "given_strategy": { "type": "string", "enum": ["deep_link", "api_injection_then_deeplink", "nav_macro"] },
           "deep_link": { "type": "string" },
           "nav_macro_fallback": { "type": "string" },
           "nl_steps": { "type": "array", "items": { "type": "string" }, "description": "runStep(...)/assertStep(...) lines (TapMind NLP)" },
@@ -75,14 +75,17 @@
             }
           },
           "locators_used": { "type": "array", "items": { "type": "string" } },
-          "data_binding": {
-            "type": "object", "additionalProperties": false,
-            "properties": {
-              "data_need_id": { "type": "string" },
-              "status": { "type": "string", "enum": ["RESOLVED", "UNMAPPED", "STATIC", "NOT_REQUIRED"] },
-              "provider": { "type": "string" },
-              "fixture_ref": { "type": "string" },
-              "provision_via": { "type": "string" }
+          "data_bindings": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "properties": {
+                "fixture_id": { "type": "string" },
+                "status": { "type": "string", "enum": ["RESOLVED", "UNMAPPED", "STATIC", "NOT_REQUIRED"] },
+                "provider": { "type": "string" },
+                "fixture_ref": { "type": "string" },
+                "provision_via": { "type": "string", "enum": ["lease", "construct", "synthetic", "override"] }
+              }
             }
           },
           "flags_required": { "type": "array", "items": { "type": "string" } },
@@ -108,7 +111,7 @@
         "type": "object", "additionalProperties": false,
         "properties": {
           "scenario_id": { "type": "string" },
-          "reason": { "type": "string", "description": "PARTIAL_READINESS | UNMAPPED_DATA_NEED | NO_LOCATOR | NO_NAV_ROUTE" },
+          "reason": { "type": "string", "enum": ["PARTIAL_READINESS", "UNMAPPED_DATA_NEED", "NO_LOCATOR", "NO_NAV_ROUTE", "NO_NLP_STEPS"] },
           "detail": { "type": "string" }
         }
       }
@@ -122,7 +125,8 @@
         "deferred": { "type": "integer" },
         "unmapped_data_need": { "type": "integer" },
         "validated_on_device": { "type": "integer" },
-        "needs_review": { "type": "integer" }
+        "needs_review": { "type": "integer" },
+        "no_nlp_steps": { "type": "integer" }
       }
     }
   }

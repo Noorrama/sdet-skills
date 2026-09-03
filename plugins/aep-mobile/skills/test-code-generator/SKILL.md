@@ -17,38 +17,48 @@ produced where NLP can't express the case.
 `platforms`, `deeplink_scheme`.
 
 ## Reads
-- **The SDET plan** — the approved scenarios (keep each scenario `scenario_id`). **Source of assertions.** *Filename:* match **`*sdet_plan.json`** — emitted feature-suffixed as `<feature_key>_sdet_plan.json` (e.g. `split_bill_gopay_groups_sdet_plan.json`); resolve by suffix (or by `feature_metadata.feature_key`), never a hardcoded `sdet_plan.json`.
+- **The SDET plan** — the approved scenarios (keep each scenario `scenario_id`). **Source of assertions and primary NLP sequence.** *Filename:* match **`*sdet_plan.json`** — emitted feature-suffixed as `<feature_key>_sdet_plan.json` (e.g. `split_bill_gopay_groups_sdet_plan.json`); resolve by suffix (or by `feature_metadata.feature_key`), never a hardcoded `sdet_plan.json`. Key fields consumed:
+  - `scenario_list[].automation_steps[]` — **primary NLP source.** Pre-built interleaved action+verify sequence in TapMind dialect (emitted by sdet-plan-generator). Wrap each line with `runStep(...)`/`assertStep(...)` and bind real locators from `change_context` — do NOT re-derive the sequence from `steps[]`.
+  - `scenario_list[].test_data[]` — structured fixtures (`fixture_id`, `entity`, `required_state`, `dynamic_conditions`, `provision`, `sensitive`). Pass to TDP for provisioning; never bind raw values inline.
+  - `scenario_list[].browserstack_case_id` — present on SDET plan scenarios post-SYNC; use directly for `@TestInfo` instead of creating a new BS case when already set.
+  - `coverage_categories.auto_selected[]` + `scenario_list[].source` — filter: generate for `source: input_derived` and `source: fe_baseline`; for `source: qa_added` generate only when `automatable: true`.
 - `change_context.json` — **real per-platform locators** (android + ios), API shapes, routes, flags (post-build). **How to interact only.**
 - `design_context.json` — screens/flows for navigation (when present).
 - **Grounding = the GMT coded repo** (page objects, base classes, existing tests) via retrieval — where the real navigation & element knowledge lives; the TapMind repo alone is too thin to ground on.
-- Test data via the **test-data-provisioner** (resolves each `test_data_tags` → handle).
+- Test data via the **test-data-provisioner** (resolves each `test_data[]` fixture → handle):
+  - `provision: "lease"` → request an existing entity from TDP's pool.
+  - `provision: "construct"` → TDP builds the entity to spec.
+  - `provision: "synthetic"` → always synthetic; mandatory when `sensitive: true` (KYC/PII/card state).
+  - `provision: "override"` → inject a state override on top of a leased entity.
+  - `dynamic_conditions[]` (TEMPORAL/RELATIONAL/SELECTION) → pass as selection constraints to TDP; these cannot be expressed as static `required_state` predicates.
 
 ## Model
 Fast tier — **Composer 2.5** default; Sonnet for complex flows; escalate to Opus only on repeated failure.
 
 ## Select scenarios
 Generate only where `automatable: true` **and** `is_legacy_regression: false` (new scenarios). Legacy
-scenarios are **updated**, not regenerated (see Dedup). Route by `target_execution_framework`
-(`TAPMIND_NLP` → NLP; `GMT_JAVA` → coded).
+scenarios are **updated**, not regenerated (see Dedup). Route by `target_execution_framework`:
+`TAPMIND_NLP` → invoke `aep-tapmind:nlp-codegen` (asks kb-only vs reuse-pioneer vs
+one device pioneer, then writes `tapmind-mobile-tests`); `GMT_JAVA` → coded tests in this skill.
 
-## Given strategy (the "Given" — Pillar 4 fallback hierarchy)
-1. **Deep link** from the plan's `target_entry_deeplink` — jump straight to the screen.
+## Given strategy (the "Given" — Pillar 3 fallback hierarchy)
+1. **Deep link** from the plan's `preconditions_metadata.target_entry_deeplink` — jump straight to the screen.
 2. **API state injection** (via TDP) *then* deep link — if the screen needs state (items in cart, etc.).
 3. **Reusable nav macro** — if no deep link; search the GMT/TapMind repo for a stable macro.
    Never generate raw home-screen tap-walks. No deep link **and** no macro → defer (see below).
 
 ## Process (per selected scenario)
+**If routed `TAPMIND_NLP`:** invoke `aep-tapmind:nlp-codegen` and stop — do not wrap
+`automation_steps` here. Remaining steps apply to `GMT_JAVA` only.
+
 1. **Given:** resolve via the hierarchy above; record `given_strategy` + `deep_link`/`nav_macro_fallback`.
 2. **Setup:** emit `mock_location` + `backdoor_login` (TDP user) via the house-style helpers.
-3. **Elements:** resolve each `element_id` → real locator from `change_context` (android=resource-id, ios=accessibilityId, flutter=Key/Semantics). Never hard-code inline locators.
-4. **NLP (primary):** emit TapMind `runStep(...)` for interactions ending in `assertStep(...)`. Align grammar to the app's TapMind syntax (see `examples/`).
-5. **GMT coded (where routed):** Appium+TestNG Java using the bound locators, real `Assert`, teardown.
-6. **Assertions:** derive the "Then" **strictly from `sdet_plan`** (`assertions_from: sdet_plan:<scenario_id>`) — never from the diff (Bias Guardrail). Turn the plan's `clickstream_events` into `analytics_assertions`.
-7. **Test data:** bind each need to the provisioner's handle (`data_binding`, never raw values).
-8. **Traceability:** stamp the test with `@TestInfo(suiteId, testCaseId)` and record the ID chain
-   (`requirement_id → story_id → jira_task_ids → browserstack_suite_id/testCaseId`). **Without the BS
-   IDs the test runs but results never post back to BrowserStack.** For an `op: CREATE` with no BS
-   case yet, create the BS case first and write the returned id into the annotation.
+3. **Elements:** bind element labels from `automation_steps[]` → real locators from `change_context` (android=resource-id, ios=accessibilityId, flutter=Key/Semantics). Never hard-code inline locators.
+4. **NLP (primary):** read `scenario_list[].automation_steps[]` from the SDET plan — this is the pre-built interleaved sequence. Wrap each action line with `runStep(...)` and each verify line with `assertStep(...)`. Substitute TapMind helper calls verbatim (`openDeeplink(...)`, `loginToDriver(...)`, `setDriverToggle(...)`). When `automation_steps` is empty (`[]`), defer the scenario with reason `NO_NLP_STEPS`.
+5. **GMT coded (where routed):** Appium+TestNG Java using the bound locators from step 3, real `Assert`, teardown.
+6. **Assertions:** sourced **strictly from `automation_steps[]` verify lines and `sdet_plan.clickstream_events[]`** (`assertions_from: sdet_plan:<scenario_id>`) — never from the diff (Bias Guardrail). Turn `clickstream_events[]` into `analytics_assertions`.
+7. **Test data:** pass each `test_data[]` fixture (by `fixture_id`) to TDP with `provision`/`dynamic_conditions`/`sensitive` signals; record each resolved handle as an entry in `data_bindings[]` (`fixture_id`, `status`, `provider`, `fixture_ref`, `provision_via`). Never raw values.
+8. **Traceability:** stamp with `@TestInfo(suiteId, testCaseId)`. ID chain: `requirement_ref → browserstack_case_id` (from scenario) → `browserstack_suite_id`. **If `browserstack_case_id` already exists on the scenario (stamped during SDET plan SYNC), use it directly — do NOT create a new BS case.** Only create a new BS case when the field is absent.
 9. **Waits/teardown:** dynamic waits only (static sleeps banned); teardown block mandatory.
 10. **Dedup/update:** if a flow changed (from `change_context` + `regression_context`), **UPDATE** the existing test in place (`op: UPDATE`); only genuinely new scenarios `CREATE`; already-covered legacy → `SKIP`.
 
@@ -64,13 +74,14 @@ Do **not** emit a broken test. Add the scenario to `deferred[]` with a reason wh
 2. **`test-code-generator.json`** (→ `schemas/test-code-generator.schema.json`) — one entry per scenario
    acted on: `op`, `target`, `class_name`/`test_method`, `artifact_ref`, `traceability`, `setup`,
    `given_strategy`, `nl_steps`, `assertions_from`, `analytics_assertions`, `locators_used`,
-   `data_binding`, `flags_required`, `waits`, `teardown`, `validation` — plus `deferred[]` and a
-   `summary` (created/updated/skipped_legacy/deferred/unmapped_data_need/validated_on_device/needs_review).
+   `data_bindings[]`, `flags_required`, `waits`, `teardown`, `validation` — plus `deferred[]` and a
+   `summary` (created/updated/skipped_legacy/deferred/unmapped_data_need/validated_on_device/needs_review/no_nlp_steps).
 
 ## Validated by construction (when a device is available)
-Drive the emitted NLP on a real device (BrowserStack/emulator), keep only steps that PASS, and record
-`validation: { mode: "validated_on_device", result, steps_validated, steps_repaired }`. Offline
-generation sets `mode: "generated"` so consumers know it's unverified.
+`TAPMIND_NLP` validation is owned by `nlp-codegen`: QA chooses kb-only (`generated`),
+reuse-pioneer, or one device pioneer per similar-flow cluster (`cloned_from_pioneer` /
+`validated_on_device`). Do not drive every NLP case on a device from this skill. GMT coded
+stays `mode: "generated"` unless a device run is explicitly requested.
 
 ## Self-heal (Phase B)
 Wrapped in the self-heal loop: generate → run on device farm → observe → fix (locators/waits) → retry.
