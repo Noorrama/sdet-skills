@@ -1,8 +1,9 @@
 # Mobile QA skills — Agentic PDLC (all 5 GoTo apps)
 
 A production skill set for the **frontend / mobile** QA track, reusable across **Gojek Consumer,
-Gojek Driver, GoFood Merchant, GoPay Consumer, GoPay Merchant**. One skill per SDLC stage + one
-shared test-data skill. **App-agnostic** — each app is a config file, not a fork.
+Gojek Driver, GoFood Merchant, GoPay Consumer, GoPay Merchant**. Three entry-point skills plus one
+shared test-data skill; extraction/generation logic lives in model-pinned `agents/`.
+**App-agnostic** — each app is a config file, not a fork.
 
 ## Folder layout
 ```
@@ -14,38 +15,42 @@ mobile-qa-skills/
     _template.json              ← copy per app (driver, gofood-merchant, gopay-consumer, gopay-merchant)
   schemas/                      ← JSON-schema validators for every context/output
     prd_context · design_context · rfc_context · plan_context · change_context · scenario · data_handle
-  skills/                       ← 8 SKILL.md (app-agnostic)
-    prd-extractor · design-extractor · rfc-extractor · impl-plan · code-change-extractor
-    sdet-plan-generator · test-code-generator · test-data-provisioner
+  skills/                       ← 4 user-facing SKILL.md (orchestrators + shared TDP)
+    mobile-context-extraction · mobile-sdet-plan-generator · mobile-postbuild
+    test-data-provisioner
+  agents/                       ← model-pinned subagents (Claude Code: sonnet / opus)
+    prd-extractor · rfc-extractor · design-extractor · task-extractor
+    regression-extractor · setup · sdet-plan-runner
+    code-change-extractor · impact-shortlister · test-code-generator
+  .cursor/agents/               ← same subagents, Cursor model IDs (claude-sonnet-5 / claude-opus-5)
   examples/gojek-consumer-save20/   ← worked example across the whole pipeline
 ```
 
 ## Pipeline & run order
 ```
-PRE-BUILD (parallel with implementation)
-  prd-extractor        → prd_context.json
-  design-extractor     → design_context.json        (frontend-primary)
-  rfc-extractor        → rfc_context.json            (optional)
-  impl-plan            → plan_context.json           ★ PRIMARY DRIVER (+ test hooks/deeplinks)
-        │  (+ existing GMT/NLP tests via retrieval → dedup)
-        ▼
-  sdet-plan-generator  → sdet_plan.json (scenarios + navigation + data_needs) + testability_feedback
+PRE-BUILD
+  /mobile-context-extraction     (setup preflight, then parallel extractors)
+    prd-extractor        → prd_context.json
+    design-extractor     → design_context.json        (frontend-primary)
+    rfc-extractor        → rfc_context.json            (optional — skip if no RFC)
+    task-extractor       → task_context.json           ★ PRIMARY DRIVER (+ test hooks/deeplinks)
+    regression-extractor → regression_context.json     (BrowserStack; skip if MCP down)
         │
-   ── HUMAN REVIEW GATE (SDET / Feature Lead) ──
         ▼
-POST-BUILD (dev shares the build)
-  code-change-extractor → change_context.json        (real per-platform locators, API, CR edges)
+  /mobile-sdet-plan-generator    (human loop here; computation in sdet-plan-runner @ opus)
+        → sdet_plan.json + analysis.md + test_cases.csv
         │
-  impact-shortlister    → impact_shortlist.json       (which existing regression cases the merged
-        │                                            code actually impacts — deterministic evidence
-        │                                            match + one agent judgment pass, no scoring
-        │                                            service; roll-up appended to sdet_plan.impact_shortlist)
+   ── HUMAN REVIEW GATE (SDET / Feature Lead; CSV edits → SYNC) ──
         ▼
-  test-code-generator   → TAPMIND_NLP → aep-tapmind:nlp-codegen (kb-only or one pioneer,
-                          then suite in tapmind-mobile-tests); GMT_JAVA stays here
-                          (test data wired via test-data-provisioner → TestBuddy)
+POST-BUILD
+  /mobile-postbuild              (sequential pipeline)
+    code-change-extractor → change_context.json + compliance.json
+    impact-shortlister    → impact_shortlist.json
+    test-code-generator   → TAPMIND_NLP → aep-tapmind:nlp-codegen;
+                            GMT_JAVA here; data via /mobile-test-data-provisioner
 ```
-Shared at both stages: **test-data-provisioner** (TestBuddy → GBT fallback → synthetic).
+Shared at both stages: **test-data-provisioner** (TestBuddy → GBT fallback → synthetic) —
+still its own command, not folded into post-build.
 
 ## Design decisions baked in
 - **Reuse:** app-agnostic skills + `config/<app>.json`. Add an app = copy `_template.json`, fill it.
@@ -56,8 +61,9 @@ Shared at both stages: **test-data-provisioner** (TestBuddy → GBT fallback →
 - **data_needs:** authored by the scenario generator (Impl. Planning) from PRD `data_signals` + boundaries; resolved by the provisioner (Code Generation). Coverage gate: every `data_signal` → ≥1 scenario.
 
 ## Model tiers (per SOP)
-- Reasoning (Opus / GPT 5.5): **sdet-plan-generator** only (accuracy-critical, ~1/EPIC).
-- Fast (Composer 2.5 default, Haiku light): the extractors, test-code-generator, provisioner.
+- Orchestrator `SKILL.md` files inherit the parent session — they never pin a model.
+- Reasoning (Opus / `claude-opus-5` on Cursor): **sdet-plan-runner** only (accuracy-critical, ~1/EPIC).
+- Fast (Sonnet / `claude-sonnet-5` on Cursor): the extractors, test-code-generator, setup, provisioner.
 - Escalate fast → reasoning only on ambiguity / repeated failure.
 
 ## Test data (TestBuddy)
@@ -83,7 +89,7 @@ python3 scripts/validate_sdet_deliverables.py \
   --checklist coverage_checklist.json
 ```
 
-See `skills/sdet-plan-generator/workflow.md` and `anti_patterns.md`. JSON schema-only check:
+See `agents/sdet-plan-generator/workflow.md` and `anti_patterns.md`. JSON schema-only check:
 
 ```bash
 python3 -c "import json,jsonschema; jsonschema.validate(
@@ -99,7 +105,8 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 
 ## Installing the plugin
 
-Each `skills/<name>/SKILL.md` is a loadable skill (folder name = skill id). Schemas and config
+Each `skills/<name>/SKILL.md` is a loadable skill (folder name = skill id) and becomes a
+user-facing `/command`. Subagents in `agents/` are **not** commands. Schemas and config
 are referenced with paths relative to the plugin root (`schemas/`, `config/`, `scripts/`).
 
 ### Claude Code (CLI / Desktop)
@@ -109,13 +116,16 @@ claude plugin marketplace add https://source.golabs.io/aep/skills.git
 claude plugin install aep-mobile@aep
 ```
 
-Then run the **aep-mobile-setup** skill to verify dependencies.
+Then ask to **check aep-mobile dependencies** (or *"Run aep-mobile-setup and tell me what
+is missing"*) — that routes to `mobile-context-extraction`, which runs the preflight first
+and stops if you only asked for setup.
 
 ### Cursor
 
 1. Install the plugin from the AEP marketplace (same repo as Claude Code), or symlink/copy
-   `plugins/aep-mobile/skills/` into your project's `.cursor/skills/` or personal
-   `~/.cursor/skills/`.
+   `plugins/aep-mobile/.cursor/skills/` (or `plugins/aep-mobile/skills/`) into your project's
+   `.cursor/skills/` or personal `~/.cursor/skills/`. Cursor subagents load from
+   `.cursor/agents/` (declared in `.cursor-plugin/plugin.json`).
 2. **Configure BrowserStack MCP** (required only for `regression-extractor` and SDET-plan upload; the prd/rfc/design/task extractors don't need it) in Cursor Settings → MCP (or `~/.cursor/mcp.json`):
 
    ```json
@@ -134,10 +144,10 @@ Then run the **aep-mobile-setup** skill to verify dependencies.
    ```
 
 3. Restart Cursor.
-4. Ask the agent to run the **aep-mobile-setup** skill. python3 + jsonschema are needed by
-   every skill; **BrowserStack MCP** is needed only by `regression-extractor` and
-   `sdet-plan-generator` (upload), which hard-stop without it — the prd/rfc/design/task
-   extractors run fine without it.
+4. Ask the agent to **check aep-mobile dependencies** (same `mobile-context-extraction`
+   setup-only path). python3 + jsonschema are needed by every skill; **BrowserStack MCP**
+   is needed only by `regression-extractor` and SDET-plan upload, which hard-stop without
+   it — the prd/rfc/design/task extractors run fine without it.
 
 ### Updating
 
@@ -151,11 +161,17 @@ Then restart your editor. In Cursor, reinstall or refresh the plugin if skills d
 
 ### Using the skills
 
-Skills auto-trigger from their description. You can also invoke them explicitly by name, e.g.
-`mobile-prd-extractor`, `mobile-regression-extractor`, `mobile-sdet-plan-generator`,
-`aep-mobile-setup`.
+Skills auto-trigger from their description. Four user-facing commands:
+
+| Command | What it does |
+|---|---|
+| `mobile-context-extraction` | Preflight + parallel PRD/RFC/design/task/regression extractors |
+| `mobile-sdet-plan-generator` | Human-gated SDET plan (GENERATE → review → SYNC) |
+| `mobile-postbuild` | Sequential code-change → impact-shortlist → test-code |
+| `mobile-test-data-provisioner` | Shared TestBuddy provisioner (not folded into post-build) |
 
 Or naturally in conversation:
-> *"Extract the PRD context for this mobile feature"* → triggers `mobile-prd-extractor`
-> *"Generate the SDET plan"* → triggers `mobile-sdet-plan-generator`
-> *"Check aep-mobile dependencies"* → triggers `aep-mobile-setup`
+> *"Extract the PRD context for this mobile feature"* → `mobile-context-extraction` (fires prd-extractor; skips missing inputs)
+> *"Generate the SDET plan"* → `mobile-sdet-plan-generator`
+> *"Run aep-mobile-setup and tell me what is missing"* → `mobile-context-extraction` (setup-only; stops after the preflight table)
+> *"The build is in — generate the tests"* → `mobile-postbuild`

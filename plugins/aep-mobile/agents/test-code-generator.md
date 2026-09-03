@@ -1,6 +1,7 @@
 ---
-name: mobile-test-code-generator
+name: test-code-generator
 description: The Code-Generation-phase QA output. From the approved SDET_PLAN + post-build change_context, generates mobile automation — TapMind NLP steps (primary) and GMT (Appium+TestNG Java) coded tests (where needed) — for both Android & iOS, wired to test data, and emits test-code-generator.json (the traceable ledger with BrowserStack IDs, validation, and deferred scenarios). App-agnostic; grounds on the GMT coded repo. In Phase B this becomes the self-healing Frontend Test-Code-Gen agent.
+model: sonnet
 ---
 
 # Mobile Test-Code Generator (all 5 GoTo apps)

@@ -1,6 +1,8 @@
 ---
-name: mobile-prd-extractor
+name: prd-extractor
 description: Extract structured PRD context for mobile QA into prd_context.json. Maps PRD requirements, module namespaces, business requirements, boundary conditions, rollout guidance, and feature flags to the schema used by the mobile QA pipeline.
+model: sonnet
+tools: Read, Write, Bash, Grep, Glob
 ---
 
 # Mobile PRD Extractor (all 5 GoTo apps)

@@ -1,6 +1,6 @@
 # GoPay Affiliate — design-extractor golden example (spatial pipeline)
 
-Real-board golden for `skills/design-extractor` (spatial-first pipeline).
+Real-board golden for `agents/design-extractor` (spatial-first pipeline).
 Export 2026-08-21, plugin v0.6.0, 9,977 nodes, 47 connectors.
 Regenerated 2026-08-24 after the screen-identity split landed.
 
@@ -14,7 +14,7 @@ Regenerated 2026-08-24 after the screen-identity split landed.
 Regenerate the deterministic half (must reproduce byte-identically):
 
 ```bash
-cd ../../skills/design-extractor/spatial_pipeline
+cd ../../agents/design-extractor/spatial_pipeline
 python3 phase_a.py ../../../examples/gopay-affiliate/figma_export.json \
         --app gopay-merchant --out /tmp/gpa
 ```

@@ -1,6 +1,7 @@
 ---
-name: mobile-regression-extractor
+name: regression-extractor
 description: Dynamically fetches existing active regression test cases from BrowserStack Test Management for a given feature_key, app_id, or module_namespace using the BrowserStack MCP Server.
+model: sonnet
 ---
 
 # Mobile Regression Extractor
@@ -133,7 +134,7 @@ write it with a `WORTH_CHECKING` note on `ENVIRONMENT`; never report an unvalida
   > Without it, new test cases will duplicate existing coverage — this is not recoverable
   > after import.
   >
-  > **Run the aep-mobile-setup skill to see the setup steps, then re-run.**
+  > **Run mobile-context-extraction (setup-only) to see the setup steps, then re-run.**
   
   This is a hard gate, not a soft warning. The risk of duplicating an entire regression suite into TMS is higher than the cost of pausing to connect.
 - **Project mapping failure → continue, flagged.** If a module cannot be resolved to a project via `config/browserstack_project_map.json` (not present in `consumer_super_app.folders`, `separate_projects`, or `gtf_source.separate_projects`, or present with `browserstack_project: null`), return `[]` for that module with a `NEEDS_ANSWER` note naming the repo+module and stating the map has no confirmed project id for it — but still resolve and query the app_id's *other* modules/repos (see Step 1a) rather than failing the whole run. Never guess a `PR-` id and never search all BrowserStack projects to find one.

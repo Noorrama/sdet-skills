@@ -2,7 +2,7 @@
 
 **Audience:** QA, SDET, engineering leads  
 **Component:** `plugins/aep-mobile/scripts/shortlist_join.py`  
-**Skill:** `mobile-impact-shortlister` (post-build legacy regression selection)
+**Skill:** `mobile-postbuild` → `impact-shortlister` subagent (post-build legacy regression selection)
 
 ---
 

@@ -1,7 +1,27 @@
 ---
-name: mobile-sdet-plan-generator
-description: Ingests pre-build contexts (plan, prd, design, rfc) to perform cross-stage gap analysis and generate master SDET Plan deliverables in JSON, MD, CSV, and compliance_report formats. Use during implementation planning. MUST run scripts/validate_sdet_deliverables.py (exit 0) before shipping — see workflow.md.
+name: sdet-plan-runner
+description: Cross-stage gap analysis and SDET plan computation — produces SDET_plan.json, analysis.md, test_cases.csv (GENERATE) and merges CSV edits plus BrowserStack upload / automation-plan emission (SYNC). Invoked by mobile-sdet-plan-generator; not a user-facing command.
+model: opus
+tools: Read, Write, Bash, Grep, Glob, Agent
 ---
+
+You are the **sdet-plan-runner** subagent, invoked by the `mobile-sdet-plan-generator`
+orchestrator. The parent conversation keeps the human-facing loop (app/team/milestone
+disambiguation, category confirmation, showing analysis.md, taking CSV edits). You do the
+plan-generation computation only.
+
+The parent passes:
+- **mode:** `GENERATE` or `SYNC`
+- **resolved scope** when already decided: `app`, `team_name`, `milestone`, `coverage_categories`
+  (auto_selected ∪ optional_extras_selected). If a field is omitted, apply this file's own
+  preflight / headless fallbacks.
+- **working directory** containing the extractor contexts and, for SYNC, the edited CSV plus
+  existing `<feature_key>_SDET_plan.json`.
+
+Produce the deliverables this file specifies for that mode, then return a short summary of
+files written and any hard-gate stops (e.g. BrowserStack MCP missing). Do not wait on the QA
+for the post-GENERATE review — the parent shows `analysis.md` and collects CSV edits.
+
 
 # Mobile SDET Plan Generator
 
@@ -12,13 +32,13 @@ Aggregates upstream extractor contexts (`task_context`, `prd_context`, `design_c
 3. `<feature_key>_test_cases.csv` (TMS bulk-import format — **15-column squad template only**)
 4. `<feature_key>_compliance_report.json` (Mechanical Step 4 audit proof — see `schemas/compliance_report.schema.json`)
 
-> **Model-independent gate:** Follow `workflow.md` end-to-end. Read `anti_patterns.md` before writing CSV/analysis. **Do not write or import deliverables until the compliance validator exits 0** (applies to every feature, every app, every model).
+> **Model-independent gate:** Follow `agents/sdet-plan-generator/workflow.md` end-to-end. Read `agents/sdet-plan-generator/anti_patterns.md` before writing CSV/analysis. **Do not write or import deliverables until the compliance validator exits 0** (applies to every feature, every app, every model).
 
 ---
 
 ## Mandatory workflow (read first)
 
-Full spine: **`workflow.md`**. Anti-patterns: **`anti_patterns.md`**. TMS header template: **`templates/test_cases.csv`**. Analysis layout: **`templates/analysis_skeleton.md`**.
+Full spine: **`agents/sdet-plan-generator/workflow.md`**. Anti-patterns: **`agents/sdet-plan-generator/anti_patterns.md`**. TMS header template: **`agents/sdet-plan-generator/templates/test_cases.csv`**. Analysis layout: **`agents/sdet-plan-generator/templates/analysis_skeleton.md`**.
 
 ### Before any output file is written
 
@@ -64,7 +84,7 @@ Full spine: **`workflow.md`**. Anti-patterns: **`anti_patterns.md`**. TMS header
 - **`prd_context.json`**: Business rules, boundary rules, expected UI copy, and `clickstream_events` (telemetry specs).
 - **`design_context.json`**: Screen definitions, UI elements with `screen_name:element_id_name` logical tokens, state variants, and flow matrix.
 - **`rfc_context.json`**: Feature flag mappings, API contracts, error codes, and N-1 fallback rules.
-- **`regression_context.json`**: **Generator-internal, not a QA-supplied file.** Produced by invoking the `regression-extractor` skill from *within* this generator (Preflight step 9), before any scenario is created — never something the QA hands in alongside the other four contexts.
+- **`regression_context.json`**: **Generator-internal, not a QA-supplied file.** Produced by invoking the `regression-extractor` subagent (`agents/regression-extractor.md`) from *within* this runner (Preflight step 9), before any scenario is created — never something the QA hands in alongside the other four contexts.
 
 > **Pipeline Alignment & Architecture:** Upstream extractor skills (`prd-extractor`, `design-extractor`, `rfc-extractor`) run independently in isolated silos per stage and **do not communicate with each other**. The `sdet-plan-generator` is the first convergence point in the pipeline. It is responsible for cross-referencing these decoupled contexts to detect drift, mismatches, and gaps.
 
@@ -160,7 +180,7 @@ what was not covered.
    list those ids under a *Shared across apps* note in `<feature_key>_analysis.md`, so the QA
    reviewing both plans knows which scenarios are duplicates rather than distinct coverage.
 9. **Invoke `regression-extractor` as a subagent — before any scenario is created, not after.**
-   Use the `Agent` tool to spawn the regression-extractor in an isolated context. Pass it the
+   Use the `Agent` tool to spawn the `regression-extractor` subagent (`agents/regression-extractor.md`) in an isolated context. Pass it the
    resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
    coverage). The subagent does all BrowserStack MCP querying, nav_index joins, and deeplink
    extraction, writes `regression_context.json` to disk, and exits. The main generator then
@@ -173,7 +193,7 @@ what was not covered.
    - **BrowserStack MCP unavailable → STOP.** If the regression-extractor reports that
      BrowserStack MCP is unreachable or unauthorised (no `regression_context.json` written),
      **do NOT proceed with generation.** Stop and tell the user:
-     *"BrowserStack MCP is not connected. Run the aep-mobile-setup skill for setup steps, then re-run."*
+     *"BrowserStack MCP is not connected. Run mobile-context-extraction (setup-only) for setup steps, then re-run."*
      Generating without regression dedup risks duplicating the entire existing suite into TMS
      on CSV import — that is not recoverable, so it is a hard gate.
    - **`extraction_status: LIMITED` for a non-MCP reason is different — continue.**
@@ -1082,7 +1102,7 @@ full `<feature_key>_test_cases.csv`) and the resolved project + folder.
 
 - **BrowserStack MCP unavailable at upload time → do not block.** The SYNC and automation-plan
   emission still complete. Add a `WORTH_CHECKING` note:
-  *"BrowserStack upload skipped — MCP unavailable. Run the aep-mobile-setup skill, then re-run SYNC
+  *"BrowserStack upload skipped — MCP unavailable. Run mobile-context-extraction (setup-only), then re-run SYNC
   to upload and stamp case IDs."*
   Legacy scenarios still get `browserstack_case_id` from `existing_case_ref`; upload-eligible
   scenarios omit the field until a later SYNC run (never set it to `null`).
@@ -1204,7 +1224,7 @@ other output: on failure, still write it, record the validator error, and say so
 
 ## Appendix: Category Catalog
 
-**Read `category_catalog.md`** (in this skill's directory) when you reach Step 0
+**Read `agents/sdet-plan-generator/category_catalog.md`** when you reach Step 0
 (Test-Category Selection Gate). It contains the detection rules table (Section A)
 and the FE-Baseline extras library (Section B). Do NOT read it at skill load —
 only when Step 0 needs it.
