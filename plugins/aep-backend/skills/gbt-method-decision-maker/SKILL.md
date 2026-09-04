@@ -53,6 +53,16 @@ Your output is `runs/<epic_id>/pass1/artifacts/method_decisions.json`.
    behavior in full**, not just call the same endpoint. Calling the same controller method is
    necessary but not sufficient — an existing happy-path test and a new negative-path scenario
    on the same endpoint are never `exact_match`.
+3a. **Match a gRPC scenario on `grpc_service` + `rpc_method`, never on a URL.** A gRPC endpoint
+   has no path, so the "same endpoint" test that gates every verdict below is the
+   service+method pair. Two RPCs on the same service are different endpoints, exactly as two
+   paths would be. When you name an assertion to add or change for a gRPC scenario, express it
+   in gRPC terms — a generated proto getter (`response.getX()`), or a status assertion
+   (`Status.Code`, `StatusRuntimeException`) — never an HTTP status code and never a
+   `deserialize(...)` DTO field. Note the failure shape differs per client in `gopay`: some
+   catch the exception and return an error-bearing response, some let
+   `StatusRuntimeException` propagate. If you cannot tell which applies to the target method,
+   say so rather than guessing — the wrong one makes the generated test unrunnable.
 4. **`closest_match_modify` must name the real method and the real assertion to change.**
    `{field, from, to}` must describe an assertion that is actually present in the method today
    (`from`) and the concrete change the scenario requires (`to`). A vague "update this

@@ -118,8 +118,16 @@ Step 2  — Identify the likely module from the host/path (see "Module identific
 Step 3  — Confirm the module — don't blindly commit to step 2's guess. Grep the repo for the path
           fragment across modules; if more than one module plausibly owns it, ask the user or pick
           based on which module's other endpoints share the same host.
+Step 3a — Determine the TRANSPORT before picking a skill: REST or gRPC. grpcurl, a
+          `package.Service/Method` identity, or a named proto message means gRPC; an HTTP verb +
+          URL path + HTTP status means REST. Presence of `.proto` files proves nothing — a module
+          can carry a full proto build with zero live consumers. If ambiguous, resolve it against
+          the module's real source before continuing; do NOT guess, because a gRPC scenario
+          generated as REST compiles and fails only at runtime. See
+          references/grpc-transport-contract.md.
 Step 4  — Load this common skill's guidance (you're doing that now).
-Step 5  — Check the "Module routing" table below. If a module-specific skill exists for the
+Step 5  — Check the "Module routing" table below — it is keyed on module AND transport. If a
+          module-specific skill exists for the
           identified module, load it now (see "How to load a module-specific skill"). If none
           exists, say so explicitly and proceed with fresh discovery using Steps 6-9 below against
           that module's actual source — do not assume it works like a module that does have a
@@ -193,8 +201,10 @@ and do not load a module skill for a module it doesn't cover.
 | Module | Skill to load | One-line reason it has its own skill |
 |---|---|---|
 | `go-logistics` | `go-logistics-api-test-writer` | TMS/GoKilat/GoSend/GoBox/GoShop layering, TMS gateway-prefix quirk, Kotlin scaffold abandoned since 2021 (Java is the living convention) |
-| `gopay` | `gopay-api-test-writer` | Two coexisting paradigms (REST/miniapp vs gRPC/OMS); also see `gopay/.gitlab/skills/qa-intern/` for its own domain playbooks (payment flows, OMS state machine) — read those too when working in `paymentTooling/**` |
-| `gofood` | `gofood-api-test-writer` | In-progress Controller/Client/Endpoint migration alongside legacy `*ClientWrapper`s; narrow-but-real gRPC surface for OpenAPI/web-order |
+| `gopay` **(REST / miniapp)** | `gopay-api-test-writer` | `userJourneyTests/userspend/**`; also see `gopay/.gitlab/skills/qa-intern/` for its domain playbooks |
+| `gopay` **(gRPC)** | `gopay-grpc-api-test-writer` | `paymentTooling/**` — OMS, Boomerang, Emoney, PRS, Subscription Engine. Pooled `AbstractGrpcClientConnection`, Figaro config, protos from published artifacts. A different stack, not a variant of the REST one |
+| `gofood` **(REST)** | `gofood-api-test-writer` | In-progress Controller/Client/Endpoint migration alongside legacy `*ClientWrapper`s |
+| `gofood` **(gRPC)** | `gofood-grpc-api-test-writer` | The OpenAPI/web-order surface — 10 endpoint classes, two coexisting `IGrpcServiceEndpoint` interfaces, in-repo `buf`-managed protos |
 | `driver-platform` | `driver-platform-api-test-writer` | No universal BaseClient; header-spoofed driver auth (not a real login helper); disabled Kafka assertions |
 | `transport` | `transport-api-test-writer` | Flow-controller orchestration layer; `TransportController` god-object; 4-year-stale README |
 | `payment-core` | `payment-core-api-test-writer` | Standalone module (no `gojek-commons`); per-sub-domain auth (Basic/API-key/HMAC/mTLS); settlement domain data conventions |
@@ -385,6 +395,11 @@ Before reporting the task done:
 
 ## Other resources referenced by this skill (read when relevant, not by default)
 
+- `references/grpc-transport-contract.md` — **read this whenever the target is or might be gRPC.**
+  How to decide REST vs gRPC, the transport-aware scenario contract (`protocol`, `grpc_service`,
+  `rpc_method`, `request_type`, `response_type`, `proto_reference`, `rpc_type`, `expected_status`)
+  that replaces the REST fields, the module→transport routing table, the eight rules verified to
+  hold in both gRPC modules, and the much longer list of things that differ between them.
 - `references/extending-an-existing-api.md` — **read this whenever the cURL targets an endpoint
   that is already automated, or a new endpoint in a folder that already has test classes.** Part 1
   is the request-building chain to walk when an existing API gains a field (with the controller

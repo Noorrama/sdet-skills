@@ -35,6 +35,19 @@ helpers, reporting framework, retry mechanisms, environment configuration,
 naming conventions, and code standards. Never introduce a new pattern when an
 existing one exists.
 
+**Record the TRANSPORT of every endpoint you analyse — REST or gRPC — before
+anything else.** They have different stacks, and in `gofood` both live in the
+same `openapi` package, so folder membership does not settle it. For a gRPC
+endpoint capture the fully-qualified service, the RPC method, the request and
+response proto types, where the protos come from (in-repo `.proto` vs a
+published artifact), how the channel is obtained (per-client vs pooled), how
+metadata is attached, and **how failures surface** — a thrown
+`StatusRuntimeException`, or an error field on a normally-returned response.
+That last one differs per client even inside one module and decides how every
+negative test is written. Presence of `.proto` files or generated stubs does not
+prove a live gRPC surface; confirm a real test-class consumer. See
+`backend-automation/references/grpc-transport-contract.md`.
+
 ## Phase 2: Service understanding
 From SERVICE-REPO REFERENCES (when present), analyze controllers, routes,
 handlers, the service layer, entities/domain models, validation logic, and
