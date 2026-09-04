@@ -17,10 +17,11 @@ mobile-qa-skills/
     prd_context · design_context · rfc_context · plan_context · change_context · scenario · data_handle
   skills/                       ← 3 user-facing SKILL.md (2 orchestrators + shared TDP)
     mobile-sdet-plan-generator · mobile-postbuild · test-data-provisioner
-  agents/                       ← model-pinned subagents (shared by Claude Code and Cursor)
+  agents/                       ← instruction bodies + Claude Code model pins (sonnet / opus)
     prd-extractor · rfc-extractor · design-extractor · task-extractor
     regression-extractor · setup · sdet-plan-runner
     code-change-extractor · impact-shortlister · test-code-generator
+  agents-cursor/                ← thin Cursor stubs only (same names; pin Cursor model IDs)
   examples/gojek-consumer-save20/   ← worked example across the whole pipeline
 ```
 
@@ -60,10 +61,17 @@ still its own command, not folded into post-build.
 
 ## Model tiers (per SOP)
 - Orchestrator `SKILL.md` files inherit the parent session — they never pin a model.
-- Reasoning (`opus` on `agents/sdet-plan-runner.md`): accuracy-critical, ~1/EPIC.
-- Fast (`sonnet` on the extractor / setup / test-code-generator agents): default for extraction and codegen.
+- Edit logic only in `agents/*.md`. `agents-cursor/` is pin-only stubs for Cursor Desktop
+  (same agent names; they load the shared body from `agents/`).
+
+| Role | Claude Code (`agents/`) | Cursor (`agents-cursor/`) |
+|---|---|---|
+| Extractors, setup, postbuild agents | `sonnet` | `composer-2.5` (stand-in for Sonnet) |
+| SDET plan runner | `opus` | `claude-opus-5` |
+
+- Claude Code discovers `agents/` by default. Cursor loads `agents-cursor/` via
+  `.cursor-plugin/plugin.json`. Skills stay shared under `skills/`.
 - Escalate fast → reasoning only on ambiguity / repeated failure.
-- Claude Code and Cursor load the same `skills/` and `agents/` trees. `.claude-plugin/` and `.cursor-plugin/` are only the two editors' required manifest filenames — not separate copies of the skills.
 
 ## Test data (TestBuddy)
 `test-data-provisioner` calls the **TestBuddy MCP** as the source of truth — e.g. `CustomerAgent`
@@ -123,8 +131,8 @@ and stops if you only asked for setup.
 
 1. Install the plugin from the AEP marketplace (same repo as Claude Code), or symlink/copy
    `plugins/aep-mobile/skills/` into your project's `.cursor/skills/` or personal
-   `~/.cursor/skills/`. Subagents are the same `agents/` folder Claude Code uses
-   (declared as `"agents": "./agents/"` in `.cursor-plugin/plugin.json`).
+   `~/.cursor/skills/`. Subagents load from `agents-cursor/` (declared in
+   `.cursor-plugin/plugin.json`); each stub follows the shared body in `agents/`.
 2. **Configure BrowserStack MCP** (required only for `regression-extractor` and SDET-plan upload; the prd/rfc/design/task extractors don't need it) in Cursor Settings → MCP (or `~/.cursor/mcp.json`):
 
    ```json

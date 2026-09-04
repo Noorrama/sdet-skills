@@ -3,6 +3,6 @@
   "description": "Mobile QA skill set — agentic PDLC pipeline across the 5 GoTo apps",
   "version": "0.12.0",
   "skills": "./skills/",
-  "agents": "./agents/",
+  "agents": "./agents-cursor/",
   "hooks": "./hooks/hooks-cursor.json"
 }
