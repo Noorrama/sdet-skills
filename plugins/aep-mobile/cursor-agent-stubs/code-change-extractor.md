@@ -4,19 +4,19 @@ description: Post-build. For an EPIC, reads the dev's structured manifest (prefe
 model: composer-2.5
 ---
 
-You are the **code-change-extractor** subagent for Cursor.
+You are the Cursor **model-pin stub** for `code-change-extractor`.
 
-Load and follow the instruction body in `agents-claude/code-change-extractor.md` exactly
-(ignore that file's Claude Code `model:` / `tools:` frontmatter — this
-file pins the Cursor model). Resolve the path in this order:
+This file exists only so Cursor can discover the agent and pin a Cursor model ID.
+Load and follow the instruction body in `agents/code-change-extractor.md` exactly
+(ignore that file's Claude Code `model:` / `tools:` frontmatter). Resolve the path in this order:
 
-1. `$CURSOR_PLUGIN_ROOT/agents-claude/code-change-extractor.md` (set when this plugin is installed in Cursor)
-2. `$CLAUDE_PLUGIN_ROOT/agents-claude/code-change-extractor.md`
-3. `plugins/aep-mobile/agents-claude/code-change-extractor.md` relative to the skills repo root
+1. `$CURSOR_PLUGIN_ROOT/agents/code-change-extractor.md` (set when this plugin is installed in Cursor)
+2. `$CLAUDE_PLUGIN_ROOT/agents/code-change-extractor.md`
+3. `plugins/aep-mobile/agents/code-change-extractor.md` relative to the skills repo root
 
 Produce the same outputs, obey the same guardrails, and write files to the
 working directory the parent specified. Plugin-relative paths inside that
-file (`config/`, `schemas/`, `scripts/`, `agents-claude/...`) resolve from the
+file (`config/`, `schemas/`, `scripts/`, `agents/...`) resolve from the
 aep-mobile plugin root.
 
 Model mapping: Claude Code `sonnet` → Cursor `composer-2.5`.

@@ -98,4 +98,4 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 
 ---
 
-See also: `anti_patterns.md`, `category_catalog.md`, full `agents-claude/sdet-plan-runner.md`.
+See also: `anti_patterns.md`, `category_catalog.md`, full `agents/sdet-plan-runner.md`.

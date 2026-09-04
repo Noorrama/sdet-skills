@@ -32,13 +32,13 @@ Aggregates upstream extractor contexts (`task_context`, `prd_context`, `design_c
 3. `<feature_key>_test_cases.csv` (TMS bulk-import format — **15-column squad template only**)
 4. `<feature_key>_compliance_report.json` (Mechanical Step 4 audit proof — see `schemas/compliance_report.schema.json`)
 
-> **Model-independent gate:** Follow `agents-claude/sdet-plan-generator/workflow.md` end-to-end. Read `agents-claude/sdet-plan-generator/anti_patterns.md` before writing CSV/analysis. **Do not write or import deliverables until the compliance validator exits 0** (applies to every feature, every app, every model).
+> **Model-independent gate:** Follow `agents/sdet-plan-generator/workflow.md` end-to-end. Read `agents/sdet-plan-generator/anti_patterns.md` before writing CSV/analysis. **Do not write or import deliverables until the compliance validator exits 0** (applies to every feature, every app, every model).
 
 ---
 
 ## Mandatory workflow (read first)
 
-Full spine: **`agents-claude/sdet-plan-generator/workflow.md`**. Anti-patterns: **`agents-claude/sdet-plan-generator/anti_patterns.md`**. TMS header template: **`agents-claude/sdet-plan-generator/templates/test_cases.csv`**. Analysis layout: **`agents-claude/sdet-plan-generator/templates/analysis_skeleton.md`**.
+Full spine: **`agents/sdet-plan-generator/workflow.md`**. Anti-patterns: **`agents/sdet-plan-generator/anti_patterns.md`**. TMS header template: **`agents/sdet-plan-generator/templates/test_cases.csv`**. Analysis layout: **`agents/sdet-plan-generator/templates/analysis_skeleton.md`**.
 
 ### Before any output file is written
 
@@ -84,7 +84,7 @@ Full spine: **`agents-claude/sdet-plan-generator/workflow.md`**. Anti-patterns: 
 - **`prd_context.json`**: Business rules, boundary rules, expected UI copy, and `clickstream_events` (telemetry specs).
 - **`design_context.json`**: Screen definitions, UI elements with `screen_name:element_id_name` logical tokens, state variants, and flow matrix.
 - **`rfc_context.json`**: Feature flag mappings, API contracts, error codes, and N-1 fallback rules.
-- **`regression_context.json`**: **Generator-internal, not a QA-supplied file.** Produced by invoking the `regression-extractor` subagent (`agents-claude/regression-extractor.md`) from *within* this runner (Preflight step 9), before any scenario is created — never something the QA hands in alongside the other four contexts.
+- **`regression_context.json`**: **Generator-internal, not a QA-supplied file.** Produced by invoking the `regression-extractor` subagent (`agents/regression-extractor.md`) from *within* this runner (Preflight step 9), before any scenario is created — never something the QA hands in alongside the other four contexts.
 
 > **Pipeline Alignment & Architecture:** Upstream extractor skills (`prd-extractor`, `design-extractor`, `rfc-extractor`) run independently in isolated silos per stage and **do not communicate with each other**. The `sdet-plan-generator` is the first convergence point in the pipeline. It is responsible for cross-referencing these decoupled contexts to detect drift, mismatches, and gaps.
 
@@ -180,7 +180,7 @@ what was not covered.
    list those ids under a *Shared across apps* note in `<feature_key>_analysis.md`, so the QA
    reviewing both plans knows which scenarios are duplicates rather than distinct coverage.
 9. **Invoke `regression-extractor` as a subagent — before any scenario is created, not after.**
-   Use the `Agent` tool to spawn the `regression-extractor` subagent (`agents-claude/regression-extractor.md`) in an isolated context. Pass it the
+   Use the `Agent` tool to spawn the `regression-extractor` subagent (`agents/regression-extractor.md`) in an isolated context. Pass it the
    resolved `app` and `module_namespace` (plus `rfc.affected_modules` for impacted-area
    coverage). The subagent does all BrowserStack MCP querying, nav_index joins, and deeplink
    extraction, writes `regression_context.json` to disk, and exits. The main generator then
@@ -1224,7 +1224,7 @@ other output: on failure, still write it, record the validator error, and say so
 
 ## Appendix: Category Catalog
 
-**Read `agents-claude/sdet-plan-generator/category_catalog.md`** when you reach Step 0
+**Read `agents/sdet-plan-generator/category_catalog.md`** when you reach Step 0
 (Test-Category Selection Gate). It contains the detection rules table (Section A)
 and the FE-Baseline extras library (Section B). Do NOT read it at skill load —
 only when Step 0 needs it.
