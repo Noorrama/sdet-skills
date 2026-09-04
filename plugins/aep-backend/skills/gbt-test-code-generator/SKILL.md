@@ -19,6 +19,14 @@ It is the skills-only path to code generation, and it is individually testable. 
 **Do not restate GBT patterns in your head from this file.** This skill owns *orchestration*;
 the patterns live elsewhere and are authoritative. Before generating anything, read:
 
+0. **Resolve the TRANSPORT first, then load the transport-correct module skill.** A scenario with
+   `protocol: "grpc"` (or naming a `grpc_service`/`rpc_method`) routes to
+   `gopay-grpc-api-test-writer` or `gofood-grpc-api-test-writer`; everything else routes to the
+   REST skill for that module. Absent `protocol` means REST, so existing plans are unaffected.
+   Generating a gRPC scenario against a REST skill produces code that compiles and fails at
+   runtime — an `IServiceEndpoint`, a `RequestHandler` call, or an HTTP-status assertion on a gRPC
+   scenario is a critical failure, not a style issue. Read
+   `backend-automation/references/grpc-transport-contract.md` before generating any gRPC file.
 1. **The `gbt-module-<normalized>` skill and its `reference.md`** for the target
    module — `:driver-platform` → `gbt-module-driver-platform`, `:services:foo` →
    `gbt-module-services-foo`. **Highest authority.** Its layer map, its 4-step endpoint
@@ -146,6 +154,14 @@ flag it, because output quality drops sharply without one.
     paths resolve through the module's properties/config readers; secrets through its secret
     reader; test values come from `automation_plan.test_data_payloads`. This holds even in a
     comment or an example.
+    - **A gRPC scenario never gets REST plumbing.** Build the request with generated protobuf
+      builders (`X.newBuilder()…build()`), read the response through generated getters, attach
+      metadata with `Metadata.Key.of(name, Metadata.ASCII_STRING_MARSHALLER)`, and use the
+      module's existing connection/client object — never a new `ManagedChannel`, never a
+      handwritten DTO where a generated proto type exists, never an HTTP status assertion. If a
+      `request_type`/`response_type` in the plan does not resolve to a real generated class,
+      reject with `unresolvable_proto_type`; do not stub it. Never modify generated protobuf
+      sources.
     - **An environment-dependent test-data id goes in the module's per-environment holder, never
       in a shared constants class.** Before adding one, look for an `I<Domain>Constants` +
       `<Domain>Constants{QA/PREPROD,Integration/int}` family (or the module's equivalent) in the feature area and

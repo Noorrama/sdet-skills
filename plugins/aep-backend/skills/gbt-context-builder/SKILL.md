@@ -38,6 +38,15 @@ Your output is `gbt_context.json`.
    identity — `{driverId}` and `{id}` are the same. A method difference on the same path is
    a **weaker** match: record `match_quality: "path_only"` and treat it as *not* a reuse
    signal for the test layer.
+   - **A gRPC endpoint has no path.** Its identity is `grpc_service` + `rpc_method`; match on
+     that pair, never on a URL. Carry `protocol: "grpc"` and the transport contract fields
+     (`grpc_service`, `rpc_method`, `request_type`, `response_type`, `proto_reference`,
+     `rpc_type`, `expected_status`) onto the endpoint's verdict, and leave every REST field
+     absent — do not synthesise an `http_method` or `path` for it. Omit `protocol` entirely for
+     REST endpoints so existing plans stay byte-compatible. `request_type`/`response_type` must
+     be real generated proto types; if you cannot verify one exists, reject with
+     `unresolvable_proto_type` rather than emitting a name codegen will fabricate against. See
+     `backend-automation/references/grpc-transport-contract.md`.
    - **The `test` layer reuses only on an exact endpoint match — same method AND same path.**
      One endpoint, one test class is the repo convention (every module's component-test package
      is one class per endpoint). A *sibling* class testing a neighbouring endpoint in the same
@@ -97,6 +106,13 @@ Always include `remediation`. This reject is almost always a one-command local f
 ## The nine layers
 
 For every endpoint in `rfc_context.api_contracts[]`, emit a verdict for each layer:
+
+> **gRPC endpoints map onto these layer names differently, and differently per module.** In
+> `gofood` the chain is endpoint → client → controller → asserts, so the layer names carry over
+> as-is. In `gopay` there is no endpoint layer at all: it is `<Svc>ClientConnection` → `<Svc>Client`
+> → `<domain>Helper` → `<X>Assertion`. Emit `endpoint` as `create_new` only if the module actually
+> has that layer; for `gopay` record the connection under `client` and the helper under `helper`,
+> and say so in the verdict's `reason`. Never invent a `*Endpoint` class for a gopay gRPC call.
 
 | Layer | Role in the GBT pattern |
 |---|---|

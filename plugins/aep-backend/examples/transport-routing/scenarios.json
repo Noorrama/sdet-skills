@@ -1,0 +1,170 @@
+{
+  "_comment": [
+    "Routing fixtures for transport-aware skill selection.",
+    "Each case states an input scenario and the skill that MUST be selected for it.",
+    "Cases 1-2 are the backward-compatibility guard: a scenario with NO 'protocol' key is REST",
+    "by definition and must keep routing to the existing REST writers, unchanged.",
+    "See backend-automation/references/grpc-transport-contract.md."
+  ],
+  "cases": [
+    {
+      "id": "ROUTE-001",
+      "name": "gofood REST — no protocol key (legacy plan shape)",
+      "scenario": {
+        "module": "gofood",
+        "http_method": "POST",
+        "path": "/gofood/meal-scheduler/v1/group-order-sessions",
+        "http_status": 200
+      },
+      "expected_skill": "gofood-api-test-writer",
+      "expected_protocol": "rest",
+      "why": "Absent 'protocol' means REST. Existing plans must route exactly as before."
+    },
+    {
+      "id": "ROUTE-002",
+      "name": "gopay REST/miniapp — no protocol key",
+      "scenario": {
+        "module": "gopay",
+        "http_method": "GET",
+        "path": "/gopay/v1/userspend/summary",
+        "http_status": 200,
+        "target_source_path": "gopay/src/test/java/userJourneyTests/userspend/"
+      },
+      "expected_skill": "gopay-api-test-writer",
+      "expected_protocol": "rest",
+      "why": "userspend is the REST/miniapp surface, not paymentTooling."
+    },
+    {
+      "id": "ROUTE-003",
+      "name": "gofood gRPC — unary success",
+      "scenario": {
+        "protocol": "grpc",
+        "module": "gofood",
+        "grpc_service": "gofood.consumer.v1.OrderService",
+        "rpc_method": "GetOrder",
+        "request_type": "gofood.consumer.v1.OrderServiceOuterClass.GetOrderRequest",
+        "response_type": "gofood.core.orders.v1.OrderOuterClass.Order",
+        "proto_reference": "gofood/src/main/proto/gofood/consumer/v1/order_service.proto",
+        "rpc_type": "unary",
+        "expected_status": "OK"
+      },
+      "expected_skill": "gofood-grpc-api-test-writer",
+      "expected_protocol": "grpc",
+      "expected_endpoint_interface": "restidioms.security.core.template.IGrpcServiceEndpoint",
+      "expected_curl_builder": "restidioms.security.utility.GRPCCurlBuilder",
+      "why": "GetOrderEndPoint is on the migrated interface; curl builder must be paired to it."
+    },
+    {
+      "id": "ROUTE-004",
+      "name": "gofood gRPC — extending a legacy-but-live endpoint",
+      "scenario": {
+        "protocol": "grpc",
+        "module": "gofood",
+        "grpc_service": "gofood.consumer.v1.OutletService",
+        "rpc_method": "SearchOutlets",
+        "request_type": "gofood.consumer.v1.OutletServiceOuterClass.SearchOutletsRequest",
+        "response_type": "gofood.consumer.v1.OutletServiceOuterClass.SearchOutletsResponse",
+        "proto_reference": "gofood/src/main/proto/gofood/consumer/v1/outlet_service.proto",
+        "rpc_type": "unary",
+        "expected_status": "OK"
+      },
+      "expected_skill": "gofood-grpc-api-test-writer",
+      "expected_protocol": "grpc",
+      "expected_endpoint_interface": "utils.IGrpcServiceEndpoint",
+      "expected_curl_builder": "utils.GRPCCurlsBuilder",
+      "why": "SearchOutletEndPoint is legacy-but-live. Match the sibling; do NOT migrate it."
+    },
+    {
+      "id": "ROUTE-005",
+      "name": "gofood gRPC — negative, non-OK status",
+      "scenario": {
+        "protocol": "grpc",
+        "module": "gofood",
+        "grpc_service": "gofood.consumer.v1.OrderService",
+        "rpc_method": "GetMaskedDriverNumber",
+        "request_type": "gofood.consumer.v1.OrderServiceOuterClass.GetMaskedDriverNumberRequest",
+        "response_type": "gofood.consumer.v1.OrderServiceOuterClass.GetMaskedDriverNumberResponse",
+        "proto_reference": "gofood/src/main/proto/gofood/consumer/v1/order_service.proto",
+        "rpc_type": "unary",
+        "expected_status": "INVALID_ARGUMENT"
+      },
+      "expected_skill": "gofood-grpc-api-test-writer",
+      "expected_protocol": "grpc",
+      "expected_failure_style": "controller *WithErrorHandling returns Status.getDescription(); assert that String",
+      "forbidden": ["HttpStatuses.*", "getStatusCode()", "numeric HTTP status"],
+      "why": "gofood surfaces gRPC failures as the status description string from the controller."
+    },
+    {
+      "id": "ROUTE-006",
+      "name": "gopay gRPC — unary success in paymentTooling",
+      "scenario": {
+        "protocol": "grpc",
+        "module": "gopay",
+        "grpc_service": "com.gopay.emoneyuserservice.proto.UserService",
+        "rpc_method": "CreateWalletProfile",
+        "request_type": "com.gopay.emoneyuserservice.proto.CreateWalletProfileRequest",
+        "response_type": "com.gopay.emoneyuserservice.proto.CreateWalletProfileResponse",
+        "proto_reference": "com.gopay:gopay-wallet-client-proto (see gopay/build.gradle)",
+        "rpc_type": "unary",
+        "expected_status": "OK"
+      },
+      "expected_skill": "gopay-grpc-api-test-writer",
+      "expected_protocol": "grpc",
+      "expected_layers": ["<Svc>ClientConnection", "<Svc>Client", "<domain>Helper", "<X>Assertion"],
+      "forbidden": ["IServiceEndpoint", "RequestHandler", "ManagedChannel", "shutdown()"],
+      "why": "gopay has no endpoint layer; the pool owns the channel."
+    },
+    {
+      "id": "ROUTE-007",
+      "name": "gopay gRPC — negative, propagating StatusRuntimeException",
+      "scenario": {
+        "protocol": "grpc",
+        "module": "gopay",
+        "grpc_service": "com.gopay.emoneyuserservice.proto.UserService",
+        "rpc_method": "GetWalletProfilesByWalletId",
+        "request_type": "com.gopay.emoneyuserservice.proto.GetWalletProfilesRequest",
+        "response_type": "com.gopay.emoneyuserservice.proto.GetWalletProfilesResponse",
+        "proto_reference": "com.gopay:gopay-wallet-client-proto (see gopay/build.gradle)",
+        "rpc_type": "unary",
+        "expected_status": "NOT_FOUND"
+      },
+      "expected_skill": "gopay-grpc-api-test-writer",
+      "expected_protocol": "grpc",
+      "expected_failure_style": "Assert.expectThrows(StatusRuntimeException.class, ...) then assert getStatus().getCode()",
+      "precondition": "Confirm the client PROPAGATES rather than catching GrpcClientException",
+      "why": "Both failure shapes are live in gopay. The client decides which one the test uses."
+    },
+    {
+      "id": "ROUTE-008",
+      "name": "streaming RPC — must not be generated",
+      "scenario": {
+        "protocol": "grpc",
+        "module": "gopay",
+        "grpc_service": "com.gopay.example.SomeService",
+        "rpc_method": "StreamThings",
+        "rpc_type": "server_streaming"
+      },
+      "expected_skill": null,
+      "expected_outcome": "NEEDS_REVIEW",
+      "why": "No live streaming pattern exists in either module. Generating one would invent a convention."
+    },
+    {
+      "id": "ROUTE-009",
+      "name": "mixed plan — REST and gRPC scenarios in one epic",
+      "scenario": {
+        "scenarios": [
+          { "module": "gofood", "http_method": "GET", "path": "/v1/outlets/{id}" },
+          {
+            "protocol": "grpc",
+            "module": "gofood",
+            "grpc_service": "gofood.consumer.v1.OutletService",
+            "rpc_method": "GetOutlet",
+            "rpc_type": "unary"
+          }
+        ]
+      },
+      "expected_skill": ["gofood-api-test-writer", "gofood-grpc-api-test-writer"],
+      "why": "Routing is per scenario, not per plan. A plan may legitimately mix transports."
+    }
+  ]
+}

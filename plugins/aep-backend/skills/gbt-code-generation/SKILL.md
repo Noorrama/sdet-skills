@@ -41,6 +41,17 @@ existing gojek-backend-tests (GBT) repository.
      moment you add a third field — delete the unused constructor rather than
      demoting `@Builder` onto a new one. Full detail in
      `backend-automation/references/extending-an-existing-api.md`.
+3c. TRANSPORT DECIDES THE STACK. A scenario carrying `protocol: "grpc"` (or a
+   `grpc_service`/`rpc_method` pair) is generated against the module's gRPC
+   stack, never the REST one: generated protobuf builders for the request,
+   generated getters for the response, `Metadata.Key.of(..., ASCII_STRING_MARSHALLER)`
+   for headers, the module's existing connection/client object for the call, and
+   `io.grpc.Status` semantics for failures. Absent `protocol` means REST — existing
+   plans are unaffected. Emitting an `IServiceEndpoint`, a `RequestHandler` call, a
+   handwritten DTO in place of a generated proto type, or an HTTP-status assertion
+   for a gRPC scenario is a critical failure. Never modify generated protobuf
+   sources. See `backend-automation/references/grpc-transport-contract.md` and the
+   module's gRPC skill (`gopay-grpc-api-test-writer`, `gofood-grpc-api-test-writer`).
 4. Order of work: component (per-API) first, then integration, then end-to-end.
 5. Implement assertions from each case's expected output. For API/component tests
    ALSO assert: response status, the presence and values of the documented
@@ -125,6 +136,15 @@ RestAssured/raw HTTP directly); every `*Response` POJO MUST `extends
 BaseResponse`. Also expected: each `@Test` carries `@TestInfo`, a `Logger` is
 declared, and no `http(s)` URL/host is hardcoded (resolve via
 ConfigurationReader / `*PropertiesInternal`).
+
+**Those three MUSTs are REST invariants and do not apply to a gRPC scenario.** A
+gRPC endpoint implements the module's `IGrpcServiceEndpoint` (gofood) or has no
+endpoint layer at all (gopay); there is no `RequestHandler`; and responses are
+generated proto types that extend no `BaseResponse`. The gRPC equivalents are:
+generated builders for requests, generated getters for responses, metadata via
+`Metadata.Key.of`, the module's existing channel/connection, and `io.grpc.Status`
+for failures. `@TestInfo` is also not universal on gopay's gRPC surface — match
+the sibling class. The no-hardcoded-host rule holds for both transports.
 
 ## Success criteria
 The generated automation compiles, follows repository conventions, uses existing

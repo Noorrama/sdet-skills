@@ -52,6 +52,16 @@ method-level reuse decision (`gbt-method-decision-maker`), and the placement/pac
    fields, and `gbt-test-code-generator`'s file placement are each that skill's
    responsibility. Your job ends at handing its output to the next stage unmodified, except
    for the two explicit transformations named in rules 4 and 4a.
+3a. **Carry `protocol` and the gRPC transport fields through every stage, unchanged.** When a
+   scenario carries `protocol: "grpc"`, it and its `grpc_service`, `rpc_method`, `request_type`,
+   `response_type`, `proto_reference`, `rpc_type` and `expected_status` must survive each handoff
+   verbatim. Never coerce them into REST fields (`http_method`, `path`, `headers`, `request_dto`,
+   `response_dto`, `http_status`) to satisfy a stage's schema — if a stage rejects because it
+   cannot express a gRPC scenario, that is a reject to surface, not to work around. A scenario
+   with no `protocol` key is REST by definition, so existing plans pass through untouched. When
+   resolving the module skill, resolve it on **(module, transport)**: gRPC scenarios route to
+   `gopay-grpc-api-test-writer` / `gofood-grpc-api-test-writer`, everything else to the REST
+   writer. A single plan may legitimately mix both.
 4. **The `test_data_payloads` merge is one of exactly two artifact transformations you
    perform.** After `test-data-generator` writes `test_data.json`, copy its array verbatim
    into the plan under a new top-level key `test_data_payloads`, then re-write the plan. Do
