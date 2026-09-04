@@ -16,7 +16,7 @@ mobile-qa-skills/
   schemas/                      ← JSON-schema validators for every context/output
     prd_context · design_context · rfc_context · plan_context · change_context · scenario · data_handle
   skills/                       ← 2 user-facing SKILL.md (orchestrators only)
-    mobile-sdet-plan-generator · mobile-postbuild
+    mobile-sdet-plan-generator · mobile-code-gen
   agents/                       ← instruction bodies + Claude Code model pins (sonnet / opus)
     prd-extractor · rfc-extractor · design-extractor · task-extractor
     regression-extractor · setup · sdet-plan-runner
@@ -43,7 +43,7 @@ PRE-BUILD
    ── HUMAN REVIEW GATE (SDET / Feature Lead; CSV edits → SYNC) ──
         ▼
 POST-BUILD
-  /mobile-postbuild              (sequential pipeline)
+  /mobile-code-gen               (sequential pipeline)
     code-change-extractor → change_context.json + compliance.json
     impact-shortlister    → impact_shortlist.json
     test-code-generator   → TAPMIND_NLP → aep-tapmind:nlp-codegen; GMT_JAVA here
@@ -175,10 +175,10 @@ Skills auto-trigger from their description. Two user-facing commands:
 | Command | What it does |
 |---|---|
 | `mobile-sdet-plan-generator` | Setup + parallel extractors + human-gated SDET plan (GENERATE → review → SYNC) |
-| `mobile-postbuild` | Sequential code-change → impact-shortlist → test-code (TDP agent inside) |
+| `mobile-code-gen` | Sequential code-change → impact-shortlist → test-code (TDP agent inside) |
 
 Or naturally in conversation:
 > *"Extract the PRD context for this mobile feature"* → `mobile-sdet-plan-generator` (fires prd-extractor; skips missing inputs; stops if you only asked to extract)
 > *"Generate the SDET plan"* → `mobile-sdet-plan-generator` (extracts first, then GENERATE)
 > *"Run aep-mobile-setup and tell me what is missing"* → `mobile-sdet-plan-generator` (setup-only; stops after the preflight table)
-> *"The build is in — generate the tests"* → `mobile-postbuild`
+> *"The build is in — generate the tests"* → `mobile-code-gen`

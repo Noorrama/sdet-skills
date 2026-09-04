@@ -168,7 +168,7 @@ again, repeat this step (one SYNC call each time). Do **not** re-run Phase A on 
 - Do not spawn `regression-extractor` in Phase A — only `sdet-plan-runner` does.
 - Do not generate the plan JSON / analysis / CSV yourself — that is the runner.
 - Do not put `model:` on this file.
-- Do not call `test-data-provisioner` from this skill — it is a postbuild agent
+- Do not call `test-data-provisioner` from this skill — it is a code-gen agent
   spawned by `test-code-generator` only.
 - Do not skip the analysis.md review before offering SYNC.
 
