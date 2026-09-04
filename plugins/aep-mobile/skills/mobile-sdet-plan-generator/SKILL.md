@@ -1,23 +1,28 @@
 ---
 name: mobile-sdet-plan-generator
-description: Pre-build mobile QA entry point. Runs the aep-mobile dependency preflight, then extracts whichever of PRD / RFC / design / task / regression inputs are present (skipping missing ones) by delegating to extractor subagents, then generates master SDET Plan deliverables in JSON, MD, CSV, and compliance_report formats. Use during implementation planning, when extracting mobile PRD/RFC/design/task/regression context, running aep-mobile-setup, checking aep-mobile dependencies, or asking what is missing after install. MUST run scripts/validate_sdet_deliverables.py (exit 0) before shipping — see workflow.md. Keeps the human review loop in this conversation; delegates GENERATE/SYNC computation to the sdet-plan-runner subagent.
+description: Pre-build mobile QA entry point. Runs the aep-mobile dependency preflight, then extracts whichever of PRD / RFC / design / task inputs are present (skipping missing ones) by delegating to extractor subagents in parallel, then generates master SDET Plan deliverables in JSON, MD, CSV, and compliance_report formats. Regression extraction runs inside sdet-plan-runner after PRD/RFC exist — not in parallel with the other extractors. Use during implementation planning, when extracting mobile PRD/RFC/design/task context, running aep-mobile-setup, checking aep-mobile dependencies, or asking what is missing after install. MUST run scripts/validate_sdet_deliverables.py (exit 0) before shipping — see workflow.md. Keeps the human review loop in this conversation; delegates GENERATE/SYNC computation to the sdet-plan-runner subagent.
 ---
 
 # Mobile SDET Plan Generator (orchestrator)
 
 This skill is the pre-build entry point. It does **not** pin a model — it inherits
-the parent session. It (1) runs setup, (2) calls the context-extractor subagents
-in parallel, then (3) keeps the human-gate loop here and delegates plan
+the parent session. It (1) runs setup, (2) calls the independent context-extractor
+subagents in parallel, then (3) keeps the human-gate loop here and delegates plan
 computation to `agents/sdet-plan-runner.md` (`model: opus`) **once per GENERATE**
 and **once per SYNC**.
 
 There is no separate `mobile-context-extraction` command. Extractors are
-subagents this skill calls.
+subagents this skill (or the runner) calls.
 
 `aep-mobile-setup` is also not a standalone command. The same preflight runs as
 step 0 of every invocation. A setup-only request
 (*"Run aep-mobile-setup and tell me what is missing"*, *"check aep-mobile
 dependencies"*) still works: run step 0, report the table, **stop**.
+
+**Regression is not parallel.** `regression-extractor` needs `app_id` /
+`feature_key` / `module_namespace` from PRD (and RFC `affected_modules` when
+present). It stays inside `sdet-plan-runner` Preflight step 9 — same as before
+this restructure — after those contexts exist and scope is resolved.
 
 Supporting files (read when you need them, not at load):
 
@@ -29,11 +34,11 @@ Supporting files (read when you need them, not at load):
 
 ---
 
-## Phase A — Setup + context extraction
+## Phase A — Setup + independent context extraction
 
 Skip this entire phase on **SYNC** (contexts already exist). On **GENERATE**,
-run it unless every needed `*_context.json` is already on disk **and** the user
-did not ask to re-extract.
+run it unless every needed independent `*_context.json` is already on disk
+**and** the user did not ask to re-extract.
 
 ### 0. Preflight (always on GENERATE / first run)
 
@@ -42,15 +47,18 @@ Spawn the `aep-mobile-setup` subagent (`agents/setup.md`, model: sonnet) and wai
 - Print its summary table in your reply.
 - If the user only asked for setup / missing dependencies: **stop here**.
 - python3 / jsonschema failures do **not** block extractors.
-- BrowserStack MCP failure: still run prd / rfc / design / task; **skip**
-  `regression-extractor` and say so.
+- BrowserStack MCP failure: still run Phase A extractors; note that
+  `sdet-plan-runner` will hard-stop on GENERATE without BrowserStack (it needs
+  `regression-extractor`).
 
-### 1. Detect which of the 5 inputs are present
+### 1. Detect which of the 4 independent inputs are present
 
-Scan the working folder (and any files the user attached). The five extractors
+Scan the working folder (and any files the user attached). These four extractors
 do not depend on each other's output. Fire only those whose input is present;
 skip the rest. If the matching `*_context.json` is already present and the user
 did not ask to re-extract, skip that extractor.
+
+**Do not** spawn `regression-extractor` here.
 
 | Subagent | Input to look for | Skip when |
 |---|---|---|
@@ -58,10 +66,9 @@ did not ask to re-extract, skip that extractor.
 | `rfc-extractor` (`agents/rfc-extractor.md`) | RFC text/file — name or heading contains `rfc` / `RFC` | No RFC exists (documented as optional) |
 | `design-extractor` (`agents/design-extractor.md`) | Figma "Export Design Raw JSON" file (`formatVersion`, large node tree) | No design export is present |
 | `task-extractor` (`agents/task-extractor.md`) | Dev task tree JSON (`schemas/task_input.schema.json`) or a raw JIRA export of the milestone → epic → story → task tree | No task/JIRA input is present |
-| `regression-extractor` (`agents/regression-extractor.md`) | Enough search metadata to query BrowserStack: `app_id` and/or `feature_key` / `module_namespace` from the user, a PRD/RFC, or an existing context file | Metadata cannot be resolved, **or** step 0 reported BrowserStack MCP down |
 
 Report the detection decision before spawning, e.g.
-*"PRD + design present; no RFC; task JSON present. Firing prd, design, task, regression; skipping rfc."*
+*"PRD + design present; no RFC; task JSON present. Firing prd, design, task; skipping rfc. Regression deferred to sdet-plan-runner."*
 
 ### 2. Fire matching extractors in PARALLEL
 
@@ -79,7 +86,7 @@ another extractor's output.
 | rfc-extractor | created / skipped / failed | `rfc_context.json` or `rfc_context.<app_id>.json` |
 | design-extractor | created / skipped / failed | `design_context.json` |
 | task-extractor | created / skipped / failed | `task_context.json` |
-| regression-extractor | created / skipped / failed | `regression_context.json` |
+| regression-extractor | *(not in Phase A — runner)* | `regression_context.json` produced in Phase B |
 
 If the user **only** asked to extract context (not to generate a plan): stop
 after this table. Otherwise continue to Phase B.
@@ -120,10 +127,13 @@ Spawn `sdet-plan-runner` (`agents/sdet-plan-runner.md`) **once** with:
 - `coverage_categories` = auto_selected ∪ optional_extras_selected
 - plugin root + working directory
 
-Wait for it. The runner writes `<feature_key>_SDET_plan.json`,
-`<feature_key>_analysis.md`, `<feature_key>_test_cases.csv`,
-`<feature_key>_compliance_report.json`. It may invoke `regression-extractor`
-internally only if `regression_context.json` is still missing after Phase A.
+Wait for it. The runner:
+
+1. Invokes **`regression-extractor`** (Preflight step 9) using resolved `app` /
+   `module_namespace` (+ RFC `affected_modules` when present) — **before** any
+   scenario is created. That is the only place regression runs on GENERATE.
+2. Writes `<feature_key>_SDET_plan.json`, `<feature_key>_analysis.md`,
+   `<feature_key>_test_cases.csv`, `<feature_key>_compliance_report.json`.
 
 If the runner hard-stops on BrowserStack MCP, quote its message and stop — do not
 invent regression coverage.
@@ -155,6 +165,7 @@ again, repeat this step (one SYNC call each time). Do **not** re-run Phase A on 
 ## What you must not do
 
 - Do not extract contexts yourself — that is the extractor subagents.
+- Do not spawn `regression-extractor` in Phase A — only `sdet-plan-runner` does.
 - Do not generate the plan JSON / analysis / CSV yourself — that is the runner.
 - Do not put `model:` on this file.
 - Do not call `test-data-provisioner` from this skill — it is a postbuild agent
@@ -170,5 +181,5 @@ again, repeat this step (one SYNC call each time). Do **not** re-run Phase A on 
 | `agents/rfc-extractor.md` | sonnet | Phase A, in parallel |
 | `agents/design-extractor.md` | sonnet | Phase A, in parallel |
 | `agents/task-extractor.md` | sonnet | Phase A, in parallel |
-| `agents/regression-extractor.md` | sonnet | Phase A, in parallel |
 | `agents/sdet-plan-runner.md` | opus | Phase B GENERATE / SYNC |
+| `agents/regression-extractor.md` | sonnet | Inside runner (GENERATE Preflight step 9), after PRD/RFC |

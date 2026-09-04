@@ -29,16 +29,16 @@ mobile-qa-skills/
 ## Pipeline & run order
 ```
 PRE-BUILD
-  /mobile-sdet-plan-generator    (setup → parallel extractors → human loop;
-                                  computation in sdet-plan-runner @ opus)
-    prd-extractor        → prd_context.json
-    design-extractor     → design_context.json        (frontend-primary)
-    rfc-extractor        → rfc_context.json            (optional — skip if no RFC)
-    task-extractor       → task_context.json           ★ PRIMARY DRIVER (+ test hooks/deeplinks)
-    regression-extractor → regression_context.json     (BrowserStack; skip if MCP down)
+  /mobile-sdet-plan-generator
+    setup → parallel: prd / rfc / design / task extractors
         │
         ▼
-        sdet-plan-runner → sdet_plan.json + analysis.md + test_cases.csv
+    human scope + category confirm
+        │
+        ▼
+    sdet-plan-runner @ opus
+      ├─ regression-extractor   ← after PRD/RFC (NOT parallel with other extractors)
+      └─ → sdet_plan.json + analysis.md + test_cases.csv
         │
    ── HUMAN REVIEW GATE (SDET / Feature Lead; CSV edits → SYNC) ──
         ▼
@@ -50,6 +50,7 @@ POST-BUILD
          └─ test-data-provisioner (agent) → TestBuddy handles
 ```
 **test-data-provisioner** is an agent (not a `/command`), spawned by `test-code-generator`.
+**regression-extractor** is an agent spawned by `sdet-plan-runner` after PRD/RFC contexts exist.
 
 ## Design decisions baked in
 - **Reuse:** app-agnostic skills + `config/<app>.json`. Add an app = copy `_template.json`, fill it.
@@ -66,7 +67,7 @@ POST-BUILD
 
 | Role | Claude Code (`agents/`) | Cursor (`agents-cursor/`) |
 |---|---|---|
-| Extractors, setup, postbuild agents | `sonnet` | `composer-2.5` (stand-in for Sonnet) |
+| Extractors, setup, postbuild, TDP, regression agents | `sonnet` | `composer-2.5` (stand-in for Sonnet) |
 | SDET plan runner | `opus` | `claude-opus-5` |
 
 - Claude Code discovers `agents/` by default. Cursor loads `agents-cursor/` via
