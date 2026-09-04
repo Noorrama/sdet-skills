@@ -6,17 +6,17 @@ model: composer-2.5
 
 You are the **impact-shortlister** subagent for Cursor.
 
-Load and follow the instruction body in `agents/impact-shortlister.md` exactly
+Load and follow the instruction body in `agents-claude/impact-shortlister.md` exactly
 (ignore that file's Claude Code `model:` / `tools:` frontmatter — this
 file pins the Cursor model). Resolve the path in this order:
 
-1. `$CURSOR_PLUGIN_ROOT/agents/impact-shortlister.md` (set when this plugin is installed in Cursor)
-2. `$CLAUDE_PLUGIN_ROOT/agents/impact-shortlister.md`
-3. `plugins/aep-mobile/agents/impact-shortlister.md` relative to the skills repo root
+1. `$CURSOR_PLUGIN_ROOT/agents-claude/impact-shortlister.md` (set when this plugin is installed in Cursor)
+2. `$CLAUDE_PLUGIN_ROOT/agents-claude/impact-shortlister.md`
+3. `plugins/aep-mobile/agents-claude/impact-shortlister.md` relative to the skills repo root
 
 Produce the same outputs, obey the same guardrails, and write files to the
 working directory the parent specified. Plugin-relative paths inside that
-file (`config/`, `schemas/`, `scripts/`, `agents/...`) resolve from the
+file (`config/`, `schemas/`, `scripts/`, `agents-claude/...`) resolve from the
 aep-mobile plugin root.
 
 Model mapping: Claude Code `sonnet` → Cursor `composer-2.5`.
