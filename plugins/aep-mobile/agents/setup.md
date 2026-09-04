@@ -40,7 +40,7 @@ python3 scripts/validate_sdet_deliverables.py --help
 - **Passes** → print `sdet compliance scripts ✓`
 - **Fails** → ensure `plugins/aep-mobile/scripts/` is on PATH or invoke with full path from plugin root
 
-See `agents-claude/sdet-plan-generator/workflow.md`.
+See `agents/sdet-plan-generator/workflow.md`.
 
 ### 3. BrowserStack MCP Server (required for BrowserStack-backed skills)
 

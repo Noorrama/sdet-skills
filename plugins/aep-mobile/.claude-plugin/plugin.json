@@ -1,18 +1,5 @@
 {
   "name": "aep-mobile",
   "description": "Mobile QA skill set — agentic PDLC pipeline across the 5 GoTo apps",
-  "version": "0.13.0",
-  "agents": [
-    "./agents-claude/setup.md",
-    "./agents-claude/prd-extractor.md",
-    "./agents-claude/rfc-extractor.md",
-    "./agents-claude/design-extractor.md",
-    "./agents-claude/task-extractor.md",
-    "./agents-claude/regression-extractor.md",
-    "./agents-claude/sdet-plan-runner.md",
-    "./agents-claude/code-change-extractor.md",
-    "./agents-claude/impact-shortlister.md",
-    "./agents-claude/test-code-generator.md",
-    "./agents-claude/test-data-provisioner.md"
-  ]
+  "version": "0.14.0"
 }
