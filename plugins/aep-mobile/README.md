@@ -2,7 +2,7 @@
 
 A production skill set for the **frontend / mobile** QA track, reusable across **Gojek Consumer,
 Gojek Driver, GoFood Merchant, GoPay Consumer, GoPay Merchant**. Two entry-point skills;
-extraction/generation/provisioning logic lives in model-pinned `agents/`.
+extraction/generation/provisioning logic lives in model-pinned `agents-claude/` (Claude) / `agents-cursor/` (Cursor).
 **App-agnostic** — each app is a config file, not a fork.
 
 ## Folder layout
@@ -17,12 +17,13 @@ mobile-qa-skills/
     prd_context · design_context · rfc_context · plan_context · change_context · scenario · data_handle
   skills/                       ← 2 user-facing SKILL.md (orchestrators only)
     mobile-sdet-plan-generator · mobile-code-gen
-  agents/                       ← instruction bodies + Claude Code model pins (sonnet / opus)
+  agents-claude/                ← instruction bodies + Claude Code model pins (sonnet / opus)
     prd-extractor · rfc-extractor · design-extractor · task-extractor
     regression-extractor · setup · sdet-plan-runner
     code-change-extractor · impact-shortlister · test-code-generator
     test-data-provisioner       ← spawned by test-code-generator (not a /command)
   agents-cursor/                ← thin Cursor stubs only (same names; pin Cursor model IDs)
+  (no agents-copilot yet — Copilot wiring is a follow-up; see below)
   examples/gojek-consumer-save20/   ← worked example across the whole pipeline
 ```
 
@@ -62,15 +63,15 @@ POST-BUILD
 
 ## Model tiers (per SOP)
 - Orchestrator `SKILL.md` files inherit the parent session — they never pin a model.
-- Edit logic only in `agents/*.md`. `agents-cursor/` is pin-only stubs for Cursor Desktop
-  (same agent names; they load the shared body from `agents/`).
+- Edit logic only in `agents-claude/*.md`. `agents-cursor/` is pin-only stubs for Cursor Desktop
+  (same agent names; they load the shared body from `agents-claude/`).
 
-| Role | Claude Code (`agents/`) | Cursor (`agents-cursor/`) |
+| Role | Claude Code (`agents-claude/`) | Cursor (`agents-cursor/`) |
 |---|---|---|
-| Extractors, setup, postbuild, TDP, regression agents | `sonnet` | `composer-2.5` (stand-in for Sonnet) |
+| Extractors, setup, code-gen, TDP, regression agents | `sonnet` | `composer-2.5` (stand-in for Sonnet) |
 | SDET plan runner | `opus` | `claude-opus-5` |
 
-- Claude Code discovers `agents/` by default. Cursor loads `agents-cursor/` via
+- Claude Code loads `agents-claude/` via `.claude-plugin/plugin.json`. Cursor loads `agents-cursor/` via
   `.cursor-plugin/plugin.json`. Skills stay shared under `skills/`.
 - Escalate fast → reasoning only on ambiguity / repeated failure.
 
@@ -98,7 +99,7 @@ python3 scripts/validate_sdet_deliverables.py \
   --checklist coverage_checklist.json
 ```
 
-See `agents/sdet-plan-generator/workflow.md` and `anti_patterns.md`. JSON schema-only check:
+See `agents-claude/sdet-plan-generator/workflow.md` and `anti_patterns.md`. JSON schema-only check:
 
 ```bash
 python3 -c "import json,jsonschema; jsonschema.validate(
@@ -115,7 +116,7 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 ## Installing the plugin
 
 Each `skills/<name>/SKILL.md` is a loadable skill (folder name = skill id) and becomes a
-user-facing `/command`. Subagents in `agents/` are **not** commands. Schemas and config
+user-facing `/command`. Subagents in `agents-claude/` / `agents-cursor/` are **not** commands. Schemas and config
 are referenced with paths relative to the plugin root (`schemas/`, `config/`, `scripts/`).
 
 ### Claude Code (CLI / Desktop)
@@ -134,7 +135,7 @@ and stops if you only asked for setup.
 1. Install the plugin from the AEP marketplace (same repo as Claude Code), or symlink/copy
    `plugins/aep-mobile/skills/` into your project's `.cursor/skills/` or personal
    `~/.cursor/skills/`. Subagents load from `agents-cursor/` (declared in
-   `.cursor-plugin/plugin.json`); each stub follows the shared body in `agents/`.
+   `.cursor-plugin/plugin.json`); each stub follows the shared body in `agents-claude/`.
 2. **Configure BrowserStack MCP** (required only for `regression-extractor` and SDET-plan upload; the prd/rfc/design/task extractors don't need it) in Cursor Settings → MCP (or `~/.cursor/mcp.json`):
 
    ```json
@@ -157,6 +158,26 @@ and stops if you only asked for setup.
    setup-only path). python3 + jsonschema are needed by every skill; **BrowserStack MCP**
    is needed only by `regression-extractor` and SDET-plan upload, which hard-stop without
    it — the prd/rfc/design/task extractors run fine without it.
+
+### GitHub Copilot (not wired yet)
+
+Copilot plugins share the same *idea* (skills + agents + `plugin.json`) but **not** the same
+agent file shape or model IDs as Claude/Cursor:
+
+| | Claude Code | Cursor | Copilot (future) |
+|---|---|---|---|
+| Manifest | `.claude-plugin/plugin.json` | `.cursor-plugin/plugin.json` | root / Copilot `plugin.json` |
+| Agent files | `agents-claude/*.md` (`model: sonnet\|opus`) | `agents-cursor/*.md` (`model: composer-2.5\|claude-opus-5`) | likely `agents-copilot/*.agent.md` |
+| Logic | **source of truth** in `agents-claude/` | stubs load `agents-claude/` | stubs would load `agents-claude/` the same way |
+
+**Today:** skills under `skills/` can already be used where Copilot discovers `SKILL.md`, but
+there is no Copilot agent tree, no Copilot model pins, and no Copilot marketplace entry for
+`aep-mobile`. Orchestrators that spawn named subagents need Copilot-native agents before the
+full pipeline works there.
+
+**When we add Copilot:** mirror Cursor — add `agents-copilot/` thin stubs (`*.agent.md`) that
+point at `agents-claude/<same-name>.md`, declare them in a Copilot manifest, and map models to
+whatever Copilot exposes (do not put Copilot IDs into `agents-claude/`).
 
 ### Updating
 

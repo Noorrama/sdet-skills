@@ -105,4 +105,4 @@ patch-plan` stays in the script for copies we own; never run it on their plan.
 - **New (non-legacy) scenarios always run** — listed in `new_scenarios_to_run`.
 - **No hallucinated evidence.**
 
-See `examples/pam_feature/IMPACT_SHORTLISTER_REPORT.md` for a worked PAM validation. Join explainer: `agents/impact-shortlister/SHORTLIST_JOIN_EXPLAINER.md`.
+See `examples/pam_feature/IMPACT_SHORTLISTER_REPORT.md` for a worked PAM validation. Join explainer: `agents-claude/impact-shortlister/SHORTLIST_JOIN_EXPLAINER.md`.

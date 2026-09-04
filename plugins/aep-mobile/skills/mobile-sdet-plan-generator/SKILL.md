@@ -8,7 +8,7 @@ description: Pre-build mobile QA entry point. Runs the aep-mobile dependency pre
 This skill is the pre-build entry point. It does **not** pin a model — it inherits
 the parent session. It (1) runs setup, (2) calls the independent context-extractor
 subagents in parallel, then (3) keeps the human-gate loop here and delegates plan
-computation to `agents/sdet-plan-runner.md` (`model: opus`) **once per GENERATE**
+computation to `agents-claude/sdet-plan-runner.md` (`model: opus`) **once per GENERATE**
 and **once per SYNC**.
 
 There is no separate `mobile-context-extraction` command. Extractors are
@@ -26,11 +26,11 @@ this restructure — after those contexts exist and scope is resolved.
 
 Supporting files (read when you need them, not at load):
 
-- `agents/sdet-plan-generator/workflow.md`
-- `agents/sdet-plan-generator/anti_patterns.md`
-- `agents/sdet-plan-generator/category_catalog.md`
-- `agents/sdet-plan-generator/templates/test_cases.csv`
-- `agents/sdet-plan-generator/templates/analysis_skeleton.md`
+- `agents-claude/sdet-plan-generator/workflow.md`
+- `agents-claude/sdet-plan-generator/anti_patterns.md`
+- `agents-claude/sdet-plan-generator/category_catalog.md`
+- `agents-claude/sdet-plan-generator/templates/test_cases.csv`
+- `agents-claude/sdet-plan-generator/templates/analysis_skeleton.md`
 
 ---
 
@@ -42,7 +42,7 @@ run it unless every needed independent `*_context.json` is already on disk
 
 ### 0. Preflight (always on GENERATE / first run)
 
-Spawn the `aep-mobile-setup` subagent (`agents/setup.md`, model: sonnet) and wait.
+Spawn the `aep-mobile-setup` subagent (`agents-claude/setup.md`, model: sonnet) and wait.
 
 - Print its summary table in your reply.
 - If the user only asked for setup / missing dependencies: **stop here**.
@@ -62,10 +62,10 @@ did not ask to re-extract, skip that extractor.
 
 | Subagent | Input to look for | Skip when |
 |---|---|---|
-| `prd-extractor` (`agents/prd-extractor.md`) | PRD text/file — name or heading contains `prd` / `PRD`, or the user pasted a PRD | No PRD is attached or findable |
-| `rfc-extractor` (`agents/rfc-extractor.md`) | RFC text/file — name or heading contains `rfc` / `RFC` | No RFC exists (documented as optional) |
-| `design-extractor` (`agents/design-extractor.md`) | Figma "Export Design Raw JSON" file (`formatVersion`, large node tree) | No design export is present |
-| `task-extractor` (`agents/task-extractor.md`) | Dev task tree JSON (`schemas/task_input.schema.json`) or a raw JIRA export of the milestone → epic → story → task tree | No task/JIRA input is present |
+| `prd-extractor` (`agents-claude/prd-extractor.md`) | PRD text/file — name or heading contains `prd` / `PRD`, or the user pasted a PRD | No PRD is attached or findable |
+| `rfc-extractor` (`agents-claude/rfc-extractor.md`) | RFC text/file — name or heading contains `rfc` / `RFC` | No RFC exists (documented as optional) |
+| `design-extractor` (`agents-claude/design-extractor.md`) | Figma "Export Design Raw JSON" file (`formatVersion`, large node tree) | No design export is present |
+| `task-extractor` (`agents-claude/task-extractor.md`) | Dev task tree JSON (`schemas/task_input.schema.json`) or a raw JIRA export of the milestone → epic → story → task tree | No task/JIRA input is present |
 
 Report the detection decision before spawning, e.g.
 *"PRD + design present; no RFC; task JSON present. Firing prd, design, task; skipping rfc. Regression deferred to sdet-plan-runner."*
@@ -111,7 +111,7 @@ after Phase A, say so and stop — the runner cannot generate a plan from nothin
 
 ### 2. Category confirmation (this conversation)
 
-Read `agents/sdet-plan-generator/category_catalog.md`. From the present contexts,
+Read `agents-claude/sdet-plan-generator/category_catalog.md`. From the present contexts,
 emit the Coverage Matrix (`Category | Tier | Why`) plus the projected-balance line,
 then confirm OPTIONAL EXTRAS via `AskUserQuestion` (multiSelect) per the runner's
 Step 0. Headless → AUTO set only.
@@ -120,7 +120,7 @@ Step 0. Headless → AUTO set only.
 
 ### 3. GENERATE — one call
 
-Spawn `sdet-plan-runner` (`agents/sdet-plan-runner.md`) **once** with:
+Spawn `sdet-plan-runner` (`agents-claude/sdet-plan-runner.md`) **once** with:
 
 - `mode: GENERATE`
 - resolved `app`, `team_name`, `milestone` (when chosen)
@@ -176,10 +176,10 @@ again, repeat this step (one SYNC call each time). Do **not** re-run Phase A on 
 
 | File | Model | When |
 |---|---|---|
-| `agents/setup.md` | sonnet | Phase A step 0 |
-| `agents/prd-extractor.md` | sonnet | Phase A, in parallel |
-| `agents/rfc-extractor.md` | sonnet | Phase A, in parallel |
-| `agents/design-extractor.md` | sonnet | Phase A, in parallel |
-| `agents/task-extractor.md` | sonnet | Phase A, in parallel |
-| `agents/sdet-plan-runner.md` | opus | Phase B GENERATE / SYNC |
-| `agents/regression-extractor.md` | sonnet | Inside runner (GENERATE Preflight step 9), after PRD/RFC |
+| `agents-claude/setup.md` | sonnet | Phase A step 0 |
+| `agents-claude/prd-extractor.md` | sonnet | Phase A, in parallel |
+| `agents-claude/rfc-extractor.md` | sonnet | Phase A, in parallel |
+| `agents-claude/design-extractor.md` | sonnet | Phase A, in parallel |
+| `agents-claude/task-extractor.md` | sonnet | Phase A, in parallel |
+| `agents-claude/sdet-plan-runner.md` | opus | Phase B GENERATE / SYNC |
+| `agents-claude/regression-extractor.md` | sonnet | Inside runner (GENERATE Preflight step 9), after PRD/RFC |

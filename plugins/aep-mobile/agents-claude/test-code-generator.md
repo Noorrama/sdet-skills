@@ -26,7 +26,7 @@ produced where NLP can't express the case.
 - `change_context.json` — **real per-platform locators** (android + ios), API shapes, routes, flags (post-build). **How to interact only.**
 - `design_context.json` — screens/flows for navigation (when present).
 - **Grounding = the GMT coded repo** (page objects, base classes, existing tests) via retrieval — where the real navigation & element knowledge lives; the TapMind repo alone is too thin to ground on.
-- Test data via the **`test-data-provisioner` subagent** (`agents/test-data-provisioner.md`) —
+- Test data via the **`test-data-provisioner` subagent** (`agents-claude/test-data-provisioner.md`) —
   spawn it with the scenario's `test_data[]` fixtures; it returns handles (never raw values):
   - `provision: "lease"` → request an existing entity from TDP's pool.
   - `provision: "construct"` → TDP builds the entity to spec.
@@ -60,7 +60,7 @@ one device pioneer, then writes `tapmind-mobile-tests`); `GMT_JAVA` → coded te
 4. **NLP (primary):** read `scenario_list[].automation_steps[]` from the SDET plan — this is the pre-built interleaved sequence. Wrap each action line with `runStep(...)` and each verify line with `assertStep(...)`. Substitute TapMind helper calls verbatim (`openDeeplink(...)`, `loginToDriver(...)`, `setDriverToggle(...)`). When `automation_steps` is empty (`[]`), defer the scenario with reason `NO_NLP_STEPS`.
 5. **GMT coded (where routed):** Appium+TestNG Java using the bound locators from step 3, real `Assert`, teardown.
 6. **Assertions:** sourced **strictly from `automation_steps[]` verify lines and `sdet_plan.clickstream_events[]`** (`assertions_from: sdet_plan:<scenario_id>`) — never from the diff (Bias Guardrail). Turn `clickstream_events[]` into `analytics_assertions`.
-7. **Test data:** spawn the `test-data-provisioner` subagent (`agents/test-data-provisioner.md`)
+7. **Test data:** spawn the `test-data-provisioner` subagent (`agents-claude/test-data-provisioner.md`)
    with each `test_data[]` fixture (`fixture_id`, `provision`/`dynamic_conditions`/`sensitive`);
    record each returned handle in `data_bindings[]` (`fixture_id`, `status`, `provider`,
    `fixture_ref`, `provision_via`). Never raw values. Never inline TestBuddy calls here.
