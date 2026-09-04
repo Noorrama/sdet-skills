@@ -1,8 +1,8 @@
 # Mobile QA skills — Agentic PDLC (all 5 GoTo apps)
 
 A production skill set for the **frontend / mobile** QA track, reusable across **Gojek Consumer,
-Gojek Driver, GoFood Merchant, GoPay Consumer, GoPay Merchant**. Two entry-point skills plus one
-shared test-data skill; extraction/generation logic lives in model-pinned `agents/`.
+Gojek Driver, GoFood Merchant, GoPay Consumer, GoPay Merchant**. Two entry-point skills;
+extraction/generation/provisioning logic lives in model-pinned `agents/`.
 **App-agnostic** — each app is a config file, not a fork.
 
 ## Folder layout
@@ -15,12 +15,13 @@ mobile-qa-skills/
     _template.json              ← copy per app (driver, gofood-merchant, gopay-consumer, gopay-merchant)
   schemas/                      ← JSON-schema validators for every context/output
     prd_context · design_context · rfc_context · plan_context · change_context · scenario · data_handle
-  skills/                       ← 3 user-facing SKILL.md (2 orchestrators + shared TDP)
-    mobile-sdet-plan-generator · mobile-postbuild · test-data-provisioner
+  skills/                       ← 2 user-facing SKILL.md (orchestrators only)
+    mobile-sdet-plan-generator · mobile-postbuild
   agents/                       ← instruction bodies + Claude Code model pins (sonnet / opus)
     prd-extractor · rfc-extractor · design-extractor · task-extractor
     regression-extractor · setup · sdet-plan-runner
     code-change-extractor · impact-shortlister · test-code-generator
+    test-data-provisioner       ← spawned by test-code-generator (not a /command)
   agents-cursor/                ← thin Cursor stubs only (same names; pin Cursor model IDs)
   examples/gojek-consumer-save20/   ← worked example across the whole pipeline
 ```
@@ -45,11 +46,10 @@ POST-BUILD
   /mobile-postbuild              (sequential pipeline)
     code-change-extractor → change_context.json + compliance.json
     impact-shortlister    → impact_shortlist.json
-    test-code-generator   → TAPMIND_NLP → aep-tapmind:nlp-codegen;
-                            GMT_JAVA here; data via /mobile-test-data-provisioner
+    test-code-generator   → TAPMIND_NLP → aep-tapmind:nlp-codegen; GMT_JAVA here
+         └─ test-data-provisioner (agent) → TestBuddy handles
 ```
-Shared at both stages: **test-data-provisioner** (TestBuddy → GBT fallback → synthetic) —
-still its own command, not folded into post-build.
+**test-data-provisioner** is an agent (not a `/command`), spawned by `test-code-generator`.
 
 ## Design decisions baked in
 - **Reuse:** app-agnostic skills + `config/<app>.json`. Add an app = copy `_template.json`, fill it.
@@ -74,10 +74,11 @@ still its own command, not folded into post-build.
 - Escalate fast → reasoning only on ambiguity / repeated failure.
 
 ## Test data (TestBuddy)
-`test-data-provisioner` calls the **TestBuddy MCP** as the source of truth — e.g. `CustomerAgent`
-(GoPay balance/recharge, segments, saved address, token), `VoucherAgent` (SAVE20), `BookingAgent`,
-`DriverAgent`, `PaymentAgent` (dynamic QR). GBT builder fallback for states TestBuddy lacks;
-synthetic for sensitive (KYC/PII). Always returns handles, never raw values; secrets from vault.
+The `test-data-provisioner` **agent** calls the **TestBuddy MCP** as the source of truth — e.g.
+`CustomerAgent` (GoPay balance/recharge, segments, saved address, token), `VoucherAgent` (SAVE20),
+`BookingAgent`, `DriverAgent`, `PaymentAgent` (dynamic QR). GBT builder fallback for states
+TestBuddy lacks; synthetic for sensitive (KYC/PII). Always returns handles, never raw values;
+secrets from vault. Invoked by `test-code-generator`, not as a user command.
 
 ## Validation
 
@@ -168,13 +169,12 @@ Then restart your editor. In Cursor, reinstall or refresh the plugin if skills d
 
 ### Using the skills
 
-Skills auto-trigger from their description. Three user-facing commands:
+Skills auto-trigger from their description. Two user-facing commands:
 
 | Command | What it does |
 |---|---|
 | `mobile-sdet-plan-generator` | Setup + parallel extractors + human-gated SDET plan (GENERATE → review → SYNC) |
-| `mobile-postbuild` | Sequential code-change → impact-shortlist → test-code |
-| `mobile-test-data-provisioner` | Shared TestBuddy provisioner (not folded into post-build) |
+| `mobile-postbuild` | Sequential code-change → impact-shortlist → test-code (TDP agent inside) |
 
 Or naturally in conversation:
 > *"Extract the PRD context for this mobile feature"* → `mobile-sdet-plan-generator` (fires prd-extractor; skips missing inputs; stops if you only asked to extract)

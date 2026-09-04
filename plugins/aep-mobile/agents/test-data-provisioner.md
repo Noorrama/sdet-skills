@@ -1,11 +1,17 @@
 ---
-name: mobile-test-data-provisioner
-description: The one shared skill. Resolves each scenario's data_needs into a data handle via the TestBuddy MCP (CustomerAgent/VoucherAgent/BookingAgent/DriverAgent/PaymentAgent), with a GBT builder fallback and synthetic generation for sensitive data. App-agnostic; used at both scenario time (validate availability) and code-gen time (provision). Returns handles, never raw values.
+name: test-data-provisioner
+description: Resolves each scenario's data_needs into a data handle via the TestBuddy MCP (CustomerAgent/VoucherAgent/BookingAgent/DriverAgent/PaymentAgent), with a GBT builder fallback and synthetic generation for sensitive data. App-agnostic; used at both scenario time (validate availability) and code-gen time (provision). Returns handles, never raw values. Invoked by test-code-generator; not a user-facing command.
+model: sonnet
 ---
+
+You are invoked by `test-code-generator` (and optionally at scenario-validation
+time). Do not wait on the QA. Resolve each requested fixture to a handle and return
+them — never raw credentials/PII.
+
 
 # Mobile Test-Data Provisioner (shared, all 5 GoTo apps)
 
-The single separate shared skill. It turns a scenario's `data_needs` into runnable test data by
+You are the **test-data-provisioner** subagent. You turn a scenario's `data_needs` into runnable test data by
 calling **TestBuddy** (the ground-truth provisioner), falling back to GBT builders, and generating
 synthetic data for sensitive states.
 
@@ -14,9 +20,6 @@ synthetic data for sensitive states.
 
 ## Reads
 A scenario's `data_needs` (from `scenario.schema.json`): `entity`, `state`, `provision`, `sensitive`, `testbuddy_hint`.
-
-## Model
-Fast tier — Haiku / Composer 2.5 (parse intent → tool calls). Most work is deterministic MCP calls.
 
 ## Resolve (in order) → data_handle.schema.json
 1. Parse `data_needs` into a spec.

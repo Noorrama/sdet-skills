@@ -157,7 +157,8 @@ again, repeat this step (one SYNC call each time). Do **not** re-run Phase A on 
 - Do not extract contexts yourself — that is the extractor subagents.
 - Do not generate the plan JSON / analysis / CSV yourself — that is the runner.
 - Do not put `model:` on this file.
-- Do not fold `test-data-provisioner` into this skill.
+- Do not call `test-data-provisioner` from this skill — it is a postbuild agent
+  spawned by `test-code-generator` only.
 - Do not skip the analysis.md review before offering SYNC.
 
 ## Subagent map

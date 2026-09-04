@@ -9,9 +9,9 @@ This skill is the post-build entry point. It does **not** pin a model — it inh
 the parent session. The three stages are a **pipeline**, not parallel: each step
 needs the prior step's output. Call the subagents **sequentially**.
 
-`test-data-provisioner` stays a **standalone skill**. The test-code-generator
-subagent already calls it for fixture handles — do not fold it in, and do not
-reimplement provisioning here.
+`test-data-provisioner` is **not** a user-facing command. `test-code-generator`
+spawns it as a subagent when it needs fixture handles — do not call it from this
+orchestrator, and do not reimplement provisioning here.
 
 ## Preconditions
 
@@ -55,9 +55,8 @@ Only after step 2. Pass the approved SDET plan, `change_context.json`,
 working directory.
 
 The subagent generates TapMind NLP (via `aep-tapmind:nlp-codegen`) and/or GMT
-coded tests, and resolves `test_data[]` through the **`mobile-test-data-provisioner`**
-skill — that skill remains a separate entry point. Do not inline TestBuddy calls
-here.
+coded tests. When scenarios need fixtures, **it** spawns `test-data-provisioner`
+(`agents/test-data-provisioner.md`) — not this orchestrator.
 
 Expected output: `test-code-generator.json` plus the test files it records.
 
@@ -73,8 +72,9 @@ After the pipeline (or after a hard stop), list:
 
 ## Subagent map
 
-| File | Model | Was |
+| File | Model | Notes |
 |---|---|---|
-| `agents/code-change-extractor.md` | sonnet | `skills/code-change-extractor` |
-| `agents/impact-shortlister.md` | sonnet | `skills/impact-shortlister` |
-| `agents/test-code-generator.md` | sonnet | `skills/test-code-generator` |
+| `agents/code-change-extractor.md` | sonnet | step 1 |
+| `agents/impact-shortlister.md` | sonnet | step 2 |
+| `agents/test-code-generator.md` | sonnet | step 3 |
+| `agents/test-data-provisioner.md` | sonnet | spawned by test-code-generator, not by this skill |
