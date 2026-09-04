@@ -1,6 +1,7 @@
 ---
 name: aep-mobile-setup
 description: Preflight check for aep-mobile plugin dependencies — validates Python/jsonschema, BrowserStack MCP connectivity (required only for BrowserStack-backed skills), and prints actionable setup steps for anything missing. Run after installing the plugin or when any aep-mobile skill reports a missing dependency.
+model: sonnet
 ---
 
 # AEP Mobile — Setup & Preflight Check
@@ -39,7 +40,7 @@ python3 scripts/validate_sdet_deliverables.py --help
 - **Passes** → print `sdet compliance scripts ✓`
 - **Fails** → ensure `plugins/aep-mobile/scripts/` is on PATH or invoke with full path from plugin root
 
-See `skills/sdet-plan-generator/workflow.md`.
+See `agents/sdet-plan-generator/workflow.md`.
 
 ### 3. BrowserStack MCP Server (required for BrowserStack-backed skills)
 
@@ -100,7 +101,7 @@ Setup steps:
 
 3. Restart your editor (Cursor or Claude Code).
 
-4. Run the aep-mobile-setup skill again to verify.
+4. Re-run mobile-sdet-plan-generator (setup-only) to verify.
 ```
 
 Do NOT attempt to edit the user's config files or install the MCP server
@@ -121,6 +122,6 @@ BrowserStack MCP        ✓ / ✗  (needed for regression / SDET upload)
 
 If everything passes: `All dependencies satisfied. You're ready to use aep-mobile skills.`
 
-If BrowserStack MCP fails: `BrowserStack MCP is needed only for regression-extractor and SDET-plan upload. If you're only running the prd/rfc/design/task extractors you can ignore this; otherwise fix the ✗ above and re-run aep-mobile-setup.`
+If BrowserStack MCP fails: `BrowserStack MCP is needed only for regression-extractor and SDET-plan upload. If you're only running the prd/rfc/design/task extractors you can ignore this; otherwise fix the ✗ above and re-run mobile-sdet-plan-generator (setup-only).`
 
-If only python/jsonschema fails: `Fix the items marked ✗ above, then run the aep-mobile-setup skill again.`
+If only python/jsonschema fails: `Fix the items marked ✗ above, then re-run mobile-sdet-plan-generator (setup-only).`

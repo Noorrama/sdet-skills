@@ -1,6 +1,7 @@
 ---
-name: mobile-test-code-generator
+name: test-code-generator
 description: The Code-Generation-phase QA output. From the approved SDET_PLAN + post-build change_context, generates mobile automation — TapMind NLP steps (primary) and GMT (Appium+TestNG Java) coded tests (where needed) — for both Android & iOS, wired to test data, and emits test-code-generator.json (the traceable ledger with BrowserStack IDs, validation, and deferred scenarios). App-agnostic; grounds on the GMT coded repo. In Phase B this becomes the self-healing Frontend Test-Code-Gen agent.
+model: sonnet
 ---
 
 # Mobile Test-Code Generator (all 5 GoTo apps)
@@ -25,12 +26,14 @@ produced where NLP can't express the case.
 - `change_context.json` — **real per-platform locators** (android + ios), API shapes, routes, flags (post-build). **How to interact only.**
 - `design_context.json` — screens/flows for navigation (when present).
 - **Grounding = the GMT coded repo** (page objects, base classes, existing tests) via retrieval — where the real navigation & element knowledge lives; the TapMind repo alone is too thin to ground on.
-- Test data via the **test-data-provisioner** (resolves each `test_data[]` fixture → handle):
+- Test data via the **`test-data-provisioner` subagent** (`agents/test-data-provisioner.md`) —
+  spawn it with the scenario's `test_data[]` fixtures; it returns handles (never raw values):
   - `provision: "lease"` → request an existing entity from TDP's pool.
   - `provision: "construct"` → TDP builds the entity to spec.
   - `provision: "synthetic"` → always synthetic; mandatory when `sensitive: true` (KYC/PII/card state).
   - `provision: "override"` → inject a state override on top of a leased entity.
   - `dynamic_conditions[]` (TEMPORAL/RELATIONAL/SELECTION) → pass as selection constraints to TDP; these cannot be expressed as static `required_state` predicates.
+  Do **not** call TestBuddy MCP yourself — always delegate to `test-data-provisioner`.
 
 ## Model
 Fast tier — **Composer 2.5** default; Sonnet for complex flows; escalate to Opus only on repeated failure.
@@ -57,7 +60,10 @@ one device pioneer, then writes `tapmind-mobile-tests`); `GMT_JAVA` → coded te
 4. **NLP (primary):** read `scenario_list[].automation_steps[]` from the SDET plan — this is the pre-built interleaved sequence. Wrap each action line with `runStep(...)` and each verify line with `assertStep(...)`. Substitute TapMind helper calls verbatim (`openDeeplink(...)`, `loginToDriver(...)`, `setDriverToggle(...)`). When `automation_steps` is empty (`[]`), defer the scenario with reason `NO_NLP_STEPS`.
 5. **GMT coded (where routed):** Appium+TestNG Java using the bound locators from step 3, real `Assert`, teardown.
 6. **Assertions:** sourced **strictly from `automation_steps[]` verify lines and `sdet_plan.clickstream_events[]`** (`assertions_from: sdet_plan:<scenario_id>`) — never from the diff (Bias Guardrail). Turn `clickstream_events[]` into `analytics_assertions`.
-7. **Test data:** pass each `test_data[]` fixture (by `fixture_id`) to TDP with `provision`/`dynamic_conditions`/`sensitive` signals; record each resolved handle as an entry in `data_bindings[]` (`fixture_id`, `status`, `provider`, `fixture_ref`, `provision_via`). Never raw values.
+7. **Test data:** spawn the `test-data-provisioner` subagent (`agents/test-data-provisioner.md`)
+   with each `test_data[]` fixture (`fixture_id`, `provision`/`dynamic_conditions`/`sensitive`);
+   record each returned handle in `data_bindings[]` (`fixture_id`, `status`, `provider`,
+   `fixture_ref`, `provision_via`). Never raw values. Never inline TestBuddy calls here.
 8. **Traceability:** stamp with `@TestInfo(suiteId, testCaseId)`. ID chain: `requirement_ref → browserstack_case_id` (from scenario) → `browserstack_suite_id`. **If `browserstack_case_id` already exists on the scenario (stamped during SDET plan SYNC), use it directly — do NOT create a new BS case.** Only create a new BS case when the field is absent.
 9. **Waits/teardown:** dynamic waits only (static sleeps banned); teardown block mandatory.
 10. **Dedup/update:** if a flow changed (from `change_context` + `regression_context`), **UPDATE** the existing test in place (`op: UPDATE`); only genuinely new scenarios `CREATE`; already-covered legacy → `SKIP`.

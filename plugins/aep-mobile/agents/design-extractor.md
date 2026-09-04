@@ -1,6 +1,8 @@
 ---
 name: design-extractor
 description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, logical element IDs, interactions, states, ui_flow, and project-level ambiguity tracking. Input is a JSON export from the "Export Design Raw JSON" Figma plugin. The concrete extraction pipeline is intentionally not specified here; this skill defines the contract, principles, and output shape that any implementation must satisfy.
+model: sonnet
+tools: Read, Write, Bash, Grep, Glob
 ---
 
 # Mobile Design Extractor
@@ -9,7 +11,7 @@ This skill is the frontend-primary stage of the AEP mobile pipeline. It produces
 
 ## Golden input
 
-The current POC reference export is `golden/inputs/GoFood-Group-Order-Bundling-Items.json` (Figma selection export, `formatVersion: 2`, 3 540 nodes). Its schema and observed conventions are memoised in `INPUT_SCHEMA.md`. Any new extraction implementation must be validated against this golden input before it replaces the previous pipeline.
+The current POC reference export is `agents/design-extractor/golden/inputs/GoFood-Group-Order-Bundling-Items.json` (Figma selection export, `formatVersion: 2`, 3 540 nodes). Its schema and observed conventions are memoised in `agents/design-extractor/INPUT_SCHEMA.md`. Any new extraction implementation must be validated against this golden input before it replaces the previous pipeline.
 
 ## Output contract
 
@@ -42,7 +44,7 @@ One `design_context.json` per app in scope. The file must validate against the p
 
 ## Pipeline scripts
 
-Five Python scripts implement the extraction pipeline. Run them from the skill directory.
+Five Python scripts implement the extraction pipeline. Run them from the `agents/design-extractor/` directory (sibling of this file).
 
 ### Full fresh run (`run_design_extractor.py`)
 
@@ -157,7 +159,7 @@ Reads `design_context.temp.json`, `screen_collapse_map.json` (when present), and
 
 ### Mandatory output artefacts (workdir convention)
 
-All run outputs go to a workdir, never into the skill directory itself. **After `run_design_extractor.py` completes, every path below must exist.**
+All run outputs go to a workdir, never into the `agents/design-extractor/` directory itself. **After `run_design_extractor.py` completes, every path below must exist.**
 
 ```
 golden/outputs/<stem>/
@@ -208,7 +210,7 @@ assert inv['summary']['elements_without_screen'] == 0
 
 ## Rules
 
-- One write per output file. Keep intermediates in a work directory; never commit run outputs into the skill directory.
+- One write per output file. Keep intermediates in a work directory; never commit run outputs into the `agents/design-extractor/` directory.
 - Blocking issues must be phrased so a PM can answer them and must name the Figma node id involved.
 - Never edit the final `design_context.json` by hand.
 - **Fresh runs only:** use `run_design_extractor.py`. It deletes all known workdir artefacts before Step 1. Never reuse `_pre-process.json`, `design_context.temp.json`, `id_refinement_map.json`, `design_context.json`, or `element_id_quality.json` from a prior run.

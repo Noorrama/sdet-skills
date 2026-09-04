@@ -1,6 +1,6 @@
 # Golden input schema memo
 
-This document memoises the schema of the main golden input for the `mobile-design-extractor` skill:
+This document memoises the schema of the main golden input for the `design-extractor` subagent:
 `golden_input.json` (exported from Figma via the "Export Design Raw JSON" plugin, page scope).
 
 Capture date: 2026-08-24
