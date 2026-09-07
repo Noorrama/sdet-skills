@@ -1,7 +1,7 @@
 {
   "name": "aep-mobile",
   "description": "Mobile QA skill set — agentic PDLC pipeline across the 5 GoTo apps",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "skills": "./skills/",
   "agents": "./cursor-agent-stubs/",
   "hooks": "./hooks/hooks-cursor.json"
