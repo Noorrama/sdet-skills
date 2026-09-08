@@ -22,6 +22,9 @@ description: >-
 
 # RFC Extractor (Phase A — RFC → QA)
 
+## Model
+Sonnet
+
 ## What this skill does
 
 Reads a single engineering RFC (technical design doc — Confluence/Lark/Markdown) and converts it into a structured, QA-ready JSON artifact (`rfc_context.json`), plus a short technical gaps/drift summary in chat. It's a Phase A extractor in the Backend Testing Agentic pipeline — its output feeds `sdet-plan-generator` alongside `prd_context.json`, `tasks_context.json`, and `regression_context.json`.
@@ -141,6 +144,16 @@ or asks to re-review — run phase-a-provenance first, then this extractor into 
     b. Run the self-check, then run `scripts/validate_rfc_context.py` and **fix every mechanical error it reports before writing** (see "Validate" — schema/enum/xref/numbering/ordering/contracts errors block; groundedness gaps don't).
     c. Stamp `provenance` per `phase-a-provenance`. Emit JSON only into `qa-artifacts/{epic}/run-YYYY-MM-DD[…]/rfc_context.json` (dated runs; `adhoc` only for scratch) once the validator prints `OK`. Do not overwrite a prior run unless asked.
     d. **Read the written file back** and build the chat readout *from the file's actual contents* — never from your working memory of what you intended to extract (see "What to say to the user"). If a re-extract, produce the context diff in chat.
+
+
+## Output versioning
+
+Before writing any output file, read and follow `common/versioning/SKILL.md`.
+
+- Resolve version from the source document; fall back to numbered `v1`, `v2`, …
+- Write `rfc_context_v{N}.json` and update the current pointer `rfc_context.json` in the same output directory.
+- Never overwrite a prior versioned file.
+- Stamp `artifact_version` and `version_lineage` on the output JSON per the shared convention.
 
 ## Reject / flag
 

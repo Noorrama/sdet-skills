@@ -18,7 +18,7 @@ Convert Task Breakdown documents into a schema-compliant `tasks_context.json`. `
 | `[Service]_CONTEXT.md` | Service-specific context from codebase scan |
 
 ## Model
-Fast tier — Haiku
+Sonnet
 
 ## Typed task templates to recognise
 
@@ -39,6 +39,16 @@ Fast tier — Haiku
 | Component boundaries | Which validations live at controller / service / repository / DB layer → maps to test layer |
 | Story → Task hierarchy | Link each task to parent story and epic for traceability |
 | Implementation constraints | DB state, upstream service state, config values required before a test can run |
+
+
+## Output versioning
+
+Before writing any output file, read and follow `common/versioning/SKILL.md`.
+
+- Resolve version from the source document; fall back to numbered `v1`, `v2`, …
+- Write `tasks_context_v{N}.json` and update the current pointer `tasks_context.json` in the same output directory.
+- Never overwrite a prior versioned file.
+- Stamp `artifact_version` and `version_lineage` on the output JSON per the shared convention.
 
 ## Output → tasks_context.json
 

@@ -17,7 +17,7 @@ Bridge between *what to test* (SDET plan) and *how to implement it* (test code +
 | `regression_context.json` (the resolver's `scope.json`) | Existing class naming patterns for consistency, and `resolvedServices[].testGroups` / `.testClasses` for the `regression_selection` block. Class-level only — it cannot locate a method, so `existing_test_ref` must come from the SDET plan, never be derived here. |
 
 ## Model
-Fast tier — Haiku
+Sonnet
 
 ## Approval gate — check before reading anything else
 
