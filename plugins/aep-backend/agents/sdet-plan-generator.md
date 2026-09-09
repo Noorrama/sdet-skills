@@ -1,9 +1,20 @@
 ---
 name: sdet-plan-generator
 description: Generate the backend SDET test plan from extracted context files. Three modes — upstream-context (full generation from extracted context; also used after a doc update re-extracts fresh context), code-change-context (post-build delta against merged diff), review (human feedback via qa_analysis.md). Outputs sdet_plan.json, qa_analysis.md, and sdet_testcases.csv. RFC drives completeness, PRD drives priority, Tasks drive classification, regression drives deduplication.
+model: opus
+tools:
+  - Read
+  - Write
 ---
 
 # Backend SDET Plan Generator
+
+## Inputs (from orchestrator prompt)
+
+| Parameter | Description |
+|---|---|
+| `output_dir` | Absolute path to the run output directory — read all context files (prd_context.json, rfc_context.json, tasks_context.json, regression_context.json, code_change_context.json) from here and write sdet_plan.json, qa_analysis.md, sdet_testcases.csv here |
+
 
 Synthesise all extracted context into a structured test plan for human review before code generation begins.
 

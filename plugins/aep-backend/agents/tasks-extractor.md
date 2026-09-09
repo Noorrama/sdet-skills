@@ -1,9 +1,22 @@
 ---
 name: backend-tasks-extractor
 description: Extract implementation details from Task Breakdown MDs (TASKS.md, STORIES.md, FEATURE_SPECIFICATION.md, SYSTEM_ARCHITECTURE.md, [Service]_CONTEXT.md) into tasks_context.json. Authoritative source for API contracts after codebase reconciliation.
+model: sonnet
+tools:
+  - Read
+  - Write
+  - Bash
 ---
 
 # Backend Tasks Extractor
+
+## Inputs (from orchestrator prompt)
+
+| Parameter | Description |
+|---|---|
+| `source_dir` | Absolute path to the directory containing task breakdown files (TASKS.md, STORIES.md, etc.) |
+| `output_dir` | Absolute path to the run output directory — write all output files here |
+
 
 Convert Task Breakdown documents into a schema-compliant `tasks_context.json`. `tasks_context.json` is the **authoritative source for API contracts** — it reflects actual codebase state after Local Codebase Scanner reconciliation. RFC captures design intent; Tasks win on contract details when they conflict.
 
