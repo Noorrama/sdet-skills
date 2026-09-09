@@ -157,8 +157,8 @@ A file that exists but fails JSON parse is treated as absent.
 
 Runs only when `regression_context.json` is absent. Check in order:
 
-1. Regression source file present in source docs dir (Step U2 matched it) → run `regression-extractor`.
-2. BrowserStack MCP reachable → run `regression-extractor`.
+1. Regression source file present in source docs dir (Step U2 matched it) → spawn the `regression-extractor` agent.
+2. BrowserStack MCP reachable → spawn the `regression-extractor` agent.
 3. Neither → ask:
 
 ```
@@ -179,14 +179,14 @@ Record the answer in `orchestrator_run_log.json` under `regression_context_gate.
 
 ### Step U5 — Run Phase A extractors
 
-Run only missing extractors, in this fixed order:
+Spawn only missing extractor agents, in this fixed order:
 
-| # | Skill | Source | Output |
+| # | Agent | Prompt params | Output |
 |---|---|---|---|
-| 1 | `prd-extractor` | PRD file | `prd_context_v{N}.json` + `prd_context.json` |
-| 2 | `rfc-extractor` | RFC file + `prd_context.json` (for drift) | `rfc_context_v{N}.json` + `rfc_context.json` |
-| 3 | `tasks-extractor` | Tasks file | `tasks_context_v{N}.json` + `tasks_context.json` |
-| 4 | `regression-extractor` | Source file or BrowserStack MCP | `regression_context_v{N}.json` + `regression_context.json` |
+| 1 | `prd-extractor` | `source_file=<PRD path> output_dir=<dir>` | `prd_context_v{N}.json` + `prd_context.json` |
+| 2 | `rfc-extractor` | `source_file=<RFC path> output_dir=<dir> prd_context_path=<dir>/prd_context.json` | `rfc_context_v{N}.json` + `rfc_context.json` |
+| 3 | `tasks-extractor` | `source_dir=<tasks dir> output_dir=<dir>` | `tasks_context_v{N}.json` + `tasks_context.json` |
+| 4 | `regression-extractor` | `source_file=<file or omit> output_dir=<dir>` | `regression_context_v{N}.json` + `regression_context.json` |
 
 On **REJECT**: write to `orchestrator_run_log.json`, stop, surface:
 ```
@@ -213,8 +213,12 @@ Fast gate before the Opus generation pass:
 
 ### Step U7 — Invoke `sdet-plan-generator` (upstream-context)
 
-Load and execute `sdet-plan-generator`. It detects `upstream-context` mode (no `sdet_plan.json`)
-and runs full scenario generation. Do not modify any context file before handing off.
+Spawn the `sdet-plan-generator` agent with prompt:
+```
+output_dir=<run output directory>
+```
+It detects `upstream-context` mode (no `sdet_plan.json`) and runs full scenario generation.
+Do not pass or modify any context file — the agent reads all inputs directly from `output_dir`.
 
 ---
 
@@ -266,14 +270,17 @@ Provide one of:
 Which do you have?
 ```
 
-Once the source is confirmed, invoke `code-change-extractor` to produce
-`code_change_context_v{N}.json` + `code_change_context.json`.
+Once the source is confirmed, spawn the `code-change-extractor` agent with prompt:
+```
+source=<diff file path | pasted diff | MR URLs>
+output_dir=<run output directory>
+```
+It produces `code_change_context_v{N}.json` + `code_change_context.json`. It extracts:
+new/changed endpoints, validation rules, error mappings, DB changes, feature flags, proto
+changes — filtering out logging, formatting, and unit test changes. Do not re-implement
+that logic here.
 
-`code-change-extractor` extracts: new/changed endpoints, validation rules, error mappings,
-DB changes, feature flags, proto changes. It filters out logging, formatting, and unit test
-changes. Do not re-implement that logic here.
-
-**On extractor REJECT:** stop and surface the reject. Do not invoke `sdet-plan-generator`.
+**On agent REJECT:** stop and surface the reject. Do not spawn `sdet-plan-generator`.
 
 ---
 
@@ -289,8 +296,12 @@ changes. Do not re-implement that logic here.
 
 ### Step C4 — Invoke `sdet-plan-generator` (code-change-context)
 
-Load and execute `sdet-plan-generator`. It detects code-change-context mode from the presence
-of `sdet_plan.json` + `code_change_context.json` and generates only delta scenarios.
+Spawn the `sdet-plan-generator` agent with prompt:
+```
+output_dir=<run output directory>
+```
+It detects code-change-context mode from the presence of `sdet_plan.json` +
+`code_change_context.json` and generates only delta scenarios.
 
 Outputs: updated `sdet_plan_v{N}.json` (delta scenarios appended) + `sdet_plan.json`.
 
@@ -345,13 +356,13 @@ Run output directory: same directory as the existing `sdet_plan.json` unless ove
 
 ### Step D2 — Re-run the stale extractor(s)
 
-Run only the extractor(s) for the updated doc(s). **Force re-run even if the context file is
-present** — the doc changed, so the existing file is stale.
+Spawn only the extractor agent(s) for the updated doc(s). **Force re-run even if the context
+file is present** — the doc changed, so the existing file is stale.
 
-| Updated doc | Extractor | Output |
-|---|---|---|
-| PRD | `prd-extractor` | `prd_context_v{N}.json` + `prd_context.json` (new version) |
-| RFC | `rfc-extractor` (pass `prd_context.json` for drift check) | `rfc_context_v{N}.json` + `rfc_context.json` (new version) |
+| Updated doc | Agent | Prompt params | Output |
+|---|---|---|---|
+| PRD | `prd-extractor` | `source_file=<new PRD path> output_dir=<dir>` | `prd_context_v{N}.json` + `prd_context.json` (new version) |
+| RFC | `rfc-extractor` | `source_file=<new RFC path> output_dir=<dir> prd_context_path=<dir>/prd_context.json` | `rfc_context_v{N}.json` + `rfc_context.json` (new version) |
 
 The extractor writes a new versioned file alongside the old one — the prior version is
 preserved. The current pointer (`prd_context.json` / `rfc_context.json`) is updated to point
@@ -371,9 +382,13 @@ Proceeding to full plan regeneration…
 
 ### Step D3 — Invoke `sdet-plan-generator` (upstream-context)
 
-Load and execute `sdet-plan-generator`. With the fresh context files in place and no
-`code_change_context.json`, it detects `upstream-context` mode and regenerates the full
-scenario set. The prior `sdet_plan.json` is superseded — a new versioned file is written.
+Spawn the `sdet-plan-generator` agent with prompt:
+```
+output_dir=<run output directory>
+```
+With the fresh context files in place and no `code_change_context.json`, it detects
+`upstream-context` mode and regenerates the full scenario set. The prior `sdet_plan.json`
+is superseded — a new versioned file is written.
 
 Outputs: `sdet_plan_v{N}.json` (full regeneration) + `sdet_plan.json`.
 
@@ -400,9 +415,11 @@ Runs when: `sdet_plan.json` + `qa_analysis.md` with `### Feedback` content are b
 
 ### Step R — Invoke `sdet-plan-generator` (review)
 
-No extractors run. No code-change-extractor or doc-change-extractor runs. Load and execute
-`sdet-plan-generator` directly — it reads `qa_analysis.md` feedback and patches `sdet_plan.json`
-accordingly.
+No extractor agents run. Spawn the `sdet-plan-generator` agent with prompt:
+```
+output_dir=<run output directory>
+```
+It reads `qa_analysis.md` feedback and patches `sdet_plan.json` accordingly.
 
 Outputs: updated `sdet_plan_v{N}.json` + `sdet_plan.json`.
 

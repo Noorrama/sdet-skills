@@ -1,9 +1,22 @@
 ---
 name: backend-prd-extractor
 description: Extract product intent from a backend PRD into prd_context.json, from a QA/test-design perspective. Reads the PRD end-to-end — body AND review comment thread — and maps requirements (business + product), GIVEN/WHEN/THEN acceptance criteria with a verifiable flag, boundary values and edge cases, undecided decisions with contingent option branches, comment resolutions, feature flags, the end-to-end flow with its failure states, and a Definition-of-Ready gate. Feeds sdet-plan-generator with scenario priority, risk weighting, boundary/negative scenarios, out-of-scope suppression, and which criteria are actually assertable.
+model: sonnet
+tools:
+  - Read
+  - Write
+  - Bash
 ---
 
 # Backend PRD Extractor (QA lens)
+
+## Inputs (from orchestrator prompt)
+
+| Parameter | Description |
+|---|---|
+| `source_file` | Absolute path to the PRD document (PDF, DOCX, MD, Confluence export) |
+| `output_dir` | Absolute path to the run output directory — write all output files here |
+
 
 Convert a backend PRD into a schema-compliant, **test-design-ready** `prd_context.json` for the backend SDET pipeline. You are not summarising the PRD for a product reader — you are turning it into the **test oracle contract** that `sdet-plan-generator` uses to decide *what to assert, at what priority, and what it must NOT assert yet.*
 
@@ -38,7 +51,7 @@ Sonnet
 - What decisions are still open? Does the comment thread resolve, clarify, or leave them open?
 - What is explicitly out of scope — and does any later section contradict that?
 
-**Pass 2 — Extract into the schema, keeping traceability.** Give every requirement, criterion, and decision a stable id and cross-link them (`story_ref`, `requirement_ref`, `related_open_decision`). Traceability is what lets the SDET plan prove coverage and lets a doc-change-context run patch only the affected scenarios. When a value is unstated, conflicting, or unverifiable, **record it in `needs_clarification` — never invent it.**
+**Pass 2 — Extract into the schema, keeping traceability.** Give every requirement, criterion, and decision a stable id and cross-link them (`story_ref`, `requirement_ref`, `related_open_decision`). Traceability is what lets the SDET plan prove coverage and lets a re-trigger patch only the affected scenarios. When a value is unstated, conflicting, or unverifiable, **record it in `needs_clarification` — never invent it.**
 
 ## What to extract
 

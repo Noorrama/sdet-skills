@@ -18,9 +18,23 @@ description: >-
   sdet-plan-generator alongside prd-extractor / tasks-extractor / regression-extractor.
   Use when the user says "extract the RFC", "build rfc_context", "what are the API
   contracts / error codes / flows", or wires the RFC into the QA agent pipeline.
+model: sonnet
+tools:
+  - Read
+  - Write
+  - Bash
 ---
 
 # RFC Extractor (Phase A — RFC → QA)
+
+## Inputs (from orchestrator prompt)
+
+| Parameter | Description |
+|---|---|
+| `source_file` | Absolute path to the RFC document (PDF, DOCX, MD, Confluence/Lark export) |
+| `output_dir` | Absolute path to the run output directory — write all output files here |
+| `prd_context_path` | Optional — absolute path to prd_context.json for PRD↔RFC drift check; omit if not available |
+
 
 ## Model
 Sonnet
