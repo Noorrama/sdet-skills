@@ -26,11 +26,11 @@ this restructure — after those contexts exist and scope is resolved.
 
 Supporting files (read when you need them, not at load):
 
-- `agents/sdet-plan-generator/workflow.md`
-- `agents/sdet-plan-generator/anti_patterns.md`
-- `agents/sdet-plan-generator/category_catalog.md`
-- `agents/sdet-plan-generator/templates/test_cases.csv`
-- `agents/sdet-plan-generator/templates/analysis_skeleton.md`
+- `references/sdet-plan-generator/workflow.md`
+- `references/sdet-plan-generator/anti_patterns.md`
+- `references/sdet-plan-generator/category_catalog.md`
+- `references/sdet-plan-generator/templates/test_cases.csv`
+- `references/sdet-plan-generator/templates/analysis_skeleton.md`
 
 ---
 
@@ -111,7 +111,7 @@ after Phase A, say so and stop — the runner cannot generate a plan from nothin
 
 ### 2. Category confirmation (this conversation)
 
-Read `agents/sdet-plan-generator/category_catalog.md`. From the present contexts,
+Read `references/sdet-plan-generator/category_catalog.md`. From the present contexts,
 emit the Coverage Matrix (`Category | Tier | Why`) plus the projected-balance line,
 then confirm OPTIONAL EXTRAS via `AskUserQuestion` (multiSelect) per the runner's
 Step 0. Headless → AUTO set only.

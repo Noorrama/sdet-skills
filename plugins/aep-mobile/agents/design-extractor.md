@@ -11,7 +11,7 @@ This skill is the frontend-primary stage of the AEP mobile pipeline. It produces
 
 ## Golden input
 
-The current POC reference export is `agents/design-extractor/golden/inputs/GoFood-Group-Order-Bundling-Items.json` (Figma selection export, `formatVersion: 2`, 3 540 nodes). Its schema and observed conventions are memoised in `agents/design-extractor/INPUT_SCHEMA.md`. Any new extraction implementation must be validated against this golden input before it replaces the previous pipeline.
+The current POC reference export is `agents/design-extractor/golden/inputs/GoFood-Group-Order-Bundling-Items.json` (Figma selection export, `formatVersion: 2`, 3 540 nodes). Its schema and observed conventions are memoised in `references/design-extractor/INPUT_SCHEMA.md`. Any new extraction implementation must be validated against this golden input before it replaces the previous pipeline.
 
 ## Output contract
 

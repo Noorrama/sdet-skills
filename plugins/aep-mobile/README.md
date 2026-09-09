@@ -99,7 +99,7 @@ python3 scripts/validate_sdet_deliverables.py \
   --checklist coverage_checklist.json
 ```
 
-See `agents/sdet-plan-generator/workflow.md` and `anti_patterns.md`. JSON schema-only check:
+See `references/sdet-plan-generator/workflow.md` and `anti_patterns.md`. JSON schema-only check:
 
 ```bash
 python3 -c "import json,jsonschema; jsonschema.validate(
