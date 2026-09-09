@@ -1,6 +1,6 @@
 ---
 name: impact-shortlister
-description: Post-build test selection. Takes legacy regression rows (is_legacy_regression true + existing_case_ref) from the SDET plan or *_automation_plan_generator.json, enriched from regression_context when available, and narrows them to the cases the merged code actually impacts by matching the change surface (change_context.json / dev_manifest.json / GitLab MR bootstrap) against each candidate's title/steps. Deterministic tier is pure evidence matching — no scoring service. Remainder gets one agent judgment pass. Emits impact_shortlist.json as a sidecar — does not mutate the SDET plan. App-agnostic; selects, never generates.
+description: "Post-build test selection. Takes legacy regression rows (is_legacy_regression true + existing_case_ref) from the SDET plan or *_automation_plan_generator.json, enriched from regression_context when available, and narrows them to the cases the merged code actually impacts by matching the change surface (change_context.json / dev_manifest.json / GitLab MR bootstrap) against each candidate's title/steps. Deterministic tier is pure evidence matching — no scoring service. Remainder gets one agent judgment pass. Emits impact_shortlist.json as a sidecar — does not mutate the SDET plan. App-agnostic; selects, never generates."
 model: sonnet
 tools: Read, Write, Bash, Grep, Glob
 ---
@@ -105,4 +105,4 @@ patch-plan` stays in the script for copies we own; never run it on their plan.
 - **New (non-legacy) scenarios always run** — listed in `new_scenarios_to_run`.
 - **No hallucinated evidence.**
 
-See `examples/pam_feature/IMPACT_SHORTLISTER_REPORT.md` for a worked PAM validation. Join explainer: `agents/impact-shortlister/SHORTLIST_JOIN_EXPLAINER.md`.
+See `examples/pam_feature/IMPACT_SHORTLISTER_REPORT.md` for a worked PAM validation. Join explainer: `references/impact-shortlister/SHORTLIST_JOIN_EXPLAINER.md`.

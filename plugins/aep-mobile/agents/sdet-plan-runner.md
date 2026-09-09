@@ -32,13 +32,13 @@ Aggregates upstream extractor contexts (`task_context`, `prd_context`, `design_c
 3. `<feature_key>_test_cases.csv` (TMS bulk-import format — **15-column squad template only**)
 4. `<feature_key>_compliance_report.json` (Mechanical Step 4 audit proof — see `schemas/compliance_report.schema.json`)
 
-> **Model-independent gate:** Follow `agents/sdet-plan-generator/workflow.md` end-to-end. Read `agents/sdet-plan-generator/anti_patterns.md` before writing CSV/analysis. **Do not write or import deliverables until the compliance validator exits 0** (applies to every feature, every app, every model).
+> **Model-independent gate:** Follow `references/sdet-plan-generator/workflow.md` end-to-end. Read `references/sdet-plan-generator/anti_patterns.md` before writing CSV/analysis. **Do not write or import deliverables until the compliance validator exits 0** (applies to every feature, every app, every model).
 
 ---
 
 ## Mandatory workflow (read first)
 
-Full spine: **`agents/sdet-plan-generator/workflow.md`**. Anti-patterns: **`agents/sdet-plan-generator/anti_patterns.md`**. TMS header template: **`agents/sdet-plan-generator/templates/test_cases.csv`**. Analysis layout: **`agents/sdet-plan-generator/templates/analysis_skeleton.md`**.
+Full spine: **`references/sdet-plan-generator/workflow.md`**. Anti-patterns: **`references/sdet-plan-generator/anti_patterns.md`**. TMS header template: **`references/sdet-plan-generator/templates/test_cases.csv`**. Analysis layout: **`references/sdet-plan-generator/templates/analysis_skeleton.md`**.
 
 ### Before any output file is written
 
@@ -1224,7 +1224,7 @@ other output: on failure, still write it, record the validator error, and say so
 
 ## Appendix: Category Catalog
 
-**Read `agents/sdet-plan-generator/category_catalog.md`** when you reach Step 0
+**Read `references/sdet-plan-generator/category_catalog.md`** when you reach Step 0
 (Test-Category Selection Gate). It contains the detection rules table (Section A)
 and the FE-Baseline extras library (Section B). Do NOT read it at skill load —
 only when Step 0 needs it.
