@@ -1,7 +1,7 @@
 {
   "name": "aep-backend",
   "description": "Backend QA skill set — agentic PDLC pipeline for GoTo backend services",
-  "version": "0.27.0",
+  "version": "0.29.0",
   "skills": "./skills/",
   "agents": "./cursor-agent-stubs/"
 }

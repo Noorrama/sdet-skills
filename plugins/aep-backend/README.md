@@ -127,7 +127,7 @@ never invents a category or operation name — both come from the TestBuddy MCP 
 `<Domain>Agent_*` tool inventory). The category matcher always returns its nearest match and never
 reports a no-match, so the skill validates every returned category against the fixture's own signals
 and rejects the uncorroborated ones instead of trusting them. Domain
-definitions live in `skills/test-data-identification/references/test_data_domains.md`; adding a
+definitions live in `skills/backend-test-data-identification/references/test_data_domains.md`; adding a
 domain is a file edit, not a skill change.
 
 Fixtures are referenced by `fixture_id` in test code — never hardcoded entity IDs. Secrets from vault only.

@@ -70,7 +70,7 @@ The context contract lives **only** in the JSON Schemas — there is no pydantic
 1. `schemas/prd_context.schema.json` → the `prd_context` contract (shared `ClarificationGap`, structured `user_flow`, mobile enrichments, `involved_teams`, `comment_resolutions`, `approach_branches`, `provenance`).
 2. `schemas/rfc_context.schema.json` → the `rfc_context` contract (same `ClarificationGap`, contracts with join refs, `provenance`).
 3. `Provenance` is defined inline under `#/definitions/Provenance` in **both** schemas — one shape, kept in sync by hand.
-4. Copy this `common/provenance/SKILL.md` (+ `common/scripts/`) into the target repo's `skills/common/` (or keep a personal `~/.claude/skills/phase-a-provenance`) and ensure both extractors can read it.
+4. Copy this `common/provenance/SKILL.md` (+ `common/scripts/`) into the target repo's `references/common/` (or keep a personal `~/.claude/skills/phase-a-provenance`) and ensure both extractors can read it.
 5. Run DeepEval for both skills.
 
 ## When to use
@@ -136,7 +136,7 @@ Schema: the shared `Provenance` object is defined inline (identically) in both `
 Use the helper when possible:
 
 ```
-python ${CLAUDE_PLUGIN_ROOT}/skills/common/scripts/hash_source.py <file-or-->
+python ${CLAUDE_PLUGIN_ROOT}/references/common/scripts/hash_source.py <file-or-->
 ```
 
 Rules:

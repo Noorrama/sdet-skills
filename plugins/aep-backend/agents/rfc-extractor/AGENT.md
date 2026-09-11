@@ -95,7 +95,7 @@ Optional join keys (populate only when the RFC or linked PRD makes the link expl
 
 ## Workspace
 
-Run inside the `aep-backend` plugin (or any repo that vendors it) where `skills/common/` and `schemas/` exist alongside this skill. Paths below are relative to the plugin root (`${CLAUDE_PLUGIN_ROOT}`). If those paths are missing, say so and stop.
+Run inside the `aep-backend` plugin (or any repo that vendors it) where `references/common/` and `schemas/` exist alongside this skill. Paths below are relative to the plugin root (`${CLAUDE_PLUGIN_ROOT}`). If those paths are missing, say so and stop.
 
 ## Source ingestion (do this before extracting)
 
@@ -133,7 +133,7 @@ RFCs arrive as Confluence/Lark pages, PDFs, or `.docx` files. **Diagrams (Block 
 ## Shared skill (required)
 
 **Before writing or refreshing any `rfc_context.json`, read and follow**
-`../common/provenance/SKILL.md` (or `${CLAUDE_PLUGIN_ROOT}/skills/common/provenance/SKILL.md`).
+`${CLAUDE_PLUGIN_ROOT}/references/common/provenance/SKILL.md`.
 That skill owns: `provenance` stamp, dated run folders, staleness check, re-extract,
 and context diff. **Do not re-implement those rules here** — defer to it, so provenance
 logic itself is not duplicated across skills.
@@ -162,7 +162,7 @@ or asks to re-review — run phase-a-provenance first, then this extractor into 
 
 ## Output versioning
 
-Before writing any output file, read and follow `common/versioning/SKILL.md`.
+Before writing any output file, read and follow `${CLAUDE_PLUGIN_ROOT}/references/common/versioning/SKILL.md`.
 
 - Resolve version from the source document; fall back to numbered `v1`, `v2`, …
 - Write `rfc_context_v{N}.json` and update the current pointer `rfc_context.json` in the same output directory.

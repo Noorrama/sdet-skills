@@ -68,7 +68,7 @@ DEFERRED_MARKERS = (
 
 def _default_schema_path():
     here = os.path.dirname(os.path.abspath(__file__))
-    # scripts/ -> rfc-extractor -> skills -> aep-backend -> schemas/
+    # scripts/ -> rfc-extractor -> agents -> aep-backend -> schemas/
     cand = os.path.normpath(os.path.join(here, "..", "..", "..", "schemas", "rfc_context.schema.json"))
     return cand
 

@@ -46,7 +46,7 @@ Fast tier — Haiku
 
 ## Output versioning
 
-Before writing any output file, read and follow `common/versioning/SKILL.md`.
+Before writing any output file, read and follow `${CLAUDE_PLUGIN_ROOT}/references/common/versioning/SKILL.md`.
 
 - Resolve version from the source document; fall back to numbered `v1`, `v2`, …
 - Write `regression_context_v{N}.json` and update the current pointer `regression_context.json` in the same output directory.
