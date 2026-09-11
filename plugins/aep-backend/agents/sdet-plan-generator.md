@@ -54,7 +54,7 @@ Set `generation_mode` in the sdet_plan.json root to the detected mode: `upstream
 
 ## Output versioning
 
-Before writing any output file, read and follow `common/versioning/SKILL.md`.
+Before writing any output file, read and follow `${CLAUDE_PLUGIN_ROOT}/references/common/versioning/SKILL.md`.
 
 - Resolve version from the source document; fall back to numbered `v1`, `v2`, …
 - Write `sdet_plan / qa_analysis / sdet_testcases_v{N}.json` and update the current pointer `sdet_plan / qa_analysis / sdet_testcases.json` in the same output directory.

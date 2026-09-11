@@ -33,7 +33,7 @@ diff, stop: those decisions belong to the individual skills.
    input is absent — ask the user first.
 6. **Reject, don't degrade.** Write `orchestrator_run_log.json` naming the failed stage with
    the stage's own reject payload verbatim. Do not paraphrase.
-7. **All outputs follow `common/versioning/SKILL.md`.** Write `{artifact}_v{N}.json` and keep
+7. **All outputs follow `${CLAUDE_PLUGIN_ROOT}/references/common/versioning/SKILL.md`.** Write `{artifact}_v{N}.json` and keep
    `{artifact}.json` as the current pointer.
 8. **Mode names are canonical.** Use exactly: `upstream-context`, `code-change-context`,
    `doc-change-context`, `review`. These match `sdet-plan-generator`'s `generation_mode` field.
