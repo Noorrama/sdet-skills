@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """Run the full design-extractor pipeline for one Figma JSON input.
 
-Fresh run policy
-----------------
-1. Delete every known workdir artefact (no reuse of prior outputs).
-2. Execute Steps 1 → 2 → 3 → 3b → 4 in order. No step is skipped.
+Default deletes known workdir artefacts. Pass --reuse to keep prior outputs
+when incrementally adding pages. Steps 1 → 2 → 3 → 3b → 4 still run in order.
 
 Step 2 writes ``screen_collapse_map.json`` (mechanical AUTO/AMBIGUOUS scaffold).
 Step 3 writes an empty ``id_refinement_map.json`` scaffold. Agent review
@@ -53,13 +51,17 @@ def run_step(skill_dir: str, label: str, args: list[str]) -> None:
     subprocess.run([sys.executable, *args], check=True, cwd=skill_dir)
 
 
-def run_pipeline(input_path: str, workdir: str) -> None:
+def run_pipeline(input_path: str, workdir: str, *, reuse: bool = False) -> None:
     skill_dir = _skill_dir()
     stem = os.path.splitext(os.path.basename(input_path))[0]
 
     print(f"Pipeline: {stem}")
     print(f"Workdir:  {workdir}")
-    clean_workdir(workdir, stem)
+    print(f"Mode:     {'reuse' if reuse else 'fresh'}")
+    if not reuse:
+        clean_workdir(workdir, stem)
+    else:
+        os.makedirs(workdir, exist_ok=True)
 
     # Step 1 — preprocess & render
     run_step(
@@ -134,8 +136,8 @@ def run_pipeline(input_path: str, workdir: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Fresh-run the design-extractor pipeline (Steps 1–4). "
-            "Deletes prior workdir artefacts before starting."
+            "Run the design-extractor pipeline (Steps 1–4). "
+            "Default wipes workdir artefacts; pass --reuse to keep them."
         )
     )
     parser.add_argument(
@@ -152,8 +154,13 @@ def main() -> None:
         metavar="WORKDIR",
         help="Output directory (e.g. golden/outputs/<stem>).",
     )
+    parser.add_argument(
+        "--reuse",
+        action="store_true",
+        help="Keep prior workdir artefacts (incremental page adds).",
+    )
     args = parser.parse_args()
-    run_pipeline(args.input, args.workdir)
+    run_pipeline(args.input, args.workdir, reuse=args.reuse)
 
 
 if __name__ == "__main__":

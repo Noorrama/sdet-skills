@@ -1,6 +1,6 @@
 ---
 name: aep-mobile-setup
-description: Preflight check for aep-mobile plugin dependencies — validates Python/jsonschema, BrowserStack MCP connectivity (required only for BrowserStack-backed skills), and prints actionable setup steps for anything missing. Run after installing the plugin or when any aep-mobile skill reports a missing dependency.
+description: Optional explicit dependency check for aep-mobile — python/jsonschema, compliance scripts, BrowserStack MCP. SessionStart hooks already cover basic deps; spawn this only when the user asks for setup / missing dependencies, not on every plan GENERATE.
 model: sonnet
 ---
 

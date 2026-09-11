@@ -120,7 +120,14 @@ report it as *"not found"* — the field was found, its value could not be expre
 send the reader to different places. Never pick the nearest-looking value to dodge the note.
 
 ## Reads
-RFC document (Lark/Confluence/PDF) — **single input**. This skill reads only the RFC. Cross-references against PRD and design are handled downstream by the `sdet-plan-generator`, which ingests all extractor outputs and performs gap analysis.
+RFC document (Lark/Confluence/PDF/exported markdown) — **single input**. This skill
+reads only the RFC. Cross-references against PRD and design are handled downstream
+by the `sdet-plan-generator`.
+
+**PDF / image inputs:** Convert to text **before** extracting (`pdftotext`,
+`textutil -convert txt`, or exported text). Never feed multi-page PDF screenshots
+to the model as images when text is available. If conversion fails, record
+`WORTH_CHECKING` and continue with recoverable text only.
 
 ## Model
 Fast tier — Haiku / Composer 2.5. Escalate to reasoning only if the RFC is long/ambiguous or contains complex architectural trade-off analysis.
