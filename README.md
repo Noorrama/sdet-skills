@@ -1,4 +1,4 @@
-# aep/skills
+# janus/skills (AEP skills marketplace)
 
 Claude Code skills marketplace for the AEP team.
 
@@ -7,7 +7,7 @@ Claude Code skills marketplace for the AEP team.
 1. Open a terminal and start Claude Code (type `claude`).
 2. Run:
    ```
-   claude plugin marketplace add https://source.golabs.io/aep/skills.git
+   claude plugin marketplace add https://source.golabs.io/janus/skills.git
    claude plugin install aep@aep
    claude plugin install aep-mobile@aep
    claude plugin install aep-tapmind@aep

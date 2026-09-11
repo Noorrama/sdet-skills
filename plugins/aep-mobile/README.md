@@ -122,7 +122,7 @@ are referenced with paths relative to the plugin root (`schemas/`, `config/`, `s
 ### Claude Code (CLI / Desktop)
 
 ```
-claude plugin marketplace add https://source.golabs.io/aep/skills.git
+claude plugin marketplace add https://source.golabs.io/janus/skills.git
 claude plugin install aep-mobile@aep
 ```
 
