@@ -12,8 +12,8 @@ disable-model-invocation: true
 
 # Backend SDET Plan Generator (Phase A → B Orchestrator)
 
-You are sequencing Phase A extractor skills, the code-change-extractor, the
-doc-change-extractor, and the sdet-plan-generator into one run. You own **mode detection,
+You are sequencing Phase A extractor skills, the code-change-extractor,
+and the sdet-plan-generator into one run. You own **mode detection,
 ordering, confirmation prompts, and handoff** — you do not re-implement any skill's logic.
 If you find yourself re-deriving an AC, re-reading an RFC contract, or re-classifying a code
 diff, stop: those decisions belong to the individual skills.
@@ -492,4 +492,4 @@ Append to this file throughout the run. Key fields:
 | Code diff signal extraction | `code-change-extractor` |
 | Team resolution, scenario generation, CSV | `sdet-plan-generator` |
 | Post-approval automation plan | `automation-plan-generator` (separate, gated) |
-| Test data provisioning | `test-data-identification` (separate, human-gated) |
+| Test data provisioning | `backend-test-data-identification` (separate, human-gated) |
