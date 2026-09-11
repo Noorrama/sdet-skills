@@ -67,29 +67,33 @@ Run before anything else — before reading the files for content, before the te
 question, before any generation. Collect every failure — do not stop at the first — so the
 rejection report is complete and one round trip fixes everything.
 
-### DoR checks
+### DoR checks — two tiers
 
-1. **Presence** — all 4 context files (`prd_context.json`, `rfc_context.json`,
-   `tasks_context.json`, `regression_context.json`) exist in the run directory.
-2. **Valid JSON / schema-valid** — each file loads as JSON and matches its upstream
-   extractor's output contract (verify only; no transformation, no merging, no re-emission).
-3. **PRD has at least one `acceptance_criteria` entry** — without ACs, no scenarios can be
-   derived.
-4. **Regression file present even if empty** — empty coverage arrays are fine and expected;
-   the **file's** absence is not, because legacy-regression status then cannot be determined
-   for any scenario.
-5. **Regression entries matchable** — every `automated_tests[]`/`manual_tests[]` entry has a
-   `requirement_ref` or an `api_endpoint`. An entry with neither cannot be matched to a
-   generated scenario — skip that entry for dedup purposes and report it; reject the run only
-   when no usable entry remains.
+**Tier 1 — Hard stops (never proceed without fix):**
 
-### On reject — STOP
+| Check | On fail |
+|---|---|
+| `prd_context.json` present but has zero `acceptance_criteria` | **STOP** — file exists but has no signal; re-run prd-extractor |
+| `tasks_context.json` present but missing `api_contract` or `test_layer` | **STOP** — file exists but is incomplete; re-run tasks-extractor |
+| Any present context file is invalid JSON or schema-invalid | **STOP** — corrupted output; re-run the owning extractor |
+| `regression_context.json` present but has no usable entries (every entry missing both `requirement_ref` and `api_endpoint`) | **STOP** — no dedup signal at all; re-run regression-extractor |
 
-Any file missing/unparseable/schema-invalid, or zero PRD ACs: write `validation_report.json`
-to the run directory and **stop — do not enter any generation mode**. No team question, no
-scenarios, no other output files. Each failure names the file, the failed check, and the
-owning extractor stage so the fix is routed to the right PIC and only the failing extractor
-is re-run — not the whole batch.
+**Tier 2 — Soft degrades (absent context files — proceed with reduced signal):**
+
+If `prd_context.json`, `rfc_context.json`, or `tasks_context.json` is absent (extractor never ran — source doc was not provided), do **not** stop. Record each missing file as a `dor_warning` and apply the degradation below during generation:
+
+| Missing file | Degradation applied |
+|---|---|
+| `prd_context.json` | No AC-driven scenarios, no priority signal — generate from RFC validation_sequence and tasks api_contract only; stamp all scenarios `priority: "unclassified"`; add prominent warning to `qa_analysis.md` |
+| `rfc_context.json` | No validation_sequence, no contracts, no error codes — generate from PRD ACs and tasks api_contract only; mark coverage `confidence: "low"`; add warning to `qa_analysis.md` |
+| `tasks_context.json` | No `test_layer`, no `api_contract` — generate scenarios without layer classification; stamp all scenarios `test_layer: "unclassified"`; add warning to `qa_analysis.md` |
+| `regression_context.json` | Skip dedup entirely; stamp all scenarios `is_legacy_regression: false`; note in `qa_analysis.md` |
+
+A run missing all three primary context files (PRD + RFC + tasks) has no signal — **STOP** in that case.
+
+### On hard stop — write validation_report.json and halt
+
+Write `validation_report.json` to the run directory and **stop — do not enter any generation mode**. Each failure names the file, the failed check, and the owning extractor stage so the fix is routed to the right PIC and only the failing extractor is re-run — not the whole batch.
 
 ```json
 {
@@ -100,11 +104,9 @@ is re-run — not the whole batch.
 }
 ```
 
-### On pass — continue
+### On pass (with or without warnings) — continue
 
-Note observations worth carrying into generation (blocking open decisions, draft contracts,
-empty coverage arrays, skipped regression entries) and continue into the detected mode,
-starting with team resolution and the scope confirmation gate below.
+Record all `dor_warnings[]` in `qa_analysis.md` under a `## DoR Warnings` section at the top, so the reviewer immediately sees what signal was missing. Then continue into the detected mode, starting with team resolution and the scope confirmation gate below.
 
 **Degrade, do not reject** for everything inside a present-and-valid file — blocking
 `open_decisions[]` / `needs_clarification[]` / `extraction_gaps[]` entries block *their own

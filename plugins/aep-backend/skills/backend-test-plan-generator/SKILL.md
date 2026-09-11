@@ -199,15 +199,40 @@ Fix the source and re-invoke. Already-generated context files will be reused.
 
 ### Step U6 — DoR pre-validation
 
-Fast gate before the Opus generation pass:
+Fast gate before the Opus generation pass. Collect **all** failures before prompting — do not stop at the first.
+
+**Hard stops (never proceed without fix):**
 
 | Check | Pass | On fail |
 |---|---|---|
-| All 4 context files present (or regression waived) | Files parse as JSON | STOP |
 | `prd_context` has ≥ 1 `acceptance_criteria` | `len > 0` | STOP — re-run prd-extractor |
-| `rfc_context` has at least one non-`not_specified` contract | Any contract with `ready` or `draft` status | WARN, continue |
 | `tasks_context` has `api_contract` and `test_layer` | Both keys non-empty | STOP — re-run tasks-extractor |
 | `regression_context` (if present) has `resolvedServices[]` | Array present | STOP — re-run regression-extractor |
+
+**Soft warnings (missing context — ask user to confirm before proceeding):**
+
+If any of `prd_context.json`, `rfc_context.json`, or `tasks_context.json` are absent (extractor did not run or was skipped due to missing source doc), surface a warning and ask for confirmation:
+
+```
+⚠️  DoR warning — the following context files are missing:
+  ❌ prd_context.json  — prd-extractor did not run (no PRD source doc found)
+  ❌ rfc_context.json  — rfc-extractor did not run (no RFC source doc found)
+
+  The sdet-plan-generator will have less signal and may produce incomplete or
+  lower-quality scenarios. Missing RFC → no validation sequence or contracts.
+  Missing PRD → no acceptance criteria or priority signal.
+
+  Proceed with partial context? (yes / no)
+```
+
+- **User says no** → STOP. Ask them to provide the missing source docs and re-invoke.
+- **User says yes** → continue to Step U7. Record the waived files in `orchestrator_run_log.json` under `dor_warnings[]`. The `sdet-plan-generator` will degrade gracefully on what it has.
+
+**RFC contract quality (always soft):**
+
+| Check | On fail |
+|---|---|
+| `rfc_context` has at least one non-`not_specified` contract | WARN, continue — draft RFC is valid input |
 
 ---
 
