@@ -105,7 +105,7 @@ RFCs arrive as Confluence/Lark pages, PDFs, or `.docx` files. **Diagrams (Block 
 - **`.docx`** — the text lives in `word/document.xml` but every diagram is an image in `word/media/`. A text-only XML pass (reading only `<w:t>`) **drops all of them**. Do **not** hand-roll a text-only parser. Run the helper:
 
   ```
-  python3 ${CLAUDE_PLUGIN_ROOT}/skills/rfc-extractor/scripts/extract_docx.py <file.docx> <out_dir>
+  python3 ${CLAUDE_PLUGIN_ROOT}/agents/rfc-extractor/scripts/extract_docx.py <file.docx> <out_dir>
   ```
 
   It writes the narrative text (paragraphs + tables) with an **inline `[IMAGE: <file> -> <path> | anchor: "<nearest heading>"]` marker at each diagram's real position**, copies every image to `<out_dir>/media/`, prints an **anchor index** (which diagram sits under which "Block Diagram"/"Sequence Diagram" heading), and prints the `sha256:` normalised-text hash for provenance. It **also extracts review comments** (`word/comments.xml` + threading/resolved state from `word/commentsExtended.xml`) into `<stem>.comments.txt` with its own `comments_sha256`, and prints a thread-ordered readout with author, date, and resolved/open state. Then **`Read` each anchored diagram image** and fold what it shows into `validation_sequence`, `user_flows`, `cross_service_dependencies`, and state-machine `business_logic` — the same as you would a text description — **and read `<stem>.comments.txt` per "Comment ingestion" below.**
@@ -588,7 +588,7 @@ There are **two classes** of validation, handled differently:
 **1. Mechanical errors — a HARD pre-write gate (fix, never ship).** Schema violations (bad enum like a `layer` outside the five, wrong type, missing required key, `additionalProperties`), forbidden legacy keys, unresolved cross-references (`failure_error_code`→`error_codes[]`, `validation_step_ref`→`validation_sequence`), non-contiguous numbering, risks not P0-first, and `prd_drift_flags`/`prd_drift_status` disagreement are **never judgement calls**. Run the validator and **fix every reported error in the JSON before writing** — do not write a file that fails it, and do not "log it as a gap" (that channel is for groundedness only):
 
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/rfc-extractor/scripts/validate_rfc_context.py \
+python3 ${CLAUDE_PLUGIN_ROOT}/agents/rfc-extractor/scripts/validate_rfc_context.py \
   qa-artifacts/{epic}/{run}/rfc_context.json
 ```
 
