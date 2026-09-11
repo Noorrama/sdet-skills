@@ -95,7 +95,7 @@ Optional join keys (populate only when the RFC or linked PRD makes the link expl
 
 ## Workspace
 
-Run inside the `aep-backend` plugin (or any repo that vendors it) where `skills/common/` and `schemas/` exist alongside this skill. Paths below are relative to the plugin root (`${CLAUDE_PLUGIN_ROOT}`). If those paths are missing, say so and stop.
+Run inside the `aep-backend` plugin (or any repo that vendors it) where `references/common/` and `schemas/` exist alongside this skill. Paths below are relative to the plugin root (`${CLAUDE_PLUGIN_ROOT}`). If those paths are missing, say so and stop.
 
 ## Source ingestion (do this before extracting)
 
@@ -133,7 +133,7 @@ RFCs arrive as Confluence/Lark pages, PDFs, or `.docx` files. **Diagrams (Block 
 ## Shared skill (required)
 
 **Before writing or refreshing any `rfc_context.json`, read and follow**
-`../common/provenance/SKILL.md` (or `${CLAUDE_PLUGIN_ROOT}/skills/common/provenance/SKILL.md`).
+`${CLAUDE_PLUGIN_ROOT}/references/common/provenance/SKILL.md`.
 That skill owns: `provenance` stamp, dated run folders, staleness check, re-extract,
 and context diff. **Do not re-implement those rules here** — defer to it, so provenance
 logic itself is not duplicated across skills.

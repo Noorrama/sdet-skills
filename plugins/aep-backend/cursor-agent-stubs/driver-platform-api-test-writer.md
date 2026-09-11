@@ -29,7 +29,7 @@ says `$CLAUDE_PLUGIN_ROOT`, substitute `$CURSOR_PLUGIN_ROOT` in Cursor.
 
 Produce the same artifacts, write the same `logs/` entries, obey the same gates and reject
 conventions, and write files to the `run_dir` the parent specified. Plugin-relative paths inside
-those documents (`stages/`, `reference/`, `schemas/`, `config/`, `skills/common/`) resolve from
+those documents (`stages/`, `reference/`, `schemas/`, `config/`, `references/common/`) resolve from
 the aep-backend plugin root.
 
 Model mapping: Claude Code `opus` → Cursor `claude-opus-5`.

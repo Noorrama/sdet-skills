@@ -1,7 +1,6 @@
 ---
 name: code-gen-orchestrator
-description: Master orchestrator for the agentic backend-test codegen path — takes an approved automation_plan.json, extracts each scenario's (module, endpoint), enriches the plan with existing GBT coverage via automation-plan-test-enricher (Memgraph), then sequences gbt-method-decision-maker (method-level reuse decision from scenario_gbt_context), the module profile resolver, gbt-code-understanding, gbt-context-builder (placement and packages), gbt-test-code-generator, and test-code-validator's fix-and-revalidate loop into one epic run. Use after the SDET plan's human review gate is approved, when you want the whole plan-through-validated-code path run in order instead of invoking each stage skill by hand. Does not re-implement any stage's logic — it dispatches each stage as a subagent (the stage documents live under the plugin's stages/ directory and are intentionally not user-invocable skills) and enforces the same gates and reject conventions they already have, writing every stage's raw return payload to runs/<epic>/pass<N>/logs/ for debugging.
-version: 2
+description: Master orchestrator for backend-test codegen: takes approved automation_plan.json, enriches via automation-plan-test-enricher (Memgraph), then sequences gbt-method-decision-maker, module profile resolver, gbt-code-understanding, gbt-context-builder, gbt-test-code-generator, and test-code-validator's fix loop. Use after SDET plan review when you want the full plan-through-validated-code path instead of invoking each stage by hand. Dispatches stages as subagents (docs under stages/); does not re-implement their logic; writes raw payloads to runs/<epic>/pass<N>/logs/.
 disable-model-invocation: true
 ---
 

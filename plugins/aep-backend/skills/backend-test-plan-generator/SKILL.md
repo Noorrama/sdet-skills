@@ -7,7 +7,6 @@ description: >
   doc-change-context (PRD/RFC updated, re-runs the stale extractor then fully regenerates),
   and review (applies human feedback from qa_analysis.md). Stops at the human review gate in
   all modes — does not chain into automation-plan-generator.
-version: 4
 disable-model-invocation: true
 ---
 
