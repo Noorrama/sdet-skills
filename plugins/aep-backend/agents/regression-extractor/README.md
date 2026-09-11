@@ -1,3 +1,8 @@
+---
+name: regression-extractor-readme
+description: Documentation for regression-extractor scripts. Not an agent entry point.
+---
+
 # regression-extractor scripts
 
 Two scripts that produce the regression coverage map this skill consumes:
