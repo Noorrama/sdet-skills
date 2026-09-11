@@ -126,9 +126,9 @@ claude plugin marketplace add https://source.golabs.io/janus/skills.git
 claude plugin install aep-mobile@aep
 ```
 
-Then ask to **check aep-mobile dependencies** (or *"Run aep-mobile-setup and tell me what
-is missing"*) — that routes to `mobile-sdet-plan-generator`, which runs the preflight first
-and stops if you only asked for setup.
+Then ask to **check aep-mobile dependencies** only when something looks missing
+(SessionStart already ran `hooks/check-deps.sh`). Prefer a short inline check —
+do **not** spawn `aep-mobile-setup` on every GENERATE.
 
 ### Cursor
 
@@ -201,5 +201,5 @@ Skills auto-trigger from their description. Two user-facing commands:
 Or naturally in conversation:
 > *"Extract the PRD context for this mobile feature"* → `mobile-sdet-plan-generator` (fires prd-extractor; skips missing inputs; stops if you only asked to extract)
 > *"Generate the SDET plan"* → `mobile-sdet-plan-generator` (extracts first, then GENERATE)
-> *"Run aep-mobile-setup and tell me what is missing"* → `mobile-sdet-plan-generator` (setup-only; stops after the preflight table)
+> *"Check aep-mobile deps"* → short inline check (hooks already cover basics; setup agent only if asked)
 > *"The build is in — generate the tests"* → `mobile-test-code-gen`

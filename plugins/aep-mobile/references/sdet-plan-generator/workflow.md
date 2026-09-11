@@ -3,9 +3,14 @@
 Feature-agnostic procedure for **any** GoTo mobile feature. Details live in `SKILL.md`;
 this file is the non-skippable spine every model must follow.
 
+**Token rules:** Do not Read schema JSON or Python validators into context — run them via
+Bash. Prefer PDF→text before extractors. GENERATE uses `agents/sdet-plan-runner.md`; SYNC
+uses `agents/sdet-plan-sync.md`. Emit CSV via `scripts/plan_to_csv.py` and fill
+`automation_steps` via `scripts/fill_automation_steps.py` — do not type those artefacts.
+
 ## Phase 0 — Preflight
 
-1. Load schemas: `schemas/sdet_plan.schema.json`, `schemas/scenario.schema.json`
+1. Know required schemas exist under `schemas/` (do not Read them into context; validator enforces).
 2. Require `prd_context.json` + `design_context.json` (record gaps if partial)
 2a. Load `task_context.json` if present (the PRIMARY DRIVER from `task-extractor`; optional — formerly `plan_context.json`). It supplies the AC coverage floor (`epics[].user_stories[].acceptance_criteria[]`), test hooks (`epics[].test_hooks[]`, `type: deeplink|flag-override|state-injection`, URI in `invoke`), per-task `observable_state`, `flag_keys[]`, and `traceability[]`/`blocking_dependencies[]`. Carry its `blocking_issues[]` (e.g. a story with no ACs) and `testability_gaps[]` straight into the gap analysis.
 3. Inherit all upstream `extraction_notes[]`

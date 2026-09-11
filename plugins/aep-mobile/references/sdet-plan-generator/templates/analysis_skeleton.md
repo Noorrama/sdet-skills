@@ -90,6 +90,9 @@
 
 ## Section 4 — Open Questions & Clarifications
 
+> Do not restate Inputs & Open Points. Only owner-tagged blockers / resolutions.
+> Omit empty tables.
+
 ### Blocked — Awaiting PM / Design Input
 
 | ID | Question | Test Impact |

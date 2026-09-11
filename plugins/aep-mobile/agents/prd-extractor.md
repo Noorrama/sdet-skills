@@ -120,7 +120,13 @@ ones: *"header reads `PRD WALKTHROUGH`; not a legal value (allowed: …)"*. Neve
 to different places. Never pick the nearest-looking value to dodge the note.
 
 ## Reads
-PRD text (Lark/Confluence)
+PRD text (Lark/Confluence/exported markdown).
+
+**PDF / image inputs:** Convert to text **before** extracting. Prefer `pdftotext`,
+`textutil -convert txt` (macOS), or an exported text paste. Do **not** Read a
+multi-page PDF as page screenshots/images when a text conversion is possible —
+that burns tokens and loses structure. If conversion fails, note
+`WORTH_CHECKING` on `ENVIRONMENT` and extract from whatever text you can obtain.
 
 ## Model
 Fast tier — Haiku / Composer 2.5. Escalate to a higher reasoning model only if the PRD is long or ambiguous.

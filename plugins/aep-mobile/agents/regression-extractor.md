@@ -71,10 +71,31 @@ equivalent) — see the TapMind join step below.
   - gmt: if the module is one of `consumer_super_app.folders`' keys, the project is **`consumer_super_app.browserstack_project`** (e.g. `PR-176`) and the folder id(s) come from that module's entry — no project search needed. If it's `driverapp`/`driver-platforms`/`driver-platform-android` (human-confirmed to share the same BrowserStack project ids), there is no single static project: resolve **per case** via the live Lumos resolver noted in the map (`resolution` field); `static_fallback_pr_id` is the last-resort fallback the repo itself uses. `gopay` resolves to **`PR-173`** (human-confirmed). Otherwise look it up in `separate_projects`.
   - gtf: look the module up in **`gtf_source.separate_projects`** (same shape as gmt's `separate_projects` — `browserstack_project`, `testrail_ids`, `source_files`, sometimes a `note`). None of gtf's project ids are BrowserStack-confirmed yet as of this corpus generation.
   - Either repo: if the resolved entry has a non-null `browserstack_project`, use it. If `browserstack_project: null`, the id genuinely isn't confirmed yet — do not guess or search all projects; raise a `NEEDS_ANSWER` note naming the repo+module and ask for the project id, then proceed with what's available from the other repo(s)/TapMind if any.
-- Establish connection to the **BrowserStack MCP Server** (relying on client-configured OAuth or credentials) only to fetch the live test-case inventory for the *resolved* project(s) — not to discover which project it is. Any app_id resolving to more than one project/module (across one or more repos) — query each and merge the results, tagging each `regression_tests[]` entry with the repo+module it came from.
+- Establish connection to the **BrowserStack MCP Server** only to fetch the live
+  test-case inventory for the *resolved* project(s).
 - **Fetch Folder Hierarchy (Optional):** If a `module_namespace` is provided and its folder id isn't already known from the map, query `listFolders` to find it.
-- **Fetch Test Cases:** Invoke the **`listTestCases`** tool with the resolved `project_identifier` (and folder ID if resolved), passing the extracted `feature_key` and `module_namespace` as filters/tags.
-- **Join to the repo for navigation and step quality.** For each returned case, strip the `C` prefix to get `case_number`, look it up via `corpus_lookup.py case <repo> <module> <case_number>` (`<repo>` is `gmt` or `gtf`, matching whichever repo resolved this module in 1a/1b). A match gives accurate `steps`/`navigation` from the repo; no match means the case is manual-only or not yet automated — keep BrowserStack's own steps and flag weak ones.
+- **Fetch Test Cases — save to disk, do not keep MCP payloads in context:**
+  1. Invoke `listTestCases` (and `listFolders` if needed) with the resolved project/folder.
+  2. Immediately **Write** the raw tool JSON to a temp file, e.g.
+     `/tmp/bs_cases_<project>.json` (one file per project queried).
+  3. Do **not** restate, summarise, or re-read that JSON in the conversation.
+  4. Run the parser (plugin root):
+     ```
+     python3 scripts/parse_regression_mcp.py \
+       --cases-json /tmp/bs_cases_<project>.json \
+       [--cases-json /tmp/bs_cases_<other>.json] \
+       --out regression_context.json \
+       --app-id <app_id> --feature-key <feature_key> \
+       --project <PR-id> [--folder-id <id>] [--repo gmt] [--module <module>]
+     ```
+  5. Then enrich with `corpus_lookup.py` joins (case / deeplinks / tapmind) as below —
+     those scripts already keep large nav_index files out of context.
+- **Join to the repo for navigation and step quality.** For each returned case id in the
+  slim `regression_context.json`, strip the `C` prefix to get `case_number`, look it up via
+  `corpus_lookup.py case <repo> <module> <case_number>` (`<repo>` is `gmt` or `gtf`, matching
+  whichever repo resolved this module in 1a/1b). A match gives accurate `steps`/`navigation`
+  from the repo; no match means the case is manual-only or not yet automated — keep
+  BrowserStack's own steps and flag weak ones.
 - **Join to the TapMind corpus for automation steps (third source repo).** `tapmind-mobile-tests` is the NLP-framework automation repo; its checked-in nav_index is `config/nav_index/tapmind/` — a third sibling directory alongside `nav_index/gmt/` and `nav_index/gtf/` (namespaced per-repo, since its module names — `driverapp`, `gofood`, … — collide with gojek-mobile-tests). Its module→project map lives alongside those files, at `config/nav_index/tapmind/project_map.json`. For each returned case, look its `case_number` up via:
   ```
   python3 scripts/corpus_lookup.py case tapmind <module> <case_number>

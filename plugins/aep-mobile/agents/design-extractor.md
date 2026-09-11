@@ -46,21 +46,24 @@ One `design_context.json` per app in scope. The file must validate against the p
 
 Five Python scripts implement the extraction pipeline. Run them from the `agents/design-extractor/` directory (sibling of this file).
 
-### Full fresh run (`run_design_extractor.py`)
+### Full run (`run_design_extractor.py`)
 
 ```
+# Fresh (default) — wipe workdir artefacts, then full pipeline
 python3 run_design_extractor.py -i <input.json> -w <workdir>
+
+# Incremental — keep prior preprocess/temp artefacts; only reprocess what changed
+python3 run_design_extractor.py -i <input.json> -w <workdir> --reuse
 ```
 
-**Always use this entry point for a complete pipeline run.** It:
+**Default (no `--reuse`):** deletes known artefacts, then runs Steps 1–4. Use for a
+first run or when the Figma export changed globally.
 
-1. **Deletes** every known artefact in `<workdir>` (fresh run — no reuse).
-2. **Runs Step 1** — `render_design.py`
-3. **Runs Step 2** — `extract_design_context.py`
-4. **Runs Step 3** — writes empty `id_refinement_map.json` scaffold (agent review overwrites when refinements are needed)
-5. **Runs Step 4** — `recover_design_context.py`
-
-No step is skipped. After a mechanical run, perform agent review (Step 3 below) to replace the scaffold with refinements, then re-run Step 4 only.
+**`--reuse`:** skip `clean_workdir`. Use when **adding pages/frames** to an existing
+export and prior Step 1/2 outputs for unchanged screens are still valid. After the
+mechanical run, agent review (Step 3) only for new/changed screens, then Step 4.
+If reuse would mix stale frames with a materially different export, run without
+`--reuse` instead.
 
 ### Step 1 — Preprocess & render (`render_design.py`)
 
@@ -213,6 +216,12 @@ assert inv['summary']['elements_without_screen'] == 0
 - One write per output file. Keep intermediates in a work directory; never commit run outputs into the `agents/design-extractor/` directory.
 - Blocking issues must be phrased so a PM can answer them and must name the Figma node id involved.
 - Never edit the final `design_context.json` by hand.
-- **Fresh runs only:** use `run_design_extractor.py`. It deletes all known workdir artefacts before Step 1. Never reuse `_pre-process.json`, `design_context.temp.json`, `id_refinement_map.json`, `design_context.json`, or `element_id_quality.json` from a prior run.
-- **No skipped steps:** Steps 1 → 2 → 3 → 4 always execute in order. Do not invoke individual scripts in a way that omits a step.
-- **Agent review:** after a mechanical run, replace the Step 3 scaffold with refinements when needed, then re-run Step 4.
+- **Fresh vs reuse:** default `run_design_extractor.py` deletes workdir artefacts.
+  Pass `--reuse` when adding pages to an existing export so prior Step outputs for
+  unchanged screens are kept. If the Figma board changed globally, omit `--reuse`.
+- **No skipped steps:** Steps 1 → 2 → 3 → 4 still execute in order (mechanical).
+- **Agent review (token rule):** after a mechanical run, replace the Step 3 scaffold with
+  refinements when needed, then re-run Step 4. On `--reuse`, **do not re-review screens
+  already present in the prior `design_context.json`** whose `source_ref` / screen node ids
+  are unchanged — only review **new or changed** screens. Re-doing the first page from
+  scratch when only page N was added is a defect.
