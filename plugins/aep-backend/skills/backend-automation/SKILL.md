@@ -6,10 +6,10 @@ description: >-
   a request like "add a test for this endpoint" — in any of the ~38 Gradle modules (go-logistics,
   gopay, gofood, driver-platform, transport, payment-core, scp, marketplace, driver-incentives,
   and others), even when the module isn't named explicitly. ALWAYS load this skill FIRST for any
-  such request, before any module-specific test-writer skill, even if the module already looks
+  such request, before any module-specific test-writer agent, even if the module already looks
   obvious from the cURL's host/path — this file defines the module-identification and
-  local-framework-discovery workflow every module-specific skill in this repo builds on, and it
-  tells you which module-specific skill (if one exists) to load next.
+  local-framework-discovery workflow every module-specific writer in this repo builds on, and it
+  tells you which module-specific writer agent (if one exists) to use next.
 ---
 
 # Backend Automation Test Generation — Common Entry Point
@@ -194,25 +194,26 @@ Look at the cURL's host and path first:
 
 ## Module routing
 
-Modules with a dedicated, deep module-specific skill today. **Load the named skill** once you've
-confirmed the module — do not try to re-derive everything from scratch when one already exists,
-and do not load a module skill for a module it doesn't cover.
+Modules with a dedicated, deep module-specific writer today. Each one is a **subagent**, not a
+user-invocable skill — see "How to load a module-specific writer" below. Use the named writer
+once you've confirmed the module — do not try to re-derive everything from scratch when one
+already exists, and do not use a module writer for a module it doesn't cover.
 
-| Module | Skill to load | One-line reason it has its own skill |
+| Module | Writer agent | One-line reason it has its own writer |
 |---|---|---|
-| `go-logistics` | `go-logistics-api-test-writer` | TMS/GoKilat/GoSend/GoBox/GoShop layering, TMS gateway-prefix quirk, Kotlin scaffold abandoned since 2021 (Java is the living convention) |
-| `gopay` **(REST / miniapp)** | `gopay-api-test-writer` | `userJourneyTests/userspend/**`; also see `gopay/.gitlab/skills/qa-intern/` for its domain playbooks |
-| `gopay` **(gRPC)** | `gopay-grpc-api-test-writer` | `paymentTooling/**` — OMS, Boomerang, Emoney, PRS, Subscription Engine. Pooled `AbstractGrpcClientConnection`, Figaro config, protos from published artifacts. A different stack, not a variant of the REST one |
-| `gofood` **(REST)** | `gofood-api-test-writer` | In-progress Controller/Client/Endpoint migration alongside legacy `*ClientWrapper`s |
-| `gofood` **(gRPC)** | `gofood-grpc-api-test-writer` | The OpenAPI/web-order surface — 10 endpoint classes, two coexisting `IGrpcServiceEndpoint` interfaces, in-repo `buf`-managed protos |
-| `driver-platform` | `driver-platform-api-test-writer` | No universal BaseClient; header-spoofed driver auth (not a real login helper); disabled Kafka assertions |
-| `transport` | `transport-api-test-writer` | Flow-controller orchestration layer; `TransportController` god-object; 4-year-stale README |
-| `payment-core` | `payment-core-api-test-writer` | Standalone module (no `gojek-commons`); per-sub-domain auth (Basic/API-key/HMAC/mTLS); settlement domain data conventions |
-| `scp` | `scp-api-test-writer` | Looks gRPC-heavy (62 `.proto` files) but is 100% dead scaffolding — real tests are plain REST identity/login |
-| `marketplace` | `marketplace-api-test-writer` | 21 test bases routed by feature area; `EndPoint`/`testName=` conventions inverted vs gofood; `ConfigManager` mutates service configs from the DataProvider row |
+| `go-logistics` | `gbt-codegen:go-logistics-api-test-writer` | TMS/GoKilat/GoSend/GoBox/GoShop layering, TMS gateway-prefix quirk, Kotlin scaffold abandoned since 2021 (Java is the living convention) |
+| `gopay` **(REST / miniapp)** | `gbt-codegen:gopay-api-test-writer` | `userJourneyTests/userspend/**`; also see `gopay/.gitlab/skills/qa-intern/` for its domain playbooks |
+| `gopay` **(gRPC)** | `gbt-codegen:gopay-grpc-api-test-writer` | `paymentTooling/**` — OMS, Boomerang, Emoney, PRS, Subscription Engine. Pooled `AbstractGrpcClientConnection`, Figaro config, protos from published artifacts. A different stack, not a variant of the REST one |
+| `gofood` **(REST)** | `gbt-codegen:gofood-api-test-writer` | In-progress Controller/Client/Endpoint migration alongside legacy `*ClientWrapper`s |
+| `gofood` **(gRPC)** | `gbt-codegen:gofood-grpc-api-test-writer` | The OpenAPI/web-order surface — 10 endpoint classes, two coexisting `IGrpcServiceEndpoint` interfaces, in-repo `buf`-managed protos |
+| `driver-platform` | `gbt-codegen:driver-platform-api-test-writer` | No universal BaseClient; header-spoofed driver auth (not a real login helper); disabled Kafka assertions |
+| `transport` | `gbt-codegen:transport-api-test-writer` | Flow-controller orchestration layer; `TransportController` god-object; 4-year-stale README |
+| `payment-core` | `gbt-codegen:payment-core-api-test-writer` | Standalone module (no `gojek-commons`); per-sub-domain auth (Basic/API-key/HMAC/mTLS); settlement domain data conventions |
+| `scp` | `gbt-codegen:scp-api-test-writer` | Looks gRPC-heavy (62 `.proto` files) but is 100% dead scaffolding — real tests are plain REST identity/login |
+| `marketplace` | `gbt-codegen:marketplace-api-test-writer` | 21 test bases routed by feature area; `EndPoint`/`testName=` conventions inverted vs gofood; `ConfigManager` mutates service configs from the DataProvider row |
 | `midtrans-core-api` | `midtrans-core-api-test-writer` | Endpoints are **enum constants**, not classes; no client layer; static-imported `@TestInfo` values; hardcoded card/credential literals to avoid copying |
-| `customer-platforms` | `customer-platforms-api-test-writer` | Umbrella module with four coexisting sub-conventions needing a routing step; on the mainstream jar `IServiceEndpoint` path; `countryName` via `TestCountry` constant |
-| `iris` | `iris-api-test-writer` | Local `HttpServiceEndpoint` clone + local `Param`/`RequestBody`/`RequestHandler`; **no controller layer** (helpers instead); ~50/50 HTTP/gRPC; 9-line base class; `TC-`-prefixed case ids |
+| `customer-platforms` | `gbt-codegen:customer-platforms-api-test-writer` | Umbrella module with four coexisting sub-conventions needing a routing step; on the mainstream jar `IServiceEndpoint` path; `countryName` via `TestCountry` constant |
+| `iris` | `gbt-codegen:iris-api-test-writer` | Local `HttpServiceEndpoint` clone + local `Param`/`RequestBody`/`RequestHandler`; **no controller layer** (helpers instead); ~50/50 HTTP/gRPC; 9-line base class; `TC-`-prefixed case ids |
 
 **Modules with no dedicated skill yet** (not because they're unimportant — because they haven't
 been deep-analyzed): `icp`,
@@ -226,12 +227,26 @@ If the same session ends up doing substantial work in one of these and the patte
 genuinely different from anything documented here, that's a signal a new module skill might be
 worth proposing to the user afterward — don't create one preemptively on thin evidence.
 
-### How to load a module-specific skill
+### How to load a module-specific writer
 
-If you have a `Skill`-invocation tool available, invoke it by the exact name in the table above.
-If you don't (e.g. you're reading these files directly rather than through a skill-loading tool),
-just read `.claude/skills/<name>/SKILL.md` (or the equivalent path your tool exposes) in full
-before writing any code for that module.
+The module writers are **agents**, not skills — they are deliberately not user-invocable, so
+this entry point (or `code-gen-orchestrator`) is always the front door. Two ways to use one,
+both valid:
+
+- **Spawn it.** Use the Agent tool with `subagent_type` set to the exact value in the table above
+  — the `gbt-codegen:` prefix is part of the name (`gbt-codegen:go-logistics-api-test-writer`,
+  fully qualified `aep-backend:gbt-codegen:go-logistics-api-test-writer`); a bare
+  `go-logistics-api-test-writer` does **not** resolve. Hand it the module, the repo path, and the
+  cURL or scenarios to cover. It writes the files and returns the created/updated list. Prefer this when
+  the module work is self-contained.
+- **Read its document into your own context.** The writer executes
+  `$CLAUDE_PLUGIN_ROOT/reference/module-writers/<name>/SKILL.md` (the `<name>` here is the
+  writer name without the `gbt-codegen:` prefix, plus its `references/` and
+  `HOW_TO_USE.md`) — read that file in full yourself when you need the conventions in this
+  conversation, for example while you are still identifying the module or spanning two modules.
+  Outside Claude Code, read the same path relative to the plugin root.
+
+Either way, read it **in full** before writing any code for that module.
 
 ## Local framework discovery
 

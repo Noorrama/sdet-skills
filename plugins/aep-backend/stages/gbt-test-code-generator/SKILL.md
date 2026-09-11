@@ -19,27 +19,37 @@ It is the skills-only path to code generation, and it is individually testable. 
 **Do not restate GBT patterns in your head from this file.** This skill owns *orchestration*;
 the patterns live elsewhere and are authoritative. Before generating anything, read:
 
-0. **Resolve the TRANSPORT first, then load the transport-correct module skill.** A scenario with
+0. **Resolve the TRANSPORT first, then load the transport-correct module writer.** A scenario with
    `protocol: "grpc"` (or naming a `grpc_service`/`rpc_method`) routes to
-   `gopay-grpc-api-test-writer` or `gofood-grpc-api-test-writer`; everything else routes to the
-   REST skill for that module. Absent `protocol` means REST, so existing plans are unaffected.
-   Generating a gRPC scenario against a REST skill produces code that compiles and fails at
+   `gbt-codegen:gopay-grpc-api-test-writer` or `gbt-codegen:gofood-grpc-api-test-writer`;
+   everything else routes to the
+   REST writer for that module. Absent `protocol` means REST, so existing plans are unaffected.
+   The module writers are **agents**, not skills: read
+   `$CLAUDE_PLUGIN_ROOT/reference/module-writers/<writer-name>/SKILL.md` into your own context
+   (that is the same document the writer agent executes), or spawn the writer agent by that name
+   when you want it to emit the module's files itself — pass it your `run_dir` when you do, so it
+   leaves `logs/writer-<module>.json` behind and its work is debuggable. Record which writer you
+   used (or read) in the manifest's `module_writer` field either way.
+   Generating a gRPC scenario against a REST writer produces code that compiles and fails at
    runtime — an `IServiceEndpoint`, a `RequestHandler` call, or an HTTP-status assertion on a gRPC
    scenario is a critical failure, not a style issue. Read
-   `backend-automation/references/grpc-transport-contract.md` before generating any gRPC file.
-1. **The `gbt-module-<normalized>` skill and its `reference.md`** for the target
+   `$CLAUDE_PLUGIN_ROOT/skills/backend-automation/references/grpc-transport-contract.md` before
+   generating any gRPC file.
+1. **The `gbt-module-<normalized>` profile and its `reference.md`** for the target
    module — `:driver-platform` → `gbt-module-driver-platform`, `:services:foo` →
    `gbt-module-services-foo`. **Highest authority.** Its layer map, its 4-step endpoint
    existence & reuse protocol, and its coding-style rules override anything you would
    otherwise infer. Its `reference.md` carries verified real-code patterns — mirror them.
-2. **The `gbt-code-understanding` skill** — the five-phase analysis method. Work
+2. **`gbt-code-understanding`** — the five-phase analysis method. Work
    through it before writing a line.
-3. **The `gbt-code-generation` skill** — the emission rules, negative/edge
+3. **`gbt-code-generation`** — the emission rules, negative/edge
    catalogue, and quality checks.
 
-All three ship alongside this skill in the `aep-backend` plugin. Load them by name where
-skills are discovered; where they are not, read `SKILL.md` from the sibling directory of
-this file.
+All three are **reference documents, not skills**. Read them directly:
+`$CLAUDE_PLUGIN_ROOT/reference/gbt-module-<normalized>/SKILL.md` (plus its `reference.md`),
+`$CLAUDE_PLUGIN_ROOT/reference/gbt-code-understanding/SKILL.md`, and
+`$CLAUDE_PLUGIN_ROOT/reference/gbt-code-generation/SKILL.md`. If `$CLAUDE_PLUGIN_ROOT` is unset,
+resolve the plugin root two levels above this file (`stages/../`) and read `reference/` beneath it.
 
 If the module has no profile, say so in the manifest and proceed with 2 and 3 alone — but
 flag it, because output quality drops sharply without one.
@@ -417,6 +427,7 @@ Exactly one JSON object. The Java goes to disk; this manifest is the record of w
   "module": ":driver-platform",
   "module_root": "driver-platform",
   "module_profile_skill": "gbt-module-driver-platform",
+  "module_writer": "gbt-codegen:driver-platform-api-test-writer",
   "review": {"status": "approved", "reviewer": "<name>", "at": "<ISO-8601>"},
   "counts": {"scenarios_in_plan": 6, "generated": 5, "skipped_dedup": 1,
              "files_created": 2, "files_updated": 3},
