@@ -51,7 +51,9 @@ existing gojek-backend-tests (GBT) repository.
    handwritten DTO in place of a generated proto type, or an HTTP-status assertion
    for a gRPC scenario is a critical failure. Never modify generated protobuf
    sources. See `backend-automation/references/grpc-transport-contract.md` and the
-   module's gRPC skill (`gopay-grpc-api-test-writer`, `gofood-grpc-api-test-writer`).
+   module's gRPC writer agent (`gopay-grpc-api-test-writer`,
+   `gofood-grpc-api-test-writer`) — its document is at
+   `reference/module-writers/<writer-name>/SKILL.md`.
 4. Order of work: component (per-API) first, then integration, then end-to-end.
 5. Implement assertions from each case's expected output. For API/component tests
    ALSO assert: response status, the presence and values of the documented

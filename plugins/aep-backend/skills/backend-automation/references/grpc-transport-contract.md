@@ -27,13 +27,13 @@ real test-class consumer before treating a surface as live.
 
 ## Routing
 
-| Module | Transport | Skill |
+| Module | Transport | Writer agent |
 |---|---|---|
-| `gopay` | REST / miniapp (`userJourneyTests/userspend/**`) | `gopay-api-test-writer` |
-| `gopay` | gRPC (`paymentTooling/**`) | `gopay-grpc-api-test-writer` |
-| `gofood` | REST | `gofood-api-test-writer` |
-| `gofood` | gRPC (OpenAPI/web-order) | `gofood-grpc-api-test-writer` |
-| any other module | either | no gRPC skill exists — do fresh discovery per `backend-automation`, and do not assume either module's shape transfers |
+| `gopay` | REST / miniapp (`userJourneyTests/userspend/**`) | `gbt-codegen:gopay-api-test-writer` |
+| `gopay` | gRPC (`paymentTooling/**`) | `gbt-codegen:gopay-grpc-api-test-writer` |
+| `gofood` | REST | `gbt-codegen:gofood-api-test-writer` |
+| `gofood` | gRPC (OpenAPI/web-order) | `gbt-codegen:gofood-grpc-api-test-writer` |
+| any other module | either | no gRPC writer exists — do fresh discovery per `backend-automation`, and do not assume either module's shape transfers |
 
 ## The transport-aware scenario contract
 

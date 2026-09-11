@@ -233,7 +233,7 @@ Next steps:
   1. Review qa_analysis.md — read the analysis and generated scenarios.
   2. Fill ## Human Review → ### Feedback in qa_analysis.md.
   3. Re-invoke /aep-backend:backend-test-plan-generator — triggers review mode.
-  4. After plan is approved, invoke /aep-backend:automation-plan-generator separately.
+  4. After plan is approved, invoke /aep-backend:code-gen-orchestrator — it dispatches automation plan generation and every later stage as subagents.
 ```
 
 ---
@@ -432,7 +432,7 @@ After completion, surface:
    Plan status        : <approved | draft | in_review>
 
 If status is "approved":
-  → Invoke /aep-backend:automation-plan-generator to continue to Phase C.
+  → Invoke /aep-backend:code-gen-orchestrator to continue to Phase C.
 If status is still "draft" or "in_review":
   → More feedback needed — repeat the review cycle.
 ```
