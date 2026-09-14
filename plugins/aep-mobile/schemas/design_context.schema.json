@@ -25,7 +25,7 @@
     },
     "design_source": {
       "type": "object",
-      "description": "ADDITION. Provenance of the Figma export, copied from the Export Design Raw JSON plugin envelope. Lets a reviewer tell a full-page export from a partial selection export, and tells them whether geometry was available, without re-opening Figma.",
+      "description": "ADDITION. Provenance from the figma-design-bundle manifest and per-state Raw JSON export envelope (file/page, scope, counts, geometry flags). Lets a reviewer tell a full-page export from a partial selection export without live design access.",
       "additionalProperties": false,
       "properties": {
         "file_name": { "type": "string", "description": "envelope file.name" },
@@ -120,7 +120,7 @@
                 "element_id": {
                   "type": "string",
                   "pattern": "^[A-Z0-9_]+\\.[a-z0-9_]+(\\.[a-z0-9_]+)?$",
-                  "description": "Built from the app config's naming_convention.element_id_pattern + role_vocabulary: <SCREEN_ID>.<purpose><role_suffix>[.<state>] — UPPER_SNAKE screen half, lower_snake role half (e.g. CONFIRM_ACCOUNT.approve_btn). This is the join key to change_context; never re-case or re-derive it."
+                  "description": "Logical element id: <SCREEN_ID>.<purpose><role_suffix>[.<state>] — UPPER_SNAKE screen half, lower_snake role half (e.g. CONFIRM_ACCOUNT.approve_btn). Bundle extraction assigns ids via scripts/design_extractor heuristics (aligned with config naming_convention in docs); config element_id_pattern is not applied at runtime. Join key to change_context; do not re-case or hand-edit after extraction."
                 },
                 "source_ref": { "type": "string", "description": "ADDITION. Figma node id of this layer." },
                 "type": { "type": "string" },

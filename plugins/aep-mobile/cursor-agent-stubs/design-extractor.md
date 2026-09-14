@@ -1,6 +1,6 @@
 ---
 name: design-extractor
-description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, logical element IDs, interactions, states, ui_flow, and project-level ambiguity tracking. Input is a JSON export from the "Export Design Raw JSON" Figma plugin. The concrete extraction pipeline is intentionally not specified here; this skill defines the contract, principles, and output shape that any implementation must satisfy.
+description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, logical element IDs, interactions, states, ui_flow, and project-level ambiguity tracking. Input is a figma-design-bundle directory on disk (manifest.json). See references/design-extractor/BUNDLE_INPUT.md and WORKFLOW.md.
 model: composer-2.5
 ---
 

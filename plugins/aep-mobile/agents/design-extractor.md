@@ -1,227 +1,173 @@
 ---
 name: design-extractor
-description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, logical element IDs, interactions, states, ui_flow, and project-level ambiguity tracking. Input is a JSON export from the "Export Design Raw JSON" Figma plugin. The concrete extraction pipeline is intentionally not specified here; this skill defines the contract, principles, and output shape that any implementation must satisfy.
+description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, logical element IDs, interactions, states, ui_flow, and project-level ambiguity tracking. Input is a figma-design-bundle directory on disk (manifest.json). See references/design-extractor/BUNDLE_INPUT.md and WORKFLOW.md.
 model: sonnet
 tools: Read, Write, Bash, Grep, Glob
 ---
 
-# Mobile Design Extractor
+# Mobile Design Extractor (all GoTo apps)
 
-This skill is the frontend-primary stage of the AEP mobile pipeline. It produces the screen/element map whose logical `element_id`s later join to real per-platform locators from the code-change-extractor stage.
+Turn a **figma-design-bundle** export into a schema-compliant `design_context.json` for mobile QA: screens, element map, interactions, and `ui_flow`. This agent runs in **Phase A** of the pre-build pipeline. It does **not** communicate with `prd-extractor`, `rfc-extractor`, or `task-extractor`. The first downstream consumer is **`sdet-plan-runner`** (via `mobile-sdet-plan-generator`), which treats `design_context.json` as **required** context alongside `prd_context.json`.
 
-## Golden input
+Read **[references/design-extractor/WORKFLOW.md](../references/design-extractor/WORKFLOW.md)** then **[references/design-extractor/BUNDLE_INPUT.md](../references/design-extractor/BUNDLE_INPUT.md)** for the bundle contract and mapping.
 
-The current POC reference export is `agents/design-extractor/golden/inputs/GoFood-Group-Order-Bundling-Items.json` (Figma selection export, `formatVersion: 2`, 3 540 nodes). Its schema and observed conventions are memoised in `references/design-extractor/INPUT_SCHEMA.md`. Any new extraction implementation must be validated against this golden input before it replaces the previous pipeline.
+## Preflight — resolve, or record and continue
 
-## Output contract
+**Never stop, never guess.** Work through these before emitting output. Anything that cannot be resolved becomes an `extraction_gaps[]` entry and the run continues — a partial, honestly labelled output is always better than no output. What is forbidden is inventing a value to fill the hole.
 
-One `design_context.json` per app in scope. The file must validate against the plugin-level `design_context` schema and contain at least:
+1. **App set — how many apps does this design cover?** Never assume one. Collect every app in scope from bundle `manifest.source` metadata, file names, or the user naming them. Map each to an app id: `gojek-consumer`, `gojek-driver`, `gofood-consumer`, `gofood-merchant`, `gopay-consumer`, `gopay-merchant`.
+   - **One app** → one output file (see *Output files*).
+   - **Two or more** → one output file per app.
+   - **None resolvable** → emit a single file with `app` absent and a `BLOCKING` gap on `app`.
+   Report the decision in your reply before writing: *"2 apps detected — gopay-consumer, gojek-consumer. Writing 2 context files."*
+2. **Config, per app in the set** — `config/<app>.json`. Each file's `app` comes from that config's `app_id`. Use `naming_convention` (especially `role_vocabulary`), optional `design_components`, and `deeplink_scheme` when grounding deep links. Pass `--app <app_id>` to the extractor script so `app` resolves from config. **`element_id` values are assigned by `scripts/design_extractor` heuristics** (see BUNDLE_INPUT); agents do not apply `element_id_pattern` at runtime or hand-edit ids for casing. Unreadable config → add a gap on `ENVIRONMENT` (`severity: DEGRADED`, reason that config could not be read, action to reinstall/update the aep-mobile plugin). Set `extraction_status: DEGRADED`. Continue; without config, `app` stays absent with a gap on `app`.
+3. **Schema** — `schemas/design_context.schema.json`. Unreadable → `DEGRADED` gap on `ENVIRONMENT`, same install action. Fall back to the field list in this document **only** in that case, and say so in the gap.
+4. **Input.** See *Accepted input*. With **`bundle_root`**, open `manifest.json` at that root for preflight only. With **`design_url_hint`** only (no bundle), follow the *URL-only path* in *Procedure* — do not run `run_design_extractor.py`. If a path was passed but is not a bundle (`manifest.json` missing or `generator.name !== "figma-design-bundle"`), emit schema-shaped JSON with `extraction_status: INCOMPLETE` and a **BLOCKING** gap: export a figma-design-bundle to disk and pass that directory. Do not fetch Figma or substitute legacy Raw JSON.
 
-- `app`: the app identifier, when resolvable.
-- `screens`: a list of screens, each with its states and logical elements.
-- `elements`: logical element IDs with role hints derived from the design, not fabricated.
-- `ui_flow`: directed edges representing navigation, starting from the reserved `ENTRY` pseudo-node.
-- `extraction_gaps`: anything that could not be resolved, with a reason and a Figma node reference when available.
-- `blocking_issues`: questions that require a design-team answer before downstream stages can proceed safely.
+## Output files — one per app in scope
 
-## Principles
+| Apps in scope | Files written |
+| :--- | :--- |
+| 1 | `design_context.json` |
+| 2+ | `design_context.<app_id>.json` for each — e.g. `design_context.gopay-consumer.json`, `design_context.gojek-consumer.json` |
 
-- Never invent `screen_id`, `element_id`, states, or edges.
-- Collapse state variants into screen-level states; do not fragment them into separate screens.
-- Report unresolved navigation in `blocking_issues` rather than fabricating it.
-- Any unresolvable ambiguity becomes an `extraction_gaps` entry and the run continues. A partial, honestly labelled output is preferable to no output.
-- The model may enrich labels, validations, and wording, but it must not create structure that the design export does not support.
-- `element_id` casing and role suffixes are the join key to the code-change context; once established, downstream stages must not re-case or re-derive them. Recognised role suffixes include `_btn`, `_button`, `_input`, `_label`, `_lbl`, `_toggle`, `_tab`, `_list`, `_container`, `_img`, and `_image`.
+Each file is a complete, independently valid `design_context` with a **single** `app` when config resolved. Nothing downstream needs to know a split happened unless filenames differ.
 
-## Workflow outline
+## Extraction status and gaps — required on every run
 
-1. **Preflight**: verify the export can be parsed, carries geometry, and contains the expected Figma document structure. Emit a `DEGRADED` context if not.
-2. **App set**: determine how many apps the export covers. Do not assume a single app from visual style or dark theme alone. Report the decision before extracting.
-3. **Extract**: derive screens, states, elements, and `ui_flow` from the export. Keep the derivation deterministic and reproducible.
-4. **Enrich**: use a constrained, fast-tier model pass only for decoration, labels, and note-traced validations. Escalate to a stronger tier only when a screen is flagged as genuinely ambiguous.
-5. **Review**: produce a human-verifiable side-by-side artifact so reviewers can confirm collapse, identity, and edge decisions against the Figma board.
-6. **Validate**: ensure the final context passes schema validation and referential integrity checks.
+- `extraction_status`
+  - `OK` — every required field resolved from inputs; **`extraction_gaps` must be empty**.
+  - `INCOMPLETE` — one or more fields could not be resolved and were left absent or minimal; gaps list what is missing.
+  - `DEGRADED` — config, schema, validator, or another dependency was unavailable; output may be structurally valid but less grounded than usual.
+- `extraction_gaps[]` — `{ field, reason, action?, severity }` where `severity` is `BLOCKING`, `DEGRADED`, `WARN`, or `INFO`.
 
-## Pipeline scripts
+Rules:
 
-Five Python scripts implement the extraction pipeline. Run them from the `agents/design-extractor/` directory (sibling of this file).
+- Never set `extraction_status: OK` when `extraction_gaps` is non-empty.
+- A field you cannot resolve is **left empty** (or omitted when optional) and recorded in `extraction_gaps`. Never use placeholders, plausible defaults, or values copied from another feature.
+- `reason` cites what you checked in the source; `action` is the concrete next step for a **human maintainer** (re-export bundle, fix connectors in the design source). Agents must **not** open Figma or fulfill those actions via MCP.
 
-### Full run (`run_design_extractor.py`)
+## Accepted input
 
-```
-# Fresh (default) — wipe workdir artefacts, then full pipeline
-python3 run_design_extractor.py -i <input.json> -w <workdir>
+Read **[references/design-extractor/BUNDLE_INPUT.md](../references/design-extractor/BUNDLE_INPUT.md)** for field-level detail and the mapping cheat sheet.
 
-# Incremental — keep prior preprocess/temp artefacts; only reprocess what changed
-python3 run_design_extractor.py -i <input.json> -w <workdir> --reuse
-```
+| Input | Who reads tree files |
+|-------|----------------------|
+| **`bundle_root`** (directory) | **Preflight:** inspect **`manifest.json` only** at the bundle root (`generator.name === "figma-design-bundle"`, `formatVersion === 1`). **Extraction:** delegate per-state `raw.json` / `connectors.json` walks to `scripts/run_design_extractor.py` — do not hand-read large state trees. |
+| **`design_url_hint`** (URL string, no bundle) | No bundle files; write the URL-only stub (*Procedure*). Optional: parse `fileKey` / `node-id` from the URL into gap **reason** text only (no network). |
 
-**Default (no `--reuse`):** deletes known artefacts, then runs Steps 1–4. Use for a
-first run or when the Figma export changed globally.
+Do not require JPGs or missing `smart.json` for bundle extraction. `links.json` / per-state `figmaUrl` in the bundle are traceability metadata only.
 
-**`--reuse`:** skip `clean_workdir`. Use when **adding pages/frames** to an existing
-export and prior Step 1/2 outputs for unchanged screens are still valid. After the
-mechanical run, agent review (Step 3) only for new/changed screens, then Step 4.
-If reuse would mix stale frames with a materially different export, run without
-`--reuse` instead.
+### App resolution (bundle)
 
-### Step 1 — Preprocess & render (`render_design.py`)
+- Map `manifest.source.fileName`, page name, and user hints to app ids (`gofood-consumer` for GoFood Group Order files, etc.).
+- Load `config/<app>.json` for the resolved app. Do not substitute another app’s config for naming or `app` when the target config is missing — record gaps instead.
 
-```
-python3 render_design.py -i <input.json> -w <workdir>
-```
+### `design_source` (bundle)
 
-Runs both the `preprocess` phase (spatial analysis → `<stem>_pre-process.json`) and the `render` phase (HTML wireframe → `<stem>_render.html`). Pass `preprocess` or `render` as a positional argument to run only one phase.
+Populate from aggregated manifest data:
 
-### Step 2 — Extract design context (`extract_design_context.py`)
+- `file_name`, `page_name`, `scope`, `exported_at` ← `manifest.source` + `manifest.exportedAt`
+- `node_count` ← sum of `stats.nodeCount` or per-state counts
+- `truncated_count` ← sum of per-state `truncatedCount` (trial bundle: 0)
+- `has_geometry` ← `true` if any state `raw.json` node includes `x` and `y`
+- When `scope === "selection"`, add a `WARN` or `INFO` gap noting flows outside the selection are unverified
 
-```
-python3 extract_design_context.py \
-    --preprocess <workdir>/stem_pre-process.json \
-    --input      <original-input.json> \
-    [-w <workdir>] \
-    [--inventory <workdir>/stem_inventory.json]  # optional override \
-    [-o <workdir>/design_context.temp.json]  # default
-```
+### `extraction_gaps` (bundle)
 
-Reads `_pre-process.json` and the Step 1 inventory sidecar (`<stem>_inventory.json`, resolved from the preprocess path unless `--inventory` is set). Writes `design_context.temp.json`, `element_id_quality.json`, and `screen_collapse_map.json` (mechanical AUTO/AMBIGUOUS scaffold). Validates against `../../schemas/design_context.schema.json` before writing.
+Record honestly — never set `extraction_status: OK` while these remain:
 
-**Screen collapse (mechanical):** Frames with identical raw Figma names and compatible outgoing flow signatures are AUTO-collapsed into one `screens[]` record with `source_refs[]` listing every frame id. Semantic element twins across collapsed frames share a canonical `element_id` with per-row `states_represented` and distinct `source_ref`. Ambiguous groups (name variants or divergent flows) stay split and appear in `screen_collapse_map.json` `candidates[]` for agent review.
+- Each distinct `manifest.warnings[].code` (cite representative `message` / count for repetitive `LABEL_HEURISTIC`)
+- `CONNECTOR_DANGLING` → `BLOCKING` or `WARN` in `extraction_gaps` and short text in `project_context.blocking_issues[]`
+- Missing on-disk `smart.json` where manifest lists it → `INFO`
+- Unresolved connector target screen id → `WARN` with connector id
 
-**Element extraction (inventory-driven):** For each screen, Step 2 extracts **all per-screen `flow_element_ids`** from the inventory — including nested nodes not present as direct children of the screen frame in `_pre-process.json`. Nodes are located via DFS in the screen subtree (`node_tree`). When the inventory file is missing, Step 2 falls back to direct-child extraction (legacy behavior) and records an `extraction_gaps` INFO entry.
+## Output (→ design_context.schema.json)
 
-**Dedup policy (prefer outgoing):** Among inventory candidates on the same screen, incoming-only ancestor containers are omitted when a descendant candidate has an outgoing connector edge (or is a leaf among candidates). This prevents duplicate elements for wrapper frames that only receive connectors while the actual trigger lives on a nested child.
+The output must conform to `schemas/design_context.schema.json`. The list below is a reading aid, not the contract — validate against the file.
 
-The `_render.html` hierarchy is unchanged (Step 1); only `design_context` element coverage improves.
+**Required top-level:**
 
-### Step 3 — Agent Review & Refinement
+- `visual_analysis_scratchpad` (string) — short structural overview before technical fields.
+- `project_context` — `overall_ambiguity_rating` (`LOW` | `MEDIUM` | `HIGH`), `blocking_issues[]`.
+- `screens[]` — screen_id, screen_name, screen_states, elements, screen_notes; element rows require `element_id`, `type`, `label`, `interactions`, `validations_and_edge_cases`.
+- `ui_flow[]` — edges with at least `from_screen_id`, `to_screen_id`, `condition`.
 
-On a fresh `run_design_extractor.py` run, Step 3 emits an empty `id_refinement_map.json` scaffold. Step 2 already wrote `screen_collapse_map.json` with mechanical `auto_collapsed[]` and `candidates[]`. **Agent review** replaces those scaffolds when element IDs or ambiguous screen groups need human decisions.
+**Optional but encouraged when known:**
 
-#### 3a — Element ID refinements
+- `design_source` — provenance from the export envelope (file/page, scope, counts, geometry flags).
+- `app` — from config `app_id`; omit only when app could not be resolved (and record a gap).
 
-Once `design_context.temp.json` is generated, check `<workdir>/element_id_quality.json` (produced by Step 2) to quickly identify which element IDs have `"quality": "BAD"`. This file covers both outgoing `trigger_element_id` values from `ui_flow` **and** incoming connector-destination element IDs from `screens[].elements[]` (elements that connectors land on but are not themselves triggers). Prioritize reviewing all BAD entries — not only those appearing as `trigger_element_id` in `ui_flow`. Then identify and highlight any remaining flow-relevant element IDs where the mechanical name is still too generic or ambiguous.
+## Cross-field rules
 
-Note: `recover_design_context.py` already renames matching `element_id` values in `screens[]` and scoped `ui_flow[]` edges (prefer `trigger_source_ref` when present); incoming-only elements do not need `trigger_element_id` updates in `ui_flow`.
+- `element_id` must match the schema pattern; values are produced by the bundle extractor (`scripts/design_extractor`). They are the join key to change context and automation locators — agents do not re-case, re-derive, or hand-edit them after extraction.
+- `ui_flow[].trigger_element_id` must match an `elements[].element_id` on the source screen when present; use `trigger_source_ref` to disambiguate state-variant twins sharing the same canonical id.
+- `screens[].screen_id` and `ui_flow` screen ids use `UPPER_SNAKE_CASE`; keep `screens[]` and `ui_flow[]` consistent — do not record a flow to a screen id that does not exist in `screens[]` without a `WARN` gap.
+- Optional fields documented in the schema as "absence is normal" (e.g. most `deep_link`, `accessibility_id`, `purpose`) must **not** be invented to look complete.
+- Do **not** populate fields reserved for downstream cross-stage analysis in other context types (this schema has no `prd_cross_refs` / `rfc_cross_refs`; `sdet-plan-runner` owns PRD↔design gap analysis).
 
-For each identified element, suggest the most appropriate replacement id based on contextual clues on that element — e.g. its label/text content, accessibility name, role, position within the screen hierarchy, and the interaction semantics of its `ui_flow` edge. The suggested id must follow the same casing/role-suffix conventions as the rest of the context (see Principles), since it is the join key to downstream code-change locators.
+## Procedure
 
-**Overwrite** `<workdir>/id_refinement_map.json` with proposed renames:
+**Multi-app:** Each `run_design_extractor.py` invocation accepts a single `--app`. Multiple apps in scope → one script run (and one output file) per app id.
 
-```json
-{
-  "refinements": [
-    {
-      "screen_id": "...",
-      "old_id": "button_1",
-      "suggested_id": "checkout_apply_promo_button",
-      "confidence": "high",
-      "rationale": "Element label reads 'Apply promo' and triggers a checkout action"
-    }
-  ]
-}
-```
+### Bundle path (`bundle_root` present and valid manifest)
 
-#### 3b — Ambiguous screen collapse review
+1. **Validate bundle** — Confirm `manifest.json` at the passed root with `generator.name === "figma-design-bundle"`. If not, stop with `INCOMPLETE` + BLOCKING gap (re-export required).
+2. **Preflight** rules 1–3 (apps, config per app, schema). For GoFood Group Order trial scope, set `app: "gofood-consumer"` when file name or user implies GoFood.
+3. **`visual_analysis_scratchpad`** — Summarise manifest: screen count, state count, scope (e.g. bundling / group order), connector count from outgoing dedupe.
+4. **`project_context`** — Set `overall_ambiguity_rating` to **MEDIUM** when label heuristics, duplicate scroll states, or dangling connectors appear; copy dangling connector messages into `blocking_issues[]`.
+5. **`screens[]` / `ui_flow[]`** — Run the Python pipeline (do not hand-walk large trees):
 
-Read `<workdir>/screen_collapse_map.json` `candidates[]`, `<stem>_render.html` for layout context, and `element_id_quality.json` for remaining BAD ids. Optionally validate flagged groups via Figma MCP (labels, notes, connector targets).
+   ```bash
+   python3 scripts/run_design_extractor.py \
+     --bundle "<bundle-root>" \
+     --plugin-root "<path-to-plugins/aep-mobile>" \
+     --app <app_id> \
+     --out design_context.json
+   ```
 
-Append agent decisions to `decisions[]` (only `medium`/`high` confidence are applied in Step 4):
+   The script implements manifest load, per-state `raw.json` indexing, connector dedupe, label/element heuristics, `interactions[]` backfill, `ui_flow[]`, and manifest-driven `extraction_gaps[]`. You may edit `visual_analysis_scratchpad` or gap wording afterward; fix extraction logic if validation fails — never patch labels only to pass checks.
 
-```json
-{
-  "decisions": [
-    {
-      "screen_id": "MPS",
-      "action": "collapse",
-      "frame_ids": ["10882:10702", "10882:10914"],
-      "confidence": "high",
-      "rationale": "Same MPS chrome; states differ only by order-type chip; flows are state variants not separate screens."
-    }
-  ]
-}
-```
+6. **Post-validate** — Run `scripts/validate_design_context.py` (see *Validate*); set `extraction_status` from gap rules (not from validator exit code alone).
 
-Actions: `collapse` | `keep_split`. Mechanical `recommendation` on each candidate is a hint only.
+### URL-only path (`design_url_hint`, no valid `bundle_root`)
 
-Do not edit `design_context.temp.json` directly; reviewers use the mapping files to confirm decisions before Step 4. After Step 3, **re-run Step 4** to refresh `design_context.json`.
+Do **not** run `run_design_extractor.py`. Write minimal schema-shaped JSON:
 
-### Step 4 — Apply refinements (`recover_design_context.py`)
+- `extraction_status: INCOMPLETE`
+- `extraction_gaps[]`: one **BLOCKING** on `input` — cite `design_url_hint` in `reason`; `action`: export a figma-design-bundle to disk and re-run with `bundle_root`
+- `visual_analysis_scratchpad` — one line that design input was URL-only (no bundle on disk)
+- `project_context`: `overall_ambiguity_rating: HIGH`, `blocking_issues[]` with the same message as the BLOCKING gap
+- `screens: []`, `ui_flow: []`
+- Omit `app` and `design_source` unless you can cite them without guessing
 
-```
-python3 recover_design_context.py \
-    [-w <workdir>] \
-    [--refinements <workdir>/id_refinement_map.json] \
-    [-c <workdir>/design_context.temp.json]  # default input \
-    [-o <workdir>/design_context.json]       # default output
-```
+Then run the validator (empty `screens` / `ui_flow` are schema-allowed for this stub).
 
-Reads `design_context.temp.json`, `screen_collapse_map.json` (when present), and `id_refinement_map.json`. Applies collapse decisions and refinements with `confidence: "medium"` or `"high"`, updates `element_id` in screens and scoped `trigger_element_id` in `ui_flow` (match via `trigger_source_ref` when set), validates against schema, and writes `design_context.json`. Re-run after Step 3 when either mapping file changes.
+## Validate — do not hand-wave valid
 
-**Trigger disambiguation:** When multiple `ui_flow` edges share a canonical `trigger_element_id`, use `trigger_source_ref` → `screens[].elements[].source_ref` to resolve the Figma node. `trigger_source_ref` is never rewritten on id rename (node id is stable).
-
-### Mandatory output artefacts (workdir convention)
-
-All run outputs go to a workdir, never into the `agents/design-extractor/` directory itself. **After `run_design_extractor.py` completes, every path below must exist.**
-
-```
-golden/outputs/<stem>/
-  <stem>_pre-process.json         # Step 1
-  <stem>_inventory.json           # Step 1
-  <stem>_render.html              # Step 1
-  design_context.temp.json        # Step 2
-  element_id_quality.json         # Step 2
-  screen_collapse_map.json        # Step 2 (mechanical scaffold; agent adds decisions[])
-  id_refinement_map.json          # Step 3 (scaffold; agent overwrites)
-  design_context.json             # Step 4
-```
-
-#### Validation (`<stem>_inventory.json`)
-
-The inventory sidecar is produced during Step 1 preprocess and supports automated review before Step 2:
-
-- `summary.connectors_unresolved` — should be `0` when every connector resolved.
-- `summary.elements_without_screen` — count of elements whose `screen_id` is still null after resolution (should be `0` for complete exports).
-- `summary.unreachable_screens` — screens not reachable from entry points via screen-to-screen edges (warn-only for partial exports).
-- `flow_audit.checks[]` — structured pass/fail checks for connector resolution and screen reachability.
-
-**Element ↔ screen mapping**
-
-- Each record in `elements[]` includes `screen_id` (resolved screen node id, or null) and `screen_resolution_method` (`subtree`, `contextual`, `distance_snap`, or `unresolved`).
-- Each record in `screens[]` includes reverse mappings:
-  - `flow_element_ids` — element node ids with `classification == "FLOW_RELEVANT"` on that screen.
-  - `contextual_element_ids` — element node ids with `classification == "CONTEXTUAL_ANNOTATION"` on that screen.
-  - `contextual_information_ids` — ids from spatial contextual-info association (kept for backward compatibility; may overlap with `contextual_element_ids`).
-
-Example one-liner:
+Run once **per output file** from the plugin root:
 
 ```bash
-python3 -c "
-import json, sys
-inv = json.load(open(sys.argv[1]))
-assert inv['summary']['connectors_unresolved'] == 0
-assert inv['summary']['elements_without_screen'] == 0
-" <workdir>/<stem>_inventory.json
+python3 scripts/validate_design_context.py <design_context.json> \
+  --schema schemas/design_context.schema.json
 ```
 
-## Model policy
+For the GoFood bundling example, add `--fixture gofood-group-order-bundling` to enforce label spot-checks (CTA, three billing lines, Learn more).
 
-- Default enrichment work runs on the fast tier.
-- Escalate only for screens flagged as genuinely ambiguous by the pipeline.
-- Never escalate to redo structure. If the structure looks wrong, the fix belongs in the Figma board or the extraction logic, not in a larger model call.
-- Do not use a tier above Sonnet for any design-extractor task.
+- **Validator exit 0 does not imply `extraction_status: OK`.** Schema/cross-field pass only means structure is valid; set `extraction_status` from `extraction_gaps` and script output (`OK` only when gaps are empty).
+- Passes → set `extraction_status: OK` only when `extraction_gaps` is empty.
+- Fails → fix structural issues if you can do so without inventing design facts. If you cannot, still write the best-effort file, set `extraction_status: INCOMPLETE` or `DEGRADED`, and add gaps (`BLOCKING` or `WARN`) with the validator JSON paths in `field`. Never patch values solely to satisfy the schema.
+- Validator unavailable (`jsonschema` not installed) → write the file, add a `DEGRADED` gap on `ENVIRONMENT`, **and say so in your reply**. Suggest: `pip3 install --break-system-packages jsonschema` (PEP 668 system Python) or `pip install jsonschema` inside a venv. Do not claim schema conformance without a successful validate run.
 
-## Rules
+## What you must not do
 
-- One write per output file. Keep intermediates in a work directory; never commit run outputs into the `agents/design-extractor/` directory.
-- Blocking issues must be phrased so a PM can answer them and must name the Figma node id involved.
-- Never edit the final `design_context.json` by hand.
-- **Fresh vs reuse:** default `run_design_extractor.py` deletes workdir artefacts.
-  Pass `--reuse` when adding pages to an existing export so prior Step outputs for
-  unchanged screens are kept. If the Figma board changed globally, omit `--reuse`.
-- **No skipped steps:** Steps 1 → 2 → 3 → 4 still execute in order (mechanical).
-- **Agent review (token rule):** after a mechanical run, replace the Step 3 scaffold with
-  refinements when needed, then re-run Step 4. On `--reuse`, **do not re-review screens
-  already present in the prior `design_context.json`** whose `source_ref` / screen node ids
-  are unchanged — only review **new or changed** screens. Re-doing the first page from
-  scratch when only page N was added is a defect.
+- Do **not** use Figma MCP, open `figma.com` URLs, or fetch live Figma — input is the bundle directory on disk only.
+- Do **not** run `agents/design-extractor/run_design_extractor.py` (maintainer legacy pipeline).
+- Do **not** run regression extraction, generate an SDET plan, or write `sdet_plan.json` / deliverables owned by `sdet-plan-runner`.
+- Do **not** guess UI copy, deep links, accessibility ids, or element roles when the design does not support them.
+- Do **not** merge two apps into one file when the design spans multiple host apps.
+- Output valid JSON only.
+
+## Downstream consumers
+
+- **`sdet-plan-runner`** — required input: screens, elements, `ui_flow`, `project_context.blocking_issues` and ambiguity rating for plan confidence and PRD↔design cross-checks.

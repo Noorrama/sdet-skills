@@ -52,15 +52,26 @@ re-extract, skip that extractor.
 |---|---|---|
 | `prd-extractor` (`agents/prd-extractor.md`) | PRD text/file (prefer text; convert PDF→text first) | No PRD |
 | `rfc-extractor` (`agents/rfc-extractor.md`) | RFC text/file (prefer text; convert PDF→text first) | No RFC |
-| `design-extractor` (`agents/design-extractor.md`) | Figma "Export Design Raw JSON" | No design export |
+| `design-extractor` (`agents/design-extractor.md`) | **(A)** Directory whose root has `manifest.json` with `generator.name: "figma-design-bundle"`, **or (B)** user text / attachment paths containing a Figma design URL (`figma.com/design/`, `figma.com/file/`, optional `node-id`) when **no** bundle is on disk | Skip when neither (A) nor (B); PRD alone is not a substitute |
 | `task-extractor` (`agents/task-extractor.md`) | Dev task tree JSON or JIRA export | No task input |
+
+**Design-extractor detection (apply in order):**
+
+1. If a **figma-design-bundle** directory is present → spawn with **`bundle_root`** (that directory only).
+2. Else if chat or attachments include Figma design URL(s) as above → **still spawn** `design-extractor` with **`design_url_hint`**: the URL string(s) for gap text only (no fetching). Do **not** pass a URL as `bundle_root`.
+3. Else → skip design-extractor.
 
 Report the detection decision before spawning.
 
 ### 2. Fire matching extractors in PARALLEL
 
-Launch selected subagents in a **single** turn. Pass plugin root, input path(s),
-working directory.
+Launch selected subagents in a **single** turn. Pass `plugin_root` (aep-mobile), input path(s),
+and working directory.
+
+| Subagent | Spawn args |
+|---|---|
+| `design-extractor` | **`bundle_root`** — bundle directory when (A) applies. Optional **`design_url_hint`** — URL string when (B) applies and `bundle_root` is omitted. Never pass Figma URLs as `bundle_root`; never pass individual `raw.json` paths. |
+| Others | Input path(s) per agent doc |
 
 ### 3. Report what was created
 
@@ -68,7 +79,7 @@ working directory.
 |---|---|---|
 | prd-extractor | created / skipped / failed | `prd_context.json` or per-app |
 | rfc-extractor | created / skipped / failed | `rfc_context.json` or per-app |
-| design-extractor | created / skipped / failed | `design_context.json` |
+| design-extractor | created / created (blocking) / skipped / failed | `design_context.json` — use **created (blocking)** when URL-only stub has `extraction_status: INCOMPLETE` and a **BLOCKING** gap on `input` |
 | task-extractor | created / skipped / failed | `task_context.json` |
 | regression-extractor | *(runner only)* | `regression_context.json` in Phase B |
 
