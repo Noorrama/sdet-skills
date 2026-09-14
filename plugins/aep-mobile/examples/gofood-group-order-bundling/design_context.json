@@ -1,0 +1,1333 @@
+{
+  "extraction_status": "INCOMPLETE",
+  "extraction_gaps": [
+    {
+      "field": "design_source.scope",
+      "reason": "manifest.source.scope is selection; flows outside selectionIds are not in the export.",
+      "action": "Re-export full page or verify flows manually in Figma.",
+      "severity": "WARN"
+    },
+    {
+      "field": "manifest.warnings.CONNECTOR_DANGLING",
+      "reason": "2 manifest warning(s): Connector 13056:83229 points at 12394:65706, which no longer exists on this page.",
+      "action": "Fix Figma naming/connectors and re-export bundle.",
+      "severity": "BLOCKING"
+    },
+    {
+      "field": "manifest.warnings.DUPLICATE_STATE_NAME",
+      "reason": "5 manifest warning(s): \"MPS\" has more than one state named \"MPS - Scroll\"; this one is stored as \"MPS - Scroll~2\".",
+      "action": "Fix Figma naming/connectors and re-export bundle.",
+      "severity": "WARN"
+    },
+    {
+      "field": "manifest.warnings.LABEL_HEURISTIC_USED",
+      "reason": "18 manifest warning(s): State \"MPS\" for \"MPS\" was read from the label above the frame. Rename the frame to \"MPS / MPS\" to make it explicit.",
+      "action": "Fix Figma naming/connectors and re-export bundle.",
+      "severity": "WARN"
+    },
+    {
+      "field": "manifest.warnings.NON_STANDARD_STATE",
+      "reason": "17 manifest warning(s): State \"MPS\" is not in the standard vocabulary (Default, Loading, Empty, Error, Success, Partial, Disabled, Offline, Skeleton). Kept verbatim.",
+      "action": "Fix Figma naming/connectors and re-export bundle.",
+      "severity": "WARN"
+    },
+    {
+      "field": "manifest.warnings.NO_DEFAULT_STATE",
+      "reason": "8 manifest warning(s): \"MPS\" has no state named Default; \"MPS\" (top-left) is used as the default.",
+      "action": "Fix Figma naming/connectors and re-export bundle.",
+      "severity": "INFO"
+    },
+    {
+      "field": "smart.json",
+      "reason": "manifest lists smart.json for 18 state(s) but files are absent on disk.",
+      "action": "Regenerate bundle when exporter writes smart.json consistently.",
+      "severity": "INFO"
+    },
+    {
+      "field": "ui_flow[3].trigger_element_id",
+      "reason": "Connector 15959:86809 from MPS has no resolvable trigger element for source node 15959:86802.",
+      "action": "Verify connector attachment in Figma or improve label heuristics.",
+      "severity": "WARN"
+    }
+  ],
+  "visual_analysis_scratchpad": "Figma design bundle: 8 screens, 18 states, 14 deduplicated outgoing connectors.",
+  "project_context": {
+    "overall_ambiguity_rating": "MEDIUM",
+    "blocking_issues": [
+      "Connector 13056:83229 points at 12394:65706, which no longer exists on this page.",
+      "Connector 19803:139829 points at 19790:137485, which no longer exists on this page."
+    ]
+  },
+  "screens": [
+    {
+      "screen_id": "MPS",
+      "screen_name": "MPS",
+      "source_ref": "14090:111412",
+      "source_refs": [
+        "14090:111412",
+        "14090:111628",
+        "14090:111955",
+        "14090:111833",
+        "14090:117604",
+        "15959:86239",
+        "14107:118955"
+      ],
+      "screen_states": [
+        "MPS",
+        "MPS - Scroll",
+        "Share - Native",
+        "MPS - Default GO",
+        "MPS - Scroll~2",
+        "MPS - Scroll~3",
+        "MPS - Scroll~4"
+      ],
+      "state_kinds": [
+        "OTHER",
+        "OTHER",
+        "OTHER",
+        "DEFAULT",
+        "OTHER",
+        "OTHER",
+        "OTHER"
+      ],
+      "elements": [
+        {
+          "element_id": "MPS.add_btn",
+          "source_ref": "I14090:117224;1672:5440;1671:7235;1671:6934",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.add_2_btn",
+          "source_ref": "I14090:111420;1672:5440;1671:7235;1671:6934",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.add_3_btn",
+          "source_ref": "I14090:117032;1672:5440;1671:7235;1671:6934",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.add_4_btn",
+          "source_ref": "I14090:117034;1672:5440;1671:7235;1671:6934",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.add_5_btn",
+          "source_ref": "I14090:117036;1672:5440;1671:7235;1671:6934",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.add_6_btn",
+          "source_ref": "I14090:117037;1672:5440;1671:7235;1671:6940",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.add_7_btn",
+          "source_ref": "I14090:117039;1672:5440;1671:7235;1671:6668",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.add_8_btn",
+          "source_ref": "I14090:117041;1672:5440;1671:7235;1671:6668",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.group_order_btn",
+          "source_ref": "I16321:130506;790:3891",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Group Order",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.group_order_2_btn",
+          "source_ref": "I16321:130506;799:3590;799:3547",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Group Order",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.group_order_3_btn",
+          "source_ref": "I16321:130506;799:3590;799:3528",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Group Order",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.group_order_4_btn",
+          "source_ref": "16321:130507",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Group Order",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.group_order_5_btn",
+          "source_ref": "16321:130508",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Group Order",
+          "states_represented": [
+            "MPS"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to LANDING via connector 14090:118188",
+              "connector_id": "14090:118188",
+              "destination_node_id": "18833:91904",
+              "destination_screen_id": "LANDING"
+            }
+          ],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.join_my_gofood_group_order_from_fore_coffee_kopi_btn",
+          "source_ref": "14090:112124",
+          "type": "instance",
+          "role": "OTHER",
+          "label": "Join my GoFood Group Order from Fore Coffee (Kopi), Pondok Indah. Add your favorites and let’s feast together!\nhttps://gofood.groupbuy/099e3das",
+          "states_represented": [
+            "Share - Native"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to MPS via connector 14090:118198",
+              "connector_id": "14090:118198",
+              "destination_node_id": "14090:111898",
+              "destination_screen_id": "MPS"
+            }
+          ],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.meal_pack_list",
+          "source_ref": "14090:117610",
+          "type": "list",
+          "role": "LIST",
+          "label": "Meal Pack",
+          "states_represented": [
+            "MPS - Scroll~2"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to SHIMMER via connector 14090:118395",
+              "connector_id": "14090:118395",
+              "destination_node_id": "14090:116246",
+              "destination_screen_id": "SHIMMER"
+            }
+          ],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.view_group_cart_1_btn",
+          "source_ref": "14107:119618",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "View group cart • 1",
+          "states_represented": [
+            "MPS - Scroll~4"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to SHARED_CART via connector 14107:119837",
+              "connector_id": "14107:119837",
+              "destination_node_id": "14107:119629",
+              "destination_screen_id": "SHARED_CART"
+            }
+          ],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MPS.meal_pack_2_list",
+          "source_ref": "14107:118961",
+          "type": "list",
+          "role": "LIST",
+          "label": "Meal Pack",
+          "states_represented": [
+            "MPS - Scroll~4"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to DISH_DETAILS_4_ITEMS via connector 14107:119606",
+              "connector_id": "14107:119606",
+              "destination_node_id": "14107:119528",
+              "destination_screen_id": "DISH_DETAILS_4_ITEMS"
+            }
+          ],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "7 states from label-instance grouping.",
+      "entry_point": true
+    },
+    {
+      "screen_id": "LANDING",
+      "screen_name": "Landing",
+      "source_ref": "14090:111251",
+      "source_refs": [
+        "14090:111251"
+      ],
+      "screen_states": [
+        "Landing"
+      ],
+      "state_kinds": [
+        "OTHER"
+      ],
+      "elements": [
+        {
+          "element_id": "LANDING.everyone_pays_for_their_items_toggle",
+          "source_ref": "18833:91917",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Everyone pays for their items",
+          "states_represented": [
+            "Landing"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.everyone_pays_an_equal_share_toggle",
+          "source_ref": "18833:91922",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Everyone pays an equal share",
+          "states_represented": [
+            "Landing"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.you_pay_for_everyone_toggle",
+          "source_ref": "18833:91927",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "You pay for everyone",
+          "states_represented": [
+            "Landing"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.you_can_invite_up_to_7_persons_btn",
+          "source_ref": "I14090:111268;790:3891",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "You can invite up to 7 persons",
+          "states_represented": [
+            "Landing"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.you_can_invite_up_to_7_persons_2_btn",
+          "source_ref": "I14090:111268;799:3590;799:3528",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "You can invite up to 7 persons",
+          "states_represented": [
+            "Landing"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.create_invite_friends_btn",
+          "source_ref": "14090:111409",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Create & invite friends",
+          "states_represented": [
+            "Landing"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to MPS via connector 14090:118193",
+              "connector_id": "14090:118193",
+              "destination_node_id": "14090:112124",
+              "destination_screen_id": "MPS"
+            }
+          ],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "LANDING.learn_more_about_billing_methods_label",
+          "source_ref": "18833:91930",
+          "type": "TEXT",
+          "role": "LINK",
+          "label": "Learn more about billing methods",
+          "states_represented": [
+            "Landing"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": ""
+    },
+    {
+      "screen_id": "SHIMMER",
+      "screen_name": "Shimmer",
+      "source_ref": "14090:116246",
+      "source_refs": [
+        "14090:116246"
+      ],
+      "screen_states": [
+        "Loading"
+      ],
+      "state_kinds": [
+        "LOADING"
+      ],
+      "elements": [
+        {
+          "element_id": "SHIMMER.circular_btn",
+          "source_ref": "I14090:116261;790:3891",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "circular",
+          "states_represented": [
+            "Loading"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHIMMER.circular_2_btn",
+          "source_ref": "I14090:116261;799:3590;799:3547",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "circular",
+          "states_represented": [
+            "Loading"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHIMMER.circular_3_btn",
+          "source_ref": "I14090:116261;799:3590;799:3528",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "circular",
+          "states_represented": [
+            "Loading"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": ""
+    },
+    {
+      "screen_id": "BUNDLING_FULL_DATA",
+      "screen_name": "Bundling - Full data",
+      "source_ref": "14090:116262",
+      "source_refs": [
+        "14090:116262",
+        "14090:118735"
+      ],
+      "screen_states": [
+        "SKU details - All require custom",
+        "SKU details - Item customized"
+      ],
+      "state_kinds": [
+        "OTHER",
+        "OTHER"
+      ],
+      "elements": [
+        {
+          "element_id": "BUNDLING_FULL_DATA.custom_btn",
+          "source_ref": "14090:116293",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Custom",
+          "states_represented": [
+            "SKU details - All require custom"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to MERCHANT_PROFILE_REQUIRED via connector 14090:118598",
+              "connector_id": "14090:118598",
+              "destination_node_id": "14090:118409",
+              "destination_screen_id": "MERCHANT_PROFILE_REQUIRED"
+            }
+          ],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "BUNDLING_FULL_DATA.custom_2_btn",
+          "source_ref": "14090:116307",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Custom",
+          "states_represented": [
+            "SKU details - All require custom"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "BUNDLING_FULL_DATA.custom_3_btn",
+          "source_ref": "14090:116321",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Custom",
+          "states_represented": [
+            "SKU details - All require custom"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "BUNDLING_FULL_DATA.custom_4_btn",
+          "source_ref": "14090:118238",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Custom",
+          "states_represented": [
+            "SKU details - All require custom"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "BUNDLING_FULL_DATA.circular_btn",
+          "source_ref": "I14090:118353;790:3891",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "circular",
+          "states_represented": [
+            "SKU details - All require custom"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "BUNDLING_FULL_DATA.circular_2_btn",
+          "source_ref": "I14090:118353;799:3590;799:3547",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "circular",
+          "states_represented": [
+            "SKU details - All require custom"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "BUNDLING_FULL_DATA.circular_3_btn",
+          "source_ref": "I14090:118353;799:3590;799:3528",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "circular",
+          "states_represented": [
+            "SKU details - All require custom"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "BUNDLING_FULL_DATA.add_to_cart_120_000_btn",
+          "source_ref": "14090:116327",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add to cart - 120.000",
+          "states_represented": [
+            "SKU details - All require custom"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "BUNDLING_FULL_DATA.add_to_cart_120_000_2_btn",
+          "source_ref": "14090:118814",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add to cart - 120.000",
+          "states_represented": [
+            "SKU details - Item customized"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to MPS via connector 14107:119622",
+              "connector_id": "14107:119622",
+              "destination_node_id": "15959:86802",
+              "destination_screen_id": "MPS"
+            }
+          ],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "2 states from label-instance grouping."
+    },
+    {
+      "screen_id": "SHARED_CART",
+      "screen_name": "Shared cart",
+      "source_ref": "14107:119629",
+      "source_refs": [
+        "14107:119629",
+        "14107:119843"
+      ],
+      "screen_states": [
+        "GO - Host item added",
+        "GO - Member item added"
+      ],
+      "state_kinds": [
+        "OTHER",
+        "OTHER"
+      ],
+      "elements": [
+        {
+          "element_id": "SHARED_CART.delete_group_btn",
+          "source_ref": "14107:119672",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Delete group",
+          "states_represented": [
+            "GO - Host item added"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.add_items_btn",
+          "source_ref": "14107:119675",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add items",
+          "states_represented": [
+            "GO - Host item added"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.go_to_checkout_btn",
+          "source_ref": "14107:119676",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Go to checkout",
+          "states_represented": [
+            "GO - Host item added"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.invite_friends_btn",
+          "source_ref": "I14107:119679;790:3891",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Invite friends",
+          "states_represented": [
+            "GO - Host item added"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.edit_btn",
+          "source_ref": "14107:119657",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Edit",
+          "states_represented": [
+            "GO - Host item added"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to DISH_DETAILS_4_ITEMS via connector 14107:120070",
+              "connector_id": "14107:120070",
+              "destination_node_id": "17351:141630",
+              "destination_screen_id": "DISH_DETAILS_4_ITEMS"
+            }
+          ],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "SHARED_CART.go_to_checkout_2_btn",
+          "source_ref": "14107:119893",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Go to checkout",
+          "states_represented": [
+            "GO - Member item added"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to CHECKOUT via connector 14107:120764",
+              "connector_id": "14107:120764",
+              "destination_node_id": "14107:120091",
+              "destination_screen_id": "CHECKOUT"
+            }
+          ],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": "2 states from label-instance grouping."
+    },
+    {
+      "screen_id": "CHECKOUT",
+      "screen_name": "Checkout",
+      "source_ref": "14107:120091",
+      "source_refs": [
+        "14107:120091"
+      ],
+      "screen_states": [
+        "Checkout - No promo"
+      ],
+      "state_kinds": [
+        "OTHER"
+      ],
+      "elements": [
+        {
+          "element_id": "CHECKOUT.13_000_toggle",
+          "source_ref": "14107:120103",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "13.000",
+          "states_represented": [
+            "Checkout - No promo"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.30_40_min_toggle",
+          "source_ref": "I14107:120112;564:5374",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "30-40 min",
+          "states_represented": [
+            "Checkout - No promo"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.change_location_btn",
+          "source_ref": "14107:120122",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Change location",
+          "states_represented": [
+            "Checkout - No promo"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.add_more_btn",
+          "source_ref": "14107:120258",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add more",
+          "states_represented": [
+            "Checkout - No promo"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.apply_btn",
+          "source_ref": "I16089:109001;564:5329",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Apply",
+          "states_represented": [
+            "Checkout - No promo"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.purchase_and_deliver_now_btn",
+          "source_ref": "I14107:120340;753:16076",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Purchase and deliver now",
+          "states_represented": [
+            "Checkout - No promo"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "CHECKOUT.edit_btn",
+          "source_ref": "14107:120150",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Edit",
+          "states_represented": [
+            "Checkout - No promo"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to DISH_DETAILS_4_ITEMS via connector 17429:142749",
+              "connector_id": "17429:142749",
+              "destination_node_id": "17351:141630",
+              "destination_screen_id": "DISH_DETAILS_4_ITEMS"
+            }
+          ],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": ""
+    },
+    {
+      "screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "screen_name": "Merchant Profile - Required",
+      "source_ref": "14090:118400",
+      "source_refs": [
+        "14090:118400"
+      ],
+      "screen_states": [
+        "SKU variants"
+      ],
+      "state_kinds": [
+        "OTHER"
+      ],
+      "elements": [
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.free_toggle",
+          "source_ref": "I14090:118406;564:3682;564:5374",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Free",
+          "states_represented": [
+            "SKU variants"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.free_2_toggle",
+          "source_ref": "I14090:118407;564:3682;564:5374",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Free",
+          "states_represented": [
+            "SKU variants"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.free_3_toggle",
+          "source_ref": "I14090:118408;564:3682;564:5374",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Free",
+          "states_represented": [
+            "SKU variants"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.free_4_toggle",
+          "source_ref": "I14090:118409;564:3682;564:5374",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Free",
+          "states_represented": [
+            "SKU variants"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.free_5_toggle",
+          "source_ref": "I14090:118413;564:3682;564:5374",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Free",
+          "states_represented": [
+            "SKU variants"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.free_6_toggle",
+          "source_ref": "I14090:118414;564:3682;564:5374",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Free",
+          "states_represented": [
+            "SKU variants"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.free_7_toggle",
+          "source_ref": "I14090:118415;564:3682;564:5374",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Free",
+          "states_represented": [
+            "SKU variants"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.free_8_toggle",
+          "source_ref": "I14090:118419;564:3682;564:5374",
+          "type": "selection_control",
+          "role": "TOGGLE",
+          "label": "Free",
+          "states_represented": [
+            "SKU variants"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_33_000_btn",
+          "source_ref": "14090:118427",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Add to cart - 33.000",
+          "states_represented": [
+            "SKU variants"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to BUNDLING_FULL_DATA via connector 14090:118949",
+              "connector_id": "14090:118949",
+              "destination_node_id": "14090:118814",
+              "destination_screen_id": "BUNDLING_FULL_DATA"
+            }
+          ],
+          "validations_and_edge_cases": []
+        }
+      ],
+      "screen_notes": ""
+    },
+    {
+      "screen_id": "DISH_DETAILS_4_ITEMS",
+      "screen_name": "Dish details - 4 items",
+      "source_ref": "14107:119525",
+      "source_refs": [
+        "14107:119525",
+        "15959:86870",
+        "17351:141627"
+      ],
+      "screen_states": [
+        "Added item details",
+        "Added item details~2",
+        "Added item details~3"
+      ],
+      "state_kinds": [
+        "OTHER",
+        "OTHER",
+        "OTHER"
+      ],
+      "elements": [
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.edit_btn",
+          "source_ref": "14107:119542",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Edit",
+          "states_represented": [
+            "Added item details"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.edit_2_btn",
+          "source_ref": "14107:119551",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Edit",
+          "states_represented": [
+            "Added item details"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.edit_3_btn",
+          "source_ref": "14107:119559",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Edit",
+          "states_represented": [
+            "Added item details"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.edit_4_btn",
+          "source_ref": "14107:119567",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Edit",
+          "states_represented": [
+            "Added item details"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.edit_5_btn",
+          "source_ref": "17644:142909",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Edit",
+          "states_represented": [
+            "Added item details"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.edit_6_btn",
+          "source_ref": "17644:142917",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Edit",
+          "states_represented": [
+            "Added item details"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.customize_another_btn",
+          "source_ref": "14107:119574",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Customize another",
+          "states_represented": [
+            "Added item details"
+          ],
+          "interactions": [],
+          "validations_and_edge_cases": []
+        },
+        {
+          "element_id": "DISH_DETAILS_4_ITEMS.120_000_btn",
+          "source_ref": "14107:119569",
+          "type": "button",
+          "role": "BUTTON",
+          "label": "Plus / minus",
+          "states_represented": [
+            "Added item details"
+          ],
+          "interactions": [
+            {
+              "trigger": "tap",
+              "action": "Navigate to DISH_DETAILS_4_ITEMS via connector 15959:86946",
+              "connector_id": "15959:86946",
+              "destination_node_id": "15959:86912",
+              "destination_screen_id": "DISH_DETAILS_4_ITEMS"
+            }
+          ],
+          "validations_and_edge_cases": [],
+          "element_ambiguity": {
+            "rating": "MEDIUM",
+            "reason": "Label from connector text; source layer has no readable TEXT."
+          }
+        }
+      ],
+      "screen_notes": "3 states from label-instance grouping."
+    }
+  ],
+  "ui_flow": [
+    {
+      "from_screen_id": "ENTRY",
+      "to_screen_id": "MPS",
+      "condition": "",
+      "edge_source": "ENTRY_LABEL",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:111412",
+      "to_source_ref": "14090:111412",
+      "navigation_kind": "ENTRY"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "LANDING",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118188",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "16321:130508",
+      "to_source_ref": "18833:91904",
+      "trigger_element_id": "MPS.group_order_5_btn",
+      "trigger_source_ref": "16321:130508"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118198",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14090:112124",
+      "to_source_ref": "14090:111898",
+      "trigger_element_id": "MPS.join_my_gofood_group_order_from_fore_coffee_kopi_btn",
+      "trigger_source_ref": "14090:112124"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHIMMER",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118395",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14090:117610",
+      "to_source_ref": "14090:116246",
+      "trigger_element_id": "MPS.meal_pack_list",
+      "trigger_source_ref": "14090:117610"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "MPS",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15959:86809",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "15959:86802",
+      "to_source_ref": "14107:118963"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "SHARED_CART",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:119837",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14107:119618",
+      "to_source_ref": "14107:119629",
+      "trigger_element_id": "MPS.view_group_cart_1_btn",
+      "trigger_source_ref": "14107:119618"
+    },
+    {
+      "from_screen_id": "MPS",
+      "to_screen_id": "DISH_DETAILS_4_ITEMS",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:119606",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14107:118961",
+      "to_source_ref": "14107:119528",
+      "trigger_element_id": "MPS.meal_pack_2_list",
+      "trigger_source_ref": "14107:118961"
+    },
+    {
+      "from_screen_id": "LANDING",
+      "to_screen_id": "MPS",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118193",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14090:111409",
+      "to_source_ref": "14090:112124",
+      "trigger_element_id": "LANDING.create_invite_friends_btn",
+      "trigger_source_ref": "14090:111409"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "DISH_DETAILS_4_ITEMS",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:120070",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14107:119657",
+      "to_source_ref": "17351:141630",
+      "trigger_element_id": "SHARED_CART.edit_btn",
+      "trigger_source_ref": "14107:119657"
+    },
+    {
+      "from_screen_id": "SHARED_CART",
+      "to_screen_id": "CHECKOUT",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:120764",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14107:119893",
+      "to_source_ref": "14107:120091",
+      "trigger_element_id": "SHARED_CART.go_to_checkout_2_btn",
+      "trigger_source_ref": "14107:119893"
+    },
+    {
+      "from_screen_id": "DISH_DETAILS_4_ITEMS",
+      "to_screen_id": "DISH_DETAILS_4_ITEMS",
+      "condition": "Plus / minus",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "15959:86946",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14107:119569",
+      "to_source_ref": "15959:86912",
+      "trigger_element_id": "DISH_DETAILS_4_ITEMS.120_000_btn",
+      "trigger_source_ref": "14107:119569"
+    },
+    {
+      "from_screen_id": "CHECKOUT",
+      "to_screen_id": "DISH_DETAILS_4_ITEMS",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "17429:142749",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14107:120150",
+      "to_source_ref": "17351:141630",
+      "trigger_element_id": "CHECKOUT.edit_btn",
+      "trigger_source_ref": "14107:120150"
+    },
+    {
+      "from_screen_id": "BUNDLING_FULL_DATA",
+      "to_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118598",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14090:116293",
+      "to_source_ref": "14090:118409",
+      "trigger_element_id": "BUNDLING_FULL_DATA.custom_btn",
+      "trigger_source_ref": "14090:116293"
+    },
+    {
+      "from_screen_id": "BUNDLING_FULL_DATA",
+      "to_screen_id": "MPS",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14107:119622",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14090:118814",
+      "to_source_ref": "15959:86802",
+      "trigger_element_id": "BUNDLING_FULL_DATA.add_to_cart_120_000_2_btn",
+      "trigger_source_ref": "14090:118814"
+    },
+    {
+      "from_screen_id": "MERCHANT_PROFILE_REQUIRED",
+      "to_screen_id": "BUNDLING_FULL_DATA",
+      "condition": "",
+      "edge_source": "CONNECTOR",
+      "confidence": "EXPLICIT",
+      "source_ref": "14090:118949",
+      "navigation_kind": "NAVIGATE",
+      "from_source_ref": "14090:118427",
+      "to_source_ref": "14090:118814",
+      "trigger_element_id": "MERCHANT_PROFILE_REQUIRED.add_to_cart_33_000_btn",
+      "trigger_source_ref": "14090:118427"
+    }
+  ],
+  "design_source": {
+    "file_name": "GoFood Group Order",
+    "page_name": "    ↪ MVP - Group Order [v5.46]",
+    "scope": "selection",
+    "exported_at": "2026-09-14T06:05:38.962Z",
+    "max_depth": 30,
+    "node_count": 3409,
+    "truncated_count": 0,
+    "has_geometry": true
+  },
+  "app": "gofood-consumer"
+}

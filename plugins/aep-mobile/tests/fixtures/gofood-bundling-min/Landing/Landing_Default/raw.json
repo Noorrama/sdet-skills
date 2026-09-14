@@ -1,0 +1,63 @@
+{
+  "scope": "state",
+  "export": { "formatVersion": 2, "maxDepth": 30, "nodeCount": 24, "truncatedCount": 0 },
+  "nodes": [
+    {
+      "id": "14090:111251",
+      "name": "Landing",
+      "type": "FRAME",
+      "x": 400,
+      "y": 0,
+      "width": 390,
+      "height": 844,
+      "children": [
+        {
+          "id": "row-billing-1",
+          "name": "billing row",
+          "type": "FRAME",
+          "children": [
+            { "id": "18833:91917", "name": "selection_control/radio", "type": "INSTANCE" },
+            { "id": "18833:91918", "name": "label", "type": "TEXT", "characters": "Everyone pays for their items" }
+          ]
+        },
+        {
+          "id": "row-billing-2",
+          "name": "billing row",
+          "type": "FRAME",
+          "children": [
+            { "id": "18833:91922", "name": "selection_control/radio", "type": "INSTANCE" },
+            { "id": "18833:91921", "name": "label", "type": "TEXT", "characters": "Everyone pays an equal share" }
+          ]
+        },
+        {
+          "id": "row-billing-3",
+          "name": "billing row",
+          "type": "FRAME",
+          "children": [
+            { "id": "18833:91927", "name": "selection_control/radio", "type": "INSTANCE" },
+            { "id": "18833:91926", "name": "label", "type": "TEXT", "characters": "You pay for everyone" }
+          ]
+        },
+        {
+          "id": "18833:91930",
+          "name": "footer link",
+          "type": "TEXT",
+          "characters": "Learn more about billing methods"
+        },
+        {
+          "id": "14090:111409",
+          "name": "button/primary",
+          "type": "INSTANCE",
+          "children": [
+            {
+              "id": "14090:111410",
+              "name": "Button text#",
+              "type": "TEXT",
+              "characters": "Create & invite friends"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -15,7 +15,7 @@ mobile-qa-skills/
     _template.json              ← copy per app (driver, gofood-merchant, gopay-consumer, gopay-merchant)
   schemas/                      ← JSON-schema validators for every context/output
     prd_context · design_context · rfc_context · plan_context · change_context · scenario · data_handle
-  skills/                       ← 2 user-facing SKILL.md (orchestrators only)
+  skills/                       ← 2 user-facing SKILL.md (orchestrators only; extractors live under agents/ + cursor-agent-stubs/)
     mobile-sdet-plan-generator · mobile-test-code-gen
   agents/                       ← agent instruction bodies (source of truth) + Claude model pins
     prd-extractor · rfc-extractor · design-extractor · task-extractor
@@ -24,10 +24,14 @@ mobile-qa-skills/
     test-data-provisioner       ← spawned by test-code-generator (not a /command)
   cursor-agent-stubs/           ← Cursor-only model-pin stubs (load bodies from agents/)
   (no copilot-agent-stubs yet — Copilot wiring is a follow-up; see below)
-  examples/gojek-consumer-save20/   ← worked example across the whole pipeline
+  examples/gojek-consumer-save20/           ← worked example across the whole pipeline
+  examples/gofood-group-order-bundling/     ← design-bundle trial (design_context.json from figma-design-bundle)
 ```
 
 ## Pipeline & run order
+
+**Phase A design input:** pass a **figma-design-bundle** directory on disk (`manifest.json` with `generator.name: "figma-design-bundle"`). The design-extractor does not accept Figma URLs or legacy single-file Raw JSON as orchestrated input — re-export as a bundle.
+
 ```
 PRE-BUILD
   /mobile-sdet-plan-generator

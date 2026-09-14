@@ -1,0 +1,30 @@
+{
+  "scope": "state",
+  "export": { "formatVersion": 2, "maxDepth": 30, "nodeCount": 8, "truncatedCount": 0 },
+  "nodes": [
+    {
+      "id": "14090:111412",
+      "name": "MPS",
+      "type": "FRAME",
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 844,
+      "children": [
+        {
+          "id": "16321:130508",
+          "name": "button/primary",
+          "type": "INSTANCE",
+          "children": [
+            {
+              "id": "16321:130509",
+              "name": "Button text#",
+              "type": "TEXT",
+              "characters": "Order type"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

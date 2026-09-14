@@ -1,0 +1,33 @@
+{
+  "app_id": "gofood-consumer",
+  "display_name": "GoFood Consumer",
+  "platforms": ["android", "ios"],
+  "deeplink_scheme": "gojek://",
+  "android_package": "com.gojek.app",
+  "ios_bundle_id": "com.gojek.gojek",
+  "repos": {
+    "gmt": "<TODO: path to GoFood Consumer GMT (Appium+TestNG) project>",
+    "tapmind": "<TODO: path to GoFood Consumer TapMind NLP repo>",
+    "shared_libs": ["<TODO: shared page-object/util lib if any>"]
+  },
+  "locator_keys": { "android": "resource-id", "ios": "accessibilityId" },
+  "naming_convention": {
+    "element_id_pattern": "<screen_id>.<element_role>",
+    "role_vocabulary": ["_btn", "_input", "_label", "_toggle", "_tab", "_list"],
+    "developer_locator_equals_role": false
+  },
+  "device_matrix": [
+    { "os": "android", "version": "13", "device": "Pixel 7" },
+    { "os": "android", "version": "11", "device": "Galaxy A52" },
+    { "os": "ios", "version": "17", "device": "iPhone 14" }
+  ],
+  "testbuddy": {
+    "agents": ["CustomerAgent", "VoucherAgent", "BookingAgent", "PaymentAgent"],
+    "segments": {
+      "first_time_gofood": "<TODO: TestBuddy segment name>",
+      "returning_gofood": "<TODO>",
+      "kyc_verified": "<TODO>"
+    }
+  },
+  "default_output": "NLP"
+}

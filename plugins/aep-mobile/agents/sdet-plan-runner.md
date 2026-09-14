@@ -615,7 +615,7 @@ Expand scenarios across:
 
 ### 3. Gap Analysis & Alignment Engine
 As the single integration point, the generator must actively compute the following cross-stage gaps:
-- **`prd_vs_figma_gaps`**: Cross-reference `prd_context.json` with `design_context.json`. Check `business_requirements[].context_screen` against Figma `screens[].screen_id`. Identify missing screens/frames, text copy mismatches, or personas with no design representation.
+- **`prd_vs_figma_gaps`**: Cross-reference `prd_context.json` with `design_context.json` (not live Figma). Check `business_requirements[].context_screen` against `screens[].screen_id`. Identify missing screens/frames, text copy mismatches, or personas with no design representation.
 - **`prd_vs_rfc_gaps`**: Cross-reference `prd_context.json` with `rfc_context.json`. Compare PRD `feature_flags` against the RFC `experimentation_matrix` (finding flag key typos, missing defaults, or status mismatches). Verify business rule conditions align with RFC error codes or API paths.
 - **`rfc_vs_impl_plan_gaps`**: Cross-reference `rfc_context.json` with the Implementation `task_context.json`. Check if RFC architectural risks, local migrations, offline strategies, or required permissions are accounted for in the implementation's screens touched, view models, and components.
 - **`element_locator_handoff`**: Map `screen_name:element_id_name` logical tokens to cross-platform accessibility attributes (`android_resource_id`, `ios_accessibility_identifier`, `flutter_key`). Only populate these fields if the matching locator values are provided by the upstream design/development context; do not use placeholders or "UNRESOLVED" strings.
