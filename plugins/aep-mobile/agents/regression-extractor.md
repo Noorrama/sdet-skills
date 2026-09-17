@@ -96,6 +96,14 @@ equivalent) — see the TapMind join step below.
   whichever repo resolved this module in 1a/1b). A match gives accurate `steps`/`navigation`
   from the repo; no match means the case is manual-only or not yet automated — keep
   BrowserStack's own steps and flag weak ones.
+- **After all corpus joins complete, hoist shared Gherkin preamble:**
+  ```
+  python3 scripts/dedupe_steps.py --context regression_context.json
+  ```
+  This detects the common boilerplate prefix (login, device setup, etc.) shared across
+  repo-sourced cases, emits it once as `module_step_preamble`, and strips it from each
+  case's `steps`. Only differentiating tail lines remain per case. Skip this step only
+  when no cases are repo-sourced.
 - **Join to the TapMind corpus for automation steps (third source repo).** `tapmind-mobile-tests` is the NLP-framework automation repo; its checked-in nav_index is `config/nav_index/tapmind/` — a third sibling directory alongside `nav_index/gmt/` and `nav_index/gtf/` (namespaced per-repo, since its module names — `driverapp`, `gofood`, … — collide with gojek-mobile-tests). Its module→project map lives alongside those files, at `config/nav_index/tapmind/project_map.json`. For each returned case, look its `case_number` up via:
   ```
   python3 scripts/corpus_lookup.py case tapmind <module> <case_number>
@@ -113,6 +121,17 @@ carries `extraction_status` (`COMPLETE` / `PARTIAL` / `LIMITED`) and `extraction
 (`{ field, reason, action, follow_up }`) alongside the results — same contract as every other
 skill in the pipeline. `COMPLETE` only when the query actually ran and `extraction_notes` is empty.
 
+**Group extraction_notes by failure class — never one note per case.**
+After all joins are done, consolidate notes:
+- All nav-failure cases (no deeplink, no repo test, no Figma map) → **one** `NEEDS_ANSWER` note per
+  BrowserStack folder with the affected case IDs listed: `"reason": "N cases in folder [X] have no
+  nav source. Affected: [C123, C456, …]"`. Do not write 34 near-identical notes.
+- All steps-warning cases (automated in BrowserStack but no repo/TapMind match) → **one**
+  `WORTH_CHECKING` note per repo listing affected case IDs. Do not write 19 near-identical notes.
+- Structural failures (missing payload, schema mismatch) remain per-occurrence as before.
+This keeps `extraction_notes` to a handful of actionable entries rather than dozens of boilerplate
+copies that inflate every downstream turn.
+
 Each retrieved case object (`regression_tests[]`) must include:
 * **`id`**: BrowserStack case identifier verbatim (e.g., `C2879733`).
 * **`case_number`**: the numeric case id without the `C` prefix — the join key to the repo's `@TestInfo`/`@GBTTestRail` `testCaseIds` and Cucumber Examples. BrowserStack is the system of record; this number was carried over from TestRail during migration (project id is mapped to BrowserStack in each module's result-listener, e.g. `CucumberExecutionListener` / `lumosClient.getProjectIdFromTestCaseId`).
@@ -124,7 +143,10 @@ Each retrieved case object (`regression_tests[]`) must include:
 * **`scope`**: `own_module` (the feature's own module) or `impacted_area` (pulled in via `rfc.affected_modules`).
 * **`source_module`**: the repo module this case came through (e.g. `gopay`, `gofood`, `driverapp`). Required whenever `app_id` resolves to more than one module (see Step 1a) — without it, a `gojek-consumer` result set spanning 10 modules is unreadable.
 * **`steps`** + **`steps_source`**: execution steps, preferring the repo's accurate steps when an automated counterpart exists (`steps_source: repo`); otherwise BrowserStack's own steps as-is (`steps_source: browserstack`), which may be weak/empty — flag those in `extraction_notes`.
-* **`preconditions`**: Extracted environment or configuration requirements.
+* **`preconditions`**: First 150 chars of environment/configuration requirements from BrowserStack,
+  truncated with `…[see BrowserStack <id>]`. Full text is in BrowserStack; fetch on demand.
+  The parser (`parse_regression_mcp.py`) handles this truncation automatically — do not
+  re-add the full preconditions text inline.
 * **`navigation`** + **`nav_source`**: ordered steps to REACH the screen (distinct from the case's own steps), resolved via the navigation ladder — `deeplink` → `existing_test` → `figma` → `needs_answer`. A `needs_answer` nav_source is recorded and flagged, never guessed.
 * **`tapmind_steps`**: the case's real TapMind automation sequence from `config/nav_index/tapmind/<module>.json` (ordered `{kind, text}`), copied verbatim, when a TapMind test exists for this case_number — per the TapMind join step above. Omitted when none exists. Feeds the generator's `automation_steps`.
 * **`variant_dimensions`**: the case's own BrowserStack **custom fields** that partition the tested population, copied verbatim as `{ field_name: [values] }` — e.g. `{"DriverType": ["IDBike","IDCar"], "Country v2": ["Indonesia"]}`. `listTestCases` already returns these in each case's `custom_fields[]`; carry them through instead of dropping them. **App-agnostic — never hardcode which fields these are:** copy whatever custom fields the project defines (a driver app's `DriverType`/service-type fields, a consumer app's payment-instrument or user-tier fields), skipping only the ones already mapped to first-class columns (`Execution Mode`, `Platform`, automation-status fields). Keys and values are passed through exactly as BrowserStack reports them — never normalised, translated, or extended with a value no case declared. This is the pipeline's **only observed enumeration of which variants real coverage actually splits on**, and the sdet-plan-generator depends on it to fan out test-data fixtures per variant rather than inventing a value or silently omitting the dimension. Absent custom fields → omit the field for that case (do not emit `{}`).
