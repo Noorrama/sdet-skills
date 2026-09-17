@@ -1,6 +1,7 @@
 ---
 name: mobile-test-code-gen
-description: Post-build mobile QA code-generation pipeline. Runs code-change extraction, then impact shortlisting, then test-code generation in sequence (each step needs the prior step's output). Use after the dev shares a build or MR, when producing change_context / compliance.json, impact_shortlist.json, or TapMind/GMT automation from an approved SDET plan.
+description: Post-build mobile QA code-generation pipeline. Runs code-change extraction, then impact shortlisting, then test-code generation in sequence (each step needs the prior step's output). Use only when explicitly invoked (e.g. /mobile-test-code-gen) after a build or MR — do not auto-start from casual chat.
+disable-model-invocation: true
 ---
 
 # Mobile Test Code Gen (orchestrator)

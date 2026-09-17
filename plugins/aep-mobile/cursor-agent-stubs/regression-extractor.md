@@ -1,6 +1,6 @@
 ---
 name: regression-extractor
-description: Dynamically fetches existing active regression test cases from BrowserStack Test Management for a given feature_key, app_id, or module_namespace using the BrowserStack MCP Server.
+description: Invoked only by an aep-mobile parent skill/orchestrator — not a standalone user command. Dynamically fetches existing active regression test cases from BrowserStack Test Management for a given feature_key, app_id, or module_namespace using the BrowserStack MCP Server.
 model: composer-2.5
 ---
 

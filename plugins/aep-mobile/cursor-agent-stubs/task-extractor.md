@@ -1,6 +1,6 @@
 ---
 name: task-extractor
-description: Normalize the Dev team's task-generation tree (Milestone → Epic → User Story → Task, from the PRD/RFC/design) into task_context.json — the PRIMARY DRIVER of the SDET_PLAN (RFC §2.4). Captures the work tree, acceptance criteria, per-task deep-link routing + observable state, cross-track dependencies, and task↔requirement↔screen traceability, PLUS the feature-level test hooks/screens/flags that let NLP steps reach a screen without a full UI walk. App-agnostic.
+description: Invoked only by an aep-mobile parent skill/orchestrator — not a standalone user command. Normalize the Dev team's task-generation tree (Milestone → Epic → User Story → Task, from the PRD/RFC/design) into task_context.json — the PRIMARY DRIVER of the SDET_PLAN (RFC §2.4). Captures the work tree, acceptance criteria, per-task deep-link routing + observable state, cross-track dependencies, and task↔requirement↔screen traceability, PLUS the feature-level test hooks/screens/flags that let NLP steps reach a screen without a full UI walk. App-agnostic.
 model: composer-2.5
 ---
 
