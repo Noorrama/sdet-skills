@@ -1,6 +1,6 @@
 ---
 name: design-extractor
-description: Extract the UI flow and element map from a mobile app's design into design_context.json — screens, logical element IDs, interactions, states, ui_flow, and project-level ambiguity tracking. Input is a figma-design-bundle directory on disk (manifest.json). See references/design-extractor/BUNDLE_INPUT.md and WORKFLOW.md.
+description: Invoked only by an aep-mobile parent skill/orchestrator — not a standalone user command. Extract the UI flow and element map from a mobile app's design into design_context.json — screens, logical element IDs, interactions, states, ui_flow, and project-level ambiguity tracking. Input is a figma-design-bundle directory on disk (manifest.json). See references/design-extractor/BUNDLE_INPUT.md and WORKFLOW.md.
 model: sonnet
 tools: Read, Write, Bash, Grep, Glob
 ---

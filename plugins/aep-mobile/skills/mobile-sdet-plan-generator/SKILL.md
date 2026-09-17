@@ -1,6 +1,7 @@
 ---
 name: mobile-sdet-plan-generator
-description: Pre-build mobile QA entry point. Extracts PRD/RFC/design/task contexts in parallel, then generates SDET plan deliverables. Regression runs inside the GENERATE runner after PRD/RFC exist. Use during implementation planning. MUST run scripts/validate_sdet_deliverables.py (exit 0) before shipping. Keeps the human review loop here; delegates GENERATE to sdet-plan-runner and SYNC to sdet-plan-sync.
+description: Pre-build mobile QA entry point. Extracts PRD/RFC/design/task contexts in parallel, then generates SDET plan deliverables. Regression runs inside the GENERATE runner after PRD/RFC exist. MUST run scripts/validate_sdet_deliverables.py (exit 0) before shipping. Keeps the human review loop here; delegates GENERATE to sdet-plan-runner and SYNC to sdet-plan-sync. Use only when explicitly invoked (e.g. /mobile-sdet-plan-generator) — do not auto-start from casual chat.
+disable-model-invocation: true
 ---
 
 # Mobile SDET Plan Generator (orchestrator)

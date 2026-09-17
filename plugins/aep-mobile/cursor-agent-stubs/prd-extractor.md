@@ -1,6 +1,6 @@
 ---
 name: prd-extractor
-description: Extract structured PRD context for mobile QA into prd_context.json. Maps PRD requirements, module namespaces, business requirements, boundary conditions, rollout guidance, and feature flags to the schema used by the mobile QA pipeline.
+description: Invoked only by an aep-mobile parent skill/orchestrator — not a standalone user command. Extract structured PRD context for mobile QA into prd_context.json. Maps PRD requirements, module namespaces, business requirements, boundary conditions, rollout guidance, and feature flags to the schema used by the mobile QA pipeline.
 model: composer-2.5
 ---
 

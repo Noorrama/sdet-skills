@@ -1,6 +1,6 @@
 ---
 name: rfc-extractor
-description: Extract comprehensive technical context from a mobile RFC into rfc_context.json — scope, experimentation flags, architectural risks, compatibility mandates, rollout plan, API contracts, state management, navigation/deep links, local data changes, platform-specific details, permissions, offline behavior, accessibility impacts, lifecycle considerations, dependency changes, notification changes, cross-cutting concerns, and open questions. App-agnostic; optional (only when an RFC exists). Tells the SDET_PLAN where to concentrate depth, which flags/N-1 versions to parameterise, and what mobile-specific edge cases to cover.
+description: Invoked only by an aep-mobile parent skill/orchestrator — not a standalone user command. Extract comprehensive technical context from a mobile RFC into rfc_context.json — scope, experimentation flags, architectural risks, compatibility mandates, rollout plan, API contracts, state management, navigation/deep links, local data changes, platform-specific details, permissions, offline behavior, accessibility impacts, lifecycle considerations, dependency changes, notification changes, cross-cutting concerns, and open questions. App-agnostic; optional (only when an RFC exists). Tells the SDET_PLAN where to concentrate depth, which flags/N-1 versions to parameterise, and what mobile-specific edge cases to cover.
 model: sonnet
 tools: Read, Write, Bash, Grep, Glob
 ---
