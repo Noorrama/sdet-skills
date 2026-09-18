@@ -6,15 +6,18 @@ of model-written python one-liners, so the model can't accidentally Read a
 3.6MB file into context.
 
 Usage:
-  corpus_lookup.py case   <repo> <module> <case_number>
+  corpus_lookup.py case      <repo> <module> <case_number>
   corpus_lookup.py deeplinks <repo> <module>
   corpus_lookup.py project-map
+  corpus_lookup.py nav-step  <repo> <module> <keyword> [<max_results>]
 
 Examples:
   python3 corpus_lookup.py case gmt gofood 2879733
   python3 corpus_lookup.py case tapmind gofood 556941
   python3 corpus_lookup.py deeplinks gmt gofood
   python3 corpus_lookup.py project-map
+  python3 corpus_lookup.py nav-step gmt driverapp "quick view"
+  python3 corpus_lookup.py nav-step gmt driverapp "go online" 5
 """
 import sys, json, os
 
@@ -61,6 +64,36 @@ def project_map() -> None:
         print(f.read())
 
 
+def nav_step_lookup(repo: str, module: str, keyword: str, max_results: int = 10) -> None:
+    """Search nav_index for step strings matching keyword; never reads the whole file into context."""
+    path = os.path.join(CONFIG, "nav_index", repo, f"{module}.json")
+    if not os.path.isfile(path):
+        print(json.dumps({"error": f"not found: {path}"}))
+        sys.exit(1)
+    with open(path) as f:
+        data = json.load(f)
+
+    keyword_lower = keyword.lower()
+    seen: set = set()
+    matches: list = []
+
+    for case_list in data.get("cases", {}).values():
+        for case in (case_list if isinstance(case_list, list) else [case_list]):
+            for step in (case.get("steps_gherkin") or case.get("steps") or []):
+                step_str = str(step).strip()
+                if keyword_lower in step_str.lower() and step_str not in seen:
+                    seen.add(step_str)
+                    matches.append(step_str)
+                    if len(matches) >= max_results:
+                        break
+            if len(matches) >= max_results:
+                break
+        if len(matches) >= max_results:
+            break
+
+    print(json.dumps({"keyword": keyword, "matches": matches, "count": len(matches)}))
+
+
 def main() -> None:
     if len(sys.argv) < 2:
         print(__doc__)
@@ -74,6 +107,9 @@ def main() -> None:
         deeplinks_lookup(sys.argv[2], sys.argv[3])
     elif cmd == "project-map":
         project_map()
+    elif cmd == "nav-step" and len(sys.argv) >= 5:
+        max_r = int(sys.argv[5]) if len(sys.argv) >= 6 else 10
+        nav_step_lookup(sys.argv[2], sys.argv[3], sys.argv[4], max_r)
     else:
         print(__doc__)
         sys.exit(1)

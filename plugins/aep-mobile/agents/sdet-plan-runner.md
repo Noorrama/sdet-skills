@@ -228,6 +228,12 @@ what was not covered.
   never governs the NLP wording of `steps[]`.
 - Never invent a deeplink or test hook. Absent hook → the scenario states the manual
   navigation path and is flagged in testability feedback.
+- **Never use a zero-interaction element as a tap target.** An element from
+  `design_context.screens[].elements[]` whose `interactions` array is empty is
+  decorative or structural — it is not tappable. Before writing a step that taps a
+  design element, confirm `interactions` is non-empty. If the element has no interactions,
+  do not infer that tapping its label navigates somewhere: use the Navigation Resolution
+  Ladder (rung 1–3b) to find the correct control, or flag `[NAVIGATION NOT CONFIRMED]`.
 - **Never assume a screen is "just open."** Reaching every screen a scenario needs — including
   the login/authenticated starting state — must be resolved through the Navigation Resolution
   Ladder (Step 2: hook/deep link → `design_context.ui_flow` → `regression_context.navigation` →
@@ -529,6 +535,23 @@ Expand scenarios across:
        vehicle card → tap profile icon" prefix). A sequence corroborated across that many
        independent cases is the app's standard entry preamble, not a one-off guess — reuse it
        (normalized per the rule above) for any scenario needing a logged-in starting point.
+  3b. **Nav-step corpus search (when rung 3 produced no match).** If the regression context
+      contains no case reaching the target screen, query the *full* nav_index for the module
+      before declaring the screen unresolved — the nav_index covers all cases in the repo, not
+      just those fetched for this feature:
+      ```bash
+      python3 scripts/corpus_lookup.py nav-step <repo> <module> "<screen_keyword>"
+      ```
+      Use a keyword that names the *interaction* being looked up (e.g. `"quick view"`,
+      `"profile icon"`, `"go online"`) rather than an element name or screen ID. Pick the
+      most specific matching step, then apply the same normalization rules as rung 3: drop
+      harness scaffolding, resolve Scenario Outline placeholders from a source, translate
+      internal codenames to on-screen labels, rephrase into declarative tester-executable NLP.
+      Cite the result in `test_data[].source_refs` so the path is auditable. Only when
+      **neither** the regression context **nor** the nav-step search produces a step does
+      resolution fall to rung 5 — `[NAVIGATION NOT CONFIRMED]` is never valid on a screen
+      the nav_index already has a step for.
+
   4. **Reconciling two sources.** When both rung 2 (design) and rung 3 (regression) produce a
      path to the same screen: if they agree (same screens/actions, or one is a superset of the
      other) use the more complete one — this is corroboration, not a conflict, and needs no note.
@@ -645,7 +668,8 @@ confirm its `steps[]` opens with one of: a deep-link open (from a plan hook, `rf
 `design_context.ui_flow` or `regression_context.navigation` (per the Navigation Resolution
 Ladder, Step 2), or an explicit `[NAVIGATION NOT CONFIRMED]` line. **Before accepting a
 `[NAVIGATION NOT CONFIRMED]` line, re-check `regression_context.deeplink_dictionary` for a key
-matching the target screen — an unresolved flag on a screen the repo dictionary actually names is a
+matching the target screen AND run `corpus_lookup.py nav-step` for the target interaction —
+an unresolved flag on a screen the repo dictionary or nav_index already has a step for is a
 defect, not a valid outcome** (this is the exact miss the deeplink rung exists to prevent). A
 scenario whose first step assumes arrival at a screen (e.g. "Open the X page" with nothing before
 it) with none of the above behind it is likewise a defect — fix it (resolve the ladder properly, or
