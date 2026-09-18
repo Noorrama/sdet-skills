@@ -124,15 +124,25 @@ def _steps(case: dict[str, Any]) -> list[str]:
     return out
 
 
+_PRECONDITIONS_CAP = 150
+
+
 def normalize_case(case: dict[str, Any], *, repo: str | None, module: str | None) -> dict[str, Any]:
     cid = _case_id(case)
     entry: dict[str, Any] = {
         "id": cid or str(case.get("title") or case.get("name") or "UNKNOWN"),
         "case_number": _case_number(cid) if cid else "",
         "title": str(case.get("title") or case.get("name") or "").strip(),
-        "status": str(case.get("status") or case.get("state") or "Active"),
         "priority": str(case.get("priority") or case.get("Priority") or ""),
     }
+    # preconditions: capped — full setup text lives in BrowserStack; fetch on demand
+    raw_pre = str(case.get("preconditions") or case.get("pre_conditions") or "").strip()
+    if raw_pre:
+        entry["preconditions"] = (
+            raw_pre[:_PRECONDITIONS_CAP] + f"…[see BrowserStack {cid}]"
+            if len(raw_pre) > _PRECONDITIONS_CAP
+            else raw_pre
+        )
     steps = _steps(case)
     if steps:
         entry["steps"] = steps
