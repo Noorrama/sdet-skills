@@ -40,3 +40,9 @@ The auto/extra partition is computed **solely** from the presence/values of sche
 | `resilience` | `double_tap_debounce`, `offline_cold_start`, `empty_error_states` | any networked/stateful screen |
 
 > When a `fe_baseline` extra is selected, generate best-effort hygiene scenarios, stamp `source: "fe_baseline"`, and note in `analysis.md` that expected behavior is not spec-derived and needs PM/dev confirmation.
+
+## C. CSV *Type of Test Case* mapping
+
+Category Catalog drives `coverage_category` (internal). Tester-facing categorisation is
+`test_case_type` → CSV **Type of Test Case**. See `scenario_economy.md` §4 for the full
+Happy Path / Negative / Boundary / … taxonomy and when to combine rows.

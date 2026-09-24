@@ -18,13 +18,17 @@ validator (`scripts/validate_sdet_deliverables.py`) rejects them mechanically.
 
 | Anti-pattern | Why |
 |---|---|
-| Exactly one scenario per `req_id` when PRD has multiple acceptance criteria / UI copy rows | Hard Coverage Rule: floor ≠ target |
+| Exactly one scenario per `req_id` when PRD has multiple acceptance criteria that need **different paths** | Hard Coverage Rule: alternate paths still need coverage |
+| One physical row per acceptance criterion when criteria share the **same flow** and only assert different elements | Scenario Economy — combine into one Happy Path with multi-line Expected Result |
 | Zero **End-to-end** / **E2E** scenarios when design `ui_flow` or multi-screen PRD exists | Hard Coverage Rule: business flows first |
+| Near-duplicate Android + iOS rows that differ only by OS in the title | Platform belongs in the Platform column; default Cross-Platform |
+| `Android` / `iOS` tokens inside `csv_title_association` / CSV Title | Title is behaviour-only; OS is Platform column |
 | `positive_pct < 50%` without documented `under_target` escape after regeneration | Step 4c-mix balance gate |
 | Clickstream/telemetry scenarios when inputs have **no** event names/schema | Telemetry Rules — open question only |
 | iOS/dark-mode **placeholder scenarios** when OQ blocks expected behavior | Report blocked in Section 4; do not invent tests |
 | Mobile scenario for admin-only / backend-only requirements (Frontend Focus) | Out of FE scope — block in analysis |
-
+| Raw JSON objects/arrays in CSV Preconditions | Tester-facing column must be numbered plain language |
+| `test_case_type` missing or not in the Happy Path / Negative / Boundary / … taxonomy | CSV Type of Test Case carries categorisation |
 ## FORBIDDEN — JSON / steps
 
 | Anti-pattern | Why |

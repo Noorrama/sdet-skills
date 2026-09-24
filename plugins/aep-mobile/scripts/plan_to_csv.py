@@ -61,44 +61,106 @@ def _numbered(lines: list[str]) -> str:
     return "\n".join(out)
 
 
-def _preconditions(sc: dict[str, Any]) -> str:
+def _human_state(value: Any) -> list[str]:
+    """Flatten required_state / nested structures into short plain-language phrases."""
     lines: list[str] = []
+    if value is None:
+        return lines
+    if isinstance(value, str):
+        s = value.strip()
+        if s:
+            lines.append(s)
+        return lines
+    if isinstance(value, (int, float, bool)):
+        lines.append(str(value))
+        return lines
+    if isinstance(value, list):
+        for item in value:
+            lines.extend(_human_state(item))
+        return lines
+    if isinstance(value, dict):
+        entity = value.get("entity")
+        parts: list[str] = []
+        for k, v in value.items():
+            if k == "entity" or v is None or v == "":
+                continue
+            if isinstance(v, (dict, list)):
+                nested = _human_state(v)
+                if nested:
+                    parts.append(f"{k}: {'; '.join(nested)}")
+            else:
+                parts.append(f"{k}={v}")
+        if entity and parts:
+            lines.append(f"{entity}: {', '.join(parts)}")
+        elif entity:
+            lines.append(str(entity))
+        elif parts:
+            lines.append(", ".join(parts))
+        return lines
+    lines.append(str(value))
+    return lines
+
+
+def _preconditions(sc: dict[str, Any]) -> str:
+    """Numbered plain-language preconditions for TMS — never raw JSON dumps."""
+    raw: list[str] = []
     for fixture in sc.get("test_data") or []:
         if not isinstance(fixture, dict):
             continue
         desc = str(fixture.get("description") or "").strip()
-        state = fixture.get("required_state")
-        if desc and state:
-            lines.append(f"{desc} ({state})")
-        elif desc:
-            lines.append(desc)
-        elif state:
-            lines.append(str(state))
+        if desc:
+            raw.append(desc)
+        for phrase in _human_state(fixture.get("required_state")):
+            # Avoid duplicating description text
+            if phrase and phrase != desc:
+                raw.append(phrase)
+        for signal in fixture.get("type_signals") or []:
+            s = str(signal).strip()
+            if s:
+                raw.append(s)
+        for dyn in fixture.get("dynamic_conditions") or []:
+            if isinstance(dyn, dict):
+                cond = str(dyn.get("condition") or "").strip()
+                if cond:
+                    raw.append(cond)
     country = sc.get("country")
     if country:
-        lines.append(f"Country: {country}")
+        raw.append(f"Country: {country}")
     driver_type = sc.get("driver_type")
     if driver_type:
-        lines.append(f"Driver type: {driver_type}")
+        raw.append(f"Driver type: {driver_type}")
     meta = sc.get("preconditions_metadata") or {}
     if isinstance(meta, dict):
         env = meta.get("target_environment")
         locale = meta.get("target_locale")
         if env:
-            lines.append(f"Environment: {env}")
+            raw.append(f"Environment: {env}")
         if locale:
-            lines.append(f"Locale: {locale}")
-        deeplink = meta.get("entry_deeplink") or meta.get("deeplink")
+            raw.append(f"Locale: {locale}")
+        deeplink = (
+            meta.get("target_entry_deeplink")
+            or meta.get("entry_deeplink")
+            or meta.get("deeplink")
+        )
         if deeplink:
-            lines.append(f"Entry deeplink: {deeplink}")
+            raw.append(f"Entry deeplink: {deeplink}")
         flags = meta.get("active_experiment_flags") or meta.get("feature_flags") or {}
         if isinstance(flags, dict):
             for k, v in flags.items():
-                lines.append(f"Flag {k}={v}")
+                raw.append(f"Feature flag {k} = {v}")
         elif isinstance(flags, list):
             for f in flags:
-                lines.append(f"Flag {f}")
-    return "\n".join(lines)
+                raw.append(f"Feature flag {f}")
+    # De-dupe while preserving order
+    seen: set[str] = set()
+    unique: list[str] = []
+    for line in raw:
+        key = line.strip().lower()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        unique.append(line.strip())
+    return _numbered(unique)
 
 
 def _android_ios_status(platform: str, automation_status: str) -> tuple[str, str]:

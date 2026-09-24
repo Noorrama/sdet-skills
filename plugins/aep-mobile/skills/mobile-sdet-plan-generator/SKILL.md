@@ -31,6 +31,7 @@ Supporting files (read when needed, not at load):
 - `references/sdet-plan-generator/workflow.md`
 - `references/sdet-plan-generator/anti_patterns.md`
 - `references/sdet-plan-generator/category_catalog.md`
+- `references/sdet-plan-generator/scenario_economy.md`
 - `references/sdet-plan-generator/templates/test_cases.csv`
 - `references/sdet-plan-generator/templates/analysis_skeleton.md`
 

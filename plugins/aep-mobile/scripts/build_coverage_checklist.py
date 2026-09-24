@@ -222,12 +222,14 @@ def build_checklist(
             "checklist_item_count": len(checklist),
             "boundary_count": len(boundaries),
             "min_e2e_scenarios": min_e2e,
+            # Coverage item count (not a forced row count — combined scenarios allowed)
             "min_total_scenarios_floor": len(checklist),
+            "combine_allowed": True,
             "telemetry_scenarios_allowed": telemetry_allowed,
             "distinct_prd_screens": distinct_screens,
             "ui_flow_edges": ui_paths,
         },
-        "rules_version": "1.0.0",
+        "rules_version": "1.1.0",
     }
 
 
