@@ -31,13 +31,16 @@ uses `agents/sdet-plan-sync.md`. Emit CSV via `scripts/plan_to_csv.py` and fill
 
 ## Phase 2 — Core scenarios (do this BEFORE negatives)
 
-Order is fixed:
+Order is fixed. Apply **`scenario_economy.md`** (combine same-flow assertion diffs;
+platform never in title; priority rubric; `test_case_type` taxonomy):
 
-1. Primary happy path **per acceptance criterion** (not one row per req_id)
-2. **End-to-end** business flows (`End-to-end:` in title when multi-screen)
-3. Alternate valid paths (personas, entry points, tiers)
-4. Positive state persistence (nav away/back, refresh)
-5. Boundaries, negatives, flags, interruptions
+1. Primary happy path(s) for shared flows (fold same-screen element checks into Expected Result)
+2. **End-to-end** business flows (`End-to-end:` in title when multi-screen) — one per narrated journey
+3. Alternate valid paths only when route/outcome differs
+4. Positive state persistence **only if** PRD/RFC requires it
+5. Boundaries, negatives, flags, interruptions (categories via `test_case_type`)
+
+Supporting reference: `references/sdet-plan-generator/scenario_economy.md`.
 
 ## Phase 3 — Regression dedup
 

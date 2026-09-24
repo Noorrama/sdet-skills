@@ -323,7 +323,9 @@ Flow:
 3. **Headless / non-interactive fallback:** if no user is available to answer (e.g. CI), skip the prompt and proceed with the **AUTO** set only — never block generation.
 4. **Generate scenarios for `auto_selected ∪ optional_extras_selected`.** Stamp each scenario with `coverage_category` and a `source` (`input_derived` for AUTO/feature_adjacent, `fe_baseline`, or `qa_added`). Record the whole decision in `coverage_categories` (see Output spec) and echo it in `<feature_key>_analysis.md`.
 
-**Scope rule:** generate scenarios **only** for selected categories — EXCEPT the Hard Coverage Rules below, which always apply (every P0 requirement and every `boundary_conditions` entry keeps ≥1 scenario regardless of selection).
+**Scope rule:** generate scenarios **only** for selected categories — EXCEPT the Hard Coverage Rules below, which always apply (every P0 requirement and every `boundary_conditions` entry keeps ≥1 *coverage* regardless of selection). Coverage may share a row — see Scenario Economy.
+
+**Read before expanding scenarios:** `references/sdet-plan-generator/scenario_economy.md` (combine rules, priority rubric, platform-in-title ban, `test_case_type` taxonomy). Prefer a compact suite that still covers every checklist item over an exhaustive 1:1 row expansion.
 
 ### 1. Ingest & Coverage Gates
 - Ingest and aggregate whatever context inputs are provided (`task_context`, `prd_context`, `design_context`, `rfc_context`).
@@ -332,28 +334,23 @@ Flow:
   - State the missing contexts clearly as a limitation inside the `<feature_key>_analysis.md` report (e.g., *"task_context.json was not provided; test hooks and specific code-change view models are excluded from this analysis."*).
   - A missing context also means its Category Catalog triggers simply cannot fire (no failure) — those categories fall through to the extras tiers.
   - **Absent is not the same as malformed.** A context file that exists but fails its schema gets a `NEEDS_ANSWER` note naming the file and the validation error (Preflight step 3) — never a silent fall-through to "treat as absent", which drops coverage the QA believes they have.
-- **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and emit at least the required scenario(s) before doing anything else. Model-independence depends on this being a mechanical loop:
-  - **For each** `prd.business_requirements[i]` → emit ≥1 scenario **per distinct acceptance
-    criterion / stated behaviour** in that requirement, each with `requirement_ref` = that
-    `req_id`. One row per `req_id` is the floor, not the target: a requirement stating three
-    outcomes owes three positive scenarios. Where the requirement names user segments, entry
-    points, or valid states that change the expected outcome, **each gets its own positive
-    row** — these are alternate valid paths, not variants of one row. (A P0 requirement always
-    keeps ≥1.)
+- **Hard Coverage Rules** — apply these as an explicit enumeration, NOT from memory. Iterate each input array and ensure coverage before doing anything else. Model-independence depends on this being a mechanical loop. **Coverage ≠ one physical row per item** — when several items share the same flow and differ only in assertions, one combined scenario may list multiple ids in `requirement_ref` (see `scenario_economy.md`).
+  - **For each** `prd.business_requirements[i]` → ensure every distinct acceptance criterion / stated behaviour is covered by ≥1 scenario whose `requirement_ref` names that criterion (e.g. `BR-1:ac[0]`). Prefer **one combined Happy Path** when criteria share the same entry path and only assert different elements/copy on the same outcome screen. Split into separate rows only when the path, persona, or expected **outcome class** differs (true alternate valid paths). A P0 requirement always keeps ≥1 covering scenario.
   - **For each end-to-end business flow** → emit ≥1 multi-screen scenario that walks the whole
     path and asserts the business outcome at its end. A business flow is a path through
     `design_context.ui_flow[]` from a `flowStartingPoints` entry to a terminal/success screen,
     or a journey the PRD narrates across more than one requirement. Stamp
-    `coverage_category: functional`, `source: input_derived`, and set `requirement_ref` to the
+    `coverage_category: functional`, `test_case_type: Happy Path`, `source: input_derived`, and set `requirement_ref` to the
     req_ids the flow satisfies (a flow may satisfy several — list them). **`ui_flow` is a
     source of scenarios here, not only a navigation lookup for the Resolution Ladder** — a plan
     that consumes `ui_flow` purely as plumbing has skipped this rule. These flows are the
     backbone of the suite: generate them before any negative, boundary, or interruption
-    expansion.
-  - **For each** `prd.boundary_conditions[i]` → emit ≥1 boundary scenario referencing that entry. Do NOT fold a boundary rule into an unrelated happy-path scenario as a substitute — it needs its own row. (This is the rule most often missed: e.g. a screenshot/privacy-mask boundary and a "shown once per customer" ordering boundary are distinct entries, each needing its own scenario.) The scenario's setup/Steps come from `edge_case_description`; its **expected outcome is taken verbatim from `proposed_default`**. If `proposed_default` is empty, still emit the scenario (the edge case must be exercised) but leave its Expected Result as a `NEEDS_ANSWER` open point — never invent the default behaviour.
-  - **For each** `rfc.lifecycle_considerations[i]` (if the lifecycle category is selected) → emit ≥1 scenario for that `event`.
-  - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario. **Flag record precedence: RFC is authoritative.** When the same flag appears in both, take the RFC `experimentation_matrix[]` record (`flag_key` verbatim + `default_variant` + `variants` + `kill_switch`) as the source of truth; the PRD entry is name-only corroboration. A PRD-only flag (absent from RFC) still gets a toggle scenario from its name **and** a `prd_vs_rfc_gap` note ("flag in PRD, undocumented in RFC — no variants/default"). An RFC-only flag is fine.
-  - Every scenario MUST carry a `requirement_ref` (the `req_id` / boundary index / event it satisfies) so Step 4 can audit coverage mechanically.
+    expansion. Prefer **one** strong E2E per narrated journey, not one E2E per `ui_flow` edge.
+  - **For each** `prd.boundary_conditions[i]` → ensure ≥1 boundary scenario referencing that entry (`test_case_type: Boundary`). Do NOT fold a boundary into an unrelated happy-path as a substitute. Boundaries that share the **same setup path** and only differ in which edge is asserted may share one row with multiple Expected Result lines and a multi-id `requirement_ref`; keep separate rows when setup or outcome class differs. Setup/Steps come from `edge_case_description`; **expected outcome is taken verbatim from `proposed_default`**. If `proposed_default` is empty, still cover the edge but leave Expected Result as a `NEEDS_ANSWER` open point — never invent the default behaviour.
+  - **For each** `rfc.lifecycle_considerations[i]` (if the lifecycle category is selected) → emit ≥1 scenario for that `event` (`test_case_type: Interruption`).
+  - **For each** feature flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if the flag category is selected) → emit ≥1 kill-switch/toggle scenario (`test_case_type: Feature Flag`). **Flag record precedence: RFC is authoritative.** When the same flag appears in both, take the RFC `experimentation_matrix[]` record (`flag_key` verbatim + `default_variant` + `variants` + `kill_switch`) as the source of truth; the PRD entry is name-only corroboration. A PRD-only flag (absent from RFC) still gets a toggle scenario from its name **and** a `prd_vs_rfc_gap` note ("flag in PRD, undocumented in RFC — no variants/default"). An RFC-only flag is fine.
+  - Every scenario MUST carry a `requirement_ref` (the `req_id` / boundary index / event it satisfies; comma-separated when combined) so Step 4 can audit coverage mechanically.
+  - Stamp `test_case_type` and `priority_tier` per `scenario_economy.md` on every scenario (CSV Type of Test Case / Priority come from these fields).
   - **Clickstream Telemetry Rules:** Clickstream verification is **NOT** a mandatory hard gate for the generator. If `clickstream_events` are explicitly provided/told in the input contexts, then generate $\ge 1$ verification step per event. If they are NOT provided or explicitly mentioned, **do NOT fail validation and do NOT generate telemetry tests.** Instead, simply list it as an Open Question / Clarification inside `<feature_key>_analysis.md` (e.g., *"Are clickstream telemetry events required for this feature?"*).
 - **Regression dedup — using `regression_context.json` from Preflight step 9, before writing any scenario:**
   - For each requirement/boundary/flag about to get a Hard-Coverage scenario, check `regression_context.json.regression_tests[]` for a case whose `title` or `steps` clearly cover the same behaviour.
@@ -375,26 +372,31 @@ Flow:
   - This never overrides a Hard Coverage Rule (Step 1 above) — every P0 requirement and boundary condition still gets ≥1 row in the plan even if a legacy case already covers it; the point of dedup is to avoid generating a *second, redundant automation target*, not to avoid *documenting* coverage.
 
 ### 2. Scenario Expansion
-Expand scenarios across:
+Expand scenarios across (apply **Scenario Economy** while expanding — combine same-flow assertion-only diffs; do not mint rows for volume):
 - **Core (generate these first — before any Mobile Extras or FE-Baseline expansion).** This is
-  the centre of gravity of the suite, and it is the part most often under-expanded. Expand, in
-  order:
-  1. **Primary happy path** per `prd.business_requirements[]` acceptance criterion — the
-     feature doing what it exists to do, with valid data, on the intended screen.
+  the centre of gravity of the suite. Expand, in order:
+  1. **Primary happy path(s)** for `prd.business_requirements[]` — the feature doing what it
+     exists to do. Prefer **one Happy Path per shared flow**, folding same-screen element/copy
+     checks into numbered `expected_result` lines and multi-id `requirement_ref`. Split only
+     when path or outcome class differs.
   2. **End-to-end business flows** per the Hard Coverage Rule above — full journeys through
      `design_context.ui_flow[]` / the PRD's narrated flow, asserting the business outcome at
-     the terminal screen, not just the next screen's render.
-  3. **Alternate valid paths** — every *valid* segment, persona, entry point, tier, or state
-     the PRD names that reaches the same outcome by a different route. These are positive
-     scenarios; do not collapse them into a single row or demote them to negatives.
-  4. **Positive state transitions** — the produced value surviving a legitimate re-entry
-     (re-open the screen, navigate away and back, pull-to-refresh) with the business state
-     intact. This is a positive assertion about persistence, distinct from the
-     process-death/interruption negatives below.
-  5. **Boundary, negative, and contract flows** — the valid-input edges, error copy, and API
-     contract behaviour required by the Hard Coverage Rules.
-  Steps 1–4 must exist before step 5 and the Extras below are expanded. Negative and edge
+     the terminal screen, not just the next screen's render. One E2E per narrated journey is enough.
+  3. **Alternate valid paths** — only when the PRD names a *different route* (segment, persona,
+     entry point, tier) that changes navigation or outcome. Same route + different labels → combine,
+     do not duplicate.
+  4. **Positive state transitions** — emit **only** when PRD/RFC explicitly requires persistence
+     after re-entry / refresh. Do not invent nav-away-and-back hygiene rows.
+  5. **Boundary, negative, and contract flows** — edges, error copy, and API contract behaviour
+     required by the Hard Coverage Rules (`test_case_type` Boundary / Negative as appropriate).
+  Steps 1–3 must exist before step 5 and the Extras below are expanded. Negative and edge
   coverage complements the business suite; it never substitutes for it.
+- **Titles & platform:** `csv_title_association` is a behaviour name only — **never** include
+  Android / iOS in the title. Default `platform: Cross-Platform`. Split Android vs iOS rows only
+  when design/RFC documents a different path or outcome; put the OS solely in `platform`.
+- **Priority:** assign `priority_tier` with the rubric in `scenario_economy.md` (P0 core/E2E /
+  money-safety / kill-switch; P1 primary alternates & named boundaries; P2 hygiene / unmandated
+  interruptions / fe_baseline). At least one P0 when any Happy Path / E2E exists.
 - **Mobile Extras**: Generates mobile-specific scenarios (deep-link navigation, regional variants, feature flag toggles) and applies **Conditional Mobile-Native Interruption Rules** to ensure test suites remain highly focused and are only generated when technically valid. These rules are the `interruption_*` / `local_data_migration` / `permission` detection triggers surfaced in Step 0 — only expand a category the gate selected:
   - **Network Loss / API Timeout**: Inject a poor-network or server-timeout scenario *only* if `rfc_context.json` declares active `api_contract_changes` or any `task_context.json` task carries an `observable_state` (API success/failure signals). Skip if the touchpoint screen is entirely static/local.
   - **App Backgrounding & Process Death**: Inject a backgrounding/kill-and-restore state preservation scenario *only* if the screens in `design_context.json` contain interactive elements (inputs, forms, toggles) or any epic in `task_context.json` lists `view_models`. Skip on purely static/read-only informational screens.
@@ -658,9 +660,9 @@ This gate is what makes coverage model-independent: it does not rely on the mode
 - every flag in `rfc.experimentation_matrix[]` / `prd.feature_flags[]` (if flag category selected)
 - every event in `prd.clickstream_events[]` / `rfc…observability.clickstream_events[]` **only if** such a structured array is non-empty (per the Telemetry Rules — never invent this list)
 
-**4b. Match generated scenarios to the checklist** using each scenario's `requirement_ref`. Produce a coverage map: `checklist_item → [scenario titles covering it]`.
+**4b. Match generated scenarios to the checklist** using each scenario's `requirement_ref` (supports comma-separated multi-ids when cases were combined). Produce a coverage map: `checklist_item → [scenario titles covering it]`.
 
-**4c. If any checklist item has zero covering scenarios → the plan is INCOMPLETE.** Do not write the output files yet. Generate the missing scenario(s), then re-run 4b. Repeat until every item is covered. A boundary rule "covered" only by being mentioned inside an unrelated scenario does NOT count — it needs a scenario whose `requirement_ref` names it.
+**4c. If any checklist item has zero covering scenarios → the plan is INCOMPLETE.** Do not write the output files yet. Generate the missing coverage (prefer extending an existing same-flow scenario's `expected_result` + `requirement_ref` over minting a new row), then re-run 4b. Repeat until every item is covered. A boundary rule "covered" only by being mentioned inside an unrelated scenario does NOT count — it needs a scenario whose `requirement_ref` names it.
 
 **4c-nav. Navigation audit (mechanical, not from memory).** For every scenario in `scenario_list`,
 confirm its `steps[]` opens with one of: a deep-link open (from a plan hook, `rfc.navigation_changes`,
@@ -905,8 +907,12 @@ python3 scripts/plan_to_csv.py \
 ```
 
 Quality still lives in the JSON: Steps = actions only (no Verify lines);
-Expected Result = numbered assertions mirroring those actions; Priority from business
-criticality (P0 core flows, P2 hygiene). The script flattens; the validator enforces parity.
+Expected Result = numbered assertions mirroring those actions; Priority from the
+`scenario_economy.md` rubric; Type of Test Case from `test_case_type` (Happy Path /
+Negative / Boundary / …); titles without platform tokens. Preconditions in CSV are
+numbered plain-language lines from `plan_to_csv.py` — keep `test_data` structured in
+JSON, never dump raw JSON into tester-facing fields. The script flattens; the validator
+enforces parity.
 
 ---
 
