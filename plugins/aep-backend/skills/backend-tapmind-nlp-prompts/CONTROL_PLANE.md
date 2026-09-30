@@ -32,8 +32,28 @@ Base URL pattern: `https://<host>` (or `http://localhost:8080` locally).
 
 ## Allowed HTTP controllers (read + registry lookup)
 
-Use **GET** for lookups during prompt generation. **Do not** call ingest, database, or cache
-controllers from this skill.
+Use **GET** for lookups during prompt generation. **Do not** call ingest, mutate-DB, or
+cache controllers from this skill — except the **read-only** `/v1/db/preview` exception
+below (path enrichment for test-case → NLP).
+
+### Database preview — read-only (`#/database-query-controller/preview_1`)
+
+| Method | Path | Use |
+|---|---|---|
+| POST | `/v1/db/preview?pdg=&serviceId=&method=&path=` | Confirm ingested API ops for a PDG (and optional service/method/path). Used by **`TESTCASE_TO_NLP.md`** before resolving vague saves. Query `pdg` is required. |
+
+```bash
+curl -sS -X POST \
+  "http://tapmind-backend-i.golabs.io/v1/db/preview?pdg=gopay&serviceId=customer-adapter&method=POST&path=/v1/cpm/qr"
+```
+
+Returns `api_specs[]`, `few_shots[]`, `intent_exemplars[]`. Prefer `http://` when local TLS
+fails against the integration host. **Do not** call `/v1/db/update/*`, `/v1/db/delete-matched`,
+or `/v1/db/drop-pdg` from this skill.
+
+JSONPath for vague fields (`save basetoken from response`) comes from MCP
+`tapmind_verify_prompt` → `step_suggestions[].declared_bindings` (see `TESTCASE_TO_NLP.md`),
+not from inventing `$.data.<field>`.
 
 ### gRPC Targets (`#/gRPC%20Targets`)
 
@@ -87,8 +107,9 @@ requests registry maintenance.
 Do **not** call these controllers or MCP tools during generate / verify / run / convert:
 
 - Ingest (OpenAPI, curl ingest, spec ingest)
-- Database / Postgres controllers
-- Redis / cache controllers
+- Database **mutate** controllers (`/v1/db/update/*`, `/v1/db/delete-matched`, `/v1/db/drop-pdg`)
+  — **exception:** read-only `POST /v1/db/preview` for `TESTCASE_TO_NLP.md`
+- Redis / cache controllers (including `/v1/cache/preview`) unless the user explicitly asks
 - `tapmind_ingest_curl`, `grpc_invoke`, `postgres_query`, `redis_get` as workflow steps
 
 If REST verify shows no matching operation, flag `NEEDS_REVIEW` — do not auto-ingest.
