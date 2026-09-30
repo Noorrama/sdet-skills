@@ -34,9 +34,12 @@ After intake merges, **all rows below marked "Both"** apply identically.
 | Data | Source | Use |
 |---|---|---|
 | Target method | User path / `testCaseIds` | Coverage anchor |
-| Steps | RestAssured, `@Step`, BS text | Normalize → action + expected |
+| Steps | RestAssured, `@Step`, BS text, sheet | Normalize → action + expected; path-enrich via **`TESTCASE_TO_NLP.md`** |
+| BrowserStack case | MCP `listTestCases` (+ `listFolders`) | Intake when source is TM, not a local file |
 | Setup | `@BeforeMethod`, helpers, inline ids | TDP inference |
-| PDG / service | package, existing `runStep(..., pdg, service)` | MCP pinning |
+| PDG / service | package, existing `runStep(..., pdg, service)` | MCP pinning + `/v1/db/preview` |
+| Ingested op match | `POST /v1/db/preview` | Confirm method/path exists for PDG |
+| JSONPath bindings | `tapmind_verify_prompt` → `declared_bindings` | Rewrite `save X from response` → `save $.path as X` |
 | Suite meta | **Existing class** | Preserve `@TestInfo` |
 | Coded test body | Java file | Migration source; coded cross-check |
 
@@ -67,9 +70,10 @@ After intake merges, **all rows below marked "Both"** apply identically.
 | `GET /v1/grpc/targets` | gRPC alias map |
 | `GET /v1/targets` | REST service map / missing op check |
 | `GET /v1/grpc/static-proto/aliases` | Static proto |
+| `POST /v1/db/preview` | Artifact path — confirm ingested op (`TESTCASE_TO_NLP.md`) |
 | Swagger UI | Human-readable spec inventory |
 
-**Do not** call ingest, database, or cache controllers. Ingest only on explicit user request.
+**Do not** call ingest, database mutate, or cache controllers. Ingest only on explicit user request.
 
 On connectivity failure → VPN message (`CONTROL_PLANE.md`).
 
@@ -79,6 +83,7 @@ On connectivity failure → VPN message (`CONTROL_PLANE.md`).
 |---|---|
 | `SKILL.md` | Grammar + §G dual paths |
 | `GENERATION.md` | Pipeline fork/merge |
+| `TESTCASE_TO_NLP.md` | BS / file intake + JSONPath enrichment → §G.B |
 | `NLP_COVERAGE.md` | Path-specific gates + shared coverage scan |
 | `FIXTURE_REUSE.md` | Shared helpers (both paths) |
 | `CONTROL_PLANE.md` | MCP + Swagger (both paths) |

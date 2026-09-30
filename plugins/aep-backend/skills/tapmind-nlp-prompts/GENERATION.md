@@ -40,6 +40,7 @@ Negative expected status: execute, then **one** verify-only for error status/mes
                                     │
                     Plan gates ─────┤ status approved, tdp_not_ready, is_dedup
                     Artifact gates ─┤ infer TDP, unresolved_data_dependency
+                    Path enrich ────┤ TESTCASE_TO_NLP.md (BS/file + declared_bindings)
                                     ▼
               SHARED CORE (both paths)
                                     │
@@ -59,6 +60,17 @@ Negative expected status: execute, then **one** verify-only for error status/mes
                                     │
          nlp_suite_tests.json + skipped[] (+ optional .java)
 ```
+
+### Artifact path enrichment (before step 2)
+
+When steps come from BrowserStack or a sheet and use path-less saves
+(`save basetoken from response`), run **`TESTCASE_TO_NLP.md`** first:
+
+1. Intake file or BrowserStack `listTestCases`
+2. `POST /v1/db/preview` — confirm ingested op
+3. `tapmind_verify_prompt` (`dryRunLlm: true`) — read `declared_bindings`
+4. Rewrite to `save $.path as <name>` (e.g. `save $.data.base_token as basetoken`)
+5. Continue shared core above
 
 ## 1. Scenario filter (path-aware)
 
@@ -197,6 +209,7 @@ Batch convert: fingerprint prompts → `sharedHelpers[]` (`FIXTURE_REUSE.md`).
 - [ ] `nlp_method_decisions.json` verdict recorded
 - [ ] Path-specific intake gates passed (or documented skip)
 - [ ] Happy-path API steps: execute (+ optional bare success) → **one** detail verify-only (§3.1.1)
+- [ ] Artifact/BS path-less saves enriched (`TESTCASE_TO_NLP.md`) — no `save <field> from response` left
 - [ ] No mega-prompt `action | verify: status + body fields…`
 - [ ] No chain of multiple verify-only prompts after one execute
 - [ ] `prompts[]` length matches runnable steps
