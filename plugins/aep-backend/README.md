@@ -127,7 +127,7 @@ never invents a category or operation name — both come from the TestBuddy MCP 
 `<Domain>Agent_*` tool inventory). The category matcher always returns its nearest match and never
 reports a no-match, so the skill validates every returned category against the fixture's own signals
 and rejects the uncorroborated ones instead of trusting them. Domain
-definitions live in `skills/test-data-identification/references/test_data_domains.md`; adding a
+definitions live in `skills/backend-test-data-identification/references/test_data_domains.md`; adding a
 domain is a file edit, not a skill change.
 
 Fixtures are referenced by `fixture_id` in test code — never hardcoded entity IDs. Secrets from vault only.
@@ -153,7 +153,7 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 2. Click **Add plugin source** and paste the skills repo Git URL
 3. Claude Desktop reads `marketplace.json` and lists available plugins
 4. Click **Install** next to `aep-backend`
-5. All 13 skills are immediately available
+5. All skills are immediately available
 ![alt text](<Screenshot 2026-07-30 at 11.51.25 AM.png>)
 
 
@@ -161,6 +161,26 @@ python3 -c "import json,jsonschema; jsonschema.validate(
 ```bash
 claude plugins install https://gitlab.com/<org>/skills --plugin aep-backend
 ```
+
+### Cursor
+
+Cursor reads `.cursor-plugin/plugin.json`, which declares `skills/` and — for the subagents —
+`cursor-agent-stubs/`. Each stub is model-pin only: it names a Cursor model and loads the shared
+body from `agents/gbt-codegen/<name>.md`, which routes on to the real specification under
+`stages/` (or `reference/module-writers/` for a module writer). **Edit logic only in
+`agents/` / `stages/` / `reference/`** — never in a stub.
+
+Model mapping: Claude Code `sonnet` → Cursor `composer-2.5`, `opus` → `claude-opus-5`.
+
+| Role | Claude Code | Cursor |
+|---|---|---|
+| Manifest | `.claude-plugin/plugin.json` | `.cursor-plugin/plugin.json` |
+| Agent files | `agents/gbt-codegen/*.md` (namespaced `gbt-codegen:<name>`) | `cursor-agent-stubs/*.md` (flat `<name>`) |
+| Skills | `skills/` | `skills/` (shared) |
+
+`.cursor/skills/` keeps one symlink, `backend-automation`, for projects that copy skills in by
+hand. The module writers are **not** symlinked there any more — they are subagents now, reached
+through `backend-automation` or `code-gen-orchestrator`, exactly as in Claude Code.
 
 ### Using the skills
 
@@ -171,15 +191,41 @@ Skills auto-trigger based on their description. You can also invoke them explici
 /backend-tasks-extractor
 /backend-regression-extractor
 /backend-sdet-plan-generator
-/backend-automation-plan-generator
 /backend-test-data-identification
-/backend-test-data-generator
-/backend-test-code-generator
-/backend-test-code-validator
 /backend-dedup-generator
 /backend-code-change-extractor
 /backend-doc-delta-extractor
 ```
+
+### The codegen pipeline is one command
+
+Everything from an approved `automation_plan.json` through to a Draft MR runs under a single
+entry point:
+
+```
+/aep-backend:code-gen-orchestrator
+```
+
+Its 13 stages are **not** skills and have no slash commands. The dispatchable ones live in
+`agents/gbt-codegen/` and are spawned as subagents (`gbt-workspace-prep`, `gbt-plan-enricher`,
+`gbt-test-data-generator`, `gbt-method-decision-maker`, `gbt-context-builder`,
+`gbt-test-code-generator`, `gbt-test-code-validator`, `gbt-build-fix`, `gbt-mr-raiser`, and the
+optional `gbt-automation-plan-generator`); their specifications live in `stages/`. The two
+context-load stages (`gbt-code-understanding`, `gbt-module-<module>`) and the generation-phase
+guidance (`gbt-code-generation`) live in `reference/` and are read directly into the
+orchestrator's context.
+
+The **module test-writers** (`go-logistics-api-test-writer`, `gopay-api-test-writer`,
+`gopay-grpc-api-test-writer`, `gofood-api-test-writer`, `gofood-grpc-api-test-writer`,
+`driver-platform-api-test-writer`, `transport-api-test-writer`, `payment-core-api-test-writer`,
+`scp-api-test-writer`, `marketplace-api-test-writer`, `midtrans-core-api-test-writer`,
+`customer-platforms-api-test-writer`, `iris-api-test-writer`) are subagents too — also under
+`agents/gbt-codegen/`, with their documents in `reference/module-writers/`. They are reached
+through `code-gen-orchestrator` or the `backend-automation` skill, never invoked directly.
+
+This keeps stage ordering, the human review gate, the retry budgets, and the MR go-ahead in one
+place — a stage run out of order skips gates that only the orchestrator enforces. Every stage's
+raw return payload is written to `runs/<epic_id>/pass<N>/logs/<stage>.json` for debugging.
 
 Or naturally in conversation:
 > *"Extract the RFC context from this RFC doc"* → triggers `backend-rfc-extractor`

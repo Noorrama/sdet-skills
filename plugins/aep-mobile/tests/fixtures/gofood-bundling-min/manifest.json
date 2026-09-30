@@ -1,0 +1,56 @@
+{
+  "formatVersion": 1,
+  "generator": { "name": "figma-design-bundle", "version": "0.1.0" },
+  "exportedAt": "2026-09-14T06:05:38.962Z",
+  "source": {
+    "fileKey": "jTOZWKW8ezufHF5pnu9N3k",
+    "fileName": "GoFood Group Order",
+    "pageName": "MVP - Group Order",
+    "scope": "selection",
+    "selectionIds": ["14090:111176"]
+  },
+  "conventions": {
+    "stateVocabulary": ["Default", "Loading", "Empty", "Error", "Success"]
+  },
+  "stats": { "nodeCount": 42, "truncatedCount": 0 },
+  "warnings": [
+    {
+      "code": "CONNECTOR_DANGLING",
+      "nodeId": "13056:83229",
+      "message": "Connector 13056:83229 points at 12394:65706, which no longer exists on this page."
+    }
+  ],
+  "screens": [
+    {
+      "id": "MPS",
+      "name": "MPS",
+      "dir": "MPS",
+      "defaultStateId": "14090:111412",
+      "states": [
+        {
+          "id": "mps-default",
+          "name": "MPS",
+          "nodeId": "14090:111412",
+          "dir": "MPS_Default",
+          "labels": ["MPS - Entry point"],
+          "files": { "raw": "raw.json", "connectors": "connectors.json" }
+        }
+      ]
+    },
+    {
+      "id": "Landing",
+      "name": "Landing",
+      "dir": "Landing",
+      "defaultStateId": "14090:111251",
+      "states": [
+        {
+          "id": "landing-default",
+          "name": "Landing",
+          "nodeId": "14090:111251",
+          "dir": "Landing_Default",
+          "files": { "raw": "raw.json", "connectors": "connectors.json", "smart": "smart.json" }
+        }
+      ]
+    }
+  ]
+}

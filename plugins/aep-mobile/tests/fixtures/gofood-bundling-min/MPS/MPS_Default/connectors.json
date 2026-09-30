@@ -1,0 +1,21 @@
+{
+  "connectors": [
+    {
+      "id": "14090:118188",
+      "role": "outgoing",
+      "text": "",
+      "source": {
+        "nodeId": "16321:130508",
+        "path": "MPS/button/primary",
+        "owner": { "screenId": "MPS", "stateId": "mps-default", "stateNodeId": "14090:111412" }
+      },
+      "target": {
+        "nodeId": "18833:91904",
+        "path": "Landing",
+        "owner": { "screenId": "Landing", "stateId": "landing-default", "stateNodeId": "14090:111251" }
+      },
+      "connectorStart": { "endpointNodeId": "16321:130508" },
+      "connectorEnd": { "endpointNodeId": "18833:91904" }
+    }
+  ]
+}

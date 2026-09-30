@@ -1,7 +1,6 @@
 ---
 name: code-gen-orchestrator
-description: Master orchestrator for the agentic backend-test codegen path — takes an approved automation_plan.json, extracts each scenario's (module, endpoint), enriches the plan with existing GBT coverage via automation-plan-test-enricher (Memgraph), then sequences gbt-method-decision-maker (method-level reuse decision from scenario_gbt_context), the module profile resolver, gbt-code-understanding, gbt-context-builder (placement and packages), gbt-test-code-generator, and test-code-validator's fix-and-revalidate loop into one epic run. Use after the SDET plan's human review gate is approved, when you want the whole plan-through-validated-code path run in order instead of invoking each stage skill by hand. Does not re-implement any stage's logic — it sequences the existing skills and enforces the same gates and reject conventions they already have.
-version: 1
+description: Master orchestrator for backend-test codegen: takes approved automation_plan.json, enriches via automation-plan-test-enricher (Memgraph), then sequences gbt-method-decision-maker, module profile resolver, gbt-code-understanding, gbt-context-builder, gbt-test-code-generator, and test-code-validator's fix loop. Use after SDET plan review when you want the full plan-through-validated-code path instead of invoking each stage by hand. Dispatches stages as subagents (docs under stages/); does not re-implement their logic; writes raw payloads to runs/<epic>/pass<N>/logs/.
 disable-model-invocation: true
 ---
 
@@ -27,7 +26,7 @@ data-provider classes named in `scenario_gbt_context`, builds a summary at **met
 assertion, and data-provider level**, compares that summary against each scenario's steps and
 `description` in the plan, and decides which existing `@Test` method the scenario belongs to —
 or which method codegen must modify, which data provider needs one new row, and which
-scenarios are genuinely new. Only then do you resolve the **module profile** skill, load
+scenarios are genuinely new. Only then do you resolve the **module profile**, load
 `gbt-code-understanding`, and run `gbt-context-builder` for placement and packages, so
 `gbt-test-code-generator` can emit code against verified anchors.
 
@@ -52,6 +51,17 @@ method-level reuse decision (`gbt-method-decision-maker`), and the placement/pac
    fields, and `gbt-test-code-generator`'s file placement are each that skill's
    responsibility. Your job ends at handing its output to the next stage unmodified, except
    for the two explicit transformations named in rules 4 and 4a.
+3a. **Carry `protocol` and the gRPC transport fields through every stage, unchanged.** When a
+   scenario carries `protocol: "grpc"`, it and its `grpc_service`, `rpc_method`, `request_type`,
+   `response_type`, `proto_reference`, `rpc_type` and `expected_status` must survive each handoff
+   verbatim. Never coerce them into REST fields (`http_method`, `path`, `headers`, `request_dto`,
+   `response_dto`, `http_status`) to satisfy a stage's schema — if a stage rejects because it
+   cannot express a gRPC scenario, that is a reject to surface, not to work around. A scenario
+   with no `protocol` key is REST by definition, so existing plans pass through untouched. When
+   resolving the module writer, resolve it on **(module, transport)**: gRPC scenarios route to
+   the `gbt-codegen:gopay-grpc-api-test-writer` / `gbt-codegen:gofood-grpc-api-test-writer` agent, everything else to the
+   REST writer agent for that module. A single plan may legitimately mix both. Module writers are
+   agents, not skills — their documents live at `reference/module-writers/<name>/SKILL.md`.
 4. **The `test_data_payloads` merge is one of exactly two artifact transformations you
    perform.** After `test-data-generator` writes `test_data.json`, copy its array verbatim
    into the plan under a new top-level key `test_data_payloads`, then re-write the plan. Do
@@ -85,6 +95,20 @@ method-level reuse decision (`gbt-method-decision-maker`), and the placement/pac
    that stage's own reject payload in verbatim — do not paraphrase or summarize a reject.
 7. **Output exactly one JSON run summary at the end.** No prose, no markdown fences outside
    the final summary object.
+
+8. **Every stage runs as its named subagent — never inline, never as a skill.** The stage
+   documents live under `$CLAUDE_PLUGIN_ROOT/stages/` and are deliberately not skills: they are
+   not user-invocable and you cannot load them as skills. Dispatch by `subagent_type` from the
+   stage table. If an agent does not resolve, reject with `stage_agent_unavailable` — doing the
+   stage's work yourself produces an artifact that claims a provenance it does not have.
+9. **You own the human go-ahead for step 13, because the agent cannot ask.** `gbt-mr-raiser` runs
+   in an isolated context with no access to this conversation. Obtain the go-ahead here — naming
+   the branch, the file count, and that the MR opens as a Draft — and pass `go_ahead: "granted"`
+   into its spawn prompt. Never spawn it and assume the agent will confirm; it will reject.
+10. **The debug trail is mandatory, not best-effort.** Before each dispatch write the prompt echo
+   and the `dispatch` record; after each return write the `return` record and verify the agent's
+   log exists. The stages are subagents nobody else can see — a run whose trail is missing cannot
+   be debugged without repeating it. See **Debug output**.
 
 ## Resolving the GBT repo
 
@@ -137,22 +161,22 @@ machine, and the plugin is distributed.
 
 ## Stage order
 
-| # | Stage skill | Reads | Writes | Gate before running |
-|---|---|---|---|---|
-| 0 | `gbt-workspace-prep` | `run.json`, `automation_plan.json`, the base clone | `workspace.json` — fetched base, run branch, isolated **worktree** | **human review gate approved**; base clone clean; network (or `--offline`) |
-| 1 | **endpoint extraction (this skill)** | `automation_plan.json` — `module`/`service_name` + `endpoint` per scenario | nothing (read-only; the pairs are passed in-memory to step 2) | **human review gate approved** (`run.json`), plan present with ≥1 `is_dedup: false` scenario |
-| 2 | `automation-plan-test-enricher` | the plan + the GBT dependency graph in **Memgraph** (bolt) | `automation_plan_enriched.json` — `scenario_gbt_context` per scenario | bolt reachable; `endpoint_context.cypher` resolved |
-| 3 | `test-data-generator` | enriched plan, `rfc_context.json`, `sdet_plan.json` | `test_data.json` | step 2 succeeded, non-empty `to_generate` |
-| 4 | **merge step (this skill)** | `test_data.json` | enriched plan (adds `test_data_payloads`) | step 3 succeeded |
-| 5 | `gbt-method-decision-maker` | **`scenario_gbt_context` from the enriched plan** + the real test / assertion / data-provider classes it names, from `$GBT_REPO_PATH`; each scenario's steps + `description` | `method_decisions.json` | enriched plan merged (step 4) |
-| 6 | **module profile resolver (this skill)** | the target module → `gbt-module-<normalized>` (`:driver-platform` → `gbt-module-driver-platform`) | nothing written — loaded into context | step 5 succeeded |
-| 7 | `gbt-code-understanding` | the enriched plan, the module profile, `$GBT_REPO_PATH` | nothing written — the five-phase analysis loaded into context | module profile resolved (or explicitly absent) |
-| 8 | `gbt-context-builder` | `rfc_context.json`, `tasks_context.json`, `regression_context.json`, code graph | `gbt_context.json` — `packages`, `module_root`, exemplars, layer verdicts | code graph reachable for target module |
-| 9 | `gbt-test-code-generator` | enriched plan (merged), `gbt_context.json`, `method_decisions.json`, `run.json` | `.java` files, `codegen_manifest.json` | review gate still approved |
-| 10 | `test-code-validator` | generated Java, `rules.json`, the enriched plan | `validation_report.json` | at least one file generated |
-| 11 | validate-fix loop | `validation_report.json` errors | re-invokes step 9 on `implicated_files`, then re-runs step 10 | `validation_report.blocked == true` and retry budget remains |
-| 12 | `gbt-build-fix` | `codegen_manifest.json`, the clone | compiled module; corrected `.java` files in place | validate-fix loop settled |
-| 13 | `gbt-mr-raiser` | `codegen_manifest.json`, `validation_report.json`, `method_decisions.json`, `run.json`, the clone | branch + commit + **Draft MR** | step 12 settled (compiling, or budget exhausted with TODOs recorded); **explicit human go-ahead** |
+| # | Stage | Agent (`subagent_type`) | Reads | Writes | Gate before running |
+|---|---|---|---|---|---|
+| 0 | `gbt-workspace-prep` | `gbt-codegen:gbt-workspace-prep` | `run.json`, `automation_plan.json`, the base clone | `workspace.json` — fetched base, run branch, isolated **worktree** | **human review gate approved**; base clone clean; network (or `--offline`) |
+| 1 | **endpoint extraction (this skill)** | — (this skill) | `automation_plan.json` — `module`/`service_name` + `endpoint` per scenario | nothing (read-only; the pairs are passed in-memory to step 2) | **human review gate approved** (`run.json`), plan present with ≥1 `is_dedup: false` scenario |
+| 2 | `automation-plan-test-enricher` | `gbt-codegen:gbt-plan-enricher` | the plan + the GBT dependency graph in **Memgraph** (bolt) | `automation_plan_enriched.json` — `scenario_gbt_context` per scenario | bolt reachable; `endpoint_context.cypher` resolved |
+| 3 | `test-data-generator` | `gbt-codegen:gbt-test-data-generator` | enriched plan, `rfc_context.json`, `sdet_plan.json` | `test_data.json` | step 2 succeeded, non-empty `to_generate` |
+| 4 | **merge step (this skill)** | — (this skill) | `test_data.json` | enriched plan (adds `test_data_payloads`) | step 3 succeeded |
+| 5 | `gbt-method-decision-maker` | `gbt-codegen:gbt-method-decision-maker` | **`scenario_gbt_context` from the enriched plan** + the real test / assertion / data-provider classes it names, from `$GBT_REPO_PATH`; each scenario's steps + `description` | `method_decisions.json` | enriched plan merged (step 4) |
+| 6 | **module profile resolver (this skill)** | — (`Read` `reference/gbt-module-<normalized>/SKILL.md`) | the target module → `gbt-module-<normalized>` (`:driver-platform` → `gbt-module-driver-platform`) | nothing written — loaded into context | step 5 succeeded |
+| 7 | `gbt-code-understanding` | — (`Read` `reference/gbt-code-understanding/SKILL.md`) | the enriched plan, the module profile, `$GBT_REPO_PATH` | nothing written — the five-phase analysis loaded into context | module profile resolved (or explicitly absent) |
+| 8 | `gbt-context-builder` | `gbt-codegen:gbt-context-builder` | `rfc_context.json`, `tasks_context.json`, `regression_context.json`, code graph | `gbt_context.json` — `packages`, `module_root`, exemplars, layer verdicts | code graph reachable for target module |
+| 9 | `gbt-test-code-generator` | `gbt-codegen:gbt-test-code-generator` | enriched plan (merged), `gbt_context.json`, `method_decisions.json`, `run.json` | `.java` files, `codegen_manifest.json` | review gate still approved |
+| 10 | `test-code-validator` | `gbt-codegen:gbt-test-code-validator` | generated Java, `rules.json`, the enriched plan | `validation_report.json` | at least one file generated |
+| 11 | validate-fix loop | `gbt-codegen:gbt-test-code-generator` + `gbt-codegen:gbt-test-code-validator` | `validation_report.json` errors | re-invokes step 9 on `implicated_files`, then re-runs step 10 | `validation_report.blocked == true` and retry budget remains |
+| 12 | `gbt-build-fix` | `gbt-codegen:gbt-build-fix` | `codegen_manifest.json`, the clone | compiled module; corrected `.java` files in place | validate-fix loop settled |
+| 13 | `gbt-mr-raiser` | `gbt-codegen:gbt-mr-raiser` | `codegen_manifest.json`, `validation_report.json`, `method_decisions.json`, `run.json`, the clone | branch + commit + **Draft MR** | step 12 settled (compiling, or budget exhausted with TODOs recorded); **explicit human go-ahead** |
 
 ### Why the order is this way
 
@@ -183,7 +207,8 @@ machine, and the plugin is distributed.
   does, after 13 pushes.
 - **Step 13 is the only stage that leaves the machine,** and the only one that is not
   idempotent from a reviewer's point of view — a pushed branch and an opened MR are visible to
-  the team. It runs **last**, and never without explicit human go-ahead. `fix_budget_exhausted:
+  the team. It runs **last**, and never without explicit human go-ahead — which **you** obtain in this
+  conversation before spawning it (rule 9), since the agent cannot prompt anyone. `fix_budget_exhausted:
   true` from either loop does **not** block it: a Draft MR carrying honest TODOs is more useful
   than generated code stranded in a working clone. Say so in the MR body.
 - **The two budgets are separate and must not be pooled.**
@@ -191,17 +216,167 @@ machine, and the plugin is distributed.
   12's compile loop. Spending one on the other is how a run burns its compile attempts on
   formatting violations and pushes code that never compiled.
 
-`sdet-plan-generator`, `automation-plan-generator`, and the extractors before them are **not**
-run by this skill — it starts from an already-approved `automation_plan.json`. Wire
-`automation-plan-generator` in ahead of step 1 only if the epic has no plan yet.
+`sdet-plan-generator` and the extractors before it are **not** run by this skill — it starts from
+an already-approved `automation_plan.json`. If the epic has no plan yet, spawn the
+`gbt-codegen:gbt-automation-plan-generator` agent ahead of step 1; it is the one stage agent that is optional.
+
+## Dispatching a stage
+
+Every stage with an agent in the table above runs as a **subagent**, spawned with the Agent tool
+using that `subagent_type`. You never inline a stage's logic, never read its `SKILL.md` to do the
+work yourself, and never invoke it as a skill — those documents now live under
+`$CLAUDE_PLUGIN_ROOT/stages/` and are not skills any more. The agent reads its own spec.
+
+**The stage agents live in `agents/gbt-codegen/`, so their `subagent_type` is namespaced by that
+folder** — `gbt-codegen:gbt-workspace-prep`, and fully qualified
+`aep-backend:gbt-codegen:gbt-workspace-prep`. Use the value in the stage table's Agent column; if
+it does not resolve, retry once with the fully-qualified form before rejecting with
+`stage_agent_unavailable`.
+
+**One at a time, in the foreground.** The pipeline is strictly sequential — each stage reads the
+previous stage's artifact off disk — so never spawn two stages in parallel and never background
+one. Wait for each to return before evaluating its gate and dispatching the next.
+
+**The spawn prompt must stand alone.** A subagent sees none of this conversation. Every prompt
+carries, at minimum:
+
+- `run_dir` — absolute path to `runs/<epic_id>/pass<N>/`
+- `epic_id`, `pass`
+- `gbt_repo` — the absolute `workspace.gbt_repo` from stage 0, never the base clone
+- the absolute path of every artifact that stage reads, and of the artifact it must write
+- the remaining retry budget, when the stage is inside a fix loop
+
+Resolve `gbt_repo` **once**, at stage 0, and pass that same absolute string to every later stage.
+Two stages resolving it differently is how generated code lands in one tree and gets committed
+from another.
+
+Steps 6 and 7 have no agent on purpose: they are context loads, not stages. `Read`
+`$CLAUDE_PLUGIN_ROOT/reference/gbt-code-understanding/SKILL.md` and the resolved
+`reference/gbt-module-<normalized>/SKILL.md` **into your own context** and apply them when
+composing step 9's prompt. Spawning them as subagents would strand their analysis in an isolated
+context and silently degrade generation.
+
+**Module writers are agents too, and step 9 owns them.** `go-logistics-api-test-writer`,
+`gopay-api-test-writer`, `gopay-grpc-api-test-writer`, `gofood-api-test-writer`,
+`gofood-grpc-api-test-writer`, `driver-platform-api-test-writer`, `transport-api-test-writer`,
+`payment-core-api-test-writer`, `scp-api-test-writer`, `marketplace-api-test-writer`,
+`midtrans-core-api-test-writer`, `customer-platforms-api-test-writer` and
+`iris-api-test-writer` are subagents, not user-invocable skills; their documents live at
+`$CLAUDE_PLUGIN_ROOT/reference/module-writers/<name>/SKILL.md`. Name the resolved
+(module, transport) writer in step 9's spawn prompt and let `gbt-test-code-generator` read or
+spawn it — do not spawn a writer yourself as a parallel stage, and do not add it to `stages[]`.
+
+## Debug output
+
+**Every stage runs inside a subagent the user cannot see, invoke, or interrupt.** The debug trail
+below is therefore the *only* way anyone reconstructs what happened — treat writing it as part of
+running the stage, not as optional bookkeeping. A stage that completed but left no trace is a
+stage nobody can debug, and re-running the pipeline to find out what it did costs a full run.
+
+Artifacts remain the contract between stages; logs are the record of how each artifact came to be.
+
+### The `logs/` directory
+
+Create `logs/` at stage 0, beside `artifacts/` and `rejects/`. Every dispatched stage lands
+exactly these files:
+
+| # | Stage | Agent log (written by the agent) | Prompt echo (written by you) |
+|---|---|---|---|
+| 0 | gbt-workspace-prep | `logs/workspace-prep.json` | `logs/workspace-prep.prompt.txt` |
+| 2 | automation-plan-test-enricher | `logs/plan-enricher.json` | `logs/plan-enricher.prompt.txt` |
+| 3 | test-data-generator | `logs/test-data-generator.json` | `logs/test-data-generator.prompt.txt` |
+| 5 | gbt-method-decision-maker | `logs/method-decision-maker.json` | `logs/method-decision-maker.prompt.txt` |
+| 8 | gbt-context-builder | `logs/context-builder.json` | `logs/context-builder.prompt.txt` |
+| 9 | gbt-test-code-generator | `logs/test-code-generator.json` | `logs/test-code-generator.prompt.txt` |
+| 10 | test-code-validator | `logs/test-code-validator.json` | `logs/test-code-validator.prompt.txt` |
+| 11 | fix attempt `<n>` | `logs/test-code-generator.attempt-<n>.json` | `logs/test-code-generator.attempt-<n>.prompt.txt` |
+| 12 | gbt-build-fix | `logs/build-fix.json` | `logs/build-fix.prompt.txt` |
+| 13 | gbt-mr-raiser | `logs/mr-raiser.json` | `logs/mr-raiser.prompt.txt` |
+| opt | gbt-automation-plan-generator | `logs/automation-plan-generator.json` | `logs/automation-plan-generator.prompt.txt` |
+
+The agent log is that agent's **complete return payload, verbatim** — never a summary, never
+reformatted. The prompt echo is the **exact spawn prompt you sent**, written before you dispatch.
+Together they make a stage replayable: a developer can re-spawn that one agent with that one
+prompt and get the same behaviour without re-running the pipeline.
+
+Steps 1, 4, 6 and 7 have no agent, so they have no agent log — but they still get a timeline
+entry (below), because "which module profile did it resolve?" and "how many pairs did endpoint
+extraction find?" are exactly the questions a failed run raises.
+
+### The run timeline — `logs/orchestrator.jsonl`
+
+You write this yourself, one JSON object per line, appended as the run proceeds. It is the
+single file to open first when a run goes wrong, because it interleaves *your* decisions with the
+agents' results in the order they actually happened.
+
+Append a `dispatch` record immediately before spawning, and a `return` record immediately after:
+
+```json
+{"ts":"<ISO-8601>","event":"dispatch","step":2,"stage":"automation-plan-test-enricher","agent":"gbt-codegen:gbt-plan-enricher","prompt_log":"logs/plan-enricher.prompt.txt","inputs":{"plan":"artifacts/automation_plan.json","gbt_repo":"<abs path>"},"gate":"passed: bolt reachable, 6 scenarios with endpoints"}
+{"ts":"<ISO-8601>","event":"return","step":2,"stage":"automation-plan-test-enricher","status":"completed","duration_s":74,"artifact":"artifacts/automation_plan_enriched.json","log":"logs/plan-enricher.json","detail":"5 enriched, 1 errored, 6 total"}
+```
+
+For the four stages you run yourself, write a single `inline` record carrying the decision:
+
+```json
+{"ts":"<ISO-8601>","event":"inline","step":1,"stage":"endpoint_extraction","detail":"6 scenarios, 5 distinct (module, endpoint) pairs","data":{"pairs":[["gofood","POST /gofood/v1/sessions"]],"skipped":["SC-006: no_endpoint"]}}
+{"ts":"<ISO-8601>","event":"inline","step":6,"stage":"module_profile_resolver","detail":"resolved :driver-platform → gbt-module-driver-platform","data":{"read":"reference/gbt-module-driver-platform/SKILL.md","found":true}}
+```
+
+Record a **skip** the same way, with `event: "skip"` and the reason — a stage that silently did
+not run is the single most confusing thing to debug later.
+
+### What to echo to the user, live
+
+The user sees no subagent output at all, so narrate the run at exactly one line per event — never
+the agent's full report, never nothing:
+
+```
+▸ stage 2 · automation-plan-test-enricher · dispatching gbt-codegen:gbt-plan-enricher
+✔ stage 2 · completed · 74s · artifacts/automation_plan_enriched.json · 5 enriched, 1 errored
+```
+
+Use `▸` on dispatch, `✔` on completion, `⚠` on a non-fatal partial (e.g. `enrichment_partial`),
+`⛔` on a reject. On a reject, follow the one-liner with the agent's verbatim `reject` and
+`detail` fields and the path of its log — the user cannot open the subagent's transcript, so if
+you paraphrase the reject here it is lost for good.
+
+### After every stage returns, in this order
+
+1. Confirm the agent's log file exists. If it is missing, write it yourself from the returned
+   payload and set `"log_written_by":"orchestrator"` on that stage's summary entry — a missing
+   log is a defect in that agent worth reporting, not a reason to lose the payload.
+2. Confirm the artifact the stage promised exists and parses. A `completed` status with no
+   artifact on disk is a **`stage_order_violated`** reject, not a pass — catch it here rather
+   than three stages later.
+3. Append the `return` record to `logs/orchestrator.jsonl` and the stage entry to `stages[]`.
+4. Echo the one-liner.
+
+### On reject
+
+`rejects/code-gen-skill.json` copies the agent's payload in **verbatim** (rule 6). The log file
+is the source for that copy — never paraphrase it, and never summarise a reject into your own
+words. Leave every log written so far in place: the run stops, the trail does not.
+
+### Pointing a human at the trail
+
+Close every run — successful or not — by telling the user where the evidence is:
+
+```
+Debug trail: runs/<epic_id>/pass<N>/logs/
+  orchestrator.jsonl        — the full timeline, one line per event
+  <stage>.json              — each agent's verbatim return payload
+  <stage>.prompt.txt        — the exact prompt it was spawned with (re-spawn to reproduce)
+```
 
 ## The validate-fix loop, precisely
 
 1. Run `test-code-validator`. If `passed: true`, stop — done.
-2. If `blocked: true` and the profile-fix budget is not exhausted, send
-   `validation_report.implicated_files` (already capped and ordered by the validator) back to
-   `gbt-test-code-generator`'s fix path with the specific violations, decrement the budget,
-   and re-run only those files. Do not re-run `gbt-method-decision-maker` for a fix pass — its
+2. If `blocked: true` and the profile-fix budget is not exhausted, spawn a **fresh**
+   `gbt-test-code-generator` with `mode: "fix"`. It keeps no memory of the generation pass, so
+   the prompt must restate `validation_report.implicated_files` (already capped and ordered by
+   the validator), the specific violations, the attempt number, and `retries_remaining`.
+   Decrement the budget and re-run only those files. Do not re-run `gbt-method-decision-maker` for a fix pass — its
    verdict was about placement, not about the rule violations this loop is fixing. Do not
    re-run `automation-plan-test-enricher` either: a fix pass changes generated files, not the
    graph, and re-querying Memgraph mid-loop can silently swap the coverage evidence the
@@ -241,6 +416,8 @@ adds exactly one orchestration-level reject:
 | `review_gate_not_approved` | Attempted to run stage 1 or later before `run.json.review.status == "approved"` |
 | `fix_loop_would_be_unbounded` | The validate-fix loop was about to run without a tracked remaining budget |
 | `enrichment_unusable` | Every non-`is_dedup` scenario came back from step 2 with an `error` in `scenario_gbt_context`. The graph is down or the module never resolves — running `gbt-method-decision-maker` on this would turn "could not check" into a plan-wide `no_match` and duplicate every existing test. Copy the enricher's own stderr summary in verbatim |
+| `stage_agent_unavailable` | The `subagent_type` named in the stage table did not resolve — the plugin is not installed, or a rename drifted. Refuse. Falling back to doing the stage's work yourself is exactly what rule 3 forbids, and it produces an artifact nobody can attribute |
+| `mr_go_ahead_missing` | Step 13 was about to be spawned without an explicit human go-ahead obtained in this conversation. `gbt-mr-raiser` cannot prompt the user itself |
 | `enrichment_partial_unacknowledged` | Some scenarios errored and some enriched. **Not a reject on its own** — continue, but record every errored `scenario_id` with its verbatim `error` in the run summary's `enrichment` block. Rejecting here is wrong: the enriched scenarios are still actionable. Silently proceeding is also wrong |
 
 On reject, write `runs/<epic_id>/pass<N>/rejects/code-gen-skill.json`:
@@ -264,20 +441,26 @@ stage skill responsible for it, not by this skill.
   "started_at": "<ISO-8601>",
   "finished_at": "<ISO-8601>",
   "stages": [
-    {"stage": "gbt-workspace-prep", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/workspace.json", "detail": "worktree on automate/... off master@72810718; base fresh"},
-    {"stage": "endpoint_extraction", "status": "completed", "detail": "6 scenarios, 5 distinct (module, endpoint) pairs extracted; 1 scenario has no endpoint (DB-only)"},
-    {"stage": "automation-plan-test-enricher", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/automation_plan_enriched.json", "detail": "5 enriched, 1 errored, 6 total"},
-    {"stage": "test-data-generator", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/test_data.json"},
-    {"stage": "merge_test_data_into_plan", "status": "completed", "detail": "test_data_payloads set from test_data.json, 5 entries"},
-    {"stage": "gbt-method-decision-maker", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/method_decisions.json", "detail": "1 exact_match, 1 closest_match_modify, 1 data_provider_new_row, 2 no_match"},
-    {"stage": "module_profile_resolver", "status": "completed", "skill": "gbt-module-driver-platform"},
-    {"stage": "gbt-code-understanding", "status": "loaded", "detail": "five-phase analysis applied; no artifact written"},
-    {"stage": "gbt-context-builder", "status": "completed", "artifact": "runs/EPIC-1122/pass1/gbt_context.json"},
-    {"stage": "gbt-test-code-generator", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/codegen_manifest.json"},
-    {"stage": "test-code-validator", "status": "completed_after_fix", "attempts": 2, "artifact": "runs/EPIC-1122/pass1/artifacts/validation_report.json"},
-    {"stage": "gbt-build-fix", "status": "completed", "detail": "compileTestJava failed on 1 fabricated method signature; fixed in 1 attempt, module now compiles"},
-    {"stage": "gbt-mr-raiser", "status": "completed", "detail": "Draft MR !4821 opened from automate/... with 3 TODOs carried", "mr_url": "<web_url>"}
+    {"stage": "gbt-workspace-prep", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/workspace.json", "detail": "worktree on automate/... off master@72810718; base fresh", "log": "runs/EPIC-1122/pass1/logs/workspace-prep.json"},
+    {"stage": "endpoint_extraction", "status": "completed", "detail": "6 scenarios, 5 distinct (module, endpoint) pairs extracted; 1 scenario has no endpoint (DB-only)", "log": ""},
+    {"stage": "gbt-plan-enricher", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/automation_plan_enriched.json", "detail": "5 enriched, 1 errored, 6 total", "log": "runs/EPIC-1122/pass1/logs/plan-enricher.json", "duration_s": 74},
+    {"stage": "gbt-test-data-generator", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/test_data.json", "log": "runs/EPIC-1122/pass1/logs/test-data-generator.json"},
+    {"stage": "merge_test_data_into_plan", "status": "completed", "detail": "test_data_payloads set from test_data.json, 5 entries", "log": ""},
+    {"stage": "gbt-method-decision-maker", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/method_decisions.json", "detail": "1 exact_match, 1 closest_match_modify, 1 data_provider_new_row, 2 no_match", "log": "runs/EPIC-1122/pass1/logs/method-decision-maker.json"},
+    {"stage": "module_profile_resolver", "status": "completed", "profile": "reference/gbt-module-driver-platform/SKILL.md", "log": ""},
+    {"stage": "gbt-code-understanding", "status": "loaded", "detail": "five-phase analysis applied; no artifact written", "log": ""},
+    {"stage": "gbt-context-builder", "status": "completed", "artifact": "runs/EPIC-1122/pass1/gbt_context.json", "log": "runs/EPIC-1122/pass1/logs/context-builder.json"},
+    {"stage": "gbt-test-code-generator", "status": "completed", "artifact": "runs/EPIC-1122/pass1/artifacts/codegen_manifest.json", "log": "runs/EPIC-1122/pass1/logs/test-code-generator.json", "writer_agent": "gbt-codegen:gofood-api-test-writer"},
+    {"stage": "gbt-test-code-validator", "status": "completed_after_fix", "attempts": 2, "artifact": "runs/EPIC-1122/pass1/artifacts/validation_report.json", "log": "runs/EPIC-1122/pass1/logs/test-code-validator.json", "attempt_logs": ["runs/EPIC-1122/pass1/logs/test-code-generator.attempt-1.json"]},
+    {"stage": "gbt-build-fix", "status": "completed", "detail": "compileTestJava failed on 1 fabricated method signature; fixed in 1 attempt, module now compiles", "log": "runs/EPIC-1122/pass1/logs/build-fix.json"},
+    {"stage": "gbt-mr-raiser", "status": "completed", "detail": "Draft MR !4821 opened from automate/... with 3 TODOs carried", "mr_url": "<web_url>", "log": "runs/EPIC-1122/pass1/logs/mr-raiser.json"}
   ],
+  "debug": {
+    "logs_dir": "runs/EPIC-1122/pass1/logs/",
+    "timeline": "runs/EPIC-1122/pass1/logs/orchestrator.jsonl",
+    "missing_logs": [],
+    "note": "every stage log holds that agent's verbatim return payload; the matching .prompt.txt re-spawns it"
+  },
   "compile": {"passed": true, "attempts_used": 1, "budget": 2, "fix_budget_exhausted": false},
   "enrichment": {
     "enriched": 5, "errored": 1, "total": 6,
@@ -325,5 +508,6 @@ Use `""` for a missing string, `[]` for a missing list. Never use `null`.
   pinned at `base_sha` on purpose.
 - **It does not create the MR itself, or run tests.** `gbt-mr-raiser` owns branch, commit,
   push, and the Draft MR end to end — including the confirmation prompt and the secret scan.
-  This skill only sequences it last, and never waives its human go-ahead on its behalf. CI
+  This skill only sequences it last, and never waives its human go-ahead — it merely *collects*
+  that go-ahead on the agent's behalf, because a subagent has no way to ask. CI
   runs the tests once the branch is pushed.

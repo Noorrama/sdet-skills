@@ -21,7 +21,7 @@ QA guide for codegen: [`skills/nlp-codegen/README.md`](skills/nlp-codegen/README
 ## Claude Code
 
 ```
-claude plugin marketplace add https://source.golabs.io/aep/skills.git
+claude plugin marketplace add https://source.golabs.io/janus/skills.git
 claude plugin install aep-tapmind@aep
 ```
 

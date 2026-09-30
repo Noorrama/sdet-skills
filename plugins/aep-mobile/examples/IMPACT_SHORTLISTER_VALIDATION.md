@@ -1,6 +1,6 @@
 # Impact Shortlister — Validation Summary (2 Features)
 
-**Skill:** `mobile-impact-shortlister` + `scripts/shortlist_join.py`  
+**Skill:** `mobile-test-code-gen` → `impact-shortlister` subagent + `scripts/shortlist_join.py`  
 **Date:** 2026-08-24  
 **Features tested:** PAM 8 Levels (Driver) · Save Group for Group Orders (GoFood Consumer)
 

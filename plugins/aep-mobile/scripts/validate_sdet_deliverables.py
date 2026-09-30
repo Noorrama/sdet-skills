@@ -77,6 +77,33 @@ NON_POSITIVE_CATEGORY_MARKERS = (
 
 E2E_TITLE_RE = re.compile(r"\b(end-to-end|e2e)\b", re.I)
 
+PLATFORM_IN_TITLE_RE = re.compile(
+    r"(?i)(?<![a-z])(android|ios)(?![a-z])|\(\s*(android|ios)\s*\)|android\s+vs\s+ios"
+)
+
+ALLOWED_TEST_CASE_TYPES = {
+    "Happy Path",
+    "Negative",
+    "Boundary",
+    "Interruption",
+    "Permission",
+    "Feature Flag",
+    "Navigation",
+    "Accessibility",
+    "Localization",
+    "Performance",
+    "Platform Variance",
+    "Sanity",
+    "Regression",
+}
+
+# Soft legacy aliases still accepted (map toward taxonomy over time)
+LEGACY_TEST_CASE_TYPES = {"Functional", "Smoke", "Story"}
+
+JSONISH_PRECONDITION_RE = re.compile(
+    r"(\[\s*\{)|(\{\s*[\"']entity[\"'])|(\"required_state\")"
+)
+
 VERIFY_IN_STEP_RE = re.compile(
     r"^\s*\d*\.?\s*(verify|assert|check|confirm that|ensure that)\b", re.I
 )
@@ -261,13 +288,101 @@ def validate_legacy_flags(plan: dict[str, Any], errors: list[str]) -> None:
 def validate_scenario_floor(
     plan: dict[str, Any], checklist: dict[str, Any], errors: list[str]
 ) -> None:
-    floor = checklist.get("summary", {}).get("min_total_scenarios_floor", 0)
-    count = len(plan.get("scenario_list") or [])
-    if count < floor:
+    """Every checklist item must be covered via requirement_ref.
+
+    Scenario *count* may be lower than checklist length when same-flow cases
+    are combined (multi-id requirement_ref). A hard row-count floor caused
+    exhaustive suites for small features.
+    """
+    items = checklist.get("checklist") or []
+    if not items:
+        return
+    refs_blob = " , ".join(
+        str(sc.get("requirement_ref") or "") for sc in plan.get("scenario_list") or []
+    )
+    missing: list[str] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        item_id = str(item.get("id") or "").strip()
+        req_id = str(item.get("req_id") or "").strip()
+        if not item_id:
+            continue
+        # Prefer exact checklist id (e.g. BR-1:ac[0] or BR-1:boundary_conditions[2])
+        covered = item_id in refs_blob
+        if not covered and req_id and item.get("type") in ("requirement", "acceptance_criterion"):
+            # Combined rows may only list the parent req_id
+            covered = re.search(
+                rf"(?<![\w-]){re.escape(req_id)}(?![\w-])", refs_blob
+            ) is not None
+        if not covered:
+            missing.append(item_id)
+    if missing:
+        preview = ", ".join(missing[:8])
+        more = f" (+{len(missing) - 8} more)" if len(missing) > 8 else ""
         errors.append(
-            f"Scenario count {count} below checklist floor {floor} "
-            "(expand per acceptance criteria / boundaries / flags — not one row per req_id only)"
+            f"Checklist coverage gaps ({len(missing)}): {preview}{more}. "
+            "Every checklist item needs a scenario whose requirement_ref names it "
+            "(combine same-flow items into one row with multi-id requirement_ref; "
+            "do not leave items uncovered)."
         )
+
+
+def validate_titles_platform_category(
+    plan: dict[str, Any], csv_rows: list[dict[str, str]], errors: list[str]
+) -> None:
+    """Platform stays in Platform column; Type of Test Case carries category."""
+    titles_norm: dict[str, list[str]] = {}
+    for sc in plan.get("scenario_list") or []:
+        title = str(sc.get("csv_title_association") or "").strip()
+        short = title[:70]
+        if PLATFORM_IN_TITLE_RE.search(title):
+            errors.append(
+                f"Title must not include Android/iOS platform tokens (use Platform column): {short}"
+            )
+        tct = str(sc.get("test_case_type") or "").strip()
+        if not tct:
+            errors.append(f"Missing test_case_type (Happy Path / Negative / Boundary / …): {short}")
+        elif tct not in ALLOWED_TEST_CASE_TYPES and tct not in LEGACY_TEST_CASE_TYPES:
+            errors.append(
+                f"Unknown test_case_type '{tct}' on '{short}'. "
+                f"Use one of: {', '.join(sorted(ALLOWED_TEST_CASE_TYPES))}"
+            )
+        plat = str(sc.get("platform") or "").strip().lower()
+        # Detect near-duplicate Android/iOS pairs (same title after stripping OS tokens)
+        norm = PLATFORM_IN_TITLE_RE.sub("", title)
+        norm = re.sub(r"\s+", " ", norm).strip().lower()
+        if norm:
+            titles_norm.setdefault(norm, []).append(plat or "cross-platform")
+
+    for norm, plats in titles_norm.items():
+        has_android = any("android" in p and "ios" not in p and "cross" not in p for p in plats)
+        has_ios = any("ios" in p and "android" not in p and "cross" not in p for p in plats)
+        if has_android and has_ios and len(plats) >= 2:
+            errors.append(
+                f"Duplicate Android/iOS scenarios for the same behaviour '{norm[:60]}' — "
+                "use one Cross-Platform row unless the path/outcome truly differs; "
+                "never split only to put OS in the title"
+            )
+
+    for i, row in enumerate(csv_rows, start=1):
+        title = (row.get("Title") or "").strip()
+        if not title or "open points" in title.lower():
+            continue
+        if PLATFORM_IN_TITLE_RE.search(title):
+            errors.append(
+                f"CSV row {i}: Title contains Android/iOS — move OS to Platform column only"
+            )
+        pre = row.get("Preconditions") or ""
+        if JSONISH_PRECONDITION_RE.search(pre):
+            errors.append(
+                f"CSV row {i}: Preconditions looks like raw JSON — use numbered plain language"
+            )
+        tct = (row.get("Type of Test Case") or "").strip()
+        if tct and tct not in ALLOWED_TEST_CASE_TYPES and tct not in LEGACY_TEST_CASE_TYPES:
+            errors.append(
+                f"CSV row {i}: Type of Test Case '{tct}' is not in the category taxonomy"
+            )
 
 
 def _count_numbered_lines(text: str) -> int:
@@ -490,6 +605,7 @@ def run_validation(args: argparse.Namespace) -> list[str]:
     analysis_text = validate_analysis(args.analysis, errors)
     validate_json_schema(args.plan, args.schema, errors)
     validate_scenario_floor(plan, checklist, errors)
+    validate_titles_platform_category(plan, csv_rows, errors)
     validate_requirement_traceability(prd, plan, task_ctx, analysis_text, errors)
     validate_e2e(plan, checklist, errors)
     validate_balance(plan, analysis_text, errors)
