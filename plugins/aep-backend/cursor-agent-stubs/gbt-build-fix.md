@@ -22,7 +22,7 @@ writer, under `reference/module-writers/`) — read it there and execute it as w
 says `$CLAUDE_PLUGIN_ROOT`, substitute `$CURSOR_PLUGIN_ROOT` in Cursor.
 
 Produce the same artifacts, write the same `logs/` entries, obey the same gates and reject
-conventions, and write files to the `run_dir` the parent specified. Plugin-relative paths inside
+conventions, and write files to the `run_dir` the parent specified. The parent orchestrator passes `plan_dir`, `codegen_dir`, `run_json`, and `run_dir` per `references/common/epic-artifact-layout/SKILL.md`. Plugin-relative paths inside
 those documents (`stages/`, `reference/`, `schemas/`, `config/`, `references/common/`) resolve from
 the aep-backend plugin root.
 

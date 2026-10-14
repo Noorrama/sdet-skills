@@ -7,21 +7,35 @@ description: Generate the automation plan from an approved sdet_plan.json. Outpu
 
 Bridge between *what to test* (SDET plan) and *how to implement it* (test code + test data). Locks in all structural decisions before code generation starts — errors here cascade into every generated test method.
 
+## Epic paths (`plan_dir`)
+
+Resolve **`plan_dir`** per `references/common/epic-artifact-layout/SKILL.md` (default
+`qa-artifacts/<epic>/plan/`). All reads and writes below are **`{plan_dir}/<file>`** pointer
+files — never `sdet_plan_vN.json` unless the spawn prompt overrides for audit.
+
+| Write | Versioning |
+|---|---|
+| `{plan_dir}/automation_plan_v{N}.json` | Immutable snapshot |
+| `{plan_dir}/automation_plan.json` | Current pointer (always `status: "draft"` at generation time) |
+
+When spawned by `gbt-automation-plan-generator`, the spawn prompt also names `plan_dir`; do not
+write the automation plan only under `run_dir/artifacts/` — the plan lane is authoritative.
+
 ## Reads
 
 | File | Purpose |
 |---|---|
-| `sdet_plan.json` (approved) | Human-reviewed output from sdet-plan-generator, and the **only** source for test-data requirements. Source of `scenario_id`, `source_ref`, `is_legacy_regression`, `description`, `preconditions`, `step_descriptions`, `test_layer`, `tags`, `priority`, plus `scenario_group` (drives grouping), `execution_mode` (drives selection), `owning_team` (drives module and BrowserStack routing per scenario) and `existing_testcase_ids` (propagated verbatim). Also read `canonical_team_id`, `code_module` and `teams_in_scope[]` (root fields) — resolved by the team registry, never re-derived here. |
-| `tasks_context.json` | Package/class naming conventions, component boundaries, api_contract, service_name, target_framework. |
-| `code_change_context.json` | `curl_reference` construction from actual endpoint signatures. |
-| `regression_context.json` (the resolver's `scope.json`) | Existing class naming patterns for consistency, and `resolvedServices[].testGroups` / `.testClasses` for the `regression_selection` block. Class-level only — it cannot locate a method, so `existing_test_ref` must come from the SDET plan, never be derived here. |
+| `{plan_dir}/sdet_plan.json` (approved) | Human-reviewed output from sdet-plan-generator, and the **only** source for test-data requirements. Source of `scenario_id`, `source_ref`, `is_legacy_regression`, `description`, `preconditions`, `step_descriptions`, `test_layer`, `tags`, `priority`, plus `scenario_group` (drives grouping), `execution_mode` (drives selection), `owning_team` (drives module and BrowserStack routing per scenario) and `existing_testcase_ids` (propagated verbatim). Also read `canonical_team_id`, `code_module` and `teams_in_scope[]` (root fields) — resolved by the team registry, never re-derived here. |
+| `{plan_dir}/tasks_context.json` | Package/class naming conventions, component boundaries, api_contract, service_name, target_framework. |
+| `{plan_dir}/code_change_context.json` | `curl_reference` construction from actual endpoint signatures. |
+| `{plan_dir}/regression_context.json` (the resolver's `scope.json`) | Existing class naming patterns for consistency, and `resolvedServices[].testGroups` / `.testClasses` for the `regression_selection` block. Class-level only — it cannot locate a method, so `existing_test_ref` must come from the SDET plan, never be derived here. |
 
 ## Model
 Sonnet
 
 ## Approval gate — check before reading anything else
 
-**Halt unless the plan root `sdet_plan.status == "approved"`.** Surface: *"sdet_plan.json is not approved (status: {value}). A human must review the plan and its qa_analysis.md, then set status to 'approved' before the automation plan can be generated."*
+**Halt unless `{plan_dir}/sdet_plan.json` root `status == "approved"`.** Surface: *"sdet_plan.json is not approved (status: {value}). A human must review the plan and its qa_analysis.md, then set status to 'approved' before the automation plan can be generated."*
 
 Approval is **two-level**. The root gate above says the plan was reviewed at all; each scenario then carries its own `status`. Once past the root gate, take only scenarios where **`status == "approved"`**. A plan may be partially approved — 60 scenarios cleared, 17 still in review — and the cleared ones generate now rather than waiting.
 
@@ -93,7 +107,8 @@ Do **not** emit a per-entry list of peer scenarios. The repeated `fixture_id` al
 | `endpoint` | HTTP method + path from tasks_context api_contract, e.g. `POST /payment/v1/cards`. Empty string for DB/infra-only tests (no HTTP call). |
 | `curl_reference` | Minimal valid curl from code_change_context or tasks_context api_contract. Use fixture-scoped placeholders matching the id scheme below: `{{FX-SG-HOST-OWNER-01.bearerToken}}`, `{{FX-MERCHANT-GO-01.restaurantId}}`. Never an unscoped `{token}`. Placeholder field names are **candidates** — TDG confirms and corrects them against the catalog response schema. Empty string for DB/infra-only tests. |
 | `step_descriptions[]` | **Propagated verbatim** from sdet_plan.json for the matching `scenario_id`. Copy all steps as-is — do not rewrite, deduplicate or summarise. `test-code-generator` builds the method body and its assertions from these; without them it cannot write the test. Each step pairs an `action` with a single `expected_result`, and that 1:1 pairing must survive. |
-| `test_data[]` | One entry per independently provisioned entity the scenario needs. Derived from `preconditions[]` and `step_descriptions[]` only. See the ownership boundary and fixture guidance below. |
+| `preconditions[]` | **Propagated verbatim** from sdet_plan.json for the matching `scenario_id`. The SDET plan has no separate test-data section — harness, environment, and global-config preconditions live here only. Do **not** copy these lines into `test_data[].description` or `required_state.config`. |
+| `test_data[]` | One entry per independently provisioned entity the scenario needs. Derived from the `Test data:` precondition line(s) and `step_descriptions[]` only — not from other precondition lines. See the ownership boundary and fixture guidance below. |
 | `tags` | From sdet_plan.json tags + priority, e.g. `["negative", "P0"]` |
 | `environments` | From tasks_context.json environments or default `["dev-cluster", "staging-cluster"]` |
 | `execution_hints` | Default `{"retry_count": 2, "timeout_ms": 15000}`. Use `30000` for DB/infra tests, `60000` for performance tests. |
@@ -150,7 +165,7 @@ Each scenario's `test_data[]` contains one entry per independently provisioned e
 | `required_state.entity` | Domain the test data service owns: `CUSTOMER` \| `DRIVER` \| `BOOKING` \| `MERCHANT` \| `PAYMENT_INSTRUMENT` \| `DB_INFRA`. Maps to `testDataEntity` in the service request. Use `DB_INFRA` for Testcontainers / migration fixtures. |
 | `required_state.category` | Exact category name from the test data service catalog (e.g. `CUSTOMER_WITH_WALLET`, `CUSTOMER_WITH_SAVED_CARD`). Maps to `testDataCategory.testDataCategoryName`. For `DB_INFRA`: the infra type (e.g. `TESTCONTAINERS_POSTGRESQL`). |
 | `required_state.count` | Number of entities to provision. Maps to `testDataCategory.count`. Default `1`. Omit for `DB_INFRA`. |
-| `required_state.config` | Additional parameters for this category (e.g. `wallet_status`, `saved_card_type`). Merged into the `testDataCategory` request body. |
+| `required_state.config` | Additional parameters the **TDP catalog accepts** for this category (e.g. `wallet_status`, `saved_card_type`). Merged into the `testDataCategory` request body. Omit keys TestBuddy cannot provision — see harness preconditions below. |
 | `response_fields_used` | Set to `[]`. **Do not populate here.** TDG looks up the TDP catalog response schema and fills confirmed field names. |
 | `test_data_output` | Set to `null`. TDG writes enrichment here: `test_data_status`, `test_data_details.test_data_operations[]`, `test_buddy_prompt`. |
 
@@ -173,10 +188,24 @@ Read **only** `preconditions[]` and `step_descriptions[]`. Do not consult `prd_c
 
 | Field | What it contributes |
 |---|---|
-| `preconditions[]` `Test data:` line | The required state in prose, plus the fixture labels naming its equivalence class |
-| `preconditions[]` other lines | Country, entry point and feature-flag state — flag state often implies a provisioning config value |
+| `preconditions[]` `Test data:` line | The required state in prose, plus the fixture labels naming its equivalence class → becomes `test_data[]` |
+| `preconditions[]` other lines | Scenario context only → copy into `preconditions[]` on the automation scenario; **never** into `test_data[]` |
 | `step_descriptions[].action` | Transactional records that must be set up or operated on — "3 completed bookings", "a group already at 100 members" |
 | `step_descriptions[].expected_result` | Data that must exist to assert against — "returns array of 3 bookings with fare" signals 3 booking records |
+
+### Classify precondition lines — test data vs harness
+
+The SDET plan expresses everything in `preconditions[]`. Split each line before building fixtures:
+
+| Kind | Examples | Where it goes |
+|---|---|---|
+| **Provisionable entity state** | `Test data: FX-CUST-… — customer with …` | `test_data[]` (`description` + `required_state`) |
+| **Harness / global runtime** | Litmus or experiment names (`*_experiment: is_enabled = …`, `litmus_variant`), feature flags, BCS / remote-config keys, env defaults, "RFC contract_status: draft" | `preconditions[]` only — `test-code-generator` / CI harness |
+| **Session / request context** | Country, entry point, delivery mode selected in session, stub behaviour | `preconditions[]` unless the TDP category documents a real provisioning parameter for it |
+
+**Litmus and A/B experiments are never test data.** They are global configuration; TestBuddy does not assign a customer to a Litmus bucket. Do not emit `litmus_experiment`, `litmus_variant`, `experiment`, or `is_enabled` for experiments inside `required_state.config`. Do not mention Litmus or experiment names in `test_data[].description` — state only what entity state TDP must create (wallet, payment methods, merchant location, etc.).
+
+Do not invent a separate customer fixture (e.g. `FX-CUST-TREATMENT-01`) whose only distinguishing state is experiment treatment; reuse the equivalence class from the `Test data:` line and keep treatment/control in `preconditions[]`.
 
 For each entity identified, ask two questions:
 1. *"Does this need to exist for test setup?"* (customer, driver) → goes into `test_data[]`
@@ -247,8 +276,9 @@ Schema root structure:
 ## Guardrails
 - Take a scenario only when **all four** hold: `status == "approved"`, `execution_mode == "Automatable"`, `is_dedup == false`, and the plan root is `approved`. Anything else — including `deprecated`, which a human explicitly marked for removal — never becomes a test method.
 - Emit one entry per distinct `scenario_group`, not one per scenario. `covers_scenario_ids[]` must list every member.
-- Derive test data from `preconditions[]` and `step_descriptions[]` only. Do not read `prd_context`, `rfc_context` or `tasks_context` for it.
+- Derive test data from the `Test data:` precondition line(s) and `step_descriptions[]` only. Propagate all other `preconditions[]` lines verbatim on the scenario; do not read `prd_context`, `rfc_context` or `tasks_context` for test data.
 - `required_state` is **your** decision, not the plan's. The plan states the requirement; you choose entity, category, count and config against the TDP catalog.
+- Never put Litmus, experiment, or feature-flag preconditions into `test_data[].description` or `required_state.config`. Never add `litmus_*` / `experiment` keys to `config` — that is a generation error (same ownership as test-data-identification: flags are harness, not TDP).
 - Do not re-derive which scenarios share a state — reuse the equivalence classes the plan's fixture labels record.
 - `existing_testcase_ids[]` is propagated verbatim and may be empty. Never invent a test-case id.
 - `test_class` groups related scenarios — not one class per scenario. Group by `(test_layer + feature_component)`.

@@ -3,6 +3,25 @@
 A production skill set for the **backend / API** QA track across GoTo services.
 Covers the full agentic PDLC pipeline: pre-build scenario planning, post-build code generation, and upstream doc doc-change-context.
 
+## Epic artifact layout (on disk)
+
+Each feature/epic uses one tree under **`qa-artifacts/<epic-slug>/`** (see
+`references/common/epic-artifact-layout/SKILL.md`):
+
+| Lane | Directory | What lives here |
+|---|---|---|
+| **Plan** | `plan/` (`plan_dir`) | Extractor contexts, `sdet_plan.json`, `qa_analysis.md`, `automation_plan.json`, TDI `enriched_automation_plan.json` — all **pointer** files plus `*_vN` history |
+| **Codegen** | `codegen/` (`codegen_dir`) | `run.json` (automation-plan review gate), `pass<N>/artifacts`, `logs/`, `rejects/` |
+
+**Two gates:** SDET approval is only `{plan_dir}/sdet_plan.json` root `status`. Codegen approval is
+only `{codegen_dir}/run.json` `review.status` — not a substitute for SDET. Before GBT stage 0, the
+orchestrator copies `{plan_dir}/enriched_automation_plan.json` (or `automation_plan.json`) into
+`{codegen_dir}/pass<N>/artifacts/automation_plan.json`.
+
+Legacy epics may still use a **flat** `qa-artifacts/<epic>/` (no `plan/` subfolder) and
+`runs/<epic>/` at repo root instead of `codegen/`; skills resolve fallbacks as documented in the
+layout skill.
+
 ## Folder layout
 ```
 aep-backend/
@@ -223,9 +242,11 @@ The **module test-writers** (`go-logistics-api-test-writer`, `gopay-api-test-wri
 `agents/gbt-codegen/`, with their documents in `reference/module-writers/`. They are reached
 through `code-gen-orchestrator` or the `backend-automation` skill, never invoked directly.
 
-This keeps stage ordering, the human review gate, the retry budgets, and the MR go-ahead in one
-place — a stage run out of order skips gates that only the orchestrator enforces. Every stage's
-raw return payload is written to `runs/<epic_id>/pass<N>/logs/<stage>.json` for debugging.
+This keeps stage ordering, the **codegen** review gate (`codegen/run.json`), the retry budgets, and
+the MR go-ahead in one place — a stage run out of order skips gates that only the orchestrator
+enforces. Every stage's raw return payload is written to
+`qa-artifacts/<epic>/codegen/pass<N>/logs/<stage>.json` for debugging (legacy:
+`runs/<epic_id>/pass<N>/logs/`).
 
 Or naturally in conversation:
 > *"Extract the RFC context from this RFC doc"* → triggers `backend-rfc-extractor`
