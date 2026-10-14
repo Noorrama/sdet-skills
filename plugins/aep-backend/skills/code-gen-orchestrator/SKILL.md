@@ -1,6 +1,6 @@
 ---
 name: code-gen-orchestrator
-description: Master orchestrator for backend-test codegen: takes approved automation_plan.json, enriches via automation-plan-test-enricher (Memgraph), then sequences gbt-method-decision-maker, module profile resolver, gbt-code-understanding, gbt-context-builder, gbt-test-code-generator, and test-code-validator's fix loop. Use after SDET plan review when you want the full plan-through-validated-code path instead of invoking each stage by hand. Dispatches stages as subagents (docs under stages/); does not re-implement their logic; writes raw payloads to runs/<epic>/pass<N>/logs/.
+description: Master orchestrator for backend-test codegen: takes approved automation_plan.json from plan_dir, copies it into codegen pass artifacts, enriches via automation-plan-test-enricher (Memgraph), then sequences gbt-method-decision-maker, module profile resolver, gbt-code-understanding, gbt-context-builder, gbt-test-code-generator, and test-code-validator's fix loop. Use after automation-plan review (codegen/run.json) when you want the full plan-through-validated-code path. Dispatches stages as subagents; writes raw payloads to qa-artifacts/<epic>/codegen/pass<N>/logs/ (legacy runs/<epic>/pass<N>/).
 disable-model-invocation: true
 ---
 
@@ -38,11 +38,14 @@ method-level reuse decision (`gbt-method-decision-maker`), and the placement/pac
 
 ## Absolute rules (violating any is a critical failure)
 
-1. **Never skip the human review gate.** Stop after `sdet-plan-generator` and wait for
-   `runs/<epic_id>/run.json` `review.status == "approved"` before running
-   `automation-plan-generator`. This is the same gate those skills already enforce
-   individually — you must not route around it by, say, calling `gbt-test-code-generator`
-   directly with a hand-built plan.
+1. **Two gates — do not merge them.**
+   - **SDET gate** (`{plan_dir}/sdet_plan.json` root `status == "approved"`): required only to
+     spawn optional `gbt-automation-plan-generator` when `{plan_dir}/automation_plan.json` is
+     missing. This skill does **not** run `sdet-plan-generator`.
+   - **Codegen gate** (`{codegen_dir}/run.json` → `review.status == "approved"` and
+     `review.pass` equals the pass being run): required before **stage 0** and before any
+     stage that writes generated code. SDET approval alone does **not** satisfy this gate.
+   Never call `gbt-test-code-generator` with a hand-built plan to bypass either gate.
 2. **Run stages in this exact order, and stop on the first reject.** Do not run a later stage
    against a partial or rejected earlier artifact — that is how a "graph was down" reject
    becomes indistinguishable from "nothing to cover" several stages downstream.
@@ -91,7 +94,7 @@ method-level reuse decision (`gbt-method-decision-maker`), and the placement/pac
    `agent/automation_agent.py` / `agent/automation_job.py` already use, not new numbers you
    invent for the orchestrated path.
 6. **Reject, don't degrade, at the orchestrator level too.** If any stage rejects, write
-   `runs/<epic_id>/pass<N>/rejects/code-gen-skill.json` naming which stage failed and copy
+   `{run_dir}/rejects/code-gen-skill.json` naming which stage failed and copy
    that stage's own reject payload in verbatim — do not paraphrase or summarize a reject.
 7. **Output exactly one JSON run summary at the end.** No prose, no markdown fences outside
    the final summary object.
@@ -159,24 +162,32 @@ skill is read by path (Cursor, or `cat SKILL.md`), so candidate 2 silently drops
 which is why candidate 1 exists. Never hardcode an absolute path to the clone: it differs per
 machine, and the plugin is distributed.
 
+**Cursor / local workspace:** If the user already has `gojek-backend-tests` cloned, ask once (or
+read from env) and set **`GBT_REPO_PATH`** to that absolute path before stage 0, and
+**`GBT_WORKTREES_DIR`** to a writable directory outside the plugin (e.g. a sibling
+`gojek-backend-tests-worktrees/`). Stage 0 still creates `automate/…` in a **worktree**, not on
+the user's current branch in the base clone — but fetch, remotes, and push auth follow their
+clone. Echo `workspace.gbt_repo` in the run summary so they open the tree that actually holds
+generated `.java` files before `gbt-mr-raiser` pushes.
+
 ## Stage order
 
 | # | Stage | Agent (`subagent_type`) | Reads | Writes | Gate before running |
 |---|---|---|---|---|---|
-| 0 | `gbt-workspace-prep` | `gbt-codegen:gbt-workspace-prep` | `run.json`, `automation_plan.json`, the base clone | `workspace.json` — fetched base, run branch, isolated **worktree** | **human review gate approved**; base clone clean; network (or `--offline`) |
-| 1 | **endpoint extraction (this skill)** | — (this skill) | `automation_plan.json` — `module`/`service_name` + `endpoint` per scenario | nothing (read-only; the pairs are passed in-memory to step 2) | **human review gate approved** (`run.json`), plan present with ≥1 `is_dedup: false` scenario |
+| 0 | `gbt-workspace-prep` | `gbt-codegen:gbt-workspace-prep` | `run_json`, `{run_dir}/artifacts/automation_plan.json`, the base clone | `workspace.json` — fetched base, run branch, isolated **worktree** | **codegen gate** approved; plan copy done; base clone clean; network (or `--offline`) |
+| 1 | **endpoint extraction (this skill)** | — (this skill) | `{run_dir}/artifacts/automation_plan.json` — `module`/`service_name` + `endpoint` per scenario | nothing (read-only; the pairs are passed in-memory to step 2) | **codegen gate** approved; plan present with ≥1 `is_dedup: false` scenario |
 | 2 | `automation-plan-test-enricher` | `gbt-codegen:gbt-plan-enricher` | the plan + the GBT dependency graph in **Memgraph** (bolt) | `automation_plan_enriched.json` — `scenario_gbt_context` per scenario | bolt reachable; `endpoint_context.cypher` resolved |
-| 3 | `test-data-generator` | `gbt-codegen:gbt-test-data-generator` | enriched plan, `rfc_context.json`, `sdet_plan.json` | `test_data.json` | step 2 succeeded, non-empty `to_generate` |
+| 3 | `test-data-generator` | `gbt-codegen:gbt-test-data-generator` | enriched plan, `{plan_dir}/rfc_context.json`, `{plan_dir}/sdet_plan.json` | `test_data.json` | step 2 succeeded, non-empty `to_generate` |
 | 4 | **merge step (this skill)** | — (this skill) | `test_data.json` | enriched plan (adds `test_data_payloads`) | step 3 succeeded |
 | 5 | `gbt-method-decision-maker` | `gbt-codegen:gbt-method-decision-maker` | **`scenario_gbt_context` from the enriched plan** + the real test / assertion / data-provider classes it names, from `$GBT_REPO_PATH`; each scenario's steps + `description` | `method_decisions.json` | enriched plan merged (step 4) |
 | 6 | **module profile resolver (this skill)** | — (`Read` `reference/gbt-module-<normalized>/SKILL.md`) | the target module → `gbt-module-<normalized>` (`:driver-platform` → `gbt-module-driver-platform`) | nothing written — loaded into context | step 5 succeeded |
 | 7 | `gbt-code-understanding` | — (`Read` `reference/gbt-code-understanding/SKILL.md`) | the enriched plan, the module profile, `$GBT_REPO_PATH` | nothing written — the five-phase analysis loaded into context | module profile resolved (or explicitly absent) |
-| 8 | `gbt-context-builder` | `gbt-codegen:gbt-context-builder` | `rfc_context.json`, `tasks_context.json`, `regression_context.json`, code graph | `gbt_context.json` — `packages`, `module_root`, exemplars, layer verdicts | code graph reachable for target module |
-| 9 | `gbt-test-code-generator` | `gbt-codegen:gbt-test-code-generator` | enriched plan (merged), `gbt_context.json`, `method_decisions.json`, `run.json` | `.java` files, `codegen_manifest.json` | review gate still approved |
+| 8 | `gbt-context-builder` | `gbt-codegen:gbt-context-builder` | `{plan_dir}/rfc_context.json`, `{plan_dir}/tasks_context.json`, `{plan_dir}/regression_context.json`, code graph | `gbt_context.json` — `packages`, `module_root`, exemplars, layer verdicts | code graph reachable for target module |
+| 9 | `gbt-test-code-generator` | `gbt-codegen:gbt-test-code-generator` | enriched plan (merged), `gbt_context.json`, `method_decisions.json`, `run_json` | `.java` files, `codegen_manifest.json` | codegen gate still approved |
 | 10 | `test-code-validator` | `gbt-codegen:gbt-test-code-validator` | generated Java, `rules.json`, the enriched plan | `validation_report.json` | at least one file generated |
 | 11 | validate-fix loop | `gbt-codegen:gbt-test-code-generator` + `gbt-codegen:gbt-test-code-validator` | `validation_report.json` errors | re-invokes step 9 on `implicated_files`, then re-runs step 10 | `validation_report.blocked == true` and retry budget remains |
 | 12 | `gbt-build-fix` | `gbt-codegen:gbt-build-fix` | `codegen_manifest.json`, the clone | compiled module; corrected `.java` files in place | validate-fix loop settled |
-| 13 | `gbt-mr-raiser` | `gbt-codegen:gbt-mr-raiser` | `codegen_manifest.json`, `validation_report.json`, `method_decisions.json`, `run.json`, the clone | branch + commit + **Draft MR** | step 12 settled (compiling, or budget exhausted with TODOs recorded); **explicit human go-ahead** |
+| 13 | `gbt-mr-raiser` | `gbt-codegen:gbt-mr-raiser` | `codegen_manifest.json`, `validation_report.json`, `method_decisions.json`, `run_json`, the clone | branch + commit + **Draft MR** | step 12 settled (compiling, or budget exhausted with TODOs recorded); **explicit human go-ahead** |
 
 ### Why the order is this way
 
@@ -217,8 +228,43 @@ machine, and the plugin is distributed.
   formatting violations and pushes code that never compiled.
 
 `sdet-plan-generator` and the extractors before it are **not** run by this skill — it starts from
-an already-approved `automation_plan.json`. If the epic has no plan yet, spawn the
-`gbt-codegen:gbt-automation-plan-generator` agent ahead of step 1; it is the one stage agent that is optional.
+an already-approved automation plan in **`plan_dir`**. If `{plan_dir}/automation_plan.json` is
+missing, spawn `gbt-automation-plan-generator` only when the **SDET gate** passes; it writes to
+`plan_dir`. If the epic has no codegen copy yet, you still run the **plan → artifacts copy** below
+before stage 0.
+
+## Epic layout resolution (ALWAYS FIRST)
+
+Read `references/common/epic-artifact-layout/SKILL.md`. Given `epic_id` (or `epic_root` from the
+caller), resolve:
+
+| Variable | Default |
+|---|---|
+| `epic_root` | `qa-artifacts/<epic_id>/` (absolute under CWD unless caller passes absolute `epic_root`) |
+| `plan_dir` | `{epic_root}/plan/` when that folder exists or is being created; else `{epic_root}/` if `{epic_root}/sdet_plan.json` exists (legacy flat) |
+| `codegen_dir` | `{epic_root}/codegen/` when present or when starting a new codegen run; else `{repo-root}/runs/<epic_id>/` (legacy) |
+| `run_dir` | `{codegen_dir}/pass<N>/` |
+| `run_json` | `{codegen_dir}/run.json` |
+
+Log `epic_root`, `plan_dir`, `codegen_dir`, and `run_dir` in `logs/orchestrator.jsonl` before any gate.
+
+### Preflight gates (in order)
+
+1. **Codegen gate** — read `run_json`. Unless `review.status == "approved"` and `review.pass == N`,
+   reject with `review_gate_not_approved` (do not spawn stage 0+). This check is **only** about
+   automation-plan / codegen review, not SDET.
+2. **Plan lane source** — require `{plan_dir}/automation_plan.json` **or**
+   `{plan_dir}/enriched_automation_plan.json`. If both missing and caller asked to run APG, check
+   **SDET gate** on `{plan_dir}/sdet_plan.json`; if not approved, reject `sdet_gate_not_approved`;
+   else spawn `gbt-automation-plan-generator` with `plan_dir` (writes `{plan_dir}/automation_plan.json`).
+3. **Plan → pass copy (orchestrator-owned)** — before stage 0, ensure `{run_dir}/artifacts/` exists
+   and copy byte-identically:
+   - from `{plan_dir}/enriched_automation_plan.json` if present, else `{plan_dir}/automation_plan.json`
+   - to `{run_dir}/artifacts/automation_plan.json`
+   Log the source path in `orchestrator.jsonl` (`event: inline`, `stage: plan_copy`).
+
+Stages that need RFC/tasks/regression/SDET read **`plan_dir`** via absolute paths in spawn prompts
+(e.g. `{plan_dir}/rfc_context.json`).
 
 ## Dispatching a stage
 
@@ -240,10 +286,13 @@ one. Wait for each to return before evaluating its gate and dispatching the next
 **The spawn prompt must stand alone.** A subagent sees none of this conversation. Every prompt
 carries, at minimum:
 
-- `run_dir` — absolute path to `runs/<epic_id>/pass<N>/`
+- `epic_root`, `plan_dir`, `codegen_dir` — absolute (see Epic layout resolution)
+- `run_dir` — absolute `{codegen_dir}/pass<N>/`
+- `run_json` — absolute `{codegen_dir}/run.json`
 - `epic_id`, `pass`
-- `gbt_repo` — the absolute `workspace.gbt_repo` from stage 0, never the base clone
+- `gbt_repo` — the absolute `workspace.gbt_repo` from stage 0, never the base clone (omit for APG-only spawn)
 - the absolute path of every artifact that stage reads, and of the artifact it must write
+  (`plan_dir` for plan-lane contexts; `run_dir/artifacts/` for pass artifacts)
 - the remaining retry budget, when the stage is inside a fix loop
 
 Resolve `gbt_repo` **once**, at stage 0, and pass that same absolute string to every later stage.
@@ -363,7 +412,7 @@ words. Leave every log written so far in place: the run stops, the trail does no
 Close every run — successful or not — by telling the user where the evidence is:
 
 ```
-Debug trail: runs/<epic_id>/pass<N>/logs/
+Debug trail: {codegen_dir}/pass<N>/logs/
   orchestrator.jsonl        — the full timeline, one line per event
   <stage>.json              — each agent's verbatim return payload
   <stage>.prompt.txt        — the exact prompt it was spawned with (re-spawn to reproduce)
@@ -390,9 +439,9 @@ Debug trail: runs/<epic_id>/pass<N>/logs/
 
 ## Definition of Ready (DoR)
 
-- `runs/<epic_id>/pass1/artifacts/automation_plan.json` exists, is schema-valid, and its pass
-  has an approved `run.json` gate — or the caller explicitly asks this skill to run
-  `automation-plan-generator` first.
+- `{run_dir}/artifacts/automation_plan.json` exists (from **plan → pass copy** or prior pass), is
+  schema-valid, and `run_json` shows **codegen gate** approved for this pass — or the caller
+  explicitly asks this skill to run `gbt-automation-plan-generator` first (SDET gate required).
 - At least one scenario with `is_dedup: false`, and at least one of those carries a non-empty
   `endpoint` (otherwise there is nothing for the enricher to resolve).
 - **Memgraph is reachable over bolt** for the enricher, and its `endpoint_context.cypher`
@@ -413,14 +462,16 @@ adds exactly one orchestration-level reject:
 | Reason | Detail |
 |---|---|
 | `stage_order_violated` | A later stage was about to run without its declared upstream artifact present — refuse rather than run against a stale or missing file |
-| `review_gate_not_approved` | Attempted to run stage 1 or later before `run.json.review.status == "approved"` |
+| `review_gate_not_approved` | Attempted to run stage 0+ before `{codegen_dir}/run.json` `review.status == "approved"` for this pass |
+| `sdet_gate_not_approved` | Attempted to spawn `gbt-automation-plan-generator` while `{plan_dir}/sdet_plan.json` is not approved |
+| `plan_copy_missing_source` | Neither `{plan_dir}/enriched_automation_plan.json` nor `{plan_dir}/automation_plan.json` exists to copy into pass artifacts |
 | `fix_loop_would_be_unbounded` | The validate-fix loop was about to run without a tracked remaining budget |
 | `enrichment_unusable` | Every non-`is_dedup` scenario came back from step 2 with an `error` in `scenario_gbt_context`. The graph is down or the module never resolves — running `gbt-method-decision-maker` on this would turn "could not check" into a plan-wide `no_match` and duplicate every existing test. Copy the enricher's own stderr summary in verbatim |
 | `stage_agent_unavailable` | The `subagent_type` named in the stage table did not resolve — the plugin is not installed, or a rename drifted. Refuse. Falling back to doing the stage's work yourself is exactly what rule 3 forbids, and it produces an artifact nobody can attribute |
 | `mr_go_ahead_missing` | Step 13 was about to be spawned without an explicit human go-ahead obtained in this conversation. `gbt-mr-raiser` cannot prompt the user itself |
 | `enrichment_partial_unacknowledged` | Some scenarios errored and some enriched. **Not a reject on its own** — continue, but record every errored `scenario_id` with its verbatim `error` in the run summary's `enrichment` block. Rejecting here is wrong: the enriched scenarios are still actionable. Silently proceeding is also wrong |
 
-On reject, write `runs/<epic_id>/pass<N>/rejects/code-gen-skill.json`:
+On reject, write `{run_dir}/rejects/code-gen-skill.json`:
 
 ```json
 {"stage": "code-gen-skill", "failed_at": "<stage-name>",
@@ -430,7 +481,7 @@ On reject, write `runs/<epic_id>/pass<N>/rejects/code-gen-skill.json`:
 
 ## OUTPUT — return ONLY a single valid JSON object
 
-Written to `runs/<epic_id>/pass1/artifacts/code_gen_run.json` (or `pass2/` on Pass 2), as the
+Written to `{run_dir}/artifacts/code_gen_run.json`, as the
 one summary of the whole orchestrated run — every artifact it references was written by the
 stage skill responsible for it, not by this skill.
 

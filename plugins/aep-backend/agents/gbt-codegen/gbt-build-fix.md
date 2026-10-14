@@ -23,13 +23,23 @@ Then read `stages/gbt-build-fix/SKILL.md` beneath it. If neither resolves, retur
 `{"stage": "gbt-build-fix", "reject": "spec_unreadable", "detail": "<paths tried>"}` — never improvise the
 stage's logic from its name.
 
-## Inputs
+## Inputs (spawn prompt — minimum contract)
 
-Your spawn prompt carries: `run_dir` (absolute), `epic_id`, `pass`, `gbt_repo` (absolute — the
-per-run worktree from `workspace.gbt_repo`, never the base clone), and the absolute paths of the
-artifacts this stage reads and writes. Use those paths verbatim. Never re-resolve the repo
-yourself and never search for an input file elsewhere: a missing declared input is a reject, not
-a cue to go looking.
+Read `references/common/epic-artifact-layout/SKILL.md` for path resolution.
+
+Your spawn prompt carries at minimum:
+
+| Field | Meaning |
+|---|---|
+| `plan_dir` | Absolute **plan lane** (`…/plan/`). Pointer files: `sdet_plan.json`, `automation_plan.json`, context `*_context.json`, TDI outputs. |
+| `codegen_dir` | Absolute **codegen lane** (`…/codegen/`). Holds `run.json` (codegen review gate) and `pass<N>/`. |
+| `run_dir` | Absolute `{codegen_dir}/pass<N>/` — pass artifacts, `logs/`, `rejects/`. |
+| `run_json` | Absolute `{codegen_dir}/run.json`. |
+| `epic_id`, `pass` | Epic slug and codegen pass number. |
+| `gbt_repo` | Absolute per-run worktree (`workspace.gbt_repo` after stage 0). Omit for APG-only spawn. |
+| Artifact paths | Absolute path of **every** file this stage reads or writes. Use `plan_dir` for plan-lane inputs; do not search elsewhere. |
+
+Use declared paths verbatim. Never re-resolve the repo yourself: a missing declared input is a reject, not a cue to go looking.
 
 ## Outputs
 

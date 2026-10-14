@@ -96,6 +96,13 @@
             "type": "string",
             "description": "Minimal valid curl using {{FIX-xxx.fieldName}} scoped placeholders."
           },
+          "preconditions": {
+            "type": "array",
+            "description": "Propagated verbatim from sdet_plan.json for the matching scenario_id. Includes harness and global-config lines (feature flags, Litmus, BCS) that must not appear in test_data[].",
+            "items": {
+              "type": "string"
+            }
+          },
           "step_descriptions": {
             "type": "array",
             "description": "Propagated verbatim from sdet_plan.json for the matching scenario_id. Drives Given/When/Then @Step annotations in generated test code.",
@@ -173,7 +180,7 @@
                     "config": {
                       "type": "object",
                       "additionalProperties": true,
-                      "description": "Extra parameters merged into testDataCategory body, e.g. wallet_status, saved_card_type."
+                      "description": "TDP-provisionable parameters merged into testDataCategory body, e.g. wallet_status, saved_card_type. Must not include Litmus, experiment, or feature-flag keys — those belong in scenario preconditions[] only."
                     }
                   }
                 },

@@ -56,8 +56,9 @@ flag it, because output quality drops sharply without one.
 
 ## Absolute rules (violating any is a critical failure)
 
-1. **The review gate is a hard precondition.** Read `runs/<epic>/run.json`. Unless
-   `review.status == "approved"` **for this pass**, reject. A gate enforced only by the UI is
+1. **The codegen review gate is a hard precondition.** Read `run_json` from the spawn prompt
+   (`{codegen_dir}/run.json`). Unless `review.status == "approved"` **for this pass**, reject.
+   This is **not** the SDET gate on `{plan_dir}/sdet_plan.json`. A gate enforced only by the UI is
    not enforced — this skill is directly invocable, so it must refuse on its own.
 1a. **Check approval PER SCENARIO, and fail closed.** The run-level gate in rule 1 says the
     *pass* was reviewed; it does **not** say every scenario in the plan was approved. Before
@@ -66,7 +67,7 @@ flag it, because output quality drops sharply without one.
 
     | Source | Approved when | Otherwise |
     |---|---|---|
-    | `run.json` → `review.per_scenario[<scenario_id>]` | `"keep"` | skip — `"drop"`, `"changes_requested"`, or any other value |
+    | `run_json` → `review.per_scenario[<scenario_id>]` | `"keep"` | skip — `"drop"`, `"changes_requested"`, or any other value |
     | the scenario's own `status` / `approval_status` field, when the plan carries one | `"approved"` | skip |
     | the plan's top-level `status` | `"approved"` — applies to every scenario that has no entry above | **reject the whole run** if present and not `"approved"` |
     | none of the above present | — | **skip the scenario.** Absence is not approval. |

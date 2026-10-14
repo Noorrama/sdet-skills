@@ -72,10 +72,10 @@ Your output is `gbt_context.json`.
 
 ## Before you build
 
-Read `runs/<epic_id>/pass1/rfc_context.json` (for `api_contracts[]`),
-`tasks_context.json` (for `modules_touched` and `implementation_constraints`), and
-`regression_context.json` (for existing test file paths). The target Gradle module comes
-from `modules_touched` intersected with the user's selection.
+Read plan-lane contexts from paths in the spawn prompt (default `{plan_dir}/rfc_context.json` for
+`api_contracts[]`, `{plan_dir}/tasks_context.json` for `modules_touched` and
+`implementation_constraints`, `{plan_dir}/regression_context.json` for existing test file paths).
+The target Gradle module comes from `modules_touched` intersected with the user's selection.
 
 ## Definition of Ready (DoR)
 

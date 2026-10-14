@@ -60,23 +60,54 @@ GBT_FETCH_REMOTE=                 # use instead of `origin` when origin embeds a
 GBT_BASE_BRANCH=                  # pin the base; default is the remote's HEAD
 ```
 
+### Where `automate/<…>` is checked out (read this before debugging “wrong repo”)
+
+This stage does **not** generate into the operator’s open IDE folder unless they configure it.
+
+| Concept | Path | Role |
+|---|---|---|
+| **Base clone** | `GBT_REPO_PATH`, else `$CLAUDE_PLUGIN_ROOT/.gbt_repo`, else `./.gbt_repo` | Fetched read-only; default branch is never checked out for codegen |
+| **Run worktree** | `{GBT_WORKTREES_DIR}/<branch-suffix>/` | **`git worktree add -b automate/…`** creates the branch here; `workspace.gbt_repo` points here |
+| **Operator’s daily clone** | e.g. `~/git/gojek-backend-tests` | Used **only** if `GBT_REPO_PATH` is set to that absolute path before stage 0 |
+
+Downstream stages (including `gbt-mr-raiser`) **never** `git clone` or `git checkout` a second
+time — they `cd` to `workspace.json` → `gbt_repo` (the worktree). If generated files are not in
+the tree the user has open in the editor, they are looking at the **base clone** or a different
+checkout, not `gbt_repo`.
+
+**To use the local `gojek-backend-tests` checkout as the base** (recommended on Cursor / local runs):
+
+```bash
+export GBT_REPO_PATH="/absolute/path/to/gojek-backend-tests"
+export GBT_WORKTREES_DIR="/absolute/path/to/gojek-backend-tests-worktrees"   # sibling dir, not inside plugin/
+```
+
+Re-run from the same shell so stage 0 and the orchestrator spawn prompts carry these values.
+After stage 0, open **`workspace.gbt_repo`** in the IDE (from `codegen/.../artifacts/workspace.json`),
+not only the base clone path.
+
 Keep `GBT_WORKTREES_DIR` **outside** the plugin directory. A worktree inside
 `plugins/aep-backend/` is at the mercy of `claude plugin update`, which re-syncs that tree.
 
 ## Inputs
 
+Spawn prompt carries `plan_dir`, `codegen_dir`, `run_dir`, and `run_json` per
+`references/common/epic-artifact-layout/SKILL.md`.
+
 | Path | Required | Used for |
 |---|---|---|
-| `runs/<epic>/run.json` | yes | the review gate, and `prd_title` for the branch name |
-| `runs/<epic>/pass1/artifacts/automation_plan.json` | yes | `module` for the branch name |
+| `{codegen_dir}/run.json` (`run_json`) | yes | **Codegen** review gate (not SDET); `prd_title` for the branch name |
+| `{run_dir}/artifacts/automation_plan.json` | yes | `module` for the branch name (orchestrator copies from `plan_dir` before stage 0) |
 | the base GBT clone | yes | resolved per the order below; fetched, never modified |
+
+Legacy: `runs/<epic>/run.json` at repo root when `codegen_dir` was not used.
 
 Base-clone resolution, first hit wins — the same order the rest of the pipeline uses:
 `$GBT_REPO_PATH` → `$CLAUDE_PLUGIN_ROOT/.gbt_repo` → `./.gbt_repo`.
 
 ## Definition of Ready (DoR)
 
-- `run.json` shows `review.status == "approved"` for this pass.
+- `run_json` shows `review.status == "approved"` for this pass (`review.pass` must match spawn `pass`).
 - The base clone resolves, is a git work tree, and has a clean working tree — a dirty base
   means someone is mid-edit, and its changes would leak into the new worktree.
 - No rebase/merge/bisect in progress in the base clone.
@@ -87,7 +118,7 @@ Base-clone resolution, first hit wins — the same order the rest of the pipelin
 | Reason | Detail |
 |---|---|
 | `review_not_approved` | Gate is `pending` or `changes_requested` |
-| `missing_input` | `run.json` or `automation_plan.json` absent/unparseable |
+| `missing_input` | `run_json` or `{run_dir}/artifacts/automation_plan.json` absent/unparseable |
 | `gbt_repo_missing` | No candidate in the resolution order is a git work tree — **or** `GBT_REPO_PATH` was set and is not one. An explicit override that does not resolve is an error, never a fallback to another clone |
 | `base_clone_dirty` | Uncommitted changes in the base clone. Name the files; do not stash them on the user's behalf |
 | `fetch_failed` | Fetch failed and `--offline` was not passed (rule 4). Include git's error verbatim, minus any URL |

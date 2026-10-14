@@ -16,11 +16,26 @@ execution-ready provisioning plan the downstream stage can consume without re-re
 here, no create/mutate tool is called. It reads catalogs and writes a plan.
 `test-data-provision` executes that plan at code-generation / execution time.
 
+## Epic paths (`plan_dir`)
+
+Resolve **`plan_dir`** per `references/common/epic-artifact-layout/SKILL.md`. Read the approved
+automation plan from **`{plan_dir}/automation_plan.json`** (pointer). Write all outputs under
+`plan_dir` with versioning where applicable:
+
+| Output | Path |
+|---|---|
+| `test_data_manifest.json` | `{plan_dir}/test_data_manifest.json` (+ `test_data_manifest_v{N}.json` on re-run) |
+| `enriched_automation_plan.json` | `{plan_dir}/enriched_automation_plan.json` (+ versioned snapshot) |
+| `run_log.json` | `{plan_dir}/run_log.json` (TDI audit trail — not codegen `run.json`) |
+
+Never edit `{plan_dir}/automation_plan.json` in place; enrichment is a new file per the Outputs
+section below.
+
 ## Reads
 
 | Source | Purpose |
 |---|---|
-| `automation_plan.json` (approved) | `fixtures_summary[]` → `fixture_id`, `description`, `required_state`, `used_by_scenarios[]`. These three fields are the whole input signal. |
+| `{plan_dir}/automation_plan.json` (approved) | `fixtures_summary[]` → `fixture_id`, `description`, `required_state`, `used_by_scenarios[]`. These three fields are the whole input signal. |
 | `references/index.md` | **Step 1 entry point** — the QA Knowledge Catalog. Routes to per-domain OKF bundles and carries the procedure for reading a natural-language statement. |
 | `references/customer/index.md` · `references/driver/index.md` | Populated domain bundles: real TDP category enums (with `isEnabled`), the account-vs-wallet-amount split, signal→token vocabulary |
 | `references/workflow/index.md`, `references/workflow/transport/index.md`, `references/workflow/food/index.md` | Which entities a booking vertical needs and in what order (Transport: Customer → Driver; Food: Customer → Merchant → Driver), grounded in `BookingService`/`GoFoodBookingService` guards — use before sequencing any fixture that names a booking, ride, or order |
