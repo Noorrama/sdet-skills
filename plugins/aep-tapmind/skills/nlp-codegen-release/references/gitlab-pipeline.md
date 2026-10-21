@@ -28,6 +28,9 @@ per-module YAML). App download uses existing `download_gojek_android_app` /
 Optional: `BS_PROJECT_ID`, `AGENTIC_LARK_CHANNEL`, `REPORT_TO_TESTRAIL`,
 `EXISTING_TEST_PLAN`.
 
+`TAPMIND_CONFIG` is required on the trigger so catch-all `web|api` manual jobs in
+other modules are skipped (`when: never`) and do not clutter the pipeline graph.
+
 ## MCP (GitLab)
 
 Use `gitlab_manage_pipeline` with action **create** (or equivalent) on project
