@@ -22,11 +22,44 @@ Never `runStep("Mock location to latitude…")` or `runStep("Do a backdoor login
 
 ## Tap / scroll / wait
 
+Use **`scroll`**, not `swipe`, to reveal off-screen content (`nlp-codegen`
+`sibling-emit.md`, `step-validation/references/direct-api-map.md`).
+
 | Step text | Emit |
 |---|---|
 | `Tap 'Edit'` / `Tap on 'Update' button` | `runStep("Tap 'Edit'")` — quote if case quoted |
-| `Scroll until "Payment Summary" is visible` | `runStep` as written or `scrollToText` if pioneer/bucket used it |
 | `Wait until … is visible` | `runStep` or `assertStep` on terminal wait |
+
+### Scroll (direct API — do not `runStep` generic scroll)
+
+Parse the **target label** from the step (strip direction words and trailing
+`is visible` / `are visible`). Match **bucket** tests for casing when the same
+screen exists (e.g. booking → `"Saved Address"` / `"Saved Addresses"`).
+
+| Author wrote (examples) | Emit |
+|---|---|
+| `Scroll down to saved Address` | `TapMind.scrollToText(Direction.DOWN, "Saved Address");` |
+| `Scroll down until saved address is visible` | same — `scrollToText` stops when text is on screen |
+| `Scroll until "Payment Summary" is visible` | `TapMind.scrollToText(Direction.DOWN, "Payment Summary");` |
+| `Scroll up to …` / `Scroll left` / `Scroll right` | `scrollToText` with `Direction.UP` / `LEFT` / `RIGHT` |
+| `Scroll down` (no target text) | `TapMind.scroll(Direction.DOWN);` — optional `ScrollSpeed` if bucket uses it |
+| `Scroll to top` / `Scroll to bottom` | `TapMind.scrollToTop();` / `TapMind.scrollToBottom();` |
+| Exact label match required | `TapMind.scrollToText(Direction.DOWN, "…", MatchType.EXACT);` |
+
+Imports (mirror the bucket class):
+
+```java
+import static io.gojek.tapmind.client.TapMind.scrollToText;
+import static io.gojek.tapmind.client.model.constants.Direction.DOWN;
+```
+
+If the expected result is only “X is visible” and the step is a scroll-to-X row,
+**do not** duplicate with `assertStep` unless the case has a separate **Verify**
+step.
+
+**Never** emit `runStep("Scroll down to …")` when a target string is present —
+use `scrollToText`. Reserve `runStep` for scroll wording the device agent must
+interpret with no stable text target (rare).
 
 ## Update / Edit / Input / Type / Enter
 

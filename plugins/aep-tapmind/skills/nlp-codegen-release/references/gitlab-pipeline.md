@@ -25,7 +25,8 @@ per-module YAML). App download uses existing `download_gojek_android_app` /
 | `APP_TYPE` | `gojek-android` or `gojek-ios` | Selects download + test job |
 | `INFRA` | `qa` | Same as other consumer jobs |
 
-Optional: `BS_PROJECT_ID`, `AGENTIC_LARK_CHANNEL`, `REPORT_TO_TESTRAIL`,
+Optional: `BS_PROJECT_ID`, `AGENTIC_LARK_CHANNEL` (default `Tapmind-release-reports`),
+`REPORT_TO_TESTRAIL`,
 `EXISTING_TEST_PLAN`.
 
 `TAPMIND_CONFIG` is required on the trigger so catch-all `web|api` manual jobs in

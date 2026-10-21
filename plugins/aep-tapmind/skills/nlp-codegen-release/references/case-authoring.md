@@ -25,7 +25,9 @@ row only — not under Preconditions. Emit `TapMind.openDeeplink(...)` per
 
 - One action per row (Steps template, not Text).
 - Quote exact on-screen control text when known (`Tap 'Edit'`).
-- `Scroll until "…" is visible` when the control is below the fold.
+- `Scroll down to …` / `Scroll down until … is visible` / `Scroll until "…" is
+  visible` when the control is below the fold (codegen emits `TapMind.scrollToText`,
+  not a vague `runStep` scroll).
 - Last row should be an **Assert** / **Verify** with visible copy, not screenshot-only.
 
 ## Auto-readiness (skill decides kb-only vs pioneer)

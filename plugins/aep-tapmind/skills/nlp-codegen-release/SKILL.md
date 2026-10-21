@@ -152,7 +152,8 @@ Read [references/step-emit.md](references/step-emit.md),
 `$ROOT/skills/step-validation/references/direct-api-map.md`.
 
 Map each `steps[].action` with **step-emit** (Update/Edit/Input → Type in
-field; Open `gojek://` in steps → `openDeeplink`). Score readiness per
+field; Open `gojek://` in steps → `openDeeplink`; Scroll down/to/until →
+`TapMind.scrollToText` / `scroll`, not `runStep` scroll). Score readiness per
 case-authoring §auto-readiness; echo before emit.
 
 Harvest guards from **that bucket's directory** first, then the module
