@@ -13,6 +13,11 @@ field + Type per [step-emit.md](plugins/aep-tapmind/skills/nlp-codegen-release/r
 `parse-bs-csv.py` adds `preconditions_parsed`. Auto-readiness scoring for
 kb-only vs pioneer. Default agent model: Composer.
 
+## 1.1.8
+
+**Plugin manifest version bump** (marketplace install URL docs on `main`; no skill
+behavior change).
+
 ## 1.1.7
 
 **`nlp-codegen` always uses an enriched plan.** If the folder has no
