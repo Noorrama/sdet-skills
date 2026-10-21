@@ -217,6 +217,21 @@ EOF
 
 No write token → stop after local commit and print the commands.
 
+### 8. Pipeline (optional, ask once)
+
+After the MR branch is pushed, ask the user **once** whether to trigger the
+generic release NLP jobs on that `ref`. If yes, use GitLab MCP
+(`gitlab_manage_pipeline` create) on `aep/tapmind-mobile-tests` with variables
+from `references/gitlab-pipeline.md`:
+
+- `TAG=Agentic_nlp_tests`
+- `MODULE`, `TAPMIND_CONFIG`, `APP_TYPE` (`gojek-android` or `gojek-ios`),
+  `INFRA=qa`
+- Optional `BS_PROJECT_ID` from the BrowserStack project
+
+Trigger Android and iOS in separate pipelines when both platforms are in scope.
+Return the pipeline URL only; do not poll for job completion.
+
 ## What this is not
 
 | Need | Skill |
