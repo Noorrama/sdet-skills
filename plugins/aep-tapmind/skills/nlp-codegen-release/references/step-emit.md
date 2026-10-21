@@ -44,7 +44,8 @@ screen exists (e.g. booking → `"Saved Address"` / `"Saved Addresses"`).
 | `Scroll up to …` / `Scroll left` / `Scroll right` | `scrollToText` with `Direction.UP` / `LEFT` / `RIGHT` |
 | `Scroll down` (no target text) | `TapMind.scroll(Direction.DOWN);` — optional `ScrollSpeed` if bucket uses it |
 | `Scroll to top` / `Scroll to bottom` | `TapMind.scrollToTop();` / `TapMind.scrollToBottom();` |
-| Label casing may differ on device | `MatchType.CONTAINS` with a **lowercase substring** from the step (e.g. `"saved address"`) |
+| Label casing may differ on device | `MatchType.CONTAINS` with a substring from the step (often lowercase on Android) |
+| Same step, different platform copy | `if (iOS) scrollToText(DOWN, "Saved addresses", CONTAINS); else scrollToText(DOWN, "saved address", CONTAINS);` when bucket/device shows distinct strings |
 | Exact label match required | `TapMind.scrollToText(Direction.DOWN, "…", MatchType.EQUALS);` |
 
 Imports (mirror the bucket class):
