@@ -37,20 +37,24 @@ diff, stop: those decisions belong to the individual skills.
    `{artifact}.json` as the current pointer.
 8. **Mode names are canonical.** Use exactly: `upstream-context`, `code-change-context`,
    `doc-change-context`, `review`. These match `sdet-plan-generator`'s `generation_mode` field.
+9. **Plan lane paths.** Resolve `epic_root`, `plan_dir`, and write all Phase A–B artifacts under
+   `plan_dir` per `references/common/epic-artifact-layout/SKILL.md`. Default:
+   `epic_root = qa-artifacts/<epic-slug>/`, `plan_dir = {epic_root}/plan/`. Legacy: when
+   `{epic_root}/sdet_plan.json` exists and `plan/` does not, use `plan_dir = {epic_root}`.
 
 ---
 
 ## Step 0 — Mode detection (ALWAYS FIRST)
 
-Check the run output directory in **priority order** — use the first match:
+Resolve `plan_dir` (see rule 9), then check **`plan_dir`** in **priority order** — use the first match:
 
 | Priority | Condition | Mode | Steps that run |
 |---|---|---|---|
-| 1 (highest) | `sdet_plan.json` present **AND** `qa_analysis.md` present **AND** `### Feedback` section has content beyond the placeholder | **review** | Step 0 → Step R |
-| 2 | `sdet_plan.json` absent | **upstream-context** | Step 0 → Steps U1–U8 |
-| 3 | `sdet_plan.json` present **AND** user signals a doc update (via `--doc-updated` flag or updated doc file path provided as arg) | **doc-change-context** | Step 0 → Steps D1–D4 |
-| 4 | `sdet_plan.json` present **AND** (`code_change_context.json` present **OR** user provides a GitLab diff) | **code-change-context** | Step 0 → Steps C1–C5 |
-| 5 (error) | `sdet_plan.json` present, no feedback, no signal | **Error** | Stop — surface guidance |
+| 1 (highest) | `{plan_dir}/sdet_plan.json` present **AND** `{plan_dir}/qa_analysis.md` present **AND** `### Feedback` section has content beyond the placeholder | **review** | Step 0 → Step R |
+| 2 | `{plan_dir}/sdet_plan.json` absent | **upstream-context** | Step 0 → Steps U1–U8 |
+| 3 | `{plan_dir}/sdet_plan.json` present **AND** user signals a doc update (via `--doc-updated` flag or updated doc file path provided as arg) | **doc-change-context** | Step 0 → Steps D1–D4 |
+| 4 | `{plan_dir}/sdet_plan.json` present **AND** (`{plan_dir}/code_change_context.json` present **OR** user provides a GitLab diff) | **code-change-context** | Step 0 → Steps C1–C5 |
+| 5 (error) | `{plan_dir}/sdet_plan.json` present, no feedback, no signal | **Error** | Stop — surface guidance |
 
 Report the detected mode before doing anything else:
 
@@ -94,17 +98,22 @@ Runs when: `sdet_plan.json` is absent.
 
 ### Step U1 — Resolve directories
 
-Ask for two inputs if not provided in args:
+Ask for inputs if not provided in args:
 
 | Input | Prompt | Default |
 |---|---|---|
 | **Source docs directory** | "Which directory contains your PRD, RFC, and task breakdown files?" | Must be specified |
-| **Run output directory** | "Where should context files and the plan be written?" | `qa-artifacts/<epic-slug>/` under working directory |
+| **Epic root** | "Epic artifact root?" | `qa-artifacts/<epic-slug>/` under working directory |
+| **Plan directory (`plan_dir`)** | "Where should context files and the plan be written?" | `{epic_root}/plan/` (create `plan/` if absent). Legacy flat epics: `{epic_root}/` when migrating in place. |
 
-Confirm before proceeding:
+All extractor and `sdet-plan-generator` spawns use **`output_dir=<plan_dir>`** (absolute). Log
+`epic_root`, `plan_dir`, and `orchestrator_run_log.json` path `{epic_root}/orchestrator_run_log.json`.
+
+Confirm before proceeding (use the resolved absolute paths — never assume a fixed epic slug):
 ```
 Source docs : /path/to/docs/
-Run output  : qa-artifacts/gofood-sg-m5/
+Epic root   : qa-artifacts/<epic-slug>/
+Plan dir    : qa-artifacts/<epic-slug>/plan/
 Proceeding with upstream-context mode…
 ```
 
@@ -270,9 +279,9 @@ Post-build milestone: code is merged, `sdet_plan.json` already exists from the u
 run. This path adds delta scenarios (`is_delta: true`) for new/changed endpoints and validation
 rules not present in the PRD/RFC at plan time.
 
-### Step C1 — Resolve run output directory
+### Step C1 — Resolve plan directory
 
-Ask if not provided. Default: same directory as the existing `sdet_plan.json`.
+Ask if not provided. Default: `plan_dir` where `{plan_dir}/sdet_plan.json` already lives (per rule 9).
 
 ---
 
@@ -456,7 +465,8 @@ After completion, surface:
    Plan status        : <approved | draft | in_review>
 
 If status is "approved":
-  → Invoke /aep-backend:code-gen-orchestrator to continue to Phase C.
+  → Run automation-plan-generator (then test-data-identification after automation-plan approval).
+  → After `{codegen_dir}/run.json` is approved, invoke /aep-backend:code-gen-orchestrator.
 If status is still "draft" or "in_review":
   → More feedback needed — repeat the review cycle.
 ```
@@ -472,7 +482,9 @@ Append to this file throughout the run. Key fields:
   "skill": "aep-backend:backend-test-plan-generator",
   "invoked_at": "<ISO8601>",
   "mode": "upstream-context | code-change-context | doc-change-context | review",
-  "run_output_dir": "<path>",
+  "epic_root": "<path>",
+  "plan_dir": "<path>",
+  "run_output_dir": "<plan_dir — same as plan_dir>",
   "source_docs_dir": "<path — null for code-change-context/doc-change-context/review>",
   "steps": [ ... ],
   "outcome": "COMPLETED | STOPPED_REVIEW_GATE | REJECTED | ERROR"

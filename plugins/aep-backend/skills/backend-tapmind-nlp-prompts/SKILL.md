@@ -9,8 +9,12 @@ description: >-
   verify-only steps / grpc / grpcurl / grpc.invoke / rpc_alias, OR when given
   automation_plan.json, existing Java tests, BrowserStack test-case steps, a test-case sheet,
   or sdet_plan step_descriptions to generate prompts, batch-verify them,
-  run steps via MCP, and emit corrected suite test methods. Two intake
-  paths (plan vs code/test-case) merge into one shared NLP core — see §G.
+  run steps via MCP, and emit corrected suite test methods. Also use when
+  converting BrowserStack / source-file test cases to NLP, rewriting vague
+  saves like "save basetoken from response" into JSONPath form
+  (`save $.data.base_token as basetoken`) via /v1/db/preview +
+  tapmind_verify_prompt declared_bindings — see TESTCASE_TO_NLP.md.
+  Two intake paths (plan vs code/test-case) merge into one shared NLP core — see §G.
   Before generating, scan for existing TapMind.runStep tests
   (NLP_COVERAGE.md) so only missing scenarios are emitted.
   This is the actual
@@ -34,13 +38,15 @@ real TapMind control-plane SDK, and for **generating suite-ready tests** from
 | Mode | When | Output |
 |---|---|---|
 | **Reference** | Hand-writing / debugging one prompt | Corrected prompt string(s) using §§0–10 (rewrite grpcurl → §3.8). On `400 invalid_request_body`, apply §8.1.1 sparse-body checklist before blaming memory. Artifact path §G.A.2 — no plan approval gate. |
+| **TC → NLP** | BrowserStack case or source-file steps (often path-less saves) | Path-enriched `prompts[]` via `TESTCASE_TO_NLP.md`, then §G.B |
 | **Generate** | Plan (`automation_plan.json`) **or** artifact (Java / BS steps / `sdet_plan`) | Ordered `prompts[]` per scenario or target method |
 | **Verify + run** | After generate — **both paths** | Corrected `prompts[]` + per-step verdicts via MCP |
 | **Suite convert** | After prompts verified (and optionally run) — **both paths** | Java method with `@Test` / `@TestInfo` + `runStep`/`assertStep` lines |
 
 **Intake paths:** §G.A (reference + TDP differ) → **shared core** §G.B (coverage, grammar,
 registry, MCP, suite convert). Detail: `GENERATION.md`. Coverage: `NLP_COVERAGE.md`.
-Fixture reuse: `FIXTURE_REUSE.md`. Control plane: `CONTROL_PLANE.md`. Grammar: §§0–10 below.
+Fixture reuse: `FIXTURE_REUSE.md`. Control plane: `CONTROL_PLANE.md`.
+Test-case / BS path enrichment: **`TESTCASE_TO_NLP.md`**. Grammar: §§0–10 below.
 
 ---
 
@@ -187,10 +193,15 @@ Use when the user points at an **existing test**, **BrowserStack case**, a **tes
 same shape as a BrowserStack case pre-upload), **`sdet_plan` steps without enrichment**, or a
 **single prompt** to fix — not a batch from an enriched plan.
 
+**Path enrichment (required for BS / sheet / vague saves):** follow **`TESTCASE_TO_NLP.md`**
+before §G.B — fetch cases from file or BrowserStack MCP, detect path-less language
+(`save basetoken from response`), resolve JSONPath via `POST /v1/db/preview` +
+`tapmind_verify_prompt` `declared_bindings`, emit `save $.data.base_token as basetoken`.
+
 | Need | Source |
 |---|---|
 | Target method | User path, `@TestInfo.testCaseIds`, or class#method |
-| Steps | Normalize to `action` + `expected_result`: RestAssured calls, `@Step`, BS step text, sheet `Steps`/`Expected Result` columns (1:1 numbered), or prompt under edit |
+| Steps | Normalize to `action` + `expected_result`: RestAssured calls, `@Step`, BS step text, sheet `Steps`/`Expected Result` columns (1:1 numbered), or prompt under edit — then **`TESTCASE_TO_NLP.md`** |
 | Setup / TDP | `@BeforeMethod`, helpers, `CustomerHelper`, inline tokens, curl `Authorization`, sheet `Preconditions` column |
 | Pinning | Existing `runStep(..., pdg, service)`, test package/module, or user |
 | Suite meta | **Preserve** from existing class when migrating — do not overwrite known `@TestInfo` |
@@ -265,6 +276,8 @@ For each accepted target, emit ordered `prompts[]` using grammar §§2–10:
 3. First-touch vs repeat-touch (§3.4).
 4. Track memory keys — **`saved <key>`**, not `${memory.<key>}` (§4).
 5. Unknown scalar vs array → flag; do not guess `save $.path` vs `entry where`.
+   Path-less saves from BS/sheet → resolve via **`TESTCASE_TO_NLP.md`** (`declared_bindings`)
+   before emitting; never leave `save <field> from response` in `prompts[]`.
 6. **Do not** emit `action | verify: status + full body fields…` mega-prompts.
 7. **Do not** emit multiple consecutive verify-only prompts after one execute — see §3.1.1.
 
@@ -979,6 +992,7 @@ Two independent mechanisms — know which one applies to your API:
 
 | Don't write | Write instead | Why |
 |---|---|---|
+| `save basetoken from response` / `save basetoken as basetoken` | `save $.data.base_token as basetoken` (path from `declared_bindings`) | Test-case wording has no JSONPath — resolve via `TESTCASE_TO_NLP.md` before generate. |
 | `data.payment_options.type equals GOPAY` | `payment_options entry where type equals GOPAY` | TapMind needs the word **"entry"** to know it's searching a list. |
 | `... with intent EWALLET_QR_COINS ... where type equals EWALLET_QR_COINS` | `... with intent EWALLET_QR_COINS ... where type equals GOPAY_WALLET` | **Query intent ≠ response `type`.** Intent is a request query; `type` is a field on each list row. Reusing the intent value in `where` matches no rows and saves nothing. |
 | `where type equals GOPAY_WALLET` but later `${memory.gopay_token}` when you saved `as gopayWalletToken` | Use the exact `as <name>` everywhere | Memory keys are exact; a different spelling is unbound. |

@@ -7,8 +7,11 @@ disable-model-invocation: true
 
 # GBT MR Raiser
 
-You are turning the working-tree changes `gbt-test-code-generator` made inside `.gbt_repo`
-into a **Draft merge request** on `gojek-backend-tests`. Every earlier stage in this pipeline
+You are turning the working-tree changes `gbt-test-code-generator` made in the **stage-0
+worktree** (`workspace.gbt_repo` from `workspace.json`) into a **Draft merge request** on
+`gojek-backend-tests`. That path is **not** necessarily the operator’s main IDE checkout — it is
+the isolated `automate/…` worktree `gbt-workspace-prep` created under `GBT_WORKTREES_DIR` off the
+**base clone** (`GBT_REPO_PATH` or plugin `./.gbt_repo`). Every earlier stage in this pipeline
 is read-or-write-local; this is the **only stage that leaves the machine**. Treat it that way.
 
 This skill mirrors what `agent/automation_job.py` already does in the Python pipeline, so an
@@ -97,7 +100,7 @@ Never add `-v`, and never print the header — `curl -v` writes `PRIVATE-TOKEN` 
 | `runs/<epic>/pass1/artifacts/validation_report.json` | yes | whether CI-blocking findings remain; summarised into the MR body |
 | `runs/<epic>/pass1/artifacts/method_decisions.json` | no | `undecidable` scenarios, appended to the TODO checklist |
 | `runs/<epic>/pass1/artifacts/workspace.json` | yes | `gbt_repo` (the worktree to commit from), `branch`, `base_branch`, `base_sha`, `base_may_be_stale` |
-| `runs/<epic>/run.json` | yes | the review gate, and `prd_title` for the commit/MR strings |
+| `{codegen_dir}/run.json` (`run_json` in spawn prompt) | yes | **Codegen** review gate, and `prd_title` for the commit/MR strings |
 | the run's worktree | yes | `workspace.gbt_repo` — the tree holding the generated files. Never the base clone. |
 
 ## Definition of Ready (DoR)
@@ -140,7 +143,9 @@ and **make no outward call**.
    `workspace.base_sha` (rule 3b).
 3. Print the plan and get confirmation (rule 1).
 4. **Push — local path first.** The worktree is already on the run's branch, cut from the
-   pinned base; there is no branch to create and nothing to switch.
+   pinned base; there is no branch to create and nothing to switch. **Do not** `cd` to
+   `GBT_REPO_PATH`, the plugin `.gbt_repo`, or the user's unrelated local clone — only
+   `workspace.gbt_repo`.
    ```bash
    cd "$(jq -r .gbt_repo "$WORKSPACE")"   # the worktree, never the base clone
    git add -- $MANIFEST_PATHS             # never -A, never .
