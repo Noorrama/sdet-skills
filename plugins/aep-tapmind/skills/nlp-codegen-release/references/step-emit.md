@@ -38,14 +38,14 @@ screen exists (e.g. booking → `"Saved Address"` / `"Saved Addresses"`).
 
 | Author wrote (examples) | Emit |
 |---|---|
-| `Scroll down to saved Address` | `TapMind.scrollToText(Direction.DOWN, "saved address", MatchType.CONTAINS);` |
+| `Scroll down to saved Address` | `TapMind.scrollToText(Direction.DOWN, "Saved addresses", MatchType.CONTAINS);` when profile uses that label (Android + iOS) |
 | `Scroll down until saved address is visible` | same — `scrollToText` stops when matching text is on screen |
 | `Scroll until "Payment Summary" is visible` | `TapMind.scrollToText(Direction.DOWN, "Payment Summary");` |
 | `Scroll up to …` / `Scroll left` / `Scroll right` | `scrollToText` with `Direction.UP` / `LEFT` / `RIGHT` |
 | `Scroll down` (no target text) | `TapMind.scroll(Direction.DOWN);` — optional `ScrollSpeed` if bucket uses it |
 | `Scroll to top` / `Scroll to bottom` | `TapMind.scrollToTop();` / `TapMind.scrollToBottom();` |
-| Label casing may differ on device | `MatchType.CONTAINS` with a substring from the step (often lowercase on Android) |
-| Same step, different platform copy | `if (iOS) scrollToText(DOWN, "Saved addresses", CONTAINS); else scrollToText(DOWN, "saved address", CONTAINS);` when bucket/device shows distinct strings |
+| Label casing may differ on device | `MatchType.CONTAINS` with the on-screen substring (e.g. `"Saved addresses"`) |
+| Same step, different platform copy | Platform `if` only when bucket tests prove different strings; otherwise one `scrollToText` for both |
 | Exact label match required | `TapMind.scrollToText(Direction.DOWN, "…", MatchType.EQUALS);` |
 
 Imports (mirror the bucket class):
