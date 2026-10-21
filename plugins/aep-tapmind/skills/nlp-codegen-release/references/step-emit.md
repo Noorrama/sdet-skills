@@ -38,20 +38,25 @@ screen exists (e.g. booking → `"Saved Address"` / `"Saved Addresses"`).
 
 | Author wrote (examples) | Emit |
 |---|---|
-| `Scroll down to saved Address` | `TapMind.scrollToText(Direction.DOWN, "Saved Address");` |
-| `Scroll down until saved address is visible` | same — `scrollToText` stops when text is on screen |
+| `Scroll down to saved Address` | `TapMind.scrollToText(Direction.DOWN, "saved address", MatchType.CONTAINS);` |
+| `Scroll down until saved address is visible` | same — `scrollToText` stops when matching text is on screen |
 | `Scroll until "Payment Summary" is visible` | `TapMind.scrollToText(Direction.DOWN, "Payment Summary");` |
 | `Scroll up to …` / `Scroll left` / `Scroll right` | `scrollToText` with `Direction.UP` / `LEFT` / `RIGHT` |
 | `Scroll down` (no target text) | `TapMind.scroll(Direction.DOWN);` — optional `ScrollSpeed` if bucket uses it |
 | `Scroll to top` / `Scroll to bottom` | `TapMind.scrollToTop();` / `TapMind.scrollToBottom();` |
-| Exact label match required | `TapMind.scrollToText(Direction.DOWN, "…", MatchType.EXACT);` |
+| Label casing may differ on device | `MatchType.CONTAINS` with a **lowercase substring** from the step (e.g. `"saved address"`) |
+| Exact label match required | `TapMind.scrollToText(Direction.DOWN, "…", MatchType.EQUALS);` |
 
 Imports (mirror the bucket class):
 
 ```java
 import static io.gojek.tapmind.client.TapMind.scrollToText;
 import static io.gojek.tapmind.client.model.constants.Direction.DOWN;
+import static io.gojek.tapmind.client.model.constants.MatchType.CONTAINS;
 ```
+
+`ScrollRequest` defaults `scrollToTextMatchType` to **CONTAINS** when omitted; still pass
+`MatchType.CONTAINS` explicitly in release tests so casing/substring intent is clear.
 
 If the expected result is only “X is visible” and the step is a scroll-to-X row,
 **do not** duplicate with `assertStep` unless the case has a separate **Verify**
