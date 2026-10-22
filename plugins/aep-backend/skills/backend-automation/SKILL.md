@@ -10,6 +10,7 @@ description: >-
   obvious from the cURL's host/path — this file defines the module-identification and
   local-framework-discovery workflow every module-specific writer in this repo builds on, and it
   tells you which module-specific writer agent (if one exists) to use next.
+disable-model-invocation: true
 ---
 
 # Backend Automation Test Generation — Common Entry Point

@@ -1,6 +1,7 @@
 ---
 name: backend-doc-delta-extractor
 description: Extract what changed between two versions of a PRD, RFC, or Task Breakdown MD into doc_change_context.json. Used when an upstream document is updated mid-sprint. Produces a human-reviewable delta before sdet-plan-generator is re-triggered. This is the doc-change-context path for doc changes — distinct from the Post-Build Code-change-context mode which handles code diffs.
+disable-model-invocation: true
 ---
 
 # Backend Doc Delta Extractor
