@@ -20,6 +20,7 @@ description: >-
   This is the actual
   TapMind SDK grammar — not the Allure `@Step("Given/When/Then ...")`
   labels used by backend-test-code-generator.
+disable-model-invocation: true
 ---
 
 # TapMind NLP Prompt Writing

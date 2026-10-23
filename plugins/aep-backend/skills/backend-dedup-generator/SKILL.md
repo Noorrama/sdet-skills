@@ -1,6 +1,7 @@
 ---
 name: backend-dedup-generator
 description: Detect and flag duplicates in the SDET scenario plan or automation test methods. Two modes: scenario mode (after sdet-plan-generator, flags duplicate scenarios before human review) and method mode (after automation-plan-generator, flags duplicate test methods before code generation). Never deletes — only flags with is_dedup.
+disable-model-invocation: true
 ---
 
 # Backend Dedup Generator

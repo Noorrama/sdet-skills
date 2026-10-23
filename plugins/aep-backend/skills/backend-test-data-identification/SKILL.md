@@ -1,6 +1,7 @@
 ---
 name: backend-test-data-identification
 description: Identify, classify and associate every test-data fixture in the approved automation_plan.json with a Test Data Domain, a real TDP category, and the operation sequence needed to close the gap. Calls the TestBuddy MCP (TestDataAgent_get_supported_category / TestDataAgent_generate_testbuddy_prompt) and validates every returned category against the fixture's own signals — the matcher is unstable across calls and returns a nearest match rather than admitting a miss, so an uncorroborated category is rejected rather than trusted. Never invents category or operation names. Emits test_data_manifest.json plus an enriched automation_plan.json carrying test_data_output per fixture.   Identification only — it provisions nothing; test-data-provision consumes its output.
+disable-model-invocation: true
 ---
 
 # Backend Test Data Identification
