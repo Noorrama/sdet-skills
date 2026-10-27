@@ -39,11 +39,11 @@ Echo before any emit:
 PDG: gofood
   Bucket B1 groupOrder/  (folder GoFood - Group Order): TC-614398, TC-614401
     class → io.gojek.gofood.tests.groupOrder.GroupOrderDeadlineNudgeTests
-    kb    → existing files in groupOrder/ only (then module login stem)
+    kb    → groupOrder/ → module login stem → nav_index (if thin) → CSV
     pioneer (if device): TC-614398
   Bucket B2 discovery/  (folder GoFood - Discovery): TC-590728, TC-590926
     class → io.gojek.gofood.tests.discovery.DiscoveryReleaseNlpTests
-    kb    → existing files in discovery/ only (then module login stem)
+    kb    → discovery/ → module login stem → nav_index (if thin) → CSV
     pioneer (if device): TC-590728
 ```
 
@@ -63,7 +63,11 @@ For each bucket, harvest **in this order**:
    prompts, `if visible` guards, API helpers like `GroupOrderControllers`).
 2. Module-level login stem only (backdoor login, `setMockLocation`, shared
    cancel / tooltip guards already used across the module).
-3. CSV `steps` / `expected` — **unquoted** if never seen in (1) or (2).
+3. **`nav_index/tapmind/<module>.json`** (aep-mobile) when (1)–(2) do not
+   answer deeplink URI, checkout entry, or navigation — see
+   [nav-index.md](nav-index.md). Lookup by bare case id or `nav-step` keyword;
+   never read the whole file.
+4. CSV `steps` / `expected` — **unquoted** if never seen in (1)–(3).
 
 Do not copy Group Order shared-cart helpers into a Discovery method. Do not
 invent `Lewati` / `Allow`. Do not invent a deadline API that

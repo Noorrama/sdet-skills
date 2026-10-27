@@ -60,5 +60,12 @@ Run iOS in a separate pipeline with `APP_TYPE=gojek-ios` and
 | customer-platforms | customerplatform_android.json | customerplatform_ios.json |
 | transport | transport_android.json | transport_ios.json |
 | cartography | cartography_android.json | cartography_ios.json |
+| communication-platform | comms_remote_android.json | comms_remote_ios.json |
 
 When unsure, list `*android*.json` under the module directory.
+
+## Finalise
+
+After successful runs, the user may ask to **finalise** the MR — see
+[finalise-mr.md](finalise-mr.md). Keep pipeline URLs from triggers in this
+step for the verification table.

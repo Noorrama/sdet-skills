@@ -71,9 +71,19 @@ Split it.
 ### 4.2 Checkout
 
 A writable `tapmind-mobile-tests` clone (`TAPMIND_TESTS_REPO` or a
-shallow clone). That checkout **is** the knowledge base. House style,
+shallow clone). That checkout **is** the primary knowledge base. House style,
 deeplinks, TDP prompts, and `if visible` guards come from the bucket
-directory first, then the module login stem.
+directory first, then the module login stem, then **`nav_index/tapmind/`**
+(aep-mobile) for proven deeplink/workflow steps when the CSV is thin — see
+`references/nav-index.md`.
+
+Release team walkthrough: [docs/nlp-codegen-release-e2e-one-pager.md](../../../../docs/nlp-codegen-release-e2e-one-pager.md)
+(relative from plugin install: same file in `sdet-skills/docs/`).
+
+**Finalise:** user says “Finalise this MR” → `references/finalise-mr.md`
+(strip `Agentic_nlp_tests`, append successful pipeline links to MR description).
+
+**Owner:** emitted `@TestInfo` uses `owner = "AI-AGENT"`, not BrowserStack Owner.
 
 ### 4.3 Machine
 

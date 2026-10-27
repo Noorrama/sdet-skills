@@ -30,6 +30,12 @@ row only — not under Preconditions. Emit `TapMind.openDeeplink(...)` per
   not a vague `runStep` scroll).
 - Last row should be an **Assert** / **Verify** with visible copy, not screenshot-only.
 
+## TestInfo (emit)
+
+- `testCaseIds`: bare id from CSV (`705875`).
+- `owner`: always **`AI-AGENT`** on skill-emitted release tests — ignore
+  BrowserStack **Owner** column.
+
 ## Auto-readiness (skill decides kb-only vs pioneer)
 
 After ingest, score each case **without** asking the author for A/B/C:

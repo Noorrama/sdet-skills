@@ -4,8 +4,9 @@ description: >-
   Generate TapMind NLP @Test methods into tapmind-mobile-tests from assigned
   BrowserStack cases (CSV export or case ids via BrowserStack MCP). One PDG
   per run (GoFood or Cartography, not both). One class per bucket directory
-  (groupOrder vs discovery). Adds groups Agentic_nlp_tests so the MR pipeline
-  can run only the new methods. Asks kb-only vs reuse-pioneer (only if the
+  (groupOrder vs discovery).   Adds groups Agentic_nlp_tests so the MR pipeline
+  can run only the new methods; finalise removes the tag and records CI.
+  Emitted tests use @TestInfo owner AI-AGENT. Asks kb-only vs reuse-pioneer (only if the
   stem is not already in the tapmind-mobile-tests checkout) vs one device
   pioneer per bucket. Use when asked to automate BrowserStack / TMS cases,
   nlp-codegen-release, release NLP, or a GoFood/Cartography CSV. Not for
@@ -81,10 +82,11 @@ Record `validation.mode`: `generated` | `cloned_from_pioneer` | `validated_on_de
 - [ ] 1b. One PDG; locate tapmind-mobile-tests; module-profile
 - [ ] 2. Bucket by folder/directory; echo classes + pioneers; wait if mixed PDG
 - [ ] 3. Pioneer only if reuse-pioneer or device-pioneer (once per bucket)
-- [ ] 4. Harvest template per bucket (that directory first)
+- [ ] 4. Harvest per bucket: directory → module stem → nav_index → CSV
 - [ ] 5. Emit siblings; every new @Test includes Agentic_nlp_tests
 - [ ] 6. Write one class per bucket; compile
 - [ ] 7. One MR on that module's branch
+- [ ] 9. Finalise MR (on request): strip Agentic_nlp_tests; MR pipeline table
 ```
 
 ### 1. Ingest
@@ -156,13 +158,17 @@ field; Open `gojek://` in steps → `openDeeplink`; Scroll down/to/until →
 `TapMind.scrollToText` / `scroll`, not `runStep` scroll). Score readiness per
 case-authoring §auto-readiness; echo before emit.
 
-Harvest guards from **that bucket's directory** first, then the module
-login stem. Do not copy Discovery labels into Group Order methods.
+Harvest guards and navigation from **that bucket's directory** first, then the
+module login stem, then **`nav_index/tapmind/<module>.json`** when the
+BrowserStack case lacks a concrete deeplink or workflow — see
+[references/nav-index.md](references/nav-index.md) and use aep-mobile
+`scripts/corpus_lookup.py` (never Read the full nav_index file). CSV steps
+fill remaining gaps. Do not copy Discovery labels into Group Order methods.
 
 Phrasing / quoting: step-validation §6. Quote only labels the pioneer
-resolved at hierarchy, or labels already quoted in that bucket. CSV
-English that never ran stays **unquoted**. Vision on a pioneer is the
-existing ladder — never emit coordinates onto siblings.
+resolved at hierarchy, labels in that bucket, or **nav_index** `nlp` steps
+already using quotes. CSV English that never ran stays **unquoted**. Vision
+on a pioneer is the existing ladder — never emit coordinates onto siblings.
 
 ### 6. Write classes
 
@@ -189,6 +195,8 @@ directory's** sample test (`extends`, imports, `suiteId`, try/catch).
   the sample writes ids — gofood samples use the bare number). Never
   invent an id. `countryName` / `projectId` / `suiteId` from the sample
   in **that directory**.
+- `@TestInfo(owner = "AI-AGENT")` on **every emitted** release method.
+  Do **not** copy the BrowserStack **Owner** column (e.g. Rachit Baid).
 - Login: `TapMind.performBackdoorLogin` with `preconditions_parsed.test_data_prompt`
   (direct API — not `runStep`). No raw phones or tokens.
 
@@ -232,6 +240,23 @@ from `references/gitlab-pipeline.md`:
 
 Trigger Android and iOS in separate pipelines when both platforms are in scope.
 Return the pipeline URL only; do not poll for job completion.
+
+**Record** each pipeline URL (and `MODULE` / platform) in the session — needed
+for §9 finalise.
+
+### 9. Finalise MR
+
+When the user says **“Finalise this MR”** (or equivalent), read
+[references/finalise-mr.md](references/finalise-mr.md):
+
+1. Remove `"Agentic_nlp_tests"` from every group array on **skill-emitted**
+   release classes on that branch.
+2. List **successful** `agentic_nlp_release` pipelines (`gitlab_get_merge_request_pipelines` + URLs from §8).
+3. Append an **Agentic NLP verification** table to the MR description; push
+   the tag-removal commit.
+
+Do not finalise while they still intend to run `Agentic_nlp_tests` on that
+branch.
 
 ## What this is not
 
