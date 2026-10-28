@@ -1,5 +1,23 @@
 # aep-tapmind changelog
 
+## 1.1.9
+
+**New skill: `nlp-codegen-release`.** BrowserStack CSV (or MCP case ids) →
+TapMind NLP tests in `tapmind-mobile-tests` with `Agentic_nlp_tests`, one PDG
+per run, one class per bucket. kb-only or one device pioneer per bucket.
+
+**Release case contract:** [case-authoring.md](plugins/aep-tapmind/skills/nlp-codegen-release/references/case-authoring.md) —
+`Test Data:` / `Location:` in Preconditions → `performBackdoorLogin` /
+`setMockLocation` (direct API); deeplinks in steps only; Update/Edit/Input →
+field + Type per [step-emit.md](plugins/aep-tapmind/skills/nlp-codegen-release/references/step-emit.md).
+`parse-bs-csv.py` adds `preconditions_parsed`. Auto-readiness scoring for
+kb-only vs pioneer. Default agent model: Composer.
+
+## 1.1.8
+
+**Plugin manifest version bump** (marketplace install URL docs on `main`; no skill
+behavior change).
+
 ## 1.1.7
 
 **`nlp-codegen` always uses an enriched plan.** If the folder has no

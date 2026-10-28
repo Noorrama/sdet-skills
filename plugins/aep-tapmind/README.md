@@ -14,6 +14,7 @@ as `aep-mobile`).
 | `goal-driven-exploration` | Plain-English goal on a real device |
 | `step-validation` | Diagnose a written step list on a device; emit one `@Test` |
 | `nlp-codegen` | Plan → kb-only **or** one pioneer → suite in `tapmind-mobile-tests` + MR |
+| `nlp-codegen-release` | BrowserStack CSV / case ids → kb-only or pioneer per bucket → MR |
 | `charter-exploration` | BrowserStack cases → exploratory charters |
 
 QA guide for codegen: [`skills/nlp-codegen/README.md`](skills/nlp-codegen/README.md).
