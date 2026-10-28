@@ -41,8 +41,8 @@ Fast tier — **Composer 2.5** default; Sonnet for complex flows; escalate to Op
 ## Select scenarios
 Generate only where `automatable: true` **and** `is_legacy_regression: false` (new scenarios). Legacy
 scenarios are **updated**, not regenerated (see Dedup). Route by `target_execution_framework`:
-`TAPMIND_NLP` → invoke `aep-tapmind:nlp-codegen` (asks kb-only vs reuse-pioneer vs
-one device pioneer, then writes `tapmind-mobile-tests`); `GMT_JAVA` → coded tests in this skill.
+**`TAPMIND_NLP`** → handled by **`mobile-test-code-gen` step 4 (`nlp-codegen`)** — do not run here.
+**`GMT_JAVA`** → coded tests in this agent only.
 
 ## Given strategy (the "Given" — Pillar 3 fallback hierarchy)
 1. **Deep link** from the plan's `preconditions_metadata.target_entry_deeplink` — jump straight to the screen.
@@ -51,8 +51,8 @@ one device pioneer, then writes `tapmind-mobile-tests`); `GMT_JAVA` → coded te
    Never generate raw home-screen tap-walks. No deep link **and** no macro → defer (see below).
 
 ## Process (per selected scenario)
-**If routed `TAPMIND_NLP`:** invoke `aep-tapmind:nlp-codegen` and stop — do not wrap
-`automation_steps` here. Remaining steps apply to `GMT_JAVA` only.
+**If routed `TAPMIND_NLP`:** skip — orchestrator **`mobile-test-code-gen`** already ran **`nlp-codegen`**.
+This agent runs **`GMT_JAVA` only**. Remaining steps apply to GMT scenarios only.
 
 1. **Given:** resolve via the hierarchy above; record `given_strategy` + `deep_link`/`nav_macro_fallback`.
 2. **Setup:** emit `mock_location` + `backdoor_login` (TDP user) via the house-style helpers.
@@ -84,9 +84,7 @@ Do **not** emit a broken test. Add the scenario to `deferred[]` with a reason wh
    `summary` (created/updated/skipped_legacy/deferred/unmapped_data_need/validated_on_device/needs_review/no_nlp_steps).
 
 ## Validated by construction (when a device is available)
-`TAPMIND_NLP` validation is owned by `nlp-codegen`: QA chooses kb-only (`generated`),
-reuse-pioneer, or one device pioneer per similar-flow cluster (`cloned_from_pioneer` /
-`validated_on_device`). Do not drive every NLP case on a device from this skill. GMT coded
+`TAPMIND_NLP` validation is owned by **`nlp-codegen`** (orchestrator step 4). GMT coded
 stays `mode: "generated"` unless a device run is explicitly requested.
 
 ## Self-heal (Phase B)

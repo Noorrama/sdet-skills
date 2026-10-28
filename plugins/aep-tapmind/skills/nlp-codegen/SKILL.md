@@ -3,7 +3,8 @@ name: nlp-codegen
 description: >-
   Generate TapMind NLP @Test methods into tapmind-mobile-tests from an
   enriched_automation_plan plus change_context. If only an automation plan or
-  SDET plan is given, invoke aep-backend:test-data-identification first so
+  SDET plan is given, the mobile-test-code-gen orchestrator runs
+  backend-test-data-identification (qa-backend-toolkit) first so
   enriched_automation_plan.json exists. Default is to ASK whether to skip the
   device (knowledge-base only, faster MR) or step-validate ONE pioneer scenario
   per similar-flow cluster (or reuse a pasted proven @Test). Use when asked to
@@ -84,8 +85,9 @@ file, use that file:
 3. `*_sdet_plan.json` / `*_SDET_plan.json`
 
 **Codegen always reads an enriched plan.** If the match is an APG or SDET
-file, invoke identification **before** clustering or Java emit (see
-**§1a**). Do not emit from an unenriched ledger.
+file, the orchestrator should have run **`backend-test-data-identification`**
+already (step 3 of **`mobile-test-code-gen`**). If enrichment is still missing,
+**stop** and ask to run that step — do not emit from an unenriched ledger.
 
 Also resolve, when present:
 
@@ -120,7 +122,7 @@ Copy this checklist:
 
 ```
 - [ ] 0. Mode: kb-only | reuse-pioneer | device-pioneer (ask unless already stated)
-- [ ] 1. Resolve plan; if not enriched, invoke test-data-identification
+- [ ] 1. Resolve plan; if not enriched, stop (run backend-test-data-identification via orchestrator)
 - [ ] 1b. change_context + module
 - [ ] 2. Cluster scenarios; pick one pioneer / reference per cluster; echo both
 - [ ] 3. Pioneer only if mode is reuse-pioneer or device-pioneer
@@ -128,6 +130,8 @@ Copy this checklist:
 - [ ] 5. Emit sibling methods from the template + each scenario's delta
 - [ ] 6. Write one class into the module; compile
 - [ ] 7. Open an MR in tapmind-mobile-tests scoped to that module
+- [ ] 8. Pipeline (optional, ask once): trigger `Agentic_nlp_tests` on MR branch
+- [ ] 9. Finalise MR (on request): strip `Agentic_nlp_tests`; append verification table
 ```
 
 ### 1a. Enrich when `enriched_automation_plan.json` is missing
@@ -135,40 +139,24 @@ Copy this checklist:
 | On disk | Action |
 |---|---|
 | `*enriched_automation_plan.json` present | Use it. Do **not** re-run identification. |
-| Only `*_automation_plan_generator.json` (or the user named that file) | Invoke identification with **that file** as the input plan. |
-| Only `*_sdet_plan.json` / `*_SDET_plan.json` | Invoke identification with **that file** (inline `test_data[]` is a valid input). |
+| Only APG or SDET | **Stop.** Run **`mobile-test-code-gen`** step 3, or skill **`backend-test-data-identification`** (qa-backend-toolkit), then re-run this agent. |
 | No plan at all | Stop and ask. |
 
-How to invoke:
+Identification is maintained by the TDI team in **qa-backend-toolkit** only
+(**`backend-test-data-identification`**). This skill does not call it inline when
+invoked from the orchestrator (step 3 already ran). Standalone invocations must
+enrich first.
 
-- Skill: `aep-backend:test-data-identification` (folder
-  `test-data-identification`). Read and follow that skill — do **not**
-  re-implement catalog calls here.
-- Run it in a **sub-agent**. Parent keeps only the output path of
-  `enriched_automation_plan.json` and whether the run aborted. Not
-  `identification_steps`, manifests, or catalog dumps.
-- Write the enriched file **next to the input plan** (same folder). Never
-  edit the APG / SDET file in place. Never write it into `aep/skills`.
-- Pass the resolved APG or SDET path as the approved plan. Identification
-  already accepts per-scenario `test_data[]` (`fixture_id` + `description`
-  + `required_state`).
+When identification **aborts**: **stop**. Do not emit Java from the unenriched APG / SDET.
 
-When identification **aborts** (TestBuddy down, no fixtures, unparseable
-plan): **stop**. Do not emit Java from the unenriched APG / SDET. Tell QA
-to restore TestBuddy or drop in an existing `enriched_automation_plan.json`.
+When identification **succeeds**: use `enriched_automation_plan.json` and continue from clustering.
 
-When identification **succeeds**: set the plan to the new
-`enriched_automation_plan.json` and continue from clustering. Fixtures
-with `test_buddy_prompt: null` stay on the later compose-or-ask fallback
-— do not invent a prompt here.
-
-`aep-mobile:test-data-provisioner` is **not** this step. It returns a data
-handle; it does not write the enriched plan.
+**`test-data-provisioner`** is **not** identification — runtime handles only.
 
 ### 1. Module (and locating `tapmind-mobile-tests`)
 
-**You do not run this skill inside `tapmind-mobile-tests`.** The skill lives in
-`aep-tapmind`. The agent can run from the plan folder, `skills`, or anywhere.
+**You do not run this skill inside `tapmind-mobile-tests`.** The skill ships in
+**qa-mobile-toolkit** (skills `nlp-codegen` + `step-validation`). The agent can run from the plan folder or anywhere.
 It only needs a **writable clone** of the tests repo to put the Java file in.
 
 Resolve the checkout in this order:
@@ -225,7 +213,7 @@ Disjoint destinations ⇒ one reference / pioneer each. Do not pick silently.
 **`reuse-pioneer`:** the pasted `@Test` / `trace.json` `run.tapmindTest` / report
 tab **is** the template. Do not re-run the device for that cluster.
 
-**`device-pioneer`:** invoke `aep-tapmind:step-validation` in a sub-agent:
+**`device-pioneer`:** invoke **`step-validation`** in a sub-agent:
 
 - Input mode B, **that one scenario only**.
 - Pre-answer location, `test_buddy_prompt` (verbatim from the fixture whose
@@ -247,7 +235,12 @@ unverified on device; they can run `device-pioneer` later on one flaky method.
 
 ### 4–5. Harvest and clone
 
-Read [references/sibling-emit.md](references/sibling-emit.md) and
+Read [references/nav-index.md](references/nav-index.md) and run the harvest
+**ladder** for each cluster before emit (subdirectory tests → module login stem →
+`corpus_lookup.py` on nav_index → plan + `change_context`).
+
+Read [references/step-emit.md](references/step-emit.md),
+[references/sibling-emit.md](references/sibling-emit.md), and
 `$ROOT/skills/step-validation/references/direct-api-map.md`.
 
 The pioneer's `kind: guard` lines (Allow / Lewati / walkthrough) go into **every**
@@ -273,8 +266,13 @@ One class per epic, next to `$SAMPLE_TEST`:
   `Pam8LevelsRelaunchM1Test`).
 - One `@Test` per selected scenario. Method name from `scenario_id` + a short
   camelCase of `description`.
-- `@Test(description)` from the scenario `description`. `groups` from
-  `$TEST_GROUPS`.
+- `@Test(description)` from the scenario `description`. **`groups`:** copy
+  `$TEST_GROUPS` from `$SAMPLE_TEST` **and always append**
+  `"Agentic_nlp_tests"` on every **new or updated** method this skill emits
+  (MR pipeline runs only that group on the branch). Do not add it to unrelated
+  existing methods.
+- **`@TestInfo(owner = "AI-AGENT")`** on every emitted method (org standard for
+  agentic-generated NLP).
 - `@TestInfo.testCaseIds` from `browserstack_case_id` if it looks like a real id
   (`TC-766717`, `5542965`); **omit / `{}`** for placeholders (`TC-PENDING-SC-005`).
   Else `existing_case_ref`. Never invent an id. Copy `countryName` / `projectId` /
@@ -342,6 +340,23 @@ In `$TAPMIND_TESTS_REPO` only, scoped to `$MODULE`:
 
 Don't force-push. Don't touch other modules.
 
+MR description should mention: pioneer/cluster summary and that pipeline can run
+group **`Agentic_nlp_tests`** on this branch.
+
+### 8. Pipeline (optional — ask once)
+
+After the MR branch is pushed, ask **once** whether to trigger generic release NLP
+jobs on that `ref`. If yes, read [references/gitlab-pipeline.md](references/gitlab-pipeline.md)
+and use GitLab MCP on `aep/tapmind-mobile-tests` with `TAG=Agentic_nlp_tests` and
+the correct `MODULE` / `TAPMIND_CONFIG` / `APP_TYPE`. Return pipeline URLs only;
+record them for §9.
+
+### 9. Finalise MR (on user request)
+
+When the user asks to finalise, read [references/finalise-mr.md](references/finalise-mr.md):
+strip `Agentic_nlp_tests`, append successful pipeline table to the MR description,
+push the cleanup commit.
+
 ## What this is not
 
 | Need | Skill |
@@ -350,7 +365,7 @@ Don't force-push. Don't touch other modules.
 | Open-ended explore a flow | `goal-driven-exploration` |
 | GMT Appium+TestNG coded tests | `aep-mobile:mobile-test-code-generator` |
 | Backend API `runStep` grammar | `aep-backend:backend-tapmind-nlp-prompts` |
-| Enriched plan / `test_buddy_prompt` from an APG or SDET file | `aep-backend:test-data-identification` (this skill **calls** it when the enriched file is missing; it does not identify itself) |
+| Enriched plan / `test_buddy_prompt` | **`backend-test-data-identification`** (qa-backend-toolkit); orchestrator step 3 of **`mobile-test-code-gen`** |
 
 ## Model
 

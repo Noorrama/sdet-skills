@@ -4,6 +4,10 @@ The pioneer `@Test` / `run.tapmindTest.lines[]` is the template. Each other
 scenario in the cluster is that template with a **delta** applied — not a
 fresh wrap of `automation_steps`.
 
+Read [step-emit.md](step-emit.md) for scroll/`scrollToText`, Update/Edit/Input,
+and setup direct-API rules on plan lines. Read
+[nav-index.md](nav-index.md) for the harvest ladder when steps are thin.
+
 Read `$ROOT/skills/step-validation/SKILL.md` §6 and
 `$ROOT/skills/step-validation/references/direct-api-map.md` for phrasing and the emit ladder. This file only
 covers what to copy vs replace.
