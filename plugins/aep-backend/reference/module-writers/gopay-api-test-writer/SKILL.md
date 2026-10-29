@@ -29,6 +29,16 @@ Read `references/templates.md` for full, copy-pasteable code templates of every 
 (Endpoint, RequestBody, Response, Client method, Helper method, Test class) before writing
 code — it has more complete examples than what's summarized below.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. gopay REST/miniapp tests typically
+**do not** call `TestDataPoolController`.
+
+| Status | gopay REST APIs |
+|---|---|
+| `TDP_SUPPORTED` | Existing journey helpers / fixtures in `userJourneyTests/userspend/**` that match `tdp_test_data_category`. |
+| `TESTBUDDY_*` | `TDP2Controller.getTDP2Response` **only if a sibling already imports it**; else `TODO(agent-pm)`. |
+
 ## Inputs to gather from the user first
 
 Before writing anything, get clear on:

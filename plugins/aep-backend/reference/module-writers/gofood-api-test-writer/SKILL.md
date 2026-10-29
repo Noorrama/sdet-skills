@@ -227,6 +227,22 @@ gofood has **no `SuiteConstants`** and **no `OWNER_*` constants** — `owner` is
 Several suite constants are empty strings in source (`OPEN_API`, `DISCOVERY`,
 `MERCHANT_EXCELLENCE_*`) — that is expected; still reference the named constant, not `""`.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Cross-module rules: `reference/fixture-acquisition-from-tdi/SKILL.md`. Gofood-specific:
+
+Codegen reads TDI output on each `test_data[]` entry. Use **status**, not class defaults:
+
+| `test_data_status` | Generated setup |
+|---|---|
+| `TDP_SUPPORTED` | **AEP pool** — `foodTestDataController.setAEPPoolCustomer(CustomerType.<enum>)` where the enum matches `test_data_details.tdp_test_data_category` (same pattern as `MafCashierSettlementTest`, `NonMafVoucherTest`, …). Optional: `@FoodTestDataManager(needsGopayCustomer = true)` only when siblings use that for the same category. |
+| `TESTBUDDY_SUPPORTED` · `TESTBUDDY_HYBRID_FALLBACK` · `TESTBUDDY_OPERATION_FALLBACK` | When `test_buddy_prompt` is non-null: **TDP2 NLP** — `TDP2Request` + `TDP2Controller.getTDP2Response(req)` with `req.setMessage(test_buddy_prompt)`, `req.setClient("GoFood")`, and `conversationId` as in `OrderHistoryTests` / `GetTenantOrderTests`. For **hybrid**, run pool first if `tdp_test_data_category` is set, then TDP2. Bind `TDP2Response` into `customer_aep` / bearer fields the test already uses (see OpenAPI expansion tests). |
+| `TDP_PARTIAL` / `TDP_NOT_SUPPORTED` | Pool and/or TDP2 only for the served portion; `TODO(agent-pm)` for gaps — do not use vanilla `customer_aep.get()` as a silent substitute. |
+
+Imports: `testdatapool.tdp2.controller.TDP2Controller`, `testdatapool.tdp2.request.TDP2Request`,
+`testdatapool.tdp2.response.tdp2response.TDP2Response` (match the import path used in the
+nearest sibling file — gofood tests vary slightly by package).
+
 ### Test-class placement — one endpoint, one class
 
 gofood follows the repo-wide convention strictly: each feature folder under `tests/**` holds one

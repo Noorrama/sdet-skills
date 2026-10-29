@@ -110,6 +110,16 @@ optionally overridden per-env under `overrides/`) — never hardcode a URL or ke
 - `@DataProvider`s are widely used for parameterization on top of these fixtures (e.g.
   `RuleCreationBankTransferTests` → `"bankTransferProviders"`).
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. This module **does not** use
+`@TestInfo` and typically has **no** `TDP2Controller` / AEP pool:
+
+| Status | payment-core APIs |
+|---|---|
+| `TDP_SUPPORTED` | Prefer an existing `testData.saudagar.MerchantData` / wallstreet / plutus / CAA constant that matches `tdp_test_data_category`. Do not invent merchant IDs. |
+| `TESTBUDDY_*` | `TODO(agent-pm)` unless a sibling already calls `TDP2Controller`. Do not add TDP2 as a new convention here. |
+
 ## Validation patterns
 
 - Status-code family assertions centralize in `assertions.commons.CommonsAssertions`

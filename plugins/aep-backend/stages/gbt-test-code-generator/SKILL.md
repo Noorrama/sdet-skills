@@ -216,6 +216,23 @@ flag it, because output quality drops sharply without one.
     When inheriting an `owner`, say in the comment that it was inherited from the class so a
     reviewer can reassign it rather than silently owning someone else's work.
 
+14a. **`@TestInfo.owner` = test author, not exemplar default.** The automation plan has **no**
+    `owner` field. Resolve `owner` in this order:
+
+    | Priority | Source | Action |
+    |---|---|---|
+    | 1 | Spawn prompt `testinfo_owner` | Use for **every new `@Test` method** in this run |
+    | 2 | `run_json` → `test_author.email` | Same |
+    | 3 | Target class siblings | Only when adding a method to a class that **already** has `@TestInfo` **and** the human did not supply 1–2: copy `owner` from those siblings |
+    | 4 | Exemplar / other file | **Do not** copy another engineer's email. If 1–3 are absent, **reject** with `test_author_email_missing` — do not generate |
+
+    Format per module (`quoted email`, `GojekEngineer.*_EMAIL`, `TestRailConfig.OWNER_*`, …) —
+    see `backend-automation/references/test-annotation-rules.md`. Add
+    `// @TestInfo.owner from run.json test_author (pass N)` when set from 1–2.
+
+    **`testCaseIds`** still come only from the plan (`existing_testcase_ids[]`,
+    `browserstack_test_id`); never invent ids.
+
 15. **Conventions come from THIS module, never from another one you have seen.** `enabled`,
     naming, assertion style, base class and annotation set are per-module. Read them off the
     target class. Never carry a convention across from a module you worked in earlier — and
@@ -253,9 +270,13 @@ flag it, because output quality drops sharply without one.
     the honest finding was "add a bakso group-order-session route", not "this module cannot
     assert DB state".
 
-18. **Read `test_data_output` for EVERY fixture of EVERY scenario, and when TDP supports it,
-    GENERATE THE ACQUISITION CODE — never settle for the class default.** This block is not a
-    go/no-go flag. It names *how to obtain* the fixture, and every field in it is actionable:
+18. **Read `test_data_output` for EVERY fixture of EVERY scenario — all modules, not gofood only.**
+    Load **`reference/fixture-acquisition-from-tdi/SKILL.md`** and the resolved **module writer**
+    (`reference/module-writers/<writer>/SKILL.md` → section *Fixture setup from enriched plan*).
+    The writer names the exact pool helpers and TDP2 `client` string; the shared doc is the
+    cross-module contract. Never settle for the class default customer/driver. This block is not a
+    go/no-go flag — it names *how to obtain* the fixture:
+
 
     | Field | What you must do with it |
     |---|---|
@@ -263,18 +284,28 @@ flag it, because output quality drops sharply without one.
     | `tdp_test_data_category` | Map to the module's pool API and emit that call — e.g. `CUSTOMER_WITH_GO_PAY` → `foodTestDataController.setAEPPoolCustomer(CustomerType.CUSTOMER_WITH_GO_PAY)`, or the equivalent flag on the module's test-data annotation (`@FoodTestDataManager(needsGopayCustomer = true)`). |
     | `test_data_operations[]` | Every entry with `operationSupported: true` is a provisioning step, in order, with its `operationInput`. Emit them, or the module's equivalent API calls. |
     | `test_data_type_signals` | The state the fixture must be in. Use it to choose between several plausible pool categories or annotation flags. |
-    | `test_buddy_prompt` | The human-readable acquisition instruction. Carry it into a comment so a reviewer can provision by hand. |
+    | `test_buddy_prompt` | **TestBuddy NLP message** when status is `TESTBUDDY_*` — see routing below. Not a comment-only field for those statuses. |
     | `match_confidence` | `low` means the category was a guess — say so in a comment rather than presenting it as settled. |
     | `identification_notes` | Why a category was chosen or rejected. Quote it when it explains a placeholder. |
 
-    Routing by status:
+    Routing by status (authoritative — do not copy exemplar defaults instead):
 
     | `test_data_status` | Action |
     |---|---|
-    | `TDP_SUPPORTED` | **Emit the acquisition code.** Wire `tdp_test_data_category` to the module's pool API or annotation flag. Do **not** fall back to the class's default customer/merchant. |
-    | `TDP_OPERATION_FALLBACK` | No single category exists but `test_data_operations[]` are supported. Emit them in order as setup. If you deliberately use the module's own API instead, say in a comment that supported operations existed and why you did not use them. |
+    | `TDP_SUPPORTED` | **Test data pool only** — same mechanism as sibling tests in the target module. Map `tdp_test_data_category` to the module pool API (gofood: `foodTestDataController.setAEPPoolCustomer(CustomerType.<…>)` from `tdp_test_data_category`, or `@FoodTestDataManager` flags). Use `tdp_request` only if the module already has a helper that accepts it; **do not** call `TDP2Controller` for a fully pool-supported fixture. Do **not** fall back to the class default customer/merchant. |
+    | `TESTBUDDY_SUPPORTED` | When `test_buddy_prompt` is non-null: **invoke TestBuddy via TDP2 NLP** (below). When `test_buddy_prompt` is null: `TODO(agent-pm)` — TDI should have emitted a prompt; do not guess a message. |
+    | `TESTBUDDY_HYBRID_FALLBACK` | When `tdp_test_data_category` is non-null, apply the **`TDP_SUPPORTED` pool step first**, then when `test_buddy_prompt` is non-null run **TDP2** for the remainder. When only operations are listed with no prompt, emit supported `test_data_operations[]` in order or TDP2 per module profile. |
+    | `TESTBUDDY_OPERATION_FALLBACK` | Same as `TESTBUDDY_SUPPORTED` when `test_buddy_prompt` is non-null. Legacy manifest value `TDP_OPERATION_FALLBACK` → treat as `TESTBUDDY_OPERATION_FALLBACK`. |
+    | `TDP_PARTIAL` | Run pool and/or **TDP2** for whatever TDI marked served (`test_buddy_prompt` / category / operations); `TODO(agent-pm)` for `missing_operations` from manifest — do not disable the whole test silently. |
     | `ALREADY_SATISFIED` | An existing constant or helper covers it (rule 16). Use the one named in `already_satisfied_by`; provision nothing. |
     | `TDP_NOT_SUPPORTED` | Placeholder plus a TODO naming the missing operation, per rule 16. |
+
+    **TestBuddy NLP via TDP2** — when status starts with `TESTBUDDY_` and `test_buddy_prompt` is
+    non-null: use `testdatapool.tdp2` (`TDP2Request` → `TDP2Controller.getTDP2Response`) or the
+    module's wrapper (`TDP2Helper`, `*AEPDataPoolingHelper`, …). See
+    `reference/fixture-acquisition-from-tdi/SKILL.md` for the module index and the module writer
+    for exact `setClient(...)` and response binding. **TDP_SUPPORTED → pool only; TESTBUDDY_* +
+    prompt → TDP2 NLP** — same rule in every Gradle module.
 
     **Judged per fixture, never per scenario.** When a scenario has two fixtures and only one is
     `TDP_SUPPORTED`, the supported one is still wired properly; only the unsupported one becomes
@@ -343,6 +374,7 @@ Pass 2 reads the same files under `pass2/`.
 | `stale_method_decision` | A `closest_match_modify`/`exact_match`/`data_provider_new_row` verdict names a method or data provider that is no longer present in the target file — regenerate `method_decisions` rather than editing against a fiction |
 | `unresolvable_fixture` | A `{{fixture-id.field}}` has no entry in `automation_plan.test_data_payloads` |
 | `nothing_to_generate` | Every scenario is `is_dedup`, `exact_match`, or `undecidable`. **Approval skips are `no_scenario_approved`, not this** — conflating "the reviewer said no" with "there was nothing to do" hides the gate. A legitimate outcome, not a bug — say so, and if the reason is `undecidable` name the remediation (re-run `automation-plan-test-enricher`, then `gbt-method-decision-maker`) rather than reporting it as "already covered" |
+| `test_author_email_missing` | No `testinfo_owner` on the spawn prompt and no `test_author.email` in `run_json`, and the target has no authoritative sibling `owner` to copy for a **new** class — ask the human / orchestrator to supply email before generating |
 
 Write `runs/<epic>/pass1/rejects/gbt-test-code-generator.json`:
 

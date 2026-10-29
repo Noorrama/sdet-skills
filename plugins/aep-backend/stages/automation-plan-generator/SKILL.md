@@ -165,7 +165,7 @@ Each scenario's `test_data[]` contains one entry per independently provisioned e
 | `required_state.entity` | Domain the test data service owns: `CUSTOMER` \| `DRIVER` \| `BOOKING` \| `MERCHANT` \| `PAYMENT_INSTRUMENT` \| `DB_INFRA`. Maps to `testDataEntity` in the service request. Use `DB_INFRA` for Testcontainers / migration fixtures. |
 | `required_state.category` | Exact category name from the test data service catalog (e.g. `CUSTOMER_WITH_WALLET`, `CUSTOMER_WITH_SAVED_CARD`). Maps to `testDataCategory.testDataCategoryName`. For `DB_INFRA`: the infra type (e.g. `TESTCONTAINERS_POSTGRESQL`). |
 | `required_state.count` | Number of entities to provision. Maps to `testDataCategory.count`. Default `1`. Omit for `DB_INFRA`. |
-| `required_state.config` | Additional parameters the **TDP catalog accepts** for this category (e.g. `wallet_status`, `saved_card_type`). Merged into the `testDataCategory` request body. Omit keys TestBuddy cannot provision — see harness preconditions below. |
+| `required_state.config` | TDP catalog parameters (e.g. `country`, `payment_methods`, `wallet_status`, `saved_card_type`) plus optional **`to_be_identified`** (APG→TDI handoff — see below). Merged into the category request. No other ad-hoc meta keys. Omit keys TestBuddy cannot provision — see harness preconditions below. |
 | `response_fields_used` | Set to `[]`. **Do not populate here.** TDG looks up the TDP catalog response schema and fills confirmed field names. |
 | `test_data_output` | Set to `null`. TDG writes enrichment here: `test_data_status`, `test_data_details.test_data_operations[]`, `test_buddy_prompt`. |
 
@@ -228,6 +228,130 @@ expected_result: "returns 200 with token"
 ```
 → One fixture: CUSTOMER (setup only — no prior records needed)
 
+### Payment instruments — normalize CUSTOMER fixtures for TDP
+
+`backend-test-data-identification` reads each fixture's `description` + `required_state` and maps
+to real TDP categories (`references/customer/index.md`). Emit shapes that stage can identify
+without re-interpreting SDET slang.
+
+**What CUSTOMER fixtures own:** linked payment instruments on the account (GoPay, card, cash,
+GoCorp, …) and pool category — not estimate-response shape. **What they do not own:** which
+`payment_options` appear under `delivery_options[id=fast]` vs `[id=cheap]` (service area,
+merchant, basket, and runtime estimate). Keep fast/cheap pairing language in `step_descriptions[]`
+and MERCHANT/LOCATION fixtures, not in CUSTOMER `description`.
+
+When parsing a combined `Test data:` line (`FX-CUST-… ordering at FX-RESTO-…`), put only the
+**customer parenthetical** into the CUSTOMER `description` and `config`; merchant, basket, and
+delivery-mode wording belongs on separate `test_data[]` entries.
+
+#### Normalize SDET payment wording
+
+| SDET / plan phrase | Do not emit | Emit instead |
+|---|---|---|
+| "GoPay active", "active wallet", "linked wallet" (no other instruments named) | `CUSTOMER_WITH_WALLET` + `wallet_status` only; "wallet **and** a payment method" | `category: CUSTOMER_WITH_GO_PAY`, `config.payment_methods: ["GOPAY"]`, description: "customer with GoPay as the only linked payment method" |
+| "GoPay active, single payment method" | Treat wallet and method as two things | Same as row above — GoPay wallet **is** the payment method |
+| "single" / "only" payment method **without** naming types | Bare "single payment method" in `description` | Named list from the same `Test data:` clause, or tag scenario `provisional` and note in `description` that instrument types need TDP confirmation — never guess `CUSTOMER_WITH_WALLET` |
+| "GoPay, card and cash" (multipay) | "multi payment method customer" | `payment_methods: ["GOPAY", "CARD", "CASH"]` (or split CUSTOMER + `PAYMENT_INSTRUMENT` when card state is the variable — follow TDI disambiguation) |
+| "payment-method set on fast not on cheap" | On CUSTOMER `description` or `config` | Named instrument type(s) on CUSTOMER; asymmetry is asserted in steps after estimate |
+| "Litmus treatment customer" inside `Test data:` | In `test_data[].description` | Strip experiment arms; treatment/control stays on harness `preconditions[]` lines only |
+
+There is no `CUSTOMER_WITH_WALLET` enum in TDP — "wallet" in fixture prose means linked GoPay
+unless the SDET line names another instrument. Prefer `CUSTOMER_WITH_GO_PAY`, `CUSTOMER_WITH_CC`,
+`VANILLA` (cash), `CUSTOMER_WITH_GOCORP` per the customer knowledge bundle.
+
+#### `required_state.config` for CUSTOMER
+
+- Include `country` (e.g. `ID`) when the SDET plan's `Country:` precondition names a market.
+- Include `payment_methods` as a **string array of instrument tokens** TDP/TestBuddy recognise
+  (`GOPAY`, `CARD`, `CASH`, `GOCORP`, …) whenever the customer clause names or implies them.
+- Do not put `wallet_status` alone when the intent is GoPay — use category + `payment_methods`.
+- Do not put delivery option ids (`fast`, `cheap`), service-area flags, or experiment keys in
+  `config`.
+
+#### TDI handoff — `to_be_identified` in `config`
+
+Most `required_state.config` keys are **TDP catalog parameters** (`country`, `payment_methods`, …)
+merged into the category request. Do not invent other meta flags.
+
+**Agreed APG → TDI contract:** when the SDET line or your best-effort `category` / `payment_methods`
+still need catalog resolution on the test-data-identification side, set exactly:
+
+```json
+"to_be_identified": true
+```
+
+in that fixture's `config`. Omit the key (or set `false`) when the fixture is fully specified —
+e.g. GoPay-only treatment customer with `CUSTOMER_WITH_GO_PAY` and `payment_methods: ["GOPAY"]`.
+
+Rules:
+
+| Situation | Do |
+|---|---|
+| Open mapping (instrument type, merchant category, etc.) | Best-effort `category` + catalog `config` fields **and** `to_be_identified: true`; add scenario tag **`provisional`** when the whole case depends on TDI closing the gap. |
+| Fully specified fixture | No `to_be_identified`; clear `description` + real catalog fields only. |
+| Ad-hoc review flags | **Never** — no `catalog_category_unconfirmed`, `payment_method_to_be_identified`, `needs_tdp_confirmation`, or any `*_to_be_identified` except the literal key **`to_be_identified`**. Schema + `schemas/validate_automation_plan.py` **reject** those keys. |
+
+APG does not define how TDI consumes this flag — that is owned by the test-data-identification
+stage. APG only sets the handoff consistently.
+
+#### `test_data[].description` — keep it short
+
+`description` is a **one-sentence** provisionable-state summary for TDP/TDI — not a mini test
+spec.
+
+- **Include:** market when useful, entity role, **named payment instrument(s)** or merchant/location
+  state drawn from the `Test data:` customer/merchant clause only.
+- **Exclude:** fast/cheap delivery-option pairing, estimate `payment_options` behaviour, references
+  to `step_descriptions`, Litmus/experiment arms, and “TDP to identify” essays — use
+  `to_be_identified: true` in `config` instead.
+
+**FX-CUST-FAST-ONLY-PAYMENT-style (provisional card customer):**
+
+```json
+"description": "Indonesia customer with linked card (CARD)",
+"required_state": {
+  "entity": "CUSTOMER",
+  "category": "CUSTOMER_WITH_CC",
+  "count": 1,
+  "config": { "country": "ID", "payment_methods": ["CARD"], "to_be_identified": true }
+}
+```
+
+Estimate asymmetry (unmatched fast vs cheap payment option) stays in **steps** and **merchant**
+fixtures — never in this `description`.
+
+#### Worked example (GoPay-only treatment customer)
+
+SDET `Test data:` fragment: `FX-CUST-TREATMENT (Litmus treatment customer, GoPay active, single payment method) ordering at FX-RESTO-FASTCHEAP …`
+
+**Wrong (generation error):**
+
+```json
+"description": "Customer with an active GoPay wallet and a single payment method",
+"required_state": {
+  "entity": "CUSTOMER",
+  "category": "CUSTOMER_WITH_WALLET",
+  "config": { "wallet_status": "active" }
+}
+```
+
+**Right:**
+
+```json
+"description": "Customer with GoPay as the only linked payment method",
+"required_state": {
+  "entity": "CUSTOMER",
+  "category": "CUSTOMER_WITH_GO_PAY",
+  "count": 1,
+  "config": {
+    "country": "ID",
+    "payment_methods": ["GOPAY"]
+  }
+}
+```
+
+Experiment allocation remains on `preconditions[]` (e.g. `checkout_cheap_savings_nudge_experiment: is_enabled = true`), not in this fixture.
+
 **Grouping rule:** Same entity + same required state across scenarios → same `fixture_id` (reuse it).
 Different state → new `fixture_id`. DB/infra setup → `entity: DB_INFRA`.
 
@@ -279,6 +403,8 @@ Schema root structure:
 - Derive test data from the `Test data:` precondition line(s) and `step_descriptions[]` only. Propagate all other `preconditions[]` lines verbatim on the scenario; do not read `prd_context`, `rfc_context` or `tasks_context` for test data.
 - `required_state` is **your** decision, not the plan's. The plan states the requirement; you choose entity, category, count and config against the TDP catalog.
 - Never put Litmus, experiment, or feature-flag preconditions into `test_data[].description` or `required_state.config`. Never add `litmus_*` / `experiment` keys to `config` — that is a generation error (same ownership as test-data-identification: flags are harness, not TDP).
+- Use **`to_be_identified: true`** in `config` only per **TDI handoff** above; never emit other ad-hoc meta keys (`catalog_category_unconfirmed`, `payment_method_to_be_identified`, etc.).
+- For `entity: CUSTOMER`, follow **Payment instruments — normalize CUSTOMER fixtures for TDP** above: name linked instruments in `description` and `payment_methods` in `config`; never describe "wallet and a payment method" when GoPay is the only instrument; never use `CUSTOMER_WITH_WALLET` when the SDET line means GoPay; never put fast/cheap delivery-option availability on the customer fixture.
 - Do not re-derive which scenarios share a state — reuse the equivalence classes the plan's fixture labels record.
 - `existing_testcase_ids[]` is propagated verbatim and may be empty. Never invent a test-case id.
 - `test_class` groups related scenarios — not one class per scenario. Group by `(test_layer + feature_component)`.
@@ -291,7 +417,24 @@ Schema root structure:
 - `endpoint` and `curl_reference` must be empty string `""` for DB/infra-only tests (no HTTP call).
 
 ## Validate
-`jsonschema.validate(output, schemas/automation_plan.schema.json)`
+
+**Mandatory before returning.** A plan that fails either step is a **generation error** — fix and
+re-validate; do not write broken JSON to `plan_dir`.
+
+1. **JSON Schema** (includes forbidden `config` property names — see
+   `schemas/automation_plan.schema.json` → `required_state.config.propertyNames`):
+
+   `jsonschema.validate(output, schemas/automation_plan.schema.json)`
+
+2. **Config policy script** (same forbidden keys + `litmus_*` in `config`):
+
+   `python3 schemas/validate_automation_plan.py <path-to-automation_plan.json>`
+
+   Resolve `schemas/` from `$CLAUDE_PLUGIN_ROOT/schemas/` (plugin root = parent of `stages/`).
+
+If validation fails because `catalog_category_unconfirmed` or `payment_method_to_be_identified`
+appeared in `config`, **delete those keys** and set `to_be_identified: true` only when the fixture
+still needs TDI resolution.
 
 ## Log
 N groups emitted, N scenarios covered, N skipped as dedup, N skipped as Manual, N unique fixture_ids, and the total fixture references across all entries — the last is the runtime TDP call count and the dominant flake driver, so log it explicitly.

@@ -64,6 +64,30 @@ override path for audit/replay. See `references/common/versioning/SKILL.md`.
 | **SDET** | `{plan_dir}/sdet_plan.json` | Root `status == "approved"` (and not stale: `updated_at` ≤ `approved_at`) | Test scenarios, BrowserStack upload, APG input |
 | **Codegen** | `{codegen_dir}/run.json` | `review.status == "approved"` and `review.pass` matches the pass being run | Automation scenarios → GBT codegen / MR |
 
+### `run.json` — `@TestInfo.owner` (test author)
+
+`@TestInfo.owner` must be the **corporate email of whoever created / owns the generated tests**
+(TestRail attribution), not a random email copied from an exemplar class.
+
+Optional top-level field (write when approving codegen or before spawning the orchestrator):
+
+```json
+"test_author": {
+  "email": "first.last@gojek.com",
+  "source": "human_prompt | run_json | session"
+}
+```
+
+- **`email`** — used verbatim on every new `@Test` method's `@TestInfo(owner = …)` for this pass
+  (module-specific form: quoted string vs `GojekEngineer.*_EMAIL` vs `TestRailConfig.OWNER_*` —
+  see `backend-automation/references/test-annotation-rules.md`).
+- **`source`** — audit only; documents how the email was obtained.
+
+**There is no automatic Cursor “user session → email” wire in the pipeline today.** The
+orchestrator (or the human driving a one-off codegen spawn) must either put `test_author.email`
+in `run.json`, pass `testinfo_owner: <email>` on the spawn prompt, or answer when the
+orchestrator asks before stage 9 (`gbt-test-code-generator`).
+
 `qa_analysis.md` feedback drives **review mode** on the test-plan generator; it is **not** a separate
 `review/sdet_gate.json` file.
 
