@@ -81,6 +81,15 @@ the goto-auth host.
   fixture data for authorized negative testing, not something to copy into new contexts or echo
   back if a user pastes it to you.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. This module:
+
+| Status | scp APIs |
+|---|---|
+| `TDP_SUPPORTED` | Named accounts in `testutils.testdata.Customers` (`E2eID1`, `GojekIndoCustomer`, …) — map category to an existing enum if it fits. Do not invent phones. |
+| `TESTBUDDY_*` | Grep `TDP2Controller` in `scp/` before emitting TDP2. If none, `TODO(agent-pm)` + keep using `Customers` / DataProviders; do not invent TDP2 `client`. |
+
 ## Validation patterns
 
 - Status-code assertions directly on the response POJO (`Assert.assertEquals(response.getHttpStatusCode(), 200)`),

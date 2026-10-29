@@ -15,6 +15,16 @@ description: >-
 `backend-automation/references/test-annotation-rules.md` first. This file covers only what is
 specific to iris.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. This module has **no** live
+`TDP2Controller` / `TestDataPoolController` usage in `iris/` — grep before emitting either.
+
+| Status | iris APIs |
+|---|---|
+| `TDP_SUPPORTED` | Existing helpers / fixtures in the feature package. Do not invent pool calls. |
+| `TESTBUDDY_*` | `TODO(agent-pm)` unless a sibling already calls TDP2. |
+
 ## Framework — iris rolls its own, module-wide
 
 iris does **not** use the `restidioms` / `gopay` `IServiceEndpoint` convention. It defines its own

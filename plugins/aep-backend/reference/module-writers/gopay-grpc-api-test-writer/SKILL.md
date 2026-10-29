@@ -29,6 +29,11 @@ reproduced below because they bite hardest on gRPC work.
 **The REST/miniapp architecture from `userJourneyTests/userspend/**` does not apply here.** No
 `IServiceEndpoint`, no `RequestHandler`, no HTTP status. Different stack entirely.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. paymentTooling gRPC tests typically
+have **no** `TDP2Controller`. Map TDI status to existing paymentTooling helpers, or `TODO(agent-pm)`.
+
 ## The layer chain
 
 ```

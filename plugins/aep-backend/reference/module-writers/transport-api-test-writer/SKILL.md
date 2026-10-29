@@ -99,6 +99,16 @@ than calling the more specific controller/client directly.
   Fixed/small case spaces use literal `Object[][]` arrays directly (e.g.
   `dataProviders.serviceTypes.ServiceTypesDataProvider`).
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first — `TDP_SUPPORTED` → pool,
+`TESTBUDDY_*` + non-null `test_buddy_prompt` → TDP2 NLP. This module:
+
+| Status | Transport APIs |
+|---|---|
+| `TDP_SUPPORTED` | `RSCustomerPool` borrow/return via `RHSBorrowManager` (see Authentication). Map `tdp_test_data_category` to the pool category siblings use. |
+| `TESTBUDDY_*` | `tests.testutils.TDP2Helper.createAndLoginCustomer(prompt)` / `createAndLoginDriver(prompt)` (`setClient("cartography")`), or `TDP2Controller.getTDP2Response` with `client` `"transport"` in e2e (`TransportBookingFlowTest`). Pass `test_buddy_prompt` as `message` verbatim. |
+
 ## Validation patterns
 
 - Negative assertions check `getHttpStatusCode()` plus `getErrors().get(0).getCode()`/`.getMessage()`

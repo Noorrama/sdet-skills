@@ -180,7 +180,26 @@
                     "config": {
                       "type": "object",
                       "additionalProperties": true,
-                      "description": "TDP-provisionable parameters merged into testDataCategory body, e.g. wallet_status, saved_card_type. Must not include Litmus, experiment, or feature-flag keys — those belong in scenario preconditions[] only."
+                      "description": "TDP-provisionable parameters merged into testDataCategory body, e.g. country, payment_methods, wallet_status, saved_card_type. May include to_be_identified (boolean) as the sole APG→TDI handoff flag when catalog mapping is still open. Forbidden key names are rejected by propertyNames and validate_automation_plan.py.",
+                      "properties": {
+                        "to_be_identified": {
+                          "type": "boolean",
+                          "description": "APG→TDI handoff only. No other meta/review booleans in config."
+                        }
+                      },
+                      "propertyNames": {
+                        "not": {
+                          "enum": [
+                            "catalog_category_unconfirmed",
+                            "payment_method_to_be_identified",
+                            "needs_tdp_confirmation",
+                            "litmus_experiment",
+                            "litmus_variant",
+                            "experiment",
+                            "is_enabled"
+                          ]
+                        }
+                      }
                     }
                   }
                 },

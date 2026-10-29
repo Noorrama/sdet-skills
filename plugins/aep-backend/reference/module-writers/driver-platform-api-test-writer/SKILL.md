@@ -93,6 +93,15 @@ Tests mirror this under `src/test/java/tests/<service>/{componentTests,e2eTest}`
   credential asserted as a literal). Do not add to this pattern; use `DriverStateManager` or the
   data providers instead.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. This module:
+
+| Status | driver-platform APIs |
+|---|---|
+| `TDP_SUPPORTED` | `BookingHelper.getDriverFromTestDataPool` / `getCustomerFromTestDataPool`; `TestDataPoolController.getTestData` with requesting module `"DriverPlatform"`. Map `tdp_test_data_category` to `DriverType` / customer category. |
+| `TESTBUDDY_*` | `TDP2Controller.getTDP2Response` **only if a sibling in this module already does**; otherwise wrap the prompt via pool helpers above or `TODO(agent-pm)`. Prefer `DriverStateManager` after the entity is acquired. |
+
 ## Validation patterns
 
 - Both status-only (`Assert.assertEquals(response.httpStatusCode, HttpStatuses.NOT_FOUND.getCode())`)

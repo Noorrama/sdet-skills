@@ -19,6 +19,13 @@ description: >-
 surface; the REST side of gofood — including most of the `openapi` package — is
 `gofood-api-test-writer`.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. Same gofood pool/TDP2 as REST
+(`GoFoodTestBase`, `foodTestDataController.setAEPPoolCustomer`, `TDP2Controller` with
+`setClient("GoFood")`). See `gofood-api-test-writer` for the full table. `@FoodTestDataManager`
+still applies when siblings use it.
+
 ## The surface is small and exactly enumerated
 
 Ten endpoint classes. `serviceEndpoints/openapi/**` also holds ~40 **REST** classes, so folder

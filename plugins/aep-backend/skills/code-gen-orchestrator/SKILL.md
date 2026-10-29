@@ -262,6 +262,23 @@ Log `epic_root`, `plan_dir`, `codegen_dir`, and `run_dir` in `logs/orchestrator.
    - from `{plan_dir}/enriched_automation_plan.json` if present, else `{plan_dir}/automation_plan.json`
    - to `{run_dir}/artifacts/automation_plan.json`
    Log the source path in `orchestrator.jsonl` (`event: inline`, `stage: plan_copy`).
+4. **`@TestInfo.owner` (test author email)** — before spawning **`gbt-test-code-generator`**
+   (stage 9), resolve the corporate email that owns generated tests. **Do not rely on exemplar
+   classes** for this — wrong-owner `@TestInfo` is a common silent defect.
+
+   Resolve in order (first hit wins):
+
+   | Source | Use when |
+   |---|---|
+   | Spawn prompt `testinfo_owner` | Human passed email in this conversation or CI job env |
+   | `run_json` → `test_author.email` | Written at codegen approval time (preferred durable record) |
+   | Human in chat | Orchestrator **must ask explicitly**: *"What corporate email should `@TestInfo.owner` use for generated tests? (e.g. first.last@gojek.com)"* — then persist to `run.json` under `test_author` before stage 9 |
+
+   If still missing after one ask, **reject** with `test_author_email_missing` — do not spawn
+   codegen. Log the resolved email in `orchestrator.jsonl` (never log secrets; email is fine).
+
+   Pass to **every** stage from workspace-prep onward when useful, and **mandatorily** on the
+   stage 9 spawn prompt: `testinfo_owner: <email>` plus `run_json` path.
 
 Stages that need RFC/tasks/regression/SDET read **`plan_dir`** via absolute paths in spawn prompts
 (e.g. `{plan_dir}/rfc_context.json`).
@@ -289,6 +306,8 @@ carries, at minimum:
 - `epic_root`, `plan_dir`, `codegen_dir` — absolute (see Epic layout resolution)
 - `run_dir` — absolute `{codegen_dir}/pass<N>/`
 - `run_json` — absolute `{codegen_dir}/run.json`
+- `testinfo_owner` — corporate email for `@TestInfo.owner` on **new** methods (required for
+  `gbt-test-code-generator`; see `test_author` in `epic-artifact-layout/SKILL.md`)
 - `epic_id`, `pass`
 - `gbt_repo` — the absolute `workspace.gbt_repo` from stage 0, never the base clone (omit for APG-only spawn)
 - the absolute path of every artifact that stage reads, and of the artifact it must write

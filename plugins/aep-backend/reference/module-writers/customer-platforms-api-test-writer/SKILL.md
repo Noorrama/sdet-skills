@@ -16,6 +16,15 @@ description: >-
 `backend-automation/references/test-annotation-rules.md` first. This file covers only what is
 specific to customer-platforms.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. This module:
+
+| Status | customer-platforms APIs |
+|---|---|
+| `TDP_SUPPORTED` | `TestDataPoolCP` / `TestDataPoolController.getCustomersFromTestDataPoolUsingRequestingModule(..., "customer-platforms")`. Map `tdp_test_data_category` (e.g. `VANILLA`) to the pool category. |
+| `TESTBUDDY_*` | TDP2 only if a sibling already uses `TDP2Controller`; else pool + `TODO(agent-pm)`. |
+
 ## Framework corrections worth knowing up front
 
 - **customer-platforms FOLLOWS the shared external convention** — it does **not** declare its own

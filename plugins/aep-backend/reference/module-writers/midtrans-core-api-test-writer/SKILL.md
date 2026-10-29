@@ -16,6 +16,16 @@ description: >-
 `backend-automation/references/test-annotation-rules.md` first. This file covers only what is
 specific to midtrans-core-api.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. Never copy credential/card literals
+from siblings into generated setup.
+
+| Status | midtrans-core-api APIs |
+|---|---|
+| `TDP_SUPPORTED` | Feature helpers / static pools already used by the nearest sibling. Map category only if a sibling already leases that pool type. |
+| `TESTBUDDY_*` | TDP2 only if a sibling uses `TDP2Controller`; else `TODO(agent-pm)`. |
+
 > ## ⚠️ Handling secrets in this module — read before writing any code
 >
 > `midtrans-core-api` is a **payments** module and currently contains **hardcoded live-looking

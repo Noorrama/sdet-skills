@@ -185,6 +185,15 @@ runnable examples of each.
    countries to cover, and any business-rule bounds/error text the cURL+sample response doesn't
    reveal — don't invent plausible-looking numbers or error strings.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. This module:
+
+| Status | go-logistics APIs |
+|---|---|
+| `TDP_SUPPORTED` | `RSCustomerPool.getCustomerFromAEPTestDataPool` / `RSDriverPool.getDriverFromAEPTestDataPool` with requesting module `"go-logistics"`. Map `tdp_test_data_category`. |
+| `TESTBUDDY_*` | TDP2 only if the feature sibling already uses `TDP2Controller`; else pool + `TODO(agent-pm)`. |
+
 ## Conventions to always follow
 
 - **TestNG, not JUnit.** `org.testng.annotations.Test/BeforeMethod/BeforeTest/DataProvider`,

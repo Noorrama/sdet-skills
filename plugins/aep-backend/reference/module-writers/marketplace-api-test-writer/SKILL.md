@@ -115,6 +115,15 @@ Two traps:
 mutates real service configs before each test (`:194-349`). That is why marketplace DataProviders
 are so structured.
 
+### Fixture setup from enriched plan (`test_data_output`)
+
+Load `reference/fixture-acquisition-from-tdi/SKILL.md` first. This module:
+
+| Status | marketplace APIs |
+|---|---|
+| `TDP_SUPPORTED` | `TestDataPoolHandler` on `MarketplaceTestBase` (and domain bases). Map `tdp_test_data_category` to the handler/category siblings use. |
+| `TESTBUDDY_*` | TDP2 only if a sibling in `marketplace/` already uses `TDP2Controller`; else pool + `TODO(agent-pm)` for the prompt remainder. |
+
 ### The annotation block
 
 ```java
