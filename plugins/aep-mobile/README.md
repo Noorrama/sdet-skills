@@ -51,8 +51,10 @@ POST-BUILD
   /mobile-test-code-gen               (sequential pipeline)
     code-change-extractor → change_context.json + compliance.json
     impact-shortlister    → impact_shortlist.json
-    test-code-generator   → TAPMIND_NLP → aep-tapmind:nlp-codegen; GMT_JAVA here
-         └─ test-data-provisioner (agent) → TestBuddy handles
+    backend-test-data-identification (qa-backend-toolkit) → enriched_automation_plan.json
+    nlp-codegen           → tapmind-mobile-tests + MR (TAPMIND_NLP)
+    test-code-generator   → GMT_JAVA coded tests + test-code-generator.json
+         └─ test-data-provisioner (agent) → TestBuddy handles at GMT codegen time
 ```
 **test-data-provisioner** is an agent (not a `/command`), spawned by `test-code-generator`.
 **regression-extractor** is an agent spawned by `sdet-plan-runner` after PRD/RFC contexts exist.

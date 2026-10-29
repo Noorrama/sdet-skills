@@ -18,7 +18,7 @@ It does **not** run step-validation on every scenario.
 
 ## 1. One-paragraph summary
 
-After the plan folder and `change_context.json` exist, you ask the agent to generate TapMind NLP tests. If the folder has no `enriched_automation_plan.json`, it runs `test-data-identification` on the APG or SDET file first. It **asks** (unless you already said) whether to skip the device. Knowledge-base-only: compile the best `runStep` / `assertStep` lines from the plan, screens/deeplinks, existing module tests, and step-validation phrasing rules, then MR. If you opt into a pioneer: it groups similar flows, step-validates **one** case, copies `if visible` transients onto the rest, writes one Java class into the right module, compiles, and opens the MR.
+After the plan folder and `change_context.json` exist, you ask the agent to generate TapMind NLP tests. If the folder has no `enriched_automation_plan.json`, run **`aep-backend:test-data-identification`** on the APG or SDET file first (or **`mobile-test-code-gen`** step 3 in Prodigy). It **asks** (unless you already said) whether to skip the device. Knowledge-base-only: harvest ladder (module tests → nav_index via `corpus_lookup.py` → plan), step-emit rules, then MR. Optional: trigger **`Agentic_nlp_tests`** CI on the MR branch and **finalise** before merge. Device-pioneer: one step-validation per cluster, clone siblings, same MR/pipeline path.
 
 You do **not** have to open or run this skill *inside* `tapmind-mobile-tests`. That repo is only the **write target**. If it is not on disk, the skill shallow-clones it.
 
@@ -29,19 +29,19 @@ You do **not** have to open or run this skill *inside* `tapmind-mobile-tests`. T
 | You say… | What actually runs |
 |---|---|
 | “Generate TapMind NLP tests / raise the MR” | **`nlp-codegen`** (this skill) |
-| “Run test-code-generator” on `TAPMIND_NLP` scenarios | `aep-mobile:test-code-generator` **hands off** to `nlp-codegen` and stops |
+| “Run test-code-generator” on `TAPMIND_NLP` scenarios | **`mobile-test-code-gen`** step 4 (`nlp-codegen`) — not test-code-generator |
 | GMT Appium+TestNG coded tests (`GMT_JAVA`) | Stays in `test-code-generator` — not this path |
 | “These steps don’t work” / debug one list | `step-validation` alone |
 | Open-ended explore a flow | `goal-driven-exploration` |
 
 `test-code-generator` is the **pipeline stage name** (Code Generation). For TapMind NLP, **`nlp-codegen` is the implementation** that writes Java and opens the MR.
 
-Plugin: `aep-tapmind`. Path: `plugins/aep-tapmind/skills/nlp-codegen/`.
+Plugin: **`aep-tapmind`**. Path: `plugins/aep-tapmind/skills/nlp-codegen/`.
 
 **Cursor vs Claude:** the skill body is the same `SKILL.md`. Cursor did not discover this plugin
 until `.cursor-plugin/plugin.json` (v1.1.4). Install from the AEP marketplace as a Cursor
-plugin, or symlink all of `plugins/aep-tapmind/skills/*` into `.cursor/skills/` **and** set
-`TAPMIND_PLUGIN_ROOT` at the plugin root so sibling scripts still resolve. Full install:
+plugin, or symlink `plugins/aep-tapmind/skills/*` into `.cursor/skills/` **and** set
+`TAPMIND_PLUGIN_ROOT` or `CURSOR_PLUGIN_ROOT` at the plugin root so sibling scripts still resolve. Full install:
 [plugin README](../../README.md).
 
 ---
@@ -77,7 +77,7 @@ Code generation
    GMT_JAVA     →  test-code-generator (coded tests)
 ```
 
-Earlier stages already decided app, screens, deeplinks, and BrowserStack ids. TDP prompts live on the **enriched** plan (`test_data[].test_data_output[].test_buddy_prompt`). If you only have an APG or SDET file, `nlp-codegen` calls `aep-backend:test-data-identification` to write `enriched_automation_plan.json` next to it, then continues. It does not invent those prompts itself.
+Earlier stages already decided app, screens, deeplinks, and BrowserStack ids. TDP prompts live on the **enriched** plan (`test_data[].test_data_output[].test_buddy_prompt`). If you only have an APG or SDET file, `nlp-codegen` calls **`aep-backend:test-data-identification`** to write `enriched_automation_plan.json` next to it, then continues. It does not invent those prompts itself.
 
 ---
 
@@ -88,7 +88,7 @@ Earlier stages already decided app, screens, deeplinks, and BrowserStack ids. TD
 At least one of these (first match wins unless you name a file):
 
 1. **`enriched_automation_plan.json`** — preferred. Has `automation_steps`, `test_buddy_prompt`, `browserstack_case_id`. Used as-is; identification is **not** re-run.
-2. `*_automation_plan_generator.json` — unenriched. The skill **must** call `aep-backend:test-data-identification` first and wait for `enriched_automation_plan.json` in the same folder. It does not codegen from the APG directly.
+2. `*_automation_plan_generator.json` — unenriched. The skill **must** call **`aep-backend:test-data-identification`** first and wait for `enriched_automation_plan.json` in the same folder. It does not codegen from the APG directly.
 3. `*_sdet_plan.json` / `*_SDET_plan.json` — same: identify first, then codegen from the new enriched file.
 
 Plus, strongly preferred:
@@ -147,7 +147,9 @@ If you did not already pick a mode, the agent **asks once**. It should still **e
 
 ---
 
-## 7. What happens (7 steps)
+## 7. What happens (steps 0–9)
+
+The agent checklist in [`SKILL.md`](SKILL.md) has nine steps after mode selection. Summary:
 
 ### Step 1 — Resolve inputs and module
 
@@ -185,7 +187,15 @@ The agent **asks once** unless your prompt already chose:
 
 kb-only copies `if visible` only from tests **already in that module**. Does not invent `Lewati`. Marks methods `validation.mode: generated`. You can device-pioneer one flaky method later.
 
-### Step 4–5 — Harvest and clone siblings
+### Step 4–5 — Harvest ladder, plan emit, clone siblings
+
+Before emit, run the **harvest ladder** ([`references/nav-index.md`](references/nav-index.md)):
+subdirectory tests → module login stem → `scripts/corpus_lookup.py` on
+`config/nav_index/tapmind/<module>.json` → enriched plan + `change_context`.
+
+Translate plan lines with [`references/step-emit.md`](references/step-emit.md)
+(scroll/`scrollToText`, Update/Edit/Input, setup direct APIs). Then
+[`references/sibling-emit.md`](references/sibling-emit.md) for pioneer copy vs delta.
 
 **Copied onto every sibling:** mock location, `performBackdoorLogin` (swap prompt per fixture), permissions, every `if visible` guard in the same place.
 
@@ -201,6 +211,10 @@ One class per epic next to the sample test, e.g.
 
 House style from `$SAMPLE_TEST` (`extends BaseTest`, `DriverProjectConfig` constants — not stringly-typed `AgenticTests`). Then `./gradlew :driverApp:compileTestJava`.
 
+`@TestInfo(owner = "AI-AGENT")` on every emitted method. **`groups`:** module
+defaults from `$SAMPLE_TEST` **plus** `"Agentic_nlp_tests"` on each new/updated
+method (MR-only CI group — removed at finalise).
+
 `@TestInfo.testCaseIds` from a real `browserstack_case_id`; placeholders like `TC-PENDING-SC-005` are omitted. BrowserStack `projectId` on `@TestInfo` is **not** the GitLab project.
 
 ### Step 7 — GitLab MR
@@ -213,6 +227,21 @@ In the tests clone only, scoped to that module:
 4. `GITLAB_HOST=source.golabs.io glab mr create --repo aep/tapmind-mobile-tests …`
 
 If there is no write token / `glab` login: **stop after the local commit** and print those commands. No `gitlab.com`, no invented token, no force-push.
+
+MR description should note pioneer/cluster summary and that CI can run TestNG group **`Agentic_nlp_tests`** on this branch.
+
+### Step 8 — Pipeline (optional)
+
+After push, the agent **asks once** whether to trigger `agentic_nlp_release_android` /
+`agentic_nlp_release_ios` on the MR branch (`TAG=Agentic_nlp_tests`). Needs GitLab MCP
+write + variables in [`references/gitlab-pipeline.md`](references/gitlab-pipeline.md).
+Returns pipeline URLs only (no polling).
+
+### Step 9 — Finalise MR (when you ask)
+
+When you say “finalise this MR”, the agent strips `Agentic_nlp_tests` from **only**
+the classes it emitted, appends a pipeline verification table to the MR, and pushes
+([`references/finalise-mr.md`](references/finalise-mr.md)).
 
 ---
 
@@ -229,7 +258,8 @@ If there is no write token / `glab` login: **stop after the local commit** and p
 | Pioneer device run or pasted `@Test` | Optional | Transients (`Allow` / `Lewati`) and rendered labels. Skip in **kb-only**. |
 | Existing `$MODULE` tests | Yes (when present) | House style + `if visible` guards in kb-only / as extra harvest |
 | `tapmind-mobile-tests` clone | Yes (or auto-clone) | File path, package, base class, groups, dedup |
-| `nav_index/tapmind/<module>.json` | If present | Proven phrasing already in that module |
+| `config/nav_index/tapmind/<module>.json` + `scripts/corpus_lookup.py` | When steps are thin | Gap-fill deeplink/workflow phrasing (ladder step 3 — never skip module harvest) |
+| [`references/step-emit.md`](references/step-emit.md) | Yes (agent) | Plan line → Java: scrollToText, setup APIs, Edit/Input |
 
 Visible strings for NLP, in order: pioneer / pasted test (if that mode ran) → existing module tests → plan steps / `expected_result` (unquoted if never resolved) → optional design labels. Missing design is normal.
 
@@ -300,7 +330,11 @@ If a **cloned sibling later flakes**, run `step-validation` on **that one method
 | `README.md` | This guide (QA / engineers) |
 | `SKILL.md` | Agent instructions when the skill is invoked |
 | `references/pioneer.md` | Cluster + pioneer pick rules |
+| `references/nav-index.md` | Harvest ladder + `corpus_lookup.py` |
+| `references/step-emit.md` | Plan `automation_steps[]` → emit rules |
 | `references/sibling-emit.md` | What to copy vs replace from the pioneer |
+| `references/gitlab-pipeline.md` | Optional `Agentic_nlp_tests` CI trigger |
+| `references/finalise-mr.md` | Strip group + MR verification table |
 | `examples.md` | PAM catalogue `@Test` used as a pioneer template |
 
 Shared with `step-validation` (same plugin, not copied): `assets/module-profile.sh`, `references/direct-api-map.md`, emit rules in `step-validation/SKILL.md` §6.
