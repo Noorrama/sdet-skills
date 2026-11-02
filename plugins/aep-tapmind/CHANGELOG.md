@@ -1,5 +1,12 @@
 # aep-tapmind changelog
 
+## 1.1.11
+
+**New skill: `tapmind-contribution` (`/tapmind-contribution`).** Merged MR descriptions on
+`aep/tapmind-mobile-tests` → per-member Android/iOS test-case counts for configured squads
+(`config/teams/aep-consumer.yaml` seeded with @noor.daulay). GitLab MCP preferred; REST
+fallback via `GITLAB_TOKEN`.
+
 ## 1.1.9
 
 **New skill: `nlp-codegen-release`.** BrowserStack CSV (or MCP case ids) →

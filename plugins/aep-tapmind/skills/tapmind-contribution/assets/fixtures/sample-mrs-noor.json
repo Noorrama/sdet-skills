@@ -1,0 +1,16 @@
+[
+  {
+    "iid": 9001,
+    "author": "noor.daulay",
+    "merged_at": "2025-10-15T08:30:00.000Z",
+    "web_url": "https://source.golabs.io/aep/tapmind-mobile-tests/-/merge_requests/9001",
+    "description": "## Summary\n\nRelease NLP cases.\n\n## Test case contributions\n\nContributors: @noor.daulay\n\n### Android\n- GOFOOD-1001 — Happy path order\n- GOFOOD-1002 — Voucher stack\n\n### iOS\n- GOFOOD-2001 — Happy path order\n"
+  },
+  {
+    "iid": 9002,
+    "author": "noor.daulay",
+    "merged_at": "2025-10-22T11:00:00.000Z",
+    "web_url": "https://source.golabs.io/aep/tapmind-mobile-tests/-/merge_requests/9002",
+    "description": "## Test case contributions\n\nContributors: @noor.daulay\n\n### Android\n- TRANSPORT-42 — KCI booking\n\n### iOS\n- TRANSPORT-43 — KCI booking\n- TRANSPORT-44 — Cancel flow\n"
+  }
+]
