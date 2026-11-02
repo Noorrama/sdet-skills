@@ -1,0 +1,8 @@
+# Team roster for /tapmind-contribution. Add one entry per engineer.
+# gitlab_handle is matched case-insensitively against MR author username and @mentions in descriptions.
+team: AEP Consumer
+project_path: aep/tapmind-mobile-tests
+gitlab_host: source.golabs.io
+members:
+  - name: Noor Putera Utama
+    gitlab_handle: noor.daulay
